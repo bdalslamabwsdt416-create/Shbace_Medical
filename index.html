@@ -44,6 +44,14 @@
  };
 })();
 </script>
+<script id="shb-v1-cache-register">
+/* v1.1: enable persistent same-origin caching for app scripts, styles, question data and artwork. */
+(function(){try{
+ if('serviceWorker' in navigator && location.protocol!=='file:'){
+  window.__shbServiceWorkerReady=navigator.serviceWorker.register('sw.js',{scope:'./'}).catch(function(e){console.warn('Shbace offline cache unavailable',e);return null});
+ }
+}catch(e){}})();
+</script>
 <meta name="theme-color" content="#07131f">
 <title>Shbace Medical</title>
 <link rel="icon" type="image/png" href="/assets/img/fc0bef7cd7ca.png">
@@ -366,8 +374,31 @@
  /* question bank (1.4 MB JSON): fetched in parallel with the splash; placed into <script id="qbData" type="application/json"> before the first app script runs, so the code that reads its textContent is unchanged */
  var selectedQB='original';try{selectedQB=localStorage.getItem('shbace_question_bank_version')==='reviewed'?'reviewed':'original'}catch(e){}
  var dataURL=selectedQB==='reviewed'?'data/qbData_reviewed.json':'data/qbData.json',dataText=null,dataErr=null;
- var dataFetch=(window.fetch?fetch(dataURL).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text()}):Promise.reject(new Error('no fetch'))).then(function(t){dataText=t},function(e){dataErr=e});
+ /* v1.1: reuse the locally cached question bank immediately; refresh its cache quietly for the next launch. */
+ var dataFetch=(function(){
+  if(!window.fetch)return Promise.reject(new Error('no fetch'));
+  function markReady(){try{performance.mark('shb-qb-data-ready')}catch(e){}}
+  function fetchAndCache(cache){
+   return fetch(dataURL,{cache:'no-cache'}).then(function(r){
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    var copy=r.clone();
+    return r.text().then(function(t){dataText=t;markReady();if(cache)cache.put(dataURL,copy).catch(function(){});});
+   });
+  }
+  return (window.caches?caches.open('shbace-data-v1-1').catch(function(){return null}):Promise.resolve(null)).then(function(cache){
+   if(!cache)return fetchAndCache(null);
+   return cache.match(dataURL).then(function(hit){
+    if(!hit)return fetchAndCache(cache);
+    return hit.text().then(function(t){
+     dataText=t;markReady();
+     fetch(dataURL,{cache:'no-cache'}).then(function(r){if(r.ok)return cache.put(dataURL,r.clone())}).catch(function(){});
+    });
+   });
+  }).catch(function(e){dataErr=e;if(dataText!==null)return;return fetchAndCache(null).catch(function(e2){dataErr=e2})});
+ })();
  try{performance.mark('shb-boot-start')}catch(e){}
+ /* Lightweight diagnostics: records long main-thread tasks during startup without changing the UI. */
+ try{if(window.PerformanceObserver){window.__SHB_BOOT_LONG_TASKS=[];new PerformanceObserver(function(list){list.getEntries().forEach(function(x){window.__SHB_BOOT_LONG_TASKS.push({start:Math.round(x.startTime),duration:Math.round(x.duration)});if(window.__SHB_BOOT_LONG_TASKS.length>40)window.__SHB_BOOT_LONG_TASKS.shift()})}).observe({type:'longtask',buffered:true})}}catch(e){}
  function isWin(t){return t===window||t==null}
  function hook(){
   hold=true;
