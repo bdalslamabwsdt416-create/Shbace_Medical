@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - task1-onboarding-pwa-build-2026-11-10
+      - fix/pwa-offline-onboarding-ui-20261110
     paths:
       - 'index.html'
       - 'css/**'
@@ -12,6 +13,11 @@ on:
       - 'img/**'
       - 'img1/**'
       - 'img2/**'
+      - 'fonts/**'
+      - 'audio/**'
+      - 'media/**'
+      - 'videos/**'
+      - 'documents/**'
       - 'manifest.webmanifest'
       - 'sw.js'
       - 'package.json'
