@@ -1,0 +1,11 @@
+# Generated Android web staging output (assembled from source folders during Gradle builds)
+/www/
+
+# Android / Gradle build outputs
+.gradle/
+**/.gradle/
+**/build/
+local.properties
+android/keystore.properties
+*.jks
+*.keystore
