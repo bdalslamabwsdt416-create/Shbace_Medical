@@ -109,7 +109,7 @@ for (const icon of manifest.icons) {
 }
 
 const html = readFileSync(join(output, "index.html"), "utf8");
-if (!html.includes("navigator.serviceWorker.register('./sw.js'") || !html.includes("js/29-offline-setup.js") || !html.includes("js/29-reviewed-bank-controls.js") || !html.includes("qbData_reviewed.json")) {
+if (!html.includes("navigator.serviceWorker.register('./sw.js'") || !html.includes("js/29-offline-setup.js") || !html.includes("js/29-reviewed-bank-controls.js") || !html.includes("qbData_reviewed_patch.json")) {
   fail("index.html does not register ./sw.js");
 }
 
