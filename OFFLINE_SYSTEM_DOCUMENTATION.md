@@ -100,7 +100,21 @@ The app does not claim that iOS background downloads are supported. The user mus
 - The grade selected in the preceding onboarding step is read-only on the final completion screen.
 - The completion screen uses normal text flow and allows vertical scrolling on compact screens, instead of forcing text to overlap the artwork.
 
-## 9. Verification checklist
+## 9. Latest validated PWA build
+
+The GitHub Actions PWA bundle job completed successfully for application commit 25f1724f6442fc1ef14bf70bc66bd5943ecb4f18. The build output reported:
+
+- 221 inventoried offline resources.
+- 14,534,734 total bytes (13.86 MiB) before ZIP compression.
+- 186 copied local images, with 186 image references verified.
+- 29 deferred JavaScript files verified.
+- Question-bank JSON size: 1.35 MiB.
+- Static external runtime-reference scan: 0 matches for the scanner's configured patterns.
+- Offline manifest version: c7aaa773f8a0165634faaafb4e9f7fb26e808bd154bfec0bc75de828b2260170.
+
+The build generated and uploaded the Shbace-Medical-PWA.zip artifact. The zero-match external-reference result is limited to the build script's static patterns; it is not proof that dynamically constructed requests or remote service features are fully offline.
+
+## 10. Verification checklist
 
 The PWA build script performs static checks for required inputs, manifest validity, question-bank JSON validity, staged deferred scripts, referenced local images, and the generated offline inventory. Its external URL scan is a heuristic and must be supplemented by runtime inspection.
 
