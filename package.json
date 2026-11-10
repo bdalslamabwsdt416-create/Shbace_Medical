@@ -5,7 +5,8 @@
   "description": "Shbace Medical web and Capacitor Android application",
   "scripts": {
     "android:debug": "cd android && ./gradlew :app:assembleDebug",
-    "android:release": "cd android && ./gradlew :app:assembleRelease"
+    "android:release": "cd android && ./gradlew :app:assembleRelease",
+    "build:pwa": "node scripts/build-pwa.mjs"
   },
   "dependencies": {
     "@capacitor/android": "8.6.0",
