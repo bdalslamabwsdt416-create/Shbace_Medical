@@ -395,8 +395,9 @@ function start(){
      'The installed app package has changed. Restore the local files manually to use this build.':
      (check.missing&&check.missing.length?'Some required files are missing from local storage. Restore them to continue offline.':'Download the complete local package before using offline mode.');
     setStatus(reason);
-    setWarning('One-time download · '+manifest.files.length+' files · '+fmtBytes(manifest.totalBytes)+'. Connect to the internet, tap Start, and keep the app open until verification completes.');
-    ui.button.disabled=false;ui.button.textContent='Start one-time download';
+    setWarning('One-time package · '+manifest.files.length+' files · '+fmtBytes(manifest.totalBytes)+'. Connect to the internet, tap the button, and keep the app open until verification completes.');
+    var restoreNeeded=!!(check.record||check.missing&&check.missing.length);
+    ui.button.disabled=false;ui.button.textContent=restoreNeeded?'Restore offline package':'Start one-time download';
     ui.count.textContent='0 / '+manifest.files.length+' files';
     ui.bytes.textContent='0 B / '+fmtBytes(manifest.totalBytes);
     ui.percent.textContent='0%';paintProgress('prepare',false);
