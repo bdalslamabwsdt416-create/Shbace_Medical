@@ -5,6 +5,7 @@ on:
     branches:
       - task1-onboarding-pwa-build-2026-11-10
       - fix/pwa-offline-onboarding-ui-20261110
+      - release/pwa-v1.1-20261110
     paths:
       - 'index.html'
       - 'css/**'
@@ -19,6 +20,7 @@ on:
       - 'videos/**'
       - 'documents/**'
       - 'manifest.webmanifest'
+      - 'pwa-version.json'
       - 'sw.js'
       - 'package.json'
       - 'scripts/**'
@@ -46,14 +48,16 @@ jobs:
       - name: Package PWA ZIP
         run: |
           cd www
-          zip -qr ../Shbace-Medical-PWA.zip .
+          zip -qr ../Shbace-Medical-PWA-v1.1.zip .
 
       - name: Upload PWA bundle
         uses: actions/upload-artifact@v4
         with:
-          name: Shbace-Medical-PWA
-          path: Shbace-Medical-PWA.zip
+          name: Shbace-Medical-PWA-v1.1
+          path: Shbace-Medical-PWA-v1.1.zip
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 90
 
 # Rebuild the offline package whenever this workflow changes on the implementation branch.
+
+# PWA 1.1 artifacts are versioned and never overwrite the earlier PWA bundle.
