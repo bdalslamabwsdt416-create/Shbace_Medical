@@ -15,6 +15,7 @@ on:
       - 'img2/**'
       - 'manifest.webmanifest'
       - 'sw.js'
+      - 'package.json'
       - 'capacitor.config.json'
       - '.github/workflows/android-debug-apk.yml'
   pull_request:
