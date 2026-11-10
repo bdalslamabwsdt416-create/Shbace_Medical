@@ -487,9 +487,14 @@ function commit(o,dir,target){
    ghost.classList.add(fwd?'ob-out-l':'ob-out-r');
    if(bgGhost)bgGhost.classList.add('ob-bg-out');
    ns.classList.add(fwd?'ob-in-r':'ob-in-l');
-   setTimeout(()=>{try{ghost.remove()}catch(e){}try{bgGhost&&bgGhost.remove()}catch(e){}try{ns.classList.remove('ob-in-r','ob-in-l')}catch(e){}},OB_T+60)};
+   const finish=()=>{try{ghost.remove()}catch(e){}try{bgGhost&&bgGhost.remove()}catch(e){}try{ns.classList.remove('ob-in-r','ob-in-l')}catch(e){}};
+   let finished=false;const finishOnce=()=>{if(finished)return;finished=true;finish()};
+   let animations=[];try{animations=[...ghost.getAnimations(),...(bgGhost?bgGhost.getAnimations():[]),...ns.getAnimations()]}catch(e){}
+   if(animations.length)Promise.all(animations.map(a=>a.finished.catch(()=>{}))).then(finishOnce);
+   else setTimeout(finishOnce,OB_T+60);
+   setTimeout(finishOnce,OB_T+500)};
   try{const imgs=[...ns.querySelectorAll('img')].filter(i=>i.decode&&!(i.complete&&i.naturalWidth));
-   if(imgs.length){Promise.all(imgs.map(i=>i.decode().catch(()=>{}))).then(start);setTimeout(start,90)}else requestAnimationFrame(start)}catch(e){start()}
+   if(imgs.length){Promise.all(imgs.map(i=>i.decode().catch(()=>{}))).then(start);setTimeout(start,220)}else requestAnimationFrame(start)}catch(e){start()}
  }catch(e){console.error('ob transition',e)}
 }
 function settle(o,dx,commitDir){busy=true;
