@@ -1,0 +1,66 @@
+name: Shbace Medical PWA bundle
+
+on:
+  push:
+    branches:
+      - task1-onboarding-pwa-build-2026-11-10
+    paths:
+      - 'index.html'
+      - 'css/**'
+      - 'js/**'
+      - 'data/**'
+      - 'img/**'
+      - 'img1/**'
+      - 'img2/**'
+      - 'manifest.webmanifest'
+      - 'sw.js'
+      - '.github/workflows/pwa-bundle.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: shbace-pwa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-pwa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Validate PWA manifest
+        run: node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest', 'utf8'))"
+
+      - name: Stage production PWA
+        run: |
+          set -eu
+          mkdir -p www/assets/img
+          cp index.html manifest.webmanifest sw.js www/
+          cp -a css js data www/
+          for dir in img img1 img2; do
+            if [ -d "$dir" ]; then
+              cp -a "$dir"/. www/assets/img/
+            fi
+          done
+          test -s www/index.html
+          test -s www/manifest.webmanifest
+          test -s www/sw.js
+          test -s www/assets/img/fc0bef7cd7ca.png
+          grep -q "navigator.serviceWorker.register('./sw.js'" www/index.html
+
+      - name: Package PWA ZIP
+        run: |
+          cd www
+          zip -qr ../Shbace-Medical-PWA.zip .
+
+      - name: Upload PWA bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: Shbace-Medical-PWA
+          path: Shbace-Medical-PWA.zip
+          if-no-files-found: error
+          retention-days: 14
