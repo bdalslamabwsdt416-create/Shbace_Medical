@@ -21,6 +21,12 @@ const requiredFiles = [
   "css/core.css",
   "css/late.css",
   "data/qbData.json",
+  "data/qbData_reviewed.json",
+  "data/qbData_review_log.json",
+  "data/Question_Review_Log_1718.csv",
+  "data/Question_Review_Log_636.csv",
+  "data/Reviewed_Copy_Status.json",
+  "js/29-reviewed-bank-controls.js",
   "pwa-version.json",
   "js/29-offline-setup.js"
 ];
@@ -50,6 +56,9 @@ if (!manifest.start_url || !manifest.scope || !Array.isArray(manifest.icons) || 
   fail("manifest.webmanifest is missing start_url, scope, or icons");
 }
 JSON.parse(readFileSync(join(root, "data/qbData.json"), "utf8"));
+JSON.parse(readFileSync(join(root, "data/qbData_reviewed.json"), "utf8"));
+JSON.parse(readFileSync(join(root, "data/qbData_review_log.json"), "utf8"));
+JSON.parse(readFileSync(join(root, "data/Reviewed_Copy_Status.json"), "utf8"));
 const pwaVersion = JSON.parse(readFileSync(join(root, "pwa-version.json"), "utf8"));
 if (pwaVersion.platform !== "PWA" || pwaVersion.version !== "1.1.0") {
   fail("pwa-version.json must declare PWA version 1.1.0");
@@ -95,7 +104,7 @@ for (const icon of manifest.icons) {
 }
 
 const html = readFileSync(join(output, "index.html"), "utf8");
-if (!html.includes("navigator.serviceWorker.register('./sw.js'") || !html.includes("js/29-offline-setup.js")) {
+if (!html.includes("navigator.serviceWorker.register('./sw.js'") || !html.includes("js/29-offline-setup.js") || !html.includes("js/29-reviewed-bank-controls.js") || !html.includes("qbData_reviewed.json")) {
   fail("index.html does not register ./sw.js");
 }
 
