@@ -21,6 +21,7 @@ const requiredFiles = [
   "css/core.css",
   "css/late.css",
   "data/qbData.json",
+  "pwa-version.json",
   "js/29-offline-setup.js"
 ];
 const requiredDirs = ["css", "js", "data"];
@@ -49,11 +50,15 @@ if (!manifest.start_url || !manifest.scope || !Array.isArray(manifest.icons) || 
   fail("manifest.webmanifest is missing start_url, scope, or icons");
 }
 JSON.parse(readFileSync(join(root, "data/qbData.json"), "utf8"));
+const pwaVersion = JSON.parse(readFileSync(join(root, "pwa-version.json"), "utf8"));
+if (pwaVersion.platform !== "PWA" || pwaVersion.version !== "1.1.0") {
+  fail("pwa-version.json must declare PWA version 1.1.0");
+}
 
 rmSync(output, { recursive: true, force: true });
 mkdirSync(output, { recursive: true });
 
-for (const file of ["index.html", "manifest.webmanifest", "sw.js"]) {
+for (const file of ["index.html", "manifest.webmanifest", "sw.js", "pwa-version.json"]) {
   copyFileSync(join(root, file), join(output, file));
 }
 for (const dir of requiredDirs) {
@@ -190,6 +195,7 @@ for (const file of scanFiles) {
 
 const imageBytes = [...copiedImages].reduce((total, name) => total + statSync(join(imageOutput, name)).size, 0);
 console.log("PWA build successful");
+console.log("PWA release: " + pwaVersion.displayVersion + " (" + pwaVersion.version + ")");
 console.log(`Output: ${relative(root, output)}`);
 console.log(`Images copied: ${copiedImages.size} (${(imageBytes / 1024 / 1024).toFixed(2)} MiB)`);
 console.log(`Image references verified: ${referencedAssets.size}`);
