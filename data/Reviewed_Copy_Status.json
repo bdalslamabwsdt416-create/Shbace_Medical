@@ -1,30 +1,33 @@
 {
-  "title": "Shbace Medical reviewed question bank - working partial",
-  "source_file": "data/qbData.json",
-  "working_file": "data/qbData_reviewed_working.json",
-  "total_questions": 1718,
-  "questions_in_audit_register": 1082,
-  "coverage_percent": 62.98,
-  "questions_not_yet_audited": 636,
-  "unreviewed_json_index_ranges_0_based": [
-    [
-      359,
-      432
-    ],
-    [
-      854,
-      950
-    ],
-    [
-      1165,
-      1230
-    ],
-    [
-      1319,
-      1717
-    ]
+  "totalQuestions": 1718,
+  "previousAuditRegister": 1082,
+  "remaining636Screened": 636,
+  "remaining636Composition": {
+    "Infectious Diseases & Vaccines": 74,
+    "Haematology": 97,
+    "Rheumatology / Metabolic / Poisoning / Immunology": 66,
+    "Previous Years' Exam Questions": 399
+  },
+  "questionRecordsModified": 47,
+  "questionContentEdits": 45,
+  "reviewNotesAddedWithoutChangingExamKey": 2,
+  "priorPassChanges": 33,
+  "newPassQuestionChanges": 12,
+  "newPassQuestionRecordsWithNotes": 2,
+  "needsReviewTotal": 110,
+  "statusCounts": {
+    "changed": 45,
+    "needs_review": 110,
+    "retained": 1563
+  },
+  "originalFileModified": false,
+  "limitations": [
+    "The 636 previously unregistered records received a first-pass screen. The 399 past-paper records were preserved as historical college questions; their clinical claims were not all individually re-verified against current guidelines.",
+    "A record marked retained does not mean it is guaranteed medically correct.",
+    "Questions marked needs_review should be checked against the original paper or a subject specialist before being presented as definitive."
   ],
-  "actual_question_edits": 33,
-  "original_file_modified": false,
-  "warning": "This working copy contains all original questions, but questions outside the audit coverage remain unchanged and must not be treated as medically reviewed."
+  "title": "Shbace Medical reviewed question bank — status",
+  "branch": "medical-reviewed-working-2026-11-10",
+  "reviewedFile": "data/qbData_reviewed.json",
+  "reviewLogFile": "data/qbData_review_log.json"
 }
