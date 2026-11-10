@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import {
   cpSync,
   copyFileSync,
@@ -5,6 +6,7 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
+  writeFileSync,
   rmSync,
   statSync
 } from "node:fs";
@@ -18,10 +20,12 @@ const requiredFiles = [
   "sw.js",
   "css/core.css",
   "css/late.css",
-  "data/qbData.json"
+  "data/qbData.json",
+  "js/29-offline-setup.js"
 ];
 const requiredDirs = ["css", "js", "data"];
 const imageDirs = ["img", "img1", "img2"];
+const optionalDirs = ["fonts", "audio", "media", "videos", "documents"];
 
 function fail(message) {
   console.error(`PWA BUILD ERROR: ${message}`);
@@ -56,6 +60,13 @@ for (const dir of requiredDirs) {
   cpSync(join(root, dir), join(output, dir), { recursive: true });
 }
 
+for (const dir of optionalDirs) {
+  const source = join(root, dir);
+  if (existsSync(source) && statSync(source).isDirectory()) {
+    cpSync(source, join(output, dir), { recursive: true });
+  }
+}
+
 const imageOutput = join(output, "assets", "img");
 mkdirSync(imageOutput, { recursive: true });
 const copiedImages = new Set();
@@ -79,18 +90,21 @@ for (const icon of manifest.icons) {
 }
 
 const html = readFileSync(join(output, "index.html"), "utf8");
-if (!html.includes("navigator.serviceWorker.register('./sw.js'")) {
+if (!html.includes("navigator.serviceWorker.register('./sw.js'") || !html.includes("js/29-offline-setup.js")) {
   fail("index.html does not register ./sw.js");
 }
 
-const scanFiles = [
-  join(output, "index.html"),
-  ...["css", "js"].flatMap(dir =>
-    readdirSync(join(output, dir))
-      .filter(name => name.endsWith(".css") || name.endsWith(".js"))
-      .map(name => join(output, dir, name))
-  )
-];
+function listOutputFiles(dir) {
+  const found = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) found.push(...listOutputFiles(full));
+    else if (entry.isFile()) found.push(full);
+  }
+  return found;
+}
+
+const scanFiles = listOutputFiles(output).filter(file => /\.(?:html|css|js|json|webmanifest)$/i.test(file));
 const missingAssets = new Set();
 const referencedAssets = new Set();
 for (const file of scanFiles) {
@@ -111,6 +125,69 @@ for (const script of scriptRefs) {
 }
 if (!existsSync(join(output, "data/qbData.json"))) fail("Question bank JSON was not copied");
 
+const inventoryFiles = listOutputFiles(output)
+  .map(full => ({
+    path: relative(output, full).replace(/\\/g, "/"),
+    full
+  }))
+  .filter(file => file.path !== "offline-assets-manifest.json")
+  .sort((a, b) => a.path.localeCompare(b.path));
+
+const offlineFiles = inventoryFiles.map(file => {
+  const bytes = readFileSync(file.full);
+  const path = file.path;
+  const group = path.startsWith("assets/img/") ? "images" :
+    path.startsWith("data/") ? "data" :
+    (path.startsWith("css/") || path.startsWith("js/") ||
+     path === "index.html" || path === "manifest.webmanifest" || path === "sw.js") ? "app" : "other";
+  return {
+    path,
+    bytes: bytes.byteLength,
+    sha256: createHash("sha256").update(bytes).digest("hex"),
+    group
+  };
+});
+const offlineVersion = createHash("sha256")
+  .update(offlineFiles.map(file => file.path + ":" + file.sha256).join("\n"))
+  .digest("hex");
+const offlineManifest = {
+  schema: 1,
+  version: offlineVersion,
+  generatedAt: new Date().toISOString(),
+  fileCount: offlineFiles.length,
+  totalBytes: offlineFiles.reduce((sum, file) => sum + file.bytes, 0),
+  files: offlineFiles
+};
+writeFileSync(join(output, "offline-assets-manifest.json"), JSON.stringify(offlineManifest, null, 2));
+const writtenManifest = JSON.parse(readFileSync(join(output, "offline-assets-manifest.json"), "utf8"));
+if (writtenManifest.files.length !== offlineFiles.length ||
+    writtenManifest.totalBytes !== offlineManifest.totalBytes ||
+    writtenManifest.version !== offlineVersion) {
+  fail("Generated offline asset manifest did not pass its self-check");
+}
+
+const externalPatterns = [
+  /<(?:script|link|img|audio|video|source)\b[^>]*(?:src|href)\s*=\s*["']https?:\/\//gi,
+  /@import\s+(?:url\(\s*)?["']?https?:\/\//gi,
+  /url\(\s*["']?https?:\/\//gi,
+  /\bfetch\s*\(\s*["']https?:\/\//gi,
+  /\b(?:new\s+)?(?:Worker|SharedWorker)\s*\(\s*["']https?:\/\//gi,
+  /\bimportScripts\s*\(\s*["']https?:\/\//gi
+];
+const externalReferences = [];
+for (const file of scanFiles) {
+  const source = readFileSync(file, "utf8");
+  for (const pattern of externalPatterns) {
+    pattern.lastIndex = 0;
+    for (const match of source.matchAll(pattern)) {
+      externalReferences.push(relative(output, file) + ": " + match[0].slice(0, 180));
+      if (externalReferences.length >= 100) break;
+    }
+    if (externalReferences.length >= 100) break;
+  }
+  if (externalReferences.length >= 100) break;
+}
+
 const imageBytes = [...copiedImages].reduce((total, name) => total + statSync(join(imageOutput, name)).size, 0);
 console.log("PWA build successful");
 console.log(`Output: ${relative(root, output)}`);
@@ -118,3 +195,7 @@ console.log(`Images copied: ${copiedImages.size} (${(imageBytes / 1024 / 1024).t
 console.log(`Image references verified: ${referencedAssets.size}`);
 console.log(`Deferred scripts verified: ${scriptRefs.length}`);
 console.log(`Question bank: ${(statSync(join(output, "data/qbData.json")).size / 1024 / 1024).toFixed(2)} MiB`);
+console.log("Offline inventory: " + offlineManifest.fileCount + " files (" + (offlineManifest.totalBytes / 1024 / 1024).toFixed(2) + " MiB)");
+console.log("Offline manifest version: " + offlineVersion.slice(0, 16));
+console.log("External runtime references for manual review: " + externalReferences.length);
+externalReferences.slice(0, 20).forEach(item => console.log("  REVIEW: " + item));
