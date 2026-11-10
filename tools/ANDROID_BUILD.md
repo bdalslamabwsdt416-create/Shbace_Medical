@@ -19,11 +19,6 @@ The `:app:preBuild` dependency runs `stageWebAssets` before copying the staged s
 4. Run **Build > Build Bundle(s) / APK(s) > Build APK(s)**, or run `gradlew.bat :app:assembleDebug` from the `android/` directory on Windows.
 5. The debug APK is written to `android/app/build/outputs/apk/debug/app-debug.apk`.
 
-1. Open the `android/` folder in Android Studio.
-2. Use JDK 21 for this project's Gradle 8.14.3 wrapper.
-3. Run **Build > Build Bundle(s) / APK(s) > Build APK(s)**, or run `gradlew.bat :app:assembleDebug` from the `android/` directory on Windows.
-4. The debug APK is written to `android/app/build/outputs/apk/debug/app-debug.apk`.
-
 ## Release signing
 
 A release APK is signed only when `android/keystore.properties` and the matching private keystore are configured. Keep those secrets out of Git. Start from `android/keystore.properties.example`.
