@@ -6,6 +6,7 @@ const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './pwa-version.json',
   './offline-assets-manifest.json',
   './css/core.css',
   './css/late.css',
