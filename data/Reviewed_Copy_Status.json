@@ -1,0 +1,30 @@
+{
+  "title": "Shbace Medical reviewed question bank - working partial",
+  "source_file": "data/qbData.json",
+  "working_file": "data/qbData_reviewed_working.json",
+  "total_questions": 1718,
+  "questions_in_audit_register": 1082,
+  "coverage_percent": 62.98,
+  "questions_not_yet_audited": 636,
+  "unreviewed_json_index_ranges_0_based": [
+    [
+      359,
+      432
+    ],
+    [
+      854,
+      950
+    ],
+    [
+      1165,
+      1230
+    ],
+    [
+      1319,
+      1717
+    ]
+  ],
+  "actual_question_edits": 33,
+  "original_file_modified": false,
+  "warning": "This working copy contains all original questions, but questions outside the audit coverage remain unchanged and must not be treated as medically reviewed."
+}
