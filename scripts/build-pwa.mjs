@@ -21,7 +21,7 @@ const requiredFiles = [
   "css/core.css",
   "css/late.css",
   "data/qbData.json",
-  "data/qbData_reviewed.json",
+  "data/qbData_reviewed_patch.json",
   "data/qbData_review_log.json",
   "data/Question_Review_Log_1718.csv",
   "data/Question_Review_Log_636.csv",
@@ -56,7 +56,12 @@ if (!manifest.start_url || !manifest.scope || !Array.isArray(manifest.icons) || 
   fail("manifest.webmanifest is missing start_url, scope, or icons");
 }
 JSON.parse(readFileSync(join(root, "data/qbData.json"), "utf8"));
-JSON.parse(readFileSync(join(root, "data/qbData_reviewed.json"), "utf8"));
+const reviewedPatch = JSON.parse(readFileSync(join(root, "data/qbData_reviewed_patch.json"), "utf8"));
+if (reviewedPatch.schema !== "shbace-question-bank-patch-v1" ||
+    !Array.isArray(reviewedPatch.questions) ||
+    reviewedPatch.questions.length !== reviewedPatch.changedCount) {
+  fail("Reviewed question-bank patch is missing or invalid");
+}
 JSON.parse(readFileSync(join(root, "data/qbData_review_log.json"), "utf8"));
 JSON.parse(readFileSync(join(root, "data/Reviewed_Copy_Status.json"), "utf8"));
 const pwaVersion = JSON.parse(readFileSync(join(root, "pwa-version.json"), "utf8"));

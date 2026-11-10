@@ -381,8 +381,13 @@ function launchExperience(){
 }
 /* The ONLY routing decision after the splash:  first run -> Onboarding;  already completed -> Home directly (no onboarding, no Completion). */
 function routeAfterSplash(){
+ let qbSwitch=null;
+ try{const raw=sessionStorage.getItem('shbace_qb_switch_restore_v1');if(raw)qbSwitch=JSON.parse(raw)}catch(e){}
  try{const g=Number(localStorage.getItem(OB_GRADE_KEY));if(g>=1&&g<=5)selectedGrade=g;}catch(e){}
- if(onboardingDone()){returningUser=true;appPage='subjects';
+ if(qbSwitch&&qbSwitch.version===1&&qbSwitch.state){
+  returningUser=true;obReplay=false;mode='app';appPage=qbSwitch.state.appPage||'settings';
+  if(Number(qbSwitch.state.selectedGrade)>=1&&Number(qbSwitch.state.selectedGrade)<=5)selectedGrade=Number(qbSwitch.state.selectedGrade);
+ }else if(onboardingDone()){returningUser=true;appPage='subjects';
   const rv=[];if(obSetOn('obFirst'))rv.push(0);if(obSetOn('obLast'))rv.push(screenTitles.length-1);
   if(rv.length){obReplay=true;mode='preview';slide=rv[0]}else{obReplay=false;mode='app'}}
  else{obReplay=false;returningUser=false;mode='preview';slide=0;appPage='subjects';}
