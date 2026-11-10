@@ -78,8 +78,25 @@ apply from: 'capacitor.build.gradle'
 // The web app lives in ../www (single source of truth). Every Gradle build copies it to src/main/assets/public,
 // exactly where `npx cap copy` puts it, so "Build > Build APK" can never package a stale or missing web app.
 // ---------------------------------------------------------------------------------------------------------------
+// Stage the split web source into the Capacitor webDir before every Android build.
+// The image folders are merged into assets/img; filenames are checked for collisions by the repository audit.
+tasks.register('stageWebAssets', Sync) {
+    description = 'Assemble index.html, CSS, JS, data and image assets into ../www'
+    from("${rootProject.projectDir}/../index.html")
+    from("${rootProject.projectDir}/../manifest.webmanifest")
+    from("${rootProject.projectDir}/../sw.js")
+    from("${rootProject.projectDir}/../css") { into 'css' }
+    from("${rootProject.projectDir}/../js") { into 'js' }
+    from("${rootProject.projectDir}/../data") { into 'data' }
+    from("${rootProject.projectDir}/../img") { into 'assets/img' }
+    from("${rootProject.projectDir}/../img1") { into 'assets/img' }
+    from("${rootProject.projectDir}/../img2") { into 'assets/img' }
+    into "${rootProject.projectDir}/../www"
+}
+
 tasks.register('copyWebAssets', Copy) {
-    description = 'Copy ../www to src/main/assets/public (same target as `npx cap copy android`)'
+    description = 'Copy staged ../www to src/main/assets/public (same target as `npx cap copy android`)'
+    dependsOn 'stageWebAssets'
     from "${rootDir}/../www"
     into "${projectDir}/src/main/assets/public"
 }

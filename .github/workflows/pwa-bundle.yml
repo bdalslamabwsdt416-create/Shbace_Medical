@@ -1,0 +1,51 @@
+name: Shbace Medical PWA bundle
+
+on:
+  push:
+    branches:
+      - task1-onboarding-pwa-build-2026-11-10
+    paths:
+      - 'index.html'
+      - 'css/**'
+      - 'js/**'
+      - 'data/**'
+      - 'img/**'
+      - 'img1/**'
+      - 'img2/**'
+      - 'manifest.webmanifest'
+      - 'sw.js'
+      - 'package.json'
+      - 'scripts/**'
+      - '.github/workflows/pwa-bundle.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: shbace-pwa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-pwa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Build and validate static PWA
+        run: npm run build:pwa
+
+      - name: Package PWA ZIP
+        run: |
+          cd www
+          zip -qr ../Shbace-Medical-PWA.zip .
+
+      - name: Upload PWA bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: Shbace-Medical-PWA
+          path: Shbace-Medical-PWA.zip
+          if-no-files-found: error
+          retention-days: 14
