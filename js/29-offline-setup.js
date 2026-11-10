@@ -383,7 +383,7 @@ function start(){
       function inspect(){
        if(idx>=manifest.files.length)return Promise.resolve(missing);
        var f=manifest.files[idx++];
-       return fileValid(f,false).then(function(ok){if(!ok)missing.push(f.path);return inspect()});
+       return fileValid(f,true).then(function(ok){if(!ok)missing.push(f.path);return inspect()});
       }
       return inspect().then(function(list){return {ready:list.length===0,missing:list,record:record}});
      });
