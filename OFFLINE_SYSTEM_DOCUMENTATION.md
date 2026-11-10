@@ -82,6 +82,8 @@ Before the full package is verified, it may use the network and store successful
 
 External-origin requests are not intercepted by this same-origin worker. A feature that genuinely depends on a remote API or third-party service is not made offline merely by caching static files; it must be documented and tested separately.
 
+The existing scheduled daily system-notification code uses the Capacitor Local Notifications plugin. In a plain browser/PWA context that native plugin is unavailable and that scheduler intentionally does nothing. The in-app notification centre opened by the header bell remains an app-local screen; background OS notifications in the PWA are not claimed by this implementation. Enabling web push or scheduled browser notifications would require a separate browser-specific design and may add platform or server requirements.
+
 The page reuses an existing Service Worker registration and only registers one when no registration exists. The app does not add periodic update polling, background sync, periodic sync, or timed content-update jobs. Browser-managed Service Worker lifecycle checks remain under iOS/Safari control and cannot be disabled by application code.
 
 ## 7. Storage durability and iOS constraints
@@ -105,12 +107,12 @@ The app does not claim that iOS background downloads are supported. The user mus
 The GitHub Actions PWA bundle job completed successfully for application commit 25f1724f6442fc1ef14bf70bc66bd5943ecb4f18. The build output reported:
 
 - 221 inventoried offline resources.
-- 14,534,734 total bytes (13.86 MiB) before ZIP compression.
+- 14,534,855 total bytes (13.86 MiB) before ZIP compression.
 - 186 copied local images, with 186 image references verified.
 - 29 deferred JavaScript files verified.
 - Question-bank JSON size: 1.35 MiB.
 - Static external runtime-reference scan: 0 matches for the scanner's configured patterns.
-- Offline manifest version: c7aaa773f8a0165634faaafb4e9f7fb26e808bd154bfec0bc75de828b2260170.
+- Offline manifest version: 52b1fa628b329bf9dbaede531cfd0ecea3a28691308469b4e2fe2622a6c6b88a.
 
 The build generated and uploaded the Shbace-Medical-PWA.zip artifact. The zero-match external-reference result is limited to the build script's static patterns; it is not proof that dynamically constructed requests or remote service features are fully offline.
 
