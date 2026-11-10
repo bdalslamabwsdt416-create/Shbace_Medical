@@ -45,6 +45,7 @@
 })();
 </script>
 <meta name="theme-color" content="#07131f">
+<link rel="manifest" href="./manifest.webmanifest">
 <title>Shbace Medical</title>
 <link rel="icon" type="image/png" href="/assets/img/fc0bef7cd7ca.png">
 <link rel="apple-touch-icon" href="/assets/img/0011d30ae5fc.webp">
@@ -652,5 +653,17 @@
 <!-- grade-sync-v46 -->
 <!-- grade-sync-v46 -->
 <script type="text/shb-deferred" id="grade-sync-v46" data-src="js/28-grade-sync-v46.js"></script>
+<script id="shbace-pwa-sw">
+/* Progressive Web App support for browsers; Capacitor keeps its native asset lifecycle. */
+(function(){
+  if(window.Capacitor || !('serviceWorker' in navigator)) return;
+  if(location.protocol!=='https:' && location.hostname!=='localhost') return;
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(function(e){
+      console.warn('Shbace Medical offline support could not be registered:',e);
+    });
+  },{once:true});
+})();
+</script>
 </body>
 </html>
