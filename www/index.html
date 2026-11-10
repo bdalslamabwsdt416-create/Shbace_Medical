@@ -373,28 +373,57 @@
  var hold=false,held={dcl:[],load:[]},domReady=false,painted=false,started=false,T=null;
  /* question bank (1.4 MB JSON): fetched in parallel with the splash; placed into <script id="qbData" type="application/json"> before the first app script runs, so the code that reads its textContent is unchanged */
  var selectedQB='original';try{selectedQB=localStorage.getItem('shbace_question_bank_version')==='reviewed'?'reviewed':'original'}catch(e){}
- var dataURL=selectedQB==='reviewed'?'data/qbData_reviewed.json':'data/qbData.json',dataText=null,dataErr=null;
- /* v1.1: reuse the locally cached question bank immediately; refresh its cache quietly for the next launch. */
+ var dataText=null,dataErr=null;
+ /* v1.1: Original is the immutable college bank. Reviewed is assembled from the small verified patch plus review-log-only cautions. */
  var dataFetch=(function(){
   if(!window.fetch)return Promise.reject(new Error('no fetch'));
   function markReady(){try{performance.mark('shb-qb-data-ready')}catch(e){}}
-  function fetchAndCache(cache){
-   return fetch(dataURL,{cache:'no-cache'}).then(function(r){
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    var copy=r.clone();
-    return r.text().then(function(t){dataText=t;markReady();if(cache)cache.put(dataURL,copy).catch(function(){});});
-   });
-  }
-  return (window.caches?caches.open('shbace-data-v1-1').catch(function(){return null}):Promise.resolve(null)).then(function(cache){
-   if(!cache)return fetchAndCache(null);
-   return cache.match(dataURL).then(function(hit){
-    if(!hit)return fetchAndCache(cache);
-    return hit.text().then(function(t){
-     dataText=t;markReady();
-     fetch(dataURL,{cache:'no-cache'}).then(function(r){if(r.ok)return cache.put(dataURL,r.clone())}).catch(function(){});
+  function refresh(url,cache){if(!cache)return;fetch(url,{cache:'no-cache'}).then(function(r){if(r.ok)return cache.put(url,r.clone())}).catch(function(){});}
+  function fetchText(url,cache){
+   if(!cache)return fetch(url,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(url+' HTTP '+r.status);return r.text()});
+   return cache.match(url).then(function(hit){
+    if(hit){refresh(url,cache);return hit.text();}
+    return fetch(url,{cache:'no-cache'}).then(function(r){
+     if(!r.ok)throw new Error(url+' HTTP '+r.status);
+     var copy=r.clone();
+     return r.text().then(function(t){cache.put(url,copy).catch(function(){});return t;});
     });
    });
-  }).catch(function(e){dataErr=e;if(dataText!==null)return;return fetchAndCache(null).catch(function(e2){dataErr=e2})});
+  }
+  function assembleReviewed(baseText,patchText,logText){
+   var base=JSON.parse(baseText),patch=JSON.parse(patchText),log=JSON.parse(logText);
+   if(!base||!Array.isArray(base.questions)||!base.order)throw new Error('Original question bank is malformed');
+   if(!patch||patch.schema!=='shbace-question-bank-patch-v1'||!Array.isArray(patch.questions))throw new Error('Reviewed patch is missing or invalid');
+   if(base.questions.length!==patch.baseQuestionCount)throw new Error('Reviewed patch does not match this Original bank');
+   var byId=Object.create(null);
+   base.questions.forEach(function(q,i){if(!q||!q.id||byId[q.id]!==undefined)throw new Error('Duplicate or missing Original question ID');byId[q.id]=i;});
+   var patched=Object.create(null);
+   patch.questions.forEach(function(q){
+    if(!q||!q.id||patched[q.id])throw new Error('Duplicate or missing patch question ID');
+    patched[q.id]=1;
+    if(byId[q.id]!==undefined)base.questions[byId[q.id]]=q;
+    else{byId[q.id]=base.questions.length;base.questions.push(q);}
+   });
+   if(patch.questions.length!==patch.changedCount)throw new Error('Reviewed patch count does not match its metadata');
+   /* Needs Review entries remain separate from the verified patch. Their cautions come from the audit log only. */
+   (log&&Array.isArray(log.entries)?log.entries:[]).forEach(function(entry){
+    if(!entry||entry.status!=='needs_review'||byId[entry.id]===undefined)return;
+    var caution=(entry.fieldsChanged||[]).find(function(x){return x&&x.field==='review_note'&&typeof x.after==='string'&&x.after;});
+    if(caution)base.questions[byId[entry.id]].note=caution.after;
+   });
+   if(base.questions.length!==patch.baseQuestionCount+(Number(patch.addedCount)||0))throw new Error('Reviewed bank record count is invalid');
+   markReady();
+   return JSON.stringify(base);
+  }
+  return (window.caches?caches.open('shbace-data-v1-1').catch(function(){return null}):Promise.resolve(null)).then(function(cache){
+   var baseURL='data/qbData.json';
+   if(selectedQB!=='reviewed')return fetchText(baseURL,cache).then(function(t){dataText=t;markReady();});
+   return Promise.all([
+    fetchText(baseURL,cache),
+    fetchText('data/qbData_reviewed_patch.json',cache),
+    fetchText('data/qbData_review_log.json',cache)
+   ]).then(function(items){dataText=assembleReviewed(items[0],items[1],items[2]);});
+  }).catch(function(e){dataErr=e;console.error('Shbace question bank load failed',e);});
  })();
  try{performance.mark('shb-boot-start')}catch(e){}
  /* Lightweight diagnostics: records long main-thread tasks during startup without changing the UI. */

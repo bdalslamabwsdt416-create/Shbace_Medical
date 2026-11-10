@@ -7,8 +7,35 @@
   let reviewLog=null, loading=false, loadError='', activeFilter='changes', searchTerm='', pageIndex=0;
   const PAGE_SIZE=25;
   const statusCounts=()=>reviewLog&&reviewLog.summary&&reviewLog.summary.statusCounts||{};
-  window.setQBVersion=function(v){if(v!=='original'&&v!=='reviewed')return;try{localStorage.setItem(STORE_KEY,v)}catch(e){alert('Could not save this preference on this device.')}location.reload()};
-  function bankCard(){const v=selected();return `<div class="card setcard"><h3>Question Bank Version</h3><p class="meta">Choose which question set you want to study. Your answers and progress remain linked by the original question IDs.</p><div class="seg wide"><button type="button" class="${v==='original'?'on':''}" aria-pressed="${v==='original'}" onclick="setQBVersion('original')">Original</button><button type="button" class="${v==='reviewed'?'on':''}" aria-pressed="${v==='reviewed'}" onclick="setQBVersion('reviewed')">Reviewed</button></div><p class="meta">Original keeps the college source file unchanged. Reviewed uses the separate corrected copy and preserves the original question order and IDs.</p>${v==='reviewed'?'<button type="button" class="btn block" style="margin-top:10px" onclick="openQBReviewLog()">See what was reviewed and why</button>':''}</div>`}
+  const SWITCH_STATE_KEY='shbace_qb_switch_restore_v1';
+  let pendingSwitch=null;
+  try{const raw=sessionStorage.getItem(SWITCH_STATE_KEY);if(raw)pendingSwitch=JSON.parse(raw)}catch(e){}
+  function restoreSwitchState(){
+    if(!pendingSwitch||pendingSwitch.version!==1||!pendingSwitch.state)return false;
+    const api=window.__shbQBVersionState;
+    if(!api||typeof api.restore!=='function')return false;
+    if(!api.restore(pendingSwitch.state))return false;
+    try{sessionStorage.removeItem(SWITCH_STATE_KEY)}catch(e){}
+    pendingSwitch=null;return true;
+  }
+  document.addEventListener('shb-scripts-ready',function(){setTimeout(restoreSwitchState,0)},{once:true});
+  window.addEventListener('load',function(){setTimeout(restoreSwitchState,5000)},{once:true});
+  window.setQBVersion=function(v){
+    if(v!=='original'&&v!=='reviewed')return;
+    if(v===selected())return;
+    try{
+      const state=window.__shbQBVersionState&&window.__shbQBVersionState.capture();
+      if(!state)throw new Error('Study position could not be captured');
+      sessionStorage.setItem(SWITCH_STATE_KEY,JSON.stringify({version:1,from:selected(),to:v,state:state}));
+      localStorage.setItem(STORE_KEY,v);
+    }catch(e){
+      try{sessionStorage.removeItem(SWITCH_STATE_KEY)}catch(_){}
+      alert('Could not safely switch the question bank. Your current study screen was not changed.');
+      return;
+    }
+    location.reload();
+  };
+  function bankCard(){const v=selected();return `<div class="card setcard"><h3>Question Bank Version</h3><p class="meta">Choose which question set you want to study. Your answers and progress remain linked by the original question IDs.</p><div class="seg wide"><button type="button" class="${v==='original'?'on':''}" aria-pressed="${v==='original'}" onclick="setQBVersion('original')">Original</button><button type="button" class="${v==='reviewed'?'on':''}" aria-pressed="${v==='reviewed'}" onclick="setQBVersion('reviewed')">Reviewed</button></div><p class="meta">Original keeps the college source file unchanged. Reviewed overlays only the verified corrections on the original questions and keeps the same IDs and order.</p>${v==='reviewed'?'<button type="button" class="btn block" style="margin-top:10px" onclick="openQBReviewLog()">See what was reviewed and why</button>':''}</div>`}
   function niceValue(v){if(Array.isArray(v))return v.map(x=>Array.isArray(x)?x.join('. '):String(x)).join('\n');if(v&&typeof v==='object')return JSON.stringify(v,null,2);return String(v==null?'—':v)}
   function matchingEntries(){
     if(!reviewLog)return [];
