@@ -6,6 +6,7 @@ on:
       - task1-onboarding-pwa-build-2026-11-10
       - fix/pwa-offline-onboarding-ui-20261110
       - release/pwa-v1.1-20261110
+      - pwa-v1.1-copy-20261110
     paths:
       - 'index.html'
       - 'css/**'
@@ -41,6 +42,11 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
 
       - name: Build and validate static PWA
         run: npm run build:pwa
