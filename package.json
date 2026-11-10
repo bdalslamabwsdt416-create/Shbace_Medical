@@ -1,0 +1,19 @@
+{
+  "name": "shbace-medical-android",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Shbace Medical Android application",
+  "scripts": {
+    "android:debug": "cd android && ./gradlew --no-daemon :app:assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.6.0",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.6.0",
+    "@capacitor/haptics": "8.0.2",
+    "@capacitor/local-notifications": "8.3.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.6.0"
+  }
+}
