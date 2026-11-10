@@ -1681,7 +1681,6 @@ function settingsView(){
  <div class="card setcard"><h3>Appearance</h3>
   ${row('Theme','Dark or light for the whole app',seg('theme',[['dark','Dark'],['light','Light']]))}
   ${row('Font size','Scales text and controls',seg('font',[['small','Small'],['medium','Medium'],['large','Large']]))}
-  ${row('Question Bank layout','Default view when you open a topic',seg('view',[['single','Single'],['all','All']]))}
   <div class="setrow"><b dir="rtl"><bdi>شخصية الطبيب والتعابير</bdi></b><small dir="rtl">تظهر تعبيرات الطبيب داخل العنصر المرتبط بالحدث فقط، وبعد الإجابة في الأسئلة</small><button type="button" class="drsw ${SET.doctor==='on'?'on':''}" role="switch" aria-checked="${SET.doctor==='on'}" aria-label="شخصية الطبيب والتعابير" onclick="setSet('doctor','${SET.doctor==='on'?'off':'on'}')"><i></i><span>${SET.doctor==='on'?'ON':'OFF'}</span></button></div></div>
  <div class="card setcard"><h3>Onboarding</h3>
   <div class="setrow"><b>First Onboarding Page</b><small>When ON, the welcome page is shown at app start. Turn it OFF to skip it.</small><button type="button" class="drsw ${SET.obFirst==='on'?'on':''}" role="switch" aria-checked="${SET.obFirst==='on'}" aria-label="First Onboarding Page" onclick="setSet('obFirst','${SET.obFirst==='on'?'off':'on'}')"><i></i><span>${SET.obFirst==='on'?'ON':'OFF'}</span></button></div>
