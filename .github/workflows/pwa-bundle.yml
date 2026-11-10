@@ -14,6 +14,8 @@ on:
       - 'img2/**'
       - 'manifest.webmanifest'
       - 'sw.js'
+      - 'package.json'
+      - 'scripts/**'
       - '.github/workflows/pwa-bundle.yml'
   workflow_dispatch:
 
@@ -32,25 +34,8 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Validate PWA manifest
-        run: node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest', 'utf8'))"
-
-      - name: Stage production PWA
-        run: |
-          set -eu
-          mkdir -p www/assets/img
-          cp index.html manifest.webmanifest sw.js www/
-          cp -a css js data www/
-          for dir in img img1 img2; do
-            if [ -d "$dir" ]; then
-              cp -a "$dir"/. www/assets/img/
-            fi
-          done
-          test -s www/index.html
-          test -s www/manifest.webmanifest
-          test -s www/sw.js
-          test -s www/assets/img/fc0bef7cd7ca.png
-          grep -q "navigator.serviceWorker.register('./sw.js'" www/index.html
+      - name: Build and validate static PWA
+        run: npm run build:pwa
 
       - name: Package PWA ZIP
         run: |
