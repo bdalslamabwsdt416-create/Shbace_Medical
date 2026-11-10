@@ -1,8 +1,29 @@
 'use strict';
 
-const CACHE_PREFIX = 'shbace-medical-shell-';
-const CACHE_NAME = CACHE_PREFIX + '1';
-const APP_SHELL = ['./', './index.html'];
+const CACHE_NAME = 'shbace-medical-offline-v2';
+const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
+const APP_SHELL = [
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './offline-assets-manifest.json',
+  './css/core.css',
+  './css/late.css',
+  './js/29-offline-setup.js'
+];
+
+function missingOfflineResponse(url) {
+  const path = new URL(url).pathname;
+  const body = '<!doctype html><html lang="en"><meta charset="utf-8">' +
+    '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<title>Offline file unavailable</title><body style="font:16px system-ui;padding:24px;background:#07131f;color:#eaf4ff">' +
+    '<h1>Shbace Medical</h1><p>A required local file is missing: <code>' + path.replace(/[&<>"]/g, '') +
+    '</code>.</p><p>Reconnect to the internet, open Shbace Medical, and choose Restore on the offline setup screen.</p></body></html>';
+  return new Response(body, {
+    status: 503,
+    headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
+  });
+}
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -13,13 +34,8 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(keys
-        .filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
-        .map(key => caches.delete(key))))
-      .then(() => self.clients.claim())
-  );
+  // Preserve older caches; they may still contain files needed by an already-open app.
+  event.waitUntil(self.clients.claim());
 });
 
 self.addEventListener('fetch', event => {
@@ -28,35 +44,27 @@ self.addEventListener('fetch', event => {
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+  if (url.pathname.endsWith('/sw.js')) return;
 
-  if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .then(response => {
-          if (response && response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
-          }
-          return response;
-        })
-        .catch(() => caches.match('./index.html'))
-    );
-    return;
-  }
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    const ready = await cache.match(READY_URL);
+    const cached = await cache.match(request, { ignoreSearch: true });
+    if (cached) return cached;
 
-  // Cache-first for same-origin app resources, with runtime population on first visit.
-  if (/\/(?:css|js|data|assets)\//.test(url.pathname)) {
-    event.respondWith(
-      caches.match(request).then(cached => {
-        if (cached) return cached;
-        return fetch(request).then(response => {
-          if (response && response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-          }
-          return response;
-        });
-      })
-    );
-  }
+    // Before the package is verified, use the network and keep successful same-origin
+    // responses. After verification, a missing same-origin file is a visible offline error.
+    if (ready) return missingOfflineResponse(request.url);
+
+    try {
+      const response = await fetch(request);
+      if (response && response.ok) {
+        try { await cache.put(request, response.clone()); } catch (_) {}
+      }
+      return response;
+    } catch (_) {
+      const fallback = await cache.match('./index.html');
+      return fallback || missingOfflineResponse(request.url);
+    }
+  })());
 });
