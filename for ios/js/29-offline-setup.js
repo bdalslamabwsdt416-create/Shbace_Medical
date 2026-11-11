@@ -45,6 +45,9 @@ function urlFor(path){
  return new URL(path.split('/').map(encodeURIComponent).join('/'),new URL('./',location.href)).href;
 }
 function wait(ms){return new Promise(function(resolve){setTimeout(resolve,ms)})}
+function releaseStartupGate(){
+ try{if(typeof window.__shbReleaseOfflineGate==='function')window.__shbReleaseOfflineGate();else document.documentElement.classList.remove('shb-offline-pending')}catch(e){}
+}
 function mount(){
  if(ui&&ui.root&&ui.root.isConnected)return ui;
  var root=document.createElement('div');
@@ -57,8 +60,8 @@ function mount(){
   '<div class="shb-offline-card">'+
    '<div class="shb-offline-brand"><span class="shb-offline-mark">S</span><span>SHBACE <b>MEDICAL</b></span><span class="shb-offline-pill">ONE-TIME SETUP</span></div>'+
    '<div class="shb-offline-kicker">LOCAL INSTALLATION</div>'+
-   '<h1 id="shbOfflineTitle">Prepare Shbace for offline study</h1>'+
-   '<p class="shb-offline-intro">Download the complete app package once. We will save every required file on this device, verify it, and then use the local copy for your study sessions.</p>'+
+   '<h1 id="shbOfflineTitle">Download resources before your first launch</h1>'+
+   '<p class="shb-offline-intro">Download the complete app package once. We will save the app, images, question bank and learning resources on this device, verify every file, then continue to the splash screen.</p>'+
    '<div class="shb-offline-status" id="shbOfflineStatus" aria-live="polite">Preparing the installation checklist…</div>'+
    '<div class="shb-offline-progress-head"><b id="shbOfflinePercent">0%</b><span id="shbOfflineCount">0 / 0 files</span></div>'+
    '<div class="shb-offline-track" role="progressbar" aria-label="Offline installation progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="shbOfflineTrack"><i id="shbOfflineBar"></i></div>'+
@@ -86,7 +89,8 @@ function mount(){
   foot:root.querySelector('#shbOfflineFootnote')
  };
  ui.button.addEventListener('click',function(){
-  if(ui.button.dataset.done==='1'){root.remove();return}
+  if(ui.button.dataset.done==='1'){root.remove();releaseStartupGate();return}
+  if(ui.button.dataset.retry==='1'){location.reload();return}
   startDownload();
  });
  if(document.querySelector('.phone.light'))root.classList.add('is-light');
@@ -276,7 +280,7 @@ function verifyAll(){
 function startDownload(){
  if(started||!manifest||!ui)return;
  started=true;errors=[];resetCounters();setErrorList([]);
- ui.button.disabled=true;ui.button.textContent='Downloading…';ui.button.dataset.done='0';
+ ui.button.disabled=true;ui.button.textContent='Downloading…';ui.button.dataset.done='0';ui.button.dataset.retry='0';
  setStatus('Preparing local storage and the offline download…');
  setWarning('The download is resumable. Files already saved and verified will be skipped.');
  Promise.resolve().then(function(){return ensureServiceWorker()})
@@ -336,9 +340,9 @@ function startDownload(){
    ui.stages.querySelector('[data-stage="verify"] b').textContent='Complete';
    ui.stages.querySelector('[data-stage="verify"]').classList.add('is-done');
    ui.stages.querySelector('[data-stage="verify"]').classList.remove('is-active');
-   setStatus('Setup complete. Shbace Medical is ready to open from this device without an internet connection.');
+   setStatus('All resources are downloaded and verified. Tap Done to continue to Shbace Medical.');
    setWarning('All '+manifest.files.length+' required files were saved and verified locally. Your existing answers and study progress were not reset.');
-   ui.button.disabled=false;ui.button.textContent='Open Shbace Medical';ui.button.dataset.done='1';
+   ui.button.disabled=false;ui.button.textContent='Done — Continue';ui.button.dataset.done='1';
    ui.foot.textContent='Offline package verified · '+fmtBytes(manifest.totalBytes)+' stored. Keep a JSON backup of your study progress.';
   });
  }).catch(function(error){
@@ -348,28 +352,15 @@ function startDownload(){
   ui.button.disabled=false;ui.button.textContent='Retry download';ui.button.dataset.done='0';
  }).finally(function(){started=false});
 }
-function waitForSplash(){
- return new Promise(function(resolve){
-  var splash=document.getElementById('startupSplash');
-  if(!splash||!splash.isConnected){resolve();return}
-  var finished=false,observer=null;
-  function done(){
-   if(finished||splash.isConnected)return;
-   finished=true;if(observer)observer.disconnect();resolve();
-  }
-  try{observer=new MutationObserver(done);observer.observe(document.body,{childList:true,subtree:true})}catch(e){}
-  setTimeout(function(){if(!finished){finished=true;if(observer)observer.disconnect();resolve()}},14000);
- });
-}
 function start(){
- if(!standalone()){showInstallHint();return}
+ if(!standalone()){showInstallHint();releaseStartupGate();return}
  if(!document.body)return;
  var root=mount();
  setStatus('Checking the installed app and local storage…');
  if(!('caches' in window)||!window.crypto||!crypto.subtle||!window.indexedDB){
   setStatus('This browser does not provide the storage features required for a verified offline installation.');
-  setWarning('Use an updated version of Safari and open Shbace Medical from its Home Screen icon. The app will remain online until offline storage is supported.');
-  ui.button.disabled=true;return;
+  setWarning('This device cannot complete verified offline setup. You may continue online, but offline study will not be ready until storage support is available.');
+  ui.button.disabled=false;ui.button.textContent='Continue online';ui.button.dataset.done='1';return;
  }
  loadManifest().then(function(data){
   manifest=data;cache=null;
@@ -389,10 +380,10 @@ function start(){
      });
     });
    }).then(function(check){
-    if(check.ready){root.remove();return}
+    if(check.ready){root.remove();releaseStartupGate();return}
     stageCounts=stageMarkup();resetCounters();
     var reason=check.record&&check.record.version!==manifest.version?
-     'The installed app package has changed. Restore the local files manually to use this build.':
+     'The installed resource package is out of date. Restore the updated package before continuing.':
      (check.missing&&check.missing.length?'Some required files are missing from local storage. Restore them to continue offline.':'Download the complete local package before using offline mode.');
     setStatus(reason);
     setWarning('One-time package · '+manifest.files.length+' files · '+fmtBytes(manifest.totalBytes)+'. Connect to the internet, tap the button, and keep the app open until verification completes.');
@@ -405,13 +396,10 @@ function start(){
  }).catch(function(error){
   setStatus(error.message||'Could not read the offline installation manifest.');
   setWarning('Connect to the internet and reload the installed app. The setup will not mark any file as complete until it is saved and verified.');
-  ui.button.disabled=false;ui.button.textContent='Reload setup';
+  ui.button.disabled=false;ui.button.textContent='Reload setup';ui.button.dataset.retry='1';
  });
 }
-function boot(){
- if(!standalone()){showInstallHint();return}
- waitForSplash().then(start);
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
-else boot();
+function boot(){start()}
+/* This script is deliberately loaded immediately after <body>, before the splash markup. */
+boot();
 })();
