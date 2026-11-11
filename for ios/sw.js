@@ -11,7 +11,6 @@ const APP_SHELL = [
   './offline-assets-manifest.json',
   './sw.js',
   './js/09-app-features-v6.js',
-  './js/29-offline-setup.js',
   './css/core.css',
   './css/late.css',
   './css/ios-v5.css',
