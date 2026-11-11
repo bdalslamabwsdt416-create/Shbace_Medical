@@ -54,10 +54,91 @@ function verify(relative, bytes, sha256) {
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
 
+function patchPackedAsset(relative, originalBytes) {
+  if (relative !== 'js/30-ios-v5.js' && relative !== 'js/32-ios-v7.js') return originalBytes;
+  let source = originalBytes.toString('utf8');
+
+  const oldGuide = "    '<li>إذا ظهر '+E('A new version is available')+'، اتصل بالإنترنت واضغط زر التحديث واترك العملية تكتمل قبل إغلاق الصفحة.</li>'+";
+  const newGuide = "    '<li>يتم فحص تحديثات التطبيق وتطبيقها تلقائياً في الخلفية، ولا تحتاج إلى الضغط على زر تحديث. قد يعاد تحميل الصفحة مرة واحدة بعد اكتمال تحديث ملفات التطبيق، مع بقاء بياناتك المحلية محفوظة.</li>'+";
+
+  if (relative === 'js/30-ios-v5.js') {
+    const flag = 'updateBanner:true,';
+    if (!source.includes(flag)) throw new Error('Expected iOS update-banner flag was not found.');
+    source = source.replace(flag, 'updateBanner:false,\n autoUpdate:true,');
+
+    const startMarker = '/* ---------- 8. new version available ---------- */';
+    const endMarker = '/* ---------- 9. weekly backup reminder';
+    const start = source.indexOf(startMarker);
+    const end = source.indexOf(endMarker, start);
+    if (start < 0 || end < 0) throw new Error('Could not locate the legacy iOS update-banner block.');
+
+    const silentUpdates = `/* ---------- 8. silent automatic PWA updates: no user-facing banner ---------- */
+var VER_KEY='shbace_v5_seen_version';
+function swReady(){return 'serviceWorker' in navigator}
+if(V5.autoUpdate&&swReady()){
+ var hadController=!!navigator.serviceWorker.controller;
+ var pendingReload=false,reloadStarted=false,waitingForGate=false,lastCheck=0;
+ function reloadWhenSafe(){
+  if(!pendingReload||reloadStarted||!hadController||!navigator.serviceWorker.controller)return;
+  /* Never interrupt an active study session. Apply the new shell when the app is backgrounded,
+     or during startup before the app has finished booting. */
+  if(!document.hidden&&window.__shbBooted)return;
+  if(window.__shbOfflineGatePromise&&!window.__shbOfflineGateReleased){
+   if(!waitingForGate){
+    waitingForGate=true;
+    window.__shbOfflineGatePromise.then(function(){waitingForGate=false;reloadWhenSafe()},function(){waitingForGate=false});
+   }
+   return;
+  }
+  reloadStarted=true;
+  setTimeout(function(){location.reload()},200);
+ }
+ navigator.serviceWorker.addEventListener('controllerchange',function(){
+  if(hadController&&navigator.serviceWorker.controller){pendingReload=true;reloadWhenSafe()}
+ });
+ function checkUpdates(force){
+  var now=Date.now();
+  if(!force&&now-lastCheck<30*60*1000)return;
+  lastCheck=now;
+  if(navigator.onLine===false)return;
+  navigator.serviceWorker.getRegistration('./').then(function(reg){
+   if(reg)return reg.update().catch(function(){});
+  }).catch(function(){});
+  fetch('pwa-version.json?shbcheck='+Date.now(),{cache:'no-store'})
+   .then(function(r){return r.ok?r.json():null})
+   .then(function(v){if(v&&v.version)lsSet(VER_KEY,v.version)})
+   .catch(function(){});
+ }
+ setTimeout(function(){checkUpdates(true)},9000);
+ setInterval(function(){checkUpdates(false)},30*60*1000);
+ document.addEventListener('visibilitychange',function(){
+  if(document.hidden){reloadWhenSafe();return}
+  setTimeout(function(){checkUpdates(true)},1200);
+ });
+ addEventListener('online',function(){setTimeout(function(){checkUpdates(true)},1200)});
+}`;
+    source = source.slice(0, start) + silentUpdates + source.slice(end);
+  }
+
+  if (!source.includes(oldGuide)) {
+    throw new Error('Expected manual-update instruction was not found in ' + relative);
+  }
+  source = source.replace(oldGuide, newGuide);
+  return Buffer.from(source, 'utf8');
+}
+
 for (const item of manifest.files) {
-  const bytes = readAsset(item.path);
+  const originalBytes = readAsset(item.path);
+  const originalDigest = crypto.createHash('sha256').update(originalBytes).digest('hex');
+  // Verify the original compressed source bundle before applying the deterministic release patch.
+  verify(item.path, originalBytes, originalDigest);
+
+  const bytes = patchPackedAsset(item.path, originalBytes);
   const digest = crypto.createHash('sha256').update(bytes).digest('hex');
-  verify(item.path, bytes, digest);
+  const record = manifest.files.find(function (entry) { return entry.path === item.path; });
+  record.bytes = bytes.length;
+  record.sha256 = digest;
+
   if (item.path.endsWith('.js')) new vm.Script(bytes.toString('utf8'), { filename: item.path });
   const destination = safePath(item.path);
   fs.mkdirSync(path.dirname(destination), { recursive: true });
