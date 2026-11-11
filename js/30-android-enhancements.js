@@ -20,7 +20,7 @@
   var DAY = 86400000;
   var DEFAULTS = {
     haptics: true, shareQuestion: true, copyQuestion: true, readAloud: true,
-    keepScreenOn: true, autoTheme: true, dailyReminder: true, examCountdown: true,
+    keepScreenOn: true, autoTheme: true, examCountdown: true,
     readingSpeed: 'normal'
   };
   function readPrefs() {
@@ -46,6 +46,10 @@
   }
   function getTimerTotals() {
     try { return window.__shbStudy && window.__shbStudy.totals ? window.__shbStudy.totals() : null; } catch (_) { return null; }
+  }
+  function reminderCategoryEnabled() {
+    try { var p = JSON.parse(localStorage.getItem('shbace_notif_prefs_v1') || '{}'); return p.reminders !== false; }
+    catch (_) { return true; }
   }
   function getActivityDays() {
     try {
@@ -123,7 +127,7 @@
       '</section>' +
       '<section class="card setcard shb-af-settings"><h3>Study reminders</h3>' +
       '<p class="meta">A small number of useful reminders. These use the app’s existing Android notification permission.</p>' +
-      toggleMarkup('dailyReminder', 'Daily study reminder', 'One reminder at 7:30 PM only on days with no recorded study activity.') +
+      '<div class="shb-af-reminder-note"><b>Daily study reminder</b><small>Uses the existing Settings → Notification preferences → Study reminders switch. One reminder at 7:30 PM when no study activity is recorded.</small></div>' +
       toggleMarkup('examCountdown', 'Exam countdown reminders', 'Three reminders at 7, 3 and 1 day before your saved exam date.') +
       '<button type="button" class="btn block shb-af-copyinfo" id="shbCopyAppInfo">Copy app information</button>' +
       '<p class="meta">Send the copied details when reporting an app issue. No account or personal data is included.</p></section>';
@@ -278,7 +282,6 @@
     } catch (_) {}
   }
   async function cancelTodayReminder() {
-    if (!prefs.dailyReminder) return;
     var p = await localPlugin();
     if (p) await cancelReminderIds(p, [DAILY_BASE + Number(todayKey().replace(/-/g, '').slice(2))]);
   }
@@ -291,7 +294,7 @@
       try { await p.createChannel({ id: 'study-reminders', name: 'Study reminders', description: 'A single daily study reminder', importance: 2 }); } catch (_) {}
       var pend = await p.getPending(), mine = (pend.notifications || []).filter(function (n) { return n.id >= DAILY_BASE && n.id < DAILY_BASE + 100000; });
       if (mine.length) await p.cancel({ notifications: mine.map(function (n) { return { id: n.id }; }) });
-      if (!prefs.dailyReminder) return;
+      if (!reminderCategoryEnabled()) return;
       var days = getActivityDays(), notifications = [], now = new Date();
       for (var i = 0; i < 7; i++) {
         var d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i, 19, 30, 0, 0), k = todayKey(d);
@@ -313,7 +316,7 @@
       try { await p.createChannel({ id: 'exam-countdown', name: 'Exam countdown', description: 'A few reminders before your exam', importance: 3 }); } catch (_) {}
       var ids = [REMINDER_BASE + 7, REMINDER_BASE + 3, REMINDER_BASE + 1];
       await cancelReminderIds(p, ids);
-      if (!prefs.examCountdown) return;
+      if (!prefs.examCountdown || !reminderCategoryEnabled()) return;
       var raw = '';
       try { raw = localStorage.getItem(GOAL_KEY) || ''; } catch (_) {}
       if (!raw) return;
@@ -548,7 +551,6 @@
       prefs[k] = !prefs[k]; savePrefs();
       if (k === 'autoTheme') applyTheme();
       if (k === 'keepScreenOn') screenAwake();
-      if (k === 'dailyReminder') planDailyReminders();
       if (k === 'examCountdown') planExamReminders();
       if (k === 'shareQuestion' || k === 'copyQuestion' || k === 'readAloud') {
         document.querySelectorAll('#phoneContent .qcard .shb-af-qtools').forEach(function (x) { x.remove(); });
