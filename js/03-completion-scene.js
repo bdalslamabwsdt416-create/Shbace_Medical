@@ -1,6 +1,10 @@
 
 (function(){
 'use strict';
+/* Android 1.3 no longer uses the legacy onboarding completion journey.
+   Keep the artwork available to the independent PWA flow, but do not preload or initialise it in Android. */
+const cap=window.Capacitor;
+if(cap&&cap.isNativePlatform&&cap.isNativePlatform()&&(!cap.getPlatform||cap.getPlatform()==='android'))return;
 const BG='/assets/img/297c220bd3da.webp';
 const VB_W=865,VB_H=680,BG_H=600;
 /* grade platforms (poster layout, numerals 1→5 climb bottom → top) */
