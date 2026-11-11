@@ -1,12 +1,13 @@
 {
   "app": "Shbace Medical",
   "platform": "PWA",
-  "version": "1.4.3",
-  "displayVersion": "1.4.3",
+  "version": "1.4.4",
+  "displayVersion": "1.4.4",
   "releaseDate": "2026-11-11",
   "releaseNotes": [
     "Added an offline Exam goal planner with multiple exam dates and independent daily targets.",
     "The planner reads unanswered questions directly from the live Question Bank and keeps Smart Review separate.",
-    "Added local daily progress, streaks, specialty priorities, a burn-down chart and weekly activity."
+    "Added local daily progress, streaks, specialty priorities, a burn-down chart and weekly activity.",
+    "Fixed the iOS service-worker cache refresh so installed offline users receive the latest Exam goal planner code."
   ]
 }
