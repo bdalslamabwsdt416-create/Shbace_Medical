@@ -20,7 +20,7 @@
   var DAY = 86400000;
   var DEFAULTS = {
     haptics: true, shareQuestion: true, copyQuestion: true, readAloud: true,
-    keepScreenOn: true, autoTheme: true, examCountdown: true,
+    keepScreenOn: true, autoTheme: true, examCountdown: true, doctorExpressions: true,
     readingSpeed: 'normal'
   };
   function readPrefs() {

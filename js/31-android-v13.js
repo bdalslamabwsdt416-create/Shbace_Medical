@@ -205,7 +205,7 @@ function closeOverlay(){
 window.navBack=function(){
  if(closeOverlay())return;
  var to=stack.length?stack.pop():null;
- if(!to){try{to=BACKP[appPage]}catch(_){}}
+ if(!to){try{to=window.__shbGetBackTarget(appPage)}catch(_){}}
  if(to==='*'){try{to=window.__qs&&window.__qs.spec&&window.__qs.spec!=='all'?'topics':'subjects'}catch(_){to='subjects'}}
  if(!to)to='subjects';if(to===appPage)return;
  backing=true;appPage=to;renderAppDemo();backing=false
@@ -265,8 +265,7 @@ function settingsPatch(){
  installDoctorSetting();var s={};try{s=window.__shbAndroidFeatures.state().prefs||{}}catch(_){}
  document.querySelectorAll('[data-shb-pref="doctorExpressions"]').forEach(function(b){var on=s.doctorExpressions!==false;b.classList.toggle('on',on);b.setAttribute('aria-checked',String(on));var v=b.querySelector('span');if(v)v.textContent=on?'ON':'OFF'})
 }
-PAGES.examgoal=plannerPage;
-try{BACKP.examgoal='subjects'}catch(_){}
+if(window.__shbRegisterPage)window.__shbRegisterPage('examgoal',plannerPage,'subjects');
 var pc=document.getElementById('phoneContent');
 if(pc&&window.MutationObserver)new MutationObserver(function(){removeOldPlanner();removeBadges();settingsPatch()}).observe(pc,{childList:true,subtree:true});
 var prevAnswer=window.qAnswer;if(typeof prevAnswer==='function')window.qAnswer=function(){var r=prevAnswer.apply(this,arguments);saveSnapshot();if(appPage==='examgoal')renderAppDemo();scheduleReminder();return r};
