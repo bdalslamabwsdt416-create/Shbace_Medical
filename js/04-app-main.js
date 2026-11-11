@@ -448,8 +448,9 @@ const OB_T=440;   /* v47: page change = 440 ms crossfade with a 24 px subtle sli
 function obSnapCanvases(from,to){try{const a=from.querySelectorAll('canvas'),b=to.querySelectorAll('canvas');a.forEach((c,i)=>{const g=b[i];if(!g||!c.width||!c.height)return;g.width=c.width;g.height=c.height;g.getContext('2d').drawImage(c,0,0)})}catch(e){}}
 function commit(o,dir,target){
  const pc=phoneContent,cur=o.cur,rm=reduce()||document.hidden;
- let ghost=null,times=null,bgGhost=null;
+ let ghost=null,times=null,bgGhost=null,obEl=null;
  const nx=(target!=null)?target:obNb(dir);
+ const obFree=()=>{try{if(obEl)obEl.style.transition=''}catch(e){}obEl=null};
  if(nx<0){cleanup(o);if(dir>0&&obCanExit())enterAppDemo();return}
  if(!rm){try{
   const dx=offsetNow(cur),op=getComputedStyle(cur).opacity||'1';
@@ -461,20 +462,25 @@ function commit(o,dir,target){
   if(cur.getAnimations)times=cur.getAnimations({subtree:true}).map(a=>a.currentTime);
   /* the shared Onboarding sky belongs to the .phone, not to the page: when the background itself changes (last page <-> others) keep the old one as a fading layer */
   const lastI=screenTitles.length-1;
-  if(pc.hasAttribute('data-ob-final')!==(nx===lastI)){
+  if(pc.hasAttribute('data-ob-final')!==(nx===lastI)||(slide===0)!==(nx===0)){
    const ph=pc.closest('.phone'),cs=ph&&getComputedStyle(ph);
    if(cs){bgGhost=document.createElement('div');bgGhost.className='ob-bgghost';bgGhost.setAttribute('aria-hidden','true');
-    bgGhost.style.cssText=`position:absolute;left:0;top:0;width:${pc.clientWidth}px;height:${pc.clientHeight}px;z-index:4;pointer-events:none;background-color:${cs.backgroundColor};background-image:${cs.backgroundImage};background-size:${cs.backgroundSize};background-position:${cs.backgroundPosition};background-repeat:${cs.backgroundRepeat}`}}
- }catch(e){ghost=null;bgGhost=null;console.error('ob ghost',e)}}
+    bgGhost.style.cssText=`position:absolute;left:0;top:0;width:${pc.clientWidth}px;height:${pc.clientHeight}px;z-index:4;pointer-events:none;background-color:${cs.backgroundColor};background-image:${cs.backgroundImage};background-size:${cs.backgroundSize};background-position:${cs.backgroundPosition};background-repeat:${cs.backgroundRepeat}`;
+    /* Page 1 uses its own .shb-obbg layer. Copy it into the frozen backdrop so it does not jump or fade independently. */
+    try{const ob=ph.querySelector(':scope>.shb-obbg');if(ob){const oc=getComputedStyle(ob),oo=parseFloat(oc.opacity)||0;
+      if(oo>.01){const layer=document.createElement('i');layer.style.cssText=`position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:none;background-color:${oc.backgroundColor};background-image:${oc.backgroundImage};background-size:${oc.backgroundSize};background-position:${oc.backgroundPosition};background-repeat:${oc.backgroundRepeat};opacity:${oc.opacity}`;bgGhost.appendChild(layer)}
+      obEl=ob;ob.style.transition='none';}}
+    catch(e){}}}
+ }catch(e){ghost=null;bgGhost=null;obFree();console.error('ob ghost',e)}}
  cleanup(o);
  slide=nx;renderSlide();
  pc.classList.add('ob-still');       /* the new page does not replay its children's entrances: the page as a whole carries the transition (nothing blinks twice) */
- if(rm)return;
+ if(rm){obFree();return}
  try{
   const ns=pc.querySelector(':scope>.screen:not(.ob-ghost)');
-  if(!ns){if(ghost)ghost=null;return}
+  if(!ns){if(ghost)ghost=null;obFree();return}
   const fwd=dir>0;
-  if(!ghost){ns.classList.add(fwd?'ob-in-r':'ob-in-l');setTimeout(()=>{try{ns.classList.remove('ob-in-r','ob-in-l')}catch(e){}},OB_T+60);return}
+  if(!ghost){obFree();ns.classList.add(fwd?'ob-in-r':'ob-in-l');setTimeout(()=>{try{ns.classList.remove('ob-in-r','ob-in-l')}catch(e){}},OB_T+60);return}
   ns.style.opacity='0';              /* hold the new page invisible (the frozen old page covers it) until its images are decoded: no blank frame, no pop-in */
   if(bgGhost)pc.appendChild(bgGhost);
   pc.appendChild(ghost);
@@ -487,9 +493,16 @@ function commit(o,dir,target){
    ghost.classList.add(fwd?'ob-out-l':'ob-out-r');
    if(bgGhost)bgGhost.classList.add('ob-bg-out');
    ns.classList.add(fwd?'ob-in-r':'ob-in-l');
-   setTimeout(()=>{try{ghost.remove()}catch(e){}try{bgGhost&&bgGhost.remove()}catch(e){}try{ns.classList.remove('ob-in-r','ob-in-l')}catch(e){}},OB_T+60)};
+   let cleaned=false;
+   const clean=()=>{if(cleaned)return;cleaned=true;try{ghost.remove()}catch(e){}try{bgGhost&&bgGhost.remove()}catch(e){}obFree();try{ns.classList.remove('ob-in-r','ob-in-l')}catch(e){}};
+   /* Wait for the actual animation finish; retain a safety timeout for interrupted animations. */
+   try{const animations=[].concat(ghost.getAnimations?ghost.getAnimations():[],bgGhost&&bgGhost.getAnimations?bgGhost.getAnimations():[],ns.getAnimations?ns.getAnimations():[]);
+    if(animations.length)Promise.all(animations.map(a=>a.finished.catch(()=>{}))).then(()=>requestAnimationFrame(clean));
+    else setTimeout(clean,OB_T+60);
+   }catch(e){setTimeout(clean,OB_T+60)}
+   setTimeout(clean,OB_T+900)};
   try{const imgs=[...ns.querySelectorAll('img')].filter(i=>i.decode&&!(i.complete&&i.naturalWidth));
-   if(imgs.length){Promise.all(imgs.map(i=>i.decode().catch(()=>{}))).then(start);setTimeout(start,90)}else requestAnimationFrame(start)}catch(e){start()}
+   if(imgs.length){Promise.all(imgs.map(i=>i.decode().catch(()=>{}))).then(start);setTimeout(start,220)}else requestAnimationFrame(start)}catch(e){start()}
  }catch(e){console.error('ob transition',e)}
 }
 function settle(o,dx,commitDir){busy=true;
