@@ -242,7 +242,7 @@ final class ShbaceNative {
                 try {
                     android.content.ClipboardManager cm = (android.content.ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
                     if (cm != null) cm.setPrimaryClip(android.content.ClipData.newPlainText("Shbace Medical", text));
-                    toast("Copied to clipboard");
+                    // Success feedback is shown once by the calling web UI.
                 } catch (Throwable t) { toast("Could not copy text"); }
             }
         });
