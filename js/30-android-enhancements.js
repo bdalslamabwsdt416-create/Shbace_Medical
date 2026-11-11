@@ -415,11 +415,18 @@
     } catch (e) { console.warn('Study reminders could not be scheduled', e); }
   }
   var EXAM_GOAL_REMINDER_BASE = 392000000;
-  async function schedulePlannerReminder(enabled, time, target, examName) {
+  function plannerReminderIds(examId) {
+    var hash = 2166136261, key = String(examId || 'default');
+    for (var i = 0; i < key.length; i++) { hash ^= key.charCodeAt(i); hash = Math.imul(hash, 16777619); }
+    var base = EXAM_GOAL_REMINDER_BASE + ((hash >>> 0) % 100000) * 7;
+    var ids = [];
+    for (var day = 0; day < 7; day++) ids.push(base + day);
+    return ids;
+  }
+  async function schedulePlannerReminder(enabled, time, target, examName, examId, daysLeft) {
     var p = await localPlugin();
     if (!p) return false;
-    var ids = [];
-    for (var i = 0; i < 7; i++) ids.push(EXAM_GOAL_REMINDER_BASE + i);
+    var ids = plannerReminderIds(examId);
     await cancelReminderIds(p, ids);
     if (!enabled || !(Number(target) > 0) || !reminderCategoryEnabled()) return true;
     try {
@@ -429,12 +436,13 @@
       var parts = String(time || '19:30').split(':').map(Number);
       var hour = Math.max(0, Math.min(23, parts[0] || 0));
       var minute = Math.max(0, Math.min(59, parts[1] || 0));
+      var horizon = Math.max(0, Math.min(7, Number.isFinite(Number(daysLeft)) ? Math.floor(Number(daysLeft)) : 7));
       var now = new Date(), notifications = [];
-      for (var day = 0; day < 7; day++) {
+      for (var day = 0; day < horizon; day++) {
         var at = new Date(now.getFullYear(), now.getMonth(), now.getDate() + day, hour, minute, 0, 0);
         if (at.getTime() <= now.getTime() + 30000) continue;
         notifications.push({
-          id: EXAM_GOAL_REMINDER_BASE + day,
+          id: ids[day],
           title: 'Exam goal · ' + String(examName || 'Today'),
           body: 'Today’s target: ' + Math.ceil(Number(target)) + ' questions.',
           schedule: { at: at, allowWhileIdle: true },
