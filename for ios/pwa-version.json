@@ -1,14 +1,16 @@
 {
   "app": "Shbace Medical",
   "platform": "PWA",
-  "version": "1.4.5",
-  "displayVersion": "1.4.5",
+  "version": "1.4.6",
+  "displayVersion": "1.4.6",
   "releaseDate": "2026-11-11",
   "releaseNotes": [
     "Added an offline Exam goal planner with multiple exam dates and independent daily targets.",
     "The planner reads unanswered questions directly from the live Question Bank and keeps Smart Review separate.",
     "Added local daily progress, streaks, specialty priorities, a burn-down chart and weekly activity.",
     "Fixed the iOS service-worker cache refresh so installed offline users receive the latest Exam goal planner code.",
-    "Moved verified one-time resource download to the first screen of the installed PWA, before splash and app startup."
+    "Moved verified one-time resource download to the first screen of the installed PWA, before splash and app startup.",
+    "Removed the manual “New version available” prompt; iOS PWA updates are checked and applied silently in the background.",
+    "Updated offline learning resources in the background for already-verified installations; the first-install download-before-splash flow is unchanged."
   ]
 }
