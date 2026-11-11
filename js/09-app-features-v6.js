@@ -1813,12 +1813,93 @@ function changelogView(){
  return `${appHeader('Changelog')}<div class="rs"><h1>Changelog</h1><p class="sub">What the app does today and what is still missing.</p>
  <div class="seg wide" style="margin-bottom:14px">${[['all','All'],['done','Available'],['dev','Not yet']].map(([v,l])=>`<button type="button" class="${clTab===v?'on':''}" onclick="setClTab('${v}')">${l}</button>`).join('')}</div>
  ${sec.map(s=>`<div class="card cl ${s.st}"><div class="clh"><h3>${s.v}</h3><span class="pill clp ${s.st}">${s.st==='dev'?'IN DEVELOPMENT':s.tag==='current'?'CURRENT':'AVAILABLE'}</span></div>${s.note?`<p class="meta">${s.note}</p>`:''}<ul class="cll">${s.items.map(([a,b])=>`<li><b>${a}</b><span>${b}</span></li>`).join('')}</ul></div>`).join('')}</div>`}
+/* SHBACE How to Use · Arabic guide. Presentation only: no question records or student storage are changed. */
+function howToUseCard(){
+ const en=function(t){return '<bdi class="how-en">'+esc(t)+'</bdi>'};
+ const sections=[
+  {title:'المواد والتخصصات والمواضيع والتثبيت',body:
+   '<p>ابدأ من الصفحة الرئيسية، ثم انتقل إلى مادة Pediatrics والتخصص والموضوع الذي تريد دراسته. المحتوى الدراسي الحالي يتركّز في Pediatrics، ويظهر المحتوى المتاح حالياً لطلاب Grade 5.</p>'+
+   '<ol><li>من '+en('Home')+' افتح بطاقة '+en('Pediatrics')+' عندما تكون متاحة في مستواك.</li>'+
+   '<li>اختر أحد التخصصات الموجودة حالياً: '+en('Endocrinology')+' أو '+en('Nephrology')+' أو '+en('Urology')+'. التخصصات الأخرى تظهر عند إضافة محتواها.</li>'+
+   '<li>افتح الموضوع لعرض أسئلته، أو استخدم '+en('All questions')+' لعرض أسئلة التخصص كلها.</li>'+
+   '<li>استخدم رمز النجمة لتثبيت موضوع أو زر '+en('Pin this specialty')+' لتثبيت التخصص. افتح '+en('Pinned & Recent')+' من القائمة الجانبية للعودة إلى المثبّت أو إلى آخر ما فتحته.</li></ol>'+
+   '<p class="how-tip"><b>نصيحة:</b> التثبيت يحفظ اختصاراً للموضوع أو التخصص؛ لا يحذف ولا ينقل الأسئلة.</p>'},
+  {title:'حل السؤال والشرح والحفظ والملاحظات',body:
+   '<ol><li>داخل بنك الأسئلة، اختر '+en('Single')+' لعرض سؤال واحد مع التنقّل السابق والتالي، أو '+en('All')+' لعرض قائمة الأسئلة.</li>'+
+   '<li>يمكنك تصفية الأسئلة حسب '+en('All Questions')+' أو '+en('Unanswered')+' أو '+en('Correct')+' أو '+en('Incorrect')+' أو '+en('Bookmarked')+'، كما يمكنك التصفية باستخدام الوسوم.</li>'+
+   '<li>اختر إجابتك؛ تظهر صحة الإجابة والتفسير المرتبط بالسؤال. تُحفظ إجابتك في تقدّم بنك الأسئلة.</li>'+
+   '<li>اضغط النجمة لحفظ السؤال في '+en('Saved Questions')+'. استخدم '+en('Note')+' لكتابة ملاحظة مرتبطة بالسؤال، ويمكنك إدارة ملاحظاتك من '+en('My Notes')+'.</li></ol>'+
+   '<p class="how-tip"><b>مهم:</b> قائمة '+en('Wrong Answers')+' تخص أخطاء بنك الأسئلة، أما إجابات الاختبارات فتظهر في '+en('Quiz History')+' بشكل مستقل.</p>'},
+  {title:'وضع الاختبار Quiz',body:
+   '<ol><li>من '+en('Quiz')+' اختر مصدر الأسئلة: '+en('All questions')+' أو '+en('By Specialty')+' أو '+en('My study list')+'.</li>'+
+   '<li>عند اختيار '+en('My study list')+' يمكنك بناء اختبار من أسئلة '+en('Any')+' أو '+en('Unanswered')+' أو '+en('Answered wrong')+' أو '+en('Saved')+'.</li>'+
+   '<li>حدّد عدد الأسئلة، ثم اختر '+en('Practice')+' أو '+en('Timed')+'. في الوضع المحدد بوقت يمكنك إدخال المدة بالدقائق؛ وإذا تركتها فارغة يستخدم التطبيق دقيقة لكل سؤال محدد.</li>'+
+   '<li>اختر توقيت ظهور التفسير: '+en('After each answer')+' أو '+en('At the end')+'، وترتيب الأسئلة '+en('Random order')+' أو '+en('Bank order')+'.</li>'+
+   '<li>اضغط '+en('Confirm my choices')+' ثم ابدأ الاختبار. أثناء الحل يمكنك وضع علامة للمراجعة، والتنقّل بين الأسئلة، ثم إرسال الاختبار عند الانتهاء.</li></ol>'+
+   '<p class="how-tip"><b>نصيحة:</b> راجع '+en('Quiz History')+' بعد الإنهاء لمشاهدة النتيجة والأسئلة التي تحتاج إلى مراجعة.</p>'},
+  {title:'المراجعة الذكية Smart Review',body:
+   '<p>تعمل المراجعة الذكية بذاكرة وجدولة منفصلتين عن إجابات بنك الأسئلة ونتائج الاختبارات. وهي ترتّب الأسئلة بحسب موعد المراجعة ومستوى التذكّر.</p>'+
+   '<ol><li>افتح '+en('Review')+' ثم اختر '+en('Topics')+' أو '+en('Overview')+' أو '+en('Schedule')+' أو '+en('Weak')+' أو '+en('History')+'.</li>'+
+   '<li>ابدأ من '+en('Start Recommended Session')+' لمراجعة الأسئلة المقترحة، أو اختر موضوعاً محدداً، أو ابدأ جلسة لكل الموضوعات.</li>'+
+   '<li>يمكنك تغيير حجم الجلسة إلى 10 أو 15 أو 20 سؤالاً، واستخدام مرشحات '+en('Due')+' و'+en('Weak')+' و'+en('In progress')+' و'+en('Not started')+'.</li>'+
+   '<li>بعد إظهار الإجابة قيّم تذكّرك باستخدام '+en('Again')+' أو '+en('Hard')+' أو '+en('Good')+' أو '+en('Easy')+'. تستخدم المراجعة تقييمك لجدولة الموعد التالي.</li></ol>'+
+   '<p class="how-tip"><b>مهم:</b> يمكنك إيقاف الجلسة واستئنافها لاحقاً، ومراجعة سجلّك من تبويب '+en('History')+'.</p>'},
+  {title:'الأسئلة الخاطئة والمحفوظة',body:
+   '<ol><li>افتح القائمة الجانبية ☰ ثم قسم '+en('Review')+'.</li>'+
+   '<li>اختر '+en('Saved Questions')+' لرؤية الأسئلة التي حفظتها بالنجمة، أو '+en('Wrong Answers')+' لمراجعة أخطاء بنك الأسئلة.</li>'+
+   '<li>استخدم البحث والمرشحات لتصفية القائمة، ثم افتح السؤال للعودة إلى نصه وشرحه.</li>'+
+   '<li>يمكنك إزالة السؤال من قائمة المحفوظات أو استخدام إجراء إعادة المحاولة المتاح في قائمة الأخطاء؛ هذا لا يحذف السؤال الأصلي من البنك.</li></ol>'+
+   '<p class="how-tip"><b>تذكّر:</b> أخطاء الاختبارات لا تندمج في قائمة أخطاء بنك الأسئلة؛ ستجدها في سجل الاختبارات ونتائجه.</p>'},
+  {title:'البحث الشامل',body:
+   '<ol><li>افتح '+en('Search')+' من الشريط السفلي.</li>'+
+   '<li>اكتب كلمة أو عبارة؛ البحث يشمل نص السؤال والخيارات والتفسير والمصدر والنظام والوسوم.</li>'+
+   '<li>ضيّق النتائج باستخدام مرشح التخصص أو الوسم أو المصدر أو الموضوع أو النظام عند توفره.</li>'+
+   '<li>عند عدم كتابة كلمة بحث، يمكنك ترتيب الموضوعات حسب '+en('Bank order')+' أو '+en('A–Z')+' أو '+en('Largest')+' أو '+en('Progress')+'.</li>'+
+   '<li>استخدم '+en('Clear search & filters')+' لإزالة البحث والمرشحات والبدء من جديد.</li></ol>'},
+  {title:'الإحصائيات والمناطق الضعيفة',body:
+   '<ol><li>افتح '+en('Stats')+' لمشاهدة تبويبات '+en('Overview')+' و'+en('Quiz')+' و'+en('Question Bank')+' و'+en('Smart Review')+' و'+en('Time')+'.</li>'+
+   '<li>كل تبويب يعرض بيانات مصدره الخاص؛ إحصائيات بنك الأسئلة لا تخلط إجابات الاختبارات مع ذاكرة المراجعة الذكية.</li>'+
+   '<li>من صفحة '+en('Weak areas')+' شاهد الموضوعات التي تحتاج إلى تحسين، مرتبة حسب أدائك في بنك الأسئلة، واضغط الموضوع للتدرب عليه أو استخدم '+en('Practice weakest topics')+'.</li></ol>'+
+   '<p class="how-tip"><b>نصيحة:</b> راجع تعريف طريقة الحساب داخل بطاقات الإحصائيات حتى تعرف بالضبط ما الذي يدخل في كل نسبة.</p>'},
+  {title:'مؤقّت الدراسة',body:
+   '<ol><li>افتح '+en('Study timer')+' من صفحة '+en('Stats')+' أو من أدوات الدراسة المتاحة.</li>'+
+   '<li>اختر هدفاً زمنياً مثل 15 أو 25 أو 45 أو 60 دقيقة، أو حدّد مدة مخصصة بين 5 و240 دقيقة.</li>'+
+   '<li>اضغط '+en('Start')+' لبدء الجلسة، ثم '+en('Pause')+' أو '+en('Resume')+' عند الحاجة.</li>'+
+   '<li>اضغط '+en('Save session')+' لحفظ الجلسة في السجل. يظهر وقت اليوم والوقت الإجمالي والجلسات السابقة في الصفحة وفي إحصائيات '+en('Time')+'.</li></ol>'+
+   '<p class="how-tip"><b>ملاحظة:</b> يستمر المؤقّت عند التنقل بين صفحات التطبيق أو تصغيره. أوقف الجلسة أو احفظها عند الانتهاء.</p>'},
+  {title:'المعلومة اليومية والإشعارات',body:
+   '<ol><li>تظهر '+en('Daily Medical Fact')+' في الصفحة الرئيسية كمعلومة طبية يومية مع مصدرها عندما يكون متاحاً.</li>'+
+   '<li>افتح جرس الإشعارات لمراجعة إشعارات التطبيق، ويمكنك تصفيتها إلى '+en('All')+' أو '+en('Unread')+' أو '+en('Review')+' أو '+en('Quiz')+' أو '+en('Reminders')+' أو '+en('Updates')+'.</li>'+
+   '<li>من '+en('Settings')+' افتح '+en('Notification preferences')+' لتحديد أنواع الإشعارات التي تريدها.</li>'+
+   '<li>في تطبيق Android الأصلي، وبعد منح الإذن، يمكن لميزة الإشعارات المحلية جدولة المعلومة اليومية عند 10:00 و22:00 حسب وقت الجهاز. أما التذكيرات الخاصة بالمراجعة الذكية فتظهر داخل التطبيق عند فتحه.</li></ol>'+
+   '<p class="how-warn"><b>تنبيه:</b> إشعارات الدفع عبر الإنترنت '+en('FCM')+' ليست مهيأة بالكامل في هذه النسخة؛ لا تعتمد عليها كخدمة تعمل حالياً.</p>'},
+  {title:'الإعدادات المهمة',body:
+   '<ol><li>من القائمة الجانبية افتح '+en('Settings')+' لتغيير المظهر بين '+en('Dark')+' و'+en('Light')+'، وحجم الخط بين '+en('Small')+' و'+en('Medium')+' و'+en('Large')+'.</li>'+
+   '<li>يمكنك تشغيل أو إيقاف تعبيرات شخصية الطبيب، والتحكم في ظهور صفحة البداية وصفحة الإنهاء من إعدادات '+en('Onboarding')+'.</li>'+
+   '<li>في قسم '+en('Study progress')+' يمكنك إعادة ضبط تقدّم موضوع واحد أو كل تقدّم بنك الأسئلة.</li></ol>'+
+   '<p class="how-warn"><b>تحذير:</b> إعادة الضبط تحذف إجابات بنك الأسئلة التي اخترتها. وهي لا تعني حذف الأسئلة الأصلية، وتُبقي المحفوظات والملاحظات والتقارير وذاكرة Smart Review وفق سلوك أداة إعادة الضبط الحالية.</p>'},
+  {title:'النسخ الاحتياطي والاستعادة',body:
+   '<ol><li>من '+en('Settings')+' افتح بطاقة '+en('Student data backup')+' واضغط '+en('Export full backup')+'. يُنزّل ملف JSON لبيانات الطالب المحفوظة على الجهاز.</li>'+
+   '<li>تتضمن النسخة بيانات التقدم والإجابات، وسجل الاختبارات، والمحفوظات والأخطاء، و'+en('Smart Review')+'، و'+en('Pinned & Recent')+'، و'+en('My Notes')+'، والإعدادات وسجل الإشعارات ومخازن الطالب الأخرى التي يديرها التطبيق.</li>'+
+   '<li>لا تتضمن النسخة ملفات بنك الأسئلة الثابتة نفسها ولا رموز المصادقة أو أسرار الدفع؛ فهي نسخة لبيانات الطالب وليست نسخة كاملة من ملفات التطبيق.</li>'+
+   '<li>للاستعادة اضغط '+en('Restore / Merge')+' واختر الملف. يتحقق التطبيق من بنية الملف وسلامته ثم يعرض نافذة '+en('BACKUP VALIDATED')+' مع ملخص محتوياته.</li>'+
+   '<li>اختر '+en('Merge Data')+' لإضافة ودمج البيانات مع الموجودة، أو '+en('Replace Data')+' لاستبدال بيانات الطالب الحالية بالنسخة، أو '+en('Cancel')+' للإلغاء.</li>'+
+   '<li>عند الدمج، إذا وُجدت ملاحظتان مختلفتان للسؤال نفسه، يطلب التطبيق منك اختيار '+en('Keep this note')+' أو '+en('Use backup note')+' أو '+en('Keep both notes')+'.</li>'+
+   '<li>الاستبدال يتطلب تأكيداً، ويستخدم التطبيق لقطة احتياطية مؤقتة لمحاولة استرجاع البيانات السابقة إذا فشلت الكتابة. بعد إتمام الاستعادة يعيد التطبيق تحميل نفسه.</li></ol>'+
+   '<p class="how-warn"><b>مهم قبل حذف التطبيق أو تغيير الهاتف:</b> نزّل ملف النسخة وانقله خارج الهاتف إلى حاسوبك أو مساحة سحابية تملكها. لا تترك النسخة الوحيدة داخل التطبيق أو على الجهاز نفسه.</p>'}
+ ];
+ return '<div class="ab2-card ab2-how" dir="rtl"><h2>How to Use</h2><p class="how-sub" lang="ar">دليل استخدام SHBACE Medical</p>'+
+  '<p class="how-intro">هذا الدليل يشرح الوظائف الموجودة في النسخة الحالية. افتح أي قسم لعرض خطواته، ثم اطوه للانتقال إلى القسم التالي.</p>'+
+  '<div class="how-list">'+sections.map(function(s,i){return '<details class="how-sec"'+(i===0?' open':'')+'><summary><span class="how-n">'+String(i+1).padStart(2,'0')+'</span><span class="how-t">'+s.title+'</span><i class="how-chev" aria-hidden="true"></i></summary><div class="how-in"><div class="how-pad">'+s.body+'</div></div></details>'}).join('')+'</div></div>';
+}
+
 function aboutView(){
  return `${appHeader('About')}<div class="rs ab2"><h1>About</h1><p class="sub">Shbace Medical · Version 36</p>
  <div class="ab2-card"><h2>About Shbace Medical</h2><p>A journey of curiosity, knowledge, and continuous growth. Shbace Medical brings learning and practice together, empowering future physicians to think critically, build confidence, and grow beyond the classroom.<br><br>Learn with purpose. Grow with knowledge.</p></div>
  <div class="ab2-card"><h2>Purpose</h2><p>Designed to turn medical knowledge into clinical understanding through focused practice, meaningful explanations, and continuous self-assessment.<br><br>Practice. Understand. Improve.</p></div>
  <div class="ab2-card"><h2>At a Glance</h2><div class="ab2-stats"><div><b>${QB.length}</b><small>Total Questions</small></div><div><b>${specCount()}</b><small>Specialties</small></div><div><b>${Object.keys(TOPIC_NAME).length}</b><small>Topics</small></div></div></div>
  <div class="ab2-card"><h2>Key Features</h2><div class="ab2-feat"><div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h6"/><circle cx="18" cy="16" r="3"/></svg><span>Topic-Based Practice</span></div><div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg><span>Detailed Explanations</span></div><div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 0 1-14.2 5"/><path d="M4 12a8 8 0 0 1 14.2-5"/><path d="M18.5 3v4.5H14"/><path d="M5.5 21v-4.5H10"/></svg><span>Smart Review</span></div><div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span>Saved Questions &amp; Progress Tracking</span></div></div></div>
+ ${howToUseCard()}
  <div class="ab2-card ab2-proj"><h2>Project</h2><b>${esc(ownerName)}</b><span>${esc(ownerLine)}</span><div class="ab2-btns"><button type="button" class="btn" onclick="appPage='changelog';renderAppDemo()">Changelog</button><button type="button" class="btn" onclick="appPage='feedback';renderAppDemo()">Send feedback</button></div></div>
  <div class="ab2-card ab2-ded ab2-ded-entry"><h2>One More Thing</h2>
   <p class="ded-mys">Curious? Tap below.</p>
