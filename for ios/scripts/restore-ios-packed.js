@@ -59,7 +59,7 @@ function patchPackedAsset(relative, originalBytes) {
   let source = originalBytes.toString('utf8');
 
   const oldGuide = "إذا ظهر '+E('A new version is available')+'، اتصل بالإنترنت واضغط زر التحديث واترك العملية تكتمل قبل إغلاق الصفحة.";
-  const newGuide = "يتم فحص تحديثات التطبيق وتطبيقها تلقائياً في الخلفية، ولا تحتاج إلى الضغط على زر تحديث. قد يعاد تحميل الصفحة مرة واحدة بعد اكتمال تحديث ملفات التطبيق، مع بقاء بياناتك المحلية محفوظة.";
+  const newGuide = "يتم فحص تحديثات التطبيق وتطبيقها تلقائياً في الخلفية، ولن تظهر رسالة تحديث أو يعاد تحميل الصفحة أثناء استخدامك. ستُستخدم الملفات الجديدة عند فتح التطبيق لاحقاً، مع بقاء بياناتك المحلية محفوظة.";
 
   if (relative === 'js/30-ios-v5.js') {
     const flag = 'updateBanner:true,';
@@ -72,35 +72,11 @@ function patchPackedAsset(relative, originalBytes) {
     const end = source.indexOf(endMarker, start);
     if (start < 0 || end < 0) throw new Error('Could not locate the legacy iOS update-banner block.');
 
-    const silentUpdates = `/* ---------- 8. silent automatic PWA updates: no user-facing banner ---------- */
+    const silentUpdates = `/* ---------- 8. silent automatic PWA updates: no prompt and no forced reload ---------- */
 var VER_KEY='shbace_v5_seen_version';
 function swReady(){return 'serviceWorker' in navigator}
 if(V5.autoUpdate&&swReady()){
- var hadController=!!navigator.serviceWorker.controller;
- var pendingReload=false,reloadStarted=false,waitingForGate=false,lastCheck=0;
- function reloadWhenSafe(){
-  if(!pendingReload||reloadStarted||!navigator.serviceWorker.controller)return;
-  /* Never interrupt an active study session. Apply the new shell when the app is backgrounded,
-     or during startup before the app has finished booting. */
-  if(!document.hidden&&window.__shbBooted)return;
-  if(window.__shbOfflineGatePromise&&!window.__shbOfflineGateReleased){
-   if(!waitingForGate){
-    waitingForGate=true;
-    window.__shbOfflineGatePromise.then(function(){waitingForGate=false;reloadWhenSafe()},function(){waitingForGate=false});
-   }
-   return;
-  }
-  reloadStarted=true;
-  setTimeout(function(){location.reload()},200);
- }
- navigator.serviceWorker.addEventListener('controllerchange',function(){
-  if(!navigator.serviceWorker.controller)return;
-  /* Claiming control for the first time is not an update. Ignore it so a fresh install or
-     first resource download cannot be interrupted by a startup reload. */
-  if(!hadController){hadController=true;return;}
-  pendingReload=true;
-  reloadWhenSafe();
- });
+ var lastCheck=0;
  function checkUpdates(force){
   var now=Date.now();
   if(!force&&now-lastCheck<30*60*1000)return;
@@ -111,22 +87,16 @@ if(V5.autoUpdate&&swReady()){
   }).catch(function(){});
   fetch('pwa-version.json?shbcheck='+Date.now(),{cache:'no-store'})
    .then(function(r){return r.ok?r.json():null})
-   .then(function(v){
-    if(!v||!v.version)return;
-    var previous=ls(VER_KEY);
-    lsSet(VER_KEY,v.version);
-    if(previous&&previous!==v.version){pendingReload=true;reloadWhenSafe()}
-   })
+   .then(function(v){if(v&&v.version)lsSet(VER_KEY,v.version)})
    .catch(function(){});
  }
  setTimeout(function(){checkUpdates(true)},9000);
  setInterval(function(){checkUpdates(false)},30*60*1000);
  document.addEventListener('visibilitychange',function(){
-  if(document.hidden){reloadWhenSafe();return}
-  setTimeout(function(){checkUpdates(true)},1200);
+  if(!document.hidden)setTimeout(function(){checkUpdates(true)},1200);
  });
  addEventListener('online',function(){setTimeout(function(){checkUpdates(true)},1200)});
-}`;
+}`
     source = source.slice(0, start) + silentUpdates + source.slice(end);
   }
 
