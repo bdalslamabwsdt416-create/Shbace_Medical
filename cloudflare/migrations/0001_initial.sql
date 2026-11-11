@@ -31,3 +31,12 @@ CREATE TABLE IF NOT EXISTS admin_audit (
 
 INSERT OR IGNORE INTO app_config(config_key, config_value)
 VALUES ('features', '{"remoteQuestionBank":false,"flashcards":false,"cloudProgressSync":false}');
+
+CREATE TABLE IF NOT EXISTS release_chunks (
+  release_id TEXT NOT NULL REFERENCES releases(id) ON DELETE CASCADE,
+  chunk_index INTEGER NOT NULL CHECK (chunk_index >= 0),
+  chunk_text TEXT NOT NULL,
+  PRIMARY KEY (release_id, chunk_index)
+);
+
+CREATE INDEX IF NOT EXISTS idx_release_chunks_release ON release_chunks(release_id, chunk_index);

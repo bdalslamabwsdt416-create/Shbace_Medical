@@ -1,6 +1,5 @@
 export interface Env {
   DB: D1Database;
-  BANKS: R2Bucket;
   FLAGS: KVNamespace;
   ASSETS: Fetcher;
   ADMIN_API_TOKEN: string;
@@ -112,13 +111,16 @@ async function handleApi(request: Request, env: Env): Promise<Response> {
   if (request.method === "GET" && path === "/v1/question-bank") {
     const row = await activeRelease(env);
     if (!row) return json({ error: "No cloud question-bank release has been published." }, 404);
-    const object = await env.BANKS.get(row.object_key);
-    if (!object) return json({ error: "Published content object is missing." }, 503);
+    const chunks = await env.DB.prepare(
+      "SELECT chunk_text FROM release_chunks WHERE release_id=? ORDER BY chunk_index ASC"
+    ).bind(row.id).all<{chunk_text:string}>();
+    if (!chunks.results?.length) return json({ error: "Published content chunks are missing." }, 503);
+    const bankText = chunks.results.map(part => part.chunk_text).join("");
     const etag = '"' + row.sha256 + '"';
     if (request.headers.get("If-None-Match") === etag) {
       return new Response(null, { status: 304, headers: { etag, "cache-control": "public, max-age=60" } });
     }
-    return new Response(object.body, {
+    return new Response(bankText, {
       headers: {
         "content-type": "application/json; charset=utf-8",
         "cache-control": "public, max-age=60, stale-while-revalidate=300",
@@ -167,18 +169,33 @@ async function handleApi(request: Request, env: Env): Promise<Response> {
       const existing = await env.DB.prepare("SELECT id FROM releases WHERE version=?").bind(version).first<{id:string}>();
       if (existing) return json({ error: "This release version already exists. Choose a new version; published snapshots are immutable." }, 409);
       const id = crypto.randomUUID();
-      const objectKey = "question-banks/" + version + ".json";
-      await env.BANKS.put(objectKey, bytes, {
-        httpMetadata: { contentType: "application/json; charset=utf-8", cacheControl: "public, max-age=60" },
-        customMetadata: { version, sha256, questionCount: String(bank.questions.length) }
-      });
+      const objectKey = "d1:" + version;
+      const bankText = new TextDecoder().decode(bytes);
+      const chunkTexts: string[] = [];
+      for (let offset = 0; offset < bankText.length;) {
+        let end = Math.min(offset + 32000, bankText.length);
+        if (end < bankText.length && end > offset) {
+          const last = bankText.charCodeAt(end - 1);
+          if (last >= 0xD800 && last <= 0xDBFF) end--;
+        }
+        chunkTexts.push(bankText.slice(offset, end));
+        offset = end;
+      }
       const now = new Date().toISOString();
-      await env.DB.batch([
+      const statements = [
         env.DB.prepare("UPDATE releases SET is_active=0 WHERE is_active=1"),
         env.DB.prepare("INSERT INTO releases(id,version,object_key,sha256,byte_size,question_count,channel,is_active,published_at) VALUES(?,?,?,?,?,?,?,?,?)")
-          .bind(id, version, objectKey, sha256, bytes.byteLength, bank.questions.length, channel, 1, now),
-        auditStatement(env, "publish_release", version, { sha256, questionCount: bank.questions.length, channel })
-      ]);
+          .bind(id, version, objectKey, sha256, bytes.byteLength, bank.questions.length, channel, 1, now)
+      ];
+      for (let i = 0; i < chunkTexts.length; i++) {
+        statements.push(env.DB.prepare(
+          "INSERT INTO release_chunks(release_id,chunk_index,chunk_text) VALUES(?,?,?)"
+        ).bind(id, i, chunkTexts[i]));
+      }
+      statements.push(auditStatement(env, "publish_release", version, { sha256, questionCount: bank.questions.length, channel, chunks: chunkTexts.length }));
+      for (let i = 0; i < statements.length; i += 40) {
+        await env.DB.batch(statements.slice(i, i + 40));
+      }
       return json({ ok: true, release: { id, version, sha256, byteSize: bytes.byteLength, questionCount: bank.questions.length, channel, publishedAt: now, active: true } }, 201);
     }
 

@@ -6,7 +6,7 @@ This is an additive Cloudflare backend. The existing Vercel deployment, PWA offl
 
 - **Workers**: versioned API and admin console.
 - **D1**: release metadata, feature configuration, and admin audit events.
-- **R2**: immutable JSON question-bank snapshots.
+- **D1**: immutable, versioned JSON question-bank snapshots stored in bounded text chunks; this avoids requiring R2 billing activation.
 - **KV binding**: reserved for future low-latency configuration/cache use.
 - **Workers Static Assets**: serves the admin console from this Worker.
 
@@ -23,7 +23,7 @@ Admin (requires `Authorization: Bearer <ADMIN_API_TOKEN>`):
 - `POST /v1/admin/rollback` with `{ "version": "1.1.0" }`
 - `PUT /v1/admin/features` with `{ "features": { "remoteQuestionBank": false, "flashcards": false, "cloudProgressSync": false } }`
 
-The admin console is served at the Worker root URL. It keeps the token in sessionStorage for the current browser session only. Never put the admin token in app JavaScript, HTML source, GitHub files, or Vercel public environment variables.
+The admin console is served at the Worker root URL. Question-bank snapshots are stored in D1 as bounded chunks; R2 is not required or enabled in this no-additional-billing setup. It keeps the token in sessionStorage for the current browser session only. Never put the admin token in app JavaScript, HTML source, GitHub files, or Vercel public environment variables.
 
 ## Provisioning
 
@@ -31,13 +31,12 @@ From this directory, with Wrangler authenticated to the intended Cloudflare acco
 
 1. Install: `npm install`
 2. Create D1: `npx wrangler d1 create shbace-medical-db`
-3. Create R2: `npx wrangler r2 bucket create shbace-medical-content`
-4. Create KV: `npx wrangler kv namespace create SHBACE_FLAGS`
-5. Put the returned D1 database ID and KV namespace ID into `wrangler.toml`. Keep the existing names/bindings.
-6. Apply schema: `npm run db:migrate:remote`
-7. Set secret: `npx wrangler secret put ADMIN_API_TOKEN`
-8. Deploy: `npm run deploy`
-9. Test `/v1/health`, then open the Worker root and connect with the admin token.
+3. Create KV: `npx wrangler kv namespace create SHBACE_FLAGS`
+4. Put the returned D1 database ID and KV namespace ID into `wrangler.toml`.
+5. Apply schema: `npm run db:migrate:remote`
+6. Set secret: `npx wrangler secret put ADMIN_API_TOKEN`
+7. Deploy: `npm run deploy`
+8. Test `/v1/health`, then open the Worker root and connect with the admin token.
 
 The `ADMIN_API_TOKEN` must be a long random secret (at least 32 random bytes). Store it in a password manager. Do not commit it.
 

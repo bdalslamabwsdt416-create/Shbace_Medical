@@ -11,12 +11,12 @@
 ## Phases
 
 ### Phase 1 — isolated cloud foundation
-- Add a Cloudflare Worker API, D1 release/config/audit schema, R2 content snapshots, and a private admin console.
+- Add a Cloudflare Worker API, D1 release/config/audit schema with chunked question-bank snapshots, and a private admin console. R2 is excluded to avoid billing authorization.
 - Create health, active-release, question-bank, publish, rollback, and feature-switch endpoints.
 - Deploy to a non-production Worker URL and validate the API.
 
 ### Phase 2 — account provisioning
-- Create D1, R2, and KV resources in the owner's Cloudflare account.
+- Create D1 and KV resources in the owner's Cloudflare account. R2 remains disabled.
 - Set Worker secrets outside Git.
 - Apply migrations and deploy the Worker.
 - Record the Worker URL and verify CORS against the Vercel app origin.
@@ -42,4 +42,4 @@
 - Do not enable user-data sync until these controls are tested.
 
 ## Current blocker
-Cloudflare account resources and credentials are not available to this repository connection. The backend scaffold can be reviewed and committed independently, but provisioning/deployment requires the account owner to authenticate Wrangler or provide a scoped Cloudflare API token through a secure secret mechanism. Do not paste the token into chat or commit it.
+Cloudflare account access is now connected. R2 is intentionally excluded because the owner declined billing authorization. D1 and KV still need resource provisioning. The backend scaffold can be reviewed and committed independently, but provisioning/deployment requires the account owner to authenticate Wrangler or provide a scoped Cloudflare API token through a secure secret mechanism. Do not paste the token into chat or commit it.
