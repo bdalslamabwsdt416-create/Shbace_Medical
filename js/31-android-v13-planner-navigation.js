@@ -601,16 +601,19 @@
 
   // Recalculate the rolling reminder target whenever a new Question Bank answer is recorded.
   var reminderRefreshTimer = null;
+  function queueReminderRefresh() {
+    if (reminderRefreshTimer) clearTimeout(reminderRefreshTimer);
+    reminderRefreshTimer = setTimeout(function () {
+      reminderRefreshTimer = null;
+      updateAllReminders();
+    }, 450);
+  }
   var originalQuestionAnswer = window.qAnswer;
   if (typeof originalQuestionAnswer === 'function') {
     window.qAnswer = function () {
       var result = originalQuestionAnswer.apply(this, arguments);
       if (appPage === 'examgoal') pageRender();
-      if (reminderRefreshTimer) clearTimeout(reminderRefreshTimer);
-      reminderRefreshTimer = setTimeout(function () {
-        reminderRefreshTimer = null;
-        updateAllReminders();
-      }, 450);
+      queueReminderRefresh();
       return result;
     };
   }
