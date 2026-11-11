@@ -20,10 +20,11 @@ on:
       - 'package.json'
       - 'capacitor.config.json'
       - 'scripts/**'
+      - '.github/workflows/android-build.yml'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: shbace-android-release-${{ github.ref }}
@@ -129,15 +130,18 @@ jobs:
           "$AAPT" dump xmltree "$APK" AndroidManifest.xml | grep -Fq LocalNotificationRestoreReceiver
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$APK"
 
-      - name: Upload signed Release APK
-        if: steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111')
-        uses: actions/upload-artifact@v4
+      - name: Publish signed Release APK
+        if: steps.release-signing.outputs.ready == 'true' && github.ref == 'refs/heads/work/android-notifications-fix-20261111'
+        uses: softprops/action-gh-release@v2
         with:
-          name: SHBACE-Medical-Android-v1.3.3-RELEASE-signed
-          path: android/app/build/outputs/apk/release/app-release.apk
-          if-no-files-found: error
-          compression-level: 0
-          retention-days: 90
+          tag_name: android-v1.3.3
+          name: SHBACE Medical Android v1.3.3
+          target_commitish: ${{ github.sha }}
+          body: |
+            Signed Android release build for SHBACE Medical v1.3.3 (versionCode 12).
+            This release preserves the existing application ID and release signing identity for in-place upgrades.
+          files: android/app/build/outputs/apk/release/app-release.apk
+          fail_on_unmatched_files: true
 
       - name: Remove temporary signing material
         if: always()
