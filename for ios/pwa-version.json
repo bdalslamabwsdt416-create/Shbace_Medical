@@ -1,13 +1,13 @@
 {
   "app": "Shbace Medical",
   "platform": "PWA",
-  "version": "1.4.7",
-  "displayVersion": "1.4.7",
+  "version": "1.4.8",
+  "displayVersion": "1.4.8",
   "releaseDate": "2026-11-11",
   "releaseNotes": [
-    "Fixed the offline setup completion path so verified installs release the startup gate correctly.",
-    "Retrying a failed setup now retries the installer without reloading the page.",
-    "Ignored the first Service Worker controller claim to prevent fresh-install startup reloads.",
-    "Kept the existing verified offline-resource cache and student data intact."
+    "Synchronised the first-launch splash with completion of verified offline setup; the splash timer no longer runs behind the installer.",
+    "Waited for every deferred application script before rendering onboarding, so the first launch uses the current hologram renderer.",
+    "Disabled the legacy intro screen through a reversible iOS feature switch; the original renderer remains available as a backup.",
+    "Removed activation-time forced page navigation and user-facing/manual reload update behavior."
   ]
 }
