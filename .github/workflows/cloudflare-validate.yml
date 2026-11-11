@@ -32,3 +32,11 @@ jobs:
         run: npm run sync:admin
       - name: Type-check Cloudflare Worker
         run: npm run check
+      - name: Smoke-test deployed Cloudflare Worker
+        working-directory: .
+        run: |
+          curl --fail --silent --show-error https://shbace-medical-cloud.shbace-medical.workers.dev/v1/health
+          echo
+          curl --fail --silent --show-error https://shbace-medical-cloud.shbace-medical.workers.dev/v1/release
+          echo
+          curl --fail --silent --show-error https://shbace-medical-cloud.shbace-medical.workers.dev/ | grep -q "SHBACE MEDICAL"
