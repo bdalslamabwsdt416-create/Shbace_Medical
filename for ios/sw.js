@@ -1,5 +1,5 @@
 'use strict';
-// build: ios-v10 (Exam goal planner)
+// build: ios-v11 (refresh installed iOS planner assets)
 
 const CACHE_NAME = 'shbace-medical-offline-v2';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
@@ -9,6 +9,8 @@ const APP_SHELL = [
   './manifest.webmanifest',
   './pwa-version.json',
   './offline-assets-manifest.json',
+  './sw.js',
+  './js/09-app-features-v6.js',
   './css/core.css',
   './css/late.css',
   './css/ios-v5.css',
