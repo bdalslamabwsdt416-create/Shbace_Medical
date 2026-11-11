@@ -43,8 +43,34 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  // Preserve older caches; they may still contain files needed by an already-open app.
-  event.waitUntil(self.clients.claim());
+  // Preserve existing caches and migrate a previously verified 1.4.5 PWA away from its legacy manual-update banner.
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    const migrationUrl = new URL('__shbace_silent_update_migration_146__', self.registration.scope).href;
+    const migrated = await cache.match(migrationUrl);
+    const ready = await cache.match(READY_URL);
+    await self.clients.claim();
+
+    if (!migrated) {
+      // Never reload a first installation before its one-time resource download is complete.
+      if (ready) {
+        const scope = new URL(self.registration.scope);
+        const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+        await Promise.all(clients.map(async client => {
+          try {
+            const url = new URL(client.url);
+            if (url.origin === scope.origin && url.pathname.startsWith(scope.pathname) &&
+                typeof client.navigate === 'function') {
+              await client.navigate(client.url);
+            }
+          } catch (_) {}
+        }));
+      }
+      await cache.put(migrationUrl, new Response('done', {
+        status: 200, headers: { 'Content-Type': 'text/plain', 'Cache-Control': 'no-store' }
+      }));
+    }
+  })());
 });
 
 self.addEventListener('fetch', event => {
