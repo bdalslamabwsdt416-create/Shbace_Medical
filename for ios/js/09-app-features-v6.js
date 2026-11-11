@@ -1202,7 +1202,13 @@ renderAppDemo=function(){if(qs.full&&appPage!=='questions'){qs.full=false;const 
    MASCOT, INTRO, QUESTION DEMO, GRADE STAIRS
    ============================================================ */
 window.SHB_HOLO_SRC='/assets/img/ae021c4b89a5.webp';
-introScreen=function(){return screenShell(`<div class="intro-brand"><img src="${ICON_SRC}" alt=""><b>Shbace <span>Medical</span></b></div>
+
+/* Keep the former icon-only introduction as a recoverable fallback, but do not show it by default.
+   The hologram screen below remains the first-run introduction and keeps its full original elements. */
+window.__SHBACE_IOS_LEGACY_INTRO_SCREEN = introScreen;
+window.SHBACE_IOS_LEGACY_INTRO_ENABLED = false;
+
+window.__SHBACE_IOS_HOLOGRAM_INTRO_SCREEN = function(){return screenShell(`<div class="intro-brand"><img src="${ICON_SRC}" alt=""><b>Shbace <span>Medical</span></b></div>
  <div class="in6-stage" aria-hidden="true"><div class="in6-comp">
  <div class="shb-holo" data-holo aria-hidden="true"><div class="shb-holo__halo"><i></i></div><img class="shb-holo__img" src="${window.SHB_HOLO_SRC}" alt="" decoding="async"><img class="shb-holo__glow" src="${window.SHB_HOLO_SRC}" alt="" decoding="async"><div class="shb-holo__ecg"><div class="shb-holo__lit"><i></i></div></div></div>
  <div class="in6-hub waves"><i class="in6-ring"></i><i class="in6-ring"></i><i class="in6-ring"></i><i class="in6-orbit"></i></div>
@@ -1212,6 +1218,30 @@ introScreen=function(){return screenShell(`<div class="intro-brand"><img src="${
  <div class="in6-chip c3 ic-img"><img src="/assets/img/4f1fe9eb829b.webp" alt="" decoding="async"></div>
  <div class="in6-chip c4 ic-img"><img src="/assets/img/3e72ffb1d6d4.webp" alt="" decoding="async"></div>
  <span class="in6-sp s1">✦</span><span class="in6-sp s2">✦</span></div></div>${footer()}`,'intro in6')};
+
+introScreen=function(){
+ return window.SHBACE_IOS_LEGACY_INTRO_ENABLED===true
+  ? window.__SHBACE_IOS_LEGACY_INTRO_SCREEN()
+  : window.__SHBACE_IOS_HOLOGRAM_INTRO_SCREEN();
+};
+
+/* Recovery switch: call SHBACE_setLegacyIntroEnabled(true) to restore the old page,
+   or pass false to return to the hologram. The old markup is kept intact, not deleted. */
+window.SHBACE_setLegacyIntroEnabled=function(enabled){
+ window.SHBACE_IOS_LEGACY_INTRO_ENABLED=(enabled===true);
+ try{if(typeof mode!=='undefined'&&mode==='preview'&&slide===0)renderSlide()}catch(e){}
+ return window.SHBACE_IOS_LEGACY_INTRO_ENABLED;
+};
+
+/* If an early route ever painted the base intro before this override arrived, replace it once all
+   ordered app scripts are ready. This is a real re-render, not a CSS hide or overlay. */
+document.addEventListener('shb-scripts-ready',function(){
+ try{
+  const pc=document.getElementById('phoneContent');
+  if(typeof mode!=='undefined'&&mode==='preview'&&slide===0&&pc&&
+     pc.querySelector('.screen.intro')&&!pc.querySelector('.in6-stage'))renderSlide();
+ }catch(e){}
+},{once:true});
 
 let qdTimers=[],qdTok=0;const qdClear=()=>{qdTok++;qdTimers.forEach(clearTimeout);qdTimers=[]};
 const QD_OPTS=['Radial pulse palpation','Carotid artery auscultation','Electrocardiography (ECG)','Chest X-ray'];
