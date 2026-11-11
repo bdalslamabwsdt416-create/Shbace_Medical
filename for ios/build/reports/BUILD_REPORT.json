@@ -1,0 +1,457 @@
+{
+ "css_blocks": [
+  {
+   "id": "CORE STYLES (needed by the splash and the first screen) \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 --> <!-- Base theme, layout, splash & onboarding",
+   "bytes": 56233,
+   "group": "core"
+  },
+  {
+   "id": "Owner credit & small additions",
+   "bytes": 8281,
+   "group": "core"
+  },
+  {
+   "id": "v6css",
+   "bytes": 35699,
+   "group": "core"
+  },
+  {
+   "id": "premium-visual-consistency-v2",
+   "bytes": 7319,
+   "group": "core"
+  },
+  {
+   "id": "targeted-fact-recent-bulb-fixes",
+   "bytes": 7620,
+   "group": "core"
+  },
+  {
+   "id": "onboarding-visual-refinement-v5",
+   "bytes": 10713,
+   "group": "core"
+  },
+  {
+   "id": "shbace-premium-theme-system-v1",
+   "bytes": 39285,
+   "group": "core"
+  },
+  {
+   "id": "font-size-layout-stability-v1",
+   "bytes": 869,
+   "group": "core"
+  },
+  {
+   "id": "student-modules-7-8-10-11",
+   "bytes": 9207,
+   "group": "core"
+  },
+  {
+   "id": "home7css",
+   "bytes": 9133,
+   "group": "late"
+  },
+  {
+   "id": "shell7css",
+   "bytes": 3059,
+   "group": "late"
+  },
+  {
+   "id": "sp7css",
+   "bytes": 4007,
+   "group": "late"
+  },
+  {
+   "id": "qb7css",
+   "bytes": 6496,
+   "group": "late"
+  },
+  {
+   "id": "cp-completion-v2",
+   "bytes": 18351,
+   "group": "late"
+  },
+  {
+   "id": "ob-smartreview-ref",
+   "bytes": 8867,
+   "group": "late"
+  },
+  {
+   "id": "ob-fix-still",
+   "bytes": 495,
+   "group": "late"
+  },
+  {
+   "id": "sb-fix-css",
+   "bytes": 786,
+   "group": "late"
+  },
+  {
+   "id": "notif-onboarding-polish-v1",
+   "bytes": 10176,
+   "group": "late"
+  },
+  {
+   "id": "qd-guided-v2",
+   "bytes": 4257,
+   "group": "late"
+  },
+  {
+   "id": "u11-note-conflict-css",
+   "bytes": 3140,
+   "group": "late"
+  },
+  {
+   "id": "sb-smooth-css",
+   "bytes": 1473,
+   "group": "late"
+  },
+  {
+   "id": "sr3css",
+   "bytes": 14267,
+   "group": "late"
+  },
+  {
+   "id": "polish-v8",
+   "bytes": 3638,
+   "group": "late"
+  },
+  {
+   "id": "motion-v2",
+   "bytes": 1949,
+   "group": "late"
+  },
+  {
+   "id": "ob-unified-v10",
+   "bytes": 5214,
+   "group": "late"
+  },
+  {
+   "id": "shb-holo-v1",
+   "bytes": 5602,
+   "group": "late"
+  },
+  {
+   "id": "about-redesign-v1",
+   "bytes": 3601,
+   "group": "late"
+  },
+  {
+   "id": "neon-buttons-v1",
+   "bytes": 3894,
+   "group": "late"
+  },
+  {
+   "id": "ob-shared-bg-v1",
+   "bytes": 4754,
+   "group": "late"
+  },
+  {
+   "id": "splash-ecg-intro-cards-v12",
+   "bytes": 1941,
+   "group": "late"
+  },
+  {
+   "id": "onb-refine-v14",
+   "bytes": 5795,
+   "group": "late"
+  },
+  {
+   "id": "v16-ui",
+   "bytes": 6842,
+   "group": "late"
+  },
+  {
+   "id": "neon-ecg-stats-v17",
+   "bytes": 8382,
+   "group": "late"
+  },
+  {
+   "id": "chrono-timer-v18",
+   "bytes": 3190,
+   "group": "late"
+  },
+  {
+   "id": "qd-smooth-v19",
+   "bytes": 1554,
+   "group": "late"
+  },
+  {
+   "id": "ob1-icons-fit-v22",
+   "bytes": 1719,
+   "group": "late"
+  },
+  {
+   "id": "ob1-center-cards-v24",
+   "bytes": 543,
+   "group": "late"
+  },
+  {
+   "id": "gx-columns-lit-v1",
+   "bytes": 763,
+   "group": "late"
+  },
+  {
+   "id": "ob-frame-v23",
+   "bytes": 2202,
+   "group": "late"
+  },
+  {
+   "id": "mj-cinematic-v1",
+   "bytes": 538,
+   "group": "late"
+  },
+  {
+   "id": "bottom-nav-v1",
+   "bytes": 1067,
+   "group": "late"
+  },
+  {
+   "id": "ob-frame-v24",
+   "bytes": 1782,
+   "group": "late"
+  },
+  {
+   "id": "qd-sheet-v21",
+   "bytes": 2450,
+   "group": "late"
+  },
+  {
+   "id": "onboarding-neon-v20",
+   "bytes": 2426,
+   "group": "late"
+  },
+  {
+   "id": "shb-v33-css",
+   "bytes": 1921,
+   "group": "late"
+  },
+  {
+   "id": "shb-portal-css",
+   "bytes": 1564,
+   "group": "late"
+  },
+  {
+   "id": "shb-dedication-css",
+   "bytes": 14680,
+   "group": "late"
+  },
+  {
+   "id": "shb-theme-final",
+   "bytes": 2324,
+   "group": "late"
+  },
+  {
+   "id": "shb-palette-final",
+   "bytes": 830,
+   "group": "late"
+  },
+  {
+   "id": "cp-journey-art-css",
+   "bytes": 3225,
+   "group": "late"
+  },
+  {
+   "id": "no-ui-select",
+   "bytes": 2786,
+   "group": "late"
+  },
+  {
+   "id": "shb-v47-css",
+   "bytes": 495,
+   "group": "late"
+  }
+ ],
+ "js_files": [
+  {
+   "file": "01-ui-images.js",
+   "id": "",
+   "bytes": 1229,
+   "orig_bytes": 852339
+  },
+  {
+   "file": "02-doctor-images.js",
+   "id": "",
+   "bytes": 597,
+   "orig_bytes": 773775
+  },
+  {
+   "file": "03-completion-scene.js",
+   "id": "cp-completion-scene",
+   "bytes": 18343,
+   "orig_bytes": 1668555
+  },
+  {
+   "file": "04-app-main.js",
+   "id": "",
+   "bytes": 100371,
+   "orig_bytes": 3912129
+  },
+  {
+   "file": "05-question-bank-summary.js",
+   "id": "",
+   "bytes": 12736,
+   "orig_bytes": 12736
+  },
+  {
+   "file": "06-drawer-menu.js",
+   "id": "",
+   "bytes": 4056,
+   "orig_bytes": 4056
+  },
+  {
+   "file": "07-returning-student-migration.js",
+   "id": "",
+   "bytes": 4394,
+   "orig_bytes": 4394
+  },
+  {
+   "file": "08-daily-facts-data.js",
+   "id": "dailyFactsData",
+   "bytes": 111533,
+   "orig_bytes": 111533
+  },
+  {
+   "file": "09-app-features-v6.js",
+   "id": "v6js",
+   "bytes": 385432,
+   "orig_bytes": 4576602
+  },
+  {
+   "file": "10-history-sync.js",
+   "id": "",
+   "bytes": 674,
+   "orig_bytes": 674
+  },
+  {
+   "file": "11-bugfix-interaction-20261106.js",
+   "id": "bugfix-interaction-20261106",
+   "bytes": 2145,
+   "orig_bytes": 2145
+  },
+  {
+   "file": "12-premium-touch-behavior.js",
+   "id": "premium-touch-behavior",
+   "bytes": 398,
+   "orig_bytes": 398
+  },
+  {
+   "file": "13-home-functional-actions-v1.js",
+   "id": "home-functional-actions-v1",
+   "bytes": 3604,
+   "orig_bytes": 3604
+  },
+  {
+   "file": "14-ob-smartreview-ref-js.js",
+   "id": "ob-smartreview-ref-js",
+   "bytes": 5436,
+   "orig_bytes": 5436
+  },
+  {
+   "file": "15-ob-fix-still-js.js",
+   "id": "ob-fix-still-js",
+   "bytes": 567,
+   "orig_bytes": 567
+  },
+  {
+   "file": "16-sb-fix-js.js",
+   "id": "sb-fix-js",
+   "bytes": 478,
+   "orig_bytes": 478
+  },
+  {
+   "file": "17-motion-v2.js",
+   "id": "",
+   "bytes": 4281,
+   "orig_bytes": 4281
+  },
+  {
+   "file": "18-shb-holo-v1-js.js",
+   "id": "shb-holo-v1-js",
+   "bytes": 632,
+   "orig_bytes": 632
+  },
+  {
+   "file": "19-ob-shared-bg-v1-js.js",
+   "id": "ob-shared-bg-v1-js",
+   "bytes": 1938,
+   "orig_bytes": 1938
+  },
+  {
+   "file": "20-drawer-order-v12.js",
+   "id": "drawer-order-v12",
+   "bytes": 1335,
+   "orig_bytes": 1335
+  },
+  {
+   "file": "21-onb-chips-lifecycle-v15.js",
+   "id": "onb-chips-lifecycle-v15",
+   "bytes": 1611,
+   "orig_bytes": 1611
+  },
+  {
+   "file": "22-shb-scroll-keep-v17.js",
+   "id": "shb-scroll-keep-v17",
+   "bytes": 2334,
+   "orig_bytes": 2334
+  },
+  {
+   "file": "23-chrono-timer-v18-js.js",
+   "id": "chrono-timer-v18-js",
+   "bytes": 3813,
+   "orig_bytes": 3813
+  },
+  {
+   "file": "24-daily-notify-v18.js",
+   "id": "daily-notify-v18",
+   "bytes": 7887,
+   "orig_bytes": 7887
+  },
+  {
+   "file": "25-shb-portal-js.js",
+   "id": "shb-portal-js",
+   "bytes": 6481,
+   "orig_bytes": 6481
+  },
+  {
+   "file": "26-shb-dedication-js.js",
+   "id": "shb-dedication-js",
+   "bytes": 10850,
+   "orig_bytes": 723003
+  },
+  {
+   "file": "27-selection-safety-net.js",
+   "id": "",
+   "bytes": 352,
+   "orig_bytes": 352
+  },
+  {
+   "file": "28-grade-sync-v46.js",
+   "id": "grade-sync-v46",
+   "bytes": 198,
+   "orig_bytes": 198
+  }
+ ],
+ "patches": [
+  "boot: deferred scripts are loaded from js/*.js (async=false, sequential) instead of being held as 14 MB of inline text",
+  "boot: start fetching data/qbData.json immediately",
+  "boot: wait for the JSON, fill #qbData, then run the app scripts",
+  "JOURNEY_AVATAR: atob(data-URI)->Blob URL replaced by the plain image file (decoded once the browser is idle) in 03-completion-scene.js",
+  "docImg: use the extracted doctor image directly (no 404 round-trip to assets/doctor/*.png) in 04-app-main.js",
+  "printHTML: use the native print dialog when running inside the Android app (WebView has no window.print) in 09-app-features-v6.js",
+  "preload hints for splash images / css / first scripts + native-bridge shim for file export (Android only)"
+ ],
+ "qbData_bytes": 1415623,
+ "splash_preloads": [
+  "/assets/img/d407f81c5a39.webp",
+  "/assets/img/4f7815b2e6df.webp",
+  "/assets/img/e5a5775b19e8.webp"
+ ],
+ "images": {
+  "unique": 186,
+  "total_refs": 190,
+  "bytes": 11995537
+ },
+ "index_html_bytes": 33584,
+ "remaining_big_data_uris": 0,
+ "original_bytes": 19104338
+}
