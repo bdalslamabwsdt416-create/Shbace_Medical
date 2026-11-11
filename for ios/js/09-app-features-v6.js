@@ -3300,7 +3300,7 @@ function egpCalc(exam,snap){
   const today=egpToday(),valid=!!egpDateParts(exam.date),daysLeft=valid?egpDayDiff(today,exam.date):null;
   const restDays=valid&&daysLeft>0?Math.ceil(daysLeft/7)*EGP_STATE.restDaysPerWeek:0;
   const studyDays=valid?Math.max(1,daysLeft-EGP_STATE.bufferDays-restDays):null;
-  const target=!valid||daysLeft<0?null:(snap.remaining===0?0:Math.ceil(snap.remaining/studyDays));
+  const target=!valid||daysLeft<0?null:(snap.remaining===0?0:(daysLeft<=EGP_STATE.bufferDays?0:Math.ceil(snap.remaining/studyDays)));
   let status='On track',idealRemaining=snap.remaining;
   if(snap.remaining===0)status='Ahead';
   else if(valid&&daysLeft<0)status='Behind';
@@ -3469,12 +3469,14 @@ function egpEnsureStyles(){
 }
 function egpPlannerView(){
   const snap=egpRecordSnapshots(egpSnapshot()),exam=egpActiveExam(),calc=egpCalc(exam,snap);
-  const target=calc.target,done=target===0||snap.answeredToday>=target;
-  const pct=target===0?100:(target>0?Math.min(100,Math.round(snap.answeredToday/target*100)):0);
+  const target=calc.target,done=snap.remaining===0||(target>0&&snap.answeredToday>=target);
+  const pct=snap.remaining===0?100:(target>0?Math.min(100,Math.round(snap.answeredToday/target*100)):0);
   const c=2*Math.PI*39,offset=(c*(1-pct/100)).toFixed(2);
   const dateLabel=egpDateParts(exam.date)?exam.date:'YYYY-MM-DD';
   const dateWarning=calc.valid&&calc.daysLeft<0?'<div class="egp-alert">Exam date has passed</div>':
     (calc.valid&&calc.daysLeft===0?'<div class="egp-alert">Exam is today</div>':'');
+  const finalReviewWarning=calc.valid&&calc.daysLeft>=0&&calc.daysLeft<=EGP_STATE.bufferDays&&snap.remaining>0?'<div class="egp-alert">Final review period · no new questions</div>':'';
+  const targetLabel=target==null||(target===0&&snap.remaining>0)?'—':String(target);
   const targetWarning=target!=null&&target>150?'<div class="egp-alert">Daily target is above 150 questions</div>':'';
   const statusClass=calc.status.toLowerCase().replace(/[^a-z]+/g,'-');
   const examTabs=EGP_STATE.exams.map(function(x){
@@ -3484,8 +3486,8 @@ function egpPlannerView(){
     return '<div class="egp-stat egp-card"><span>'+label+'</span><b>'+value+'</b>'+(extra||'')+'</div>';
   };
   const sentence=snap.remaining===0?'<p class="egp-sentence">Question Bank complete.</p>':
-    (target==null?'':'<p class="egp-sentence">Answer about <b>'+target+'</b> questions each day to finish the currently unanswered bank before your exam.</p>');
-  const face=done?'celebrating':(calc.status==='Behind'?'encouraging':'normal');
+    (target==null?'':(target===0?'<p class="egp-sentence">Final review only.</p>':'<p class="egp-sentence">Answer about <b>'+target+'</b> questions each day to finish the currently unanswered bank before your exam.</p>'));
+  const face=done?'celebrating':((calc.status==='Behind'||(target===0&&snap.remaining>0))?'encouraging':'normal');
   const faceSrc=(window.DOC_EMB&&window.DOC_EMB[face])||'';
   const dueText=snap.dueSmartReview+' due in Smart Review',timeText=egpTimeEstimate(snap,target);
   const settings='<details class="egp-settings"><summary>Plan settings</summary>'+
@@ -3501,17 +3503,17 @@ function egpPlannerView(){
         '<label class="egp-field-label" for="egpExamDate">Your exam date</label>'+
         '<div class="egp-date-run" dir="ltr"><input id="egpExamDate" class="field egp-date" type="date" dir="ltr" style="direction:ltr;unicode-bidi:isolate;text-align:left" value="'+egpEsc(exam.date)+'" data-egp-date>'+
         '<bdi class="egp-date-format" dir="ltr">'+egpEsc(dateLabel)+'</bdi></div>'+
-        dateWarning+targetWarning+
+        dateWarning+finalReviewWarning+targetWarning+
         '<div class="egp-stats">'+
           stat('Days left',calc.daysLeft==null?'—':(calc.daysLeft<0?'Past':String(calc.daysLeft)))+
           stat('Questions remaining',String(snap.remaining))+
-          stat('Questions per day',target==null?'—':String(target),'<small class="egp-due">'+dueText+'</small>')+
+          stat('Questions per day',targetLabel,'<small class="egp-due">'+dueText+'</small>')+
         '</div>'+sentence+
       '</section>'+
       '<section class="egp-card egp-today-card"><div class="egp-today-top"><div><span class="egp-section-kicker">TODAY</span><h2>Daily progress</h2></div>'+
         '<div class="egp-streak"><b>'+snap.streak+'</b><span>Streak</span></div></div>'+
-        '<div class="egp-today-body"><div class="egp-ring"><svg viewBox="0 0 96 96" aria-hidden="true"><circle class="egp-ring-track" cx="48" cy="48" r="39"/><circle class="egp-ring-progress" cx="48" cy="48" r="39" style="stroke-dasharray:'+c.toFixed(2)+';stroke-dashoffset:'+offset+'"/></svg><div><b>'+snap.answeredToday+'</b><small>/ '+(target==null?'—':target)+'</small></div></div>'+
-        '<div class="egp-mascot-copy"><img src="'+egpEsc(faceSrc)+'" alt="Shbace doctor"><span><b>'+(done?'Target complete':(calc.status==='Behind'?'Keep going':'On track'))+'</b></span></div></div></section>'+
+        '<div class="egp-today-body"><div class="egp-ring"><svg viewBox="0 0 96 96" aria-hidden="true"><circle class="egp-ring-track" cx="48" cy="48" r="39"/><circle class="egp-ring-progress" cx="48" cy="48" r="39" style="stroke-dasharray:'+c.toFixed(2)+';stroke-dashoffset:'+offset+'"/></svg><div><b>'+snap.answeredToday+'</b><small>/ '+targetLabel+'</small></div></div>'+
+        '<div class="egp-mascot-copy"><img src="'+egpEsc(faceSrc)+'" alt="Shbace doctor"><span><b>'+(done?'Target complete':(target===0&&snap.remaining>0?'Review remaining':(calc.status==='Behind'?'Keep going':'On track')))+'</b></span></div></div></section>'+
       '<section class="egp-card"><div class="egp-section-head"><h2>Remaining by specialty</h2></div>'+egpSpecialtyMarkup(snap)+'</section>'+
       '<section class="egp-card egp-time-card"><div><span class="egp-section-kicker">DAILY TIME ESTIMATE</span><b>'+egpEsc(timeText)+'</b></div><button type="button" class="egp-timer-link" data-egp-timer>Study Timer</button></section>'+
       '<section class="egp-card"><div class="egp-section-head"><h2>Burn-down</h2><div class="egp-legend"><span>Remaining</span><span>Ideal</span></div></div>'+egpBurnChart(exam)+'</section>'+
