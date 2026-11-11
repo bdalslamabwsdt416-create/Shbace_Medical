@@ -301,6 +301,7 @@
       '</div>';
   }
   function plannerView() {
+    queueReminderRefresh();
     var data = snapshot(), exam = activeExam();
     if (!exam) return '<div class="rs shb-eg-page"><h1>Exam goal planner</h1></div>';
     return '<div class="rs shb-eg-page" id="shbExamGoalPage">' +
