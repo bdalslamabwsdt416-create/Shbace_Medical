@@ -1,0 +1,4 @@
+/* iOS pack v7: cross out an option (long press). Only on iOS (class added by js/32-ios-v7.js). */
+html.v7-strike .qopt:not([disabled]){-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html.v7-strike .qopt.v7-struck:not([disabled]){opacity:.45}
+html.v7-strike .qopt.v7-struck:not([disabled]) span{text-decoration:line-through;text-decoration-thickness:2px}
