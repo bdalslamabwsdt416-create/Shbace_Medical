@@ -69,10 +69,10 @@
     return a;
   }
   function markActivity() {
-    var k = todayKey(), a = getActivityDays();
-    if (a.indexOf(k) < 0) a.push(k);
+    var k = todayKey(), a = getActivityDays(), firstToday = a.indexOf(k) < 0;
+    if (firstToday) a.push(k);
     try { localStorage.setItem(ACTIVITY_KEY, JSON.stringify(a.slice(-45))); } catch (_) {}
-    cancelTodayReminder();
+    if (firstToday) cancelTodayReminder();
   }
   function haptic(kind) {
     if (!prefs.haptics) return;
@@ -607,7 +607,6 @@
     haptic(card && card.querySelector('.qreact.ok') ? 'correct' : 'wrong');
     requestAnimationFrame(decorateQuestionCards);
     renderPlannerResult();
-    planExamReminders();
     return r;
   };
   var oldQzPick = window.qzPick;
