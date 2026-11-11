@@ -387,7 +387,7 @@
   var parents = {
     specialties: ['subjects'], topics: ['specialties'], questions: ['topics', 'subjects'],
     quizrun: ['quiz'], quizresult: ['quizrun', 'quiz'], quizhistory: ['quiz'],
-    timer: ['examgoal', 'subjects'], weak: ['stats','subjects'], dedication: ['about']
+    timer: ['subjects', 'examgoal'], weak: ['stats','subjects'], dedication: ['about']
   };
   var rootPages = ['subjects','quiz','review','stats','timer','examgoal','settings','about','changelog','feedback','rate','pinned','saved','wrong','notes','notifs','search'];
   function closeTransient() {
