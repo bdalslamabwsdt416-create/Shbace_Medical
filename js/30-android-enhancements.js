@@ -168,20 +168,20 @@
       stem.insertAdjacentHTML('afterend', html);
     });
   }
-  function copyText(text) {
+  function copyText(text, successMessage) {
     if (!text) return;
     if (window.ShbaceNative && window.ShbaceNative.copyText) {
       try { window.ShbaceNative.copyText(text); toast('Question copied'); return; } catch (_) {}
     }
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function () { toast('Question copied'); }).catch(function () { fallbackCopy(text); });
-    } else fallbackCopy(text);
+      navigator.clipboard.writeText(text).then(function () { toast(successMessage || 'Question copied'); }).catch(function () { fallbackCopy(text, successMessage); });
+    } else fallbackCopy(text, successMessage);
   }
-  function fallbackCopy(text) {
+  function fallbackCopy(text, successMessage) {
     var ta = document.createElement('textarea');
     ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
     document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); toast('Question copied'); } catch (_) { toast('Could not copy question'); }
+    try { document.execCommand('copy'); toast(successMessage || 'Question copied'); } catch (_) { toast('Could not copy text'); }
     ta.remove();
   }
   function shareText(text) {
