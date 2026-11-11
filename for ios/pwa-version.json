@@ -1,12 +1,10 @@
 {
   "app": "Shbace Medical",
   "platform": "PWA",
-  "version": "1.1.0",
-  "displayVersion": "1.1",
+  "version": "1.4.0",
+  "displayVersion": "1.4",
   "releaseDate": "2026-11-11",
   "releaseNotes": [
-    "Reviewed mode overlays 45 confirmed content corrections on the unchanged 1,718-question original bank.",
-    "Two review-note-only records and 110 Needs Review flags remain separate from confirmed question corrections.",
-    "Adds resumable offline installation with file-size and SHA-256 verification."
+    "iOS pack v7: long-press an answer option to cross it out."
   ]
 }
