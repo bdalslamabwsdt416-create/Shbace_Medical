@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'shbace-medical-offline-v4';
+const CACHE_NAME = 'shbace-medical-offline-v5';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
 const APP_SHELL = [
   './',
@@ -50,7 +50,7 @@ self.addEventListener('fetch', event => {
 
   // Manifest + version file: network first, so an updated manifest/icons always reach Chrome.
   // Falls back to the cached copy when offline.
-  if (url.pathname.endsWith('/manifest.webmanifest') || url.pathname.endsWith('/pwa-version.json')) {
+  if (url.pathname.endsWith('/manifest.webmanifest') || url.pathname.endsWith('/pwa-version.json') || url.pathname.endsWith('/offline-assets-manifest.json')) {
     event.respondWith((async () => {
       const cache = await caches.open(CACHE_NAME);
       try {
