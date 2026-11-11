@@ -37,9 +37,14 @@ Move the verified one-time offline resource download to the first screen of an i
 ## Validation / test results
 
 - Git branch diff reviewed against the 1.4.4 source baseline.
-- Production build and live deployment checks: pending.
-- Real iPhone Home Screen first-install test: pending.
+- Vercel production build passed; build log confirms 236 offline assets were verified.
+- Live production checks returned HTTP 200 for the app shell, `pwa-version.json`, service worker, installer script, and offline asset manifest.
+- Confirmed live HTML places the offline installer before `#startupSplash`, uses the `shbcheck` cache-bypass query, and holds app boot behind the gate.
+- Confirmed live release metadata is 1.4.5 and the offline manifest contains 236 assets.
+- Real iPhone Home Screen first-install interaction test: not performed from this environment; requires a physical iPhone/iPad.
 
 ## Commit(s)
 
-- Source updates are committed on the target branch; final deployment commit to be recorded after the production build is verified.
+- Final source commit: `d02f04c01a76ee3079ff394fd6863b63fce9758e`
+- Production deployment: `dpl_DcdNjr6B15L452KZ4zPF9FT1212Q` (READY)
+- Production domain: `https://shbace-medical-ios.vercel.app/`
