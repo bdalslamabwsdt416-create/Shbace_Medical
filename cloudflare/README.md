@@ -8,7 +8,7 @@ This is an additive Cloudflare backend. The existing Vercel deployment, PWA offl
 - **D1**: release metadata, feature configuration, and admin audit events.
 - **D1**: immutable, versioned JSON question-bank snapshots stored in bounded text chunks; this avoids requiring R2 billing activation.
 - **KV binding**: reserved for future low-latency configuration/cache use.
-- **Workers Static Assets**: serves the admin console from this Worker.
+- **Worker HTML response**: serves the admin console from the Worker root.
 
 ## Current API
 
@@ -34,11 +34,13 @@ From this directory, with Wrangler authenticated to the intended Cloudflare acco
 3. Create KV: `npx wrangler kv namespace create SHBACE_FLAGS`
 4. Put the returned D1 database ID and KV namespace ID into `wrangler.toml`.
 5. Apply schema: `npm run db:migrate:remote`
-6. Set secret: `npx wrangler secret put ADMIN_API_TOKEN`
+6. Set the `ADMIN_API_TOKEN` secret in the Cloudflare Dashboard (or `npx wrangler secret put ADMIN_API_TOKEN` from an authenticated local terminal).
 7. Deploy: `npm run deploy`
 8. Test `/v1/health`, then open the Worker root and connect with the admin token.
 
 The `ADMIN_API_TOKEN` must be a long random secret (at least 32 random bytes). Store it in a password manager. Do not commit it.
+
+The D1 and KV resources are already provisioned in the linked Cloudflare account. R2 is intentionally not used because the account owner declined any additional-billing authorization. The Worker has been uploaded to the `shbace-medical` workers.dev subdomain; set `ADMIN_API_TOKEN` before using administration endpoints.
 
 ## Safe rollout policy
 
