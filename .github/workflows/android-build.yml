@@ -130,3 +130,5 @@ jobs:
         shell: bash
         run: |
           rm -f android/keystore.properties "$RUNNER_TEMP/shbace-release.jks"
+
+# Release build trigger: user confirmed Actions signing secrets are configured.
