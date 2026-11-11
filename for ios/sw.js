@@ -2,6 +2,8 @@
 // build: ios-v15 (gate-synchronized splash, onboarding renderer order, silent activation)
 
 const CACHE_NAME = 'shbace-medical-offline-v2';
+// App-shell updates are isolated from the verified offline package. Never overwrite offline resources during SW install.
+const SHELL_CACHE_NAME = 'shbace-medical-ios-shell-v148';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
 const APP_SHELL = [
   './',
@@ -37,8 +39,8 @@ function missingOfflineResponse(url) {
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(APP_SHELL))
+    caches.open(SHELL_CACHE_NAME)
+      .then(cache => cache.addAll(APP_SHELL)
       .then(() => self.skipWaiting())
   );
 });
@@ -66,9 +68,12 @@ self.addEventListener('fetch', event => {
   if (url.searchParams.has('shbcheck')) return;
 
   event.respondWith((async () => {
-    const cache = await caches.open(CACHE_NAME);
-    const ready = await cache.match(READY_URL);
-    const cached = await cache.match(request, { ignoreSearch: true });
+    const shellCache = await caches.open(SHELL_CACHE_NAME);
+    const offlineCache = await caches.open(CACHE_NAME);
+    const shellCached = await shellCache.match(request, { ignoreSearch: true });
+    if (shellCached) return shellCached;
+    const ready = await offlineCache.match(READY_URL);
+    const cached = await offlineCache.match(request, { ignoreSearch: true });
     if (cached) return cached;
     // Before verification, successful same-origin responses are cached opportunistically.
     // Once ready, any missing local asset is surfaced instead of silently falling through.
@@ -76,11 +81,11 @@ self.addEventListener('fetch', event => {
     try {
       const response = await fetch(request);
       if (response && response.ok) {
-        try { await cache.put(request, response.clone()); } catch (_) {}
+        try { await offlineCache.put(request, response.clone()); } catch (_) {}
       }
       return response;
     } catch (_) {
-      const fallback = await cache.match('./index.html');
+      const fallback = await shellCache.match('./index.html') || await offlineCache.match('./index.html');
       return fallback || missingOfflineResponse(request.url);
     }
   })());
