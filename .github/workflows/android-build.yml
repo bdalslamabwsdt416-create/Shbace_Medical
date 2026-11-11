@@ -1,4 +1,4 @@
-name: SHBACE Medical Android APK 1.2 · Enhancement Work Copy
+name: SHBACE Medical Android APK 1.3 · Manual Enhancement Release
 
 on:
   push:
@@ -25,7 +25,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: shbace-android-v1.2-${{ github.ref }}
+  group: shbace-android-v1.3-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -76,13 +76,13 @@ jobs:
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: SHBACE-Medical-Android-v1.2-enhancement-work-copy-debug
+          name: SHBACE-Medical-Android-v1.3-enhancement-work-copy-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 90
 
       - name: Prepare Release signing key
-        if: github.ref == 'refs/heads/work/android-enhancements-20261111'
+        if: github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/shbace-medical-1.3-20261111'
         id: release-signing
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -111,7 +111,7 @@ jobs:
           echo "ready=true" >> "$GITHUB_OUTPUT"
 
       - name: Build signed Release APK
-        if: steps.release-signing.outputs.ready == 'true' && github.ref == 'refs/heads/work/android-enhancements-20261111'
+        if: steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/shbace-medical-1.3-20261111')
         working-directory: android
         run: |
           chmod +x gradlew
@@ -119,10 +119,10 @@ jobs:
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
 
       - name: Upload signed Release APK
-        if: steps.release-signing.outputs.ready == 'true' && github.ref == 'refs/heads/work/android-enhancements-20261111'
+        if: steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/shbace-medical-1.3-20261111')
         uses: actions/upload-artifact@v4
         with:
-          name: SHBACE-Medical-Android-v1.2-enhancement-work-copy-RELEASE-signed
+          name: SHBACE-Medical-Android-v1.3-enhancement-work-copy-RELEASE-signed
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 90
