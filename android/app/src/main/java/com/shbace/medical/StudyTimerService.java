@@ -53,10 +53,15 @@ public final class StudyTimerService extends Service {
 
         NotificationCompat.Builder b = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_stat_shbace)
-                .setContentTitle("Shbace Medical · Study time")
-                .setContentText(running ? "Focus session in progress" : "Study session paused")
+                .setContentTitle("Shbace Medical · Study Time")
+                .setContentText(running ? "FOCUS SESSION · In progress" : "FOCUS SESSION · Paused")
+                .setSubText(running ? "Your study clock is running" : "Timer paused")
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(
+                        running ? "Your Focus Session is active. The elapsed time continues while Shbace Medical is in the background or your screen is locked."
+                                : "Your Focus Session is paused. Open Shbace Medical to resume or save this session."))
                 .setContentIntent(content)
-                .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                .setCategory(NotificationCompat.CATEGORY_STOPWATCH)
+                .setColor(0xFF35B9F2)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
