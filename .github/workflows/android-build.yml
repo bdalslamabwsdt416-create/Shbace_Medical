@@ -82,7 +82,7 @@ jobs:
           retention-days: 90
 
       - name: Prepare Release signing key
-        if: github.ref == 'refs/heads/work/shbace-medical-1.1-copy-20261111'
+        if: github.ref == 'refs/heads/work/android-enhancements-20261111'
         id: release-signing
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -111,7 +111,7 @@ jobs:
           echo "ready=true" >> "$GITHUB_OUTPUT"
 
       - name: Build signed Release APK
-        if: steps.release-signing.outputs.ready == 'true' && github.ref == 'refs/heads/work/shbace-medical-1.1-copy-20261111'
+        if: steps.release-signing.outputs.ready == 'true' && github.ref == 'refs/heads/work/android-enhancements-20261111'
         working-directory: android
         run: |
           chmod +x gradlew
@@ -119,7 +119,7 @@ jobs:
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
 
       - name: Upload signed Release APK
-        if: steps.release-signing.outputs.ready == 'true' && github.ref == 'refs/heads/work/shbace-medical-1.1-copy-20261111'
+        if: steps.release-signing.outputs.ready == 'true' && github.ref == 'refs/heads/work/android-enhancements-20261111'
         uses: actions/upload-artifact@v4
         with:
           name: SHBACE-Medical-Android-v1.2-enhancement-work-copy-RELEASE-signed
