@@ -454,7 +454,10 @@
   };
   var oldSave = window.qSave;
   if (typeof oldSave === 'function') window.qSave = function () {
-    var r = oldSave.apply(this, arguments); haptic('light'); return r;
+    var r = oldSave.apply(this, arguments);
+    haptic('light');
+    requestAnimationFrame(decorateQuestionCards);
+    return r;
   };
   var oldStep = window.qStep;
   if (typeof oldStep === 'function') window.qStep = function (d) {
