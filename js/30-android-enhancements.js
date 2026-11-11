@@ -52,10 +52,21 @@
     catch (_) { return true; }
   }
   function getActivityDays() {
+    var a = [];
     try {
-      var a = JSON.parse(localStorage.getItem(ACTIVITY_KEY) || '[]');
-      return Array.isArray(a) ? a.filter(function (x) { return /^\d{4}-\d{2}-\d{2}$/.test(x); }) : [];
-    } catch (_) { return []; }
+      var stored = JSON.parse(localStorage.getItem(ACTIVITY_KEY) || '[]');
+      if (Array.isArray(stored)) a = stored.filter(function (x) { return /^\d{4}-\d{2}-\d{2}$/.test(x); });
+    } catch (_) {}
+    // Count activity already stored by earlier app versions, so a student who studied today
+    // before installing this update does not receive a false "you have not studied" reminder.
+    try {
+      var qb = JSON.parse(localStorage.getItem('shbace_qb_v6') || '{}'), ans = qb && qb.ans || {};
+      Object.keys(ans).forEach(function (id) {
+        var t = Number(ans[id] && ans[id].t);
+        if (t > 0) { var k = todayKey(new Date(t)); if (a.indexOf(k) < 0) a.push(k); }
+      });
+    } catch (_) {}
+    return a;
   }
   function markActivity() {
     var k = todayKey(), a = getActivityDays();
