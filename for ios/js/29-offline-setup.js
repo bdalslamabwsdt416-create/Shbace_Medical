@@ -412,8 +412,8 @@ function start(){
    });
  }).catch(function(error){
   setStatus(error.message||'Could not read the offline installation manifest.');
-  setWarning('Connect to the internet and reload the installed app. The setup will not mark any file as complete until it is saved and verified.');
-  ui.button.disabled=false;ui.button.textContent='Reload setup';ui.button.dataset.retry='1';
+  setWarning('Connect to the internet, then tap Retry setup. No file will be marked complete until it is saved and verified.');
+  ui.button.disabled=false;ui.button.textContent='Retry setup';ui.button.dataset.retry='1';
  });
 }
 function boot(){start()}
