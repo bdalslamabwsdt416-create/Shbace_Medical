@@ -90,7 +90,7 @@ function mount(){
  };
  ui.button.addEventListener('click',function(){
   if(ui.button.dataset.done==='1'){root.remove();releaseStartupGate();return}
-  if(ui.button.dataset.retry==='1'){location.reload();return}
+  if(ui.button.dataset.retry==='1'){ui.button.disabled=true;ui.button.dataset.retry='0';ui.button.textContent='Retrying…';start();return}
   startDownload();
  });
  if(document.querySelector('.phone.light'))root.classList.add('is-light');
@@ -390,10 +390,10 @@ function start(){
      });
     });
    }).then(function(check){
-    if(check.ready){root.remove();releaseStartupGate();return}
+    if(check.ready){ui.root.remove();releaseStartupGate();return}
     if(check.record&&check.record.verified&&check.record.version!==manifest.version){
      // Existing verified installs update the offline package quietly; first installs still use the full pre-splash download gate.
-     root.remove();
+     ui.root.remove();
      releaseStartupGate();
      setTimeout(function(){startDownload(true)},0);
      return;
