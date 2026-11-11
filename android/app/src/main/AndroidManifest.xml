@@ -52,5 +52,5 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />                  <!-- haptic feedback on taps -->
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="33" />  <!-- on-time notifications on Android 12-13 (granted by default there) -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />  <!-- user-granted exact scheduling for daily study reminders on Android 12+ -->
 </manifest>

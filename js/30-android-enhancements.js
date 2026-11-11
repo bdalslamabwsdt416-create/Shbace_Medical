@@ -390,18 +390,65 @@
     var p = await localPlugin();
     if (p) await cancelReminderIds(p, [DAILY_BASE + Number(todayKey().replace(/-/g, '').slice(2))]);
   }
+  var reminderPermissionTask = null;
+  async function requestDailyReminderAccess() {
+    if (reminderPermissionTask) return reminderPermissionTask;
+    reminderPermissionTask = (async function () {
+      try {
+        var p = await localPlugin();
+        if (!p) { toast('تعذّر الوصول إلى خدمة الإشعارات في التطبيق.'); return false; }
+        var perm = await p.checkPermissions();
+        if (!perm || perm.display !== 'granted') {
+          var allowNotifications = window.confirm('حتى يقدر SHBACE Medical يرسل تذكير الدراسة، يحتاج إذن الإشعارات. هل تبي تفعّله الآن؟');
+          if (!allowNotifications) return false;
+          perm = await p.requestPermissions();
+          if (!perm || perm.display !== 'granted') {
+            toast('إذن الإشعارات غير مفعّل. فعّله من إعدادات التطبيق.');
+            return false;
+          }
+        }
+        if (typeof p.checkExactNotificationSetting === 'function') {
+          var exact = await p.checkExactNotificationSetting();
+          if (exact && exact.exact_alarm && exact.exact_alarm !== 'granted') {
+            var openExactSettings = window.confirm('حتى يصل تذكير الدراسة في موعده، فعّل صلاحية «المنبّهات والتذكيرات» لـ SHBACE Medical. هذه الصلاحية تُستخدم لجدولة التذكير اليومي فقط. هل تبي تفتح إعداد النظام الآن؟');
+            if (!openExactSettings) { toast('التذكير يحتاج تفعيل «المنبّهات والتذكيرات».'); return false; }
+            if (typeof p.changeExactNotificationSetting !== 'function') {
+              toast('افتح إعدادات التطبيق وفعّل «المنبّهات والتذكيرات» يدوياً.');
+              return false;
+            }
+            await p.changeExactNotificationSetting();
+            toast('بعد تفعيل «المنبّهات والتذكيرات»، ارجع للتطبيق وسيُعاد إعداد التذكير.');
+            return false;
+          }
+        }
+        return true;
+      } catch (e) {
+        console.warn('Daily reminder permission flow failed', e);
+        toast('تعذّر التحقق من أذونات التذكير. راجع إعدادات التطبيق.');
+        return false;
+      }
+    })();
+    try { return await reminderPermissionTask; }
+    finally { reminderPermissionTask = null; }
+  }
+  window.__shbRequestReminderAccess = requestDailyReminderAccess;
+
   async function planDailyReminders() {
     var p = await localPlugin();
     if (!p) return;
     try {
       var perm = await p.checkPermissions();
       if (!perm || perm.display !== 'granted') return;
+      if (typeof p.checkExactNotificationSetting === 'function') {
+        var exact = await p.checkExactNotificationSetting();
+        if (exact && exact.exact_alarm && exact.exact_alarm !== 'granted') return;
+      }
       try { await p.createChannel({ id: 'study-reminders', name: 'Study reminders', description: 'A single daily study reminder', importance: 2 }); } catch (_) {}
       var pend = await p.getPending(), mine = (pend.notifications || []).filter(function (n) { return n.id >= DAILY_BASE && n.id < DAILY_BASE + 100000; });
       if (mine.length) await p.cancel({ notifications: mine.map(function (n) { return { id: n.id }; }) });
       if (!reminderCategoryEnabled()) return;
       var days = getActivityDays(), notifications = [], now = new Date();
-      for (var i = 0; i < 7; i++) {
+      for (var i = 0; i < 30; i++) {
         var d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i, 19, 30, 0, 0), k = todayKey(d);
         if (d.getTime() <= Date.now() + 30000 || days.indexOf(k) >= 0) continue;
         var totals = getTimerTotals();
@@ -418,6 +465,10 @@
     try {
       var perm = await p.checkPermissions();
       if (!perm || perm.display !== 'granted') return;
+      if (typeof p.checkExactNotificationSetting === 'function') {
+        var exact = await p.checkExactNotificationSetting();
+        if (exact && exact.exact_alarm && exact.exact_alarm !== 'granted') return;
+      }
       try { await p.createChannel({ id: 'exam-countdown', name: 'Exam countdown', description: 'A few reminders before your exam', importance: 3 }); } catch (_) {}
       var ids = [REMINDER_BASE + 7, REMINDER_BASE + 3, REMINDER_BASE + 1];
       await cancelReminderIds(p, ids);
@@ -596,7 +647,13 @@
   var oldNSetPref = window.nSetPref;
   if (typeof oldNSetPref === 'function') window.nSetPref = function (kind, value) {
     var r = oldNSetPref.apply(this, arguments);
-    if (kind === 'reminders') { planDailyReminders(); planExamReminders(); }
+    if (kind === 'reminders') {
+      if (value) {
+        requestDailyReminderAccess().then(function (ok) {
+          if (ok) { planDailyReminders(); planExamReminders(); }
+        });
+      } else { planDailyReminders(); planExamReminders(); }
+    }
     return r;
   };
   var oldAnswer = window.qAnswer;
@@ -753,6 +810,7 @@
       try { if (window.ShbaceNative.keepScreenOn) window.ShbaceNative.keepScreenOn(false); } catch (_) {}
     } else {
       applyTheme(); screenAwake(); nativeTimerSync();
+      planDailyReminders(); planExamReminders();
     }
   });
   // Restore the native foreground timer notification after a process/activity recreation.

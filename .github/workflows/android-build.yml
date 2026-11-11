@@ -6,6 +6,7 @@ on:
       - work/shbace-medical-1.1-copy-20261111
       - work/android-enhancements-20261111
       - work/android-v1.3-planner-navigation-20261111
+      - work/android-notifications-fix-20261111
     paths:
       - 'android/**'
       - 'index.html'
@@ -58,9 +59,12 @@ jobs:
       - name: Install Capacitor dependencies
         run: npm install --no-audit --no-fund
 
-      - name: JavaScript syntax (already checked on this commit)
-        if: false
-        run: echo "Syntax was checked in the preceding v1.3 run."
+      - name: JavaScript syntax
+        run: |
+          node --check js/09-app-features-v6.js
+          node --check js/24-daily-notify-v18.js
+          node --check js/30-android-enhancements.js
+          node --check js/31-android-v13.js
 
       - name: Build the matching PWA assets for Android
         run: npm run build:pwa
@@ -74,13 +78,13 @@ jobs:
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: SHBACE-Medical-Android-v1.3.1-debug
+          name: SHBACE-Medical-Android-v1.3.2-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 90
 
       - name: Prepare Release signing key
-        if: always() && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111')
+        if: always() && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111')
         id: release-signing
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -109,18 +113,27 @@ jobs:
           echo "ready=true" >> "$GITHUB_OUTPUT"
 
       - name: Build signed Release APK
-        if: always() && steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111')
+        if: always() && steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111')
         working-directory: android
         run: |
           chmod +x gradlew
           ./gradlew --no-daemon --stacktrace :app:assembleRelease
-          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
+          APK="app/build/outputs/apk/release/app-release.apk"
+          AAPT="$ANDROID_HOME/build-tools/36.0.0/aapt"
+          PERMISSIONS=$("$AAPT" dump permissions "$APK")
+          printf '%s\\n' "$PERMISSIONS"
+          for permission in android.permission.SCHEDULE_EXACT_ALARM android.permission.POST_NOTIFICATIONS android.permission.RECEIVE_BOOT_COMPLETED; do
+            grep -Fq "$permission" <<< "$PERMISSIONS" || { echo "Missing permission: $permission"; exit 1; }
+          done
+          if grep -Fq android.permission.USE_EXACT_ALARM <<< "$PERMISSIONS"; then echo "Unexpected USE_EXACT_ALARM"; exit 1; fi
+          "$AAPT" dump xmltree "$APK" AndroidManifest.xml | grep -Fq LocalNotificationRestoreReceiver
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$APK"
 
       - name: Upload signed Release APK
-        if: steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111')
+        if: steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111')
         uses: actions/upload-artifact@v4
         with:
-          name: SHBACE-Medical-Android-v1.3.1-RELEASE-signed
+          name: SHBACE-Medical-Android-v1.3.2-RELEASE-signed
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 90

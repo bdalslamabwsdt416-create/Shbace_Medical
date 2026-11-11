@@ -62,6 +62,9 @@
    var perm=await LN.checkPermissions();
    /* no automatic permission prompt: the request is made only after the student taps the bell and agrees (see askFromBell) */
    if(perm.display!=='granted')return;
+   if(typeof LN.checkExactNotificationSetting==='function'){
+    var exact=await LN.checkExactNotificationSetting();if(exact&&exact.exact_alarm&&exact.exact_alarm!=='granted')return;
+   }
    try{await LN.createChannel({id:CH,name:'Daily Medical Insight',description:'A clinical pearl every day at 10:00 and 22:00',importance:4,visibility:1,lights:true,lightColor:'#35E6FF',vibration:true})}catch(e){}
    var list=build(),pend=await LN.getPending(),mine=(pend.notifications||[]).filter(function(n){return n.id>=LO&&n.id<=HI});
    var want={};list.forEach(function(n){want[n.id]=1});

@@ -90,9 +90,9 @@ function weekBars(counts){
  for(var i=6;i>=0;i--){var key=fromDay(n-i),v=Number(counts[key]||0);a.push({key:key,n:v});max=Math.max(max,v)}
  return '<div class="eg-week">'+a.map(function(x){var d=localDate(x.key),label=d?names[d.getDay()]:'—';return '<div class="eg-week-col"><span class="eg-week-count">'+(x.n||'')+'</span><i style="height:'+Math.max(4,Math.round(x.n/max*48))+'px"></i><small>'+label+'</small></div>'}).join('')+'</div>'
 }
-function mascotHtml(m,count){
- if(!m.target)return '';
- try{if(count>=m.target)return '<div class="eg-mascot">'+mascot('celebrating','mascot small')+'</div>';return '<div class="eg-mascot">'+mascot('encouraging','mascot small')+'</div>'}catch(_){return ''}
+function mascotHtml(){
+ // The doctor mascot is intentionally omitted from Exam Goal Planner to prevent overlap with the date/target cards.
+ return '';
 }
 function dateText(s){var d=localDate(s);return d?d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):''}
 function specialtiesHtml(){
@@ -151,6 +151,9 @@ function onGoalChange(ev){
   if(field==='time')e.reminderTime=/^\d{2}:\d{2}$/.test(el.value)?el.value:'19:30';
   if(field==='name')e.name=String(el.value||'Written paper');
  });
+ if(field==='reminder'&&el.checked&&typeof window.__shbRequestReminderAccess==='function'){
+  window.__shbRequestReminderAccess().then(function(ok){if(ok)setTimeout(scheduleReminder,250)});
+ }
 }
 document.addEventListener('change',onGoalChange);
 document.addEventListener('click',function(ev){
@@ -175,6 +178,9 @@ async function scheduleReminder(){
     jsonWrite(REMINDER_IDS,[]);return;
   }
   var perm=await p.checkPermissions();if(!perm||perm.display!=='granted')return;
+  if(typeof p.checkExactNotificationSetting==='function'){
+   var exact=await p.checkExactNotificationSetting();if(exact&&exact.exact_alarm&&exact.exact_alarm!=='granted')return;
+  }
   if(old.length)await p.cancel({notifications:old.map(function(id){return {id:Number(id)}})});
   var m=calc(enabled,liveStats()),clock=(enabled.reminderTime||'19:30').split(':').map(Number),out=[],now=new Date();
   for(var i=0;i<14;i++){
