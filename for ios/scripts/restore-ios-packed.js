@@ -94,7 +94,12 @@ if(V5.autoUpdate&&swReady()){
   setTimeout(function(){location.reload()},200);
  }
  navigator.serviceWorker.addEventListener('controllerchange',function(){
-  if(navigator.serviceWorker.controller){pendingReload=true;reloadWhenSafe()}
+  if(!navigator.serviceWorker.controller)return;
+  /* Claiming control for the first time is not an update. Ignore it so a fresh install or
+     first resource download cannot be interrupted by a startup reload. */
+  if(!hadController){hadController=true;return;}
+  pendingReload=true;
+  reloadWhenSafe();
  });
  function checkUpdates(force){
   var now=Date.now();
