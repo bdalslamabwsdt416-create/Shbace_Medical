@@ -613,8 +613,7 @@
     if (t.closest && t.closest('#shbCopyAppInfo')) {
       try {
         var info = window.ShbaceNative.getDeviceInfo ? window.ShbaceNative.getDeviceInfo() : navigator.userAgent;
-        copyText('Shbace Medical app diagnostics\n' + info);
-        toast('App information copied');
+        copyText('Shbace Medical app diagnostics\n' + info, 'App information copied');
       } catch (_) { copyText(navigator.userAgent); }
     }
     if (t.closest && t.closest('#shbShareProgress')) shareProgressCard();
