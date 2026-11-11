@@ -370,7 +370,19 @@
   requestAnimationFrame(frame);
  }
 
- if(rm||!startWorker())startMain();
+ /* The ECG is part of the real splash timeline. Do not start it while the one-time offline installer is on screen:
+    otherwise the 7-second ECG finishes during the download and the splash is already over when the learner taps Continue. */
+ var ecgStarted=false;
+ function startAfterOfflineGate(){
+  if(ecgStarted)return;
+  if(window.__shbOfflineGatePromise&&!window.__shbOfflineGateReleased){
+   window.__shbOfflineGatePromise.then(startAfterOfflineGate,startAfterOfflineGate);
+   return;
+  }
+  ecgStarted=true;
+  if(rm||!startWorker())startMain();
+ }
+ startAfterOfflineGate();
 })();
 </script>
 <script id="shb-boot-v1">
