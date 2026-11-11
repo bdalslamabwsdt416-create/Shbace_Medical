@@ -1733,6 +1733,12 @@ function settingsView(){
   <div class="setrow"><b>First Onboarding Page</b><small>When ON, the welcome page is shown at app start. Turn it OFF to skip it.</small><button type="button" class="drsw ${SET.obFirst==='on'?'on':''}" role="switch" aria-checked="${SET.obFirst==='on'}" aria-label="First Onboarding Page" onclick="setSet('obFirst','${SET.obFirst==='on'?'off':'on'}')"><i></i><span>${SET.obFirst==='on'?'ON':'OFF'}</span></button></div>
   <div class="setrow"><b>Last Onboarding Page</b><small>When ON, the final “Your journey starts here” page is shown at app start. Turn it OFF to skip it.</small><button type="button" class="drsw ${SET.obLast==='on'?'on':''}" role="switch" aria-checked="${SET.obLast==='on'}" aria-label="Last Onboarding Page" onclick="setSet('obLast','${SET.obLast==='on'?'off':'on'}')"><i></i><span>${SET.obLast==='on'?'ON':'OFF'}</span></button></div></div>
  <input type="file" id="bkFile" accept=".json,application/json" hidden onchange="restoreBackup(this)">
+ <div class="card setcard"><h3>Backup &amp; restore</h3>
+  <p class="meta">${last}</p>
+  <div class="setrow"><b>Save a backup</b><small>Download your answers, saved questions, notes, Smart Review, preferences, pins, recent topics and other Shbace data.</small><button type="button" class="btn primary block" onclick="exportBackup()">Download backup</button></div>
+  <div class="setrow"><b>Restore a backup</b><small>Choose a previous Shbace JSON backup. The file is checked and summarised before your current data is replaced.</small><button type="button" class="btn block" onclick="document.getElementById('bkFile').click()">Choose backup file</button></div>
+  <p class="meta">Before uninstalling, create a backup and keep it in Downloads. Android saves this file outside the app, so it remains after uninstall. Android and iOS do not allow an app to display a custom dialog during the system uninstall process.</p>
+ </div>
  <div class="card setcard"><h3>Study progress</h3><p class="meta">${n} answered · ${ok} correct</p><p class="meta">Reset clears answers and progress only. Saved questions, notes, reports and Smart Review are kept.</p>
   <div class="setrow"><b>Reset one topic</b>${ddHTML('rtopic',topics,String(rTopic))}<button type="button" class="btn danger block" style="margin-top:10px" ${tn?'':'disabled'} onclick="resetTopicAsk()">Reset topic progress${tn?` (${tn})`:''}</button></div>
   <div class="setrow"><b>Reset everything</b><button type="button" class="btn danger block" style="margin-top:10px" ${n?'':'disabled'} onclick="resetAllAsk()">Reset all study progress${n?` (${n})`:''}</button></div></div></div>`}
@@ -1743,16 +1749,29 @@ window.resetAllAsk=function(){const n=Object.keys(S.ans).length;if(!n)return;
  confirmBox({title:'Reset all study progress?',text:`This clears all ${n} answer${n>1?'s':''} and your progress.`,detail:'Saved questions, notes, reports and Smart Review are kept. This cannot be undone. Export a backup first if unsure.',ok:'Reset all',danger:true},()=>{S.ans={};qs.streak=0;save();renderAppDemo();toast('All study progress reset')})};
 
 window.exportBackup=function(){
+ SET.lastBackup=Date.now();persistSettings();
  let grade=null;try{grade=localStorage.getItem('shbace_onboarding_v3_grade')}catch(e){}
- const obj={app:'Shbace Medical',format:'backup',version:1,exportedAt:new Date().toISOString(),data:{qb:{ans:S.ans,saved:S.saved,notes:S.notes,rep:S.rep,sr:S.sr},settings:{theme:SET.theme,font:SET.font,view:SET.view,obFirst:SET.obFirst,obLast:SET.obLast},grade}};
- const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});const a=document.createElement('a');
+ const localState={};
+ try{
+  for(let i=0;i<localStorage.length;i++){
+   const key=localStorage.key(i);
+   if(key&&key.indexOf('shbace_')===0&&key!=='shbace_question_bank_version'){
+    const value=localStorage.getItem(key);
+    if(value!==null)localState[key]=value;
+   }
+  }
+ }catch(e){console.warn('Some local Shbace state could not be included in the backup',e)}
+ const obj={app:'Shbace Medical',format:'backup',version:2,exportedAt:new Date().toISOString(),data:{qb:{ans:S.ans,saved:S.saved,notes:S.notes,rep:S.rep,sr:S.sr},settings:{theme:SET.theme,font:SET.font,view:SET.view,doctor:SET.doctor,obFirst:SET.obFirst,obLast:SET.obLast},grade,localStorage:localState}};
+ const json=JSON.stringify(obj);
+ if(json.length>32*1024*1024){toast('Backup is too large to export safely');return}
+ const blob=new Blob([json],{type:'application/json'});const a=document.createElement('a');
  a.href=URL.createObjectURL(blob);a.download='shbace-medical-backup-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();
  setTimeout(()=>{a.remove();URL.revokeObjectURL(a.href)},4000);
- SET.lastBackup=Date.now();persistSettings();renderAppDemo();toast('Backup file created')};
+ renderAppDemo();toast('Backup file created. Keep it in Downloads.')};
 const isObj=o=>o&&typeof o==='object'&&!Array.isArray(o);
 function validateBackup(obj){
  if(!isObj(obj)||obj.app!=='Shbace Medical')throw new Error('not a Shbace Medical backup');
- if(obj.version!==1)throw new Error('unsupported version');
+ if(obj.version!==1&&obj.version!==2)throw new Error('unsupported version');
  if(!isObj(obj.data)||!isObj(obj.data.qb))throw new Error('missing data');
  const q=obj.data.qb,out={ans:{},saved:{},notes:{},rep:{},sr:{}},idOk=k=>/^[A-Za-z]{2,8}-[A-Za-z0-9-]{1,12}$/.test(k);
  for(const f of Object.keys(out)){if(q[f]===undefined)continue;if(!isObj(q[f]))throw new Error(f+' is malformed');if(Object.keys(q[f]).length>20000)throw new Error('too many entries')}
@@ -1762,13 +1781,32 @@ function validateBackup(obj){
  for(const [k,v] of Object.entries(q.sr||{})){if(!idOk(k)||!isObj(v)||!Number.isFinite(v.due)||!Number.isFinite(v.added))throw new Error('invalid Smart Review record');out.sr[k]={added:v.added,due:v.due,stage:Number.isInteger(v.stage)?v.stage:0,...(Number.isFinite(v.last)?{last:v.last}:{})}}
  let st=null;if(obj.data.settings!==undefined){if(!isObj(obj.data.settings))throw new Error('settings are malformed');st={};for(const k of Object.keys(ENUM)){const v=obj.data.settings[k];if(v===undefined)continue;if(!ENUM[k].includes(v))throw new Error('invalid setting: '+k);st[k]=v}}
  const g=obj.data.grade;const grade=(g===null||g===undefined)?null:(['1','2','3','4','5'].includes(String(g))?String(g):(()=>{throw new Error('invalid grade')})());
- return {qb:out,settings:st,grade}}
+ const localStorageState={};
+ if(obj.version===2){
+  if(!isObj(obj.data.localStorage))throw new Error('local storage snapshot is missing');
+  const entries=Object.entries(obj.data.localStorage);if(entries.length>500)throw new Error('too many local data entries');
+  let total=0;
+  for(const [key,value] of entries){
+   if(!/^shbace_[A-Za-z0-9_.:-]{1,120}$/.test(key)||key==='shbace_question_bank_version')throw new Error('invalid local data key');
+   if(typeof value!=='string'||value.length>4*1024*1024)throw new Error('invalid local data value');
+   total+=key.length+value.length;if(total>24*1024*1024)throw new Error('local data snapshot is too large');
+   localStorageState[key]=value;
+  }
+ }
+ return {qb:out,settings:st,grade,localStorage:localStorageState}}
 window.restoreBackup=function(input){const f=input.files&&input.files[0];input.value='';if(!f)return;
  if(f.size>8*1024*1024)return toast('Backup file is too large');
  const r=new FileReader();r.onerror=()=>toast('Could not read the file');
  r.onload=()=>{let clean;try{clean=validateBackup(JSON.parse(r.result))}catch(e){return toast('Invalid backup: '+(e instanceof SyntaxError?'not a JSON file':e.message))}
   const c=clean.qb,n=o=>Object.keys(o).length;
   confirmBox({title:'Restore this backup?',text:`Answers: ${n(c.ans)} · Saved: ${n(c.saved)} · Notes: ${n(c.notes)} · Reports: ${n(c.rep)} · Smart Review: ${n(c.sr)}`,detail:'Your current study data on this device will be replaced. Export a backup first if you want to keep it.',ok:'Restore',danger:true},()=>{
+   if(clean.localStorage&&Object.keys(clean.localStorage).length){
+    try{
+     const remove=[];for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key&&key.indexOf('shbace_')===0&&key!=='shbace_question_bank_version')remove.push(key)}
+     remove.forEach(key=>localStorage.removeItem(key));
+     Object.entries(clean.localStorage).forEach(([key,value])=>localStorage.setItem(key,value));
+    }catch(e){toast('Some saved preferences could not be restored. Study data will still be restored.')}
+   }
    S.ans=c.ans;S.saved=c.saved;S.notes=c.notes;S.rep=c.rep;S.sr=c.sr;qs.streak=0;qs.noteOpen={};save();
    if(clean.settings)Object.assign(SET,clean.settings);persistSettings();
    if(clean.grade){try{localStorage.setItem('shbace_onboarding_v3_grade',clean.grade)}catch(e){}selectedGrade=Number(clean.grade)}
@@ -1789,7 +1827,7 @@ const CHANGELOG=[
   ['Study Timer','Focus session timer that keeps counting while you move between pages.'],
   ['Smart Review','Spaced-repetition review with due and difficulty information.'],
   ['Notifications','In-app notification centre for reminders and study updates.'],
-  ['Backup & restore','One full student-data backup (export, restore or merge) in Settings; files are validated before anything changes.'],
+  ['Backup & restore','A full student-data backup (export and restore) in Settings; files are validated before anything changes.'],
   ['Question bank fixes','Cleaner explanations, corrected spelling slips, safer handling of invalid answer keys, and a clear error instead of sample questions if the bank cannot load.']]},
  {v:'Version 5.8',tag:'available',st:'done',items:[
   ['Settings','Theme (dark / light), font size (small / medium / large) and Question Bank layout (single / all), saved on this device.'],
