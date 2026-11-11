@@ -466,6 +466,7 @@ questionBankView=function(){
  const sp=qs.spec==='all'?'All specialties':SPEC_NAME[qs.spec];
  return `${appHeader('Question bank')}<div class="rs qb"><h1>Question Bank</h1><p class="sub">Pediatrics · ${esc(sp)} · ${esc(topicTitle())}</p>
  <div class="qtools"><button type="button" class="btn" id="fsBtn" onclick="qFull()">${fsLabel()}</button><button type="button" class="btn" onclick="xOpen()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg>Export PDF</button></div>
+ <div class="seg wide" style="margin:4px 0 8px"><button type="button" data-v="single" class="on" onclick="setView('single')">Single</button><button type="button" data-v="all" onclick="setView('all')">All</button></div>
  <div class="qfilters">${ddHTML('filter',FILTERS,qs.filter)}${ddHTML('tag',[['all','All Tags'],...TAGS.map(t=>[t,t])],qs.tag)}</div>
  <div id="qbProg">${progHTML()}</div><div id="qbBody">${bankBody()}</div></div>`};
 
@@ -1694,17 +1695,17 @@ addEventListener('resize',()=>{
    SETTINGS — theme, font size, bank layout, backup/restore, progress reset
    ============================================================ */
 const SKEY='shbace_settings_v1';
-const SET=Object.assign({theme:'dark',font:'medium',view:'single',doctor:'on',obFirst:'off',obLast:'off',lastBackup:null},LS.get(SKEY,{}));
+const SET=Object.assign({theme:'dark',font:'medium',doctor:'on',obFirst:'off',obLast:'off',lastBackup:null},LS.get(SKEY,{}));
+ delete SET.view;
 try{if(LS.get(SKEY,null)===null){const lt=localStorage.getItem('shbace_theme');if(lt)SET.theme=lt==='light'?'light':'dark'}}catch(e){}
-const ENUM={theme:['dark','light'],font:['small','medium','large'],view:['single'],doctor:['on','off'],obFirst:['on','off'],obLast:['on','off']};
+const ENUM={theme:['dark','light'],font:['small','medium','large'],doctor:['on','off'],obFirst:['on','off'],obLast:['on','off']};
 const FZ={small:.92,medium:1,large:1.1};
-Object.keys(ENUM).forEach(k=>{if(!ENUM[k].includes(SET[k]))SET[k]={theme:'dark',font:'medium',view:'single',doctor:'on',obFirst:'off',obLast:'off'}[k]});
+Object.keys(ENUM).forEach(k=>{if(!ENUM[k].includes(SET[k]))SET[k]={theme:'dark',font:'medium',doctor:'on',obFirst:'off',obLast:'off'}[k]});
 window.__SET=SET;   /* v47: lets the global onboarding router read the real, persisted switches */
 function persistSettings(){LS.set(SKEY,SET);try{localStorage.setItem('shbace_theme',SET.theme)}catch(e){}}
-function applySettings(){const ph=$('.phone');if(ph){ph.classList.toggle('light',SET.theme==='light');ph.classList.toggle('nodoc',SET.doctor==='off')}document.body.classList.toggle('nodoc',SET.doctor==='off');document.documentElement.style.setProperty('--fz',FZ[SET.font]||1);qs.view='single';SET.view='single'}
+function applySettings(){const ph=$('.phone');if(ph){ph.classList.toggle('light',SET.theme==='light');ph.classList.toggle('nodoc',SET.doctor==='off')}document.body.classList.toggle('nodoc',SET.doctor==='off');document.documentElement.style.setProperty('--fz',FZ[SET.font]||1)}
 window.setSet=function(k,v){if(!ENUM[k]||!ENUM[k].includes(v))return;SET[k]=v;persistSettings();applySettings();if(mode==='app')renderAppDemo();else if(mode==='preview')renderSlide()};
 toggleTheme=function(){setSet('theme',SET.theme==='light'?'dark':'light')};
-const __sv=window.setView;window.setView=function(){SET.view='single';qs.view='single';persistSettings();__sv('single')};
 const __ht=hdrTap;hdrTap=function(n){if(n==='Settings'){appPage='settings';renderAppDemo();return}__ht(n)};
 DR2.forEach(g=>g[1].forEach(it=>{if(it[0]==='Settings')it[1]='settings'}));
 const __menu2=menuView;menuView=function(){return appPage==='settings'?settingsView():__menu2()};
@@ -1742,7 +1743,7 @@ window.resetAllAsk=function(){const n=Object.keys(S.ans).length;if(!n)return;
 
 window.exportBackup=function(){
  let grade=null;try{grade=localStorage.getItem('shbace_onboarding_v3_grade')}catch(e){}
- const obj={app:'Shbace Medical',format:'backup',version:1,exportedAt:new Date().toISOString(),data:{qb:{ans:S.ans,saved:S.saved,notes:S.notes,rep:S.rep,sr:S.sr},settings:{theme:SET.theme,font:SET.font,view:SET.view,obFirst:SET.obFirst,obLast:SET.obLast},grade}};
+ const obj={app:'Shbace Medical',format:'backup',version:1,exportedAt:new Date().toISOString(),data:{qb:{ans:S.ans,saved:S.saved,notes:S.notes,rep:S.rep,sr:S.sr},settings:{theme:SET.theme,font:SET.font,obFirst:SET.obFirst,obLast:SET.obLast},grade}};
  const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});const a=document.createElement('a');
  a.href=URL.createObjectURL(blob);a.download='shbace-medical-backup-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();
  setTimeout(()=>{a.remove();URL.revokeObjectURL(a.href)},4000);
