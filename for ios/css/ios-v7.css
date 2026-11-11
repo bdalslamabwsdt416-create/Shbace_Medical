@@ -2,3 +2,31 @@
 html.v7-strike .qopt:not([disabled]){-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 html.v7-strike .qopt.v7-struck:not([disabled]){opacity:.45}
 html.v7-strike .qopt.v7-struck:not([disabled]) span{text-decoration:line-through;text-decoration-thickness:2px}
+
+
+/* iOS v8 · onboarding layout corrections (kept inside the independent iOS build). */
+/* The grade staircase now uses the full usable phone width instead of being squeezed
+   to fit every sibling into one fixed-height viewport. The page can scroll naturally. */
+#phoneContent[data-ob="5"]>.screen:has(#gradeStage){
+  overflow:visible!important;
+}
+#phoneContent[data-ob="5"]>.screen:has(#gradeStage) #gradeStage.gx{
+  width:calc(100% + 40px)!important;
+  max-width:none!important;
+  margin-left:-20px!important;
+  margin-right:-20px!important;
+}
+/* Final journey page: remove the optional quote and reveal a little more of the
+   lower staircase artwork so it has breathing room above the grade badge. */
+#phoneContent[data-ob-final]>.screen.cp-screen{
+  overflow:visible!important;
+}
+#phoneContent[data-ob-final] .cp-art-frame{
+  aspect-ratio:1/1.17!important;
+}
+#phoneContent[data-ob-final] .cp-screen .cp-welcome{
+  margin-top:-4px!important;
+}
+#phoneContent[data-ob-final] .cp-screen .cp-welcome .hero-sub{
+  display:none!important;
+}
