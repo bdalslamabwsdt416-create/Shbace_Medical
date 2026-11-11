@@ -1,11 +1,12 @@
 {
   "app": "Shbace Medical",
   "platform": "PWA",
-  "version": "1.4.1",
-  "displayVersion": "1.4.1",
+  "version": "1.4.2",
+  "displayVersion": "1.4.2",
   "releaseDate": "2026-11-11",
   "releaseNotes": [
     "iOS onboarding: the final journey screen has more room and no longer shows the optional quote.",
-    "iOS onboarding: the grade staircase now uses a responsive full-width layout."
+    "iOS onboarding: the grade staircase now uses a responsive full-width layout.",
+    "iOS onboarding: removed the overlapping Grade / Current Level badge from the final page."
   ]
 }

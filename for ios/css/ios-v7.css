@@ -30,3 +30,9 @@ html.v7-strike .qopt.v7-struck:not([disabled]) span{text-decoration:line-through
 #phoneContent[data-ob-final] .cp-screen .cp-welcome .hero-sub{
   display:none!important;
 }
+
+
+/* iOS v9: remove only the overlapping grade badge from the final onboarding page. */
+#phoneContent[data-ob-final] .cp-screen .cp-grade-badge{
+  display:none!important;
+}
