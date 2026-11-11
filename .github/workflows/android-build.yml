@@ -1,9 +1,9 @@
-name: Shbace Medical Android APK 1.1
+name: SHBACE Medical Android APK 1.1 · Work Copy
 
 on:
   push:
     branches:
-      - release/shbace-medical-1.1-complete-20261111
+      - work/shbace-medical-1.1-copy-20261111
     paths:
       - 'android/**'
       - 'index.html'
@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
-      - name: Checkout release branch
+      - name: Checkout working copy
         uses: actions/checkout@v4
 
       - name: Set up JDK 21
@@ -75,7 +75,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Shbace-Medical-Android-v1.1-debug
+          name: SHBACE-Medical-Android-v1.1-work-copy-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 90
