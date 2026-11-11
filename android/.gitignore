@@ -1,0 +1,4 @@
+# Local Android release signing material — never commit these files
+keystore.properties
+*.jks
+*.keystore
