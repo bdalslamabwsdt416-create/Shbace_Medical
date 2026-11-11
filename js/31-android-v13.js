@@ -45,8 +45,7 @@ function todayInfo(){
  return {count:count,counts:counts,streak:streak,answers:ans}
 }
 function dueReview(){
- var sr=qState().sr||{},now=Date.now(),n=0;
- Object.keys(sr).forEach(function(id){var d=Number(sr[id]&&sr[id].due);if(Number.isFinite(d)&&d<=now)n++});return n
+ try{var api=window.__sr3x&&window.__sr3x();return api&&typeof api.dueList==='function'?api.dueList().length:0}catch(_){return 0}
 }
 function qIndex(){try{return window.__shbQuestionIndex&&window.__shbQuestionIndex()||[]}catch(_){return []}}
 function topicPerf(){try{return window.__shbTopicPerformance&&window.__shbTopicPerformance()||[]}catch(_){return []}}
@@ -64,10 +63,10 @@ function specialties(){
  }).filter(function(t){return t.remaining>0}).sort(function(a,b){var aa=a.accuracy==null?101:a.accuracy,bb=b.accuracy==null?101:b.accuracy;return aa-bb||b.remaining-a.remaining});
  return x}).filter(function(x){return x.total>0}).sort(function(a,b){return b.remaining-a.remaining})
 }
-function avgMs(){try{var t=window.__shbStudy&&window.__shbStudy.totals&&window.__shbStudy.totals();if(t&&+t.q>0&&+t.tot>0)return +t.tot/+t.q}catch(_){}return 0}
+function avgMs(){try{var api=window.__sr3x&&window.__sr3x(),r=api&&api.srSpeedRef&&api.srSpeedRef();if(r&&Number.isFinite(r.med)&&r.n>0)return r.med}catch(_){}return 0}
 function calc(e,s){
  var days=e.date?dayNo(e.date)-dayNo(today()):NaN,buffer=Math.max(0,Math.round(+e.bufferDays||0)),
- rest=Number.isFinite(days)&&days>0?Math.floor(days/7)*Math.max(0,Math.round(+e.restDaysPerWeek||0)):0,
+ rest=Number.isFinite(days)&&days>0?Math.ceil(days/7)*Math.max(0,Math.round(+e.restDaysPerWeek||0)):0,
  raw=Number.isFinite(days)?days-buffer-rest:0,study=Math.max(1,raw),
  target=e.date&&Number.isFinite(days)&&days>0&&s.remaining?Math.ceil(s.remaining/study):0;
  return {days:days,buffer:buffer,rest:rest,raw:raw,study:study,target:target,past:Number.isFinite(days)&&days<0,
