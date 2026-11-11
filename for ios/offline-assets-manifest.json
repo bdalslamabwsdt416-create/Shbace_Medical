@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "version": "38f9071977a81827e6730c376a1b0acec0c389d93597ef25d34ed532fd839bf6",
-  "generatedAt": "2026-11-11T18:59:28.913Z",
+  "version": "5d81cd5109fc19964cc583b00399f2a03fc5bc2812c3a28b8192a2841426314f",
+  "generatedAt": "2026-11-11T19:01:15.257Z",
   "fileCount": 236,
-  "totalBytes": 18455297,
+  "totalBytes": 18455202,
   "files": [
     {
       "path": "assets/img/0011d30ae5fc.webp",
@@ -1255,8 +1255,8 @@
     },
     {
       "path": "js/09-app-features-v6.js",
-      "bytes": 433666,
-      "sha256": "64f6bb25db73aea1bb6170274c2e87112684d942bde84fe423c2bf1f5c093b77",
+      "bytes": 433571,
+      "sha256": "9b5124e81313ad0aad79f13a8da42214dfd1545cc3407a2294e30c6ac32b013d",
       "group": "app"
     },
     {
