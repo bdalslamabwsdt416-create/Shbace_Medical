@@ -53,6 +53,7 @@ public class MainActivity extends BridgeActivity {
     private volatile String insetsJson = "{\"top\":0,\"bottom\":0,\"left\":0,\"right\":0}";
     private volatile boolean webReady = false;
     private boolean imeWasVisible = false;
+    private ShbaceNative nativeBridge;
 
     /** Exposed to JS as window.ShbaceInsets */
     private final class InsetsBridge {
@@ -100,7 +101,8 @@ public class MainActivity extends BridgeActivity {
         web.setBackgroundColor(APP_BG);
         web.setOverScrollMode(View.OVER_SCROLL_NEVER); // no stretch/glow at scroll ends
         web.addJavascriptInterface(new InsetsBridge(), "ShbaceInsets");
-        web.addJavascriptInterface(new ShbaceNative(this), "ShbaceNative"); // file saving + print/PDF (see ShbaceNative.java)
+        nativeBridge = new ShbaceNative(this);
+        web.addJavascriptInterface(nativeBridge, "ShbaceNative"); // file, print, haptics, TTS, timer service and sharing bridge
 
         final View content = findViewById(android.R.id.content);
 
@@ -150,6 +152,12 @@ public class MainActivity extends BridgeActivity {
         hideSystemBars();
         // Plugins loaded during super.onCreate() may touch the bars; apply once more after startup.
         new Handler(Looper.getMainLooper()).postDelayed(this::hideSystemBars, 700);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (nativeBridge != null) nativeBridge.shutdown();
+        super.onDestroy();
     }
 
     /** Immersive Sticky: hide status + navigation bars; an edge swipe reveals them only transiently. */

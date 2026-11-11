@@ -1,9 +1,10 @@
-name: SHBACE Medical Android APK 1.1 · Work Copy
+name: SHBACE Medical Android APK 1.2 · Enhancement Work Copy
 
 on:
   push:
     branches:
       - work/shbace-medical-1.1-copy-20261111
+      - work/android-enhancements-20261111
     paths:
       - 'android/**'
       - 'index.html'
@@ -75,7 +76,7 @@ jobs:
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: SHBACE-Medical-Android-v1.1-work-copy-debug
+          name: SHBACE-Medical-Android-v1.2-enhancement-work-copy-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 90
@@ -109,7 +110,7 @@ jobs:
           echo "ready=true" >> "$GITHUB_OUTPUT"
 
       - name: Build signed Release APK
-        if: steps.release-signing.outputs.ready == 'true'
+        if: steps.release-signing.outputs.ready == 'true' && github.ref == 'refs/heads/work/shbace-medical-1.1-copy-20261111'
         working-directory: android
         run: |
           chmod +x gradlew
@@ -120,7 +121,7 @@ jobs:
         if: steps.release-signing.outputs.ready == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: SHBACE-Medical-Android-v1.1-work-copy-RELEASE-signed
+          name: SHBACE-Medical-Android-v1.2-enhancement-work-copy-RELEASE-signed
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 90

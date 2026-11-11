@@ -97,6 +97,223 @@ final class ShbaceNative {
         return true;
     }
 
+
+    @JavascriptInterface
+    public void keepScreenOn(final boolean enabled) {
+        activity.runOnUiThread(new Runnable() {
+            @Override public void run() {
+                if (enabled) activity.getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                else activity.getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            }
+        });
+    }
+
+    @JavascriptInterface
+    public void haptic(String kind) {
+        try {
+            android.os.Vibrator vibrator = (android.os.Vibrator) activity.getSystemService(Context.VIBRATOR_SERVICE);
+            if (vibrator == null || !vibrator.hasVibrator()) return;
+            String k = kind == null ? "light" : kind.toLowerCase(java.util.Locale.US);
+            long[] pattern;
+            int[] amplitude;
+            if ("correct".equals(k)) {
+                pattern = new long[]{0, 24, 42, 30};
+                amplitude = new int[]{0, 90, 0, 135};
+            } else if ("wrong".equals(k)) {
+                pattern = new long[]{0, 42, 48, 42, 48, 42};
+                amplitude = new int[]{0, 150, 0, 120, 0, 150};
+            } else {
+                pattern = new long[]{0, 12};
+                amplitude = new int[]{0, 70};
+            }
+            if (Build.VERSION.SDK_INT >= 26) {
+                vibrator.vibrate(android.os.VibrationEffect.createWaveform(pattern, amplitude, -1));
+            } else {
+                vibrator.vibrate(pattern, -1);
+            }
+        } catch (Throwable t) {
+            Log.w(TAG, "haptic unavailable", t);
+        }
+    }
+
+    @JavascriptInterface
+    public void updateStudyTimer(long elapsedMs, boolean running) {
+        try {
+            android.content.Intent intent = new android.content.Intent(activity, StudyTimerService.class);
+            intent.setAction(StudyTimerService.ACTION_UPDATE);
+            intent.putExtra(StudyTimerService.EXTRA_ELAPSED, Math.max(0L, elapsedMs));
+            intent.putExtra(StudyTimerService.EXTRA_RUNNING, running);
+            if (Build.VERSION.SDK_INT >= 26) androidx.core.content.ContextCompat.startForegroundService(activity, intent);
+            else activity.startService(intent);
+        } catch (Throwable t) {
+            Log.e(TAG, "Could not update study timer notification", t);
+        }
+    }
+
+    @JavascriptInterface
+    public void stopStudyTimer() {
+        try { activity.stopService(new android.content.Intent(activity, StudyTimerService.class)); }
+        catch (Throwable t) { Log.e(TAG, "Could not stop study timer notification", t); }
+    }
+
+    @JavascriptInterface
+    public void speakText(final String text, final String language, final float rate) {
+        if (text == null || text.trim().length() == 0) return;
+        activity.runOnUiThread(new Runnable() {
+            @Override public void run() {
+                try {
+                    pendingSpeech = text;
+                    pendingLanguage = (language == null || language.length() == 0) ? "en-US" : language;
+                    pendingRate = Math.max(0.65f, Math.min(1.4f, rate));
+                    if (tts == null) {
+                        tts = new android.speech.tts.TextToSpeech(activity, status -> {
+                            if (status == android.speech.tts.TextToSpeech.SUCCESS) {
+                                ttsReady = true;
+                                speakPending();
+                            } else {
+                                ttsReady = false;
+                                toast("Speech engine is not available");
+                            }
+                        });
+                    } else if (ttsReady) {
+                        speakPending();
+                    }
+                } catch (Throwable t) {
+                    Log.e(TAG, "Text to speech failed", t);
+                    toast("Could not read this question aloud");
+                }
+            }
+        });
+    }
+
+    @JavascriptInterface
+    public void stopSpeaking() {
+        activity.runOnUiThread(new Runnable() {
+            @Override public void run() {
+                try { if (tts != null) tts.stop(); pendingSpeech = null; }
+                catch (Throwable t) { Log.w(TAG, "TTS stop failed", t); }
+            }
+        });
+    }
+
+    private android.speech.tts.TextToSpeech tts;
+    private boolean ttsReady = false;
+    private String pendingSpeech = null;
+    private String pendingLanguage = "en-US";
+    private float pendingRate = 1f;
+
+    private void speakPending() {
+        if (tts == null || !ttsReady || pendingSpeech == null) return;
+        try {
+            java.util.Locale locale = java.util.Locale.forLanguageTag(pendingLanguage);
+            tts.setLanguage(locale);
+            tts.setSpeechRate(pendingRate);
+            // Prefer a voice whose provider explicitly labels it male; fall back to the best matching English voice.
+            if (Build.VERSION.SDK_INT >= 21) {
+                android.speech.tts.Voice chosen = null;
+                java.util.Set<android.speech.tts.Voice> voices = tts.getVoices();
+                if (voices != null) {
+                    for (android.speech.tts.Voice voice : voices) {
+                        if (voice == null || voice.getLocale() == null) continue;
+                        if (!voice.getLocale().getLanguage().equalsIgnoreCase(locale.getLanguage())) continue;
+                        String name = voice.getName() == null ? "" : voice.getName().toLowerCase(java.util.Locale.US);
+                        if (name.contains("male") || name.contains("masculine")) {
+                            chosen = voice;
+                            break;
+                        }
+                        if (chosen == null || voice.getQuality() > chosen.getQuality()) chosen = voice;
+                    }
+                }
+                if (chosen != null) tts.setVoice(chosen);
+            }
+            tts.speak(pendingSpeech, android.speech.tts.TextToSpeech.QUEUE_FLUSH, null, "shbace-question");
+            pendingSpeech = null;
+        } catch (Throwable t) {
+            Log.e(TAG, "Could not start speech", t);
+            toast("Could not read this question aloud");
+        }
+    }
+
+    @JavascriptInterface
+    public void copyText(final String text) {
+        if (text == null) return;
+        activity.runOnUiThread(new Runnable() {
+            @Override public void run() {
+                try {
+                    android.content.ClipboardManager cm = (android.content.ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
+                    if (cm != null) cm.setPrimaryClip(android.content.ClipData.newPlainText("Shbace Medical", text));
+                    toast("Copied to clipboard");
+                } catch (Throwable t) { toast("Could not copy text"); }
+            }
+        });
+    }
+
+    @JavascriptInterface
+    public void shareText(final String text) {
+        if (text == null || text.trim().length() == 0) return;
+        activity.runOnUiThread(new Runnable() {
+            @Override public void run() {
+                try {
+                    android.content.Intent send = new android.content.Intent(android.content.Intent.ACTION_SEND);
+                    send.setType("text/plain");
+                    send.putExtra(android.content.Intent.EXTRA_TEXT, text);
+                    activity.startActivity(android.content.Intent.createChooser(send, "Share question"));
+                } catch (Throwable t) { toast("Could not open sharing options"); }
+            }
+        });
+    }
+
+    @JavascriptInterface
+    public void shareImage(final String base64) {
+        if (base64 == null || base64.length() == 0) return;
+        activity.runOnUiThread(new Runnable() {
+            @Override public void run() {
+                java.io.FileOutputStream out = null;
+                try {
+                    byte[] bytes = Base64.decode(base64, Base64.DEFAULT);
+                    java.io.File dir = new java.io.File(activity.getCacheDir(), "shared");
+                    if (!dir.exists() && !dir.mkdirs()) throw new IllegalStateException("cache folder unavailable");
+                    java.io.File file = new java.io.File(dir, "shbace-progress-" + System.currentTimeMillis() + ".png");
+                    out = new java.io.FileOutputStream(file);
+                    out.write(bytes); out.flush(); out.close(); out = null;
+                    Uri uri = androidx.core.content.FileProvider.getUriForFile(activity,
+                            activity.getPackageName() + ".fileprovider", file);
+                    android.content.Intent send = new android.content.Intent(android.content.Intent.ACTION_SEND);
+                    send.setType("image/png");
+                    send.putExtra(android.content.Intent.EXTRA_STREAM, uri);
+                    send.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    activity.startActivity(android.content.Intent.createChooser(send, "Share study progress"));
+                } catch (Throwable t) {
+                    Log.e(TAG, "shareImage failed", t);
+                    toast("Could not share the progress card");
+                } finally {
+                    if (out != null) try { out.close(); } catch (Exception ignored) {}
+                }
+            }
+        });
+    }
+
+    @JavascriptInterface
+    public String getDeviceInfo() {
+        try {
+            android.content.pm.PackageInfo p = activity.getPackageManager().getPackageInfo(activity.getPackageName(), 0);
+            long code = Build.VERSION.SDK_INT >= 28 ? p.getLongVersionCode() : p.versionCode;
+            String name = p.versionName == null ? "unknown" : p.versionName;
+            String model = Build.MANUFACTURER + " " + Build.MODEL;
+            return "Package: " + activity.getPackageName() + "\nVersion: " + name + " (" + code + ")" +
+                    "\nAndroid: " + Build.VERSION.RELEASE + " · API " + Build.VERSION.SDK_INT +
+                    "\nDevice: " + model + "\nBuild: " +
+                    (((activity.getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) ? "debug" : "release");
+        } catch (Throwable t) { return "Package: " + activity.getPackageName() + "\nAndroid API: " + Build.VERSION.SDK_INT; }
+    }
+
+    void shutdown() {
+        try { if (tts != null) { tts.stop(); tts.shutdown(); tts = null; ttsReady = false; } }
+        catch (Throwable ignored) {}
+        try { activity.getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); }
+        catch (Throwable ignored) {}
+    }
+
     // ------------------------------------------------------------------------------------------------------------
 
     private String write(String name, String mime, byte[] data) throws Exception {

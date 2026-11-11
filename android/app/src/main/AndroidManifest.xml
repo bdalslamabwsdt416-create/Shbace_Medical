@@ -25,6 +25,15 @@
             </intent-filter>
         </activity>
 
+        <service
+            android:name=".StudyTimerService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="User-started Study Timer with an ongoing elapsed-time notification" />
+        </service>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -40,6 +49,8 @@
     <uses-permission android:name="android.permission.INTERNET" />                 <!-- Capacitor WebView; opens external links -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />       <!-- daily-insight / review / quiz notifications (Android 13+) -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />   <!-- local notifications are re-scheduled after a reboot -->
-    <uses-permission android:name="android.permission.VIBRATE" />                  <!-- haptic feedback on taps -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />                  <!-- haptic feedback on taps -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="33" />  <!-- on-time notifications on Android 12-13 (granted by default there) -->
 </manifest>

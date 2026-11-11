@@ -16,8 +16,8 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         // IMPORTANT: when updating an app that is already installed / published, versionCode MUST be higher than the old one.
-        versionCode 7
-        versionName "1.1"
+        versionCode 8
+        versionName "1.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
