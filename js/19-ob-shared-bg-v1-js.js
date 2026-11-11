@@ -25,3 +25,21 @@ enterAppDemo=function(){
  requestAnimationFrame(()=>splashDissolve(g,RM()?350:2000,end));   /* same left -> right reveal as the splash */
  return r};
 })();
+
+
+/* PWA-only onboarding image pre-decode. Native Android keeps its existing asset lifecycle. */
+(function(){
+ try{
+  const c=window.Capacitor;
+  if(c&&typeof c.isNativePlatform==='function'&&c.isNativePlatform())return;
+  const list=['/assets/img/62a732b97cb4.png','/assets/img/9611283933e0.webp','/assets/img/8e6540881e86.png','/assets/img/300a2b16b550.jpg'];
+  window.__obPre=window.__obPre||[];
+  const idle=window.requestIdleCallback?(f=>window.requestIdleCallback(f,{timeout:2500})):(f=>setTimeout(f,1500));
+  const one=i=>{
+   if(i>=list.length)return;
+   try{const im=new Image();im.decoding='async';im.src=list[i];window.__obPre.push(im);(im.decode?im.decode():Promise.resolve()).catch(()=>{})}catch(e){}
+   setTimeout(()=>one(i+1),250);
+  };
+  idle(()=>one(0));
+ }catch(e){}
+})();
