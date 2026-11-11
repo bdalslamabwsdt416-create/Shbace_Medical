@@ -152,8 +152,12 @@ final class ShbaceNative {
 
     @JavascriptInterface
     public void stopStudyTimer() {
-        try { activity.stopService(new android.content.Intent(activity, StudyTimerService.class)); }
-        catch (Throwable t) { Log.e(TAG, "Could not stop study timer notification", t); }
+        try {
+            StudyTimerService.clearSavedState(activity);
+            activity.stopService(new android.content.Intent(activity, StudyTimerService.class));
+        } catch (Throwable t) {
+            Log.e(TAG, "Could not stop study timer notification", t);
+        }
     }
 
     @JavascriptInterface
