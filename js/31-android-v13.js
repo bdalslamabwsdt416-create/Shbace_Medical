@@ -1,4 +1,5 @@
 /* Shbace Medical v1.3 · Android-only planner, drawer and navigation refinement. */
+/* Release artifact retry: static artifact names; the previous Gradle compile completed successfully. */
 (function(){
 'use strict';
 function nativeAndroid(){try{var c=window.Capacitor;return !!(c&&c.isNativePlatform&&c.isNativePlatform()&&(!c.getPlatform||c.getPlatform()==='android')&&window.ShbaceNative)}catch(_){return false}}
