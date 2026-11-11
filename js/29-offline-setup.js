@@ -159,11 +159,18 @@ function fileValid(file,checkHash){
 }
 function loadManifest(){
  return caches.open(CACHE_NAME).then(function(c){
-  return c.match(MANIFEST_URL).then(function(hit){
-   if(hit)return hit.json();
-   return fetch(MANIFEST_URL,{credentials:'same-origin'}).then(function(r){
-    if(!r.ok)throw new Error('Offline asset manifest returned HTTP '+r.status+'.');
-    return r.json();
+  /* Network first: a stale cached copy of the file list makes size/SHA checks fail against newer files.
+     The cached copy is only a fallback for when the device is offline. */
+  return fetch(MANIFEST_URL,{credentials:'same-origin',cache:'no-store'}).then(function(r){
+   if(!r.ok)throw new Error('Offline asset manifest returned HTTP '+r.status+'.');
+   var copy=r.clone();
+   return r.json().then(function(data){
+    return c.put(MANIFEST_URL,copy).catch(function(){}).then(function(){return data});
+   });
+  }).catch(function(err){
+   return c.match(MANIFEST_URL).then(function(hit){
+    if(hit)return hit.json();
+    throw err;
    });
   });
  }).then(function(data){
