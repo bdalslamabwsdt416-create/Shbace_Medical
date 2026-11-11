@@ -774,6 +774,13 @@
   document.head.appendChild(style);
 
   setTimeout(onRender, 350);
+  // Mirror only events created during this app launch (never replay the student's old notification history).
+  setTimeout(function () {
+    try {
+      var recent = window.__shbRecentInAppNotifications ? window.__shbRecentInAppNotifications(120000) : [];
+      recent.forEach(function (n) { mirrorInAppNotification(n); });
+    } catch (e) { console.warn('Recent Android notices could not be mirrored', e); }
+  }, 1300);
   window.__shbAndroidFeatures = {
     state: function () { return { prefs: Object.assign({}, prefs), examDate: localStorage.getItem(GOAL_KEY) || '' }; },
     refresh: onRender
