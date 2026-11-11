@@ -385,9 +385,50 @@
     var goal = root.querySelector('#shbExamGoal');
     (goal || root.querySelector('.ov-grid')).insertAdjacentElement('afterend', b);
   }
+  function mountAndroidHowToUse() {
+    var root = document.querySelector('#phoneContent .rs');
+    var list = root && root.querySelector('.ab2-how .how-list');
+    if (!list || list.querySelector('[data-shb-android-help]')) return;
+    Array.prototype.forEach.call(list.querySelectorAll('.how-sec'), function (section) {
+      var title = safeText(section.querySelector('.how-t'));
+      var pad = section.querySelector('.how-pad');
+      if (!pad) return;
+      if (title.indexOf('مؤقّت الدراسة') >= 0) {
+        var timerTip = document.createElement('p');
+        timerTip.className = 'how-tip';
+        timerTip.textContent = 'Android: أثناء تشغيل جلسة Study Timer يظهر الوقت في إشعار مستمر، ويستمر العدّ عند تصغير التطبيق أو قفل الشاشة. أوقف الجلسة أو أوقفها مؤقتاً من داخل التطبيق عند الانتهاء.';
+        pad.appendChild(timerTip);
+      }
+      if (title.indexOf('الإشعارات') >= 0) {
+        pad.innerHTML = pad.innerHTML.replace(
+          'أما إشعارات المراجعة الذكية والتذكير بالدراسة فتُحدّث داخل التطبيق عند فتحه.',
+          'في Android يمكن أيضاً تشغيل تذكير مذاكرة يومي واحد، وتنبيهات الامتحان قبل 7 و3 و1 أيام من إعدادات التطبيق.'
+        );
+      }
+    });
+    var section = document.createElement('details');
+    section.className = 'how-sec';
+    section.setAttribute('data-shb-android-help', '1');
+    section.innerHTML =
+      '<summary><span class="how-n">A</span><span class="how-t">Android study tools</span><i class="how-chev" aria-hidden="true"></i></summary>' +
+      '<div class="how-in"><div class="how-pad">' +
+      '<ol>' +
+      '<li>داخل السؤال استخدم <b>Share</b> لإرسال نص السؤال، أو <b>Copy</b> لنسخه، أو <b>Read aloud</b> لسماعه. يمكن تشغيل أو إيقاف كل أداة من Settings؛ وهي مفعّلة افتراضياً.</li>' +
+      '<li>تفضيل القراءة <b>Slow / Normal / Fast</b>. يفضّل Android صوتاً رجاليّاً إن كان متاحاً في محرك القراءة المثبّت على الجهاز، وإلا يستخدم صوتاً مناسباً متاحاً.</li>' +
+      '<li>اضغط مطوّلاً على خيار إجابة لاستبعاده بصرياً. هذا لا يختار الإجابة ولا يغيّر نتيجتك.</li>' +
+      '<li>يمنع <b>Keep screen awake</b> انطفاء الشاشة أثناء وجودك في Question Bank فقط، ويعود سلوك الشاشة الطبيعي عند مغادرته.</li>' +
+      '<li>من <b>Stats → Overview</b> حدّد تاريخ الامتحان في <b>Exam Goal Planner</b> ليحسب التطبيق الأيام المتبقية وعدد الأسئلة اليومية المطلوب لإنهاء الأسئلة غير المجابة.</li>' +
+      '<li>تجد تذكير المذاكرة والعدّ التنازلي للامتحان في Settings. أوقف أي تذكير لا تحتاجه؛ التذكيرات محدودة وليست إشعارات متكررة كل ساعة.</li>' +
+      '<li>زر <b>Copy app information</b> ينسخ معلومات تشخيصية مثل إصدار التطبيق وAndroid والجهاز، من دون بياناتك الدراسية، لتُرسلها عند الإبلاغ عن مشكلة.</li>' +
+      '<li>بطاقة <b>Share my progress card</b> في Study Progress تنشئ صورة لإحصائياتك لمشاركتها.</li>' +
+      '</ol></div></div>';
+    list.appendChild(section);
+  }
+
   function mountQuestionHelpersAndTop() {
     if (prefs.autoTheme) applyTheme();
     mountSettings();
+    mountAndroidHowToUse();
     mountPlanner();
     renderPlannerResult();
     mountShareProgress();
