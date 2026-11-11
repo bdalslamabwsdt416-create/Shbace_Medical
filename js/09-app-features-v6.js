@@ -2854,7 +2854,7 @@ window.shbaceEnablePush=async function(){
 
 /* Unit 11: versioned, integrity-checked backup of all app-prefixed student stores,
    including the separate Quiz History store. Never includes the static QB data script. */
-const U11_EXCLUDED_KEYS=new Set(['shbace_splash_completed_session_v1','shbace_fcm_token_v1','shbace_push_auth_v1']);
+const U11_EXCLUDED_KEYS=new Set(['shbace_splash_completed_session_v1','shbace_fcm_token_v1','shbace_push_auth_v1','shbace_question_bank_version']);
 function u11DataKeys(){const keys=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('shbace_')&&!U11_EXCLUDED_KEYS.has(k)&&!/token|secret|credential/i.test(k))keys.push(k)}return keys.sort()}
 function u11Capture(){const stores={};u11DataKeys().forEach(k=>{const v=localStorage.getItem(k);if(v!==null)stores[k]=v});return stores}
 function u11Checksum(stores){const payload=Object.keys(stores).sort().map(k=>k+'\u0000'+stores[k]).join('\u0001');let h=2166136261;for(let i=0;i<payload.length;i++){h^=payload.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(16).padStart(8,'0')}
