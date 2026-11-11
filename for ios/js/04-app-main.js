@@ -37,6 +37,9 @@ function dots(){return `<div class="dots">${obVisible().map(i=>`<span class="dot
 function footer(nextText='Next',final=false){return `<div class="screen-foot">${slide>0?'<button class="back-btn" onclick="prevSlide()" aria-label="Back">←</button>':'<span class="back-spacer"></span>'}${dots()}<button class="arrow-btn" onclick="${final?'enterAppDemo()':'nextSlide()'}" aria-label="${final?'Enter demo':'Next screen'}">${final?'↗':'→'}</button></div>`}
 function splash(){return screenShell(`<div class="screen-kicker">SHBACE MEDICAL</div><div class="screen-heading">Your medical learning space.</div><p class="hero-sub">A World of Knowledge. A Future of Possibilities.</p>${ecg()}<div class="tiny">This brand artwork appears in the recurring 5-second startup splash, not as a repeated onboarding slide.</div>${footer()}`)}
 function introScreen(){return screenShell(`<div class="intro-brand"><img src="${ICON_SRC}" alt=""><b>Shbace <span>Medical</span></b></div><div class="intro-stage" aria-hidden="true"><div class="chip chip-q"><small>QUESTION</small><div><i>?</i></div></div><div class="chip chip-f"><small>SMART REVIEW</small><b><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#6ec3ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 0 1-14.2 5"/><path d="M4 12a8 8 0 0 1 14.2-5"/><path d="M18.5 3v4.5H14"/><path d="M5.5 21v-4.5H10"/></svg></b></div><span class="spark" style="left:66%;top:34%">✦</span><span class="spark" style="right:14%;top:56%;font-size:13px;animation-delay:-2s">✦</span><div class="intro-core"><img src="${ICON_SRC}" alt="Shbace Medical"></div><div class="chip chip-t"><i></i>24:18</div><div class="chip chip-p"><svg viewBox="0 0 70 70"><circle cx="35" cy="35" r="29" fill="none" stroke="#2a2c32" stroke-width="7"/><circle cx="35" cy="35" r="29" fill="none" stroke="#58d46d" stroke-width="7" stroke-linecap="round" stroke-dasharray="142 182" transform="rotate(-90 35 35)"/></svg><span>78%</span></div></div><div class="intro-title">Learn. Practice.<br>Excel.</div>${footer()}`,'intro')}
+/* Reversible iOS-only design switch: false hides the legacy intro; true restores it. The original function is retained below as a backup. */
+if(typeof window.SHBACE_LEGACY_INTRO_ENABLED!=='boolean')window.SHBACE_LEGACY_INTRO_ENABLED=false;
+window.__SHBACE_LEGACY_INTRO_SCREEN=introScreen;
 function welcome(){return screenShell(`<div class="screen-kicker">WELCOME TO SHBACE MEDICAL</div><div class="hero-title">A world of<br><span class="mint">knowledge awaits.</span></div><p class="hero-sub">Explore medical questions, understand the reasoning, review what you miss, and follow your progress — in one learning space.</p><div class="mascot-stage" style="height:270px"><div class="mascot-wrap">${mascot('neutral')}</div></div><div class="welcome-note"><b>Built with a Palestinian vision.</b><br><span class="tiny">Dr. Abdulsalam Muhammad Abu Saada · A Palestinian Medical Student's Project</span></div>${footer()}`)}
 function quizDemo(){
  let mood=demoAnswer===null?'thinking':demoAnswer==='A'?'celebrate':(wrongStreak>=2?'angry':'wrong');
@@ -92,7 +95,7 @@ function cpMountFinish(){
  const g=Math.max(0,Math.min(5,Number(selectedGrade)||0));
  window.cpScene.mount(svg,g);
 }
-function renderSlide(){if(mode!=='preview')return;const renders=[introScreen,quizDemo,smartReviewScreen,timedTestScreen,progressScreen,gradeScreen,finishScreen];phoneContent.innerHTML=`<div class="device-status"><span>9:41</span><span>● ● ● ▰</span></div>${renders[slide]()}`;document.getElementById('previewCount').textContent=String(slide+1).padStart(2,'0')+' / '+String(screenTitles.length).padStart(2,'0');document.getElementById('previewLabel').textContent='INTERACTIVE ONBOARDING · '+screenTitles[slide].toUpperCase();renderGuide()}
+function renderSlide(){if(mode!=='preview')return;const firstIntro=(window.SHBACE_LEGACY_INTRO_ENABLED===true&&window.__SHBACE_LEGACY_INTRO_SCREEN)?window.__SHBACE_LEGACY_INTRO_SCREEN:introScreen;const renders=[firstIntro,quizDemo,smartReviewScreen,timedTestScreen,progressScreen,gradeScreen,finishScreen];phoneContent.innerHTML=`<div class="device-status"><span>9:41</span><span>● ● ● ▰</span></div>${renders[slide]()}`;document.getElementById('previewCount').textContent=String(slide+1).padStart(2,'0')+' / '+String(screenTitles.length).padStart(2,'0');document.getElementById('previewLabel').textContent='INTERACTIVE ONBOARDING · '+screenTitles[slide].toUpperCase();renderGuide()}
 function nextSlide(){const n=obNb(1);if(n>=0){slide=n;renderSlide()}else enterAppDemo()}
 function prevSlide(){const p=obNb(-1);if(p>=0){slide=p;renderSlide()}}
 function chooseDemo(letter){demoAnswer=letter;if(letter==='A'){wrongStreak=0;}else{wrongStreak++;}renderSlide();}
@@ -225,7 +228,6 @@ function gradeHasPediatrics(){const g=obGradeNow()||5;   /* 0 = older install th
 const SP_HAPTIC=[24,80,16];
 const SPLASH_DURATION_MS=7000;      /* Splash stays fully visible for exactly 7 s; the dissolve starts AFTER this and is not part of it */
 const SPLASH_FADE_MS=(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)?350:1900;           /* dissolve duration (1.8–2 s). The real screen is already drawn under the splash */
-const SPLASH_SESSION_KEY='shbace_splash_completed_session_v1';
 let spBeats=0,spHapticTimer=null,spHapticDubTimer=null,spHapticLoopTimer=null;
 let splashDeadline=0,splashCompletionTimer=null,splashFinalized=false,splashRouteDone=false,splashPre=false;
 function nativeHapticsBridge(){
@@ -326,7 +328,6 @@ function completeSplashOnce(overlay,instant){
  if(splashFinalized)return;
  splashFinalized=true;
  clearTimeout(splashCompletionTimer);splashCompletionTimer=null;
- try{sessionStorage.setItem(SPLASH_SESSION_KEY,'1')}catch(e){}
  /* normally the destination was already drawn SPLASH_PRE_MS earlier; this is only the fallback */
  splashPre=true;
  if(!splashRouteDone){splashRouteDone=true;routeAfterSplash();}
@@ -338,7 +339,7 @@ function completeSplashOnce(overlay,instant){
  splashDissolve(overlay,SPLASH_FADE_MS,fin);
 }
 function syncSplashOnForeground(){
- const overlay=document.getElementById('startupSplash');if(!overlay||splashFinalized)return;
+ const overlay=document.getElementById('startupSplash');if(!overlay||splashFinalized||window.__shbBooted!==true)return;
  const r=splashDeadline-Date.now();
  if(r<=-SPLASH_FADE_MS)completeSplashOnce(overlay,true);      /* the whole hold + dissolve already passed while the app was in the background */
  else if(r<=0)completeSplashOnce(overlay);
@@ -362,18 +363,14 @@ function launchExperience(){
  try{const raw=localStorage.getItem('shbace_home_tip_index_v3');activeDailyTip=(Number(raw||'-1')+1)%5;localStorage.setItem('shbace_home_tip_index_v3',String(activeDailyTip));}catch(e){}
  const overlay=document.getElementById('startupSplash');
  if(!overlay){routeAfterSplash();return;}
- /* A completed splash is not replayed when this WebView/session resumes or reloads. */
- try{if(sessionStorage.getItem(SPLASH_SESSION_KEY)==='1'){
-  overlay.remove();if(!splashRouteDone){splashRouteDone=true;routeAfterSplash();}return;
- }}catch(e){}
  splashDeadline=(function(){const e=window.__spEcg;return Date.now()-((e&&e.t0!==null)?Math.max(0,performance.now()-e.t0):0)})()+SPLASH_DURATION_MS;      /* end of the 7 s hold (same clock as the ECG head); the transition starts here */
  splashFinalized=false;splashRouteDone=false;spBeats=0;
  startSplashHaptics();
  const tick=()=>{
   if(splashFinalized)return;
   const remaining=splashDeadline-Date.now();
-  if(!splashRouteDone&&(remaining<=SPLASH_PRE_MS||splashPreReady())){splashRouteDone=true;splashPre=true;routeAfterSplash();}   /* draw Onboarding / Home under the opaque splash: as soon as every script has loaded (early, so the heavy build never lands in the last ECG sweep); 0.9 s before the end at the latest */
-  if(remaining<=0){whenSplashEcgDone(()=>completeSplashOnce(overlay));return;}
+  if(!splashRouteDone&&window.__shbBooted===true&&(remaining<=SPLASH_PRE_MS||splashPreReady())){splashRouteDone=true;splashPre=true;routeAfterSplash();}   /* wait for the deferred script queue: on a cold first install the hologram override arrives after the base app script */
+  if(remaining<=0){if(window.__shbBooted!==true){splashCompletionTimer=window.setTimeout(tick,80);return;}whenSplashEcgDone(()=>completeSplashOnce(overlay));return;}
   clearTimeout(splashCompletionTimer);
   splashCompletionTimer=window.setTimeout(tick,Math.max(8,splashRouteDone?remaining:Math.min(150,remaining-SPLASH_PRE_MS)));
  };
