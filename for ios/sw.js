@@ -1,5 +1,5 @@
 'use strict';
-// build: ios-v12 (pre-splash verified resource setup)
+// build: ios-v13 (silent automatic updates; verified pre-splash setup)
 
 const CACHE_NAME = 'shbace-medical-offline-v2';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
@@ -11,6 +11,8 @@ const APP_SHELL = [
   './offline-assets-manifest.json',
   './sw.js',
   './js/09-app-features-v6.js',
+  './js/30-ios-v5.js',
+  './js/32-ios-v7.js',
   './css/core.css',
   './css/late.css',
   './css/ios-v5.css',
