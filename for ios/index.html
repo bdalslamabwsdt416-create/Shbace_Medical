@@ -129,8 +129,11 @@
 </head>
 <body>
 
+<!-- iOS onboarding default: keep the legacy intro renderer disabled but retained as a reversible backup in js/04-app-main.js. -->
+<script id="shbace-ios-onboarding-switch">window.SHBACE_LEGACY_INTRO_ENABLED=false;</script>
+
 <!-- Load the offline installer before creating or revealing the splash screen. -->
-<script id="shbace-offline-setup-pre-splash" src="js/29-offline-setup.js?shbcheck=1.4.7" onerror="window.__shbReleaseOfflineGate&&window.__shbReleaseOfflineGate()"></script>
+<script id="shbace-offline-setup-pre-splash" src="js/29-offline-setup.js?shbcheck=1.4.8" onerror="window.__shbReleaseOfflineGate&&window.__shbReleaseOfflineGate()"></script>
 
 <!-- ═══════════ 1) SPLASH SCREEN: markup ═══════════ -->
 
@@ -370,7 +373,17 @@
   requestAnimationFrame(frame);
  }
 
- if(rm||!startWorker())startMain();
+ function startAfterOfflineGate(){
+  if(window.__shbOfflineGatePromise&&!window.__shbOfflineGateReleased){
+   window.__shbOfflineGatePromise.then(startAfterOfflineGate,startAfterOfflineGate);return;
+  }
+  if(document.hidden){
+   const waitUntilVisible=function(){if(document.hidden)return;document.removeEventListener('visibilitychange',waitUntilVisible);startAfterOfflineGate()};
+   document.addEventListener('visibilitychange',waitUntilVisible);return;
+  }
+  if(rm||!startWorker())startMain();
+ }
+ startAfterOfflineGate();
 })();
 </script>
 <script id="shb-boot-v1">
