@@ -40,7 +40,7 @@ function missingOfflineResponse(url) {
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(SHELL_CACHE_NAME)
-      .then(cache => cache.addAll(APP_SHELL)
+      .then(cache => cache.addAll(APP_SHELL))
       .then(() => self.skipWaiting())
   );
 });
