@@ -1,12 +1,14 @@
 'use strict';
 
-const CACHE_NAME = 'shbace-medical-offline-v3';
+const CACHE_NAME = 'shbace-medical-offline-v4';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './pwa-version.json',
+  './assets/img/shbace-pwa-192.png',
+  './branding/play-store-icon-512.png',
   './offline-assets-manifest.json',
   './css/core.css',
   './css/late.css',
@@ -46,13 +48,28 @@ self.addEventListener('fetch', event => {
   if (url.origin !== self.location.origin) return;
   if (url.pathname.endsWith('/sw.js')) return;
 
+  // Manifest + version file: network first, so an updated manifest/icons always reach Chrome.
+  // Falls back to the cached copy when offline.
+  if (url.pathname.endsWith('/manifest.webmanifest') || url.pathname.endsWith('/pwa-version.json')) {
+    event.respondWith((async () => {
+      const cache = await caches.open(CACHE_NAME);
+      try {
+        const fresh = await fetch(request, { cache: 'no-store' });
+        if (fresh && fresh.ok) { try { await cache.put(request, fresh.clone()); } catch (_) {} }
+        return fresh;
+      } catch (_) {
+        const hit = await cache.match(request, { ignoreSearch: true });
+        return hit || missingOfflineResponse(request.url);
+      }
+    })());
+    return;
+  }
+
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
     const ready = await cache.match(READY_URL);
     const cached = await cache.match(request, { ignoreSearch: true });
     if (cached) return cached;
-    // Before verification, successful same-origin responses are cached opportunistically.
-    // Once ready, any missing local asset is surfaced instead of silently falling through.
     if (ready) return missingOfflineResponse(request.url);
     try {
       const response = await fetch(request);
