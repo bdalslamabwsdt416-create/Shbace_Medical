@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'shbace-medical-offline-v2';
+const CACHE_NAME = 'shbace-medical-offline-v3';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
 const APP_SHELL = [
   './',
