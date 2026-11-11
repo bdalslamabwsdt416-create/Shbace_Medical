@@ -1,0 +1,34 @@
+name: SHBACE Cloud Platform Validation
+on:
+  push:
+    branches:
+      - cloudflare/shbace-cloud-platform-v1
+    paths:
+      - 'cloudflare/**'
+      - '.github/workflows/cloudflare-validate.yml'
+  pull_request:
+    paths:
+      - 'cloudflare/**'
+      - '.github/workflows/cloudflare-validate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-worker:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cloudflare
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: cloudflare/package-lock.json
+      - name: Install Worker dependencies
+        run: npm install --no-audit --no-fund
+      - name: Type-check Cloudflare Worker
+        run: npm run check

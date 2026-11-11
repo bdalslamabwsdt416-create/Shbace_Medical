@@ -152,6 +152,8 @@ async function handleApi(request: Request, env: Env): Promise<Response> {
       const bytes = new TextEncoder().encode(JSON.stringify(bank));
       const digest = await crypto.subtle.digest("SHA-256", bytes);
       const sha256 = Array.from(new Uint8Array(digest)).map(x => x.toString(16).padStart(2, "0")).join("");
+      const existing = await env.DB.prepare("SELECT id FROM releases WHERE version=?").bind(version).first<{id:string}>();
+      if (existing) return json({ error: "This release version already exists. Choose a new version; published snapshots are immutable." }, 409);
       const id = crypto.randomUUID();
       const objectKey = "question-banks/" + version + ".json";
       await env.BANKS.put(objectKey, bytes, {
