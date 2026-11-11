@@ -487,6 +487,12 @@
       return r;
     };
   }
+  var oldNSetPref = window.nSetPref;
+  if (typeof oldNSetPref === 'function') window.nSetPref = function (kind, value) {
+    var r = oldNSetPref.apply(this, arguments);
+    if (kind === 'reminders') { planDailyReminders(); planExamReminders(); }
+    return r;
+  };
   var oldAnswer = window.qAnswer;
   if (typeof oldAnswer === 'function') window.qAnswer = function (id, index) {
     var r = oldAnswer.apply(this, arguments);
