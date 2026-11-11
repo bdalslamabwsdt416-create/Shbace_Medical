@@ -12,9 +12,15 @@
   "theme_color": "#07131f",
   "icons": [
     {
-      "src": "./assets/img/fc0bef7cd7ca.png",
+      "src": "./assets/img/shbace-pwa-icon.svg",
       "sizes": "any",
-      "type": "image/png",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/img/a3d6b2849763.webp",
+      "sizes": "520x520",
+      "type": "image/webp",
       "purpose": "any"
     }
   ]
