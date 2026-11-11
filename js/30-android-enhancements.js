@@ -273,6 +273,100 @@
       return c && c.Plugins && c.Plugins.LocalNotifications ? c.Plugins.LocalNotifications : null;
     } catch (_) { return null; }
   }
+  var APP_PHONE_NOTIFY_BASE = 100000000;
+  var APP_PHONE_NOTIFY_KEY = 'shbace_android_phone_notifs_v1';
+  var phoneNotifPlugin = null, phoneNotifListenerReady = false, phoneNotifChannelsReady = false;
+  function phoneNotifHistory() {
+    try {
+      var x = JSON.parse(localStorage.getItem(APP_PHONE_NOTIFY_KEY) || '[]');
+      return Array.isArray(x) ? x.filter(function (v) { return typeof v === 'string'; }).slice(-250) : [];
+    } catch (_) { return []; }
+  }
+  function rememberPhoneNotif(id) {
+    var list = phoneNotifHistory();
+    if (list.indexOf(id) < 0) list.push(id);
+    try { localStorage.setItem(APP_PHONE_NOTIFY_KEY, JSON.stringify(list.slice(-250))); } catch (_) {}
+  }
+  function phoneNotifId(raw) {
+    var h = 2166136261, v = String(raw || '');
+    for (var i = 0; i < v.length; i++) { h ^= v.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return APP_PHONE_NOTIFY_BASE + ((h >>> 0) % 90000000);
+  }
+  function phoneNotifChannel(kind) {
+    return kind === 'review' ? 'shbace-review' :
+      kind === 'quiz' ? 'shbace-quiz' :
+      kind === 'reminders' ? 'shbace-reminders' : 'shbace-updates';
+  }
+  async function preparePhoneNotificationPlugin() {
+    if (!androidNative()) return null;
+    if (phoneNotifPlugin) return phoneNotifPlugin;
+    var p = await localPlugin();
+    if (!p) return null;
+    phoneNotifPlugin = p;
+    try {
+      var permission = await p.checkPermissions();
+      if (!permission || permission.display !== 'granted') return null;
+    } catch (_) { return null; }
+    if (!phoneNotifListenerReady && typeof p.addListener === 'function') {
+      phoneNotifListenerReady = true;
+      try {
+        await p.addListener('localNotificationActionPerformed', function (action) {
+          var n = action && action.notification, extra = n && n.extra || {};
+          var id = String(extra.shbaceNotifId || '');
+          if (id && typeof window.nOpen === 'function') window.nOpen(id);
+        });
+      } catch (e) { phoneNotifListenerReady = false; console.warn('Phone notification tap listener unavailable', e); }
+    }
+    if (!phoneNotifChannelsReady && typeof p.createChannel === 'function') {
+      var defs = [
+        ['shbace-review', 'Study review', 'Questions ready for Smart Review', 3],
+        ['shbace-quiz', 'Quiz results', 'Quiz completion and study results', 3],
+        ['shbace-reminders', 'Study reminders', 'Gentle study and exam reminders', 3],
+        ['shbace-updates', 'Shbace Medical updates', 'Important app and account events', 3]
+      ];
+      try {
+        for (var j = 0; j < defs.length; j++) {
+          await p.createChannel({ id: defs[j][0], name: defs[j][1], description: defs[j][2], importance: defs[j][3], vibration: true, lights: true, lightColor: '#35B9F2' });
+        }
+        phoneNotifChannelsReady = true;
+      } catch (e) { console.warn('Phone notification channels could not be prepared', e); }
+    }
+    return p;
+  }
+  async function mirrorInAppNotification(event) {
+    if (!androidNative() || !event || !event.id) return;
+    var rawId = String(event.id), kind = String(event.kind || 'updates');
+    if (rawId.indexOf('push-') === 0) return; // FCM already arrives through Android's system notification tray.
+    if (['review', 'quiz', 'reminders', 'updates'].indexOf(kind) < 0) kind = 'updates';
+    // The daily study reminder is scheduled for 7:30 PM. Do not duplicate it on app launch earlier that day.
+    if (kind === 'reminders' && rawId.indexOf('reminder-') === 0) {
+      var now = new Date();
+      if (now.getHours() * 60 + now.getMinutes() < 19 * 60 + 30) return;
+    }
+    var sent = phoneNotifHistory();
+    if (sent.indexOf(rawId) >= 0) return;
+    var p = await preparePhoneNotificationPlugin();
+    if (!p) return; // Permission is requested by the existing notification bell, never by surprise.
+    var nid = phoneNotifId(rawId), title = String(event.title || 'Shbace Medical');
+    var body = String(event.body || 'Open Shbace Medical to view this update.');
+    var channel = phoneNotifChannel(kind);
+    try {
+      await p.schedule({ notifications: [{
+        id: nid,
+        title: title,
+        body: body,
+        largeBody: body,
+        summaryText: 'Shbace Medical · ' + (kind === 'review' ? 'Study review' : kind === 'quiz' ? 'Quiz update' : kind === 'reminders' ? 'Study reminder' : 'App update'),
+        smallIcon: 'ic_stat_shbace',
+        iconColor: '#35B9F2',
+        channelId: channel,
+        schedule: { at: new Date(Date.now() + 700), allowWhileIdle: true },
+        extra: { shbaceNotifId: rawId, page: String(event.page || ''), ref: String(event.ref || '') }
+      }] });
+      rememberPhoneNotif(rawId);
+    } catch (e) { console.warn('Could not mirror app notification to Android', e); }
+  }
+  window.__shbAndroidNotify = mirrorInAppNotification;
   var REMINDER_BASE = 310000000, DAILY_BASE = 310100000;
   async function cancelReminderIds(plugin, ids) {
     try {
