@@ -1,5 +1,5 @@
 'use strict';
-// build: ios-v7 (change this line on every release so iOS notices a new service worker)
+// build: ios-v8 (responsive onboarding layout correction)
 
 const CACHE_NAME = 'shbace-medical-offline-v2';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
