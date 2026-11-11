@@ -173,7 +173,7 @@ function loadManifest(){
   });
  }).then(function(data){
   if(!data||data.schema!==1||!Array.isArray(data.files)||!data.files.length||!data.version)
-   throw new Error('The offline asset manifest is missing or invalid. Reconnect and reload the installed app.');
+   throw new Error('The offline asset manifest is missing or invalid. Reconnect, then tap Retry setup.');
   var total=data.files.reduce(function(sum,f){return sum+(Number(f.bytes)||0)},0);
   data.totalBytes=Number(data.totalBytes)||total;
   data.fileCount=data.files.length;
