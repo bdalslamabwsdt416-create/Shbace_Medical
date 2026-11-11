@@ -1739,3 +1739,59 @@ html:has(#startupSplash){background:#030b16}
 #startupSplash .splash-poster{animation:none!important}
 /* v47 · grade stage: never shrunk by flex / min-height; JS sizes it */
 #gradeStage.gx{min-height:0!important;flex:0 0 auto}
+
+
+/* Additive PWA offline installer styles; existing app styling is preserved. */
+.shb-offline-setup{
+  position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;
+  overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
+  padding:calc(18px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom));
+  background:radial-gradient(ellipse at 50% -10%,rgba(41,117,220,.26),transparent 55%),#030b16;
+  color:#e8f3ff;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+}
+.shb-offline-card{
+  width:min(100%,520px);margin:auto;padding:clamp(18px,5vw,28px);border:1px solid rgba(91,167,255,.35);
+  border-radius:24px;background:linear-gradient(160deg,rgba(12,32,67,.97),rgba(5,15,35,.99));
+  box-shadow:0 24px 80px rgba(0,0,0,.48),inset 0 1px 0 rgba(198,228,255,.08);
+}
+.shb-offline-brand{display:flex;align-items:center;gap:9px;min-width:0;font-size:12px;font-weight:900;letter-spacing:.09em}
+.shb-offline-brand b{color:#73c8ff}
+.shb-offline-mark{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:linear-gradient(145deg,#2089ff,#1547aa);box-shadow:0 0 18px rgba(52,145,255,.38);font-size:18px}
+.shb-offline-pill{margin-left:auto;padding:6px 9px;border:1px solid rgba(93,186,255,.35);border-radius:99px;color:#9fdcff;font-size:9px;white-space:nowrap}
+.shb-offline-kicker{margin:23px 0 7px;color:#72caff;font-size:10px;font-weight:900;letter-spacing:.2em}
+.shb-offline-card h1{margin:0;color:#f4f9ff;font-size:clamp(25px,7vw,34px);line-height:1.12;letter-spacing:-.035em}
+.shb-offline-intro{margin:12px 0 18px;color:#b4c9e2;font-size:14px;line-height:1.55}
+.shb-offline-status{min-height:40px;padding:11px 12px;border:1px solid rgba(77,151,237,.24);border-radius:12px;background:rgba(10,28,60,.72);font-size:13px;line-height:1.45;color:#d9ebff}
+.shb-offline-progress-head,.shb-offline-bytes{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;font-size:12px;color:#a9c1df}
+.shb-offline-progress-head b{font-size:22px;color:#8fd9ff;font-variant-numeric:tabular-nums}
+.shb-offline-track{height:10px;margin-top:8px;overflow:hidden;border-radius:99px;background:#071329;border:1px solid rgba(75,136,215,.3)}
+.shb-offline-track i{display:block;width:0;height:100%;border-radius:99px;background:linear-gradient(90deg,#1674ed,#55d2ff);box-shadow:0 0 14px rgba(53,174,255,.55);transition:width .18s ease}
+.shb-offline-bytes{margin-top:8px;font-variant-numeric:tabular-nums}
+.shb-offline-stages{display:grid;gap:7px;margin-top:16px}
+.shb-offline-stage{display:flex;align-items:center;gap:9px;min-height:37px;padding:8px 10px;border:1px solid rgba(87,135,198,.18);border-radius:11px;background:rgba(7,21,47,.62);font-size:12px;color:#99b2d1}
+.shb-offline-stage b{margin-left:auto;color:#a9c5e5;font-size:11px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.shb-offline-stage-dot{width:8px;height:8px;flex:none;border-radius:50%;background:#47617f}
+.shb-offline-stage.is-active{border-color:rgba(80,181,255,.48);background:rgba(20,67,125,.28);color:#e1f4ff}
+.shb-offline-stage.is-active .shb-offline-stage-dot{background:#52cfff;box-shadow:0 0 10px #39b8ff}
+.shb-offline-stage.is-done .shb-offline-stage-dot{background:#45d69a;box-shadow:0 0 8px rgba(69,214,154,.35)}
+.shb-offline-stage.is-done{color:#b8f1d9}
+.shb-offline-warning{margin-top:13px;padding:10px 12px;border-left:3px solid #4baeff;border-radius:8px;background:rgba(28,94,160,.16);color:#aac9e9;font-size:11px;line-height:1.5}
+.shb-offline-errors{margin-top:11px;padding:10px 12px;border:1px solid rgba(245,111,124,.38);border-radius:10px;background:rgba(130,25,44,.16);color:#ffd5db;font-size:11px;line-height:1.5}
+.shb-offline-errors ul{margin:6px 0 0;padding-left:18px;overflow-wrap:anywhere}
+.shb-offline-action{width:100%;min-height:50px;margin-top:16px;padding:0 16px;border:0;border-radius:14px;background:linear-gradient(135deg,#328dff,#1559d9);box-shadow:0 8px 24px rgba(20,107,235,.28);color:#fff;font-size:15px;font-weight:850;cursor:pointer}
+.shb-offline-action:disabled{opacity:.5;cursor:wait}
+.shb-offline-footnote{margin:12px 1px 0;color:#7793b5;font-size:10px;line-height:1.5;text-align:center}
+.shb-offline-setup.is-light{background:radial-gradient(ellipse at 50% -10%,rgba(75,150,240,.2),transparent 55%),#edf4fb;color:#17334e}
+.shb-offline-setup.is-light .shb-offline-card{background:linear-gradient(160deg,#fff,#f3f7fc);border-color:#c7d9eb;box-shadow:0 20px 55px rgba(34,69,105,.16)}
+.shb-offline-setup.is-light .shb-offline-card h1{color:#183751}
+.shb-offline-setup.is-light .shb-offline-intro,.shb-offline-setup.is-light .shb-offline-footnote{color:#5b7793}
+.shb-offline-setup.is-light .shb-offline-status{background:#f0f6fc;color:#21415f;border-color:#d1e0ed}
+.shb-offline-setup.is-light .shb-offline-stage{background:#f6f9fd;color:#496681;border-color:#d8e4f0}
+.shb-offline-setup.is-light .shb-offline-stage b{color:#345674}
+.shb-pwa-install-hint{position:fixed;z-index:2147482000;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;padding:12px 13px;border:1px solid rgba(89,166,242,.4);border-radius:14px;background:rgba(7,20,43,.96);color:#e4f2ff;box-shadow:0 12px 35px rgba(0,0,0,.35);font:12px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+.shb-pwa-install-hint div{display:grid;gap:3px;min-width:0}.shb-pwa-install-hint span{color:#b5cce5}
+.shb-pwa-install-hint button{width:34px;height:34px;flex:none;border:1px solid rgba(125,177,232,.35);border-radius:9px;background:transparent;color:#eaf4ff;font-size:21px}
+@media(max-width:360px){.shb-offline-card{padding:17px;border-radius:20px}.shb-offline-pill{font-size:8px;padding:5px 7px}.shb-offline-card h1{font-size:25px}}
+@media(max-height:700px){.shb-offline-kicker{margin-top:14px}.shb-offline-card{padding-top:16px;padding-bottom:16px}.shb-offline-intro{margin:8px 0 12px}.shb-offline-stages{gap:5px}.shb-offline-stage{min-height:32px}}
+
+
