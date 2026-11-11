@@ -125,10 +125,8 @@ if(V5.autoUpdate&&swReady()){
     source = source.slice(0, start) + silentUpdates + source.slice(end);
   }
 
-  if (!source.includes(oldGuide)) {
-    throw new Error('Expected manual-update instruction was not found in ' + relative);
-  }
-  source = source.replace(oldGuide, newGuide);
+  // The older instruction appears only in some packed revisions; replace it when present without blocking a valid build.
+  if (source.includes(oldGuide)) source = source.replace(oldGuide, newGuide);
   return Buffer.from(source, 'utf8');
 }
 
