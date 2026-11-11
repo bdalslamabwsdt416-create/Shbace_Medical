@@ -2410,6 +2410,9 @@ statsView=function(){const keep=stTab,cust=keep==='time'||keep==='overview';let 
 window.__shbStats=function(){const ans=Object.keys(S.ans).filter(id=>QBY.has(id)),tot=QB.length;let c=0;ans.forEach(id=>{if(S.ans[id].ok)c++});
  let tS=0,tD=0,tT=0;(gradeHasPediatrics()?Object.entries(REAL.spec):[]).forEach(([k,sp])=>sp.topics.forEach(([id])=>{const l=QB.filter(q=>q.topic===id);if(!l.length)return;tT++;const a=l.filter(q=>S.ans[q.id]).length;if(a>0)tS++;if(a>=l.length)tD++}));
  const T=stTotals();return {bankTotal:tot,answered:ans.length,correct:c,accuracy:ans.length?pct(c,ans.length):null,completion:pct(ans.length,tot),topicsTotal:tT,topicsStarted:tS,topicsDone:tD,quizzes:QZ.attempts.length,studyMs:T.tot,sessions:T.sessions}};
+/* Read-only bridge for the offline Exam Goal Planner; the QBank remains the sole source of question state. */
+window.__shbQuestionIndex=function(){return QB.map(function(q){return {id:String(q.id),spec:String(q.spec||'other'),topic:String(q.topic||''),topicName:String(TOPIC_NAME[q.topic]||'Other')}})};
+window.__shbTopicPerformance=function(){try{return stTopicPerf()}catch(e){return []}};
 /* ---- wiring ---- */
 PAGES.notifs=notifsView;PAGES.quizhistory=qzHistoryView;PAGES.timer=timerView;
 /* ---- Weak areas: topics ranked weakest-first from your real answers (same source as Statistics > Topic performance) ---- */
