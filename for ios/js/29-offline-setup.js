@@ -163,12 +163,13 @@ function fileValid(file,checkHash){
 }
 function loadManifest(){
  return caches.open(CACHE_NAME).then(function(c){
-  return c.match(MANIFEST_URL).then(function(hit){
-   if(hit)return hit.json();
-   return fetch(MANIFEST_URL,{credentials:'same-origin'}).then(function(r){
-    if(!r.ok)throw new Error('Offline asset manifest returned HTTP '+r.status+'.');
-    return r.json();
-   });
+  cache=c;
+  var freshUrl=MANIFEST_URL+(MANIFEST_URL.indexOf('?')>=0?'&':'?')+'shbcheck='+Date.now();
+  return fetch(freshUrl,{credentials:'same-origin',cache:'no-store'}).then(function(r){
+   if(!r.ok)throw new Error('Offline asset manifest returned HTTP '+r.status+'.');
+   return r.json();
+  }).catch(function(error){
+   return c.match(MANIFEST_URL).then(function(hit){if(hit)return hit.json();throw error;});
   });
  }).then(function(data){
   if(!data||data.schema!==1||!Array.isArray(data.files)||!data.files.length||!data.version)
@@ -234,12 +235,15 @@ function ensureServiceWorker(){
  return navigator.serviceWorker.getRegistration('./').then(function(reg){
   if(reg)return reg;
   return navigator.serviceWorker.register('./sw.js',{scope:'./'});
- }).then(function(){return navigator.serviceWorker.ready});
+ }).then(function(reg){
+  return Promise.resolve().then(function(){return reg.update()}).catch(function(){})
+   .then(function(){return navigator.serviceWorker.ready});
+ });
 }
 function fetchAndStore(file){
- var target=urlFor(file.path),lastError=null;
+ var target=urlFor(file.path),requestUrl=target+(target.indexOf('?')>=0?'&':'?')+'shbcheck='+encodeURIComponent(manifest.version),lastError=null;
  function attempt(n){
-  return fetch(target,{credentials:'same-origin',cache:'no-store'}).then(function(response){
+  return fetch(requestUrl,{credentials:'same-origin',cache:'no-store'}).then(function(response){
    if(!response||!response.ok)throw new Error('HTTP '+(response?response.status:'no response'));
    return response.arrayBuffer().then(function(bytes){
     if(bytes.byteLength!==file.bytes)throw new Error('Size check failed ('+bytes.byteLength+' of '+file.bytes+' bytes).');
