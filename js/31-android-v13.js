@@ -269,7 +269,15 @@ function doctorOn(){try{return window.__shbAndroidFeatures.state().prefs.doctorE
 try{if(typeof window.docFace==='function'){var oldDocFace=window.docFace;window.docFace=function(){return doctorOn()?oldDocFace.apply(this,arguments):''}}}catch(_){}
 function settingsPatch(){
  installDoctorSetting();var s={};try{s=window.__shbAndroidFeatures.state().prefs||{}}catch(_){}
- document.querySelectorAll('[data-shb-pref="doctorExpressions"]').forEach(function(b){var on=s.doctorExpressions!==false;b.classList.toggle('on',on);b.setAttribute('aria-checked',String(on));var v=b.querySelector('span');if(v)v.textContent=on?'ON':'OFF'})
+ document.querySelectorAll('[data-shb-pref="doctorExpressions"]').forEach(function(b){
+  var on=s.doctorExpressions!==false,label=on?'ON':'OFF';
+  // The phoneContent observer watches descendant child-list changes. Assigning textContent
+  // unconditionally replaces the text node, queues another observer callback, and can create
+  // an endless render loop that freezes Settings. Only mutate the DOM when its value differs.
+  if(b.classList.contains('on')!==on)b.classList.toggle('on',on);
+  if(b.getAttribute('aria-checked')!==String(on))b.setAttribute('aria-checked',String(on));
+  var v=b.querySelector('span');if(v&&v.textContent!==label)v.textContent=label;
+ })
 }
 if(window.__shbRegisterPage)window.__shbRegisterPage('examgoal',plannerPage,'subjects');
 var pc=document.getElementById('phoneContent');
