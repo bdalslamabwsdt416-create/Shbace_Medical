@@ -2902,7 +2902,14 @@ const u10OldAddNotif=addNotif;
 addNotif=function(id,title,body,page,ref){
  const kind=u10Kind(id,title);if(U10_PREFS[kind]===false)return;
  u10OldAddNotif(id,title,body,page,ref);
- const n=NOTIF.find(x=>x.id===id);if(n){n.kind=kind;n.priority=n.priority||u10Priority[kind];n.route=n.page||'';n.ref=n.ref||'';n.updatedAt=n.updatedAt||n.t;LS.set(NKEY,NOTIF)}
+ const n=NOTIF.find(x=>x.id===id);if(n){
+  n.kind=kind;n.priority=n.priority||u10Priority[kind];n.route=n.page||'';n.ref=n.ref||'';n.updatedAt=n.updatedAt||n.t;LS.set(NKEY,NOTIF);
+  /* Android-only mirror: send the same in-app event to the phone notification tray.
+     The bridge is absent on iOS, PWA and browser builds, so those platforms are unchanged. */
+  try{if(typeof window.__shbAndroidNotify==='function')window.__shbAndroidNotify({
+   id:String(n.id),title:n.title,body:n.body,kind:n.kind,page:n.page,ref:n.ref,t:n.t
+  })}catch(e){console.warn('Android notification mirror unavailable',e)}
+ }
 };
 NOTIF.forEach(n=>{if(!n.kind)n.kind=u10Kind(n.id,n.title);if(!n.priority)n.priority=u10Priority[n.kind]||1;if(!n.updatedAt)n.updatedAt=n.t});
 LS.set(NKEY,NOTIF);
