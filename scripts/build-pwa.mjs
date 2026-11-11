@@ -143,6 +143,11 @@ const imageOutput = join(output, "assets", "img");
 if (!existsSync(imageOutput) || !statSync(imageOutput).isDirectory()) {
   fail("The source assets/img directory is missing");
 }
+const existing512Icon = join(root, "branding", "play-store-icon-512.png");
+if (!existsSync(existing512Icon) || !statSync(existing512Icon).isFile()) {
+  fail("The existing 512px SHBACE brand icon is missing");
+}
+copyFileSync(existing512Icon, join(imageOutput, "shbace-pwa-512.png"));
 const copiedImages = new Set(
   readdirSync(imageOutput).filter(name => statSync(join(imageOutput, name)).isFile() &&
     /\.(?:png|jpe?g|webp|gif|svg)$/i.test(name))

@@ -12,6 +12,18 @@
   "theme_color": "#07131f",
   "icons": [
     {
+      "src": "./assets/img/shbace-pwa-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/img/shbace-pwa-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
       "src": "./assets/img/0011d30ae5fc.webp",
       "sizes": "384x384",
       "type": "image/webp",
