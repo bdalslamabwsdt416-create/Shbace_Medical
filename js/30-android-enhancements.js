@@ -302,11 +302,11 @@
     if (phoneNotifPlugin) return phoneNotifPlugin;
     var p = await localPlugin();
     if (!p) return null;
-    phoneNotifPlugin = p;
     try {
       var permission = await p.checkPermissions();
       if (!permission || permission.display !== 'granted') return null;
     } catch (_) { return null; }
+    phoneNotifPlugin = p;
     if (!phoneNotifListenerReady && typeof p.addListener === 'function') {
       phoneNotifListenerReady = true;
       try {
@@ -501,7 +501,7 @@
       if (title.indexOf('الإشعارات') >= 0) {
         pad.innerHTML = pad.innerHTML.replace(
           'أما إشعارات المراجعة الذكية والتذكير بالدراسة فتُحدّث داخل التطبيق عند فتحه.',
-          'في Android يمكن أيضاً تشغيل تذكير مذاكرة يومي واحد، وتنبيهات الامتحان قبل 7 و3 و1 أيام من إعدادات التطبيق.'
+          'في Android تظهر إشعارات المراجعة والاختبارات والتذكيرات وتحديثات التطبيق أيضاً في شريط إشعارات الهاتف، إضافة إلى مركز الإشعارات داخل التطبيق، بعد منح إذن الإشعارات. ويمكن تشغيل تذكير مذاكرة يومي واحد وتنبيهات الامتحان قبل 7 و3 و1 أيام.'
         );
       }
     });
