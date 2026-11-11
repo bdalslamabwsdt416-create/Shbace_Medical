@@ -281,7 +281,8 @@ function verifyAll(){
  }
  return next();
 }
-function startDownload(){
+function startDownload(silentMode){
+  silentMode=!!silentMode;
  if(started||!manifest||!ui)return;
  started=true;errors=[];resetCounters();setErrorList([]);
  ui.button.disabled=true;ui.button.textContent='Downloading…';ui.button.dataset.done='0';ui.button.dataset.retry='0';
@@ -305,7 +306,8 @@ function startDownload(){
    var free=Math.max(0,estimate.quota-estimate.usage);
    if(free<manifest.totalBytes)setWarning('Available storage estimate ('+fmtBytes(free)+') is below the package size ('+fmtBytes(manifest.totalBytes)+'). Free some space before continuing. Completed files will remain saved if the download stops.');
   }
-  return cache.delete(READY_URL);
+  // Keep the previous verified-ready marker until every updated asset passes integrity checks.
+  return Promise.resolve();
  }).then(function(){
   stageCounts=stageMarkup();
   var cursor=0;
@@ -317,7 +319,7 @@ function startDownload(){
      try{
       var valid=await fileValid(file,true);
       if(!valid){
-       await cache.delete(urlFor(file.path));
+       // Preserve the prior response until its replacement passes size and SHA-256 verification.
        await fetchAndStore(file);
       }else{
        await dbPut('verified',manifest.version+':'+file.path,{version:manifest.version,path:file.path,bytes:file.bytes,sha256:file.sha256,verifiedAt:Date.now()});
@@ -350,6 +352,10 @@ function startDownload(){
    ui.foot.textContent='Offline package verified · '+fmtBytes(manifest.totalBytes)+' stored. Keep a JSON backup of your study progress.';
   });
  }).catch(function(error){
+  if(silentMode){
+   try{console.warn('Shbace Medical background resource update failed; the app will retry automatically.',error)}catch(e){}
+   return;
+  }
   setStatus(error.message||'The offline download could not be completed.');
   setWarning('No file is marked complete unless the HTTP response, byte size, SHA-256 hash, and local cache write have all succeeded. Retry to continue from verified files.');
   setErrorList(errors.length?errors:[error.message||String(error)]);
@@ -385,6 +391,13 @@ function start(){
     });
    }).then(function(check){
     if(check.ready){root.remove();releaseStartupGate();return}
+    if(check.record&&check.record.verified&&check.record.version!==manifest.version){
+     // Existing verified installs update the offline package quietly; first installs still use the full pre-splash download gate.
+     root.remove();
+     releaseStartupGate();
+     setTimeout(function(){startDownload(true)},0);
+     return;
+    }
     stageCounts=stageMarkup();resetCounters();
     var reason=check.record&&check.record.version!==manifest.version?
      'The installed resource package is out of date. Restore the updated package before continuing.':
