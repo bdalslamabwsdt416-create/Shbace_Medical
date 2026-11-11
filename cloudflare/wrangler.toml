@@ -3,11 +3,6 @@ main = "src/index.ts"
 compatibility_date = "2026-11-11"
 workers_dev = true
 
-[assets]
-directory = "./admin"
-binding = "ASSETS"
-run_worker_first = ["/v1/*"]
-
 [vars]
 APP_ORIGIN = "https://shbace-medical.vercel.app"
 
