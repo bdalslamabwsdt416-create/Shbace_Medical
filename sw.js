@@ -8,7 +8,7 @@ const APP_SHELL = [
   './manifest.webmanifest',
   './pwa-version.json',
   './assets/img/shbace-pwa-192.png',
-  './branding/play-store-icon-512.png',
+  './assets/img/shbace-pwa-512.png',
   './offline-assets-manifest.json',
   './css/core.css',
   './css/late.css',
