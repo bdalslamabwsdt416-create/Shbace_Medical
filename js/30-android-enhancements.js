@@ -234,26 +234,28 @@
     var s = getStats(), input = document.getElementById('shbEgDate');
     if (!s || !input) return;
     var date = input.value, remaining = Math.max(0, Number(s.bankTotal) - Number(s.answered || 0));
-    var days = 0, target = 0, label = 'Choose your exam date to calculate your daily target.';
+    var days = 0, target = 0, examToday = false;
+    var label = 'Choose your exam date to calculate your daily target.';
     if (date) {
       var p = date.split('-').map(Number), exam = new Date(p[0], p[1] - 1, p[2]); exam.setHours(0,0,0,0);
       var today = new Date(); today.setHours(0,0,0,0);
-      days = Math.max(1, Math.ceil((exam.getTime() - today.getTime()) / DAY));
-      if (exam.getTime() < today.getTime()) label = 'This exam date has passed. Choose a future date.';
-      else target = remaining ? Math.ceil(remaining / days) : 0;
+      var diff = Math.ceil((exam.getTime() - today.getTime()) / DAY);
+      if (diff < 0) label = 'This exam date has passed. Choose a future date.';
+      else if (diff === 0) { examToday = true; days = 0; }
+      else { days = diff; target = remaining ? Math.ceil(remaining / days) : 0; }
     }
     var result = document.getElementById('shbEgResult');
     if (!result) return;
-    if (!date || (date && !target && remaining && label.indexOf('passed') >= 0)) {
+    if (!date || (date && label.indexOf('passed') >= 0)) {
       result.innerHTML = '<p class="shb-eg-empty">' + label + '</p>';
       return;
     }
     var pct = Math.max(0, Math.min(100, s.bankTotal ? (s.answered / s.bankTotal) * 100 : 0));
-    result.innerHTML = '<div class="shb-eg-metrics"><div><b>' + days + '</b><small>Days left</small></div>' +
+    result.innerHTML = '<div class="shb-eg-metrics"><div><b>' + (examToday ? 'Today' : days) + '</b><small>' + (examToday ? 'Exam day' : 'Days left') + '</small></div>' +
       '<div><b>' + remaining.toLocaleString() + '</b><small>Questions remaining</small></div>' +
-      '<div class="shb-eg-target"><b>' + target.toLocaleString() + '</b><small>Questions per day</small></div></div>' +
+      '<div class="shb-eg-target"><b>' + (examToday ? '—' : target.toLocaleString()) + '</b><small>' + (examToday ? 'Final review' : 'Questions per day') + '</small></div></div>' +
       '<div class="shb-eg-bar"><i style="width:' + pct.toFixed(1) + '%"></i></div>' +
-      '<p class="shb-eg-caption">' + (remaining ? 'Answer about ' + target + ' questions each day to finish the currently unanswered bank before your exam.' : 'Your question bank is complete. Keep revising and reviewing.') + '</p>';
+      '<p class="shb-eg-caption">' + (remaining ? (examToday ? 'It is exam day. Use the remaining ' + remaining + ' unanswered questions for final review as time allows.' : 'Answer about ' + target + ' questions each day to finish the currently unanswered bank before your exam.') : 'Your question bank is complete. Keep revising and reviewing.') + '</p>';
   }
   function plannerDateChanged(input) {
     var v = input && input.value || '';
