@@ -58,8 +58,8 @@ function patchPackedAsset(relative, originalBytes) {
   if (relative !== 'js/30-ios-v5.js' && relative !== 'js/32-ios-v7.js') return originalBytes;
   let source = originalBytes.toString('utf8');
 
-  const oldGuide = "    '<li>إذا ظهر '+E('A new version is available')+'، اتصل بالإنترنت واضغط زر التحديث واترك العملية تكتمل قبل إغلاق الصفحة.</li>'+";
-  const newGuide = "    '<li>يتم فحص تحديثات التطبيق وتطبيقها تلقائياً في الخلفية، ولا تحتاج إلى الضغط على زر تحديث. قد يعاد تحميل الصفحة مرة واحدة بعد اكتمال تحديث ملفات التطبيق، مع بقاء بياناتك المحلية محفوظة.</li>'+";
+  const oldGuide = "إذا ظهر '+E('A new version is available')+'، اتصل بالإنترنت واضغط زر التحديث واترك العملية تكتمل قبل إغلاق الصفحة.";
+  const newGuide = "يتم فحص تحديثات التطبيق وتطبيقها تلقائياً في الخلفية، ولا تحتاج إلى الضغط على زر تحديث. قد يعاد تحميل الصفحة مرة واحدة بعد اكتمال تحديث ملفات التطبيق، مع بقاء بياناتك المحلية محفوظة.";
 
   if (relative === 'js/30-ios-v5.js') {
     const flag = 'updateBanner:true,';
@@ -127,6 +127,11 @@ if(V5.autoUpdate&&swReady()){
 
   // The older instruction appears only in some packed revisions; replace it when present without blocking a valid build.
   if (source.includes(oldGuide)) source = source.replace(oldGuide, newGuide);
+  source = source.replace("upd:'نسخة جديدة متوفرة',updBtn:'اضغط للتحديث',updWait:'جارٍ التحديث…',updFail:'ارجع اتصل وحاول ثانية',copyQ:'انسخ نص السؤال',",
+                          "upd:'',updBtn:'',updWait:'',updFail:'',copyQ:'انسخ نص السؤال',");
+  source = source.replace("upd:'A new version is available',updBtn:'Tap to update',updWait:'Updating…',updFail:'Reconnect and try again',copyQ:'Copy question text',",
+                          "upd:'',updBtn:'',updWait:'',updFail:'',copyQ:'Copy question text',");
+  source = source.replace('autoUpdate:true,    /* 8  "new version available" */','autoUpdate:true,    /* 8  silent background updates */');
   return Buffer.from(source, 'utf8');
 }
 
