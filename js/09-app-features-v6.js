@@ -1993,6 +1993,12 @@ const L26=i=>String.fromCharCode(65+i),dayKey=()=>new Date().toISOString().slice
 const nidOk=id=>typeof id==='string'&&id.length>0&&id.length<=160&&!/['"\\<>`&;(){}\u0000-\u001f]/.test(id);
 let NOTIF=(()=>{const v=LS.get(NKEY,[]);return Array.isArray(v)?v.filter(n=>isObj(n)&&nidOk(n.id)&&typeof n.title==='string'&&Number.isFinite(n.t)).slice(0,100):[]})();
 const unreadN=()=>NOTIF.filter(n=>!n.read).length;
+window.__shbRecentInAppNotifications=function(maxAgeMs){
+ const age=Math.max(1000,Number(maxAgeMs)||120000),now=Date.now();
+ return NOTIF.filter(n=>n&&Number.isFinite(n.t)&&now-n.t>=0&&now-n.t<=age).slice(0,12).map(n=>({
+  id:String(n.id),title:n.title,body:n.body||'',kind:n.kind||'',page:n.page||'',ref:n.ref||'',t:n.t
+ }));
+};
 function addNotif(id,title,body,page,ref){if(!nidOk(id)||NOTIF.some(n=>n.id===id))return;NOTIF.unshift({id,t:Date.now(),title,body:body||'',page:page||'',ref:ref||'',read:false});NOTIF=NOTIF.slice(0,100);LS.set(NKEY,NOTIF)}
 window.nOpen=function(id){const n=NOTIF.find(x=>x.id===id);if(!n)return;n.read=true;LS.set(NKEY,NOTIF);
  if(n.page==='quizresult'&&n.ref&&QZ.attempts.some(a=>a.id===n.ref))qzViewId=n.ref;
