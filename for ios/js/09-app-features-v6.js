@@ -3170,4 +3170,452 @@ PAGES.notifs=notifsView;PAGES.settings=settingsView;
    native Android folder, google-services.json or deployed backend endpoint to bind. */
 
 })();
+
+/* ============================================================
+   EXAM GOAL PLANNER v1.4.3
+   Reads the live Question Bank state; only plan settings and
+   historical daily snapshots are stored by this feature.
+   ============================================================ */
+const EGP_STORE_KEY = 'shbace_exam_goal_planner_v1';
+const EGP_DEFAULT = {
+  version: 1, bufferDays: 3, restDaysPerWeek: 1, activeExamId: 'written-paper',
+  exams: [{id:'written-paper',name:'Written paper',date:'',baseline:null,history:{}}]
+};
+function egpIsObject(x){return !!x&&typeof x==='object'&&!Array.isArray(x)}
+function egpInt(x,lo,hi,fallback){
+  const n=Number(x);return Number.isFinite(n)?Math.max(lo,Math.min(hi,Math.round(n))):fallback;
+}
+function egpLoad(){
+  let raw=null;try{raw=JSON.parse(localStorage.getItem(EGP_STORE_KEY)||'null')}catch(e){}
+  if(!egpIsObject(raw)||raw.version!==1||!Array.isArray(raw.exams)||!raw.exams.length)
+    return JSON.parse(JSON.stringify(EGP_DEFAULT));
+  const exams=raw.exams.filter(x=>egpIsObject(x)&&typeof x.id==='string').slice(0,12).map(function(x,i){
+    return {
+      id:x.id.slice(0,80),name:String(x.name||('Exam '+(i+1))).slice(0,48),
+      date:/^\d{4}-\d{2}-\d{2}$/.test(x.date||'')?x.date:'',
+      baseline:egpIsObject(x.baseline)&&/^\d{4}-\d{2}-\d{2}$/.test(x.baseline.startDate||'')&&Number.isFinite(x.baseline.remaining)
+        ?{startDate:x.baseline.startDate,remaining:Math.max(0,Math.floor(x.baseline.remaining))}:null,
+      history:egpIsObject(x.history)?x.history:{}
+    };
+  });
+  if(!exams.length)return JSON.parse(JSON.stringify(EGP_DEFAULT));
+  return {
+    version:1,bufferDays:egpInt(raw.bufferDays,0,60,3),restDaysPerWeek:egpInt(raw.restDaysPerWeek,0,3,1),
+    activeExamId:exams.some(x=>x.id===raw.activeExamId)?raw.activeExamId:exams[0].id,exams:exams
+  };
+}
+let EGP_STATE=egpLoad(),egpMidnightTimer=null,egpBoundHost=null;
+function egpSave(){
+  try{localStorage.setItem(EGP_STORE_KEY,JSON.stringify(EGP_STATE));return true}
+  catch(e){try{console.warn('Exam goal planner could not save locally',e)}catch(_){}return false}
+}
+function egpEsc(v){
+  return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]}).replace(/'/g,'&#39;');
+}
+function egpDateParts(value){
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value||''));if(!m)return null;
+  const y=Number(m[1]),mo=Number(m[2]),d=Number(m[3]),dt=new Date(y,mo-1,d);
+  return dt.getFullYear()===y&&dt.getMonth()===mo-1&&dt.getDate()===d?{y:y,m:mo,d:d}:null;
+}
+function egpLocalKey(date){
+  return date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');
+}
+function egpToday(){return egpLocalKey(new Date())}
+function egpOrdinal(value){
+  const p=egpDateParts(value);return p?Math.floor(Date.UTC(p.y,p.m-1,p.d)/86400000):null;
+}
+function egpDayDiff(from,to){
+  const a=egpOrdinal(from),b=egpOrdinal(to);return a==null||b==null?null:b-a;
+}
+function egpShiftDay(value,delta){
+  const p=egpDateParts(value);if(!p)return '';
+  const d=new Date(p.y,p.m-1,p.d);d.setDate(d.getDate()+delta);return egpLocalKey(d);
+}
+function egpClamp(n,lo,hi){return Math.max(lo,Math.min(hi,n))}
+function egpRemaining(){
+  let n=0;QB.forEach(function(q){if(!S.ans[q.id])n++});return n;
+}
+function egpSnapshot(){
+  const today=egpToday(),dayCounts=Object.create(null),activityDays=new Set();
+  let answeredToday=0;
+  QB.forEach(function(q){
+    const a=S.ans[q.id];if(!a||!Number.isFinite(a.t))return;
+    const k=egpLocalKey(new Date(a.t));dayCounts[k]=(dayCounts[k]||0)+1;activityDays.add(k);
+    if(k===today)answeredToday++;
+  });
+  let streak=0,cursor=today;
+  if(!activityDays.has(cursor))cursor=egpShiftDay(cursor,-1);
+  while(cursor&&activityDays.has(cursor)&&streak<3650){streak++;cursor=egpShiftDay(cursor,-1)}
+  let dueSmartReview=0;
+  try{dueSmartReview=srList().filter(function(x){return x&&x.r&&Number.isFinite(x.r.due)&&x.r.due<=Date.now()}).length}catch(e){}
+  let avgMs=0,avgQuestions=0,totalMs=0;
+  try{
+    ST.sessions.forEach(function(x){if(x&&Number.isFinite(x.ms)&&x.ms>0&&Number.isFinite(x.q)&&x.q>0){totalMs+=x.ms;avgQuestions+=x.q}});
+    if(ST.cur){
+      const currentMs=stCurMs(ST.cur),currentQ=Math.max(0,stAnsCount()-(ST.cur.a0||0));
+      if(currentMs>0&&currentQ>0){totalMs+=currentMs;avgQuestions+=currentQ}
+    }
+    if(avgQuestions>0)avgMs=totalMs/avgQuestions;
+  }catch(e){}
+  const perf=new Map();try{stTopicPerf().forEach(function(x){perf.set(String(x.id),x.acc)})}catch(e){}
+  const specs=Object.create(null);
+  QB.forEach(function(q){
+    const sk=String(q.spec||'other'),tk=String(q.topic||'other');
+    if(!specs[sk])specs[sk]={id:sk,name:SPEC_NAME[sk]||sk,remaining:0,total:0,topics:Object.create(null),lowest:101};
+    const sp=specs[sk];sp.total++;
+    if(!S.ans[q.id]){
+      sp.remaining++;
+      if(!sp.topics[tk])sp.topics[tk]={id:tk,name:TOPIC_NAME[q.topic]||'Other',remaining:0,accuracy:perf.has(tk)?perf.get(tk):null};
+      sp.topics[tk].remaining++;
+    }
+  });
+  const specialtyList=Object.keys(specs).map(function(k){
+    const sp=specs[k];
+    sp.topics=Object.keys(sp.topics).map(function(t){return sp.topics[t]}).sort(function(a,b){
+      const aa=a.accuracy==null?101:a.accuracy,bb=b.accuracy==null?101:b.accuracy;
+      return aa-bb||b.remaining-a.remaining||a.name.localeCompare(b.name);
+    });
+    sp.lowest=sp.topics.reduce(function(v,t){return Math.min(v,t.accuracy==null?101:t.accuracy)},101);
+    return sp;
+  }).sort(function(a,b){return a.lowest-b.lowest||b.remaining-a.remaining||a.name.localeCompare(b.name)});
+  return {
+    remaining:egpRemaining(),total:QB.length,answeredToday:answeredToday,streak:streak,dayCounts:dayCounts,
+    dueSmartReview:dueSmartReview,averageAnswerMs:avgMs,specialties:specialtyList
+  };
+}
+function egpRecordSnapshots(snapshot){
+  const snap=snapshot||egpSnapshot(),today=egpToday(),todayOrd=egpOrdinal(today);let changed=false;
+  EGP_STATE.exams.forEach(function(exam){
+    if(!egpDateParts(exam.date))return;
+    if(!exam.baseline){exam.baseline={startDate:today,remaining:snap.remaining};changed=true}
+    if(egpOrdinal(exam.date)>=todayOrd){
+      if(exam.history[today]!==snap.remaining){exam.history[today]=snap.remaining;changed=true}
+      const keys=Object.keys(exam.history).sort();
+      while(keys.length>240){delete exam.history[keys.shift()];changed=true}
+    }
+  });
+  if(changed)egpSave();return snap;
+}
+function egpCalc(exam,snap){
+  const today=egpToday(),valid=!!egpDateParts(exam.date),daysLeft=valid?egpDayDiff(today,exam.date):null;
+  const restDays=valid&&daysLeft>0?Math.ceil(daysLeft/7)*EGP_STATE.restDaysPerWeek:0;
+  const studyDays=valid?Math.max(1,daysLeft-EGP_STATE.bufferDays-restDays):null;
+  const target=!valid||daysLeft<0?null:(snap.remaining===0?0:Math.ceil(snap.remaining/studyDays));
+  let status='On track',idealRemaining=snap.remaining;
+  if(snap.remaining===0)status='Ahead';
+  else if(valid&&daysLeft<0)status='Behind';
+  else if(valid&&exam.baseline){
+    const totalDays=egpDayDiff(exam.baseline.startDate,exam.date);
+    if(totalDays!=null&&totalDays>=0){
+      const totalRest=Math.ceil(totalDays/7)*EGP_STATE.restDaysPerWeek;
+      const available=Math.max(1,totalDays-EGP_STATE.bufferDays-totalRest);
+      const elapsed=Math.max(0,egpDayDiff(exam.baseline.startDate,today)||0);
+      const elapsedRest=Math.floor(elapsed/7)*EGP_STATE.restDaysPerWeek;
+      const elapsedStudy=egpClamp(elapsed-elapsedRest,0,available);
+      idealRemaining=exam.baseline.remaining*(1-elapsedStudy/available);
+      const tolerance=Math.max(2,target?Math.ceil(target*0.12):2);
+      if(snap.remaining<idealRemaining-tolerance)status='Ahead';
+      else if(snap.remaining>idealRemaining+tolerance)status='Behind';
+    }
+  }
+  return {valid:valid,daysLeft:daysLeft,restDays:restDays,studyDays:studyDays,target:target,status:status,idealRemaining:idealRemaining};
+}
+function egpActiveExam(){
+  return EGP_STATE.exams.find(function(x){return x.id===EGP_STATE.activeExamId})||EGP_STATE.exams[0];
+}
+function egpTimeEstimate(snap,target){
+  if(target==null)return '—';if(target===0)return '0 min';if(!(snap.averageAnswerMs>0))return '—';
+  return 'about '+Math.max(1,Math.round(target*snap.averageAnswerMs/60000))+' min';
+}
+function egpBurnChart(exam){
+  const base=exam.baseline;
+  if(!base||!egpDateParts(exam.date))return '<div class="egp-chart-empty">—</div>';
+  const start=egpOrdinal(base.startDate),examEnd=egpOrdinal(exam.date);
+  const finish=Math.max(start+1,examEnd-EGP_STATE.bufferDays),max=Math.max(1,base.remaining);
+  const W=320,H=142,L=28,R=308,T=12,B=114;
+  const x=function(ord){return L+egpClamp((ord-start)/(finish-start),0,1)*(R-L)};
+  const y=function(value){return B-egpClamp(value/max,0,1)*(B-T)};
+  const ideal='M '+L+' '+y(base.remaining).toFixed(1)+' L '+R+' '+y(0).toFixed(1);
+  const todayOrd=egpOrdinal(egpToday());
+  const keys=Object.keys(exam.history||{}).filter(function(k){return egpOrdinal(k)!=null&&egpOrdinal(k)>=start&&egpOrdinal(k)<=todayOrd}).sort();
+  const step=Math.max(1,Math.ceil(keys.length/28));
+  const points=keys.filter(function(k,i){return i%step===0||i===keys.length-1}).map(function(k){
+    return x(egpOrdinal(k)).toFixed(1)+','+y(exam.history[k]).toFixed(1);
+  });
+  const actual=points.length>1?'<polyline class="egp-actual-line" points="'+points.join(' ')+'"/>':
+    (points.length===1?'<circle class="egp-actual-dot" cx="'+points[0].split(',')[0]+'" cy="'+points[0].split(',')[1]+'" r="4"/>':'');
+  return '<svg class="egp-svg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Remaining questions compared with the ideal burn-down line">'+
+    '<line class="egp-gridline" x1="'+L+'" y1="'+T+'" x2="'+R+'" y2="'+T+'"/>'+
+    '<line class="egp-gridline" x1="'+L+'" y1="'+((T+B)/2)+'" x2="'+R+'" y2="'+((T+B)/2)+'"/>'+
+    '<line class="egp-gridline" x1="'+L+'" y1="'+B+'" x2="'+R+'" y2="'+B+'"/>'+
+    '<path class="egp-ideal-line" d="'+ideal+'"/>'+actual+
+    '<text class="egp-axis" x="'+L+'" y="132">Start</text><text class="egp-axis" x="'+R+'" y="132" text-anchor="end">Exam</text>'+
+    '<text class="egp-axis" x="'+L+'" y="9">'+max+'</text><text class="egp-axis" x="'+L+'" y="126">0</text></svg>';
+}
+function egpWeeklyBars(snap){
+  const today=egpToday(),days=[];
+  for(let i=6;i>=0;i--){
+    const key=egpShiftDay(today,-i),d=egpDateParts(key);
+    days.push({label:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(d.y,d.m-1,d.d).getDay()],count:snap.dayCounts[key]||0});
+  }
+  const max=Math.max(1,...days.map(function(d){return d.count}));
+  const bars=days.map(function(d,i){
+    const h=Math.max(2,Math.round(d.count/max*66)),x=13+i*44;
+    return '<rect class="egp-week-bar" x="'+x+'" y="'+(88-h)+'" width="25" height="'+h+'" rx="6"/>'+
+      '<text class="egp-week-count" x="'+(x+12.5)+'" y="'+(82-h)+'" text-anchor="middle">'+d.count+'</text>'+
+      '<text class="egp-axis" x="'+(x+12.5)+'" y="108" text-anchor="middle">'+d.label+'</text>';
+  }).join('');
+  return '<svg class="egp-svg egp-week-svg" viewBox="0 0 320 116" role="img" aria-label="Questions answered during the last seven days">'+bars+'</svg>';
+}
+function egpSpecialtyMarkup(snap){
+  if(!snap.specialties.length)return '<div class="egp-muted">—</div>';
+  return snap.specialties.map(function(sp){
+    const rows=sp.topics.length?sp.topics.map(function(t){
+      return '<div class="egp-topic-row"><span class="egp-topic-name">'+egpEsc(t.name)+
+        (t.accuracy==null?'':' <small>'+Math.round(t.accuracy)+'%</small>')+
+        '</span><b>'+t.remaining+'</b></div>';
+    }).join(''):'<div class="egp-muted">0 remaining</div>';
+    return '<details class="egp-specialty"><summary><span>'+egpEsc(sp.name)+'</span><b>'+sp.remaining+'</b></summary><div class="egp-topic-list">'+rows+'</div></details>';
+  }).join('');
+}
+function egpEnsureStyles(){
+  if(document.getElementById('egpPlannerStyles'))return;
+  const style=document.createElement('style');style.id='egpPlannerStyles';
+  style.textContent=[
+    '#phoneContent .rs.egp{max-width:100%;padding:2px 0 28px;direction:ltr;color:var(--text)}',
+    '#phoneContent .egp h1{font-size:clamp(22px,6vw,28px);line-height:1.15;margin:4px 0 7px}',
+    '#phoneContent .egp .sub{margin:0;line-height:1.4}',
+    '#phoneContent .egp-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin:4px 2px 14px}',
+    '#phoneContent .egp-status{font-size:11px;font-weight:800;border-radius:999px;padding:7px 10px;white-space:nowrap;background:rgba(90,150,230,.14);border:1px solid rgba(100,170,255,.25)}',
+    '#phoneContent .egp-status.ahead{color:#24b979;background:rgba(36,185,121,.12)}',
+    '#phoneContent .egp-status.behind{color:#e09a45;background:rgba(224,154,69,.12)}',
+    '#phoneContent .egp-exams{display:flex;gap:7px;overflow-x:auto;padding:2px 0 10px;align-items:center}',
+    '#phoneContent .egp-exam-tab,#phoneContent .egp-add,#phoneContent .egp-timer-link{border:1px solid rgba(100,160,230,.3);border-radius:12px;padding:9px 12px;background:rgba(70,130,220,.09);color:inherit;font:inherit;font-size:12px;font-weight:750;white-space:nowrap}',
+    '#phoneContent .egp-exam-tab.active{background:linear-gradient(120deg,#286de0,#39a5eb);color:#fff;border-color:transparent}',
+    '#phoneContent .egp-add{border-style:dashed}',
+    '#phoneContent .egp-card{border-radius:19px;padding:14px;margin:0 0 11px;background:linear-gradient(145deg,rgba(35,93,174,.2),rgba(15,35,72,.65));border:1px solid rgba(115,165,230,.22);box-shadow:0 8px 22px rgba(2,15,40,.16);min-width:0}',
+    '#phoneContent .egp-name-label,#phoneContent .egp-field-label{display:block;font-size:12px;font-weight:800;margin:0 0 7px}',
+    '#phoneContent .egp-name-label{margin-bottom:12px}',
+    '#phoneContent .egp .field{width:100%;min-width:0;box-sizing:border-box}',
+    '#phoneContent .egp-date-run{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:12px;direction:ltr;unicode-bidi:isolate}',
+    '#phoneContent .egp-date{width:min(100%,230px);min-height:43px;text-align:left;direction:ltr;unicode-bidi:isolate}',
+    '#phoneContent .egp-date-format{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}',
+    '#phoneContent .egp-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:5px}',
+    '#phoneContent .egp-stat{padding:10px 8px;border-radius:15px;margin:0;display:flex;flex-direction:column;gap:5px;min-width:0}',
+    '#phoneContent .egp-stat>span{font-size:10px;line-height:1.25;color:var(--muted);font-weight:700}',
+    '#phoneContent .egp-stat>b{font-size:clamp(19px,5.5vw,25px);line-height:1.05;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}',
+    '#phoneContent .egp-due{font-size:9px;line-height:1.2;color:var(--muted);font-weight:700}',
+    '#phoneContent .egp-sentence{font-size:12px;line-height:1.5;margin:13px 2px 0}',
+    '#phoneContent .egp-alert{font-size:11px;font-weight:750;color:#e09a45;background:rgba(224,154,69,.1);border:1px solid rgba(224,154,69,.28);padding:8px 10px;border-radius:11px;margin:8px 0}',
+    '#phoneContent .egp-today-top,#phoneContent .egp-section-head{display:flex;justify-content:space-between;align-items:center;gap:8px}',
+    '#phoneContent .egp-section-kicker{font-size:9px;font-weight:900;letter-spacing:.14em;color:#69a8ef}',
+    '#phoneContent .egp-card h2{font-size:15px;margin:4px 0 0}',
+    '#phoneContent .egp-streak{display:flex;flex-direction:column;align-items:center;min-width:54px;border-radius:12px;padding:5px 8px;background:rgba(68,130,220,.12)}',
+    '#phoneContent .egp-streak>b{font-size:20px;font-variant-numeric:tabular-nums}',
+    '#phoneContent .egp-streak>span{font-size:9px;color:var(--muted)}',
+    '#phoneContent .egp-today-body{display:flex;align-items:center;gap:17px;padding:12px 2px 2px}',
+    '#phoneContent .egp-ring{width:96px;height:96px;position:relative;flex:0 0 96px}',
+    '#phoneContent .egp-ring svg{width:100%;height:100%;transform:rotate(-90deg);overflow:visible}',
+    '#phoneContent .egp-ring circle{fill:none;stroke-width:8}',
+    '#phoneContent .egp-ring-track{stroke:rgba(120,155,200,.2)}',
+    '#phoneContent .egp-ring-progress{stroke:#45b7f2;stroke-linecap:round;transition:stroke-dashoffset .25s ease}',
+    '#phoneContent .egp-ring>div{position:absolute;inset:0;display:flex;align-items:baseline;justify-content:center;gap:3px;padding-top:35px}',
+    '#phoneContent .egp-ring>div>b{font-size:22px;font-variant-numeric:tabular-nums}',
+    '#phoneContent .egp-ring>div>small{font-size:10px;color:var(--muted)}',
+    '#phoneContent .egp-mascot-copy{display:flex;align-items:center;gap:9px;min-width:0;font-size:12px}',
+    '#phoneContent .egp-mascot-copy img{width:48px;height:48px;object-fit:contain;flex:0 0 48px}',
+    '#phoneContent .egp-specialty{border-top:1px solid rgba(125,160,205,.18);padding:10px 2px}',
+    '#phoneContent .egp-specialty:first-of-type{margin-top:8px}',
+    '#phoneContent .egp-specialty summary{display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;list-style:none;font-size:12px;font-weight:800}',
+    '#phoneContent .egp-specialty summary::-webkit-details-marker{display:none}',
+    '#phoneContent .egp-specialty summary>b{font-size:13px;color:#52b6ef;font-variant-numeric:tabular-nums}',
+    '#phoneContent .egp-topic-list{padding:7px 0 0 10px}',
+    '#phoneContent .egp-topic-row{display:flex;justify-content:space-between;gap:8px;padding:5px 0;font-size:11px;border-bottom:1px solid rgba(125,160,205,.1)}',
+    '#phoneContent .egp-topic-row>b{font-variant-numeric:tabular-nums}',
+    '#phoneContent .egp-topic-name small{color:var(--muted);font-size:9px;margin-left:4px}',
+    '#phoneContent .egp-time-card{display:flex;justify-content:space-between;align-items:center;gap:10px}',
+    '#phoneContent .egp-time-card>div{display:flex;flex-direction:column;gap:5px}',
+    '#phoneContent .egp-time-card>div>b{font-size:19px;font-variant-numeric:tabular-nums}',
+    '#phoneContent .egp-timer-link{background:linear-gradient(120deg,#286de0,#39a5eb);color:#fff;border:0}',
+    '#phoneContent .egp-legend{display:flex;gap:10px;font-size:9px;color:var(--muted)}',
+    '#phoneContent .egp-legend span:before{content:"";display:inline-block;width:12px;height:3px;margin:0 4px 2px 0;background:#43b9ee;border-radius:3px}',
+    '#phoneContent .egp-legend span+span:before{background:repeating-linear-gradient(90deg,#e1a851 0 4px,transparent 4px 7px)}',
+    '#phoneContent .egp-svg{display:block;width:100%;height:auto;margin-top:10px;overflow:visible}',
+    '#phoneContent .egp-gridline{stroke:rgba(135,165,205,.2);stroke-width:1}',
+    '#phoneContent .egp-ideal-line{fill:none;stroke:#e1a851;stroke-width:2.4;stroke-dasharray:5 5}',
+    '#phoneContent .egp-actual-line{fill:none;stroke:#43b9ee;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}',
+    '#phoneContent .egp-actual-dot{fill:#43b9ee;stroke:#fff;stroke-width:1.4}',
+    '#phoneContent .egp-axis{fill:var(--muted);font-size:9px}',
+    '#phoneContent .egp-week-bar{fill:#438fe9}',
+    '#phoneContent .egp-week-count{fill:var(--text);font-size:9px}',
+    '#phoneContent .egp-chart-empty,#phoneContent .egp-muted{font-size:11px;color:var(--muted);padding:10px 2px}',
+    '#phoneContent .egp-settings{border-radius:15px;padding:11px 13px;margin:1px 0 12px;background:rgba(75,125,205,.08);border:1px solid rgba(115,165,230,.2)}',
+    '#phoneContent .egp-settings summary{cursor:pointer;font-size:12px;font-weight:800}',
+    '#phoneContent .egp-settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}',
+    '#phoneContent .egp-settings-grid label{font-size:10px;font-weight:750;color:var(--muted)}',
+    '#phoneContent .egp-settings-grid input{margin-top:6px;min-height:38px}',
+    '#phoneContent .egp-remove{width:100%;border:1px solid rgba(225,100,100,.35);color:#d87878;background:transparent;border-radius:12px;padding:10px;font-size:12px;font-weight:800}',
+    '.phone.light #phoneContent .egp-card{background:linear-gradient(145deg,#fff,#edf4ff);border-color:#d6e3f6;box-shadow:0 7px 18px rgba(32,70,130,.08);color:#102344}',
+    '.phone.light #phoneContent .egp-settings{background:#f1f6ff;border-color:#d9e5f7}',
+    '.phone.light #phoneContent .egp-status{color:#285da8}',
+    '.phone.light #phoneContent .egp-status.ahead{color:#16895c}',
+    '.phone.light #phoneContent .egp-status.behind{color:#a7671e}',
+    '.phone.light #phoneContent .egp-stat>span,.phone.light #phoneContent .egp-date-format,.phone.light #phoneContent .egp-due,.phone.light #phoneContent .egp-axis{color:#647998}',
+    '.phone.light #phoneContent .egp-week-count{fill:#102344}',
+    '@media(max-width:360px){#phoneContent .egp-card{padding:11px}#phoneContent .egp-stats{gap:5px}#phoneContent .egp-stat{padding:9px 6px}#phoneContent .egp-stat>span{font-size:9px}#phoneContent .egp-stat>b{font-size:18px}#phoneContent .egp-today-body{gap:10px}}',
+    '@media(prefers-reduced-motion:reduce){#phoneContent .egp-ring-progress{transition:none}}'
+  ].join('\n');
+  document.head.appendChild(style);
+}
+function egpPlannerView(){
+  const snap=egpRecordSnapshots(egpSnapshot()),exam=egpActiveExam(),calc=egpCalc(exam,snap);
+  const target=calc.target,done=target===0||snap.answeredToday>=target;
+  const pct=target===0?100:(target>0?Math.min(100,Math.round(snap.answeredToday/target*100)):0);
+  const c=2*Math.PI*39,offset=(c*(1-pct/100)).toFixed(2);
+  const dateLabel=egpDateParts(exam.date)?exam.date:'YYYY-MM-DD';
+  const dateWarning=calc.valid&&calc.daysLeft<0?'<div class="egp-alert">Exam date has passed</div>':
+    (calc.valid&&calc.daysLeft===0?'<div class="egp-alert">Exam is today</div>':'');
+  const targetWarning=target!=null&&target>150?'<div class="egp-alert">Daily target is above 150 questions</div>':'';
+  const statusClass=calc.status.toLowerCase().replace(/[^a-z]+/g,'-');
+  const examTabs=EGP_STATE.exams.map(function(x){
+    return '<button type="button" class="egp-exam-tab'+(x.id===exam.id?' active':'')+'" data-egp-select="'+egpEsc(x.id)+'">'+egpEsc(x.name)+'</button>';
+  }).join('');
+  const stat=function(label,value,extra){
+    return '<div class="egp-stat egp-card"><span>'+label+'</span><b>'+value+'</b>'+(extra||'')+'</div>';
+  };
+  const sentence=snap.remaining===0?'<p class="egp-sentence">Question Bank complete.</p>':
+    (target==null?'':'<p class="egp-sentence">Answer about <b>'+target+'</b> questions each day to finish the currently unanswered bank before your exam.</p>');
+  const face=done?'celebrating':(calc.status==='Behind'?'encouraging':'normal');
+  const faceSrc=(window.DOC_EMB&&window.DOC_EMB[face])||'';
+  const dueText=snap.dueSmartReview+' due in Smart Review',timeText=egpTimeEstimate(snap,target);
+  const settings='<details class="egp-settings"><summary>Plan settings</summary>'+
+    '<div class="egp-settings-grid"><label>Final-review buffer (days)<input class="field" type="number" min="0" max="60" step="1" value="'+EGP_STATE.bufferDays+'" data-egp-setting="bufferDays"></label>'+
+    '<label>Rest days per week<input class="field" type="number" min="0" max="3" step="1" value="'+EGP_STATE.restDaysPerWeek+'" data-egp-setting="restDaysPerWeek"></label></div></details>';
+  const examName='<label class="egp-name-label">Exam name<input class="field" type="text" maxlength="48" value="'+egpEsc(exam.name)+'" data-egp-name="'+egpEsc(exam.id)+'"></label>';
+  egpEnsureStyles();
+  return appHeader('Exam goal planner')+
+    '<div class="rs egp">'+
+      '<div class="egp-head"><div><h1>Exam goal planner</h1><p class="sub">Set your exam date and get a realistic daily question target.</p></div><span class="egp-status '+statusClass+'">'+calc.status+'</span></div>'+
+      '<div class="egp-exams">'+examTabs+'<button type="button" class="egp-add" data-egp-add>+ Add exam</button></div>'+
+      '<section class="egp-card egp-main-card">'+examName+
+        '<label class="egp-field-label" for="egpExamDate">Your exam date</label>'+
+        '<div class="egp-date-run" dir="ltr"><input id="egpExamDate" class="field egp-date" type="date" dir="ltr" style="direction:ltr;unicode-bidi:isolate;text-align:left" value="'+egpEsc(exam.date)+'" data-egp-date>'+
+        '<bdi class="egp-date-format" dir="ltr">'+egpEsc(dateLabel)+'</bdi></div>'+
+        dateWarning+targetWarning+
+        '<div class="egp-stats">'+
+          stat('Days left',calc.daysLeft==null?'—':(calc.daysLeft<0?'Past':String(calc.daysLeft)))+
+          stat('Questions remaining',String(snap.remaining))+
+          stat('Questions per day',target==null?'—':String(target),'<small class="egp-due">'+dueText+'</small>')+
+        '</div>'+sentence+
+      '</section>'+
+      '<section class="egp-card egp-today-card"><div class="egp-today-top"><div><span class="egp-section-kicker">TODAY</span><h2>Daily progress</h2></div>'+
+        '<div class="egp-streak"><b>'+snap.streak+'</b><span>Streak</span></div></div>'+
+        '<div class="egp-today-body"><div class="egp-ring"><svg viewBox="0 0 96 96" aria-hidden="true"><circle class="egp-ring-track" cx="48" cy="48" r="39"/><circle class="egp-ring-progress" cx="48" cy="48" r="39" style="stroke-dasharray:'+c.toFixed(2)+';stroke-dashoffset:'+offset+'"/></svg><div><b>'+snap.answeredToday+'</b><small>/ '+(target==null?'—':target)+'</small></div></div>'+
+        '<div class="egp-mascot-copy"><img src="'+egpEsc(faceSrc)+'" alt="Shbace doctor"><span><b>'+(done?'Target complete':(calc.status==='Behind'?'Keep going':'On track'))+'</b></span></div></div></section>'+
+      '<section class="egp-card"><div class="egp-section-head"><h2>Remaining by specialty</h2></div>'+egpSpecialtyMarkup(snap)+'</section>'+
+      '<section class="egp-card egp-time-card"><div><span class="egp-section-kicker">DAILY TIME ESTIMATE</span><b>'+egpEsc(timeText)+'</b></div><button type="button" class="egp-timer-link" data-egp-timer>Study Timer</button></section>'+
+      '<section class="egp-card"><div class="egp-section-head"><h2>Burn-down</h2><div class="egp-legend"><span>Remaining</span><span>Ideal</span></div></div>'+egpBurnChart(exam)+'</section>'+
+      '<section class="egp-card"><div class="egp-section-head"><h2>Weekly activity</h2></div>'+egpWeeklyBars(snap)+'</section>'+
+      settings+
+      (EGP_STATE.exams.length>1?'<button type="button" class="egp-remove" data-egp-remove>Remove this exam</button>':'')+
+    '</div>';
+}
+function egpAddExam(){
+  if(EGP_STATE.exams.length>=12)return;
+  const hasWritten=EGP_STATE.exams.some(function(x){return x.name.toLowerCase()==='written paper'});
+  const hasOSCE=EGP_STATE.exams.some(function(x){return x.name.toLowerCase()==='osce'});
+  const name=!hasWritten?'Written paper':(!hasOSCE?'OSCE':'Exam '+(EGP_STATE.exams.length+1));
+  const id='exam-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*100000).toString(36);
+  EGP_STATE.exams.push({id:id,name:name,date:'',baseline:null,history:{}});
+  EGP_STATE.activeExamId=id;egpSave();renderAppDemo();
+}
+function egpSelectExam(id){
+  if(!EGP_STATE.exams.some(function(x){return x.id===id}))return;
+  EGP_STATE.activeExamId=id;egpSave();renderAppDemo();
+}
+function egpSetDate(value){
+  const exam=egpActiveExam();if(!exam)return;
+  exam.date=egpDateParts(value)?value:'';egpRecordSnapshots();egpSave();renderAppDemo();
+}
+function egpRemoveExam(){
+  if(EGP_STATE.exams.length<=1||!window.confirm('Remove this exam plan?'))return;
+  EGP_STATE.exams=EGP_STATE.exams.filter(function(x){return x.id!==EGP_STATE.activeExamId});
+  EGP_STATE.activeExamId=EGP_STATE.exams[0].id;egpSave();renderAppDemo();
+}
+function egpBindHost(){
+  const host=document.getElementById('phoneContent');if(!host||egpBoundHost===host)return;
+  egpBoundHost=host;
+  host.addEventListener('click',function(event){
+    const select=event.target.closest('[data-egp-select]');
+    if(select){egpSelectExam(select.getAttribute('data-egp-select'));return}
+    if(event.target.closest('[data-egp-add]')){egpAddExam();return}
+    if(event.target.closest('[data-egp-remove]')){egpRemoveExam();return}
+    if(event.target.closest('[data-egp-timer]')){appPage='timer';renderAppDemo();return}
+  });
+  host.addEventListener('change',function(event){
+    const target=event.target;
+    if(target.matches('[data-egp-date]')){egpSetDate(target.value);return}
+    if(target.matches('[data-egp-name]')){
+      const exam=EGP_STATE.exams.find(function(x){return x.id===target.getAttribute('data-egp-name')});
+      if(exam){exam.name=String(target.value||'Exam').trim().slice(0,48)||'Exam';egpSave();renderAppDemo()}
+      return;
+    }
+    if(target.matches('[data-egp-setting]')){
+      const key=target.getAttribute('data-egp-setting');
+      if(key==='bufferDays')EGP_STATE.bufferDays=egpInt(target.value,0,60,3);
+      if(key==='restDaysPerWeek')EGP_STATE.restDaysPerWeek=egpInt(target.value,0,3,1);
+      egpSave();renderAppDemo();
+    }
+  });
+}
+function egpInstall(){
+  if(window.__shbExamGoalPlannerInstalled)return;
+  window.__shbExamGoalPlannerInstalled=true;
+  const progressGroup=DR2.find(function(g){return g[0]==='Progress'})||DR2.find(function(g){return g[0]==='Analytics'});
+  if(progressGroup&&!progressGroup[1].some(function(x){return x[1]==='examPlanner'})){
+    progressGroup[1].push(['Exam goal planner','examPlanner','<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2M8 3h8"/>']);
+  }
+  const oldMenu=menuView;
+  menuView=function(){
+    if(appPage==='examPlanner')return egpPlannerView();
+    return oldMenu.apply(this,arguments);
+  };
+  const oldRender=renderAppDemo;
+  renderAppDemo=function(){
+    const result=oldRender.apply(this,arguments);
+    if(mode==='app'){
+      egpRecordSnapshots();egpScheduleMidnight();
+      if(appPage==='examPlanner')egpBindHost();
+    }
+    return result;
+  };
+  const oldAnswer=window.qAnswer;
+  if(typeof oldAnswer==='function'){
+    window.qAnswer=function(){
+      const id=arguments[0],before=S.ans[id],result=oldAnswer.apply(this,arguments);
+      if(!before&&S.ans[id])egpRecordSnapshots();
+      if(mode==='app'&&appPage==='examPlanner')renderAppDemo();
+      return result;
+    };
+  }
+  egpScheduleMidnight();egpRecordSnapshots();
+}
+function egpScheduleMidnight(){
+  if(egpMidnightTimer)clearTimeout(egpMidnightTimer);
+  const now=new Date(),next=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,2,0);
+  egpMidnightTimer=setTimeout(function(){
+    egpRecordSnapshots();
+    if(mode==='app'&&appPage==='examPlanner')renderAppDemo();
+    egpScheduleMidnight();
+  },Math.max(1000,next.getTime()-Date.now()));
+}
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden)return;
+  egpRecordSnapshots();
+  if(mode==='app'&&appPage==='examPlanner')renderAppDemo();
+  egpScheduleMidnight();
+});
+document.addEventListener('shb-scripts-ready',egpInstall,{once:true});
+window.addEventListener('load',egpInstall,{once:true});
+
 })();

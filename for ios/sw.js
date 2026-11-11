@@ -1,5 +1,5 @@
 'use strict';
-// build: ios-v9 (final onboarding grade badge overlap fix)
+// build: ios-v10 (Exam goal planner)
 
 const CACHE_NAME = 'shbace-medical-offline-v2';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;

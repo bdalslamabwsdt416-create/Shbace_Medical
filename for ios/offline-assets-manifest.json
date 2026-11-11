@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "version": "b2710af55551c7c8f296d9fbdbd254911d15e83d8374ad7be4e99f237ecc52f8",
-  "generatedAt": "2026-11-11T11:42:57.000Z",
+  "version": "9c62ce630d546575dd2587c7c7c139f3ee17c31855edefafb61f8e56348edce2",
+  "generatedAt": "2026-11-11T18:57:57.259Z",
   "fileCount": 236,
-  "totalBytes": 18422656,
+  "totalBytes": 18454834,
   "files": [
     {
       "path": "assets/img/0011d30ae5fc.webp",
@@ -1141,8 +1141,8 @@
     },
     {
       "path": "css/ios-v7.css",
-      "bytes": 378,
-      "sha256": "2117b9e19d3c5d2cdd80302d4cbe1de95d60945478a2eca4fcafd19ad4b016fb",
+      "bytes": 1592,
+      "sha256": "a36383132b9250ca86a82cf768eba6c25bef134e424319832cfe803b3cfcfb8e",
       "group": "app"
     },
     {
@@ -1255,8 +1255,8 @@
     },
     {
       "path": "js/09-app-features-v6.js",
-      "bytes": 402442,
-      "sha256": "cd7021d63b86f2d76ad56ae05af3cbbe2c9de43e930f4a3dde37dd727ae645eb",
+      "bytes": 433203,
+      "sha256": "dfd7f8f69ce71b1d5574232264c775540fdb6e12d5d4867dc321b31385c6dd75",
       "group": "app"
     },
     {
@@ -1411,14 +1411,14 @@
     },
     {
       "path": "pwa-version.json",
-      "bytes": 219,
-      "sha256": "f4a3af4333944c6aa6e6cc1e39b380d0e50b5c7efef8028f8b65b007d914075e",
+      "bytes": 476,
+      "sha256": "5f31a2d453fc08f46c0110507dc2810dfb36ccb1342fa1c08b503e71ad20ac1f",
       "group": "other"
     },
     {
       "path": "sw.js",
-      "bytes": 2856,
-      "sha256": "5ea4e52a2123c9575a2a00e1b2c0276e5f4783ffdf8a5e692bc6dc8fe5cb5c71",
+      "bytes": 2804,
+      "sha256": "430e828e1690f6fbc3bdc828250d78a3c265fc6d492adba1b09e936421968750",
       "group": "app"
     }
   ]

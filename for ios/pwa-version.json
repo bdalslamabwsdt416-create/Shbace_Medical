@@ -1,12 +1,12 @@
 {
   "app": "Shbace Medical",
   "platform": "PWA",
-  "version": "1.4.2",
-  "displayVersion": "1.4.2",
+  "version": "1.4.3",
+  "displayVersion": "1.4.3",
   "releaseDate": "2026-11-11",
   "releaseNotes": [
-    "iOS onboarding: the final journey screen has more room and no longer shows the optional quote.",
-    "iOS onboarding: the grade staircase now uses a responsive full-width layout.",
-    "iOS onboarding: removed the overlapping Grade / Current Level badge from the final page."
+    "Added an offline Exam goal planner with multiple exam dates and independent daily targets.",
+    "The planner reads unanswered questions directly from the live Question Bank and keeps Smart Review separate.",
+    "Added local daily progress, streaks, specialty priorities, a burn-down chart and weekly activity."
   ]
 }
