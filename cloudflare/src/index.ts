@@ -66,10 +66,10 @@ function adminAuthorized(request: Request, env: Env): boolean {
   return !!env.ADMIN_API_TOKEN && safeEqual(token, env.ADMIN_API_TOKEN);
 }
 
-async function audit(env: Env, action: string, target: string | null, details: unknown = {}) {
-  await env.DB.prepare(
+function auditStatement(env: Env, action: string, target: string | null, details: unknown = {}) {
+  return env.DB.prepare(
     "INSERT INTO admin_audit(action,target,details_json) VALUES(?,?,?)"
-  ).bind(action, target, JSON.stringify(details)).run();
+  ).bind(action, target, JSON.stringify(details));
 }
 
 async function activeRelease(env: Env): Promise<ReleaseRow | null> {
@@ -135,6 +135,10 @@ async function handleApi(request: Request, env: Env): Promise<Response> {
       const rows = await env.DB.prepare("SELECT * FROM releases ORDER BY created_at DESC LIMIT 100").all<ReleaseRow>();
       return json({ releases: (rows.results || []).map(releaseDto) });
     }
+    if (request.method === "GET" && path === "/v1/admin/audit") {
+      const rows = await env.DB.prepare("SELECT id,action,target,details_json,created_at FROM admin_audit ORDER BY id DESC LIMIT 100").all();
+      return json({ events: rows.results || [] });
+    }
 
     if (request.method === "POST" && path === "/v1/admin/releases") {
       const raw = await request.text();
@@ -149,7 +153,15 @@ async function handleApi(request: Request, env: Env): Promise<Response> {
         return json({ error: "Bank must contain a questions array and an order object." }, 400);
       }
       if (bank.questions.length < 1 || bank.questions.length > 100000) return json({ error: "Question count is outside the supported range." }, 400);
+      const ids = new Set<string>();
+      for (const question of bank.questions) {
+        if (!question || typeof question.id !== "string" || !question.id.trim() || ids.has(question.id)) {
+          return json({ error: "Every question must have a unique, non-empty string ID." }, 400);
+        }
+        ids.add(question.id);
+      }
       const bytes = new TextEncoder().encode(JSON.stringify(bank));
+      if (bytes.byteLength > MAX_BANK_BYTES) return json({ error: "Serialized question bank exceeds 12 MiB limit." }, 413);
       const digest = await crypto.subtle.digest("SHA-256", bytes);
       const sha256 = Array.from(new Uint8Array(digest)).map(x => x.toString(16).padStart(2, "0")).join("");
       const existing = await env.DB.prepare("SELECT id FROM releases WHERE version=?").bind(version).first<{id:string}>();
@@ -164,9 +176,9 @@ async function handleApi(request: Request, env: Env): Promise<Response> {
       await env.DB.batch([
         env.DB.prepare("UPDATE releases SET is_active=0 WHERE is_active=1"),
         env.DB.prepare("INSERT INTO releases(id,version,object_key,sha256,byte_size,question_count,channel,is_active,published_at) VALUES(?,?,?,?,?,?,?,?,?)")
-          .bind(id, version, objectKey, sha256, bytes.byteLength, bank.questions.length, channel, 1, now)
+          .bind(id, version, objectKey, sha256, bytes.byteLength, bank.questions.length, channel, 1, now),
+        auditStatement(env, "publish_release", version, { sha256, questionCount: bank.questions.length, channel })
       ]);
-      await audit(env, "publish_release", version, { sha256, questionCount: bank.questions.length, channel });
       return json({ ok: true, release: { id, version, sha256, byteSize: bytes.byteLength, questionCount: bank.questions.length, channel, publishedAt: now, active: true } }, 201);
     }
 
@@ -178,9 +190,9 @@ async function handleApi(request: Request, env: Env): Promise<Response> {
       if (!target) return json({ error: "Release not found." }, 404);
       await env.DB.batch([
         env.DB.prepare("UPDATE releases SET is_active=0 WHERE is_active=1"),
-        env.DB.prepare("UPDATE releases SET is_active=1,published_at=? WHERE version=?").bind(new Date().toISOString(), body.version)
+        env.DB.prepare("UPDATE releases SET is_active=1,published_at=? WHERE version=?").bind(new Date().toISOString(), body.version),
+        auditStatement(env, "rollback_release", body.version)
       ]);
-      await audit(env, "rollback_release", body.version);
       return json({ ok: true, activeVersion: body.version });
     }
 
@@ -194,10 +206,12 @@ async function handleApi(request: Request, env: Env): Promise<Response> {
         if (key in body.features && typeof body.features[key] !== "boolean") return json({ error: "Feature values must be boolean." }, 400);
         features[key] = typeof body.features[key] === "boolean" ? body.features[key] : false;
       }
-      await env.DB.prepare(
-        "INSERT INTO app_config(config_key,config_value,updated_at) VALUES('features',?,CURRENT_TIMESTAMP) ON CONFLICT(config_key) DO UPDATE SET config_value=excluded.config_value,updated_at=CURRENT_TIMESTAMP"
-      ).bind(JSON.stringify(features)).run();
-      await audit(env, "update_features", "features", features);
+      await env.DB.batch([
+        env.DB.prepare(
+          "INSERT INTO app_config(config_key,config_value,updated_at) VALUES('features',?,CURRENT_TIMESTAMP) ON CONFLICT(config_key) DO UPDATE SET config_value=excluded.config_value,updated_at=CURRENT_TIMESTAMP"
+        ).bind(JSON.stringify(features)),
+        auditStatement(env, "update_features", "features", features)
+      ]);
       return json({ ok: true, features });
     }
 
