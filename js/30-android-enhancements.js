@@ -20,7 +20,7 @@
   var DAY = 86400000;
   var DEFAULTS = {
     haptics: true, shareQuestion: true, copyQuestion: true, readAloud: true,
-    keepScreenOn: true, autoTheme: true, examCountdown: true,
+    keepScreenOn: true, autoTheme: true,
     readingSpeed: 'normal', doctorExpressions: true
   };
   function readPrefs() {
@@ -141,7 +141,6 @@
       '<section class="card setcard shb-af-settings"><h3>Study reminders</h3>' +
       '<p class="meta">A small number of useful reminders. These use the app’s existing Android notification permission.</p>' +
       '<div class="shb-af-reminder-note"><b>Daily study reminder</b><small>Uses the existing Settings → Notification preferences → Study reminders switch. One reminder at 7:30 PM when no study activity is recorded.</small></div>' +
-      toggleMarkup('examCountdown', 'Exam countdown reminders', 'Three reminders at 7, 3 and 1 day before your saved exam date.') +
       '<button type="button" class="btn block shb-af-copyinfo" id="shbCopyAppInfo">Copy app information</button>' +
       '<p class="meta">Send the copied details when reporting an app issue. No account or personal data is included.</p></section>';
   }
@@ -738,7 +737,6 @@
       if (k === 'autoTheme') applyTheme();
       if (k === 'doctorExpressions') applyTheme();
       if (k === 'keepScreenOn') screenAwake();
-      if (k === 'examCountdown') planExamReminders();
       if (k === 'shareQuestion' || k === 'copyQuestion' || k === 'readAloud') {
         document.querySelectorAll('#phoneContent .qcard .shb-af-qtools').forEach(function (x) { x.remove(); });
         decorateQuestionCards();
