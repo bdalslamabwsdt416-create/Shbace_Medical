@@ -402,7 +402,6 @@ function start(){
     ui.bytes.textContent='0 B / '+fmtBytes(manifest.totalBytes);
     ui.percent.textContent='0%';paintProgress('prepare',false);
    });
-  });
  }).catch(function(error){
   setStatus(error.message||'Could not read the offline installation manifest.');
   setWarning('Connect to the internet and reload the installed app. The setup will not mark any file as complete until it is saved and verified.');
