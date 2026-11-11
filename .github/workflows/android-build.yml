@@ -31,6 +31,7 @@ concurrency:
 
 jobs:
   build-debug-apk:
+    if: false # temporary cancellation guard; restore after stopping the unintended run
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
