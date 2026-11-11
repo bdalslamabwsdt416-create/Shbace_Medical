@@ -225,7 +225,6 @@ function gradeHasPediatrics(){const g=obGradeNow()||5;   /* 0 = older install th
 const SP_HAPTIC=[24,80,16];
 const SPLASH_DURATION_MS=7000;      /* Splash stays fully visible for exactly 7 s; the dissolve starts AFTER this and is not part of it */
 const SPLASH_FADE_MS=(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)?350:1900;           /* dissolve duration (1.8–2 s). The real screen is already drawn under the splash */
-const SPLASH_SESSION_KEY='shbace_splash_completed_session_v1';
 let spBeats=0,spHapticTimer=null,spHapticDubTimer=null,spHapticLoopTimer=null;
 let splashDeadline=0,splashCompletionTimer=null,splashFinalized=false,splashRouteDone=false,splashPre=false;
 function nativeHapticsBridge(){
@@ -326,7 +325,6 @@ function completeSplashOnce(overlay,instant){
  if(splashFinalized)return;
  splashFinalized=true;
  clearTimeout(splashCompletionTimer);splashCompletionTimer=null;
- try{sessionStorage.setItem(SPLASH_SESSION_KEY,'1')}catch(e){}
  /* normally the destination was already drawn SPLASH_PRE_MS earlier; this is only the fallback */
  splashPre=true;
  if(!splashRouteDone){splashRouteDone=true;routeAfterSplash();}
@@ -362,10 +360,8 @@ function launchExperience(){
  try{const raw=localStorage.getItem('shbace_home_tip_index_v3');activeDailyTip=(Number(raw||'-1')+1)%5;localStorage.setItem('shbace_home_tip_index_v3',String(activeDailyTip));}catch(e){}
  const overlay=document.getElementById('startupSplash');
  if(!overlay){routeAfterSplash();return;}
- /* A completed splash is not replayed when this WebView/session resumes or reloads. */
- try{if(sessionStorage.getItem(SPLASH_SESSION_KEY)==='1'){
-  overlay.remove();if(!splashRouteDone){splashRouteDone=true;routeAfterSplash();}return;
- }}catch(e){}
+ /* Each new document launch gets a full splash. A true foreground resume does not re-run this function;
+    syncSplashOnForeground() handles that lifecycle without flashing a second splash. */
  splashDeadline=(function(){const e=window.__spEcg;return Date.now()-((e&&e.t0!==null)?Math.max(0,performance.now()-e.t0):0)})()+SPLASH_DURATION_MS;      /* end of the 7 s hold (same clock as the ECG head); the transition starts here */
  splashFinalized=false;splashRouteDone=false;spBeats=0;
  startSplashHaptics();
