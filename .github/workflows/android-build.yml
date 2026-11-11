@@ -7,6 +7,7 @@ on:
       - work/android-enhancements-20261111
       - work/android-v1.3-planner-navigation-20261111
       - work/android-notifications-fix-20261111
+      - work/android-notifications-final-20261111
     paths:
       - 'android/**'
       - 'index.html'
@@ -84,7 +85,7 @@ jobs:
           retention-days: 90
 
       - name: Prepare Release signing key
-        if: always() && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111')
+        if: always() && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111' || github.ref == 'refs/heads/work/android-notifications-final-20261111')
         id: release-signing
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -113,7 +114,7 @@ jobs:
           echo "ready=true" >> "$GITHUB_OUTPUT"
 
       - name: Build signed Release APK
-        if: always() && steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111')
+        if: always() && steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111' || github.ref == 'refs/heads/work/android-notifications-final-20261111')
         working-directory: android
         run: |
           chmod +x gradlew
@@ -130,7 +131,7 @@ jobs:
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$APK"
 
       - name: Upload signed Release APK
-        if: steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111')
+        if: steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111' || github.ref == 'refs/heads/work/android-notifications-final-20261111')
         uses: actions/upload-artifact@v4
         with:
           name: SHBACE-Medical-Android-v1.3.3-RELEASE-signed
