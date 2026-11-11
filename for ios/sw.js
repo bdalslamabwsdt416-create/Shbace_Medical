@@ -1,5 +1,5 @@
 'use strict';
-// build: ios-v13 (silent automatic updates; verified pre-splash setup)
+// build: ios-v14 (safe setup retry and first-controller adoption guard) (silent automatic updates; verified pre-splash setup)
 
 const CACHE_NAME = 'shbace-medical-offline-v2';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
