@@ -121,6 +121,52 @@ const FILTERS=[['all','All Questions'],['unanswered','Unanswered'],['correct','C
 /* ---------- state ---------- */
 const qs={spec:'endocrinology',topic:0,filter:'all',tag:'all',view:'all',idx:0,full:false,noteOpen:{},streak:0,dd:null};
 window.__qs=qs;
+window.__shbQBVersionState={
+ capture:function(){
+  var activeId=null;
+  try{if(appPage==='questions'){var current=filtered()[qs.idx];if(current)activeId=current.id;}}catch(e){}
+  var pc=document.getElementById('phoneContent');
+  var review={};try{review={tab:srTab,run:!!srRun}}catch(e){}
+  return {
+   version:1,appPage:appPage,mode:mode,slide:slide,selectedGrade:selectedGrade,guideTab:guideTab,
+   qs:JSON.parse(JSON.stringify(qs)),
+   search:{gq:gq,gSpec:gSpec,gTag:gTag,gSrc:gSrc,gTopic:gTopic,gSys:gSys,gSort:gSort,gLim:gLim},
+   review:review,activeQuestionId:activeId,
+   scroll:{windowY:window.scrollY||document.documentElement.scrollTop||0,phoneY:pc?pc.scrollTop:0}
+  };
+ },
+ restore:function(state){
+  if(!state||state.version!==1)return false;
+  try{
+   if(state.qs&&typeof state.qs==='object')Object.assign(qs,state.qs);
+   if(state.search){gq=String(state.search.gq||'');gSpec=state.search.gSpec||'all';gTag=state.search.gTag||'all';gSrc=state.search.gSrc||'all';gTopic=state.search.gTopic||'all';gSys=state.search.gSys||'all';gSort=state.search.gSort||'bank';gLim=Math.max(40,Number(state.search.gLim)||40);gIdx=null;}
+   if(state.review){try{if(state.review.tab)srTab=state.review.tab;if(typeof state.review.run==='boolean')srRun=state.review.run}catch(e){}}
+   if(typeof state.appPage==='string'&&state.appPage)appPage=state.appPage;
+   mode='app';
+   if(Number(state.selectedGrade)>=1&&Number(state.selectedGrade)<=5)selectedGrade=Number(state.selectedGrade);
+   if(Number.isInteger(state.slide)&&state.slide>=0)slide=state.slide;
+   if(typeof state.guideTab==='string')guideTab=state.guideTab;
+   if(state.activeQuestionId&&appPage==='questions'){
+    var targetIndex=filtered().findIndex(function(q){return q.id===state.activeQuestionId;});
+    if(targetIndex>=0)qs.idx=targetIndex;
+   }
+   try{if(typeof window.gradeSync==='function')window.gradeSync()}catch(e){}
+   renderAppDemo();
+   function restoreScroll(){
+    var pc=document.getElementById('phoneContent');
+    if(pc&&state.scroll&&Number.isFinite(state.scroll.phoneY))pc.scrollTop=state.scroll.phoneY;
+    if(state.scroll&&Number.isFinite(state.scroll.windowY))window.scrollTo(0,state.scroll.windowY);
+    if(state.activeQuestionId&&appPage==='questions'&&(!state.scroll||!state.scroll.phoneY)){
+     var q=document.getElementById('qc-'+state.activeQuestionId);if(q)q.scrollIntoView({block:'start'});
+    }
+   }
+   requestAnimationFrame(function(){restoreScroll();requestAnimationFrame(restoreScroll)});
+   setTimeout(restoreScroll,90);
+   if(appPage==='reviewAudit'&&typeof window.openQBReviewLog==='function')window.openQBReviewLog();
+   return true;
+  }catch(e){console.error('Could not restore Question Bank screen state',e);return false}
+ }
+};
 
 /* ---------- icons ---------- */
 const URO_SVG=`<svg viewBox="0 0 100 100" class="uro-svg" aria-hidden="true"><defs><linearGradient id="urg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9f8a"/><stop offset="1" stop-color="#d2566a"/></linearGradient><radialGradient id="urb" cx=".5" cy=".4" r=".7"><stop offset="0" stop-color="#ffd3b8"/><stop offset="1" stop-color="#e98a7c"/></radialGradient></defs><rect width="100" height="100" fill="#0b1f55"/><circle cx="50" cy="50" r="46" fill="#123a99" opacity=".55"/><path d="M33 14c-12 4-16 22-10 38 4 10 12 12 16 6 5-8 2-22-1-30-1-5 0-11-5-14z" fill="url(#urg)"/><path d="M67 14c12 4 16 22 10 38-4 10-12 12-16 6-5-8-2-22 1-30 1-5 0-11 5-14z" fill="url(#urg)"/><path d="M37 50c4 10 10 14 12 24M63 50c-4 10-10 14-12 24" stroke="#ffb36b" stroke-width="3.4" fill="none" stroke-linecap="round"/><ellipse cx="50" cy="80" rx="15" ry="13" fill="url(#urb)"/><path d="M50 60v9" stroke="#ffb36b" stroke-width="3.4" stroke-linecap="round"/></svg>`;
