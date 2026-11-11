@@ -112,10 +112,11 @@
     var buffer = clampInt(exam.bufferDays, 0, 90, 3);
     var restPerWeek = clampInt(exam.restDays, 0, 7, 1);
     var restDays = daysLeft > 0 ? Math.floor(daysLeft / 7) * restPerWeek : 0;
+    var finalReview = daysLeft !== null && daysLeft >= 0 && daysLeft <= buffer;
     var studyDays = daysLeft !== null && daysLeft >= 0 ? Math.max(1, daysLeft - buffer - restDays) : 0;
-    var target = daysLeft > 0 && remaining > 0 ? Math.ceil(remaining / studyDays) : 0;
+    var target = daysLeft > buffer && remaining > 0 ? Math.ceil(remaining / studyDays) : 0;
     return { today: today, daysLeft: daysLeft, remaining: remaining, bufferDays: buffer,
-      restDays: restDays, studyDays: studyDays, target: target,
+      restDays: restDays, studyDays: studyDays, target: target, finalReview: finalReview,
       examToday: daysLeft === 0, past: daysLeft !== null && daysLeft < 0,
       unrealistic: target > 150, complete: remaining === 0 };
   }
@@ -253,9 +254,11 @@
     var dateText = exam.date ? '<bdi dir="ltr" class="eg-date-isolate">' + esc(exam.date) + '</bdi>' : '—';
     var passed = metrics.past;
     var noDate = !exam.date;
-    var sentence = 'Answer about ' + metrics.target.toLocaleString('en-US') + ' questions each day to finish the currently unanswered bank before your exam.';
+    var sentence = metrics.complete ? 'Your question bank is complete.' :
+      metrics.finalReview ? 'Final review only · no new questions.' :
+      'Answer about ' + metrics.target.toLocaleString('en-US') + ' questions each day to finish the currently unanswered bank before your exam.';
     var warning = metrics.unrealistic ? '<div class="eg-warning">High daily target · ' + metrics.target + '/day</div>' : '';
-    var stateLabel = passed ? 'Date passed' : metrics.examToday ? 'Exam day' : metrics.complete ? 'Completed' : status;
+    var stateLabel = passed ? 'Date passed' : metrics.examToday ? 'Exam day' : metrics.complete ? 'Completed' : metrics.finalReview ? 'Final review' : status;
     var coach = !passed && !metrics.examToday ? coachMarkup(status, doneToday, metrics.target) : '';
     var reminders = '<div class="eg-reminder-row"><label class="eg-reminder-toggle"><input type="checkbox" data-eg-reminder ' +
       (exam.reminderEnabled ? 'checked' : '') + '><span>Daily reminder</span></label><input type="time" dir="ltr" class="eg-time" data-eg-time value="' +
@@ -267,7 +270,7 @@
     var metricsMarkup = '<div class="eg-metrics">' +
       '<div class="eg-metric"><b>' + (noDate ? '—' : (passed ? '—' : metrics.daysLeft.toLocaleString('en-US'))) + '</b><small>Days left</small></div>' +
       '<div class="eg-metric"><b>' + metrics.remaining.toLocaleString('en-US') + '</b><small>Questions remaining</small></div>' +
-      '<div class="eg-metric eg-target"><b>' + (noDate || passed || metrics.examToday ? '—' : metrics.target.toLocaleString('en-US')) + '</b><small>Questions per day</small>' +
+      '<div class="eg-metric eg-target"><b>' + (noDate || passed || metrics.finalReview || metrics.complete ? '—' : metrics.target.toLocaleString('en-US')) + '</b><small>' + (metrics.finalReview ? 'Final review' : 'Questions per day') + '</small>' +
       '<em>Smart Review · ' + smart + ' due</em></div></div>';
     var progress = '<div class="eg-today-card"><div class="eg-ring-wrap"><svg viewBox="0 0 112 112" aria-label="Answered today: ' + doneToday + ' of ' + metrics.target + '">' +
       '<circle cx="56" cy="56" r="47" fill="none" stroke="currentColor" stroke-opacity=".14" stroke-width="8"/>' +
