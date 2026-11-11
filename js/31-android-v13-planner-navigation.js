@@ -31,7 +31,8 @@
     var p = String(key || '').split('-').map(Number);
     if (p.length !== 3 || !p[0] || !p[1] || !p[2]) return null;
     var d = new Date(p[0], p[1] - 1, p[2], 0, 0, 0, 0);
-    return isNaN(d.getTime()) ? null : d;
+    if (isNaN(d.getTime()) || d.getFullYear() !== p[0] || d.getMonth() !== p[1] - 1 || d.getDate() !== p[2]) return null;
+    return d;
   }
   function dayDiff(fromKey, toKey) {
     var a = localMidnight(fromKey), b = localMidnight(toKey);
@@ -111,7 +112,7 @@
     var buffer = clampInt(exam.bufferDays, 0, 90, 3);
     var restPerWeek = clampInt(exam.restDays, 0, 7, 1);
     var restDays = daysLeft > 0 ? Math.floor(daysLeft / 7) * restPerWeek : 0;
-    var studyDays = daysLeft > 0 ? Math.max(1, daysLeft - buffer - restDays) : 0;
+    var studyDays = daysLeft !== null && daysLeft >= 0 ? Math.max(1, daysLeft - buffer - restDays) : 0;
     var target = daysLeft > 0 && remaining > 0 ? Math.ceil(remaining / studyDays) : 0;
     return { today: today, daysLeft: daysLeft, remaining: remaining, bufferDays: buffer,
       restDays: restDays, studyDays: studyDays, target: target,
@@ -300,6 +301,7 @@
     var data = snapshot(), exam = activeExam();
     if (!exam) return '<div class="rs shb-eg-page"><h1>Exam goal planner</h1></div>';
     return '<div class="rs shb-eg-page" id="shbExamGoalPage">' +
+      '<button type="button" class="backb eg-back" onclick="navBack()" aria-label="Go back">‹ Back</button>' +
       '<div class="eg-heading"><h1>Exam goal planner</h1><p>Set your exam date and get a realistic daily question target.</p></div>' +
       examTabs() + examPanelMarkup(exam, data) + '</div>';
   }
@@ -381,7 +383,7 @@
   var parents = {
     specialties: ['subjects'], topics: ['specialties'], questions: ['topics', 'subjects'],
     quizrun: ['quiz'], quizresult: ['quizrun', 'quiz'], quizhistory: ['quiz'],
-    weak: ['stats'], dedication: ['about']
+    timer: ['examgoal', 'subjects'], weak: ['stats','subjects'], dedication: ['about']
   };
   var rootPages = ['subjects','quiz','review','stats','timer','examgoal','settings','about','changelog','feedback','rate','pinned','saved','wrong','notes','notifs','search'];
   function closeTransient() {
@@ -418,8 +420,8 @@
     var stackPage = backStack.length ? backStack[backStack.length - 1] : null;
     var allowed = parents[appPage] || [];
     if (stackPage && allowed.indexOf(stackPage) >= 0) dest = backStack.pop();
-    if (!dest && allowed.length) dest = allowed[0];
     if (!dest && appPage === 'quizresult' && window.qzBack) dest = window.qzBack === 'history' ? 'quizhistory' : window.qzBack;
+    if (!dest && allowed.length) dest = allowed[0];
     if (!dest) dest = 'subjects';
     suppressStack = true;
     appPage = dest;
@@ -584,5 +586,28 @@
   setTimeout(refreshIfNewLocalDay, 500);
   setInterval(refreshIfNewLocalDay, 60000);
   document.addEventListener('visibilitychange', refreshIfNewLocalDay);
-  window.addEventListener('focus', refreshIfNewLocalDay);
+  document.addEventListener('visibilitychange', function () {
+    refreshIfNewLocalDay();
+    if (!document.hidden) updateAllReminders();
+  });
+  window.addEventListener('focus', function () {
+    refreshIfNewLocalDay();
+    updateAllReminders();
+  });
+
+  // Recalculate the rolling reminder target whenever a new Question Bank answer is recorded.
+  var reminderRefreshTimer = null;
+  var originalQuestionAnswer = window.qAnswer;
+  if (typeof originalQuestionAnswer === 'function') {
+    window.qAnswer = function () {
+      var result = originalQuestionAnswer.apply(this, arguments);
+      if (appPage === 'examgoal') pageRender();
+      if (reminderRefreshTimer) clearTimeout(reminderRefreshTimer);
+      reminderRefreshTimer = setTimeout(function () {
+        reminderRefreshTimer = null;
+        updateAllReminders();
+      }, 450);
+      return result;
+    };
+  }
 })();
