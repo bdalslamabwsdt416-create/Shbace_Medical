@@ -504,6 +504,33 @@
     planExamReminders();
     return r;
   };
+  var oldQzPick = window.qzPick;
+  if (typeof oldQzPick === 'function') window.qzPick = function (index) {
+    var before = window.__shbQuizCurrent ? window.__shbQuizCurrent() : null;
+    var r = oldQzPick.apply(this, arguments);
+    var after = window.__shbQuizCurrent ? window.__shbQuizCurrent() : null;
+    if (Number(index) >= 0 && before && after && after.selected === Number(index) && before.selected !== Number(index)) {
+      markActivity();
+      haptic(Number(index) === Number(before.correct) ? 'correct' : 'wrong');
+    }
+    return r;
+  };
+  var oldQzGo = window.qzGo;
+  if (typeof oldQzGo === 'function') window.qzGo = function (direction) {
+    var before = window.__shbQuizCurrent ? window.__shbQuizCurrent() : null;
+    var r = oldQzGo.apply(this, arguments);
+    var after = window.__shbQuizCurrent ? window.__shbQuizCurrent() : null;
+    if (before && after && after.idx > before.idx) haptic('light');
+    return r;
+  };
+  var oldQzJump = window.qzJump;
+  if (typeof oldQzJump === 'function') window.qzJump = function (index) {
+    var before = window.__shbQuizCurrent ? window.__shbQuizCurrent() : null;
+    var r = oldQzJump.apply(this, arguments);
+    var after = window.__shbQuizCurrent ? window.__shbQuizCurrent() : null;
+    if (before && after && after.idx > before.idx) haptic('light');
+    return r;
+  };
   var oldSave = window.qSave;
   if (typeof oldSave === 'function') window.qSave = function () {
     var r = oldSave.apply(this, arguments);
