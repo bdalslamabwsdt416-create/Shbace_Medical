@@ -30,5 +30,7 @@ jobs:
           cache-dependency-path: cloudflare/package-lock.json
       - name: Install Worker dependencies
         run: npm install --no-audit --no-fund
+      - name: Synchronize the embedded admin page
+        run: npm run sync:admin
       - name: Type-check Cloudflare Worker
         run: npm run check
