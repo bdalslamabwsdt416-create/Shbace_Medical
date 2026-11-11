@@ -38,6 +38,11 @@ android {
     }
 
     buildTypes {
+        // Keep the test APK installable beside the distributed Release app; Release keeps the original applicationId.
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+        }
         release {
             // Java code is only MainActivity + Capacitor (which relies on reflection): keep R8 off, like the Capacitor template.
             minifyEnabled false
