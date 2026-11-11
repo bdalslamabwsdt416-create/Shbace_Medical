@@ -14,12 +14,12 @@ APP_ORIGIN = "https://shbace-medical.vercel.app"
 [[d1_databases]]
 binding = "DB"
 database_name = "shbace-medical-db"
-database_id = "REPLACE_WITH_CLOUDFLARE_D1_DATABASE_ID"
+database_id = "ff76db9d-ee7e-4c11-9080-db8876ae70a8"
 migrations_dir = "migrations"
 
 [[kv_namespaces]]
 binding = "FLAGS"
-id = "REPLACE_WITH_CLOUDFLARE_KV_NAMESPACE_ID"
+id = "0d43eba31d334d07a537e5d5326092e0"
 
 # Set ADMIN_API_TOKEN as a Worker secret; never commit it to this repository.
 # wrangler secret put ADMIN_API_TOKEN
