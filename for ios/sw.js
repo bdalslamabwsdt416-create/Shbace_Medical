@@ -52,23 +52,26 @@ self.addEventListener('activate', event => {
     await self.clients.claim();
 
     if (!migrated) {
-      // Never reload a first installation before its one-time resource download is complete.
+      // Record the one-time migration before starting navigations. First installs have no ready marker and are never reloaded.
+      await cache.put(migrationUrl, new Response('done', {
+        status: 200, headers: { 'Content-Type': 'text/plain', 'Cache-Control': 'no-store' }
+      }));
       if (ready) {
         const scope = new URL(self.registration.scope);
         const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-        await Promise.all(clients.map(async client => {
+        clients.forEach(client => {
           try {
             const url = new URL(client.url);
             if (url.origin === scope.origin && url.pathname.startsWith(scope.pathname) &&
                 typeof client.navigate === 'function') {
-              await client.navigate(client.url);
+              // Start the reload without waiting for navigation completion inside activate().
+              // This lets the activated worker finish activation before it serves the new document.
+              const navigation = client.navigate(client.url);
+              if (navigation && typeof navigation.catch === 'function') navigation.catch(() => {});
             }
           } catch (_) {}
-        }));
+        });
       }
-      await cache.put(migrationUrl, new Response('done', {
-        status: 200, headers: { 'Content-Type': 'text/plain', 'Cache-Control': 'no-store' }
-      }));
     }
   })());
 });
