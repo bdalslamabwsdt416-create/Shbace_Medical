@@ -119,7 +119,7 @@ window.__bank={on:BANK_ON,total:QB.length,demo:DEMO_QB};
 const FILTERS=[['all','All Questions'],['unanswered','Unanswered'],['correct','Correct'],['incorrect','Incorrect'],['bookmarked','Bookmarked']];
 
 /* ---------- state ---------- */
-const qs={spec:'endocrinology',topic:0,filter:'all',tag:'all',view:'all',idx:0,full:false,noteOpen:{},streak:0,dd:null};
+const qs={spec:'endocrinology',topic:0,filter:'all',tag:'all',view:'single',idx:0,full:false,noteOpen:{},streak:0,dd:null};
 window.__qs=qs;
 window.__shbQBVersionState={
  capture:function(){
@@ -467,7 +467,6 @@ questionBankView=function(){
  return `${appHeader('Question bank')}<div class="rs qb"><h1>Question Bank</h1><p class="sub">Pediatrics · ${esc(sp)} · ${esc(topicTitle())}</p>
  <div class="qtools"><button type="button" class="btn" id="fsBtn" onclick="qFull()">${fsLabel()}</button><button type="button" class="btn" onclick="xOpen()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg>Export PDF</button></div>
  <div class="qfilters">${ddHTML('filter',FILTERS,qs.filter)}${ddHTML('tag',[['all','All Tags'],...TAGS.map(t=>[t,t])],qs.tag)}</div>
- <div class="seg" role="tablist"><button type="button" data-v="single" class="${qs.view==='single'?'on':''}" onclick="setView('single')">Single</button><button type="button" data-v="all" class="${qs.view==='all'?'on':''}" onclick="setView('all')">All</button></div>
  <div id="qbProg">${progHTML()}</div><div id="qbBody">${bankBody()}</div></div>`};
 
 /* ============================================================
@@ -1695,17 +1694,17 @@ addEventListener('resize',()=>{
    SETTINGS — theme, font size, bank layout, backup/restore, progress reset
    ============================================================ */
 const SKEY='shbace_settings_v1';
-const SET=Object.assign({theme:'dark',font:'medium',view:'all',doctor:'on',obFirst:'off',obLast:'off',lastBackup:null},LS.get(SKEY,{}));
+const SET=Object.assign({theme:'dark',font:'medium',view:'single',doctor:'on',obFirst:'off',obLast:'off',lastBackup:null},LS.get(SKEY,{}));
 try{if(LS.get(SKEY,null)===null){const lt=localStorage.getItem('shbace_theme');if(lt)SET.theme=lt==='light'?'light':'dark'}}catch(e){}
-const ENUM={theme:['dark','light'],font:['small','medium','large'],view:['single','all'],doctor:['on','off'],obFirst:['on','off'],obLast:['on','off']};
+const ENUM={theme:['dark','light'],font:['small','medium','large'],view:['single'],doctor:['on','off'],obFirst:['on','off'],obLast:['on','off']};
 const FZ={small:.92,medium:1,large:1.1};
-Object.keys(ENUM).forEach(k=>{if(!ENUM[k].includes(SET[k]))SET[k]={theme:'dark',font:'medium',view:'all',doctor:'on',obFirst:'off',obLast:'off'}[k]});
+Object.keys(ENUM).forEach(k=>{if(!ENUM[k].includes(SET[k]))SET[k]={theme:'dark',font:'medium',view:'single',doctor:'on',obFirst:'off',obLast:'off'}[k]});
 window.__SET=SET;   /* v47: lets the global onboarding router read the real, persisted switches */
 function persistSettings(){LS.set(SKEY,SET);try{localStorage.setItem('shbace_theme',SET.theme)}catch(e){}}
-function applySettings(){const ph=$('.phone');if(ph){ph.classList.toggle('light',SET.theme==='light');ph.classList.toggle('nodoc',SET.doctor==='off')}document.body.classList.toggle('nodoc',SET.doctor==='off');document.documentElement.style.setProperty('--fz',FZ[SET.font]||1);qs.view=SET.view}
+function applySettings(){const ph=$('.phone');if(ph){ph.classList.toggle('light',SET.theme==='light');ph.classList.toggle('nodoc',SET.doctor==='off')}document.body.classList.toggle('nodoc',SET.doctor==='off');document.documentElement.style.setProperty('--fz',FZ[SET.font]||1);qs.view='single';SET.view='single'}
 window.setSet=function(k,v){if(!ENUM[k]||!ENUM[k].includes(v))return;SET[k]=v;persistSettings();applySettings();if(mode==='app')renderAppDemo();else if(mode==='preview')renderSlide()};
 toggleTheme=function(){setSet('theme',SET.theme==='light'?'dark':'light')};
-const __sv=window.setView;window.setView=function(v){SET.view=v;persistSettings();__sv(v)};
+const __sv=window.setView;window.setView=function(){SET.view='single';qs.view='single';persistSettings();__sv('single')};
 const __ht=hdrTap;hdrTap=function(n){if(n==='Settings'){appPage='settings';renderAppDemo();return}__ht(n)};
 DR2.forEach(g=>g[1].forEach(it=>{if(it[0]==='Settings')it[1]='settings'}));
 const __menu2=menuView;menuView=function(){return appPage==='settings'?settingsView():__menu2()};
@@ -1727,7 +1726,6 @@ function settingsView(){
  <div class="card setcard"><h3>Appearance</h3>
   ${row('Theme','Dark or light for the whole app',seg('theme',[['dark','Dark'],['light','Light']]))}
   ${row('Font size','Scales text and controls',seg('font',[['small','Small'],['medium','Medium'],['large','Large']]))}
-  ${row('Question Bank layout','Default view when you open a topic',seg('view',[['single','Single'],['all','All']]))}
   <div class="setrow"><b dir="rtl"><bdi>شخصية الطبيب والتعابير</bdi></b><small dir="rtl">تظهر تعبيرات الطبيب داخل العنصر المرتبط بالحدث فقط، وبعد الإجابة في الأسئلة</small><button type="button" class="drsw ${SET.doctor==='on'?'on':''}" role="switch" aria-checked="${SET.doctor==='on'}" aria-label="شخصية الطبيب والتعابير" onclick="setSet('doctor','${SET.doctor==='on'?'off':'on'}')"><i></i><span>${SET.doctor==='on'?'ON':'OFF'}</span></button></div></div>
  <div class="card setcard"><h3>Onboarding</h3>
   <div class="setrow"><b>First Onboarding Page</b><small>When ON, the welcome page is shown at app start. Turn it OFF to skip it.</small><button type="button" class="drsw ${SET.obFirst==='on'?'on':''}" role="switch" aria-checked="${SET.obFirst==='on'}" aria-label="First Onboarding Page" onclick="setSet('obFirst','${SET.obFirst==='on'?'off':'on'}')"><i></i><span>${SET.obFirst==='on'?'ON':'OFF'}</span></button></div>
@@ -1792,7 +1790,7 @@ const CHANGELOG=[
   ['Backup & restore','One full student-data backup (export, restore or merge) in Settings; files are validated before anything changes.'],
   ['Question bank fixes','Cleaner explanations, corrected spelling slips, safer handling of invalid answer keys, and a clear error instead of sample questions if the bank cannot load.']]},
  {v:'Version 5.8',tag:'available',st:'done',items:[
-  ['Settings','Theme (dark / light), font size (small / medium / large) and Question Bank layout (single / all), saved on this device.'],
+  ['Settings','Theme (dark / light), font size (small / medium / large); the Question Bank now opens one question at a time.'],
   ['Backup & restore','JSON backup of answers, saved questions, notes, reports, Smart Review and settings. Files are validated, summarised and confirmed before restoring; invalid files are rejected without changing your data.'],
   ['Reset progress','Reset one topic or all topics. Saved questions, notes, reports and Smart Review are kept.'],
   ['About page','What the app is for, live question and specialty counts, and how your data is stored.'],
@@ -2914,7 +2912,7 @@ function u11Counts(stores){
 function u11LegacyV1(obj){
  if(!obj||obj.version!==1||obj.format!=='backup'||obj.app!=='Shbace Medical'||!obj.data||!obj.data.qb)throw new Error('Unsupported or malformed legacy backup');
  const d=obj.data,q=d.qb;const stores={};stores[KEY]=JSON.stringify({ans:q.ans||{},saved:q.saved||{},notes:q.notes||{},rep:q.rep||{},sr:q.sr||{}});
- if(d.settings){stores[SKEY]=JSON.stringify(Object.assign({theme:'dark',font:'medium',view:'all',doctor:'on'},d.settings));if(d.settings.theme)stores['shbace_theme']=d.settings.theme}
+ if(d.settings){stores[SKEY]=JSON.stringify(Object.assign({theme:'dark',font:'medium',view:'single',doctor:'on'},d.settings));if(d.settings.theme)stores['shbace_theme']=d.settings.theme}
  if(d.grade!==null&&d.grade!==undefined)stores['shbace_onboarding_v3_grade']=String(d.grade);
  return {app:'Shbace Medical',format:'backup',version:U11_VERSION,exportedAt:obj.exportedAt||'',stores,checksum:u11Checksum(stores),legacyPartial:true};
 }
