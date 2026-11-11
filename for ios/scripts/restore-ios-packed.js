@@ -79,7 +79,7 @@ if(V5.autoUpdate&&swReady()){
  var hadController=!!navigator.serviceWorker.controller;
  var pendingReload=false,reloadStarted=false,waitingForGate=false,lastCheck=0;
  function reloadWhenSafe(){
-  if(!pendingReload||reloadStarted||!hadController||!navigator.serviceWorker.controller)return;
+  if(!pendingReload||reloadStarted||!navigator.serviceWorker.controller)return;
   /* Never interrupt an active study session. Apply the new shell when the app is backgrounded,
      or during startup before the app has finished booting. */
   if(!document.hidden&&window.__shbBooted)return;
@@ -106,7 +106,12 @@ if(V5.autoUpdate&&swReady()){
   }).catch(function(){});
   fetch('pwa-version.json?shbcheck='+Date.now(),{cache:'no-store'})
    .then(function(r){return r.ok?r.json():null})
-   .then(function(v){if(v&&v.version)lsSet(VER_KEY,v.version)})
+   .then(function(v){
+    if(!v||!v.version)return;
+    var previous=ls(VER_KEY);
+    lsSet(VER_KEY,v.version);
+    if(previous&&previous!==v.version){pendingReload=true;reloadWhenSafe()}
+   })
    .catch(function(){});
  }
  setTimeout(function(){checkUpdates(true)},9000);
