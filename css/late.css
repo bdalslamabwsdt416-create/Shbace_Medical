@@ -1835,3 +1835,23 @@ html:has(#startupSplash){background:#030b16}
 .phone.light .ab2-how .how-tip{background:rgba(31,107,255,.06);border-color:rgba(31,107,255,.35)}
 .phone.light .ab2-how .how-warn{background:#fff4e0;border-color:rgba(200,120,0,.45)}
 @media(prefers-reduced-motion:reduce){.ab2-how .how-chev{transition:none}.ab2-how .how-sec[open]>.how-in{animation:none}}
+
+ 
+/* v1.3.1 corrective guard: keep BOTH original first-onboarding background layers visible under the hologram. */
+.phone:has(#phoneContent[data-ob="0"]){
+  background-color:#030b1f!important;
+  background-image:url("/assets/img/8e6540881e86.png")!important;
+  background-size:cover!important;
+  background-position:center center!important;
+  background-repeat:no-repeat!important;
+}
+.phone:has(#phoneContent[data-ob="0"])>.shb-obbg{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  background-image:url("/assets/img/300a2b16b550.jpg")!important;
+  background-color:#030b1f!important;
+  background-size:cover!important;
+  background-position:center center!important;
+  background-repeat:no-repeat!important;
+}
