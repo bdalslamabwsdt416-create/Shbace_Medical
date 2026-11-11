@@ -1,0 +1,44 @@
+/* Shbace Medical — iOS pack v5 (styles for js/30-ios-v5.js). Harmless on other browsers: nothing here is used unless that script runs. */
+
+/* 1. landscape: keep content out of the notch / home bar (only the part of the inset the centred phone column does not already clear) */
+html.v5-land{--v5-w:min(100vw,430px)}
+@media(min-width:900px){html.v5-land{--v5-w:min(100vw,640px)}}
+@media(orientation:landscape){
+ html.v5-land body.app-mode .phone{
+  padding-left:max(0px,calc(env(safe-area-inset-left) - (100vw - var(--v5-w))/2));
+  padding-right:max(0px,calc(env(safe-area-inset-right) - (100vw - var(--v5-w))/2));
+ }
+ html.v5-land .shb-pwa-install-hint{left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right))}
+}
+
+/* offline bar */
+.v5-offbar{position:fixed;z-index:2147481500;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top) + 6px) max(12px,env(safe-area-inset-right)) 7px max(12px,env(safe-area-inset-left));text-align:center;font:600 12.5px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;color:#fff;background:#8a5a00;transform:translateY(-110%);transition:transform .3s ease;pointer-events:none}
+.v5-offbar.good{background:#14794f}
+.v5-offbar.show{transform:none}
+
+/* banners (update / backup) */
+.v5-banner{position:fixed;z-index:2147481000;left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));bottom:calc(88px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid rgba(89,166,242,.45);border-radius:16px;background:rgba(7,20,43,.97);color:#e4f2ff;box-shadow:0 12px 35px rgba(0,0,0,.4);font:13px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;opacity:0;transform:translateY(14px);transition:opacity .3s,transform .3s}
+.v5-banner.show{opacity:1;transform:none}
+.v5-bt{display:grid;gap:2px;min-width:0;flex:1}.v5-bt span{color:#b5cce5;font-size:12px}
+.v5-go{flex:none;min-height:38px;padding:0 14px;border:0;border-radius:11px;background:#2f8bff;color:#fff;font:700 13px system-ui,-apple-system,sans-serif}
+.v5-go:disabled{opacity:.6}
+.v5-x{flex:none;width:34px;height:34px;border:1px solid rgba(125,177,232,.35);border-radius:9px;background:transparent;color:#eaf4ff;font-size:20px}
+html.v5-kb .v5-banner{display:none}
+
+/* hide the bottom bar while the keyboard is open so fields are not covered */
+html.v5-kb .phone .app-nav{display:none!important}
+
+/* question buttons */
+.v5-acts{margin-top:9px}
+.v5-acts .qa b{font-weight:650}
+.v5-acts .qa.on{border-color:#2f8bff}
+
+/* toast */
+.v5-toast{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);z-index:90;padding:9px 15px;border-radius:99px;background:rgba(10,30,70,.95);border:1px solid rgba(94,182,255,.5);color:#e6f1ff;font:600 13px system-ui,sans-serif;white-space:nowrap}
+
+/* About: install card + progress card */
+.v5-inst ol{margin:8px 0 6px;padding-inline-start:22px;display:grid;gap:8px;line-height:1.7}
+.v5-inst .v5-sub,.v5-inst .v5-note{margin:4px 0;opacity:.85}
+.v5-inst .v5-ic{display:inline-block;padding:0 6px;border:1px solid currentColor;border-radius:6px;font-size:.9em}
+.v5-pcard{margin-top:12px}
+.v5-pcard p{margin:4px 0 12px;opacity:.85}
