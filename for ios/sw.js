@@ -1,4 +1,5 @@
 'use strict';
+// build: ios-v7 (change this line on every release so iOS notices a new service worker)
 
 const CACHE_NAME = 'shbace-medical-offline-v2';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
@@ -10,6 +11,9 @@ const APP_SHELL = [
   './offline-assets-manifest.json',
   './css/core.css',
   './css/late.css',
+  './css/ios-v5.css',
+  './css/ios-v6.css',
+  './css/ios-v7.css',
   './js/29-offline-setup.js'
 ];
 
@@ -45,6 +49,8 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
   if (url.pathname.endsWith('/sw.js')) return;
+  // v5: the in-app update check asks for pwa-version.json?shbcheck=… and must reach the network, not the cache.
+  if (url.searchParams.has('shbcheck')) return;
 
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
