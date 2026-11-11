@@ -280,13 +280,10 @@ try{
  var t=localStorage.getItem('shbace_onboarding_v3_grade');
  if(!Number(t))localStorage.setItem('shbace_onboarding_v3_grade','5');
  if(!selectedGrade)selectedGrade=Number(localStorage.getItem('shbace_onboarding_v3_grade'))||5;
- screenTitles.splice(1);screenHints.splice(1);
- obReplay=false;
- routeAfterSplash=function(){
-  try{selectedGrade=Number(localStorage.getItem('shbace_onboarding_v3_grade'))||5}catch(_){selectedGrade=5}
-  returningUser=!!onboardingDone();mode=onboardingDone()?'app':'preview';slide=0;appPage='subjects';obReplay=false;setModeUI()
- };
-}catch(e){console.warn('v1.3 onboarding routing setup failed',e)}
+ /* Keep the original onboarding screens and routeAfterSplash() intact.
+    Truncating screenTitles made the hologram screen appear to be the final page,
+    which hid its shared background and removed the remaining navigation steps. */
+}catch(e){console.warn('v1.3 onboarding grade initialization failed',e)}
 function startup(){
  saveSnapshot();scheduleReminder();midnight();removeBadges();removeOldPlanner();settingsPatch();
  if(appPage==='examgoal'&&mode==='app')renderAppDemo()
