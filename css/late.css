@@ -1795,3 +1795,43 @@ html:has(#startupSplash){background:#030b16}
 @media(max-height:700px){.shb-offline-kicker{margin-top:14px}.shb-offline-card{padding-top:16px;padding-bottom:16px}.shb-offline-intro{margin:8px 0 12px}.shb-offline-stages{gap:5px}.shb-offline-stage{min-height:32px}}
 
 
+
+/* ===== About · Arabic How to Use accordion — additive and scoped ===== */
+.ab2-how{margin-top:14px;direction:rtl}
+.ab2-how .how-sub{margin:-2px 0 10px;direction:rtl;text-align:right;font:800 17px/1.6 'Noto Sans Arabic','Segoe UI',Tahoma,system-ui,sans-serif;color:#DCE8F2}
+.ab2-how .how-intro{margin:0 0 12px;direction:rtl;text-align:right;font:500 13px/1.8 'Noto Sans Arabic','Segoe UI',Tahoma,system-ui,sans-serif;color:#c7d9f0}
+.ab2-how .how-list{display:grid;gap:8px}
+.ab2-how .how-sec{border-radius:15px;border:1px solid rgba(80,170,255,.25);background:rgba(60,150,255,.07);overflow:hidden}
+.ab2-how .how-sec[open]{background:rgba(60,150,255,.11);border-color:rgba(80,190,255,.42)}
+.ab2-how .how-sec>summary{list-style:none;display:flex;align-items:center;gap:10px;min-height:54px;padding:9px 12px;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.ab2-how .how-sec>summary::-webkit-details-marker{display:none}
+.ab2-how .how-sec>summary::marker{content:""}
+.ab2-how .how-n{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:800 12px/1 system-ui,sans-serif;color:#06223f;background:linear-gradient(135deg,#35e6ff,#2f8bff)}
+.ab2-how .how-t{flex:1;min-width:0;font:800 14px/1.7 'Noto Sans Arabic','Segoe UI',Tahoma,system-ui,sans-serif;color:#eaf4ff}
+.ab2-how .how-chev{flex:none;width:9px;height:9px;margin:0 4px 3px;border-right:2px solid #35e6ff;border-bottom:2px solid #35e6ff;transform:rotate(45deg);transition:transform .22s ease}
+.ab2-how .how-sec[open]>summary .how-chev{transform:rotate(-135deg) translate(-2px,-2px)}
+.ab2-how .how-in{overflow:hidden}
+.ab2-how .how-sec[open]>.how-in{animation:shbHowReveal .2s ease both}
+@keyframes shbHowReveal{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.ab2-how .how-pad{padding:2px 14px 14px;direction:rtl;text-align:right;font:400 13.5px/1.9 'Noto Sans Arabic','Segoe UI',Tahoma,system-ui,sans-serif;color:#d6e6fb;overflow-wrap:anywhere}
+.ab2-how .how-pad p{margin:0 0 8px;color:inherit;font:inherit}
+.ab2-how .how-pad ol,.ab2-how .how-pad ul{margin:7px 0 0;padding-inline-start:23px}
+.ab2-how .how-pad li{padding-inline-start:2px;color:inherit;font:inherit}
+.ab2-how .how-pad li+li{margin-top:7px}
+.ab2-how .how-en{display:inline-block;max-width:100%;direction:ltr;unicode-bidi:isolate;font-weight:750;color:#a8e6ff;overflow-wrap:anywhere;vertical-align:baseline}
+.ab2-how .how-tip,.ab2-how .how-warn{margin-top:10px!important;padding:9px 12px;border-radius:12px}
+.ab2-how .how-tip{background:rgba(53,230,255,.07);border:1px dashed rgba(53,230,255,.38)}
+.ab2-how .how-warn{background:rgba(255,170,60,.09);border:1px solid rgba(255,190,90,.42)}
+.ab2-how .how-tip b,.ab2-how .how-warn b{color:#eaf4ff}
+.phone.light .ab2-how .how-sub{color:#1d365e}
+.phone.light .ab2-how .how-intro{color:#425b7b}
+.phone.light .ab2-how .how-t,.phone.light .ab2-how .how-tip b,.phone.light .ab2-how .how-warn b{color:#132b4d}
+.phone.light .ab2-how .how-pad{color:#213d5d}
+.phone.light .ab2-how .how-en{color:#0a5a96}
+.phone.light .ab2-how .how-sec{background:#f2f7ff;border-color:rgba(40,100,200,.22)}
+.phone.light .ab2-how .how-sec[open]{background:#eaf2ff;border-color:rgba(40,100,200,.4)}
+.phone.light .ab2-how .how-n{color:#fff;background:linear-gradient(135deg,#1f6bff,#2b8bd9)}
+.phone.light .ab2-how .how-chev{border-color:#1f6bff}
+.phone.light .ab2-how .how-tip{background:rgba(31,107,255,.06);border-color:rgba(31,107,255,.35)}
+.phone.light .ab2-how .how-warn{background:#fff4e0;border-color:rgba(200,120,0,.45)}
+@media(prefers-reduced-motion:reduce){.ab2-how .how-chev{transition:none}.ab2-how .how-sec[open]>.how-in{animation:none}}
