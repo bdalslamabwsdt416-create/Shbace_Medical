@@ -2118,6 +2118,7 @@ quizRunView=function(){const A=QZ.active;if(!A)return quizView();
 const qzRe=()=>{if(appPage==='quizrun')renderAppDemo()};
 window.qzPick=function(i){const A=QZ.active;if(!A)return;const id=A.ids[A.idx];
  if(i<0||A.ans[id]===i){if(A.fb==='instant'&&A.ans[id]!==undefined)return;delete A.ans[id]}else{if(A.fb==='instant'&&A.ans[id]!==undefined)return;A.ans[id]=i}qzSave();qzRe()};
+window.__shbQuizCurrent=function(){const A=QZ.active;if(!A)return null;const id=A.ids[A.idx],q=QBY.get(id);return {id:id,idx:A.idx,correct:q?q.k:null,selected:Object.prototype.hasOwnProperty.call(A.ans,id)?A.ans[id]:undefined}};
 window.qzMark=function(){const A=QZ.active;if(!A)return;const id=A.ids[A.idx];A.mark[id]?delete A.mark[id]:A.mark[id]=1;qzSave();qzRe()};
 const qzTop=()=>setTimeout(()=>{const e=document.querySelector('.qzbar');e&&e.scrollIntoView({block:'start'})},30);
 window.qzGo=function(d){const A=QZ.active;if(!A)return;const n=Math.max(0,Math.min(A.ids.length-1,A.idx+d));if(n!==A.idx){qzAnim=true;A.idx=n;qzSave();qzRe();qzTop()}};
