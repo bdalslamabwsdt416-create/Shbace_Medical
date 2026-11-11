@@ -1,5 +1,5 @@
 'use strict';
-// build: ios-v14 (safe setup retry and first-controller adoption guard) (silent automatic updates; verified pre-splash setup)
+// build: ios-v15 (gate-synchronized splash, onboarding renderer order, silent activation)
 
 const CACHE_NAME = 'shbace-medical-offline-v2';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
@@ -10,6 +10,7 @@ const APP_SHELL = [
   './pwa-version.json',
   './offline-assets-manifest.json',
   './sw.js',
+  './js/04-app-main.js',
   './js/09-app-features-v6.js',
   './js/30-ios-v5.js',
   './js/32-ios-v7.js',
@@ -43,39 +44,18 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  // Preserve existing caches and migrate a previously verified 1.4.5 PWA away from its legacy manual-update banner.
+  // Activate and claim silently. Never navigate/reload existing PWA clients from the activation handler.
   event.waitUntil((async () => {
-    const cache = await caches.open(CACHE_NAME);
-    const migrationUrl = new URL('__shbace_silent_update_migration_146__', self.registration.scope).href;
-    const migrated = await cache.match(migrationUrl);
-    const ready = await cache.match(READY_URL);
     await self.clients.claim();
-
-    if (!migrated) {
-      // Record the one-time migration before starting navigations. First installs have no ready marker and are never reloaded.
+    const cache = await caches.open(CACHE_NAME);
+    const migrationUrl = new URL('__shbace_silent_update_migration_148__', self.registration.scope).href;
+    if (!(await cache.match(migrationUrl))) {
       await cache.put(migrationUrl, new Response('done', {
         status: 200, headers: { 'Content-Type': 'text/plain', 'Cache-Control': 'no-store' }
       }));
-      if (ready) {
-        const scope = new URL(self.registration.scope);
-        const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-        clients.forEach(client => {
-          try {
-            const url = new URL(client.url);
-            if (url.origin === scope.origin && url.pathname.startsWith(scope.pathname) &&
-                typeof client.navigate === 'function') {
-              // Start the reload without waiting for navigation completion inside activate().
-              // This lets the activated worker finish activation before it serves the new document.
-              const navigation = client.navigate(client.url);
-              if (navigation && typeof navigation.catch === 'function') navigation.catch(() => {});
-            }
-          } catch (_) {}
-        });
-      }
     }
   })());
 });
-
 self.addEventListener('fetch', event => {
   const request = event.request;
   if (request.method !== 'GET') return;
