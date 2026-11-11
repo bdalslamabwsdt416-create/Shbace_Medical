@@ -14,7 +14,6 @@
  const groups=[
   ...(SHOW_LEARN?[learn]:[]),review,
   ['Your progress',[pick('Statistics'),['Weak areas','weak','<path d=\"M4 20V10M10 20V4M16 20v-7M22 20H2\"/><circle cx=\"16\" cy=\"8\" r=\"2.2\"/>'],pick('Study timer')].filter(Boolean)],
-  ['Updates',[pick('Notifications')].filter(Boolean)],
   ['App & support',['Settings','Contact & Feedback','Changelog','About','Rate this app'].map(pick).filter(Boolean)]
  ];
  DR2.length=0;groups.forEach(g=>DR2.push(g));
