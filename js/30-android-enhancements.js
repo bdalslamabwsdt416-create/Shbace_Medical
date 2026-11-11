@@ -21,7 +21,7 @@
   var DEFAULTS = {
     haptics: true, shareQuestion: true, copyQuestion: true, readAloud: true,
     keepScreenOn: true, autoTheme: true, examCountdown: true,
-    readingSpeed: 'normal'
+    readingSpeed: 'normal', doctorExpressions: true
   };
   function readPrefs() {
     try {
@@ -105,6 +105,7 @@
       var phone = document.querySelector('.phone');
       if (phone) phone.classList.toggle('light', light);
       document.body.classList.toggle('nodoc', !!(window.__SET && window.__SET.doctor === 'off'));
+      document.documentElement.classList.toggle('shb-doctor-expressions-off', !prefs.doctorExpressions);
     } catch (_) {}
   }
   var themeQuery = null;
@@ -127,6 +128,7 @@
       toggleMarkup('shareQuestion', 'Share a question', 'Show the question-sharing action.') +
       toggleMarkup('copyQuestion', 'Copy question text', 'Show the copy action for notes or AI tools.') +
       toggleMarkup('readAloud', 'Read questions aloud', 'Show voice playback controls on questions.') +
+      toggleMarkup('doctorExpressions', 'Doctor character & expressions', 'Show the doctor’s expressions only in the related event element and after answering a question.') +
       '<div class="shb-af-row"><div class="shb-af-copy"><b>Reading speed</b><small>Applies to spoken question text.</small></div>' +
       '<div class="seg shb-af-speed" role="group" aria-label="Reading speed">' +
       ['slow', 'normal', 'fast'].map(function (v) {
@@ -412,6 +414,46 @@
       if (notifications.length) await p.schedule({ notifications: notifications });
     } catch (e) { console.warn('Study reminders could not be scheduled', e); }
   }
+  var EXAM_GOAL_REMINDER_BASE = 392000000;
+  async function schedulePlannerReminder(enabled, time, target, examName) {
+    var p = await localPlugin();
+    if (!p) return false;
+    var ids = [];
+    for (var i = 0; i < 7; i++) ids.push(EXAM_GOAL_REMINDER_BASE + i);
+    await cancelReminderIds(p, ids);
+    if (!enabled || !(Number(target) > 0) || !reminderCategoryEnabled()) return true;
+    try {
+      var perm = await p.checkPermissions();
+      if (!perm || perm.display !== 'granted') return false;
+      try { await p.createChannel({ id: 'shbace-reminders', name: 'Study reminders', description: 'Daily exam goal reminders', importance: 2 }); } catch (_) {}
+      var parts = String(time || '19:30').split(':').map(Number);
+      var hour = Math.max(0, Math.min(23, parts[0] || 0));
+      var minute = Math.max(0, Math.min(59, parts[1] || 0));
+      var now = new Date(), notifications = [];
+      for (var day = 0; day < 7; day++) {
+        var at = new Date(now.getFullYear(), now.getMonth(), now.getDate() + day, hour, minute, 0, 0);
+        if (at.getTime() <= now.getTime() + 30000) continue;
+        notifications.push({
+          id: EXAM_GOAL_REMINDER_BASE + day,
+          title: 'Exam goal · ' + String(examName || 'Today'),
+          body: 'Today’s target: ' + Math.ceil(Number(target)) + ' questions.',
+          schedule: { at: at, allowWhileIdle: true },
+          channelId: 'shbace-reminders'
+        });
+      }
+      if (notifications.length) await p.schedule({ notifications: notifications });
+      return true;
+    } catch (e) {
+      console.warn('Exam goal reminder could not be scheduled', e);
+      return false;
+    }
+  }
+  async function clearLegacyExamReminders() {
+    var p = await localPlugin();
+    if (!p) return;
+    try { await cancelReminderIds(p, [REMINDER_BASE + 7, REMINDER_BASE + 3, REMINDER_BASE + 1]); } catch (_) {}
+  }
+
   async function planExamReminders() {
     var p = await localPlugin();
     if (!p) return;
@@ -540,8 +582,6 @@
     if (prefs.autoTheme) applyTheme();
     mountSettings();
     mountAndroidHowToUse();
-    mountPlanner();
-    renderPlannerResult();
     mountShareProgress();
     decorateQuestionCards();
     screenAwake();
@@ -596,7 +636,7 @@
   var oldNSetPref = window.nSetPref;
   if (typeof oldNSetPref === 'function') window.nSetPref = function (kind, value) {
     var r = oldNSetPref.apply(this, arguments);
-    if (kind === 'reminders') { planDailyReminders(); planExamReminders(); }
+    if (kind === 'reminders') { planDailyReminders(); }
     return r;
   };
   var oldAnswer = window.qAnswer;
@@ -688,6 +728,7 @@
       var k = prefBtn.getAttribute('data-shb-pref');
       prefs[k] = !prefs[k]; savePrefs();
       if (k === 'autoTheme') applyTheme();
+      if (k === 'doctorExpressions') applyTheme();
       if (k === 'keepScreenOn') screenAwake();
       if (k === 'examCountdown') planExamReminders();
       if (k === 'shareQuestion' || k === 'copyQuestion' || k === 'readAloud') {
@@ -773,6 +814,7 @@
     '.shb-af-qtools{display:flex;flex-wrap:wrap;gap:7px;margin:7px 0 10px}.shb-af-qtools button{border:1px solid rgba(75,160,240,.35);border-radius:10px;background:rgba(24,92,160,.13);color:inherit;padding:7px 10px;font:700 11px inherit;cursor:pointer}',
     '.qopt.shb-struck{opacity:.32!important;text-decoration:line-through!important;filter:grayscale(1)}',
     '.shb-eg-card{margin:14px 0;padding:16px;border:1px solid rgba(79,164,255,.35);background:linear-gradient(145deg,rgba(15,54,105,.48),rgba(8,26,58,.76))}',
+    '.shb-doctor-expressions-off .qreact .drface,.shb-doctor-expressions-off .qfb .drface,.shb-doctor-expressions-off .qd-coach .drface,.shb-doctor-expressions-off .qzr .drface{display:none!important}',
     '.shb-eg-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.shb-eg-kicker{font-size:9px;letter-spacing:.15em;font-weight:900;color:#71d8ff}.shb-eg-head h2{font-size:18px;margin:5px 0}.shb-eg-head p{font-size:11px;line-height:1.45;color:var(--muted,#8da7c5);margin:0}.shb-eg-icon{width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:rgba(50,151,255,.17);font-size:25px;color:#8fe2ff}',
     '.shb-eg-date-label{display:block;font-size:11px;font-weight:800;margin:15px 0 6px}.shb-eg-date{width:100%;min-height:44px}',
     '.shb-eg-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:13px}.shb-eg-metrics>div{min-width:0;padding:10px 7px;border-radius:12px;background:rgba(70,137,210,.12);border:1px solid rgba(85,160,230,.15);text-align:center}.shb-eg-metrics b,.shb-eg-metrics small{display:block}.shb-eg-metrics b{font-size:21px;font-variant-numeric:tabular-nums;color:#f0f8ff}.shb-eg-metrics small{font-size:9px;line-height:1.3;color:#a6c4e7;margin-top:3px}.shb-eg-metrics .shb-eg-target{background:rgba(29,185,151,.12);border-color:rgba(65,211,177,.25)}.shb-eg-metrics .shb-eg-target b{color:#80f0cc}',
@@ -783,6 +825,7 @@
   ].join('');
   document.head.appendChild(style);
 
+  applyTheme();
   setTimeout(onRender, 350);
   // Mirror only events created during this app launch (never replay the student's old notification history).
   setTimeout(function () {
@@ -793,6 +836,8 @@
   }, 1300);
   window.__shbAndroidFeatures = {
     state: function () { return { prefs: Object.assign({}, prefs), examDate: localStorage.getItem(GOAL_KEY) || '' }; },
-    refresh: onRender
+    refresh: onRender,
+    schedulePlannerReminder: schedulePlannerReminder,
+    clearLegacyExamReminders: clearLegacyExamReminders
   };
 })();
