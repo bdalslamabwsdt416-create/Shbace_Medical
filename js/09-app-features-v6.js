@@ -3182,6 +3182,26 @@ const u11OriginalSettings=settingsView;
 settingsView=function(){let h=u11OriginalSettings();const extra=`<div class="u10-settings-card">${u10PrefCard()}</div><div class="card setcard"><h3>Student data backup</h3><p class="meta">Versioned JSON backup includes the separate Quiz History store, Question Bank progress, Saved Questions, Wrong Answers, Smart Review, Pinned &amp; Recent, My Notes, reports, settings, notification history and other app-prefixed student stores. Static Question Bank content is not exported.</p><div class="setbtns"><button type="button" class="btn primary" onclick="exportBackup()">Export full backup</button><button type="button" class="btn" onclick="document.getElementById('bkFile').click()">Restore / Merge</button></div><p class="meta">${SET.lastBackup?'Last backup: '+new Date(SET.lastBackup).toLocaleString():'No backup created yet.'}</p></div>`;const ix=h.lastIndexOf('</div>');return ix>=0?h.slice(0,ix)+extra+h.slice(ix):h+extra};
 /* PAGES stores function references, so refresh the routes after replacing their renderers. */
 PAGES.notifs=notifsView;PAGES.settings=settingsView;
+/* Android 1.3 bridge: expose the existing Question Bank state read-only; no duplicate unanswered counter. */
+window.__shbAndroidPageRegistry=PAGES;
+window.__shbExamPlannerSnapshot=function(){
+ const rows=QB.map(function(q){
+  const a=S.ans[q.id]||null;
+  return {id:String(q.id),spec:String(q.spec||'other'),specName:String(SPEC_NAME[q.spec]||q.spec||'Other'),
+   topic:String(q.topic||'other'),topicName:String(TOPIC_NAME[q.topic]||'Other'),
+   answered:!!a,correct:!!(a&&a.ok),at:a&&Number(a.t)>0?Number(a.t):0};
+ });
+ const answered=rows.filter(function(x){return x.answered;});
+ const done=rows.filter(function(x){return x.correct;}).length;
+ const totals=stTotals();
+ const sessionQ=(ST.sessions||[]).reduce(function(n,x){return n+Math.max(0,Number(x.q)||0)},0);
+ const sessionMs=(ST.sessions||[]).reduce(function(n,x){return n+Math.max(0,Number(x.ms)||0)},0);
+ let due=0;try{due=dueList().length}catch(e){}
+ return {bankTotal:rows.length,answered:answered.length,correct:done,remaining:Math.max(0,rows.length-answered.length),
+  rows:rows,dueSmartReview:due,averageAnswerMs:sessionQ?sessionMs/sessionQ:null,
+  studyMs:totals.tot||0};
+};
+
 
 /* Push setup guidance is intentionally explicit: this HTML has no Firebase project,
    native Android folder, google-services.json or deployed backend endpoint to bind. */
