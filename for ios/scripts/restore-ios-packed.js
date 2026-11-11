@@ -94,7 +94,7 @@ if(V5.autoUpdate&&swReady()){
   setTimeout(function(){location.reload()},200);
  }
  navigator.serviceWorker.addEventListener('controllerchange',function(){
-  if(hadController&&navigator.serviceWorker.controller){pendingReload=true;reloadWhenSafe()}
+  if(navigator.serviceWorker.controller){pendingReload=true;reloadWhenSafe()}
  });
  function checkUpdates(force){
   var now=Date.now();
