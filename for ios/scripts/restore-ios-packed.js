@@ -74,7 +74,7 @@ manifest.totalBytes = manifest.files.reduce(function (sum, item) { return sum + 
 // Keep the offline package version tied to the exact deployed file inventory and hashes.
 manifest.version = crypto.createHash('sha256')
   .update(manifest.files.slice().sort(function (a, b) { return a.path.localeCompare(b.path); })
-    .map(function (item) { return item.path + ':' + item.sha256; }).join('\\n'))
+    .map(function (item) { return item.path + ':' + item.sha256; }).join('\n'))
   .digest('hex');
 manifest.generatedAt = new Date().toISOString();
 fs.writeFileSync(path.join(out, 'offline-assets-manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
