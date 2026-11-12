@@ -267,7 +267,7 @@
       u.pitch = 0.96;
       u.volume = 1;
       var voices = window.speechSynthesis.getVoices() || [];
-      var maleNames = /\\b(david|mark|guy|james|daniel|alex|fred|thomas|tom|george|oliver|ryan|aaron|jason|matthew|andrew|brian|arthur|liam|nathan|john|michael|christopher|eric|peter|paul|stephen|richard|william|henry|bruce)\\b/i;
+      var maleNames = /\b(david|mark|guy|james|daniel|alex|fred|thomas|tom|george|oliver|ryan|aaron|jason|matthew|andrew|brian|arthur|liam|nathan|john|michael|christopher|eric|peter|paul|stephen|richard|william|henry|bruce)\b/i;
       var voice = voices.find(function (v) { return maleNames.test(String(v.name || '')) && /^en/i.test(v.lang); }) ||
         voices.find(function (v) { return /^en-US$/i.test(v.lang); }) ||
         voices.find(function (v) { return /^en/i.test(v.lang); });
