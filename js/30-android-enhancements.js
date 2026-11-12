@@ -464,6 +464,14 @@
   function dailyReminderAt(day) {
     var minutes = 19 * 60 + 30; // 7:30 PM is the normal daily reminder time.
     try {
+      // The planner schedules only the next 14 days. Do not shift this reminder
+      // outside that window when the planner has no notification on that date.
+      var today = new Date(); today.setHours(0, 0, 0, 0);
+      var targetDay = new Date(day.getFullYear(), day.getMonth(), day.getDate());
+      var offset = Math.round((targetDay.getTime() - today.getTime()) / DAY);
+      if (offset < 0 || offset >= 14) {
+        return new Date(day.getFullYear(), day.getMonth(), day.getDate(), 19, 30, 0, 0);
+      }
       var goals = JSON.parse(localStorage.getItem('shbace_exam_goals_v2') || 'null');
       if (Array.isArray(goals)) {
         var eligible = goals.filter(function (goal) {
@@ -474,8 +482,8 @@
           var parts = eligible[0].reminderTime.split(':').map(Number);
           var plannerMinutes = parts[0] * 60 + parts[1];
           if (Number.isFinite(plannerMinutes) && Math.abs(plannerMinutes - minutes) < 15) {
-            // allowWhileIdle alarms are rate-limited by Android; keep at least 15 minutes
-            // between the planner's configured daily reminder and this generic reminder.
+            // Android can rate-limit allowWhileIdle alarms to one every 9 minutes.
+            // Keep a 15-minute gap so both distinct reminders can still be delivered.
             minutes = plannerMinutes + 15;
             if (minutes > 23 * 60 + 44) minutes = plannerMinutes - 15;
           }
@@ -509,6 +517,7 @@
       if (notifications.length) await p.schedule({ notifications: notifications });
     } catch (e) { console.warn('Study reminders could not be scheduled', e); }
   }
+  window.__shbPlanDailyReminders = planDailyReminders;
   async function planExamReminders() {
     var p = await localPlugin();
     if (!p) return;
