@@ -1,13 +1,12 @@
 {
   "app": "Shbace Medical",
   "platform": "PWA",
-  "version": "1.4.9",
-  "displayVersion": "1.4.9",
+  "version": "1.4.10",
+  "displayVersion": "1.4.10",
   "releaseDate": "2026-11-12",
   "releaseNotes": [
-    "Always show the seven-second Splash first; offline setup no longer hides or delays the Splash.",
-    "Check the latest offline package and verify saved resources silently in the background during Splash.",
-    "Show the one-time download or restore screen only after Splash finishes, and only when files are missing, damaged, or an update is available.",
-    "Keep the existing offline cache and study data; reuse verified files during package restoration."
+    "Replace the full-width offline status bar with a small floating notification that does not cover or move the top bar.",
+    "Automatically dismiss both offline and back-online notifications after two seconds.",
+    "Keep all other app behavior and saved study data unchanged."
   ]
 }
