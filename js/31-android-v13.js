@@ -177,9 +177,10 @@ async function scheduleReminder(){
     if(p&&old.length)await p.cancel({notifications:old.map(function(id){return {id:Number(id)}})});
     jsonWrite(REMINDER_IDS,[]);return;
   }
-  var perm=await p.checkPermissions();if(!perm||perm.display!=='granted')return;
-  if(typeof p.checkExactNotificationSetting==='function'){
-   var exact=await p.checkExactNotificationSetting();if(exact&&exact.exact_alarm&&exact.exact_alarm!=='granted')return;
+  var perm=await p.checkPermissions();
+  if(!perm||perm.display!=='granted'){
+   if(typeof window.__shbNotifyReminderPermissionRequired==='function')window.__shbNotifyReminderPermissionRequired();
+   return;
   }
   if(old.length)await p.cancel({notifications:old.map(function(id){return {id:Number(id)}})});
   var m=calc(enabled,liveStats()),clock=(enabled.reminderTime||'19:30').split(':').map(Number),out=[],now=new Date();
@@ -187,7 +188,7 @@ async function scheduleReminder(){
     var d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i,clock[0],clock[1],0,0);
     if(d.getTime()<=Date.now()+30000)continue;
     out.push({id:360000000+i,title:"Today's study target",body:'Answer about '+m.target+' questions for '+enabled.name+'.',
-      schedule:{at:d,allowWhileIdle:true},channelId:'shbace-reminders',extra:{shbaceExamGoal:true,examId:enabled.id}});
+      isExactNotification:false,schedule:{at:d,allowWhileIdle:true},channelId:'shbace-reminders',extra:{shbaceExamGoal:true,examId:enabled.id}});
   }
   if(out.length)await p.schedule({notifications:out});
   jsonWrite(REMINDER_IDS,out.map(function(x){return x.id}));
