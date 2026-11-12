@@ -186,3 +186,37 @@ button.ped-collection-card:active{transform:scale(.99);border-color:rgba(88,214,
 .phone.light .ped-collection-copy>b{color:#1d3e59}
 .phone.light .ped-collection-copy small{color:#58738a}
 .phone.light .ped-collection-footnote{background:#f3f8fc;color:#5a7489;border-color:#d3e2ec}
+
+
+/* --- Pediatrics source collections: native SHBACE card language --- */
+.ped-collection-page,.ped-systems-page,.ped-bank-topics{max-width:980px;margin-inline:auto}
+.ped-collection-kicker{font-size:10px;letter-spacing:.14em;font-weight:800;color:var(--muted,#8da4ba);margin:8px 0 10px;text-transform:uppercase}
+.ped-collection-page>h1,.ped-systems-page>h1{margin:0 0 8px}
+.ped-collection-page>.sub,.ped-systems-page>.sub{margin:0 0 18px}
+.ped-collections-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:18px 0}
+.ped-collection-card{appearance:none;width:100%;min-width:0;display:flex;align-items:center;gap:14px;text-align:left;padding:16px;border:1px solid var(--line,rgba(140,170,200,.2));border-radius:20px;background:var(--card,rgba(16,31,50,.72));color:inherit;box-shadow:0 10px 30px rgba(0,0,0,.12);cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.ped-collection-card:hover{transform:translateY(-2px);border-color:var(--accent,#56a9ed);box-shadow:0 14px 34px rgba(0,0,0,.18)}
+.ped-collection-avatar{width:76px;height:76px;flex:0 0 76px;border-radius:50%;overflow:hidden;position:relative;display:grid;place-items:center;background:linear-gradient(145deg,rgba(45,119,183,.24),rgba(25,49,77,.88));border:2px solid rgba(112,174,225,.55);box-shadow:0 0 0 4px rgba(80,145,205,.10),0 8px 20px rgba(0,0,0,.18)}
+.ped-collection-avatar img{width:100%;height:100%;display:block;object-fit:cover;object-position:center;border-radius:50%}
+.ped-avatar-doctor img{object-position:center 28%}
+.ped-avatar-faculty{background:linear-gradient(145deg,rgba(47,129,184,.18),rgba(13,35,58,.95))}
+.ped-avatar-initials{font-size:22px;font-weight:900;letter-spacing:.04em;color:#d8edff}
+.ped-collection-avatar.is-fallback .ped-avatar-initials{display:grid!important}
+.ped-collection-copy{min-width:0;flex:1;display:flex;flex-direction:column;gap:5px}
+.ped-collection-copy .eyebrow{font-size:9px;letter-spacing:.12em;font-weight:800;color:var(--muted,#8da4ba)}
+.ped-collection-copy>b{font-size:15px;line-height:1.3;color:var(--text,#edf5fc)}
+.ped-collection-copy>small{font-size:11px;line-height:1.45;color:var(--muted,#9db0c4)}
+.ped-collection-count{font-size:11px;font-weight:800;color:var(--accent,#77bdf4);margin-top:2px}
+.ped-collection-arrow{font-size:25px;color:var(--muted,#8da4ba);padding-inline:2px}
+.ped-collection-footnote{font-size:11px;line-height:1.5;color:var(--muted,#8da4ba);padding:10px 2px}
+.ped-system-card{cursor:pointer}
+.ped-bank-topics .ped-collection-kicker{margin-top:2px}
+.qstem{overflow-wrap:normal;word-break:normal;hyphens:manual;text-wrap:pretty}
+.qstem,.qstem *{word-break:normal}
+@media(max-width:640px){
+ .ped-collections-grid{grid-template-columns:1fr;gap:11px}
+ .ped-collection-card{padding:13px;border-radius:17px;gap:12px}
+ .ped-collection-avatar{width:66px;height:66px;flex-basis:66px}
+ .ped-collection-copy>b{font-size:14px}
+ .ped-collection-copy>small{font-size:10.5px}
+}
