@@ -90,3 +90,61 @@
 .phone.light .tm-alert-controls{background:#f1f7fc;border-color:#c8dce9}
 .phone.light .tm-alert-controls small,.phone.light .tm-alert-controls p{color:#536c84}
 @media(prefers-reduced-motion:reduce){.sr3-pick-item{transition:none}}
+
+
+/* ===== Pediatrics collections · SHBACE navy / electric-blue identity ===== */
+#phoneContent .ped-collection-page,
+#phoneContent .ped-systems-page{padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))}
+.ped-collection-kicker{margin:4px 0 9px;color:#65d7ff;font-size:10px;font-weight:900;letter-spacing:.16em;line-height:1.4;text-transform:uppercase}
+#phoneContent .ped-collection-page>h1,
+#phoneContent .ped-systems-page>h1{margin:0 0 8px;color:#eef7ff;font-size:clamp(22px,5.4vw,29px);font-weight:850;line-height:1.16;letter-spacing:-.025em}
+#phoneContent .ped-collection-page>.sub,
+#phoneContent .ped-systems-page>.sub{margin:0 0 16px;color:#9eb9d8;font-size:12px;line-height:1.55}
+.ped-collections-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin:16px 0}
+button.ped-collection-card{position:relative;display:grid;grid-template-columns:76px minmax(0,1fr) 16px;align-items:center;gap:13px;width:100%;min-width:0;min-height:132px;padding:15px 13px;border:1px solid rgba(83,166,255,.32);border-radius:20px;background:radial-gradient(ellipse at 0 0,rgba(27,151,226,.18),transparent 55%),linear-gradient(145deg,rgba(12,35,69,.96),rgba(5,17,39,.98));box-shadow:0 12px 28px rgba(0,5,20,.24),inset 0 1px 0 rgba(196,229,255,.07);color:#e8f4ff;font:inherit;text-align:left;cursor:pointer;transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+button.ped-collection-card:active{transform:scale(.99);border-color:rgba(88,214,238,.68);box-shadow:0 0 0 2px rgba(51,192,226,.09),0 12px 28px rgba(0,5,20,.26)}
+.ped-collection-card.ped-collection-previous{border-color:rgba(81,205,190,.29);background:radial-gradient(ellipse at 0 0,rgba(27,176,167,.13),transparent 55%),linear-gradient(145deg,rgba(10,37,57,.96),rgba(5,18,39,.98))}
+.ped-collection-avatar{position:relative;isolation:isolate;display:grid;place-items:center;width:76px;height:76px;min-width:76px;overflow:hidden;border:1px solid rgba(111,201,255,.62);border-radius:50%;clip-path:circle(50% at 50% 50%);background:radial-gradient(circle at 50% 35%,#174a76,#07162f 75%);box-shadow:0 0 0 3px rgba(41,142,226,.10),0 0 19px rgba(42,153,238,.18)}
+.ped-avatar-doctor{border-color:rgba(90,190,255,.72)}
+.ped-avatar-faculty{border-color:rgba(79,215,196,.65);background:radial-gradient(circle at 50% 35%,#14515e,#071b31 75%);box-shadow:0 0 0 3px rgba(36,195,177,.09),0 0 19px rgba(36,195,177,.13)}
+.ped-collection-avatar img{display:block;width:100%;height:100%;max-width:none;max-height:none;border:0;border-radius:0;object-fit:cover;object-position:center;clip-path:circle(50% at 50% 50%);background:transparent}
+.ped-collection-avatar.ped-avatar-faculty img{padding:7px;object-fit:contain}
+.ped-avatar-initials{position:absolute;inset:0;display:none;place-items:center;color:#e9f7ff;font-size:22px;font-weight:950;letter-spacing:.04em;text-shadow:0 0 13px rgba(70,174,255,.52)}
+.ped-collection-avatar.is-fallback .ped-avatar-initials{display:grid}
+.ped-collection-copy{display:grid;gap:5px;min-width:0}
+.ped-collection-copy>.eyebrow{color:#76d7ff;font-size:9px;font-weight:900;letter-spacing:.13em;line-height:1.3}
+.ped-collection-previous .ped-collection-copy>.eyebrow{color:#73ded0}
+.ped-collection-copy>b{display:block;color:#f0f7ff;font-size:14px;font-weight:850;line-height:1.3;overflow-wrap:break-word;word-break:normal}
+.ped-collection-copy>small{display:block;color:#a6c0dc;font-size:10.5px;font-weight:500;line-height:1.45;overflow-wrap:break-word;word-break:normal}
+.ped-collection-count{display:inline-flex;align-items:center;justify-self:start;margin-top:3px;padding:4px 8px;border:1px solid rgba(90,178,255,.22);border-radius:99px;background:rgba(32,111,184,.13);color:#a8dcff;font-size:9px;font-weight:850;line-height:1.3;font-variant-numeric:tabular-nums}
+.ped-collection-previous .ped-collection-count{border-color:rgba(83,207,190,.22);background:rgba(26,139,129,.12);color:#9de9dc}
+.ped-collection-arrow{justify-self:end;color:#83cbff;font-size:24px;font-weight:300;line-height:1}
+.ped-collection-previous .ped-collection-arrow{color:#79ddce}
+.ped-collection-footnote{margin:14px 2px 0;padding:10px 12px;border-left:2px solid rgba(91,177,255,.55);border-radius:0 10px 10px 0;background:rgba(21,74,116,.13);color:#91abc7;font-size:10px;line-height:1.55}
+#phoneContent .ped-system-card{min-width:0}
+#phoneContent .ped-bank-topics .tpc{min-width:0}
+#phoneContent .ped-bank-topics .tpc .tpc-tx{min-width:0}
+#phoneContent .ped-bank-topics .tpc h3{overflow-wrap:break-word;word-break:normal}
+@media(min-width:760px){
+ #phoneContent .ped-collections-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+ button.ped-collection-card{min-height:150px;grid-template-columns:82px minmax(0,1fr) 16px;padding:17px}
+ .ped-collection-avatar{width:82px;height:82px;min-width:82px}
+}
+
+/* Long question stems: keep natural word boundaries, allow emergency breaks only
+   for truly unbreakable tokens, and ask Chromium for balanced line composition. */
+#phoneContent .rs.qb .qstem,
+#phoneContent .rs.qb .qtopic,
+#phoneContent .rs.qb .qopt{
+ min-width:0;
+ max-width:100%;
+ white-space:normal;
+ word-break:normal;
+ overflow-wrap:break-word;
+ hyphens:manual;
+ line-break:auto;
+ text-align:start;
+}
+#phoneContent .rs.qb .qstem{
+ text-wrap:pretty;
+}
