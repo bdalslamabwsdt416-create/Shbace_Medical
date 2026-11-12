@@ -49,7 +49,7 @@ public final class StudyTimerService extends Service {
     private void setClockState(long elapsed, boolean active) {
         accumulatedMs = elapsed;
         running = active;
-        startedAtElapsedRealtime = active ? Math.max(0L, SystemClock.elapsedRealtime() - elapsed) : 0L;
+        startedAtElapsedRealtime = StudyTimerClock.runningStart(active, SystemClock.elapsedRealtime());
         persistState();
     }
 
@@ -67,8 +67,8 @@ public final class StudyTimerService extends Service {
     }
 
     private long elapsedNow() {
-        if (!running || startedAtElapsedRealtime <= 0L) return accumulatedMs;
-        return Math.max(0L, accumulatedMs + SystemClock.elapsedRealtime() - startedAtElapsedRealtime);
+        return StudyTimerClock.elapsedNow(accumulatedMs, startedAtElapsedRealtime,
+                SystemClock.elapsedRealtime(), running);
     }
 
     private String formatClock(long millis) {
