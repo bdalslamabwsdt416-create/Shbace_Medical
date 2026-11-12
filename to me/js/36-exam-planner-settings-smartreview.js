@@ -22,7 +22,17 @@ function dayDiff(date){
   return Math.round((Date.UTC(p[0],p[1]-1,p[2])-Date.UTC(n[0],n[1]-1,n[2]))/86400000);
 }
 function questionBankCount(){
-  try{var a=window.__shbQuestionIndex&&window.__shbQuestionIndex();if(Array.isArray(a)&&a.length)return a.length}catch(_){}
+  try{
+    var stats=typeof window.__shbStats==='function'?window.__shbStats():null;
+    var total=Number(stats&&stats.bankTotal);
+    if(Number.isSafeInteger(total)&&total>0)return total;
+  }catch(_){}
+  try{
+    var index=typeof window.__shbQuestionIndex==='function'?window.__shbQuestionIndex():null;
+    if(Array.isArray(index)&&index.length)return index.length;
+  }catch(_){}
+  /* Current validated release contains 1,718 records; the build guard rejects an
+     unexpected bank-size change until the bank review metadata is updated. */
   return 1718;
 }
 function examMetrics(item){
