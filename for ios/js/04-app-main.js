@@ -332,7 +332,7 @@ function completeSplashOnce(overlay,instant){
  splashPre=true;
  if(!splashRouteDone){splashRouteDone=true;routeAfterSplash();}
  cancelSplashHaptics();
- const fin=()=>{if(overlay&&overlay.isConnected)overlay.remove();splashPre=false};
+ const fin=()=>{if(overlay&&overlay.isConnected)overlay.remove();splashPre=false;window.__shbSplashComplete=true;try{document.dispatchEvent(new Event('shb-splash-complete'))}catch(e){}};
  if(instant||!overlay||!overlay.isConnected){fin();return}
  /* same cinematic transition as Onboarding -> Home (defined in #shb-portal-js); the old left->right dissolve stays only as a fallback */
  if(window.shbPortalSplash&&window.shbPortalSplash(overlay,fin))return;
