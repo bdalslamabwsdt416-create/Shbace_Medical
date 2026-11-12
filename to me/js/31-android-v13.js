@@ -1,8 +1,8 @@
-/* Shbace Medical · unified Chrome phone and desktop planner, drawer and navigation refinement. */
+/* Shbace Medical v1.3 · Android-only planner, drawer and navigation refinement. */
 /* Release artifact retry: static artifact names; the previous Gradle compile completed successfully. */
 (function(){
 'use strict';
-function nativeAndroid(){try{var c=window.Capacitor;var nativeApp=!!(c&&c.isNativePlatform&&c.isNativePlatform()&&(!c.getPlatform||c.getPlatform()==='android')&&window.ShbaceNative);var chromePwa=!!(window.__SHBACE_CHROME_PWA__&&/Android/i.test(navigator.userAgent||'')&&!window.ShbaceNative);return nativeApp||chromePwa}catch(_){return false}}
+function nativeAndroid(){try{var c=window.Capacitor;var nativeApp=!!(c&&c.isNativePlatform&&c.isNativePlatform()&&(!c.getPlatform||c.getPlatform()==='android')&&window.ShbaceNative);var chromePwa=!!(window.__SHBACE_CHROME_PWA__&&!window.ShbaceNative);return nativeApp||chromePwa}catch(_){return false}}
 if(!nativeAndroid())return;
 var GOALS='shbace_exam_goals_v2',LEGACY='shbace_exam_goal_v1',HISTORY='shbace_exam_goal_history_v1',
  ACTIVITY='shbace_study_activity_days_v1',REMINDER_IDS='shbace_exam_goal_notification_ids_v1',DAY=86400000;
@@ -15,18 +15,18 @@ function dayNo(s){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||''));return m
 function today(){return dateKey(new Date())}
 function fromDay(n){var d=new Date(n*DAY);return d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate())}
 function localDate(s){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||''));return m?new Date(+m[1],+m[2]-1,+m[3],0,0,0,0):null}
-function makeExam(name,date){return {id:'eg-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7),name:name||'Written paper',date:date||'',bufferDays:3,restDaysPerWeek:1,reminderEnabled:false,reminderTime:'19:30'}}
+function makeExam(name,date){return {id:'eg-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7),name:name||'New exam date',date:date||'',bufferDays:3,restDaysPerWeek:1,reminderEnabled:false,reminderTime:'19:30'}}
 function goals(){
  var a=jsonRead(GOALS,null);
  if(Array.isArray(a))return a.filter(function(x){return x&&typeof x==='object'}).map(function(x){return {
-  id:String(x.id||('eg-'+Math.random().toString(36).slice(2))),name:String(x.name||'Written paper'),
+  id:String(x.id||('eg-'+Math.random().toString(36).slice(2))),name:String(x.name||'New exam date'),
   date:/^\d{4}-\d{2}-\d{2}$/.test(x.date||'')?x.date:'',
   bufferDays:Math.max(0,Math.min(30,Math.round(Number.isFinite(+x.bufferDays)?+x.bufferDays:3))),
   restDaysPerWeek:Math.max(0,Math.min(3,Math.round(Number.isFinite(+x.restDaysPerWeek)?+x.restDaysPerWeek:1))),
   reminderEnabled:!!x.reminderEnabled,reminderTime:/^\d{2}:\d{2}$/.test(x.reminderTime||'')?x.reminderTime:'19:30'
  }});
  var old='';try{old=localStorage.getItem(LEGACY)||''}catch(_){}
- var first=makeExam('Written paper',/^\d{4}-\d{2}-\d{2}$/.test(old)?old:'');jsonWrite(GOALS,[first]);return [first]
+ var first=makeExam('New exam date',/^\d{4}-\d{2}-\d{2}$/.test(old)?old:'');jsonWrite(GOALS,[first]);return [first]
 }
 var reminderBusy=false;
 function saveGoals(a){
@@ -113,16 +113,15 @@ function examCard(e,s,t){
  var m=calc(e,s),status=m.past?'Date passed':m.today?'Exam today':s.remaining===0?'Complete':m.constrained?'Not enough study days':m.unrealistic?'High daily target':t.count>m.target?'Ahead':t.count===m.target?'On track':'Behind',
  cls=status==='Ahead'||status==='On track'||status==='Complete'?'good':status==='Behind'||status==='High daily target'||status==='Not enough study days'?'warn':'neutral',
  target=!e.date||m.past||m.today?'—':String(m.target),days=!e.date||m.past?'—':m.today?'Today':String(m.days),
- sentence=e.date&&!m.past&&!m.today&&s.remaining>0?'<p class="eg-sentence">Answer about '+m.target+' questions each day to finish the currently unanswered bank before your exam.</p>':
+ sentence=e.date&&!m.past&&!m.today&&s.remaining>0?'<p class="eg-sentence">Answer about '+m.target+' questions each day to finish the currently unanswered bank before this exam date.</p>':
   s.remaining===0?'<p class="eg-sentence">Your Question Bank is complete.</p>':m.today?'<p class="eg-sentence">Exam day · Final review.</p>':m.past?'<p class="eg-sentence eg-warning">This exam date has passed.</p>':'',
  warning=m.unrealistic?'<p class="eg-warning">Daily target exceeds 150 questions.</p>':m.constrained?'<p class="eg-warning">Not enough study days remain after review and rest days.</p>':'',
  pct=m.target?Math.min(100,Math.round(t.count/m.target*100)):(s.remaining===0?100:0),
  ring='<div class="eg-ring" style="--eg-progress:'+pct+'%"><div><b>'+t.count+'</b><small> / '+m.target+'</small></div></div>',
  average=avgMs(),minutes=average&&s.remaining?Math.max(1,Math.round(s.remaining*average/60000)):'—',
- time=average&&s.remaining?'About '+minutes+' min':'—',
- types=['Written paper','OSCE','Clinical exam','Other'];
+ time=average&&s.remaining?'About '+minutes+' min':'—';
  return '<article class="eg-card" data-eg-card="'+esc(e.id)+'"><div class="eg-card-head"><div><span class="eg-kicker">EXAM</span><h2>'+esc(e.name)+'</h2><span class="eg-status '+cls+'">'+status+'</span></div><button type="button" class="eg-remove" data-eg-remove="'+esc(e.id)+'" aria-label="Remove exam">×</button></div>'+
- '<label class="eg-label" for="eg-type-'+esc(e.id)+'">Exam type</label><select id="eg-type-'+esc(e.id)+'" class="eg-type" data-eg-name="'+esc(e.id)+'">'+types.map(function(x){return '<option '+(x===e.name?'selected':'')+'>'+x+'</option>'}).join('')+'</select>'+
+ '<label class="eg-label" for="eg-type-'+esc(e.id)+'">Exam name</label><input id="eg-type-'+esc(e.id)+'" class="eg-type" type="text" maxlength="80" placeholder="e.g. Pediatrics Final, OSCE, Surgery Paper" value="'+esc(e.name)+'" data-eg-name="'+esc(e.id)+'"/>'+
  '<label class="eg-label" for="eg-date-'+esc(e.id)+'">Your exam date</label><input id="eg-date-'+esc(e.id)+'" class="eg-date" type="date" dir="ltr" lang="en-GB" value="'+esc(e.date)+'" min="'+today()+'" data-eg-date="'+esc(e.id)+'"/>'+
  '<div class="eg-stats"><div><b>'+days+'</b><small>Days left</small></div><div><b>'+s.remaining.toLocaleString('en-GB')+'</b><small>Questions remaining</small></div><div class="eg-target"><b>'+target+'</b><small>Questions per day</small><em>Smart Review · '+dueReview()+' due</em></div></div>'+sentence+warning+
  '<div class="eg-today"><div><span class="eg-label">Today</span><b>'+t.count+' / '+(m.target||0)+'</b><small>Answered today</small></div>'+ring+'<div class="eg-streak"><b>'+t.streak+'</b><small>Day streak</small></div></div>'+
@@ -135,15 +134,15 @@ function examCard(e,s,t){
 function plannerPage(){
  saveSnapshot();
  var s=liveStats(),t=todayInfo();t.streak=t.streak||0;
- return appHeader('Exam goal planner')+'<div class="rs eg-page"><div class="eg-hero"><span class="eg-kicker">YOUR PROGRESS</span><h1>Exam goal planner</h1><p>Set your exam date and get a realistic daily question target.</p></div>'+
+ return appHeader('Exam goal planner')+'<div class="rs eg-page"><div class="eg-hero"><span class="eg-kicker">YOUR PROGRESS</span><h1>Exam goal planner</h1><p>Add a separate entry for every exam or exam day. Give each entry a custom name and its own date.</p></div>'+
  '<div class="eg-exams">'+goals().map(function(e){return examCard(e,s,t)}).join('')+'</div>'+specialtiesHtml()+
  '<button type="button" class="eg-add" id="eg-add-exam">＋ Add another exam date</button></div>'
 }
 function updateExam(id,fn){
  var a=goals(),e=a.find(function(x){return x.id===id});if(!e)return;fn(e);saveGoals(a);if(appPage==='examgoal')renderAppDemo()
 }
-window.shbGoalAdd=function(){var a=goals();a.push(makeExam('OSCE',''));saveGoals(a);renderAppDemo()};
-window.shbGoalRemove=function(id){var a=goals().filter(function(e){return e.id!==id});if(!a.length)a.push(makeExam('Written paper',''));saveGoals(a);renderAppDemo()};
+window.shbGoalAdd=function(){var a=goals(),last=a[a.length-1];a.push(makeExam(last&&last.name?last.name:'New exam date',''));saveGoals(a);renderAppDemo()};
+window.shbGoalRemove=function(id){var a=goals().filter(function(e){return e.id!==id});if(!a.length)a.push(makeExam('New exam date',''));saveGoals(a);renderAppDemo()};
 function onGoalChange(ev){
  var el=ev.target,id=el.getAttribute('data-eg-date')||el.getAttribute('data-eg-buffer')||el.getAttribute('data-eg-rest')||
   el.getAttribute('data-eg-reminder')||el.getAttribute('data-eg-time')||el.getAttribute('data-eg-name');
@@ -156,7 +155,7 @@ function onGoalChange(ev){
   if(field==='rest')e.restDaysPerWeek=Math.max(0,Math.min(3,Number(el.value)||0));
   if(field==='reminder')e.reminderEnabled=!!el.checked;
   if(field==='time')e.reminderTime=/^\d{2}:\d{2}$/.test(el.value)?el.value:'19:30';
-  if(field==='name')e.name=String(el.value||'Written paper');
+  if(field==='name')e.name=String(el.value||'New exam date').trim().slice(0,80);
  });
  if(field==='reminder'&&el.checked&&typeof window.__shbRequestReminderAccess==='function'){
   window.__shbRequestReminderAccess().then(function(ok){
