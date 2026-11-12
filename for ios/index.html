@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script id="shb-offline-first-gate">
-/* Installed iOS PWA: hold the splash and application boot until the one-time offline package is verified. */
+/* Installed iOS PWA: setup checks run behind the Splash; only the app boot gate is released immediately by the checker. */
 (function(){
  var standalone=false;
  try{
@@ -25,7 +25,7 @@
 })();
 </script>
 <!-- ═══════════ FIRST PAINT: runs before anything else (splash gate, background, status-bar safe area) ═══════════ -->
-<style id="shb-v47-gate">html:has(#startupSplash){background:#030b16}#startupSplash:not(.sp-ready)>*{opacity:0!important}#startupSplash>*{transition:opacity .4s ease}#startupSplash.sp-ready>*{opacity:1}#startupSplash .splash-poster{animation:none!important}html.shb-offline-pending #startupSplash{visibility:hidden!important;opacity:0!important;pointer-events:none!important}</style>
+<style id="shb-v47-gate">html:has(#startupSplash){background:#030b16}#startupSplash:not(.sp-ready)>*{opacity:0!important}#startupSplash>*{transition:opacity .4s ease}#startupSplash.sp-ready>*{opacity:1}#startupSplash .splash-poster{animation:none!important}/* Offline resource checks no longer hide or delay the Splash. */</style>
 <style id="sb-early-bg">html{background:#050b16}</style>
 
 <!-- shell gate: the design-handoff panels (.rail, .topbar, guide) must never flash before the app is ready.
@@ -133,7 +133,7 @@
 <script id="shbace-ios-onboarding-switch">window.SHBACE_LEGACY_INTRO_ENABLED=false;</script>
 
 <!-- Load the offline installer before creating or revealing the splash screen. -->
-<script id="shbace-offline-setup-pre-splash" src="js/29-offline-setup.js?shbcheck=1.4.8" onerror="window.__shbReleaseOfflineGate&&window.__shbReleaseOfflineGate()"></script>
+<script id="shbace-offline-setup-pre-splash" src="js/29-offline-setup.js?shbcheck=1.4.9" onerror="window.__shbReleaseOfflineGate&&window.__shbReleaseOfflineGate()"></script>
 
 <!-- ═══════════ 1) SPLASH SCREEN: markup ═══════════ -->
 
