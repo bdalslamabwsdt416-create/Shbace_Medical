@@ -113,8 +113,8 @@ if (reviewLog && Array.isArray(reviewLog.entries)) {
   if (logChanged !== 45 || logNeedsReview !== 110) fail("Question review JSON counts do not match the master audit");
 }
 const pwaVersion = JSON.parse(readFileSync(join(root, "pwa-version.json"), "utf8"));
-if (pwaVersion.platform !== "Chrome Android PWA" || pwaVersion.version !== "1.3.4-chrome.2") {
-  fail("pwa-version.json must declare PWA version 1.1.0");
+if (pwaVersion.platform !== "Computer PWA" || pwaVersion.version !== "1.3.4-computer.1") {
+  fail("pwa-version.json must declare Computer PWA version 1.3.4-computer.1");
 }
 
 rmSync(output, { recursive: true, force: true });
