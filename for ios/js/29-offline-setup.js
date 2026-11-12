@@ -412,7 +412,7 @@ function start(){
    });
   });
  }).then(function(check){
-  if(check&&check.ready)return;
+  if(check&&check.ready){if(ui&&ui.root&&ui.root.parentNode)ui.root.parentNode.removeChild(ui.root);releaseStartupGate();return;}
   // No setup UI is created for a healthy install. If a download/update is needed, show it after the Splash.
   afterSplash(function(){showSetup(check||{})});
  }).catch(function(error){afterSplash(function(){showProblem(error.message||'Could not verify the offline installation.')})});
