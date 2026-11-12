@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'shbace-to-me-chrome-offline-v1.3.9';
+const CACHE_NAME = 'shbace-to-me-chrome-offline-v1.3.9-to-me.7';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
 const APP_SHELL = [
   './',
