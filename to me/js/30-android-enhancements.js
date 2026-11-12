@@ -244,9 +244,16 @@
     if (navigator.share) navigator.share({ title: 'Shbace Medical question', text: text }).catch(function () {});
     else copyText(text);
   }
-  function speak(text) {
+  function speak(text, button) {
     if (!prefs.readAloud || !text) return;
-    var rates = { slow: 0.82, normal: 1, fast: 1.18 };
+    var rates = { slow: 0.82, normal: 0.94, fast: 1.08 };
+    try {
+      if (!(window.ShbaceNative && window.ShbaceNative.speakText) &&
+          window.__SHBACE_CHROME_PWA__ && typeof window.__shbUnifiedToggleSpeakText === 'function') {
+        window.__shbUnifiedToggleSpeakText(text, rates[prefs.readingSpeed] || 0.94, button || null);
+        return;
+      }
+    } catch (_) {}
     try {
       if (window.ShbaceNative && window.ShbaceNative.speakText) {
         window.ShbaceNative.speakText(text, 'en-US', rates[prefs.readingSpeed] || 1);
@@ -877,7 +884,7 @@
       var card = action.closest('.qcard'), text = cardQuestion(card), type = action.getAttribute('data-shb-question-action');
       if (type === 'copy') copyText(text);
       if (type === 'share') shareText(text);
-      if (type === 'speak') speak(text);
+      if (type === 'speak') speak(text, action);
     }
     if (t.closest && t.closest('#shbCopyAppInfo')) {
       try {

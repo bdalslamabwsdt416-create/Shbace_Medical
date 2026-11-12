@@ -11,6 +11,7 @@ var computerActiveVoice=null,computerVoiceList=[],computerVoiceReady=false;
 var computerVoiceFallback=false,computerVoiceFallbackFor='en-US';
 var computerVoiceMessage='',computerVoiceMessageOption='',computerVoicePendingChoice='';
 var computerVoiceNoticesShown={},computerVoiceSpeechToken=0;
+var computerCurrentSpeechText='',computerCurrentSpeechButton=null;
 var computerVoiceRetryDelays=[250,650,1300,2600];
 function computerVoiceLanguageLabel(lang){
  return lang==='en-GB'?'English (UK)':lang==='ar'?'Arabic':'English (US)';
@@ -47,7 +48,10 @@ function computerVoiceFind(lang,list){
   candidates.sort(function(a,b){
    function score(v){
     var l=computerVoiceNormLang(v),exact=lang==='ar'?l==='ar':l===lang.toLowerCase();
-    return (v.localService===true?100:v.localService===false?0:45)+(exact?25:0)+(v.default?3:0);
+    var name=String(v.name||'').toLowerCase();
+    var male=/(^|[^a-z])(male|masculine|david|mark|daniel|james|alex|guy|fred|lee|tom|oliver|aaron|rishi|arthur|matthew|thomas|george|andrew|ryan|liam|michael|john|paul|roger|hassan|ahmed|omar|ali|tareq|tarik|majed|maher|khaled)([^a-z]|$)/.test(name);
+    var female=/(^|[^a-z])(female|woman|feminine)([^a-z]|$)/.test(name);
+    return (male?180:0)-(female?65:0)+(v.localService===true?100:v.localService===false?0:45)+(exact?25:0)+(v.default?3:0);
    }
    return score(b)-score(a);
   });
@@ -183,38 +187,68 @@ function computerVoiceRequestChoice(lang){
 function computerVoiceVoiceListForChoice(list){
  return list&&list.length?list:computerVoiceList;
 }
+function computerVoiceSetButton(button,active){
+ try{
+  if(!button)return;
+  button.classList.toggle('is-speaking',!!active);
+  button.setAttribute('aria-pressed',active?'true':'false');
+  button.setAttribute('aria-label',active?'Stop question reading':'Read question aloud');
+  var label=button.querySelector('span');
+  if(label)label.textContent=active?'Stop reading':'Read aloud';
+ }catch(_){}
+}
+function computerVoiceClearCurrent(){
+ computerVoiceSetButton(computerCurrentSpeechButton,false);
+ computerCurrentSpeechButton=null;computerCurrentSpeechText='';
+}
+function computerVoiceStopCurrent(){
+ computerVoiceSpeechToken++;
+ try{if(computerVoiceApi)window.speechSynthesis.cancel()}catch(_){}
+ computerVoiceClearCurrent();
+}
 function computerVoiceMakeUtterance(text,lang,voice,allowFallback,rate){
  try{
   if(!computerVoiceApi||!text)return;
   var token=++computerVoiceSpeechToken;
   var utterance=new SpeechSynthesisUtterance(String(text));
   utterance.lang=lang==='ar'?'ar':lang;
-  var speed=Number(rate);utterance.rate=Number.isFinite(speed)?Math.max(0.7,Math.min(1.3,speed)):1;
+  var speed=Number(rate);
+  utterance.rate=Number.isFinite(speed)?Math.max(0.7,Math.min(1.3,speed)):0.94;
+  utterance.pitch=0.92;
   if(voice)utterance.voice=voice;
+  utterance.onstart=function(){
+   if(token===computerVoiceSpeechToken)computerVoiceSetButton(computerCurrentSpeechButton,true);
+  };
+  utterance.onend=function(){
+   if(token===computerVoiceSpeechToken)computerVoiceClearCurrent();
+  };
   utterance.onerror=function(event){
    try{
-    if(token!==computerVoiceSpeechToken||!allowFallback)return;
+    if(token!==computerVoiceSpeechToken)return;
     var reason=event&&event.error||'';
-    if(reason==='canceled'||reason==='interrupted')return;
-    computerVoiceFallbackToArabic(text,rate);
+    if(reason==='canceled'||reason==='interrupted'){computerVoiceClearCurrent();return}
+    if(allowFallback){computerVoiceFallbackToArabic(text,rate);return}
+    computerVoiceClearCurrent();
    }catch(_){}
   };
   try{window.speechSynthesis.speak(utterance)}
-  catch(_){if(allowFallback&&lang!=='ar')computerVoiceFallbackToArabic(text)}
- }catch(_){if(allowFallback&&lang!=='ar')computerVoiceFallbackToArabic(text)}
+  catch(_){if(allowFallback&&lang!=='ar')computerVoiceFallbackToArabic(text,rate);else computerVoiceClearCurrent()}
+ }catch(_){if(allowFallback&&lang!=='ar')computerVoiceFallbackToArabic(text,rate);else computerVoiceClearCurrent()}
 }
 function computerVoiceFallbackToArabic(text,rate){
  try{
+  var keptText=String(text||''),keptButton=computerCurrentSpeechButton;
   computerVoiceSpeechToken++;
   try{window.speechSynthesis.cancel()}catch(_){}
+  computerCurrentSpeechText=keptText;computerCurrentSpeechButton=keptButton;
   computerActiveLanguage='ar';computerActiveVoice=computerVoiceFind('ar',computerVoiceGetVoices());
   computerVoiceFallback=computerVoicePreference!=='ar';
   computerVoiceFallbackFor=computerVoicePreference;
   computerVoiceUpdateUi();
-  computerVoiceMakeUtterance(text,'ar',computerActiveVoice,false,rate);
+  computerVoiceMakeUtterance(keptText,'ar',computerActiveVoice,false,rate);
  }catch(_){}
 }
-function computerVoiceSpeak(text,rate){
+function computerVoiceSpeak(text,rate,button){
  try{
   if(!computerVoiceApi||!text)return;
   var latest=computerVoiceGetVoices();
@@ -236,9 +270,11 @@ function computerVoiceSpeak(text,rate){
   }else if(computerVoicePreference==='ar'){
    computerActiveLanguage='ar';computerActiveVoice=null;
   }
-  try{window.speechSynthesis.cancel()}catch(_){}
+  computerVoiceStopCurrent();
+  computerCurrentSpeechText=String(text);computerCurrentSpeechButton=button||null;
+  computerVoiceSetButton(computerCurrentSpeechButton,true);
   var lang=computerActiveLanguage,voice=computerActiveVoice;
-  computerVoiceMakeUtterance(String(text),lang,voice,lang!=='ar',rate);
+  computerVoiceMakeUtterance(computerCurrentSpeechText,lang,voice,lang!=='ar',rate);
  }catch(_){
   try{computerVoiceFallbackToArabic(String(text||''))}catch(__){}
  }
@@ -258,7 +294,7 @@ function computerVoicePlaySample(lang){
 function computerVoiceSpeakSample(text,lang,voice){
  try{
   if(!computerVoiceApi)return;
-  try{window.speechSynthesis.cancel()}catch(_){}
+  computerVoiceStopCurrent();
   computerVoiceMakeUtterance(text,lang,voice,lang!=='ar');
  }catch(_){}
 }
@@ -291,7 +327,25 @@ function computerVoiceQuestionText(card){
   return [stemText,options.length?options.join('. '):''].filter(Boolean).join('. ');
  }catch(_){return ''}
 }
-function computerVoiceDecorateQuestions(){ /* Unified Share / Copy / Read aloud toolbar is mounted by 30. */ }
+function computerVoiceDecorateQuestions(){
+ try{
+  if(!window.__SHBACE_CHROME_PWA__)return;
+  var prefs={};try{prefs=JSON.parse(localStorage.getItem('shbace_android_features_v1')||'{}')}catch(_){}
+  if(prefs.readAloud===false)return;
+  var cards=document.querySelectorAll('#phoneContent .qcard');
+  Array.prototype.forEach.call(cards,function(card){
+   if(card.querySelector('.shb-af-qtools,[data-shb-unified-read-aloud]'))return;
+   var stem=card.querySelector('.qstem');if(!stem)return;
+   var button=document.createElement('button');button.type='button';
+   button.className='shb-computer-read-aloud';button.setAttribute('data-shb-unified-read-aloud','1');
+   button.setAttribute('aria-label','Read question aloud');button.setAttribute('aria-pressed','false');
+   button.disabled=!computerVoiceApi;
+   button.title=computerVoiceApi?'Read or stop this question':'Speech is not supported in this browser';
+   button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"></path><path d="M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M18.5 5.5a9 9 0 0 1 0 13"></path></svg><span>Read aloud</span>';
+   stem.insertAdjacentElement('afterend',button);
+  });
+ }catch(_){}
+}
 function computerVoiceInstallStyles(){
  try{
   if(document.getElementById('shbComputerVoiceStyles'))return;
@@ -306,6 +360,8 @@ function computerVoiceInstallStyles(){
    '.shb-computer-voice-status-text{flex:1;min-width:0}',
    '.shb-computer-voice-dismiss{border:0;background:transparent;color:inherit;font-size:18px;line-height:1;cursor:pointer;padding:0 2px}',
    '.shb-computer-read-aloud{display:inline-flex;align-items:center;gap:6px;margin:8px 0 10px}',
+   '.shb-computer-read-aloud svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}',
+   '.shb-computer-read-aloud.is-speaking{border-color:rgba(255,130,130,.7);background:rgba(158,49,62,.22);color:#ffdfe2}',
    '.shb-computer-read-aloud:active{transform:translateY(1px)}',
    '.phone.light .shb-computer-voice-options button,.phone.light .shb-computer-read-aloud{background:#eef6ff;color:#174b7a;border-color:#c9def3}',
    '.phone.light .shb-computer-voice-options button.on{background:#dff2ff;border-color:#5aaee5}'
@@ -331,6 +387,7 @@ function computerVoiceInit(){
   computerVoiceRetryDelays.forEach(function(delay,index){
    setTimeout(function(){computerVoiceScan(index===computerVoiceRetryDelays.length-1)},delay);
   });
+  computerVoiceDecorateQuestions();
   document.addEventListener('click',function(event){
    try{
     var target=event.target&&event.target.closest?event.target.closest('[data-shb-unified-voice]'):null;
@@ -347,20 +404,35 @@ function computerVoiceInit(){
     if(read){
      event.preventDefault();event.stopPropagation();
      var card=read.closest('.qcard'),text=computerVoiceQuestionText(card);
-     if(text)computerVoiceSpeak(text);
+     if(text)computerVoiceToggle(text,0.94,read);
     }
    }catch(_){}
   },true);
  }catch(_){}
 }
+function computerVoiceToggle(text,rate,button){
+ try{
+  if(!computerVoiceApi||!text)return false;
+  var sameButton=!!button&&button===computerCurrentSpeechButton;
+  var sameText=String(text)===computerCurrentSpeechText;
+  var speaking=!!(window.speechSynthesis.speaking||window.speechSynthesis.pending);
+  if((sameButton||(!button&&sameText))&&(speaking||computerCurrentSpeechText)){
+   computerVoiceStopCurrent();return false;
+  }
+  computerVoiceSpeak(text,rate,button);return true;
+ }catch(_){return false}
+}
 window.__shbUnifiedSpeakText=function(text,rate){computerVoiceSpeak(text,rate)};
+window.__shbUnifiedToggleSpeakText=computerVoiceToggle;
+window.__shbUnifiedStopSpeaking=computerVoiceStopCurrent;
 computerVoiceInit();
 
 function mountVoiceSettings(){try{computerVoiceMountSettings()}catch(_){}}
 try{
- var ob=new MutationObserver(function(){mountVoiceSettings()});
+ var ob=new MutationObserver(function(){mountVoiceSettings();computerVoiceDecorateQuestions()});
  if(document.body)ob.observe(document.body,{childList:true,subtree:true});
 }catch(_){}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mountVoiceSettings,{once:true});else mountVoiceSettings();
 computerVoiceMountSettings();
+computerVoiceDecorateQuestions();
 })();

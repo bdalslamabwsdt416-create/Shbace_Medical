@@ -7,7 +7,7 @@
   "releaseNotes": [
     "Smart Review always includes Smart Recommended and supports multiple specialties, systems and topics with a custom question count for each selected topic.",
     "Exam Goal Planner supports multiple separately named exams and dates, with an individual daily question target for each exam.",
-    "Settings are grouped in a clearer order. English (US), English (UK) and Arabic question-reading voices remain available with English (US) as the default.",
+    "Settings are grouped in a clearer order. Question reading supports English (US), English (UK) and Arabic, prefers a male voice when the device provides one, and toggles between Read aloud and Stop reading on the same button. English (US) remains the default.",
     "Pediatrics separates Dr. Abdulrahman Al-Joaki MCQs from Previous Years' Exam Questions; both collections are organised by medical systems and topics.",
     "Question stems use natural word wrapping without changing original question text.",
     "The focus timer uses a real countdown, with completion sound and browser notification where supported.",

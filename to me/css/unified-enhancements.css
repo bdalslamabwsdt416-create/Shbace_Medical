@@ -369,3 +369,16 @@ button.ped-collection-card:active{transform:scale(.99);border-color:rgba(88,214,
 .shb-settings-stack{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;width:100%;min-width:0}
 .shb-settings-stack>.setcard,.shb-settings-stack>.u10-settings-card,.shb-settings-stack>#shbUnifiedVoiceSettings{margin:0;min-width:0}
 @media(max-width:560px){.sr3-rec-card{grid-template-columns:minmax(0,1fr);gap:12px}.sr3-rec-count{grid-template-columns:1fr auto;align-items:center}.sr3-rec-count small{grid-column:1/-1}.sr3-gh-row{align-items:stretch}.sr3-group-pick{padding:7px 8px;font-size:9px}}
+
+/* Read-aloud buttons visibly switch to Stop reading while the question is spoken. */
+.shb-af-qtools button.shb-af-qtool.is-speaking,
+.shb-computer-read-aloud.is-speaking{
+ border-color:rgba(255,130,130,.7);
+ background:linear-gradient(145deg,rgba(158,49,62,.38),rgba(70,20,30,.66));
+ color:#ffe7e9;
+ box-shadow:0 0 0 1px rgba(255,130,130,.16),0 0 15px rgba(230,70,85,.14);
+}
+.phone.light .shb-af-qtools button.shb-af-qtool.is-speaking,
+.phone.light .shb-computer-read-aloud.is-speaking{
+ background:linear-gradient(145deg,#fff0f1,#ffe2e5);color:#8f2733;border-color:#e8a0a7;
+}
