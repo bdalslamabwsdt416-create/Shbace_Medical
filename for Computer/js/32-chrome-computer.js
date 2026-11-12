@@ -261,8 +261,32 @@ function computerVoiceProcessList(list,finalAttempt){
   }
  }catch(_){}
 }
+var computerVoiceEmptyRetryPending=false;
 function computerVoiceScan(finalAttempt){
- try{computerVoiceProcessList(computerVoiceGetVoices(),!!finalAttempt)}catch(_){}
+ try{
+  var list=computerVoiceGetVoices();
+  if(list.length){
+   computerVoiceEmptyRetryPending=false;
+   computerVoiceProcessList(list,false);
+   return;
+  }
+  if(finalAttempt){
+   computerVoiceEmptyRetryPending=false;computerVoiceList=[];
+   computerVoiceProcessList([],true);
+   return;
+  }
+  if(computerVoiceReady&&!computerVoiceEmptyRetryPending){
+   computerVoiceEmptyRetryPending=true;
+   setTimeout(function(){
+    try{
+     var refreshed=computerVoiceGetVoices();
+     computerVoiceEmptyRetryPending=false;
+     if(refreshed.length)computerVoiceProcessList(refreshed,false);
+     else{computerVoiceList=[];computerVoiceProcessList([],true)}
+    }catch(_){computerVoiceEmptyRetryPending=false}
+   },900);
+  }
+ }catch(_){}
 }
 function computerVoiceRequestChoice(lang){
  try{
@@ -332,6 +356,11 @@ function computerVoiceSpeak(text){
     computerVoiceFallback=true;computerVoiceFallbackFor=computerVoicePreference;
    }
    computerVoiceReady=true;computerVoiceUpdateUi();
+  }else if(computerVoiceReady&&computerVoicePreference!=='ar'){
+   computerVoiceList=[];computerActiveLanguage='ar';computerActiveVoice=null;
+   computerVoiceFallback=true;computerVoiceFallbackFor=computerVoicePreference;computerVoiceUpdateUi();
+  }else if(computerVoicePreference==='ar'){
+   computerActiveLanguage='ar';computerActiveVoice=null;
   }
   try{window.speechSynthesis.cancel()}catch(_){}
   var lang=computerActiveLanguage,voice=computerActiveVoice;
