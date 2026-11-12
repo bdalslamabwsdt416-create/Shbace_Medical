@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 
-var CACHE_NAME='shbace-chrome-offline-v1.3.9';
+var CACHE_NAME='shbace-chrome-offline-v1.3.8';
 var DB_NAME='shbace-medical-offline-state-v1';
 var MANIFEST_URL=new URL('./offline-assets-manifest.json',location.href).href;
 var READY_URL=new URL('./__shbace_offline_ready__',location.href).href;
@@ -169,13 +169,25 @@ function fileValid(file,checkHash){
    files have passed full SHA-256 verification. IndexedDB and student records
    are deliberately untouched. */
 function cleanupPreviousCaches(){
- return caches.keys().then(function(names){
-  var stale=names.filter(function(name){
-   return name.indexOf('shbace-chrome-offline-')===0&&name!==CACHE_NAME;
-  });
-  return Promise.all(stale.map(function(name){
-   return caches.delete(name).then(function(ok){return {name:name,ok:ok}}).catch(function(){return {name:name,ok:false}});
+ /* Keep only the current manifest assets, its manifest and its ready marker in
+    the active package cache. This also removes stale files left by older releases. */
+ var keep=Object.create(null);
+ manifest.files.forEach(function(file){keep[urlFor(file.path)]=true});
+ keep[MANIFEST_URL]=true;
+ keep[READY_URL]=true;
+ return cache.keys().then(function(requests){
+  return Promise.all(requests.filter(function(request){return !keep[request.url]}).map(function(request){
+   return cache.delete(request).then(function(ok){return {name:request.url,ok:ok}}).catch(function(){return {name:request.url,ok:false}});
   }));
+ }).then(function(internalResults){
+  return caches.keys().then(function(names){
+   var stale=names.filter(function(name){
+    return name.indexOf('shbace-chrome-offline-')===0&&name!==CACHE_NAME;
+   });
+   return Promise.all(stale.map(function(name){
+    return caches.delete(name).then(function(ok){return {name:name,ok:ok}}).catch(function(){return {name:name,ok:false}});
+   })).then(function(namedResults){return internalResults.concat(namedResults)});
+  });
  });
 }
 function loadManifest(){
@@ -253,11 +265,29 @@ function resetCounters(){
  verifiedCount=0;verifiedBytes=0;donePaths=Object.create(null);
  stageDone={app:0,images:0,data:0,other:0};
 }
+function waitForWorkerActivation(worker){
+ return new Promise(function(resolve,reject){
+  function check(){
+   if(worker.state==='activated'){
+    worker.removeEventListener('statechange',check);resolve();
+   }else if(worker.state==='redundant'){
+    worker.removeEventListener('statechange',check);
+    reject(new Error('The updated offline worker could not activate. Close other Shbace tabs and retry.'));
+   }
+  }
+  worker.addEventListener('statechange',check);check();
+ });
+}
 function ensureServiceWorker(){
  if(!('serviceWorker' in navigator))return Promise.reject(new Error('This browser does not support Service Workers.'));
  return navigator.serviceWorker.getRegistration('./').then(function(reg){
-  if(reg)return reg;
-  return navigator.serviceWorker.register('./sw.js',{scope:'./'});
+  if(!reg)return navigator.serviceWorker.register('./sw.js',{scope:'./'});
+  /* Force an update check so integrity downloads are not intercepted by an older
+     cache-first worker. The current worker uses a network-only integrity route. */
+  return reg.update().then(function(){
+   var candidate=reg.installing||reg.waiting;
+   return candidate?waitForWorkerActivation(candidate).then(function(){return reg}):reg;
+  });
  }).then(function(){return navigator.serviceWorker.ready});
 }
 function fetchAndStore(file){
