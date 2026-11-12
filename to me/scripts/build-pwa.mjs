@@ -208,10 +208,12 @@ async function toInlineWebp(sourcePath, mode) {
     return "";
   }
 }
-const repoRoot = join(root, "..");
+/* These paths are inside the PWA root so Vercel can resolve them reliably. The PNG
+   files reuse the exact original Git blobs from main; only the 256px WebP data URIs
+   are embedded in index.html at build time. */
 const [ajPortraitData, facultyLogoData] = await Promise.all([
-  toInlineWebp(join(repoRoot, "طبيب مبتسم بإطلالة احترافية.png"), "cover"),
-  toInlineWebp(join(repoRoot, "file_000000009660820ab35ec7d81fea4cef.png"), "contain")
+  toInlineWebp(join(root, "assets/img/pediatrics-dr-aljoaki-source.png"), "cover"),
+  toInlineWebp(join(root, "assets/img/faculty-of-medicine-tripoli-source.png"), "contain")
 ]);
 const ajSlot = 'window.__SHBACE_AJ_PORTRAIT_DATA__="__SHBACE_AJ_PORTRAIT_DATA__";';
 const facultySlot = 'window.__SHBACE_FACULTY_LOGO_DATA__="__SHBACE_FACULTY_LOGO_DATA__";';
