@@ -22,18 +22,21 @@ const requiredFiles = [
   "css/core.css",
   "css/late.css",
   "css/unified-enhancements.css",
+  "css/shbace-layout-refinements.css",
   "data/qbData.json",
   "data/qbData_reviewed_patch.json",
   "data/qbData_review_log.json",
   "data/audit/Question_Review_Log_1718.csv",
   "data/audit/Question_Review_Log_636.csv",
   "data/audit/Reviewed_Copy_Status.json",
+  "data/audit/Question_Explanation_Audit_1718.json",
   "js/29-reviewed-bank-controls.js",
   "pwa-version.json",
   "js/29-offline-setup.js",
   "js/33-unified-voice.js",
   "js/34-study-countdown.js",
-  "js/35-pediatrics-collections.js"
+  "js/35-pediatrics-collections.js",
+  "js/36-exam-planner-settings-smartreview.js"
 ];
 const requiredDirs = ["css", "js", "data"];
 const imageDirs = ["img", "img1", "img2"];
@@ -61,11 +64,26 @@ if (!manifest.start_url || !manifest.scope || !Array.isArray(manifest.icons) || 
   fail("manifest.webmanifest is missing start_url, scope, or icons");
 }
 const baseBank = JSON.parse(readFileSync(join(root, "data/qbData.json"), "utf8"));
+const explanationAudit = JSON.parse(readFileSync(join(root, "data/audit/Question_Explanation_Audit_1718.json"), "utf8"));
 const reviewedPatch = JSON.parse(readFileSync(join(root, "data/qbData_reviewed_patch.json"), "utf8"));
 const reviewLog = JSON.parse(readFileSync(join(root, "data/qbData_review_log.json"), "utf8"));
 const reviewStatus = JSON.parse(readFileSync(join(root, "data/audit/Reviewed_Copy_Status.json"), "utf8"));
 if (!Array.isArray(baseBank.questions) || baseBank.questions.length !== 1718) {
   fail("Original question bank must remain the 1,718-question base");
+}
+const explanationMissing = baseBank.questions.filter(q => !String(q && q.e || "").trim()).length;
+const shortExplanationQuestions = baseBank.questions.filter(q => String(q && q.e || "").trim().length < 20).map(q => q.id);
+const auditedExplanationIds = Array.isArray(explanationAudit.manualReviewQueue)
+  ? explanationAudit.manualReviewQueue.map(q => q && q.id) : [];
+if (explanationAudit.schema !== "shbace-question-explanation-audit-v1" ||
+    explanationAudit.questionCount !== baseBank.questions.length ||
+    !explanationAudit.result ||
+    explanationAudit.result.missingExplanation !== explanationMissing ||
+    explanationAudit.result.explanationsUnder20Characters !== shortExplanationQuestions.length ||
+    auditedExplanationIds.length !== shortExplanationQuestions.length ||
+    new Set(auditedExplanationIds).size !== shortExplanationQuestions.length ||
+    shortExplanationQuestions.some(id => !auditedExplanationIds.includes(id))) {
+  fail("Question explanation audit does not match the unchanged 1,718-question bank");
 }
 if (reviewedPatch.schema !== "shbace-question-bank-patch-v1" ||
     reviewedPatch.baseFile !== "qbData.json" ||
@@ -118,8 +136,8 @@ if (reviewLog && Array.isArray(reviewLog.entries)) {
   if (logChanged !== 45 || logNeedsReview !== 110) fail("Question review JSON counts do not match the master audit");
 }
 const pwaVersion = JSON.parse(readFileSync(join(root, "pwa-version.json"), "utf8"));
-if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.7-to-me.2") {
-  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.6-to-me.1");
+if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.8-to-me.3") {
+  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.8-to-me.3");
 }
 
 rmSync(output, { recursive: true, force: true });
@@ -223,8 +241,10 @@ if (!html.includes(ajSlot) || !html.includes(facultySlot)) {
 html = html.replace(ajSlot, "window.__SHBACE_AJ_PORTRAIT_DATA__=" + JSON.stringify(ajPortraitData) + ";");
 html = html.replace(facultySlot, "window.__SHBACE_FACULTY_LOGO_DATA__=" + JSON.stringify(facultyLogoData) + ";");
 writeFileSync(htmlPath, html);
-if (!html.includes("js/35-pediatrics-collections.js")) {
-  fail("Pediatrics collections script is not referenced by index.html");
+if (!html.includes("js/35-pediatrics-collections.js") ||
+    !html.includes("js/36-exam-planner-settings-smartreview.js") ||
+    !html.includes("css/shbace-layout-refinements.css")) {
+  fail("Pediatrics, Exam Planner/Smart Review or layout refinement assets are not referenced by index.html");
 }
 if (!html.includes("navigator.serviceWorker.register('./sw.js'") || !html.includes("js/29-offline-setup.js") || !html.includes("js/29-reviewed-bank-controls.js") || !html.includes("qbData_reviewed_patch.json")) {
   fail("index.html does not register ./sw.js");
