@@ -43,8 +43,15 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  // Preserve older caches; they may still contain files needed by an already-open app.
-  event.waitUntil(self.clients.claim());
+  // The new worker is activated only after its complete APP_SHELL cache was installed.
+  // It is therefore safe to remove obsolete worker-shell caches; student data is not stored here.
+  event.waitUntil((async () => {
+    await self.clients.claim();
+    const names = await caches.keys();
+    await Promise.all(names
+      .filter(name => name.startsWith('shbace-to-me-chrome-offline-') && name !== CACHE_NAME)
+      .map(name => caches.delete(name)));
+  })());
 });
 
 self.addEventListener('fetch', event => {
