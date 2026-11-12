@@ -1,28 +1,22 @@
-/* Shbace Medical · Android-only enhancements
- * Isolated behind a native Android Capacitor check. Does not alter iOS/PWA behaviour.
- * Adds haptics, question actions, TTS, strike-through, system theme, exam planner,
- * controlled local reminders, share card, native timer notification and keep-screen-on.
+/* SHBACE Medical · Computer PWA portable study enhancements.
+ * Reuses portable Chrome Android study tools without activating native Android APIs.
+ * Computer voice, wake lock and silent update handling remain in 32-chrome-computer.js.
  */
 (function () {
   'use strict';
-  function androidNative() {
-    try {
-      var c = window.Capacitor;
-      var nativeApp = !!(c && c.isNativePlatform && c.isNativePlatform() &&
-        (!c.getPlatform || c.getPlatform() === 'android') && window.ShbaceNative);
-      var chromePwa = !!(window.__SHBACE_CHROME_PWA__ && /Android/i.test(navigator.userAgent || '') && !window.ShbaceNative);
-      return nativeApp || chromePwa;
-    } catch (_) { return false; }
+  function computerPwa() {
+    try { return !!window.__SHBACE_CHROME_COMPUTER__ && !window.Capacitor && !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent || ''); }
+    catch (_) { return false; }
   }
-  if (!androidNative()) return;
+  if (!computerPwa()) return;
 
-  var PREF_KEY = 'shbace_android_features_v1';
+  var PREF_KEY = 'shbace_computer_features_v1';
   var GOAL_KEY = 'shbace_exam_goal_v1';
   var ACTIVITY_KEY = 'shbace_study_activity_days_v1';
   var DAY = 86400000;
   var DEFAULTS = {
-    haptics: true, shareQuestion: true, copyQuestion: true, readAloud: true,
-    keepScreenOn: true, autoTheme: true, examCountdown: true, doctorExpressions: true,
+    haptics: false, shareQuestion: true, copyQuestion: true, readAloud: true,
+    keepScreenOn: true, autoTheme: true, examCountdown: false, doctorExpressions: true,
     readingSpeed: 'normal'
   };
   function readPrefs() {
@@ -114,30 +108,9 @@
     try { localStorage.setItem(ACTIVITY_KEY, JSON.stringify(a.slice(-45))); } catch (_) {}
     if (firstToday) cancelTodayReminder();
   }
-  function haptic(kind) {
-    if (!prefs.haptics) return;
-    try { window.ShbaceNative.haptic(String(kind || 'light')); } catch (_) {
-      try { if (navigator.vibrate) navigator.vibrate(kind === 'wrong' ? [45, 55, 45] : kind === 'correct' ? [22, 35, 22] : 12); } catch (__) {}
-    }
-  }
-  function nativeTimerSync() {
-    try {
-      var s = getTimerState(), c = s && s.cur;
-      if (c) {
-        var elapsed = Number(c.ms) || 0;
-        if (c.running && Number(c.rs)) elapsed += Math.max(0, Date.now() - c.rs);
-        window.ShbaceNative.updateStudyTimer(Math.max(0, Math.floor(elapsed)), !!c.running);
-      } else {
-        window.ShbaceNative.stopStudyTimer();
-      }
-    } catch (_) {}
-  }
-  function screenAwake() {
-    try {
-      var on = !!(prefs.keepScreenOn && document.querySelector('#phoneContent .rs.qb'));
-      window.ShbaceNative.keepScreenOn(on);
-    } catch (_) {}
-  }
+  function haptic() { /* Haptic feedback is unavailable in the Computer PWA. */ }
+  function nativeTimerSync() { /* The Computer PWA timer remains in-page. */ }
+  function screenAwake() { /* Screen wake lock is managed by the Computer-only bridge. */ }
   function applyTheme() {
     try {
       var m = window.matchMedia('(prefers-color-scheme: light)');
@@ -162,26 +135,23 @@
   }
   function featureSettingsHTML() {
     return '<section class="card setcard shb-af-settings" id="shbAndroidSettings">' +
-      '<h3>Study experience</h3><p class="meta">Controls for Android study sessions and question tools.</p>' +
-      toggleMarkup('haptics', 'Haptic feedback', 'Light touch, correct-answer and incorrect-answer patterns.') +
-      toggleMarkup('shareQuestion', 'Share a question', 'Show the question-sharing action.') +
-      toggleMarkup('copyQuestion', 'Copy question text', 'Show the copy action for notes or AI tools.') +
-      toggleMarkup('readAloud', 'Read questions aloud', 'Show voice playback controls on questions.') +
+      '<h3>Computer study experience</h3><p class="meta">Portable question tools and study preferences for the Computer PWA.</p>' +
+      toggleMarkup('shareQuestion', 'Share a question', 'Open the browser share sheet when supported.') +
+      toggleMarkup('copyQuestion', 'Copy question text', 'Copy the complete question and all options.') +
+      toggleMarkup('readAloud', 'Read questions aloud', 'Use the selected English or Arabic voice.') +
       '<div class="shb-af-row"><div class="shb-af-copy"><b>Reading speed</b><small>Applies to spoken question text.</small></div>' +
       '<div class="seg shb-af-speed" role="group" aria-label="Reading speed">' +
       ['slow', 'normal', 'fast'].map(function (v) {
         return '<button type="button" data-shb-speed="' + v + '" class="' + (prefs.readingSpeed === v ? 'on' : '') + '">' +
           (v === 'slow' ? 'Slow' : v === 'fast' ? 'Fast' : 'Normal') + '</button>';
       }).join('') + '</div></div>' +
-      toggleMarkup('keepScreenOn', 'Keep screen awake', 'Prevent the display from sleeping while the Question Bank is open.') +
-      toggleMarkup('autoTheme', 'Follow device theme', 'Automatically match Android light or dark appearance.') +
+      toggleMarkup('keepScreenOn', 'Keep screen awake', 'Use the browser screen wake lock while the Question Bank is open.') +
+      toggleMarkup('autoTheme', 'Follow device theme', 'Automatically match the computer light or dark appearance.') +
       '</section>' +
-      '<section class="card setcard shb-af-settings"><h3>Study reminders</h3>' +
-      '<p class="meta">A small number of useful reminders. These use the app’s existing Android notification permission.</p>' +
-      '<div class="shb-af-reminder-note"><b>Daily study reminder</b><small>Uses the existing Settings → Notification preferences → Study reminders switch. Normally 7:30 PM; moves to 7:45 PM on days when an Exam Goal reminder is also set for 7:30 PM, avoiding two alerts together. Exact-alarm access is not required; delivery may be a little later.</small></div>' +
-      toggleMarkup('examCountdown', 'Exam countdown reminders', 'Three reminders at 7, 3 and 1 day before your saved exam date.') +
-      '<button type="button" class="btn block shb-af-copyinfo" id="shbCopyAppInfo">Copy app information</button>' +
-      '<p class="meta">Send the copied details when reporting an app issue. No account or personal data is included.</p></section>';
+      '<section class="card setcard shb-af-settings"><h3>Browser support</h3>' +
+      '<p class="meta">Exam planning and study progress are saved locally. Desktop browsers do not provide Android native notification scheduling or haptic feedback.</p>' +
+      '<button type="button" class="btn block shb-af-copyinfo" id="shbCopyAppInfo">Copy browser information</button>' +
+      '<p class="meta">Copies browser diagnostics only. No question answers or personal study data are included.</p></section>';
   }
   function mountSettings() {
     var root = document.querySelector('#phoneContent .rs');
@@ -247,24 +217,30 @@
   function speak(text) {
     if (!prefs.readAloud || !text) return;
     var rates = { slow: 0.82, normal: 1, fast: 1.18 };
+    var rate = rates[prefs.readingSpeed] || 1;
     try {
-      if (window.ShbaceNative && window.ShbaceNative.speakText) {
-        window.ShbaceNative.speakText(text, 'en-US', rates[prefs.readingSpeed] || 1);
+      if (typeof window.__shbComputerSpeakText === 'function') {
+        window.__shbComputerSpeakText(text, rate);
         return;
       }
     } catch (_) {}
     try {
-      if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) { toast('Speech is not available on this device'); return; }
+      if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) {
+        toast('Speech is not available in this browser');
+        return;
+      }
       window.speechSynthesis.cancel();
-      var u = new SpeechSynthesisUtterance(text);
-      u.rate = rates[prefs.readingSpeed] || 1;
+      var u = new SpeechSynthesisUtterance(String(text));
+      u.lang = 'en-US';
+      u.rate = rate;
       var voices = window.speechSynthesis.getVoices() || [];
-      var voice = voices.find(function (v) { return /male/i.test(v.name) && /^en/i.test(v.lang); }) ||
-        voices.find(function (v) { return /^en/i.test(v.lang); });
+      var voice = voices.find(function (v) { return /^en-US$/i.test(v.lang || '') && v.localService === true; }) ||
+        voices.find(function (v) { return /^en-US$/i.test(v.lang || ''); });
       if (voice) u.voice = voice;
       window.speechSynthesis.speak(u);
-    } catch (_) { toast('Speech is not available on this device'); }
+    } catch (_) { toast('Speech is not available in this browser'); }
   }
+
   function mountPlanner() {
     var root = document.querySelector('#phoneContent .rs');
     var grid = root && root.querySelector('.ov-grid');
@@ -438,7 +414,7 @@
     reminderPermissionTask = (async function () {
       try {
         var p = await localPlugin();
-        if (!p) { toast('تعذّر الوصول إلى خدمة الإشعارات في التطبيق.'); return false; }
+        if (!p) return false;
         var perm = await p.checkPermissions();
         if (!perm || perm.display !== 'granted') {
           var allowNotifications = window.confirm('حتى يقدر SHBACE Medical يرسل تذكير الدراسة، يحتاج إذن الإشعارات. هل تبي تفعّله الآن؟');
@@ -582,19 +558,25 @@
     ctx.fillStyle = '#82d7ff'; ctx.font = '28px sans-serif'; ctx.fillText('Learn · Practice · Excel',82,1230);
     canvas.toBlob(function (blob) {
       if (!blob) { toast('Could not create the progress card'); return; }
-      var reader = new FileReader();
-      reader.onloadend = function () {
-        var b64 = String(reader.result || '').split(',')[1] || '';
-        try {
-          if (window.ShbaceNative && window.ShbaceNative.shareImage) { window.ShbaceNative.shareImage(b64); return; }
-        } catch (_) {}
+      function saveProgressCard() {
         try {
           var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'shbace-study-progress.png'; a.click();
           setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
           toast('Progress card saved');
         } catch (_) { toast('Could not save the progress card'); }
-      };
-      reader.readAsDataURL(blob);
+      }
+      try {
+        if (typeof File === 'function' && navigator.share && navigator.canShare) {
+          var file = new File([blob], 'shbace-study-progress.png', { type: 'image/png' });
+          if (navigator.canShare({ files: [file] })) {
+            navigator.share({ files: [file], title: 'My Study Progress' })
+              .then(function () { toast('Progress card shared'); })
+              .catch(function (error) { if (!error || error.name !== 'AbortError') saveProgressCard(); });
+            return;
+          }
+        }
+      } catch (_) {}
+      saveProgressCard();
     }, 'image/png');
   }
   function mountShareProgress() {
@@ -606,43 +588,24 @@
     var goal = root.querySelector('#shbExamGoal');
     (goal || root.querySelector('.ov-grid')).insertAdjacentElement('afterend', b);
   }
-  function mountAndroidHowToUse() {
+  function mountComputerHowToUse() {
     var root = document.querySelector('#phoneContent .rs');
     var list = root && root.querySelector('.ab2-how .how-list');
-    if (!list || list.querySelector('[data-shb-android-help]')) return;
-    Array.prototype.forEach.call(list.querySelectorAll('.how-sec'), function (section) {
-      var title = safeText(section.querySelector('.how-t'));
-      var pad = section.querySelector('.how-pad');
-      if (!pad) return;
-      if (title.indexOf('مؤقّت الدراسة') >= 0) {
-        var timerTip = document.createElement('p');
-        timerTip.className = 'how-tip';
-        timerTip.textContent = 'Android: أثناء تشغيل جلسة Study Timer يظهر الوقت في إشعار مستمر، ويستمر العدّ عند تصغير التطبيق أو قفل الشاشة. أوقف الجلسة أو أوقفها مؤقتاً من داخل التطبيق عند الانتهاء.';
-        pad.appendChild(timerTip);
-      }
-      if (title.indexOf('الإشعارات') >= 0) {
-        pad.innerHTML = pad.innerHTML.replace(
-          'أما إشعارات المراجعة الذكية والتذكير بالدراسة فتُحدّث داخل التطبيق عند فتحه.',
-          'في Android تظهر إشعارات المراجعة والاختبارات والتذكيرات وتحديثات التطبيق أيضاً في شريط إشعارات الهاتف، إضافة إلى مركز الإشعارات داخل التطبيق، بعد منح إذن الإشعارات. ويمكن تشغيل تذكير مذاكرة يومي واحد وتنبيهات الامتحان قبل 7 و3 و1 أيام.'
-        );
-      }
-    });
+    if (!list || list.querySelector('[data-shb-computer-help]')) return;
     var section = document.createElement('details');
     section.className = 'how-sec';
-    section.setAttribute('data-shb-android-help', '1');
+    section.setAttribute('data-shb-computer-help', '1');
     section.innerHTML =
-      '<summary><span class="how-n">A</span><span class="how-t">Android study tools</span><i class="how-chev" aria-hidden="true"></i></summary>' +
-      '<div class="how-in"><div class="how-pad">' +
-      '<ol>' +
-      '<li>داخل السؤال استخدم <b>Share</b> لإرسال نص السؤال، أو <b>Copy</b> لنسخه، أو <b>Read aloud</b> لسماعه. يمكن تشغيل أو إيقاف كل أداة من Settings؛ وهي مفعّلة افتراضياً.</li>' +
-      '<li>تفضيل القراءة <b>Slow / Normal / Fast</b>. يفضّل Android صوتاً رجاليّاً إن كان متاحاً في محرك القراءة المثبّت على الجهاز، وإلا يستخدم صوتاً مناسباً متاحاً.</li>' +
-      '<li>اضغط مطوّلاً على خيار إجابة لاستبعاده بصرياً. هذا لا يختار الإجابة ولا يغيّر نتيجتك.</li>' +
-      '<li>يمنع <b>Keep screen awake</b> انطفاء الشاشة أثناء وجودك في Question Bank فقط، ويعود سلوك الشاشة الطبيعي عند مغادرته.</li>' +
-      '<li>من <b>Stats → Overview</b> حدّد تاريخ الامتحان في <b>Exam Goal Planner</b> ليحسب التطبيق الأيام المتبقية وعدد الأسئلة اليومية المطلوب لإنهاء الأسئلة غير المجابة.</li>' +
-      '<li>تجد تذكير المذاكرة والعدّ التنازلي للامتحان في Settings. أوقف أي تذكير لا تحتاجه؛ التذكيرات محدودة وليست إشعارات متكررة كل ساعة.</li>' +
-      '<li>زر <b>Copy app information</b> ينسخ معلومات تشخيصية مثل إصدار التطبيق وAndroid والجهاز، من دون بياناتك الدراسية، لتُرسلها عند الإبلاغ عن مشكلة.</li>' +
-      '<li>بطاقة <b>Share my progress card</b> في Study Progress تنشئ صورة لإحصائياتك لمشاركتها.</li>' +
-      '<li>يعمل <b>Haptic feedback</b> باهتزاز خفيف عند حفظ السؤال والانتقال للتالي، وبنمطين مختلفين للإجابة الصحيحة والخاطئة، سواء في Question Bank أو Quiz. تحكم فيه من Settings.</li>' +
+      '<summary><span class="how-n">C</span><span class="how-t">Computer study tools</span><i class="how-chev" aria-hidden="true"></i></summary>' +
+      '<div class="how-in"><div class="how-pad"><ol>' +
+      '<li>Inside a question, use <b>Share</b> to send it or <b>Copy</b> to copy the stem and all options. You can enable or disable each tool in Settings.</li>' +
+      '<li>Use <b>Read aloud</b> to hear the question and options. English (US) is the default; English (UK) and Arabic are available in Settings. The app prefers local voices and falls back to Arabic when the selected English voice is unavailable.</li>' +
+      '<li>Choose <b>Slow / Normal / Fast</b> in Settings to control reading speed. Installing extra voices is optional.</li>' +
+      '<li>Press and hold an answer option to cross it out visually. This does not select an answer or change your result.</li>' +
+      '<li><b>Keep screen awake</b> uses the browser wake lock while the Question Bank is open, when the browser supports it.</li>' +
+      '<li>Open <b>Exam goal planner</b> from the navigation menu to manage multiple exams, daily question targets, review days, rest days, Smart Review and progress trends.</li>' +
+      '<li><b>Share my progress card</b> creates a PNG summary of your study progress. Your answers and saved progress remain on this device.</li>' +
+      '<li>Background reminders are not scheduled by this Computer browser; exam planning and calculations still work normally.</li>' +
       '</ol></div></div>';
     list.appendChild(section);
   }
@@ -652,9 +615,8 @@
     mountSettings();
     hideLegacyDoctorSetting();
     applyDoctorVisibility();
-    mountAndroidHowToUse();
-    mountPlanner();
-    renderPlannerResult();
+    mountComputerHowToUse();
+    /* The advanced multi-exam planner is registered by 31-android-v13.js. */
     mountShareProgress();
     decorateQuestionCards();
     screenAwake();

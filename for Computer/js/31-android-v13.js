@@ -1,9 +1,9 @@
-/* Shbace Medical v1.3 · Android-only planner, drawer and navigation refinement. */
+/* SHBACE Medical v1.3 · Computer PWA planner, drawer and navigation refinement. */
 /* Release artifact retry: static artifact names; the previous Gradle compile completed successfully. */
 (function(){
 'use strict';
-function nativeAndroid(){try{var c=window.Capacitor;var nativeApp=!!(c&&c.isNativePlatform&&c.isNativePlatform()&&(!c.getPlatform||c.getPlatform()==='android')&&window.ShbaceNative);var chromePwa=!!(window.__SHBACE_CHROME_PWA__&&/Android/i.test(navigator.userAgent||'')&&!window.ShbaceNative);return nativeApp||chromePwa}catch(_){return false}}
-if(!nativeAndroid())return;
+function computerPwa(){try{return !!window.__SHBACE_CHROME_COMPUTER__&&!window.Capacitor&&!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent||'')}catch(_){return false}}
+if(!computerPwa())return;
 var GOALS='shbace_exam_goals_v2',LEGACY='shbace_exam_goal_v1',HISTORY='shbace_exam_goal_history_v1',
  ACTIVITY='shbace_study_activity_days_v1',REMINDER_IDS='shbace_exam_goal_notification_ids_v1',DAY=86400000;
 var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
@@ -129,7 +129,7 @@ function examCard(e,s,t){
  mascotHtml(m,t.count)+'<div class="eg-tools"><div class="eg-review-line"><span>Smart Review due</span><b>'+dueReview()+'</b></div><a href="#" data-eg-timer="1">Study Timer</a></div>'+
  '<div class="eg-time"><span>Estimated study time</span><b>'+time+'</b></div><details class="eg-settings"><summary>Planning settings</summary><div class="eg-settings-grid">'+
  '<label>Final review days<input type="number" min="0" max="30" value="'+m.buffer+'" data-eg-buffer="'+esc(e.id)+'"/></label><label>Rest days per week<input type="number" min="0" max="3" value="'+e.restDaysPerWeek+'" data-eg-rest="'+esc(e.id)+'"/></label></div>'+
- '<div class="eg-reminder"><label class="eg-reminder-toggle"><input type="checkbox" '+(e.reminderEnabled?'checked':'')+' data-eg-reminder="'+esc(e.id)+'"/><span>Daily reminder</span></label><label class="eg-reminder-time">Reminder time<input type="time" value="'+esc(e.reminderTime)+'" data-eg-time="'+esc(e.id)+'" '+(e.reminderEnabled?'':'disabled')+'/></label></div></details>'+
+ '<p class="eg-sentence">Background reminders are not scheduled in this Computer browser. Exam dates, targets and planning settings are saved locally.</p></details>'+
  '<div class="eg-chart-wrap"><h3>Burn-down</h3>'+burnChart(m,s)+'</div><div class="eg-week-wrap"><h3>Questions this week</h3>'+weekBars(t.counts)+'</div></article>'
 }
 function plannerPage(){
@@ -177,36 +177,7 @@ function nextMidnight(){
  var n=new Date(),at=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1,0,0,2,0);
  setTimeout(function(){saveSnapshot();scheduleReminder();if(appPage==='examgoal')renderAppDemo();nextMidnight()},Math.max(1000,at.getTime()-n.getTime()))
 }
-async function scheduleReminder(){
- if(reminderBusy)return;reminderBusy=true;
- try{
-  var p=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.LocalNotifications,old=jsonRead(REMINDER_IDS,[]);
-  if(!Array.isArray(old))old=[];
-  var enabled=goals().filter(function(e){return e.reminderEnabled&&e.date&&dayNo(e.date)>=dayNo(today())})
-    .sort(function(a,b){return dayNo(a.date)-dayNo(b.date)})[0];
-  var pref=jsonRead('shbace_notif_prefs_v1',{});
-  if(!p||pref.reminders===false||!enabled){
-    if(p&&old.length)await p.cancel({notifications:old.map(function(id){return {id:Number(id)}})});
-    jsonWrite(REMINDER_IDS,[]);return;
-  }
-  var perm=await p.checkPermissions();
-  if(!perm||perm.display!=='granted'){
-   if(typeof window.__shbNotifyReminderPermissionRequired==='function')window.__shbNotifyReminderPermissionRequired();
-   return;
-  }
-  if(old.length)await p.cancel({notifications:old.map(function(id){return {id:Number(id)}})});
-  var m=calc(enabled,liveStats()),clock=(enabled.reminderTime||'19:30').split(':').map(Number),out=[],now=new Date();
-  for(var i=0;i<14;i++){
-    var d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i,clock[0],clock[1],0,0);
-    if(d.getTime()<=Date.now()+30000||dateKey(d)>enabled.date)continue;
-    out.push({id:360000000+i,title:"Today's study target",body:'Answer about '+m.target+' questions for '+enabled.name+'.',
-      isExactNotification:false,schedule:{at:d,allowWhileIdle:true},channelId:'shbace-reminders',extra:{shbaceExamGoal:true,examId:enabled.id}});
-  }
-  if(out.length)await p.schedule({notifications:out});
-  jsonWrite(REMINDER_IDS,out.map(function(x){return x.id}));
- }catch(e){console.warn('Exam Goal Planner reminder scheduling failed',e)}
- finally{reminderBusy=false}
-}
+async function scheduleReminder(){ return; }
 try{
  var LN=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.LocalNotifications;
  if(LN&&typeof LN.addListener==='function')LN.addListener('localNotificationActionPerformed',function(a){
@@ -303,14 +274,7 @@ try{
  var appPlugin=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.App;
  if(appPlugin&&typeof appPlugin.addListener==='function')appPlugin.addListener('backButton',function(){window.navBack()});
 }catch(_){}
-try{
- var t=localStorage.getItem('shbace_onboarding_v3_grade');
- if(!Number(t))localStorage.setItem('shbace_onboarding_v3_grade','5');
- if(!selectedGrade)selectedGrade=Number(localStorage.getItem('shbace_onboarding_v3_grade'))||5;
- /* Keep the original onboarding screens and routeAfterSplash() intact.
-    Truncating screenTitles made the hologram screen appear to be the final page,
-    which hid its shared background and removed the remaining navigation steps. */
-}catch(e){console.warn('v1.3 onboarding grade initialization failed',e)}
+/* The Computer PWA keeps its own onboarding and selected study year unchanged. */
 function startup(){
  saveSnapshot();scheduleReminder();midnight();removeBadges();removeOldPlanner();settingsPatch();
  if(appPage==='examgoal'&&mode==='app')renderAppDemo()

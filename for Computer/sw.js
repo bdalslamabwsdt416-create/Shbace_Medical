@@ -13,6 +13,8 @@ const APP_SHELL = [
   './css/core.css',
   './css/late.css',
   './css/chrome-computer.css',
+  './js/30-android-enhancements.js',
+  './js/31-android-v13.js',
   './js/32-chrome-computer.js',
   './js/29-offline-setup.js'
 ];
