@@ -95,7 +95,7 @@ function previousSystemsView(){
  const systemRank=name=>{const row=mappedSystem(name);if(!row)return 999;const i=SYS.findIndex(s=>s[0]===row[0]);return i<0?999:i};
  const systems=[...groups.values()].sort((a,b)=>systemRank(a.name)-systemRank(b.name)||a.name.localeCompare(b.name)),total=previousQuestions().length;
  const cards=systems.map(s=>{
-  const icon=mappedSystem(s.name),iconMarkup=icon&&icon[2]?sysIcon(icon[2],'lg'):sysIcon('s_exams','lg');
+  const icon=mappedSystem(s.name),iconMarkup=icon&&icon[2]?sysIcon(icon[2],'lg'):sysIcon('s_growth','lg');
   return `<div class="card sc spc ped-system-card" data-ped-system="${escHtml(s.name)}" onclick="openPreviousSystemFromCard(this)">${iconMarkup}<div class="spc-tx"><h3>${escHtml(s.name)}</h3><div class="meta"><b>${s.questions}</b> questions · <b>${s.topics}</b> topics</div></div><span class="chev">›</span></div>`;
  }).join('');
  return `${appHeader('Previous Questions')}<div class="rs ped-systems-page">
