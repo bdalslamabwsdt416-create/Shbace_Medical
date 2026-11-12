@@ -5,5 +5,8 @@
   "description": "SHBACE Medical — unified adaptive Chrome PWA for phone and computer.",
   "scripts": {
     "build:pwa": "node scripts/build-pwa.mjs"
+  },
+  "dependencies": {
+    "sharp": "0.35.5"
   }
 }
