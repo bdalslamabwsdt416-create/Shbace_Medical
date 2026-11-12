@@ -12,9 +12,9 @@ html.v5-land{--v5-w:min(100vw,430px)}
 }
 
 /* offline bar */
-.v5-offbar{position:fixed;z-index:2147481500;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top) + 6px) max(12px,env(safe-area-inset-right)) 7px max(12px,env(safe-area-inset-left));text-align:center;font:600 12.5px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;color:#fff;background:#8a5a00;transform:translateY(-110%);transition:transform .3s ease;pointer-events:none}
+.v5-offbar{position:fixed;z-index:2147481500;left:50%;right:auto;bottom:calc(88px + env(safe-area-inset-bottom));width:max-content;max-width:calc(100vw - 32px);box-sizing:border-box;padding:8px 14px;border:1px solid rgba(255,255,255,.16);border-radius:999px;text-align:center;font:600 12px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;color:#fff;background:#8a5a00;box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;transform:translate(-50%,12px);transition:opacity .22s ease,transform .22s ease;pointer-events:none;overflow-wrap:anywhere}
 .v5-offbar.good{background:#14794f}
-.v5-offbar.show{transform:none}
+.v5-offbar.show{opacity:1;transform:translate(-50%,0)}
 
 /* banners (update / backup) */
 .v5-banner{position:fixed;z-index:2147481000;left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));bottom:calc(88px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid rgba(89,166,242,.45);border-radius:16px;background:rgba(7,20,43,.97);color:#e4f2ff;box-shadow:0 12px 35px rgba(0,0,0,.4);font:13px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;opacity:0;transform:translateY(14px);transition:opacity .3s,transform .3s}
