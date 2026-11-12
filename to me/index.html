@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script id="shbace-chrome-android-platform">
+/* Enable the Android study enhancements only in an Android Chromium browser/PWA.
+   The APK keeps its real Capacitor bridge; Chrome never receives a fake native bridge. */
+(function(){
+  var ua=navigator.userAgent||'';
+  window.__SHBACE_CHROME_PWA__=/Chrome\//i.test(ua)&&!window.Capacitor;
+})();
+</script>
+
+<!-- ═══════════ FIRST PAINT: runs before anything else (splash gate, background, status-bar safe area) ═══════════ -->
+<style id="shb-v47-gate">html:has(#startupSplash){background:#030b16}#startupSplash:not(.sp-ready)>*{opacity:0!important}#startupSplash>*{transition:opacity .4s ease}#startupSplash.sp-ready>*{opacity:1}#startupSplash .splash-poster{animation:none!important}</style>
+<style id="sb-early-bg">html{background:#050b16}</style>
+
+<!-- shell gate: the design-handoff panels (.rail, .topbar, guide) must never flash before the app is ready.
+     They stay hidden until JS applies body.app-mode; open the page with #notes to see them. -->
+<style id="shb-shell-gate">html:not(.shb-notes) body:not(.app-mode) .shell{visibility:hidden!important}</style>
+<script id="shb-shell-gate-js">if(location.hash==='#notes')document.documentElement.classList.add('shb-notes');addEventListener('hashchange',function(){document.documentElement.classList.toggle('shb-notes',location.hash==='#notes')})</script>
+<!-- ═══════════ PAGE META & ICONS ═══════════ -->
+<link rel="preload" as="image" href="/assets/img/d407f81c5a39.webp" fetchpriority="high">
+<link rel="preload" as="image" href="/assets/img/4f7815b2e6df.webp" fetchpriority="high">
+<link rel="preload" as="image" href="/assets/img/e5a5775b19e8.webp" fetchpriority="high">
+<link rel="preload" as="style" href="css/core.css">
+<link rel="preload" as="style" href="css/late.css">
+<link rel="preload" as="script" href="js/01-ui-images.js">
+<link rel="preload" as="script" href="js/02-doctor-images.js">
+<link rel="preload" as="script" href="js/03-completion-scene.js">
+<link rel="preload" as="script" href="js/04-app-main.js">
+<link rel="preload" as="script" href="js/05-question-bank-summary.js">
+<link rel="preload" as="script" href="js/06-drawer-menu.js">
+<script id="shb-native-shim">
+/* Android app only: window.ShbaceNative is injected by MainActivity. In a normal browser nothing below changes behaviour.
+   WebView ignores <a download> for blob:/data: links, so hand the bytes to the native side (public Downloads folder). */
+(function(){
+ var proto=window.HTMLAnchorElement&&HTMLAnchorElement.prototype; if(!proto)return;
+ var orig=proto.click;
+ function b64(blob,cb){var r=new FileReader();r.onloadend=function(){var s=String(r.result||'');cb(s.slice(s.indexOf(',')+1))};r.readAsDataURL(blob)}
+ proto.click=function(){
+  var a=this,N=window.ShbaceNative,href=a.href||'';
+  if(N&&N.saveFile&&a.hasAttribute('download')&&/^(blob|data):/.test(href)){
+   var name=a.getAttribute('download')||'shbace-medical-file';
+   fetch(href).then(function(r){return r.blob()}).then(function(blob){
+    b64(blob,function(s){var ok=false;try{ok=N.saveFile(name,blob.type||'application/octet-stream',s)}catch(e){}if(!ok)orig.call(a)})
+   }).catch(function(){orig.call(a)});
+   return;
+  }
+  return orig.apply(this,arguments);
+ };
+})();
+</script>
+<meta name="theme-color" content="#07131f">
+<link rel="manifest" href="./manifest.webmanifest">
+<title>Shbace Medical · Chrome</title>
+<link rel="icon" type="image/png" href="/assets/img/fc0bef7cd7ca.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Shbace">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" sizes="192x192" href="./assets/img/shbace-pwa-192.png">
+<script id="sb-safe-top">
+/* Status-bar safe area: publishes --sat (px) so nothing is drawn under the phone's status bar.
+   1) uses env(safe-area-inset-top) when the WebView reports it;
+   2) otherwise, inside an Android WebView/Capacitor shell, falls back to SB_FALLBACK_PX;
+   3) override anytime with  window.SHBACE_STATUS_BAR_PX = <number>  (0 disables the fallback). */
+(function(){
+  var SB_FALLBACK_PX=28, d=document, r=d.documentElement;
+  function envTop(){
+    try{
+      var p=d.createElement('div');
+      p.style.cssText='position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;padding-top:env(safe-area-inset-top,0px)';
+      (d.body||r).appendChild(p);
+      var v=parseFloat(getComputedStyle(p).paddingTop)||0;
+      p.parentNode&&p.parentNode.removeChild(p);
+      return v;
+    }catch(e){return 0}
+  }
+  function isShell(){
+    var ua=navigator.userAgent||'';
+    if(!/Android/i.test(ua))return false;
+    return /; wv\)/.test(ua)||!!window.Capacitor||!!window.cordova||/Version\/4\.0/.test(ua);
+  }
+  function apply(){
+    var v=0;
+    try{
+      if(typeof window.SHBACE_STATUS_BAR_PX==='number')v=window.SHBACE_STATUS_BAR_PX;
+      else{v=envTop();if(!v&&isShell())v=SB_FALLBACK_PX}
+    }catch(e){}
+    r.style.setProperty('--sat',Math.max(0,Math.round(v))+'px');
+  }
+  apply();
+  d.addEventListener('DOMContentLoaded',apply);
+  addEventListener('load',apply);
+  addEventListener('resize',apply);
+  addEventListener('orientationchange',function(){setTimeout(apply,250)});
+})();
+</script>
+
+<!-- ═══════════ CORE STYLES (needed by the splash and the first screen) ═══════════ -->
+<!-- Base theme, layout, splash & onboarding -->
+<link rel="stylesheet" href="css/core.css">
+<link rel="stylesheet" href="css/android-v13.css">
+<link rel="stylesheet" href="css/chrome-android.css">
+<!-- Owner credit & small additions -->
+
+<!-- v6css -->
+
+<!-- premium-visual-consistency-v2 -->
+
+<!-- targeted-fact-recent-bulb-fixes -->
+
+<!-- onboarding-visual-refinement-v5 -->
+
+<!-- shbace-premium-theme-system-v1 -->
+
+<!-- font-size-layout-stability-v1 -->
+
+<!-- student-modules-7-8-10-11 -->
+
+</head>
+<body>
+
+<!-- ═══════════ 1) SPLASH SCREEN: markup ═══════════ -->
+
+<div id="startupSplash" aria-label="Shbace Medical startup splash" role="status" style="--splash-bg:url(/assets/img/d407f81c5a39.webp)">
+  <div class="splash-backdrop" aria-hidden="true"></div>
+  <img class="splash-poster" alt="Shbace Medical — A World of Knowledge. A Future of Possibilities." src="/assets/img/d407f81c5a39.webp">
+  <img class="splash-wide" alt="" aria-hidden="true" src="/assets/img/4f7815b2e6df.webp">
+  <div class="sp-frame" aria-hidden="true">
+<img class="sp-beat" alt="" draggable="false" decoding="sync" loading="eager" fetchpriority="high" src="/assets/img/e5a5775b19e8.webp">
+<div class="sp-ecg"><canvas id="spEcgCv" aria-hidden="true"></canvas></div>
+<!-- neon progress line under the splash text: switched off until further notice (restore by uncommenting)
+<div class="splash-timer" aria-hidden="true"><span></span></div> -->
+</div>
+</div>
+
+<!-- ═══════════ 2) SPLASH SCREEN: reveal, ECG animation, boot loader ═══════════ -->
+<script id="splash-reveal-v47">
+/* v47: the small heart sprite used to decode/paint long before the 1290x2796 poster, so for a few frames it floated alone on the dark
+   blurred backdrop (and the poster then faded in with a scale while the sprite did not). Everything inside the splash now stays hidden
+   until BOTH images are decoded, then the whole splash fades in as ONE layer. Safety timeout: never blocks the splash. */
+(function(){var el=document.getElementById('startupSplash');if(!el)return;var done=false;
+ function go(){if(done)return;done=true;requestAnimationFrame(function(){requestAnimationFrame(function(){el.classList.add('sp-ready')})})}
+ var imgs=[].slice.call(el.querySelectorAll('img.splash-poster,img.sp-beat'));
+ try{Promise.all(imgs.map(function(i){return(i.decode?i.decode():Promise.resolve()).catch(function(){})})).then(go,go)}catch(e){go()}
+ setTimeout(go,1600);
+ /* v47 ROOT CAUSE of the splash glitch: .sp-frame (heart sprite + ECG) was sized from 100vw/100dvh formulas while the poster is drawn inside the
+    container's REAL box with object-fit. When the visible height differs from dvh (browser bar, WebView insets, odd aspect ratios) the sprite
+    drifted off the poster: the erased-heart patch edges and a stray ECG column showed. The frame now copies the poster's exact rendered box. */
+ var fr=el.querySelector('.sp-frame'),po=el.querySelector('img.splash-poster');
+ function fit(){if(!fr||!po)return;var W=el.clientWidth,H=el.clientHeight;if(!W||!H)return;
+  var cover=getComputedStyle(po).objectFit==='cover',k=cover?Math.max(W/1290,H/2796):Math.min(W/1290,H/2796);
+  fr.style.width=(1290*k)+'px';fr.style.height=(2796*k)+'px';fr.style.left='50%';fr.style.top='50%'}
+ fit();
+ try{new ResizeObserver(fit).observe(el)}catch(e){}
+ addEventListener('resize',fit);addEventListener('orientationchange',fit);
+ if(window.visualViewport)visualViewport.addEventListener('resize',fit);
+})();
+</script>
+<script id="splash-ecg-v18">
+/* Splash ECG v18 — SAME drawing, colours, glow, timing and heart/haptic sync as v17.
+   Only WHERE it is drawn changed: the trace is now drawn by a Worker on an OffscreenCanvas, so it keeps moving smoothly while the main thread
+   is busy running the app scripts / building the first page (that main-thread work was what made the ECG stutter).
+   The Worker runs the very same maths (copied unchanged). The main thread only receives three tiny messages: t0 (first frame),
+   fire (R peak -> heart sprite + haptic, exactly as before) and done (head reached the right edge -> window.__spEcg.done + 'spEcgDone').
+   If the Worker / OffscreenCanvas is unavailable or fails to start, the previous main-thread drawing (v17, unchanged below) is used. */
+(function(){
+ var cv=document.getElementById('spEcgCv'),el=document.getElementById('startupSplash');
+ if(!cv||!el)return;
+ var beatEl=el.querySelector('.sp-beat');
+ var E=window.__spEcg={t0:null,done:false,end:0};
+ var rm=false;try{rm=window.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}
+ function fire(){
+  if(beatEl){beatEl.classList.remove('go');void beatEl.offsetWidth;beatEl.classList.add('go')}
+  try{if(typeof window.__spR==='function')window.__spR()}catch(e){}
+ }
+
+ /* ---------- Worker body (runs inside the Worker; stringified, so it must not touch outer variables) ---------- */
+ function ecgWorkerBody(){
+  var cv=null,ctx=null,W=0,H=0,dpr=1,ys=null,yb=0,AM=0,fired=0,off=0;
+  var L=7000,SW=3,N=3,S=L/SW,P=S/N,PR=0.5,FL=640;
+  var t0=null,done=false,end=0;
+  function g(p,c,s,a){var z=(p-c)/s;return a*Math.exp(-z*z/2)}
+  function beat(q){return g(q,0.300,0.034,0.13)+g(q,0.4775,0.0075,-0.17)+g(q,PR,0.0082,1)+g(q,0.5275,0.009,-0.32)+g(q,0.705,0.058,0.30)}
+  function wave(p){var v=0,q=p*N;for(var k=0;k<N;k++)v+=beat(q-k);return v}
+  function size(w,h,d){
+   dpr=d;
+   if(w===W&&h===H)return;
+   W=cv.width=w;H=cv.height=h;yb=H*0.62;AM=H*0.53;
+   ys=new Float32Array(W+1);for(var i=0;i<=W;i++)ys[i]=yb-AM*wave(i/W);
+   ctx.lineJoin='round';ctx.lineCap='round';
+  }
+  function trace(i0,i1){ctx.beginPath();ctx.moveTo(i0,ys[i0]);for(var i=i0+1;i<=i1;i++)ctx.lineTo(i,ys[i])}
+  function stroke(i0,i1,gx1,gx2){
+   if(i1<=i0)return;
+   var gr=ctx.createLinearGradient(gx1,0,gx2,0);
+   gr.addColorStop(0,'rgba(170,236,255,1)');gr.addColorStop(1,'rgba(120,214,255,0)');
+   ctx.strokeStyle=gr;trace(i0,i1);
+   ctx.save();ctx.globalAlpha=0.13;ctx.lineWidth=dpr*11;ctx.stroke();ctx.restore();
+   ctx.save();ctx.globalAlpha=0.6;ctx.lineWidth=dpr*5;ctx.shadowColor='rgba(40,160,255,0.95)';ctx.shadowBlur=dpr*15;ctx.stroke();ctx.restore();
+   ctx.lineWidth=dpr*2.3;ctx.stroke();
+  }
+  function draw(et,now){
+   ctx.clearRect(0,0,W,H);
+   var m=Math.min(SW-1,Math.floor(et/S)),ph=(et>=L)?1:(et-m*S)/S,head=ph*W,ih=Math.min(W,Math.max(0,Math.round(head))),A=W*0.7;
+   var fl=(et>=L)?Math.min(1,Math.max(0,(now-(t0+L))/FL)):1,f=1-fl;
+   if(m>0&&ih<W)stroke(ih,W,head+W,head+W-A);
+   stroke(0,ih,head,head-A);
+   var hy=ys[ih],rr=dpr*(11+8*f),rg=ctx.createRadialGradient(ih,hy,0,ih,hy,rr);
+   rg.addColorStop(0,'rgba(255,255,255,1)');rg.addColorStop(0.28,'rgba(170,225,255,0.9)');rg.addColorStop(1,'rgba(56,170,255,0)');
+   ctx.fillStyle=rg;ctx.beginPath();ctx.arc(ih,hy,rr,0,6.2832);ctx.fill();
+   if(f>0){
+    var g2=ctx.createLinearGradient(W,0,W-A*1.15,0);
+    g2.addColorStop(0,'rgba(220,250,255,1)');g2.addColorStop(1,'rgba(120,214,255,0)');
+    ctx.save();ctx.globalAlpha=0.55*f;ctx.lineWidth=dpr*3.4;ctx.shadowColor='rgba(150,232,255,1)';ctx.shadowBlur=dpr*(30*f+6);ctx.strokeStyle=g2;trace(0,W);ctx.stroke();ctx.restore();
+   }
+  }
+  function frame(now){
+   if(t0===null){t0=now;postMessage({type:'t0',t:now+off})}
+   var et=now-t0;if(et<0)et=0;
+   var run=et>L?L:et;
+   var n=(run/P>=PR)?Math.floor(run/P-PR)+1:0;
+   if(n>fired){var age=run-(n-1+PR)*P;fired=n;if(age<140)postMessage({type:'fire',t:now+off})}
+   if(et>=L&&!done){done=true;end=now;postMessage({type:'done',t:now+off})}
+   draw(run,now);
+   if(done&&now-end>=FL)return;
+   requestAnimationFrame(frame);
+  }
+  onmessage=function(e){
+   var d=e.data||{};
+   if(d.type==='init'){
+    try{
+     cv=d.canvas;ctx=cv.getContext('2d');
+     if(!ctx||typeof requestAnimationFrame!=='function'){postMessage({type:'fail'});return}
+     L=d.L||L;S=L/SW;P=S/N;
+     off=(self.performance.timeOrigin||(Date.now()-self.performance.now()))-d.mainOrigin;
+     size(d.w,d.h,d.dpr);draw(0,0);requestAnimationFrame(frame);
+    }catch(err){postMessage({type:'fail'})}
+   }else if(d.type==='size'){
+    if(ctx){size(d.w,d.h,d.dpr);if(done)draw(L,1e12)}
+   }
+  };
+ }
+
+ /* ---------- main-thread side of the Worker drawing ---------- */
+ function startWorker(){
+  var w=null,url=null,oc=null,dead=false,seen=false,L=7000,SW=3,N=3,P=L/SW/N,host=cv.parentNode;
+  try{
+   if(!(window.Worker&&window.Blob&&window.URL&&window.URL.createObjectURL&&cv.transferControlToOffscreen))return false;
+   url=URL.createObjectURL(new Blob(['('+ecgWorkerBody.toString()+')()'],{type:'text/javascript'}));
+   oc=cv.transferControlToOffscreen();
+   w=new Worker(url);
+  }catch(e){
+   try{if(w)w.terminate()}catch(_){}
+   if(oc){fallback();return true}     /* canvas already handed over: continue on a fresh canvas */
+   return false;
+  }
+  function dims(){var r=host.getBoundingClientRect(),d=Math.min(2,window.devicePixelRatio||1);return{w:Math.max(2,Math.round(r.width*d)),h:Math.max(2,Math.round(r.height*d)),dpr:d}}
+  function fallback(){
+   if(dead)return;dead=true;
+   try{if(w)w.terminate()}catch(e){}
+   try{if(url)URL.revokeObjectURL(url)}catch(e){}
+   var nc=cv.cloneNode(false);cv.parentNode.replaceChild(nc,cv);cv=nc;   /* a canvas that was transferred can never get a 2D context again */
+   E.t0=null;E.done=false;E.end=0;
+   startMain();
+  }
+  if(beatEl)beatEl.style.setProperty('animation-duration',P.toFixed(1)+'ms','important');   /* heart cycle = ECG beat period (as v17 did at its first frame) */
+  var mo=performance.timeOrigin||(Date.now()-performance.now());
+  w.onmessage=function(ev){
+   var d=ev.data||{};
+   if(d.type==='t0'){
+    seen=true;
+    if(E.t0===null){E.t0=d.t;try{if(splashDeadline&&!splashFinalized)splashDeadline=Date.now()+L-(performance.now()-d.t)}catch(e){}}   /* the 7 s hold is counted from the first painted frame of the trace */
+   }else if(d.type==='fire'){
+    if(performance.now()-d.t<250)fire();           /* never replay a missed beat after a stalled main thread */
+   }else if(d.type==='done'){
+    if(!E.done){E.done=true;E.end=d.t;try{document.dispatchEvent(new Event('spEcgDone'))}catch(e){}}
+   }else if(d.type==='fail'){fallback()}
+  };
+  w.onerror=function(){if(!seen)fallback()};
+  var s0=dims();
+  w.postMessage({type:'init',canvas:oc,L:L,mainOrigin:mo,w:s0.w,h:s0.h,dpr:s0.dpr},[oc]);
+  window.addEventListener('resize',function(){if(dead)return;var s=dims();try{w.postMessage({type:'size',w:s.w,h:s.h,dpr:s.dpr})}catch(e){}});
+  /* watchdog: if the Worker never draws a first frame, fall back to the v17 main-thread drawing. A late timer means the main thread was busy, so wait for its queued messages first. */
+  var due=performance.now()+3000;
+  (function wd(){setTimeout(function(){
+   if(dead||seen||E.t0!==null)return;
+   var n=performance.now();if(n-due>250){due=n+700;wd();return}
+   fallback();
+  },Math.max(0,due-performance.now()))})();
+  /* release the Worker once the splash has been removed (the finished trace must stay on screen until then) */
+  var gc=setInterval(function(){if(dead){clearInterval(gc);return}if(!el.isConnected){clearInterval(gc);dead=true;try{w.terminate()}catch(e){}try{URL.revokeObjectURL(url)}catch(e){}}},500);
+  return true;
+ }
+
+ /* ---------- v17 main-thread drawing (unchanged; now only the fallback) ---------- */
+ function startMain(){
+  var ctx=cv.getContext('2d');if(!ctx)return;
+  var host=cv.parentNode;
+  var L=7000,SW=3,N=3,S=L/SW,P=S/N,PR=0.5,FL=640,W=0,H=0,dpr=1,ys=null,yb=0,AM=0,fired=0;
+  function g(p,c,s,a){var z=(p-c)/s;return a*Math.exp(-z*z/2)}
+  function beat(q){return g(q,0.300,0.034,0.13)+g(q,0.4775,0.0075,-0.17)+g(q,PR,0.0082,1)+g(q,0.5275,0.009,-0.32)+g(q,0.705,0.058,0.30)}
+  function wave(p){var v=0,q=p*N;for(var k=0;k<N;k++)v+=beat(q-k);return v}
+  function size(){
+   var r=host.getBoundingClientRect();dpr=Math.min(2,window.devicePixelRatio||1);
+   var w=Math.max(2,Math.round(r.width*dpr)),h=Math.max(2,Math.round(r.height*dpr));
+   if(w===W&&h===H)return;
+   W=cv.width=w;H=cv.height=h;yb=H*0.62;AM=H*0.53;
+   ys=new Float32Array(W+1);for(var i=0;i<=W;i++)ys[i]=yb-AM*wave(i/W);
+   ctx.lineJoin='round';ctx.lineCap='round';
+  }
+  function trace(i0,i1){ctx.beginPath();ctx.moveTo(i0,ys[i0]);for(var i=i0+1;i<=i1;i++)ctx.lineTo(i,ys[i])}
+  function stroke(i0,i1,gx1,gx2){
+   if(i1<=i0)return;
+   var gr=ctx.createLinearGradient(gx1,0,gx2,0);
+   gr.addColorStop(0,'rgba(170,236,255,1)');gr.addColorStop(1,'rgba(120,214,255,0)');
+   ctx.strokeStyle=gr;trace(i0,i1);
+   ctx.save();ctx.globalAlpha=0.13;ctx.lineWidth=dpr*11;ctx.stroke();ctx.restore();
+   ctx.save();ctx.globalAlpha=0.6;ctx.lineWidth=dpr*5;ctx.shadowColor='rgba(40,160,255,0.95)';ctx.shadowBlur=dpr*15;ctx.stroke();ctx.restore();
+   ctx.lineWidth=dpr*2.3;ctx.stroke();
+  }
+  function draw(et,now){
+   ctx.clearRect(0,0,W,H);
+   var m=Math.min(SW-1,Math.floor(et/S)),ph=(et>=L)?1:(et-m*S)/S,head=ph*W,ih=Math.min(W,Math.max(0,Math.round(head))),A=W*0.7;
+   var fl=(et>=L)?Math.min(1,Math.max(0,(now-(E.t0+L))/FL)):1,f=1-fl;
+   if(m>0&&ih<W)stroke(ih,W,head+W,head+W-A);
+   stroke(0,ih,head,head-A);
+   var hy=ys[ih],rr=dpr*(11+8*f),rg=ctx.createRadialGradient(ih,hy,0,ih,hy,rr);
+   rg.addColorStop(0,'rgba(255,255,255,1)');rg.addColorStop(0.28,'rgba(170,225,255,0.9)');rg.addColorStop(1,'rgba(56,170,255,0)');
+   ctx.fillStyle=rg;ctx.beginPath();ctx.arc(ih,hy,rr,0,6.2832);ctx.fill();
+   if(f>0){
+    var g2=ctx.createLinearGradient(W,0,W-A*1.15,0);
+    g2.addColorStop(0,'rgba(220,250,255,1)');g2.addColorStop(1,'rgba(120,214,255,0)');
+    ctx.save();ctx.globalAlpha=0.55*f;ctx.lineWidth=dpr*3.4;ctx.shadowColor='rgba(150,232,255,1)';ctx.shadowBlur=dpr*(30*f+6);ctx.strokeStyle=g2;trace(0,W);ctx.stroke();ctx.restore();
+   }
+  }
+  function begin(now){
+   try{L=SPLASH_DURATION_MS||L}catch(e){}
+   S=L/SW;P=S/N;
+   if(beatEl)beatEl.style.setProperty('animation-duration',P.toFixed(1)+'ms','important');
+   try{if(splashDeadline&&!splashFinalized)splashDeadline=Date.now()+L-(performance.now()-now)}catch(e){}
+  }
+  function frame(now){
+   if(!el.isConnected)return;
+   if(E.t0===null){E.t0=now;begin(now)}
+   var et=now-E.t0;if(et<0)et=0;
+   var run=et>L?L:et;
+   var n=(run/P>=PR)?Math.floor(run/P-PR)+1:0;
+   if(n>fired){var age=run-(n-1+PR)*P;fired=n;if(age<140)fire()}
+   if(et>=L&&!E.done){E.done=true;E.end=now;try{document.dispatchEvent(new Event('spEcgDone'))}catch(e){}}
+   draw(run,now);
+   if(E.done&&now-E.end>=FL)return;
+   requestAnimationFrame(frame);
+  }
+  size();window.addEventListener('resize',function(){size();if(E.done&&el.isConnected)draw(L,1e12)});
+  if(rm){E.t0=performance.now();draw(L,1e12);E.done=true;return}
+  draw(0,0);
+  requestAnimationFrame(frame);
+ }
+
+ if(rm||!startWorker())startMain();
+})();
+</script>
+<script id="shb-boot-v1">
+/* Boot v1 — first visual frame first, app scripts second.
+   ROOT CAUSE of the slow start: ~14 MB of inline <script> (images, data, the 3.9 MB app, the 4.5 MB question-bank code ...) sat right after the splash markup and ran
+   synchronously while the document was still being parsed. The main thread was therefore busy for the whole start-up and the splash (which needs the main thread to
+   decode its images and to run its reveal) could only appear after all of it.
+   Fix: every script after the splash is kept in the page as inert text (type="text/shb-deferred"). Once the splash has really been painted (class sp-ready + one frame),
+   they are executed one after another in the ORIGINAL ORDER, each in its own task (a frame is allowed to draw before every big one). Nothing else is changed:
+   - same code, same order, same global scope (classic scripts), same ids;
+   - listeners that those scripts register for 'DOMContentLoaded' / 'load' are held and called, in that order, right after the last script ran, which is exactly the
+     moment those events used to mean for them ("every script is loaded") — so launchExperience()'s splashPreReady() still builds the first page only when all
+     components are ready, never earlier (no old-design flash). */
+(function(){
+ var el=document.getElementById('startupSplash');
+ var hold=false,held={dcl:[],load:[]},domReady=false,painted=false,started=false,T=null;
+ /* question bank (1.4 MB JSON): fetched in parallel with the splash; placed into <script id="qbData" type="application/json"> before the first app script runs, so the code that reads its textContent is unchanged */
+ var selectedQB='original';try{selectedQB=localStorage.getItem('shbace_question_bank_version')==='reviewed'?'reviewed':'original'}catch(e){}
+ var dataText=null,dataErr=null;
+ /* v1.1: Original is the immutable college bank. Reviewed is assembled from the small verified patch plus review-log-only cautions. */
+ var dataFetch=(function(){
+  if(!window.fetch)return Promise.reject(new Error('no fetch'));
+  function markReady(){try{performance.mark('shb-qb-data-ready')}catch(e){}}
+  function refresh(url,cache){if(!cache)return;fetch(url,{cache:'no-cache'}).then(function(r){if(r.ok)return cache.put(url,r.clone())}).catch(function(){});}
+  function fetchText(url,cache){
+   if(!cache)return fetch(url,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(url+' HTTP '+r.status);return r.text()});
+   return cache.match(url).then(function(hit){
+    if(hit){refresh(url,cache);return hit.text();}
+    return fetch(url,{cache:'no-cache'}).then(function(r){
+     if(!r.ok)throw new Error(url+' HTTP '+r.status);
+     var copy=r.clone();
+     return r.text().then(function(t){cache.put(url,copy).catch(function(){});return t;});
+    });
+   });
+  }
+  function assembleReviewed(baseText,patchText,logText){
+   var base=JSON.parse(baseText),patch=JSON.parse(patchText),log=JSON.parse(logText);
+   if(!base||!Array.isArray(base.questions)||!base.order)throw new Error('Original question bank is malformed');
+   if(!patch||patch.schema!=='shbace-question-bank-patch-v1'||!Array.isArray(patch.questions))throw new Error('Reviewed patch is missing or invalid');
+   if(base.questions.length!==patch.baseQuestionCount)throw new Error('Reviewed patch does not match this Original bank');
+   var byId=Object.create(null);
+   base.questions.forEach(function(q,i){if(!q||!q.id||byId[q.id]!==undefined)throw new Error('Duplicate or missing Original question ID');byId[q.id]=i;});
+   var patched=Object.create(null);
+   patch.questions.forEach(function(q){
+    if(!q||!q.id||patched[q.id])throw new Error('Duplicate or missing patch question ID');
+    patched[q.id]=1;
+    if(byId[q.id]!==undefined)base.questions[byId[q.id]]=q;
+    else{byId[q.id]=base.questions.length;base.questions.push(q);}
+   });
+   if(patch.questions.length!==patch.changedCount)throw new Error('Reviewed patch count does not match its metadata');
+   /* Needs Review entries remain separate from the verified patch. Their cautions come from the audit log only. */
+   (log&&Array.isArray(log.entries)?log.entries:[]).forEach(function(entry){
+    if(!entry||entry.status!=='needs_review'||byId[entry.id]===undefined)return;
+    var caution=(entry.fieldsChanged||[]).find(function(x){return x&&x.field==='review_note'&&typeof x.after==='string'&&x.after;});
+    if(caution)base.questions[byId[entry.id]].note=caution.after;
+   });
+   if(base.questions.length!==patch.baseQuestionCount+(Number(patch.addedCount)||0))throw new Error('Reviewed bank record count is invalid');
+   markReady();
+   return JSON.stringify(base);
+  }
+  return (window.caches?caches.open('shbace-data-v1-1').catch(function(){return null}):Promise.resolve(null)).then(function(cache){
+   var baseURL='data/qbData.json';
+   if(selectedQB!=='reviewed')return fetchText(baseURL,cache).then(function(t){dataText=t;markReady();});
+   return Promise.all([
+    fetchText(baseURL,cache),
+    fetchText('data/qbData_reviewed_patch.json',cache),
+    fetchText('data/qbData_review_log.json',cache)
+   ]).then(function(items){dataText=assembleReviewed(items[0],items[1],items[2]);});
+  }).catch(function(e){dataErr=e;console.error('Shbace question bank load failed',e);});
+ })();
+ try{performance.mark('shb-boot-start')}catch(e){}
+ function isWin(t){return t===window||t==null}
+ function hook(){
+  hold=true;
+  var wAdd=EventTarget.prototype.addEventListener;
+  window.addEventListener=function(type,fn,opt){
+   if(hold&&isWin(this)&&type==='load'&&fn){held.load.push(fn);return}
+   return wAdd.apply(this==null?window:this,arguments);
+  };
+  document.addEventListener=function(type,fn,opt){
+   if(hold&&this===document&&type==='DOMContentLoaded'&&fn){held.dcl.push(fn);return}
+   return wAdd.apply(this,arguments);
+  };
+ }
+ function unhook(){hold=false;try{delete window.addEventListener}catch(e){}try{delete document.addEventListener}catch(e){}}
+ function callAll(list,type,target){
+  var ev;try{ev=new Event(type)}catch(e){ev=document.createEvent('Event');ev.initEvent(type,false,false)}
+  list.forEach(function(fn){try{if(typeof fn==='function')fn.call(target,ev);else if(fn&&fn.handleEvent)fn.handleEvent(ev)}catch(e){console.error(e)}});
+ }
+ function finish(){
+  unhook();
+  setTimeout(function(){
+   callAll(held.dcl,'DOMContentLoaded',document);
+   setTimeout(function(){
+    callAll(held.load,'load',window);
+    window.__shbBooted=true;
+    try{performance.mark('shb-scripts-done')}catch(e){}
+    try{document.dispatchEvent(new Event('shb-scripts-ready'))}catch(e){}
+   },0);
+  },0);
+ }
+ function run(){
+  var list=[].slice.call(document.querySelectorAll('script[type="text/shb-deferred"]')),i=0;
+  hook();
+  function next(){
+   if(i>=list.length){finish();return}
+   var o=list[i++],big=o.getAttribute('data-big')==='1';
+   function exec(){
+    var n=document.createElement('script');
+    for(var k=0;k<o.attributes.length;k++){var a=o.attributes[k];if(a.name!=='type'&&a.name!=='data-src'&&a.name!=='data-big')n.setAttribute(a.name,a.value)}
+    n.async=false;
+    /* external classic script: same global scope and same order as the former inline text; the next one starts only after this one has RUN (onload/onerror) */
+    n.onload=function(){setTimeout(next,0)};
+    n.onerror=function(){console.error('shb-boot: could not load '+o.getAttribute('data-src'));setTimeout(next,0)};
+    n.src=o.getAttribute('data-src');
+    try{o.parentNode.replaceChild(n,o)}catch(e){console.error(e);setTimeout(next,0)}
+   }
+   if(big&&!document.hidden)requestAnimationFrame(function(){setTimeout(exec,0)});   /* let one frame (splash fade, ECG) draw right before a heavy script */
+   else exec();
+  }
+  next();
+ }
+ function go(){if(started||!domReady||!painted)return;started=true;clearTimeout(T);
+  dataFetch.then(function(){
+   var q=document.getElementById('qbData');
+   if(q&&dataText!=null)q.textContent=dataText;
+   else console.error('shb-boot: question bank missing',dataErr);
+   dataText=null;run()
+  })
+ }
+ function markPainted(){
+  if(painted)return;painted=true;
+  try{performance.mark('shb-splash-ready')}catch(e){}
+  requestAnimationFrame(function(){setTimeout(go,0)});
+  setTimeout(go,300);          /* rAF can be paused (WebView in background): never leave the app unbooted */
+ }
+ document.addEventListener('DOMContentLoaded',function(){domReady=true;go()});
+ if(!el)painted=true;
+ else if(el.classList.contains('sp-ready'))markPainted();
+ else{
+  try{var mo=new MutationObserver(function(){if(el.classList.contains('sp-ready')){mo.disconnect();markPainted()}});mo.observe(el,{attributes:true,attributeFilter:['class']})}catch(e){}
+ }
+ T=setTimeout(markPainted,2300);   /* safety net: the splash reveal itself has a 1.6 s timeout */
+})();
+</script>
+
+<!-- ═══════════ 3) APP SHELL (static layout) ═══════════ -->
+<div class="shell">
+  <aside class="rail">
+    <div class="brand-small"><img src="/assets/img/a3d6b2849763.webp" alt="Shbace Medical icon"><div><strong>Shbace Medical</strong><small>REDESIGN HANDOFF</small></div></div>
+    <div class="rail-label">WORKSPACE</div>
+    <button class="active" data-mode="preview"><span class="ico">▣</span> Interactive preview</button>
+    <button data-mode="app"><span class="ico">▦</span> Inside the app</button>
+    <div class="rail-label">HANDOFF NOTES</div>
+    <button data-mode="decisions"><span class="ico">✓</span> Agreed & rejected</button>
+    <button data-mode="preserve"><span class="ico">⛨</span> Preserve functions</button>
+    <button data-mode="build"><span class="ico">⌘</span> Build instructions</button>
+    <div class="rail-note"><b style="color:#e4f1ff">Important</b><br>This is a standalone design prototype and handoff brief. It is not the production question bank and must not replace the live HTML file.</div>
+  </aside>
+  <main class="workspace">
+    <header class="topbar">
+      <div><div class="eyebrow">PALESTINIAN MEDICAL LEARNING PROJECT</div><h1>Shbace Medical · Redesign Blueprint</h1></div>
+      <div class="topbar-right"><span class="status">Prototype · No real data</span><button class="soft-btn" id="resetDemo">↺ Reset demo</button></div>
+    </header>
+    <div class="content-grid">
+      <section class="preview-panel">
+        <div class="preview-head"><b id="previewLabel">INTERACTIVE ONBOARDING</b><span id="previewCount">STARTUP → ONBOARDING</span></div>
+        <div class="preview-view" id="previewView">
+          <div class="phone-wrap"><div class="phone"><i class="shb-obbg" aria-hidden="true"></i><div class="phone-content" id="phoneContent"></div></div></div>
+        </div>
+        <div class="doc-view" id="docView"></div>
+      </section>
+      <aside class="guide-panel">
+        <div class="guide-tabs"><button class="active" data-guide="screen">Current screen</button><button data-guide="logic">Interaction notes</button><button data-guide="handoff">AI handoff prompt</button></div>
+        <div class="guide-content" id="guideContent"></div>
+      </aside>
+    </div>
+    <div class="footer-note">SHBACE MEDICAL · A World of Knowledge. A Future of Possibilities. · Independent design reference, not production software</div>
+  </main>
+</div>
+
+<!-- ═══════════ 4) LATE STYLES (feature & theme layers, in original cascade order) ═══════════ -->
+<!-- home7css -->
+<link rel="stylesheet" href="css/late.css">
+<link rel="stylesheet" href="css/unified-enhancements.css">
+<!-- shell7css -->
+
+<!-- sp7css -->
+
+<!-- qb7css -->
+
+<!-- cp-completion-v2 -->
+
+<!-- ob-smartreview-ref -->
+
+<!-- ob-fix-still -->
+
+<!-- sb-fix-css -->
+
+<!-- notif-onboarding-polish-v1 -->
+
+<!-- qd-guided-v2 -->
+
+<!-- u11-note-conflict-css -->
+
+<!-- sb-smooth-css -->
+
+<!-- sr3css -->
+
+<!-- polish-v8 -->
+
+<!-- motion-v2 -->
+
+<!-- ob-unified-v10 -->
+
+<!-- shb-holo-v1 -->
+
+<!-- about-redesign-v1 -->
+
+<!-- neon-buttons-v1 -->
+
+<!-- ob-shared-bg-v1 -->
+
+<!-- splash-ecg-intro-cards-v12 -->
+
+<!-- onb-refine-v14 -->
+
+<!-- v16-ui -->
+
+<!-- neon-ecg-stats-v17 -->
+
+<!-- chrono-timer-v18 -->
+
+<!-- qd-smooth-v19 -->
+
+<!-- ob1-icons-fit-v22 -->
+
+<!-- ob1-center-cards-v24 -->
+
+<!-- gx-columns-lit-v1 -->
+
+<!-- ob-frame-v23 -->
+
+<!-- mj-cinematic-v1 -->
+
+<!-- bottom-nav-v1 -->
+
+<!-- ob-frame-v24 -->
+
+<!-- qd-sheet-v21 -->
+
+<!-- onboarding-neon-v20 -->
+
+<!-- shb-v33-css -->
+
+<!-- shb-portal-css -->
+
+<!-- shb-dedication-css -->
+
+<!-- shb-theme-final -->
+
+<!-- shb-palette-final -->
+
+<!-- cp-journey-art-css -->
+
+<!-- no-ui-select -->
+
+<!-- shb-v47-css -->
+
+
+<!-- ═══════════ 5) SCRIPTS: data first, then app code, then feature patches (original execution order; run by the boot loader) ═══════════ -->
+<!-- Embedded images (IMG) -->
+<!-- 5) SCRIPTS: data first, then app code, then feature patches (original execution order; run by the boot loader) ═══════════ --> <!-- Embedded images (IMG) -->
+<script type="text/shb-deferred" data-src="js/01-ui-images.js"></script>
+<!-- Embedded doctor images (DOC_EMB) -->
+<!-- Embedded doctor images (DOC_EMB) -->
+<script type="text/shb-deferred" data-src="js/02-doctor-images.js"></script>
+<!-- cp-completion-scene -->
+<!-- cp-completion-scene -->
+<script type="text/shb-deferred" id="cp-completion-scene" data-src="js/03-completion-scene.js"></script>
+<!-- Main application code -->
+<!-- Main application code -->
+<script type="text/shb-deferred" data-src="js/04-app-main.js"></script>
+<!-- Question-bank summary (REAL) -->
+<!-- Question-bank summary (REAL) -->
+<script type="text/shb-deferred" data-src="js/05-question-bank-summary.js"></script>
+<!-- Drawer menu definition (DR) -->
+<!-- Drawer menu definition (DR) -->
+<script type="text/shb-deferred" data-src="js/06-drawer-menu.js"></script>
+<!-- Returning-student migration -->
+<!-- Returning-student migration -->
+<script type="text/shb-deferred" data-src="js/07-returning-student-migration.js"></script>
+<!-- Question-bank data (JSON) -->
+<script id="qbData" type="application/json" data-src="data/qbData.json"></script>
+<!-- dailyFactsData -->
+<!-- dailyFactsData -->
+<script type="text/shb-deferred" id="dailyFactsData" data-src="js/08-daily-facts-data.js"></script>
+<!-- v6js -->
+<!-- v6js -->
+<script type="text/shb-deferred" id="v6js" data-src="js/09-app-features-v6.js" data-big="1"></script>
+<!-- Browser back-button history sync -->
+<!-- Browser back-button history sync -->
+<script type="text/shb-deferred" data-src="js/10-history-sync.js"></script>
+<!-- bugfix-interaction-20261106 -->
+<!-- bugfix-interaction-20261106 -->
+<script type="text/shb-deferred" id="bugfix-interaction-20261106" data-src="js/11-bugfix-interaction-20261106.js"></script>
+<!-- premium-touch-behavior -->
+<!-- premium-touch-behavior -->
+<script type="text/shb-deferred" id="premium-touch-behavior" data-src="js/12-premium-touch-behavior.js"></script>
+<!-- home-functional-actions-v1 -->
+<!-- home-functional-actions-v1 -->
+<script type="text/shb-deferred" id="home-functional-actions-v1" data-src="js/13-home-functional-actions-v1.js"></script>
+<!-- ob-smartreview-ref-js -->
+<!-- ob-smartreview-ref-js -->
+<script type="text/shb-deferred" id="ob-smartreview-ref-js" data-src="js/14-ob-smartreview-ref-js.js"></script>
+<!-- ob-fix-still-js -->
+<!-- ob-fix-still-js -->
+<script type="text/shb-deferred" id="ob-fix-still-js" data-src="js/15-ob-fix-still-js.js"></script>
+<!-- sb-fix-js -->
+<!-- sb-fix-js -->
+<script type="text/shb-deferred" id="sb-fix-js" data-src="js/16-sb-fix-js.js"></script>
+<!-- Motion v2 -->
+<!-- Motion v2 -->
+<script type="text/shb-deferred" data-src="js/17-motion-v2.js"></script>
+<!-- shb-holo-v1-js -->
+<!-- shb-holo-v1-js -->
+<script type="text/shb-deferred" id="shb-holo-v1-js" data-src="js/18-shb-holo-v1-js.js"></script>
+<!-- ob-shared-bg-v1-js -->
+<!-- ob-shared-bg-v1-js -->
+<script type="text/shb-deferred" id="ob-shared-bg-v1-js" data-src="js/19-ob-shared-bg-v1-js.js"></script>
+<!-- drawer-order-v12 -->
+<!-- drawer-order-v12 -->
+<script type="text/shb-deferred" id="drawer-order-v12" data-src="js/20-drawer-order-v12.js"></script>
+<!-- onb-chips-lifecycle-v15 -->
+<!-- onb-chips-lifecycle-v15 -->
+<script type="text/shb-deferred" id="onb-chips-lifecycle-v15" data-src="js/21-onb-chips-lifecycle-v15.js"></script>
+<!-- shb-scroll-keep-v17 -->
+<!-- shb-scroll-keep-v17 -->
+<script type="text/shb-deferred" id="shb-scroll-keep-v17" data-src="js/22-shb-scroll-keep-v17.js"></script>
+<!-- chrono-timer-v18-js -->
+<!-- chrono-timer-v18-js -->
+<script type="text/shb-deferred" id="chrono-timer-v18-js" data-src="js/23-chrono-timer-v18-js.js"></script>
+<!-- daily-notify-v18 -->
+<!-- daily-notify-v18 -->
+<script type="text/shb-deferred" id="daily-notify-v18" data-src="js/24-daily-notify-v18.js"></script>
+<!-- shb-portal-js -->
+<!-- shb-portal-js -->
+<script type="text/shb-deferred" id="shb-portal-js" data-src="js/25-shb-portal-js.js"></script>
+<!-- shb-dedication-js -->
+<!-- shb-dedication-js -->
+<script type="text/shb-deferred" id="shb-dedication-js" data-src="js/26-shb-dedication-js.js"></script>
+<!-- Selection safety net -->
+<!-- Selection safety net -->
+<script type="text/shb-deferred" data-src="js/27-selection-safety-net.js"></script>
+<!-- grade-sync-v46 -->
+<!-- grade-sync-v46 -->
+<script type="text/shb-deferred" id="grade-sync-v46" data-src="js/28-grade-sync-v46.js"></script>
+<script type="text/shb-deferred" data-src="js/29-reviewed-bank-controls.js"></script>
+<script type="text/shb-deferred" id="shbace-offline-setup" data-src="js/29-offline-setup.js"></script>
+<script type="text/shb-deferred" id="android-enhancements-v1" data-src="js/30-android-enhancements.js"></script>
+<script type="text/shb-deferred" id="android-v13-enhancements" data-src="js/31-android-v13.js"></script>
+<script type="text/shb-deferred" id="chrome-android-enhancements" data-src="js/32-chrome-android.js"></script>
+<script type="text/shb-deferred" id="unified-question-voice" data-src="js/33-unified-voice.js"></script>
+<script type="text/shb-deferred" id="focus-countdown-timer" data-src="js/34-study-countdown.js"></script>
+<script id="shbace-pwa-sw">
+/* Progressive Web App support for browsers; Capacitor keeps its native asset lifecycle. */
+(function(){
+  if(window.Capacitor || !('serviceWorker' in navigator)) return;
+  if(location.protocol!=='https:' && location.hostname!=='localhost') return;
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.getRegistration('./').then(function(reg){
+      if(reg) return reg;
+      return navigator.serviceWorker.register('./sw.js',{scope:'./'});
+    }).catch(function(e){
+      console.warn('Shbace Medical offline support could not be registered:',e);
+    });
+  },{once:true});
+})();
+</script>
+</body>
+</html>
