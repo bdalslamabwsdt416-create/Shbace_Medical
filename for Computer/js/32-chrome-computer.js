@@ -196,7 +196,7 @@ function computerVoiceUpdateUi(){
   if(status&&statusText){
    var message=computerVoiceMessage;
    var dismissible=!!message;
-   if(!message&&computerVoiceFallback&&computerVoicePreference!=='ar'){
+   if(!message&&computerVoiceFallback&&computerVoicePreference!=='ar'&&computerVoiceReady){
     message=computerVoiceLanguageLabel(computerVoiceFallbackFor)+' voice is unavailable on this device. Arabic voice is being used instead.';
    }
    if(!message&&!computerVoiceApi)message='Voice playback is not supported in this browser.';
