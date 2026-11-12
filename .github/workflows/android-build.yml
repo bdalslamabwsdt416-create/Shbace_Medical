@@ -7,6 +7,7 @@ on:
       - work/android-enhancements-20261111
       - work/android-v1.3-planner-navigation-20261111
       - work/android-notifications-fix-20261111
+      - work/android-qtools-persistence-20261112
     paths:
       - 'android/**'
       - 'index.html'
@@ -62,13 +63,19 @@ jobs:
 
       - name: JavaScript syntax
         run: |
-          node --check js/09-app-features-v6.js
-          node --check js/24-daily-notify-v18.js
-          node --check js/30-android-enhancements.js
-          node --check js/31-android-v13.js
+          for file in js/*.js; do
+            node --check "$file"
+          done
+          node --check scripts/build-pwa.mjs
 
       - name: Build the matching PWA assets for Android
         run: npm run build:pwa
+
+      - name: Run Android unit tests
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon --stacktrace :app:testDebugUnitTest
 
       - name: Build debug APK
         working-directory: android
@@ -79,13 +86,13 @@ jobs:
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: SHBACE-Medical-Android-v1.3.3-debug
+          name: SHBACE-Medical-Android-v1.3.4-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 90
 
       - name: Prepare Release signing key
-        if: always() && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111')
+        if: success() && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111' || github.ref == 'refs/heads/work/android-qtools-persistence-20261112')
         id: release-signing
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -114,7 +121,7 @@ jobs:
           echo "ready=true" >> "$GITHUB_OUTPUT"
 
       - name: Build signed Release APK
-        if: always() && steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111')
+        if: success() && steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111' || github.ref == 'refs/heads/work/android-qtools-persistence-20261112')
         working-directory: android
         run: |
           chmod +x gradlew
@@ -128,18 +135,24 @@ jobs:
           done
           if grep -Fq android.permission.USE_EXACT_ALARM <<< "$PERMISSIONS"; then echo "Unexpected USE_EXACT_ALARM"; exit 1; fi
           "$AAPT" dump xmltree "$APK" AndroidManifest.xml | grep -Fq LocalNotificationRestoreReceiver
-          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$APK"
+          BADGING=$("$AAPT" dump badging "$APK")
+          grep -Fq "name='com.shbace.medical'" <<< "$BADGING" || { echo "Unexpected Android application ID"; exit 1; }
+          grep -Fq "versionCode='13' versionName='1.3.4'" <<< "$BADGING" || { echo "Unexpected Android version metadata"; exit 1; }
+          SIGNATURE_INFO=$("$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$APK")
+          printf '%s\\n' "$SIGNATURE_INFO"
+          grep -Fq "certificate SHA-256 digest: 8412e14418309829ca3d2432643672508ff5d6e9f00b727a3ce9654745a53337" <<< "$SIGNATURE_INFO" || { echo "Release signing certificate changed; refusing to publish an incompatible update"; exit 1; }
 
       - name: Publish signed Release APK
-        if: steps.release-signing.outputs.ready == 'true' && github.ref == 'refs/heads/work/android-notifications-fix-20261111'
+        if: success() && steps.release-signing.outputs.ready == 'true' && github.ref == 'refs/heads/work/android-qtools-persistence-20261112'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: android-v1.3.3
-          name: SHBACE Medical Android v1.3.3
+          tag_name: android-v1.3.4
+          name: SHBACE Medical Android v1.3.4
           target_commitish: ${{ github.sha }}
           body: |
-            Signed Android release build for SHBACE Medical v1.3.3 (versionCode 12).
-            This release preserves the existing application ID and release signing identity for in-place upgrades.
+            Signed Android release build for SHBACE Medical v1.3.4 (versionCode 13).
+            Includes persistent question tools, refined SVG action icons and a study-timer clock correction.
+            The build runs Android unit tests and verifies the established release signing certificate before publishing.
           files: android/app/build/outputs/apk/release/app-release.apk
           fail_on_unmatched_files: true
 
