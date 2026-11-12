@@ -112,6 +112,20 @@ subjectsView=function(){
  html=html.replace('onkeydown="if(event.key===\'Enter\')appPage=\'pedcollections\',renderAppDemo()"','onkeydown="if(event.key===\'Enter\')openPediatricCollections(event)"');
  return html;
 };
+/* Register custom Pediatrics page with the app renderer. The core renderer only knows built-in pages. */
+window.__shbRegisterPage=window.__shbRegisterPage||function(id,view){
+ const previousRender=window.renderAppDemo;
+ window.renderAppDemo=function(){
+  if(appPage===id){
+   document.getElementById('previewLabel').textContent='INSIDE THE APP · PEDIATRICS';
+   document.getElementById('previewCount').textContent='QUESTION COLLECTIONS';
+   phoneContent.innerHTML=`<div class="device-status"><span>9:41</span><span>● ● ● ▰</span></div><section class="screen" style="padding-top:11px;padding-bottom:10px">${view()}${appNav()}</section>`;
+   renderGuide();
+   return;
+  }
+  return previousRender.apply(this,arguments);
+ };
+};
 window.__shbRegisterPage('pedcollections',collectionView,'subjects');
 if(typeof BACKP!=='undefined')BACKP.specialties='pedcollections';
 const _oldSpecialtiesView=specialtiesView;
