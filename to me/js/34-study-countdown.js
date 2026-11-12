@@ -10,11 +10,11 @@ function goal(){try{var x=JSON.parse(localStorage.getItem('shbace_studytime_v1')
 function elapsed(c){if(!c)return 0;return Math.max(0,(Number(c.ms)||0)+(c.running&&Number.isFinite(c.rs)?Math.max(0,Date.now()-c.rs):0))}
 function clock(ms){var s=Math.max(0,Math.ceil(ms/1000)),m=Math.floor(s/60),x=s%60,h=Math.floor(m/60);return h?String(h)+':'+String(m%60).padStart(2,'0')+':'+String(x).padStart(2,'0'):String(m).padStart(2,'0')+':'+String(x).padStart(2,'0')}
 function update(ms){
- var c=(state()||{}).cur,g=goal(),total=g*60000,left=Math.max(0,total-ms),progress=Math.max(0,Math.min(1,ms/total));
+ var c=(state()||{}).cur,g=goal(),total=g*60000,done=false;try{done=!c&&!!localStorage.getItem(ALERT_KEY)}catch(_){}var left=done?0:Math.max(0,total-ms),progress=done?1:Math.max(0,Math.min(1,ms/total));
  var d=document.getElementById('tmDigits'),t=document.getElementById('tmGoalTxt'),a=document.getElementById('tmArc'),dot=document.getElementById('tmDot');document.querySelectorAll('.sst-time').forEach(function(el){el.textContent=clock(left)});
  if(d)d.textContent=clock(left);
  var mini=document.getElementById('qbMiniClockDigits');if(mini)mini.textContent=clock(left);
- if(t)t.textContent=left>0?(clock(left)+' remaining · '+Math.round(progress*100)+'% complete'):'Focus time complete';
+ if(t)t.textContent=done||left===0?'Focus time complete':clock(left)+' remaining · '+Math.round(progress*100)+'% complete';
  if(a){var circ=2*Math.PI*100;a.style.strokeDashoffset=String(circ*progress)}
  if(dot){var ang=progress*2*Math.PI-Math.PI/2;dot.setAttribute('cx',(120+100*Math.cos(ang)).toFixed(1));dot.setAttribute('cy',(120+100*Math.sin(ang)).toFixed(1))}
  var st=document.getElementById('tmAlertStatus');
@@ -69,12 +69,17 @@ function notify(title,body){
  }catch(_){}
 }
 function finishAtZero(c,g){
- if(!c||!c.id||lastId===c.id)return;lastId=c.id;
+ if(!c||!c.id||lastId===c.id)return;try{if(localStorage.getItem(ALERT_KEY)===c.id){lastId=c.id;return}}catch(_){}lastId=c.id;
  try{localStorage.setItem(ALERT_KEY,c.id)}catch(_){}
  try{if(typeof window.stTimerFinish==='function')window.stTimerFinish()}catch(_){}
  softChime();showFinishToast(g);notify('Focus session complete','Your '+g+'-minute study timer has reached zero. Take a short break or start another session.');
  setTimeout(function(){try{if(typeof window.renderAppDemo==='function'&&onTimerPage())window.renderAppDemo()}catch(_){}},80);
 }
+function clearCompletedState(){lastId='';try{localStorage.removeItem(ALERT_KEY)}catch(_){}}
+var originalStartAction=window.stTimerStart;
+if(typeof originalStartAction==='function')window.stTimerStart=function(){clearCompletedState();return originalStartAction.apply(this,arguments)};
+var originalToggleAction=window.tmToggle;
+if(typeof originalToggleAction==='function')window.tmToggle=function(){var c=(state()||{}).cur;if(!c||!c.running)clearCompletedState();return originalToggleAction.apply(this,arguments)};
 function sync(){
  var st=state(),c=st&&st.cur;
  if(!c){update(0);return}
