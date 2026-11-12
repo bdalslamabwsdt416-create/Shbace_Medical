@@ -1,7 +1,7 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.8-to-me.3",
+  "version": "1.3.8-to-me.4",
   "displayVersion": "1.3.8 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-12",
   "releaseNotes": [
@@ -10,7 +10,7 @@
     "Settings are grouped in a clearer order. Question reading supports English (US), English (UK) and Arabic, prefers a male voice when the device provides one, and toggles between Read aloud and Stop reading on the same button. English (US) remains the default.",
     "Pediatrics separates Dr. Abdulrahman Al-Joaki MCQs from Previous Years' Exam Questions; both collections are organised by medical systems and topics.",
     "Question stems use natural word wrapping without changing original question text.",
-    "The focus timer uses a real countdown, with completion sound and browser notification where supported.",
+    "The focus timer has a real countdown, a small live Q Bank indicator, a soft completion chime, a visual completion message and a browser notification where supported.",
     "Question-bank records, IDs, answer keys and existing explanations are preserved."
   ]
 }
