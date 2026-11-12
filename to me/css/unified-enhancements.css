@@ -148,3 +148,41 @@ button.ped-collection-card:active{transform:scale(.99);border-color:rgba(88,214,
 #phoneContent .rs.qb .qstem{
  text-wrap:pretty;
 }
+
+
+/* SHBACE Pediatrics source selector — additive styling */
+.ped-collection-page,.ped-systems-page{max-width:100%;margin-inline:auto}
+.ped-collection-kicker{color:var(--mint,#6ee3ce);font-size:9px;font-weight:850;letter-spacing:.16em;text-transform:uppercase;margin:4px 0 8px}
+.ped-collection-page h1,.ped-systems-page h1{font-size:clamp(21px,3vw,27px);line-height:1.18;letter-spacing:-.035em;margin:0 0 7px}
+.ped-collection-page>.sub,.ped-systems-page>.sub{line-height:1.55;margin:0 0 16px}
+.ped-collections-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin-top:16px}
+.ped-collection-card{display:flex;align-items:center;gap:13px;min-width:0;text-align:left;padding:15px;border:1px solid rgba(91,174,207,.27);border-radius:19px;background:linear-gradient(145deg,rgba(17,49,69,.96),rgba(9,27,44,.98));color:#edf8ff;box-shadow:0 12px 28px rgba(0,0,0,.14);transition:border-color .2s,transform .2s,box-shadow .2s}
+.ped-collection-card:focus-visible{outline:2px solid var(--mint);outline-offset:3px}
+.ped-collection-card:hover{border-color:rgba(110,227,206,.58);transform:translateY(-2px);box-shadow:0 15px 32px rgba(0,0,0,.2)}
+.ped-collection-avatar{position:relative;display:grid;place-items:center;flex:0 0 76px;width:76px;height:76px;border-radius:50%;overflow:hidden;isolation:isolate;border:2px solid rgba(112,224,213,.52);background:radial-gradient(circle at 35% 25%,#245b70,#102a42 72%);box-shadow:0 0 0 4px rgba(80,190,190,.08),0 8px 18px rgba(0,0,0,.24)}
+.ped-collection-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%;clip-path:circle(50% at 50% 50%)}
+.ped-avatar-initials{position:absolute;inset:0;place-items:center;color:#eaffff;font-size:21px;font-weight:900;letter-spacing:.02em;background:radial-gradient(circle at 35% 25%,#276a79,#112b46 75%)}
+.ped-collection-avatar.is-fallback .ped-avatar-initials{display:grid}
+.ped-collection-copy{display:grid;gap:5px;min-width:0;flex:1}
+.ped-collection-copy .eyebrow{font-size:8px;letter-spacing:.13em;font-weight:850;color:#73d9d0}
+.ped-collection-copy>b{font-size:14px;line-height:1.3;color:#f1fbff}
+.ped-collection-copy small{font-size:10px;line-height:1.5;color:#9fb9ca}
+.ped-collection-count{font-size:10px;font-weight:800;color:#8fe7d5;margin-top:2px}
+.ped-collection-arrow{font-size:25px;color:#7bdacb;line-height:1}
+.ped-collection-footnote{margin:16px 2px 0;padding:11px 13px;border:1px solid rgba(105,162,196,.18);border-radius:12px;background:rgba(9,31,49,.55);color:#9bb7c8;font-size:10px;line-height:1.5}
+.ped-system-card{cursor:pointer}
+.ped-bank-topics .ped-collection-kicker{margin:1px 0 10px}
+.ped-bank-topics .tpc{min-width:0}
+.ped-bank-topics .tpc-tx{min-width:0}
+.ped-bank-topics .tpc-tx h3{line-height:1.35}
+.ped-bank-topics .tno.ti{flex:0 0 56px;width:56px;height:56px;border-radius:14px;overflow:hidden}
+.ped-bank-topics .tno.ti img{width:100%;height:100%;object-fit:cover}
+.ped-collection-card.ped-collection-previous .ped-avatar-faculty{border-color:rgba(115,177,235,.62);background:radial-gradient(circle at 35% 25%,#315a83,#142a48 75%)}
+.ped-collection-card.ped-collection-previous .ped-avatar-initials{background:radial-gradient(circle at 35% 25%,#315a83,#142a48 75%)}
+.qstem{overflow-wrap:normal;word-break:normal;hyphens:manual;text-wrap:pretty;max-width:100%}
+@media(max-width:650px){.ped-collections-grid{grid-template-columns:1fr;gap:10px}.ped-collection-card{padding:13px;gap:11px}.ped-collection-avatar{flex-basis:66px;width:66px;height:66px}.ped-collection-copy>b{font-size:13px}.ped-collection-copy small{font-size:9px}}
+@media(min-width:760px){.ped-collection-page,.ped-systems-page{max-width:1000px}.ped-collections-grid{gap:17px}.ped-collection-card{padding:19px}.ped-collection-avatar{width:88px;height:88px;flex-basis:88px}}
+.phone.light .ped-collection-card{background:linear-gradient(145deg,#f7fbff,#edf5fb);border-color:#c9ddeb;color:#193b54}
+.phone.light .ped-collection-copy>b{color:#1d3e59}
+.phone.light .ped-collection-copy small{color:#58738a}
+.phone.light .ped-collection-footnote{background:#f3f8fc;color:#5a7489;border-color:#d3e2ec}
