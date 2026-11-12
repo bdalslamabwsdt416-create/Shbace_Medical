@@ -1,7 +1,7 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.9-to-me.5",
+  "version": "1.3.9-to-me.6",
   "displayVersion": "1.3.9 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-13",
   "releaseNotes": [
@@ -13,6 +13,7 @@
     "The side menu keeps the existing Exam Goal Planner under Your Progress and removes the duplicate extension entry.",
     "Question bank records, stable question IDs, question wording, option labels, answer keys and explanations are preserved.",
     "Fixes offline installation integrity retries by bypassing stale Service Worker cache responses for hash-versioned verification requests, while storing verified bytes under canonical local cache URLs.",
-    "After all 245 current assets pass SHA-256 verification, obsolete offline package caches are deleted. Previous Service Worker shell caches are removed only after the replacement shell is installed. Student answers, bookmarks, notes and progress storage are preserved."
+    "Offline retry reuses the previously saved package cache, rechecks existing files against the current byte sizes and SHA-256 hashes, and downloads only missing or changed assets. The latest Service Worker is checked and activated before integrity downloads.",
+    "After the complete current package passes integrity verification, obsolete cache entries and older package caches are deleted. Existing answers, bookmarks, notes and study progress remain preserved."
   ]
 }
