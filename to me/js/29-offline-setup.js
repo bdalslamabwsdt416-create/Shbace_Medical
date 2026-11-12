@@ -165,6 +165,19 @@ function fileValid(file,checkHash){
   }).catch(function(){return false});
  });
 }
+/* Remove only obsolete downloaded-app caches after the current manifest's
+   files have passed full SHA-256 verification. IndexedDB and student records
+   are deliberately untouched. */
+function cleanupPreviousCaches(){
+ return caches.keys().then(function(names){
+  var stale=names.filter(function(name){
+   return name.indexOf('shbace-chrome-offline-')===0&&name!==CACHE_NAME;
+  });
+  return Promise.all(stale.map(function(name){
+   return caches.delete(name).then(function(ok){return {name:name,ok:ok}}).catch(function(){return {name:name,ok:false}});
+  }));
+ });
+}
 function loadManifest(){
  return caches.open(CACHE_NAME).then(function(c){
   /* Network first: a stale cached copy of the file list makes size/SHA checks fail against newer files.
@@ -347,6 +360,9 @@ function startDownload(){
   return dbPut('meta','ready',record).then(function(){
    return cache.put(READY_URL,new Response(JSON.stringify(record),{status:200,headers:{'content-type':'application/json'}}));
   }).then(function(){
+   return cleanupPreviousCaches();
+  }).then(function(cleanupResults){
+   var cleanupPending=cleanupResults.filter(function(item){return !item.ok;}).length;
    ui.percent.textContent='100%';ui.count.textContent=manifest.files.length+' / '+manifest.files.length+' files';
    ui.track.setAttribute('aria-valuenow','100');ui.bar.style.width='100%';
    ui.bytes.textContent=fmtBytes(manifest.totalBytes)+' / '+fmtBytes(manifest.totalBytes);
@@ -355,7 +371,9 @@ function startDownload(){
    ui.stages.querySelector('[data-stage="verify"]').classList.add('is-done');
    ui.stages.querySelector('[data-stage="verify"]').classList.remove('is-active');
    setStatus('Setup complete. Shbace Medical is ready to open from this device without an internet connection.');
-   setWarning('All '+manifest.files.length+' required files were saved and verified locally. Your existing answers and study progress were not reset.');
+   setWarning(cleanupPending
+    ? 'All '+manifest.files.length+' required files are verified. Some obsolete app-cache entries could not be removed; your answers and study progress remain untouched.'
+    : 'All '+manifest.files.length+' required files were saved and verified. Previous app-download caches were removed. Your answers, bookmarks and study progress were preserved.');
    ui.button.disabled=false;ui.button.textContent='Open Shbace Medical';ui.button.dataset.done='1';ui.button.dataset.retryCheck='0';
    ui.foot.textContent='Offline package verified · '+fmtBytes(manifest.totalBytes)+' stored. Keep a JSON backup of your study progress.';
   });
@@ -424,7 +442,7 @@ function inspectInstalledState(){
      var refreshed={version:manifest.version,verified:true,fileCount:manifest.files.length,totalBytes:manifest.totalBytes,completedAt:Date.now()};
      return dbPut('meta','ready',refreshed).then(function(){
       return cache.put(READY_URL,new Response(JSON.stringify(refreshed),{status:200,headers:{'content-type':'application/json'}}));
-     }).then(function(){return {ready:true,record:refreshed}});
+     }).then(function(){return cleanupPreviousCaches()}).then(function(){return {ready:true,record:refreshed}});
     });
    });
  });
