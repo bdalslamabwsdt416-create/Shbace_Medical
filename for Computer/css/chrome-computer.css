@@ -91,3 +91,108 @@ body.app-mode .phone .app-scroll{
     padding-right:14px!important;
   }
 }
+
+/* ===== Computer PWA · responsive phone portrait adaptation =====
+   Applies only at phone-sized viewports. Desktop/laptop wide layout above 760px is unchanged. */
+@media (max-width:760px){
+  html,body{
+    width:100%;
+    min-width:320px;
+    height:100%;
+    min-height:100%;
+    overflow-x:hidden;
+  }
+  body.app-mode{
+    width:100vw;
+    height:100dvh;
+    min-height:100dvh;
+    overflow:hidden;
+  }
+  body.app-mode .shell,
+  body.app-mode .workspace,
+  body.app-mode .content-grid,
+  body.app-mode .preview-panel,
+  body.app-mode .preview-view,
+  body.app-mode .phone-wrap,
+  body.app-mode .phone,
+  body.app-mode .phone-content{
+    width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box;
+  }
+  body.app-mode .shell,
+  body.app-mode .workspace{
+    height:100dvh;
+    min-height:0;
+    overflow:hidden;
+  }
+  body.app-mode .content-grid,
+  body.app-mode .preview-panel,
+  body.app-mode .preview-view{
+    height:100%;
+    min-height:0;
+    overflow:hidden;
+  }
+  body.app-mode .phone-wrap{
+    display:block!important;
+    height:100dvh;
+    min-height:100dvh;
+    padding:0!important;
+  }
+  body.app-mode .phone{
+    width:100vw!important;
+    height:100dvh!important;
+    min-height:0!important;
+    max-height:none!important;
+    border:0!important;
+    border-radius:0!important;
+    box-shadow:none!important;
+  }
+  body.app-mode .phone-content{
+    height:100dvh!important;
+    min-height:0!important;
+    overflow:hidden!important;
+  }
+  body.app-mode .phone .screen.app-shell{
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    height:100%!important;
+    min-height:0!important;
+    padding-left:14px!important;
+    padding-right:14px!important;
+  }
+  body.app-mode .phone .app-shell>:is(.phone-appbar,.app-scroll,.app-nav){
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    margin-left:0!important;
+    margin-right:0!important;
+  }
+  body.app-mode .phone .app-scroll{
+    min-width:0;
+    overflow-x:hidden;
+    overflow-y:auto;
+    overscroll-behavior-y:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+  body.app-mode .phone .app-scroll>*{
+    min-width:0;
+    max-width:100%;
+  }
+  body.app-mode .phone .app-nav{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+  }
+  body.app-mode .phone .app-nav button{
+    min-width:0;
+    overflow-wrap:anywhere;
+  }
+}
+@media (max-width:380px){
+  body.app-mode .phone .screen.app-shell{
+    padding-left:10px!important;
+    padding-right:10px!important;
+  }
+  body.app-mode .phone .app-nav{gap:2px;padding-left:4px;padding-right:4px}
+  body.app-mode .phone .app-nav button{font-size:11px}
+}
