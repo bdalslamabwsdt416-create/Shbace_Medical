@@ -632,7 +632,7 @@ function srSave(){srCache=null;
  try{localStorage.setItem(SR3KEY,JSON.stringify(SR3));srSaveFail=false;return true}
  catch(e){if(!srSaveFail){srSaveFail=true;try{toast('Could not save Smart Review progress (storage is full)')}catch(_){}}return false}}
 window.__sr3=()=>SR3; /* read-only handle used by the self-tests */
-window.__sr3x=()=>({SRT,SRT_Q,QB,qmap,srTopicStats,srTotals,srLevel,srIsWeak,srSpeedRef,srCompose,srCalc,srAutoGrade,dueList,srPool});
+window.__sr3x=()=>({SRT,SRT_Q,QB,qmap,srTopicStats,srTotals,srLevel,srIsWeak,srSpeedRef,srCompose,srCalc,srAutoGrade,dueList,srPool,SRUI});
 
 /* ---------- one-time, idempotent migration of REAL v2 reviews (never imports Question Bank history) ---------- */
 function sr3Migrate(){
