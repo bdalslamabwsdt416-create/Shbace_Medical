@@ -89,11 +89,16 @@ function mount(){
   foot:root.querySelector('#shbOfflineFootnote')
  };
  ui.button.addEventListener('click',function(){
-  if(ui.button.dataset.done==='1'){root.remove();return}
+  if(ui.button.dataset.done==='1'){removeSetupOverlay();return}
+  if(ui.button.dataset.retryCheck==='1'){location.reload();return}
   startDownload();
  });
  if(document.querySelector('.phone.light'))root.classList.add('is-light');
  return ui;
+}
+function removeSetupOverlay(){
+ var element=ui&&ui.root;
+ if(element&&element.parentNode)element.parentNode.removeChild(element);
 }
 function showInstallHint(){
  if(!iosDevice())return;
@@ -285,7 +290,7 @@ function verifyAll(){
 }
 function startDownload(){
  if(started||!manifest||!ui)return;
- started=true;errors=[];resetCounters();setErrorList([]);
+ started=true;errors=[];resetCounters();setErrorList([]);ui.button.dataset.retryCheck='0';
  ui.button.disabled=true;ui.button.textContent='Downloading…';ui.button.dataset.done='0';
  setStatus('Preparing local storage and the offline download…');
  setWarning('The download is resumable. Files already saved and verified will be skipped.');
@@ -348,7 +353,7 @@ function startDownload(){
    ui.stages.querySelector('[data-stage="verify"]').classList.remove('is-active');
    setStatus('Setup complete. Shbace Medical is ready to open from this device without an internet connection.');
    setWarning('All '+manifest.files.length+' required files were saved and verified locally. Your existing answers and study progress were not reset.');
-   ui.button.disabled=false;ui.button.textContent='Open Shbace Medical';ui.button.dataset.done='1';
+   ui.button.disabled=false;ui.button.textContent='Open Shbace Medical';ui.button.dataset.done='1';ui.button.dataset.retryCheck='0';
    ui.foot.textContent='Offline package verified · '+fmtBytes(manifest.totalBytes)+' stored. Keep a JSON backup of your study progress.';
   });
  }).catch(function(error){
@@ -374,7 +379,7 @@ function waitForSplash(){
 function start(){
  if(!standalone()){showInstallHint();return}
  if(!document.body)return;
- var root=mount();
+ mount();
  setStatus('Checking the installed app and local storage…');
  if(!('caches' in window)||!window.crypto||!crypto.subtle||!window.indexedDB){
   setStatus('This browser does not provide the storage features required for a verified offline installation.');
@@ -385,21 +390,24 @@ function start(){
   manifest=data;cache=null;
   return caches.open(CACHE_NAME).then(function(c){cache=c;return dbGet('meta','ready')})
    .then(function(record){
-    return cache.match(READY_URL).then(function(marker){
-     if(!marker||!record||!record.verified||record.version!==manifest.version)return {ready:false,record:record};
-     return marker.json().then(function(mark){
-      if(!mark||mark.version!==manifest.version)return {ready:false,record:record};
-      var missing=[],idx=0;
-      function inspect(){
-       if(idx>=manifest.files.length)return Promise.resolve(missing);
-       var f=manifest.files[idx++];
-       return fileValid(f,true).then(function(ok){if(!ok)missing.push(f.path);return inspect()});
-      }
-      return inspect().then(function(list){return {ready:list.length===0,missing:list,record:record}});
-     });
+    if(!record||!record.verified)return {ready:false,record:record};
+    // A previously verified install is retained only after every current asset passes
+    // byte-length and SHA-256 verification. This also refreshes the marker after an update.
+    var missing=[],idx=0;
+    function inspect(){
+     if(idx>=manifest.files.length)return Promise.resolve(missing);
+     var f=manifest.files[idx++];
+     return fileValid(f,true).then(function(ok){if(!ok)missing.push(f.path);return inspect()});
+    }
+    return inspect().then(function(list){
+     if(list.length)return {ready:false,missing:list,record:record};
+     var refreshed={version:manifest.version,verified:true,fileCount:manifest.files.length,totalBytes:manifest.totalBytes,completedAt:Date.now()};
+     return dbPut('meta','ready',refreshed).then(function(){
+      return cache.put(READY_URL,new Response(JSON.stringify(refreshed),{status:200,headers:{'content-type':'application/json'}}));
+     }).then(function(){return {ready:true,record:refreshed}});
     });
    }).then(function(check){
-    if(check.ready){root.remove();return}
+    if(check.ready){removeSetupOverlay();return}
     stageCounts=stageMarkup();resetCounters();
     var reason=check.record&&check.record.version!==manifest.version?
      'The installed app package has changed. Restore the local files manually to use this build.':
@@ -414,8 +422,8 @@ function start(){
    });
  }).catch(function(error){
   setStatus(error.message||'Could not read the offline installation manifest.');
-  setWarning('Connect to the internet and reload the installed app. The setup will not mark any file as complete until it is saved and verified.');
-  ui.button.disabled=false;ui.button.textContent='Reload setup';
+  setWarning('The setup check could not finish. Your previously saved files have not been deleted. Connect to the internet if needed, then choose Retry setup.');
+  ui.button.disabled=false;ui.button.textContent='Retry setup';ui.button.dataset.done='0';ui.button.dataset.retryCheck='1';
  });
 }
 function boot(){

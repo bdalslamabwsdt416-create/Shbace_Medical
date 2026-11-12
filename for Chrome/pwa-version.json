@@ -1,15 +1,13 @@
 {
   "app": "Shbace Medical",
   "platform": "Chrome Android PWA",
-  "version": "1.3.4-chrome.2",
+  "version": "1.3.4-chrome.3",
   "displayVersion": "1.3.4 · Chrome Android",
   "releaseDate": "2026-11-12",
   "releaseNotes": [
-    "Android 1.3.4 study tools adapted for Chrome: share, copy, read aloud, doctor preference and theme controls.",
-    "Exam Goal Planner and Android navigation refinements are enabled without a fake Capacitor bridge.",
-    "Screen Wake Lock while the Question Bank is open, install guidance and fullscreen launch mode.",
-    "Independent Chrome PWA origin and offline package with SHA-256 asset verification.",
-    "Chrome does not claim native Android scheduled reminders; APK-only notification services remain APK-only.",
-    "Fix: installed Chrome fullscreen mode is now recognized by the verified offline setup screen."
+    "Fix: close the offline setup through its actual DOM element; the setup controller object is no longer passed to remove().",
+    "Previously verified installations are re-audited against the current offline asset manifest and automatically retained when every file passes byte-length and SHA-256 checks, including after this update.",
+    "Verified cached files are reused across this release; the full offline package is not downloaded again when the files are already present.",
+    "Retry setup now reruns the setup check correctly and reports local setup failures without mislabeling them as network-only errors."
   ]
 }

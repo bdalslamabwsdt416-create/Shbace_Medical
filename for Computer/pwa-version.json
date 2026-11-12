@@ -1,14 +1,13 @@
 {
   "app": "Shbace Medical",
   "platform": "Computer PWA",
-  "version": "1.3.4-computer.1",
+  "version": "1.3.4-computer.2",
   "displayVersion": "1.3.4 · Computer",
   "releaseDate": "2026-11-12",
   "releaseNotes": [
-    "Independent computer PWA copied from the Chrome Android release with the same app data, screens, assets and study functionality.",
-    "Desktop layout now uses the full browser/app window instead of the phone-width 430px frame; application controls stay centered within a readable maximum width.",
-    "Desktop Chromium install support, user-triggered fullscreen and Screen Wake Lock where supported.",
-    "Separate Computer manifest, service-worker cache and resumable offline package with SHA-256 verification.",
-    "Native Android alarms, scheduled notifications and the APK foreground timer service are not represented as computer browser features."
+    "Fix: close the offline setup through its actual DOM element; the setup controller object is no longer passed to remove().",
+    "Previously verified installations are re-audited against the current offline asset manifest and automatically retained when every file passes byte-length and SHA-256 checks, including after this update.",
+    "Verified cached files are reused across this release; the full offline package is not downloaded again when the files are already present.",
+    "Retry setup now reruns the setup check correctly and reports local setup failures without mislabeling them as network-only errors."
   ]
 }
