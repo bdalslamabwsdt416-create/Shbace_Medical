@@ -159,7 +159,12 @@ function onGoalChange(ev){
   if(field==='name')e.name=String(el.value||'Written paper');
  });
  if(field==='reminder'&&el.checked&&typeof window.__shbRequestReminderAccess==='function'){
-  window.__shbRequestReminderAccess().then(function(ok){if(ok)setTimeout(scheduleReminder,250)});
+  window.__shbRequestReminderAccess().then(function(ok){
+   if(ok){
+    setTimeout(scheduleReminder,250);
+    if(typeof window.__shbPlanDailyReminders==='function')setTimeout(window.__shbPlanDailyReminders,350);
+   }
+  });
  }
 }
 document.addEventListener('change',onGoalChange);
@@ -193,7 +198,7 @@ async function scheduleReminder(){
   var m=calc(enabled,liveStats()),clock=(enabled.reminderTime||'19:30').split(':').map(Number),out=[],now=new Date();
   for(var i=0;i<14;i++){
     var d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i,clock[0],clock[1],0,0);
-    if(d.getTime()<=Date.now()+30000)continue;
+    if(d.getTime()<=Date.now()+30000||dateKey(d)>enabled.date)continue;
     out.push({id:360000000+i,title:"Today's study target",body:'Answer about '+m.target+' questions for '+enabled.name+'.',
       isExactNotification:false,schedule:{at:d,allowWhileIdle:true},channelId:'shbace-reminders',extra:{shbaceExamGoal:true,examId:enabled.id}});
   }
