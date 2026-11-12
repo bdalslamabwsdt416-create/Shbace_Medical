@@ -61,7 +61,10 @@
   try{
    var perm=await LN.checkPermissions();
    /* no automatic permission prompt: the request is made only after the student taps the bell and agrees (see askFromBell) */
-   if(perm.display!=='granted')return;
+   if(!perm||perm.display!=='granted'){
+    if(typeof window.__shbNotifyReminderPermissionRequired==='function')window.__shbNotifyReminderPermissionRequired();
+    return;
+   }
    // Daily insight notifications are convenience reminders; do not require
    // Android's optional exact-alarm access.
 
