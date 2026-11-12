@@ -1,13 +1,13 @@
 {
   "app": "Shbace Medical",
   "platform": "PWA",
-  "version": "1.4.8",
-  "displayVersion": "1.4.8",
-  "releaseDate": "2026-11-11",
+  "version": "1.4.9",
+  "displayVersion": "1.4.9",
+  "releaseDate": "2026-11-12",
   "releaseNotes": [
-    "Synchronised the first-launch splash with completion of verified offline setup; the splash timer no longer runs behind the installer.",
-    "Waited for every deferred application script before rendering onboarding, so the first launch uses the current hologram renderer.",
-    "Disabled the legacy intro screen through a reversible iOS feature switch; the original renderer remains available as a backup.",
-    "Removed activation-time forced page navigation and user-facing/manual reload update behavior."
+    "Always show the seven-second Splash first; offline setup no longer hides or delays the Splash.",
+    "Check the latest offline package and verify saved resources silently in the background during Splash.",
+    "Show the one-time download or restore screen only after Splash finishes, and only when files are missing, damaged, or an update is available.",
+    "Keep the existing offline cache and study data; reuse verified files during package restoration."
   ]
 }
