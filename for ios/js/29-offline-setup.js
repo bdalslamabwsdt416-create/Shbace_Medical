@@ -6,6 +6,9 @@ var DB_NAME='shbace-medical-offline-state-v1';
 var MANIFEST_URL=new URL('./offline-assets-manifest.json',location.href).href;
 var READY_URL=new URL('./__shbace_offline_ready__',location.href).href;
 var manifest=null,cache=null,ui=null,started=false;
+var splashComplete=window.__shbSplashComplete===true,splashWaiters=[];
+document.addEventListener('shb-splash-complete',function(){splashComplete=true;var pending=splashWaiters.slice();splashWaiters.length=0;pending.forEach(function(fn){try{fn()}catch(error){console.error('Offline setup presentation failed:',error)}})},{once:true});
+function afterSplash(fn){if(splashComplete||window.__shbSplashComplete===true){fn();return;}splashWaiters.push(fn)}
 var verifiedCount=0,verifiedBytes=0,donePaths=Object.create(null),errors=[];
 var STAGES=[
  {id:'app',label:'Application files'},
@@ -363,58 +366,56 @@ function startDownload(silentMode){
  }).finally(function(){started=false});
 }
 function start(){
- if(!standalone()){showInstallHint();releaseStartupGate();return}
+ if(!standalone()){releaseStartupGate();afterSplash(showInstallHint);return}
  if(!document.body)return;
- var root=mount();
- setStatus('Checking the installed app and local storage…');
+ // The Splash and app boot are independent from local-resource verification.
+ // Check the package immediately in the background while the seven-second Splash is visible.
+ releaseStartupGate();
+ if(ui&&ui.root&&ui.root.isConnected){setStatus('Checking the installed app and local storage…');setWarning('Checking quietly during startup. The offline setup screen will stay open only if something needs attention.');ui.button.disabled=true;ui.button.textContent='Checking…'}
+ function showProblem(message){
+  mount();setStatus(message);
+  setWarning('Connect to the internet or check the available device storage, then retry. Nothing is marked complete until all files pass size and SHA-256 verification.');
+  setErrorList([message]);ui.button.disabled=false;ui.button.textContent='Retry setup';ui.button.dataset.retry='1';ui.button.dataset.done='0';
+ }
+ function showSetup(check){
+  mount();stageCounts=stageMarkup();resetCounters();setErrorList([]);
+  var record=check&&check.record,hasSaved=!!(record&&record.verified),hasMissing=!!(check&&check.missing&&check.missing.length);
+  var updateAvailable=hasSaved&&record.version!==manifest.version;
+  var reason=updateAvailable?'An updated offline resource package is available. Restore it to keep offline study up to date.':
+   (hasMissing?'Some required files are missing or no longer match their integrity hashes. Restore them before offline study.':
+   (record?'The saved offline package needs to be restored.':'Download the complete app package once to prepare offline study.'));
+  setStatus(reason);
+  setWarning('Package · '+manifest.files.length+' files · '+fmtBytes(manifest.totalBytes)+'. The Splash has finished; you can now restore the local resources. Verified files already saved on this device will be reused.');
+  var restoreNeeded=!!record||hasMissing;
+  ui.button.disabled=false;ui.button.textContent=updateAvailable?'Restore updated offline package':(restoreNeeded?'Restore offline package':'Start one-time download');
+  ui.button.dataset.done='0';ui.button.dataset.retry='0';
+  ui.count.textContent='0 / '+manifest.files.length+' files';ui.bytes.textContent='0 B / '+fmtBytes(manifest.totalBytes);
+  ui.percent.textContent='0%';paintProgress('prepare',false);
+ }
  if(!('caches' in window)||!window.crypto||!crypto.subtle||!window.indexedDB){
-  setStatus('This browser does not provide the storage features required for a verified offline installation.');
-  setWarning('This device cannot complete verified offline setup. You may continue online, but offline study will not be ready until storage support is available.');
-  ui.button.disabled=false;ui.button.textContent='Continue online';ui.button.dataset.done='1';return;
+  afterSplash(function(){mount();setStatus('This browser does not provide the storage features required for a verified offline installation.');
+   setWarning('You can continue online, but verified offline study cannot be prepared until the required storage support is available.');
+   ui.button.disabled=false;ui.button.textContent='Continue online';ui.button.dataset.done='1'});
+  return;
  }
  loadManifest().then(function(data){
   manifest=data;cache=null;
-  return caches.open(CACHE_NAME).then(function(c){cache=c;return dbGet('meta','ready')})
-   .then(function(record){
-    return cache.match(READY_URL).then(function(marker){
-     if(!marker||!record||!record.verified||record.version!==manifest.version)return {ready:false,record:record};
-     return marker.json().then(function(mark){
-      if(!mark||mark.version!==manifest.version)return {ready:false,record:record};
-      var missing=[],idx=0;
-      function inspect(){
-       if(idx>=manifest.files.length)return Promise.resolve(missing);
-       var f=manifest.files[idx++];
-       return fileValid(f,true).then(function(ok){if(!ok)missing.push(f.path);return inspect()});
-      }
-      return inspect().then(function(list){return {ready:list.length===0,missing:list,record:record}});
-     });
+  return caches.open(CACHE_NAME).then(function(c){cache=c;return dbGet('meta','ready')}).then(function(record){
+   return cache.match(READY_URL).then(function(marker){
+    if(!marker||!record||!record.verified||record.version!==manifest.version)return {ready:false,record:record};
+    return marker.json().then(function(mark){
+     if(!mark||mark.version!==manifest.version)return {ready:false,record:record};
+     var missing=[],idx=0;
+     function inspect(){if(idx>=manifest.files.length)return Promise.resolve(missing);var f=manifest.files[idx++];return fileValid(f,true).then(function(ok){if(!ok)missing.push(f.path);return inspect()})}
+     return inspect().then(function(list){return {ready:list.length===0,missing:list,record:record}});
     });
-   }).then(function(check){
-    if(check.ready){ui.root.remove();releaseStartupGate();return}
-    if(check.record&&check.record.verified&&check.record.version!==manifest.version){
-     // Existing verified installs update the offline package quietly; first installs still use the full pre-splash download gate.
-     ui.root.remove();
-     releaseStartupGate();
-     setTimeout(function(){startDownload(true)},0);
-     return;
-    }
-    stageCounts=stageMarkup();resetCounters();
-    var reason=check.record&&check.record.version!==manifest.version?
-     'The installed resource package is out of date. Restore the updated package before continuing.':
-     (check.missing&&check.missing.length?'Some required files are missing from local storage. Restore them to continue offline.':'Download the complete local package before using offline mode.');
-    setStatus(reason);
-    setWarning('One-time package · '+manifest.files.length+' files · '+fmtBytes(manifest.totalBytes)+'. Connect to the internet, tap the button, and keep the app open until verification completes.');
-    var restoreNeeded=!!(check.record||check.missing&&check.missing.length);
-    ui.button.disabled=false;ui.button.textContent=restoreNeeded?'Restore offline package':'Start one-time download';
-    ui.count.textContent='0 / '+manifest.files.length+' files';
-    ui.bytes.textContent='0 B / '+fmtBytes(manifest.totalBytes);
-    ui.percent.textContent='0%';paintProgress('prepare',false);
    });
- }).catch(function(error){
-  setStatus(error.message||'Could not read the offline installation manifest.');
-  setWarning('Connect to the internet, then tap Retry setup. No file will be marked complete until it is saved and verified.');
-  ui.button.disabled=false;ui.button.textContent='Retry setup';ui.button.dataset.retry='1';
- });
+  });
+ }).then(function(check){
+  if(check&&check.ready)return;
+  // No setup UI is created for a healthy install. If a download/update is needed, show it after the Splash.
+  afterSplash(function(){showSetup(check||{})});
+ }).catch(function(error){afterSplash(function(){showProblem(error.message||'Could not verify the offline installation.')})});
 }
 function boot(){start()}
 /* This script is deliberately loaded immediately after <body>, before the splash markup. */
