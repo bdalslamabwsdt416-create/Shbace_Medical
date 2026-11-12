@@ -17,8 +17,8 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         // IMPORTANT: when updating an app that is already installed / published, versionCode MUST be higher than the old one.
         // Reminder permissions and reboot-rescheduling update; same original applicationId and release key.
-        versionCode 12
-        versionName "1.3.3"
+        versionCode 13
+        versionName "1.3.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
