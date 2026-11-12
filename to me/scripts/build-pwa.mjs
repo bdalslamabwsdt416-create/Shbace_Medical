@@ -198,7 +198,7 @@ async function toInlineWebp(sourcePath, mode) {
       });
     }
     const buffer = await pipeline.webp({ quality: 82, effort: 5, alphaQuality: 85 }).toBuffer();
-    console.log("Pediatrics image embedded: " + sourcePath.split(/[\\\\/]/).pop() +
+    console.log("Pediatrics image embedded: " + sourcePath.slice(Math.max(sourcePath.lastIndexOf("/"), sourcePath.lastIndexOf("\\") ) + 1)) +
       " → 256px WebP (" + buffer.byteLength + " bytes)");
     return "data:image/webp;base64," + buffer.toString("base64");
   } catch (error) {
