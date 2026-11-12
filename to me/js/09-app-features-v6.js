@@ -836,9 +836,7 @@ window.srToggleTopic=function(id){id=Number(id);const e=srTopicStats().get(id);i
 window.srSetTopicCount=function(id,value){id=Number(id);const e=srTopicStats().get(id);if(!e||!SRUI.selected.includes(id))return;const max=srAvailable(e),n=Number(value);if(!Number.isInteger(n)||n<1){toast('Choose a whole number from 1 to '+max);srSyncSelectionUI(id);return}SRUI.counts[id]=Math.min(max,n);srSyncSelectionUI(id)};
 window.srBumpTopicCount=function(id,delta){id=Number(id);const e=srTopicStats().get(id);if(!e||!SRUI.selected.includes(id))return;const n=srCountFor(e)+Number(delta||0);SRUI.counts[id]=Math.min(srAvailable(e),Math.max(1,n));srSyncSelectionUI(id)};
 window.srClearSelection=function(){SRUI.selected=[];SRUI.counts={};renderAppDemo()};
-window.srHidePick=function(){SRUI.hidePick=true;srUiSave();renderAppDemo()};
-window.srShowPick=function(){SRUI.hidePick=false;srUiSave();renderAppDemo()};
-window.srAddSuggested=function(id){id=Number(id);const e=srTopicStats().get(id);if(!e||!srAvailable(e))return;if(!SRUI.selected.includes(id))SRUI.selected.push(id);if(!Number.isInteger(Number(SRUI.counts[id]))||Number(SRUI.counts[id])<1)SRUI.counts[id]=Math.min(10,srAvailable(e));SRUI.hidePick=true;srUiSave();renderAppDemo();toast('Suggested topic added. Set its question count, then start when ready.')};
+
 window.srChooseTopic=function(id){id=Number(id);const e=srTopicStats().get(id);if(!e||!srAvailable(e))return;SRUI.selected=[id];SRUI.counts={[id]:Math.min(10,srAvailable(e))};srTab='topics';renderAppDemo()};
 window.srStartSelected=function(){
  const M=srTopicStats(),selected=SRUI.selected.map(id=>M.get(Number(id))).filter(e=>e&&srAvailable(e));
@@ -854,7 +852,7 @@ window.srStartSelected=function(){
 
 window.srResume=function(){if(!SR3.sess)return;SU={qid:null};SRSUM=null;srRun=true;renderAppDemo()};
 window.srPause=function(){srTPause(true);srRun=false;SU={qid:null};srSave();renderAppDemo()};
-window.srSize=function(n){n=Number(n);if(![10,15,20].includes(n))return;SR3.size=n;srSave();renderAppDemo()};
+window.srSize=function(n){n=Number(n);if(!Number.isInteger(n)||n<1||n>200)return;SR3.size=n;srSave();renderAppDemo()};
 window.srEnd=function(){const s=SR3.sess;if(!s)return;const n=Object.keys(s.first).length;
  confirmBox({title:'End this session?',text:n?`${n} answered question${n>1?'s':''} will be kept and scheduled. The rest stay as they are.`:'No questions were answered in this session.',detail:'Unanswered questions are never counted.',ok:'End session'},()=>{srFinish();renderAppDemo()})};
 window.srDrill=function(){const sum=SRSUM||SR3.last;if(!sum||!Array.isArray(sum.weak))return;
@@ -1871,8 +1869,8 @@ function howToUseCard(){
   {title:'المراجعة الذكية Smart Review',body:
    '<p>تعمل المراجعة الذكية بذاكرة وجدولة منفصلتين عن إجابات بنك الأسئلة ونتائج الاختبارات. وهي ترتّب الأسئلة بحسب موعد المراجعة ومستوى التذكّر.</p>'+
    '<ol><li>افتح '+en('Review')+' ثم اختر '+en('Topics')+' أو '+en('Overview')+' أو '+en('Schedule')+' أو '+en('Weak')+' أو '+en('History')+'.</li>'+
-   '<li>ابدأ من '+en('Start Recommended Session')+' لمراجعة الأسئلة المقترحة، أو اختر موضوعاً محدداً، أو ابدأ جلسة لكل الموضوعات.</li>'+
-   '<li>يمكنك تغيير حجم الجلسة إلى 10 أو 15 أو 20 سؤالاً، واستخدام مرشحات '+en('Due')+' و'+en('Weak')+' و'+en('In progress')+' و'+en('Not started')+'.</li>'+
+   '<li>اختر Topic واحداً أو أكثر، وحدد عدد الأسئلة لكل موضوع من الحقل الرقمي المفتوح.</li>'+
+   '<li>يمكنك استخدام مرشحات '+en('Due')+' و'+en('Weak')+' و'+en('In progress')+' و'+en('Not started')+' لتنظيم المواضيع.</li>'+
    '<li>بعد إظهار الإجابة قيّم تذكّرك باستخدام '+en('Again')+' أو '+en('Hard')+' أو '+en('Good')+' أو '+en('Easy')+'. تستخدم المراجعة تقييمك لجدولة الموعد التالي.</li></ol>'+
    '<p class="how-tip"><b>مهم:</b> يمكنك إيقاف الجلسة واستئنافها لاحقاً، ومراجعة سجلّك من تبويب '+en('History')+'.</p>'},
   {title:'الأسئلة الخاطئة والمحفوظة',body:
