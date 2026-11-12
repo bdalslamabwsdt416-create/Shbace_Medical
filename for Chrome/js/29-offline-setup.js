@@ -16,7 +16,10 @@ var STAGES=[
 ];
 
 function standalone(){
- try{return !!(navigator.standalone===true || (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches))}
+ try{return !!(navigator.standalone===true || (window.matchMedia&&(
+  window.matchMedia('(display-mode: standalone)').matches ||
+  window.matchMedia('(display-mode: fullscreen)').matches
+ )))}
  catch(e){return false}
 }
 function iosDevice(){
