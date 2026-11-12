@@ -42,7 +42,7 @@
     var f=factFor(d,slot);if(!f)return;
     out.push({id:Number(d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate()))*10+slot,
      title:titleOf(f,slot),body:bodyOf(f),largeBody:clip(f.text,420),summaryText:'Shbace Medical'+(f.category?' · '+f.category:''),
-     schedule:{at:at,allowWhileIdle:true},channelId:CH,extra:{ymd:ymdOf(d),slot:slot}})});}
+     isExactNotification:false,schedule:{at:at,allowWhileIdle:true},channelId:CH,extra:{ymd:ymdOf(d),slot:slot}})});}
   return out}
  /* tapping a notification: open the matching fact in the existing Daily Medical Fact sheet */
  function openFact(ymd,slot){
@@ -62,9 +62,9 @@
    var perm=await LN.checkPermissions();
    /* no automatic permission prompt: the request is made only after the student taps the bell and agrees (see askFromBell) */
    if(perm.display!=='granted')return;
-   if(window.Capacitor&&window.Capacitor.getPlatform&&window.Capacitor.getPlatform()==='android'&&typeof LN.checkExactNotificationSetting==='function'){
-    var exact=await LN.checkExactNotificationSetting();if(exact&&exact.exact_alarm&&exact.exact_alarm!=='granted')return;
-   }
+   // Daily insight notifications are convenience reminders; do not require
+   // Android's optional exact-alarm access.
+
    try{await LN.createChannel({id:CH,name:'Daily Medical Insight',description:'A clinical pearl every day at 10:00 and 22:00',importance:4,visibility:1,lights:true,lightColor:'#35E6FF',vibration:true})}catch(e){}
    var list=build(),pend=await LN.getPending(),mine=(pend.notifications||[]).filter(function(n){return n.id>=LO&&n.id<=HI});
    var want={};list.forEach(function(n){want[n.id]=1});
