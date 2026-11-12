@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'shbace-chrome-offline-v1.3.4';
+const CACHE_NAME = 'shbace-chrome-offline-v1.3.5';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
 const APP_SHELL = [
   './',
@@ -12,6 +12,7 @@ const APP_SHELL = [
   './offline-assets-manifest.json',
   './css/core.css',
   './css/late.css',
+  './css/chrome-computer.css',
   './js/29-offline-setup.js'
 ];
 
