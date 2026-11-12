@@ -29,7 +29,14 @@ function goals(){
  var first=makeExam('Written paper',/^\d{4}-\d{2}-\d{2}$/.test(old)?old:'');jsonWrite(GOALS,[first]);return [first]
 }
 var reminderBusy=false;
-function saveGoals(a){jsonWrite(GOALS,a);scheduleReminder()}
+function saveGoals(a){
+ jsonWrite(GOALS,a);
+ scheduleReminder();
+ // Keep the generic daily reminder at least 15 minutes away if the planner
+ // reminder time was just enabled or changed.
+ if(typeof window.__shbPlanDailyReminders==='function')
+  setTimeout(window.__shbPlanDailyReminders,350);
+}
 function qState(){return jsonRead('shbace_qb_v6',{ans:{},sr:{}})||{ans:{},sr:{}}}
 function liveStats(){
  try{var s=window.__shbStats&&window.__shbStats();if(s&&Number.isFinite(+s.bankTotal)&&Number.isFinite(+s.answered))return {total:Math.max(0,+s.bankTotal),answered:Math.max(0,+s.answered),remaining:Math.max(0,+s.bankTotal-(+s.answered))}}catch(_){}
