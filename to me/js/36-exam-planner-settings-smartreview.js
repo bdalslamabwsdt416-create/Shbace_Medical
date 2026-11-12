@@ -120,15 +120,16 @@ window.shbExamDelete=function(id){
 };
 if(typeof window.__shbRegisterPage==='function')window.__shbRegisterPage('examplanner',examPlannerView,'subjects');
 try{
+  /* The original planner already lives under YOUR PROGRESS as "examgoal".
+     Remove only this extension's duplicate menu entry; keep the registered page
+     available internally so existing links/data are not broken. */
   if(typeof DR2!=='undefined'&&Array.isArray(DR2)){
-    var menuGroup=DR2.find(function(g){return /^(progress|analytics|analytics & topics|learning)$/i.test(String(g&&g[0]||''))});
-    if(!menuGroup)menuGroup=DR2.find(function(g){return /analytics|learning/i.test(String(g&&g[0]||''))});
-    if(!menuGroup){menuGroup=['Planning',[]];DR2.push(menuGroup)}
-    if(!menuGroup[1].some(function(it){return it&&it[1]==='examplanner'})){
-      menuGroup[1].push(['Exam Goal Planner','examplanner','<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>','']);
-    }
+    DR2.forEach(function(group){
+      if(!group||!Array.isArray(group[1]))return;
+      group[1]=group[1].filter(function(item){return !item||item[1]!=='examplanner'});
+    });
   }
-}catch(e){console.warn('Exam planner menu registration failed:',e)}
+}catch(e){console.warn('Duplicate exam planner menu cleanup skipped:',e)}
 
 /* Clear Settings hierarchy: keep existing controls and stores, only change their visual order. */
 var settingsBusy=false,settingsQueued=false;
@@ -209,16 +210,52 @@ window.shbSrBulkSelectSpecialty=function(spec){srBulkSelect(spec,null)};
 window.shbSrBulkSelectSystem=function(spec,system){srBulkSelect(spec,system)};
 function enhanceSmartReview(){
   var api=srApi();if(!api)return;
-  var host=document.querySelector('#phoneContent'),hero=host&&host.querySelector('.sr3-builder-hero');
-  if(hero&&!host.querySelector('[data-shb-smart-recommended]')){
-    var p=api.srPool(null),avail=p.due.length+p.weak.length+p.fresh.length;
-    var store=typeof window.__sr3==='function'?window.__sr3():{},size=Math.max(1,Number(store&&store.size)||15),count=Math.min(size,avail);
-    var card=document.createElement('section');card.className='shb-smart-recommended';card.setAttribute('data-shb-smart-recommended','true');
-    var detail='<span><b>'+p.due.length+'</b> due</span><span><b>'+p.weak.length+'</b> weak</span><span><b>'+p.fresh.length+'</b> new</span>';
-    card.innerHTML='<div class="shb-sr-rec-copy"><span class="shb-sr-rec-kicker">ALWAYS AVAILABLE · SMART REVIEW</span><h3>Smart Recommended</h3><p>Start with an automatically balanced mix of due reviews, weaker questions and new questions from across your bank. This recommendation is always kept available.</p><div class="shb-sr-rec-stats">'+detail+'</div></div><button type="button" class="btn primary" '+(count?'':'disabled')+' onclick="srStart(null)">Start recommended · '+count+' question'+(count===1?'':'s')+'</button>';
-    hero.insertAdjacentElement('afterend',card);
+  var host=document.querySelector('#phoneContent');
+  if(!host)return;
+
+  /* Start Build Session directly at YOUR SESSION. Smart Recommended stays available
+     as a compact action inside this panel instead of taking a separate top card. */
+  var builderIntro=host.querySelector('.sr3-builder-hero');
+  if(builderIntro)builderIntro.remove();
+  var oldRecommended=host.querySelector('[data-shb-smart-recommended]');
+  if(oldRecommended)oldRecommended.remove();
+
+  var panel=host.querySelector('.sr3-selected-panel');
+  if(panel){
+    var pool=api.srPool(null),available=pool.due.length+pool.weak.length+pool.fresh.length;
+    var store=typeof window.__sr3==='function'?window.__sr3():{};
+    var size=Math.max(1,Number(store&&store.size)||15),count=Math.min(size,available);
+    var inline=panel.querySelector('[data-shb-smart-rec-inline]');
+    if(!inline){
+      inline=document.createElement('div');
+      inline.className='shb-sr-rec-inline';
+      inline.setAttribute('data-shb-smart-rec-inline','true');
+      panel.appendChild(inline);
+    }
+    var detail=pool.due.length+' due · '+pool.weak.length+' weak · '+pool.fresh.length+' new';
+    inline.innerHTML='<div class="shb-sr-rec-inline-copy"><span class="shb-sr-rec-kicker">ALWAYS AVAILABLE · SMART REVIEW</span><b>Smart Recommended</b><small>'+detail+'</small></div>'+
+      '<button type="button" class="btn" '+(count?'':'disabled')+' onclick="srStart(null)">Start recommended · '+count+' question'+(count===1?'':'s')+'</button>';
   }
-  var groups=host?host.querySelectorAll('.sr3-grp[data-spec]'):[];
+
+  /* Keep the Overview tab and all its stats/mastery sections; remove only the old
+     due-today / 20-question hero card requested by the student. */
+  var tabs=host.querySelector('.sr3-tabs');
+  var activeTab=tabs&&tabs.querySelector('[role="tab"][aria-selected="true"]');
+  if(activeTab&&/overview/i.test(activeTab.textContent||'')){
+    var overviewHero=host.querySelector('.sr2-hero');
+    if(overviewHero)overviewHero.remove();
+  }
+
+  /* The empty Schedule state already explains where to begin; drop its redundant CTA. */
+  var emptySchedule=host.querySelector('.sr2-empty');
+  if(emptySchedule){
+    var chooseButton=Array.prototype.slice.call(emptySchedule.querySelectorAll('button')).find(function(button){
+      return /choose a topic/i.test(button.textContent||'');
+    });
+    if(chooseButton)chooseButton.remove();
+  }
+
+  var groups=host.querySelectorAll('.sr3-grp[data-spec]');
   Array.prototype.forEach.call(groups,function(section){
     var spec=section.getAttribute('data-spec'),head=section.querySelector(':scope > .sr3-gh'),body=section.querySelector(':scope > .sr3-gb');
     if(!head)return;
