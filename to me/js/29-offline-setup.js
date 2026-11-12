@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 
-var CACHE_NAME='shbace-chrome-offline-v1.3.8';
+var CACHE_NAME='shbace-chrome-offline-v1.3.9';
 var DB_NAME='shbace-medical-offline-state-v1';
 var MANIFEST_URL=new URL('./offline-assets-manifest.json',location.href).href;
 var READY_URL=new URL('./__shbace_offline_ready__',location.href).href;
@@ -249,8 +249,11 @@ function ensureServiceWorker(){
 }
 function fetchAndStore(file){
  var target=urlFor(file.path),lastError=null;
+ /* Integrity downloads must bypass any stale Service Worker/CDN representation.
+    Keep the canonical URL as the local cache key after the fresh bytes are verified. */
+ var freshTarget=target+(target.indexOf('?')>=0?'&':'?')+'__shbace_integrity='+encodeURIComponent(manifest.version+'-'+file.sha256.slice(0,16));
  function attempt(n){
-  return fetch(target,{credentials:'same-origin',cache:'no-store'}).then(function(response){
+  return fetch(freshTarget,{credentials:'same-origin',cache:'reload'}).then(function(response){
    if(!response||!response.ok)throw new Error('HTTP '+(response?response.status:'no response'));
    return response.arrayBuffer().then(function(bytes){
     if(bytes.byteLength!==file.bytes)throw new Error('Size check failed ('+bytes.byteLength+' of '+file.bytes+' bytes).');
