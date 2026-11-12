@@ -72,7 +72,7 @@ function patchPackedAsset(relative, originalBytes) {
     const end = source.indexOf(endMarker, start);
     if (start < 0 || end < 0) throw new Error('Could not locate the legacy iOS update-banner block.');
 
-    const silentUpdates = `/* ---------- 8. silent automatic PWA updates: no prompt and no forced reload ---------- */
+    const silentUpdates = `/* ---------- 8. silent automatic PWA updates during the startup Splash ---------- */
 var VER_KEY='shbace_v5_seen_version';
 function swReady(){return 'serviceWorker' in navigator}
 if(V5.autoUpdate&&swReady()){
@@ -90,7 +90,7 @@ if(V5.autoUpdate&&swReady()){
    .then(function(v){if(v&&v.version)lsSet(VER_KEY,v.version)})
    .catch(function(){});
  }
- setTimeout(function(){checkUpdates(true)},9000);
+ setTimeout(function(){checkUpdates(true)},400);
  setInterval(function(){checkUpdates(false)},30*60*1000);
  document.addEventListener('visibilitychange',function(){
   if(!document.hidden)setTimeout(function(){checkUpdates(true)},1200);
