@@ -1,8 +1,8 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.9-to-me.6",
-  "displayVersion": "1.3.9 · Chrome (Phone + Computer)",
+  "version": "1.3.9-to-me.7",
+  "displayVersion": "1.3.9.7 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-13",
   "releaseNotes": [
     "Continues the independent unified Chrome PWA for phone and computer. Android APK, iOS and Computer deliveries remain separate.",
@@ -15,5 +15,6 @@
     "Fixes offline installation integrity retries by bypassing stale Service Worker cache responses for hash-versioned verification requests, while storing verified bytes under canonical local cache URLs.",
     "Offline retry reuses the previously saved package cache, rechecks existing files against the current byte sizes and SHA-256 hashes, and downloads only missing or changed assets. The latest Service Worker is checked and activated before integrity downloads.",
     "After the complete current package passes integrity verification, obsolete cache entries and older package caches are deleted. Existing answers, bookmarks, notes and study progress remain preserved."
+    ,"Pediatrics collection navigation now renders the registered collection chooser correctly from Start Studying, with the doctor MCQ and Previous Questions paths available."
   ]
 }
