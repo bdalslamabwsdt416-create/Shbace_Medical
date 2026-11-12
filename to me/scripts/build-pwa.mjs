@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { Script } from "node:vm";
 import {
   cpSync,
   copyFileSync,
@@ -278,6 +279,11 @@ if (missingAssets.size) {
 const scriptRefs = [...html.matchAll(/data-src=["']([^"']+\.js)["']/g)].map(m => m[1]);
 for (const script of scriptRefs) {
   if (!existsSync(join(output, script))) fail(`Deferred application script is missing: ${script}`);
+  try {
+    new Script(readFileSync(join(output, script), "utf8"), { filename: script });
+  } catch (error) {
+    fail(`JavaScript syntax check failed in ${script}: ${error.message}`);
+  }
 }
 if (!existsSync(join(output, "data/qbData.json"))) fail("Question bank JSON was not copied");
 
@@ -350,7 +356,7 @@ console.log("PWA release: " + pwaVersion.displayVersion + " (" + pwaVersion.vers
 console.log(`Output: ${relative(root, output)}`);
 console.log(`Images copied: ${copiedImages.size} (${(imageBytes / 1024 / 1024).toFixed(2)} MiB)`);
 console.log(`Image references verified: ${referencedAssets.size}`);
-console.log(`Deferred scripts verified: ${scriptRefs.length}`);
+console.log(`Deferred scripts verified and syntax-checked: ${scriptRefs.length}`);
 console.log(`Question bank: ${(statSync(join(output, "data/qbData.json")).size / 1024 / 1024).toFixed(2)} MiB`);
 console.log("Offline inventory: " + offlineManifest.fileCount + " files (" + (offlineManifest.totalBytes / 1024 / 1024).toFixed(2) + " MiB)");
 console.log("Offline manifest version: " + offlineVersion.slice(0, 16));
