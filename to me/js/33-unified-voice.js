@@ -10,7 +10,7 @@ var computerVoiceApi=false,computerVoicePreference='en-US',computerActiveLanguag
 var computerActiveVoice=null,computerVoiceList=[],computerVoiceReady=false;
 var computerVoiceFallback=false,computerVoiceFallbackFor='en-US';
 var computerVoiceMessage='',computerVoiceMessageOption='',computerVoicePendingChoice='';
-var computerVoiceNoticesShown={},computerVoiceSpeechToken=0;
+var computerVoiceNoticesShown={},computerVoiceSpeechToken=0,computerVoiceReadingButton=null;
 var computerVoiceRetryDelays=[250,650,1300,2600];
 function computerVoiceLanguageLabel(lang){
  return lang==='en-GB'?'English (UK)':lang==='ar'?'Arabic':'English (US)';
@@ -41,13 +41,21 @@ function computerVoiceMatches(voice,lang){
  if(lang==='en-GB')return l==='en-gb'||l==='en'||/^en-gb-/.test(l);
  return false;
 }
+function computerVoiceGenderHint(voice){
+ var name=String(voice&&((voice.name||'')+' '+(voice.voiceURI||''))||'').toLowerCase();
+ var male=/(^|[\\s_-])(male|man|masculine|david|mark|guy|james|daniel|alex|fred|thomas|tom|george|oliver|ryan|aaron|jason|matthew|andrew|brian|arthur|liam|nathan|john|michael|christopher|eric|peter|paul|stephen|richard|william|henry|bruce|majed|hamed|naayf|hamdan|abdulrahman|fares|hisham|tarik|salim|mohammed|muhammad|omar|khalid|fahad|saud)([\\s_-]|$)/i.test(name);
+ var female=/(^|[\\s_-])(female|woman|feminine|zira|aria|jenny|samantha|victoria|susan|hazel|eva|michelle|joanna|kate|sonia|libby|ava|emma|salli|kendra|kimberly|ivy|nicole|olivia|serena|moira|tessa|karen|fiona|veena)([\\s_-]|$)/i.test(name);
+ return male?2:female?-1:0;
+}
 function computerVoiceFind(lang,list){
  try{
   var candidates=(list||computerVoiceList).filter(function(v){return computerVoiceMatches(v,lang)});
   candidates.sort(function(a,b){
    function score(v){
     var l=computerVoiceNormLang(v),exact=lang==='ar'?l==='ar':l===lang.toLowerCase();
-    return (v.localService===true?100:v.localService===false?0:45)+(exact?25:0)+(v.default?3:0);
+    var gender=computerVoiceGenderHint(v),name=String(v.name||'').toLowerCase();
+    var natural=/(neural|natural|premium|enhanced)/i.test(name+' '+String(v.voiceURI||''));
+    return gender*180+(v.localService===true?70:v.localService===false?0:35)+(exact?35:0)+(natural?18:0)+(v.default?4:0);
    }
    return score(b)-score(a);
   });
@@ -109,6 +117,7 @@ function computerVoiceApplySavedPreference(list){
 }
 function computerVoiceCommitChoice(lang,voice){
  try{
+  computerVoiceStopQuestionReadAloud();
   computerVoicePreference=lang;computerVoiceSavePreference(lang);
   computerActiveLanguage=lang;computerActiveVoice=voice||computerVoiceFind(lang,computerVoiceList);
   computerVoiceFallback=false;computerVoiceMessage='';computerVoiceMessageOption='';
@@ -183,25 +192,61 @@ function computerVoiceRequestChoice(lang){
 function computerVoiceVoiceListForChoice(list){
  return list&&list.length?list:computerVoiceList;
 }
+function computerVoiceSetReadButton(button,active){
+ try{
+  if(!button)return;
+  button.setAttribute('aria-pressed',active?'true':'false');
+  button.setAttribute('aria-label',active?'Stop reading aloud':'Read question aloud');
+  button.classList.toggle('shb-reading-active',!!active);
+  var label=button.querySelector('span');if(label)label.textContent=active?'Stop reading':'Read aloud';
+ }catch(_){}
+}
+function computerVoiceFinishReadAloud(token){
+ if(token!==computerVoiceSpeechToken)return;
+ computerVoiceSetReadButton(computerVoiceReadingButton,false);
+ computerVoiceReadingButton=null;
+}
+function computerVoiceStopQuestionReadAloud(){
+ computerVoiceSpeechToken++;
+ try{if(window.speechSynthesis)window.speechSynthesis.cancel()}catch(_){}
+ computerVoiceSetReadButton(computerVoiceReadingButton,false);
+ computerVoiceReadingButton=null;
+}
+function computerVoiceToggleQuestionReadAloud(card,text,button){
+ try{
+  if(!computerVoiceApi){computerVoiceUpdateUi();return}
+  var same=!!button&&computerVoiceReadingButton===button;
+  var synth=window.speechSynthesis;
+  if(same&&(synth.speaking||synth.pending)){computerVoiceStopQuestionReadAloud();return}
+  if(computerVoiceReadingButton||synth.speaking||synth.pending)computerVoiceStopQuestionReadAloud();
+  if(!text)return;
+  computerVoiceReadingButton=button||null;
+  computerVoiceSetReadButton(computerVoiceReadingButton,true);
+  computerVoiceSpeak(String(text),0.92);
+ }catch(_){computerVoiceStopQuestionReadAloud()}
+}
 function computerVoiceMakeUtterance(text,lang,voice,allowFallback,rate){
  try{
   if(!computerVoiceApi||!text)return;
   var token=++computerVoiceSpeechToken;
   var utterance=new SpeechSynthesisUtterance(String(text));
   utterance.lang=lang==='ar'?'ar':lang;
-  var speed=Number(rate);utterance.rate=Number.isFinite(speed)?Math.max(0.7,Math.min(1.3,speed)):1;
+  var speed=Number(rate);utterance.rate=Number.isFinite(speed)?Math.max(0.7,Math.min(1.3,speed)):0.92;
+  utterance.pitch=0.96;
+  utterance.volume=1;
   if(voice)utterance.voice=voice;
+  utterance.onend=function(){computerVoiceFinishReadAloud(token)};
   utterance.onerror=function(event){
    try{
-    if(token!==computerVoiceSpeechToken||!allowFallback)return;
+    if(token!==computerVoiceSpeechToken)return;
     var reason=event&&event.error||'';
-    if(reason==='canceled'||reason==='interrupted')return;
-    computerVoiceFallbackToArabic(text,rate);
-   }catch(_){}
+    if(allowFallback&&lang!=='ar'&&reason!=='canceled'&&reason!=='interrupted'){computerVoiceFallbackToArabic(text,rate);return}
+    computerVoiceFinishReadAloud(token);
+   }catch(_){computerVoiceFinishReadAloud(token)}
   };
   try{window.speechSynthesis.speak(utterance)}
-  catch(_){if(allowFallback&&lang!=='ar')computerVoiceFallbackToArabic(text)}
- }catch(_){if(allowFallback&&lang!=='ar')computerVoiceFallbackToArabic(text)}
+  catch(_){if(allowFallback&&lang!=='ar')computerVoiceFallbackToArabic(text,rate);else computerVoiceFinishReadAloud(token)}
+ }catch(_){if(allowFallback&&lang!=='ar')computerVoiceFallbackToArabic(text,rate)}
 }
 function computerVoiceFallbackToArabic(text,rate){
  try{
@@ -236,6 +281,7 @@ function computerVoiceSpeak(text,rate){
   }else if(computerVoicePreference==='ar'){
    computerActiveLanguage='ar';computerActiveVoice=null;
   }
+  computerVoiceSpeechToken++;
   try{window.speechSynthesis.cancel()}catch(_){}
   var lang=computerActiveLanguage,voice=computerActiveVoice;
   computerVoiceMakeUtterance(String(text),lang,voice,lang!=='ar',rate);
@@ -268,7 +314,7 @@ function computerVoiceMountSettings(){
   var card=document.createElement('section');
   card.className='card setcard';card.id='shbUnifiedVoiceSettings';
   card.innerHTML='<h3>Question voice</h3>'+
-   '<p class="meta">Choose the voice used when reading questions aloud. English (US) is the default; Arabic is used automatically when it is unavailable.</p>'+
+   '<p class="meta">Choose the question-reading language. SHBACE prefers a clear male voice when your device provides one; speech is slightly slower for better clarity. English (US) is the default.</p>'+
    '<div class="shb-computer-voice-options" role="group" aria-label="Question reading voice">'+
    '<button type="button" data-shb-unified-voice="en-US" aria-pressed="false">English (US)</button>'+
    '<button type="button" data-shb-unified-voice="en-GB" aria-pressed="false">English (UK)</button>'+
@@ -307,6 +353,8 @@ function computerVoiceInstallStyles(){
    '.shb-computer-voice-dismiss{border:0;background:transparent;color:inherit;font-size:18px;line-height:1;cursor:pointer;padding:0 2px}',
    '.shb-computer-read-aloud{display:inline-flex;align-items:center;gap:6px;margin:8px 0 10px}',
    '.shb-computer-read-aloud:active{transform:translateY(1px)}',
+   '.shb-af-qtool.shb-reading-active{border-color:#4fd6b2!important;background:rgba(35,160,129,.2)!important;color:#8ff0d0!important;box-shadow:0 0 0 1px rgba(79,214,178,.16)}',
+   '.phone.light .shb-af-qtool.shb-reading-active{background:#e5faf3!important;color:#176c58!important;border-color:#7acdb7!important}',
    '.phone.light .shb-computer-voice-options button,.phone.light .shb-computer-read-aloud{background:#eef6ff;color:#174b7a;border-color:#c9def3}',
    '.phone.light .shb-computer-voice-options button.on{background:#dff2ff;border-color:#5aaee5}'
   ].join('');
@@ -354,6 +402,7 @@ function computerVoiceInit(){
  }catch(_){}
 }
 window.__shbUnifiedSpeakText=function(text,rate){computerVoiceSpeak(text,rate)};
+window.__shbUnifiedToggleQuestionReadAloud=function(card,text,button){computerVoiceToggleQuestionReadAloud(card,text,button)};
 computerVoiceInit();
 
 function mountVoiceSettings(){try{computerVoiceMountSettings()}catch(_){}}
