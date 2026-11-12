@@ -212,8 +212,8 @@ async function toInlineWebp(sourcePath, mode) {
    files reuse the exact original Git blobs from main; only the 256px WebP data URIs
    are embedded in index.html at build time. */
 const [ajPortraitData, facultyLogoData] = await Promise.all([
-  toInlineWebp(join(root, "assets/img/pediatrics-dr-aljoaki-source.png"), "cover"),
-  toInlineWebp(join(root, "assets/img/faculty-of-medicine-tripoli-source.png"), "contain")
+  toInlineWebp(join(root, "scripts/source-assets/pediatrics-dr-aljoaki-source.png"), "cover"),
+  toInlineWebp(join(root, "scripts/source-assets/faculty-of-medicine-tripoli-source.png"), "contain")
 ]);
 const ajSlot = 'window.__SHBACE_AJ_PORTRAIT_DATA__="__SHBACE_AJ_PORTRAIT_DATA__";';
 const facultySlot = 'window.__SHBACE_FACULTY_LOGO_DATA__="__SHBACE_FACULTY_LOGO_DATA__";';
