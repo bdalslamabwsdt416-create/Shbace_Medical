@@ -1,8 +1,8 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.6-to-me.1",
-  "displayVersion": "1.3.6 · Chrome (Phone + Computer)",
+  "version": "1.3.7-to-me.2",
+  "displayVersion": "1.3.7 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-12",
   "releaseNotes": [
     "Created an independent adaptive Chrome PWA for phone and computer; the original Chrome Android, iOS and Computer deliveries remain separate.",
@@ -10,6 +10,10 @@
     "Added English (US), English (UK) and Arabic question-reading voice selection; English (US) is the default.",
     "Exam Goal Planner now accepts custom exam names and multiple separate exam dates.",
     "Study Timer presents a countdown using the configured focus duration, with browser notification and sound alerts when the page is running; browser alarms cannot be guaranteed after the browser or device fully closes the app.",
-    "The existing 1,718-question bank and its explanations are preserved unchanged."
+    "The existing 1,718-question bank and its explanations are preserved unchanged.",
+    "Pediatrics now opens a separate choice between Dr. Abdulrahman Al-Joaki MCQ and Previous Questions; each collection has its own medical systems and topics.",
+    "Previous Questions reuses the existing SHBACE medical-system and topic artwork. Question wording, IDs, answer keys and explanations remain unchanged.",
+    "Pediatrics collection artwork is reduced to 256px WebP and embedded in the page; circular CSS clipping hides square corners, with AJ/FM initials as load fallbacks.",
+    "Long MCQ stems use safer word wrapping without changing the original question text."
   ]
 }
