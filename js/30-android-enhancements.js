@@ -741,7 +741,10 @@
     if (kind === 'reminders') {
       if (value) {
         requestDailyReminderAccess().then(function (ok) {
-          if (ok) { planDailyReminders(); planExamReminders(); }
+          if (ok) {
+            planDailyReminders(); planExamReminders();
+            try { if (window.__shbV13 && window.__shbV13.refresh) window.__shbV13.refresh(); } catch (_) {}
+          }
         });
       } else { planDailyReminders(); planExamReminders(); }
     }
@@ -839,7 +842,12 @@
       if (k === 'keepScreenOn') screenAwake();
       if (k === 'examCountdown') {
         if (prefs.examCountdown) {
-          requestDailyReminderAccess().then(function (ok) { if (ok) planExamReminders(); });
+          requestDailyReminderAccess().then(function (ok) {
+            if (ok) {
+              planDailyReminders(); planExamReminders();
+              try { if (window.__shbV13 && window.__shbV13.refresh) window.__shbV13.refresh(); } catch (_) {}
+            }
+          });
         } else planExamReminders();
       }
       if (k === 'doctorExpressions') syncLegacyDoctorPreference();
