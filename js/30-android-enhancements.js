@@ -209,11 +209,12 @@
       if (card.querySelector('.shb-af-qtools')) return;
       var stem = card.querySelector('.qstem');
       if (!stem) return;
-      var html = '<div class="shb-af-qtools" role="group" aria-label="Question tools">' +
-        (prefs.shareQuestion ? '<button type="button" class="shb-af-qtool" data-shb-question-action="share" aria-label="Share question"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4"></path><path d="m7 9 5-5 5 5"></path><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"></path></svg><span>Share</span></button>' : '') +
-        (prefs.copyQuestion ? '<button type="button" class="shb-af-qtool" data-shb-question-action="copy" aria-label="Copy question"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"></path></svg><span>Copy</span></button>' : '') +
-        (prefs.readAloud ? '<button type="button" class="shb-af-qtool" data-shb-question-action="speak" aria-label="Read question aloud"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"></path><path d="M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M18.5 5.5a9 9 0 0 1 0 13"></path></svg><span>Read aloud</span></button>' : '') +
-        '</div>';
+      var actions = [];
+      if (prefs.shareQuestion) actions.push('<button type="button" class="shb-af-qtool" data-shb-question-action="share" aria-label="Share question"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4"></path><path d="m7 9 5-5 5 5"></path><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"></path></svg><span>Share</span></button>');
+      if (prefs.copyQuestion) actions.push('<button type="button" class="shb-af-qtool" data-shb-question-action="copy" aria-label="Copy question"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"></path></svg><span>Copy</span></button>');
+      if (prefs.readAloud) actions.push('<button type="button" class="shb-af-qtool" data-shb-question-action="speak" aria-label="Read question aloud"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"></path><path d="M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M18.5 5.5a9 9 0 0 1 0 13"></path></svg><span>Read aloud</span></button>');
+      if (!actions.length) return;
+      var html = '<div class="shb-af-qtools" role="group" aria-label="Question tools">' + actions.join('') + '</div>';
       stem.insertAdjacentHTML('afterend', html);
     });
   }
@@ -474,11 +475,12 @@
       }
       var goals = JSON.parse(localStorage.getItem('shbace_exam_goals_v2') || 'null');
       if (Array.isArray(goals)) {
+        // Match the same earliest future exam selected by the planner scheduler.
         var eligible = goals.filter(function (goal) {
           return goal && goal.reminderEnabled && /^\d{4}-\d{2}-\d{2}$/.test(goal.date || '') &&
-            goal.date >= todayKey(day) && /^\d{2}:\d{2}$/.test(goal.reminderTime || '');
+            goal.date >= todayKey() && /^\d{2}:\d{2}$/.test(goal.reminderTime || '');
         }).sort(function (a, b) { return a.date.localeCompare(b.date); });
-        if (eligible.length) {
+        if (eligible.length && eligible[0].date >= todayKey(day)) {
           var parts = eligible[0].reminderTime.split(':').map(Number);
           var plannerMinutes = parts[0] * 60 + parts[1];
           if (Number.isFinite(plannerMinutes) && Math.abs(plannerMinutes - minutes) < 15) {
