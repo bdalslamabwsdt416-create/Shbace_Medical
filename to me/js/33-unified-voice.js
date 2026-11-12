@@ -43,8 +43,8 @@ function computerVoiceMatches(voice,lang){
 }
 function computerVoiceGenderHint(voice){
  var name=String(voice&&((voice.name||'')+' '+(voice.voiceURI||''))||'').toLowerCase();
- var male=/(^|[\\s_-])(male|man|masculine|david|mark|guy|james|daniel|alex|fred|thomas|tom|george|oliver|ryan|aaron|jason|matthew|andrew|brian|arthur|liam|nathan|john|michael|christopher|eric|peter|paul|stephen|richard|william|henry|bruce|majed|hamed|naayf|hamdan|abdulrahman|fares|hisham|tarik|salim|mohammed|muhammad|omar|khalid|fahad|saud)([\\s_-]|$)/i.test(name);
- var female=/(^|[\\s_-])(female|woman|feminine|zira|aria|jenny|samantha|victoria|susan|hazel|eva|michelle|joanna|kate|sonia|libby|ava|emma|salli|kendra|kimberly|ivy|nicole|olivia|serena|moira|tessa|karen|fiona|veena)([\\s_-]|$)/i.test(name);
+ var male=/(^|[\s_-])(male|man|masculine|david|mark|guy|james|daniel|alex|fred|thomas|tom|george|oliver|ryan|aaron|jason|matthew|andrew|brian|arthur|liam|nathan|john|michael|christopher|eric|peter|paul|stephen|richard|william|henry|bruce|majed|hamed|naayf|hamdan|abdulrahman|fares|hisham|tarik|salim|mohammed|muhammad|omar|khalid|fahad|saud)([\s_-]|$)/i.test(name);
+ var female=/(^|[\s_-])(female|woman|feminine|zira|aria|jenny|samantha|victoria|susan|hazel|eva|michelle|joanna|kate|sonia|libby|ava|emma|salli|kendra|kimberly|ivy|nicole|olivia|serena|moira|tessa|karen|fiona|veena)([\s_-]|$)/i.test(name);
  return male?2:female?-1:0;
 }
 function computerVoiceFind(lang,list){
