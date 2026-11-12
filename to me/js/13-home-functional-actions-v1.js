@@ -53,8 +53,13 @@
   saveProgress(p.spec,p.topic,p.questionId||null);
  };
  window.h7StartPediatrics=function(){
-  // The star/start action opens the Medical System picker; it never resumes or resets a topic.
-  appPage='specialties';
+  // Start at the collection chooser so the student can choose the doctor's bank or previous exams.
+  // This preserves each collection's own system/topic filters and never changes question data.
+  if(typeof window.openPediatricCollections==='function'){
+   window.openPediatricCollections();
+   return;
+  }
+  appPage='pedcollections';
   renderAppDemo();
  };
 })();
