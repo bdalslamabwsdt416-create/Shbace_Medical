@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 
-var CACHE_NAME='shbace-chrome-offline-v1.3.7';
+var CACHE_NAME='shbace-chrome-offline-v1.3.8';
 var DB_NAME='shbace-medical-offline-state-v1';
 var MANIFEST_URL=new URL('./offline-assets-manifest.json',location.href).href;
 var READY_URL=new URL('./__shbace_offline_ready__',location.href).href;
