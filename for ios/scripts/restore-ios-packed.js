@@ -65,6 +65,9 @@ function patchPackedAsset(relative, originalBytes) {
     const flag = 'updateBanner:true,';
     if (!source.includes(flag)) throw new Error('Expected iOS update-banner flag was not found.');
     source = source.replace(flag, 'updateBanner:false,\n autoUpdate:true,');
+    const offlineTimer = 'if(good)offT=setTimeout(hideBar,2200);';
+    if (!source.includes(offlineTimer)) throw new Error('Expected persistent offline notification timer was not found.');
+    source = source.replace(offlineTimer, 'offT=setTimeout(hideBar,2000);');
 
     const startMarker = '/* ---------- 8. new version available ---------- */';
     const endMarker = '/* ---------- 9. weekly backup reminder';
