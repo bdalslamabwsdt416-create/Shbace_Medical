@@ -30,10 +30,47 @@
     } catch (_) { return Object.assign({}, DEFAULTS); }
   }
   var prefs = readPrefs();
+  // Migration safety: if either of the former doctor controls was OFF, preserve that
+  // restrictive choice when moving to the single English Android control.
+  try { if (window.__SET && window.__SET.doctor === 'off') prefs.doctorExpressions = false; } catch (_) {}
   function savePrefs() {
     try { localStorage.setItem(PREF_KEY, JSON.stringify(prefs)); } catch (_) {}
   }
   function toast(s) { try { if (typeof window.toast === 'function') window.toast(s); } catch (_) {} }
+  var notificationPermissionNoticeShown = false;
+  function notifyReminderPermissionRequired() {
+    if (notificationPermissionNoticeShown) return;
+    notificationPermissionNoticeShown = true;
+    toast('إذن الإشعارات غير مفعّل. فعّله من إعدادات التطبيق حتى تصلك التذكيرات. لا تحتاج إلى صلاحية المنبّهات الدقيقة.');
+  }
+  window.__shbNotifyReminderPermissionRequired = notifyReminderPermissionRequired;
+  function syncLegacyDoctorPreference() {
+    var legacy = prefs.doctorExpressions === false ? 'off' : 'on';
+    try {
+      if (window.__SET) window.__SET.doctor = legacy;
+      var saved = JSON.parse(localStorage.getItem('shbace_settings_v1') || '{}');
+      if (!saved || typeof saved !== 'object' || Array.isArray(saved)) saved = {};
+      if (saved.doctor !== legacy) {
+        saved.doctor = legacy;
+        localStorage.setItem('shbace_settings_v1', JSON.stringify(saved));
+      }
+    } catch (_) {}
+    applyDoctorVisibility();
+  }
+  function applyDoctorVisibility() {
+    var hide = prefs.doctorExpressions === false;
+    var phone = document.querySelector('.phone');
+    if (phone) phone.classList.toggle('nodoc', hide);
+    document.body.classList.toggle('nodoc', hide);
+  }
+  function hideLegacyDoctorSetting() {
+    var legacy = document.querySelectorAll('#phoneContent .setcard .setrow button[aria-label="شخصية الطبيب والتعابير"]');
+    Array.prototype.forEach.call(legacy, function (button) {
+      var row = button.closest('.setrow');
+      if (row) { row.hidden = true; row.setAttribute('aria-hidden', 'true'); }
+    });
+  }
+  syncLegacyDoctorPreference();
   function todayKey(d) {
     d = d || new Date();
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -104,7 +141,7 @@
       var light = prefs.autoTheme ? m.matches : !!(window.__SET && window.__SET.theme === 'light');
       var phone = document.querySelector('.phone');
       if (phone) phone.classList.toggle('light', light);
-      document.body.classList.toggle('nodoc', !!(window.__SET && window.__SET.doctor === 'off'));
+      applyDoctorVisibility();
     } catch (_) {}
   }
   var themeQuery = null;
@@ -138,7 +175,7 @@
       '</section>' +
       '<section class="card setcard shb-af-settings"><h3>Study reminders</h3>' +
       '<p class="meta">A small number of useful reminders. These use the app’s existing Android notification permission.</p>' +
-      '<div class="shb-af-reminder-note"><b>Daily study reminder</b><small>Uses the existing Settings → Notification preferences → Study reminders switch. One reminder at 7:30 PM when no study activity is recorded.</small></div>' +
+      '<div class="shb-af-reminder-note"><b>Daily study reminder</b><small>Uses the existing Settings → Notification preferences → Study reminders switch. Normally 7:30 PM; moves to 7:45 PM on days when an Exam Goal reminder is also set for 7:30 PM, avoiding two alerts together. Exact-alarm access is not required; delivery may be a little later.</small></div>' +
       toggleMarkup('examCountdown', 'Exam countdown reminders', 'Three reminders at 7, 3 and 1 day before your saved exam date.') +
       '<button type="button" class="btn block shb-af-copyinfo" id="shbCopyAppInfo">Copy app information</button>' +
       '<p class="meta">Send the copied details when reporting an app issue. No account or personal data is included.</p></section>';
@@ -371,6 +408,7 @@
         smallIcon: 'ic_stat_shbace',
         iconColor: '#35B9F2',
         channelId: channel,
+        isExactNotification: false,
         schedule: { at: new Date(Date.now() + 700), allowWhileIdle: true },
         extra: { shbaceNotifId: rawId, page: String(event.page || ''), ref: String(event.ref || '') }
       }] });
@@ -407,20 +445,9 @@
             return false;
           }
         }
-        if (typeof p.checkExactNotificationSetting === 'function') {
-          var exact = await p.checkExactNotificationSetting();
-          if (exact && exact.exact_alarm && exact.exact_alarm !== 'granted') {
-            var openExactSettings = window.confirm('حتى يصل تذكير الدراسة في موعده، فعّل صلاحية «المنبّهات والتذكيرات» لـ SHBACE Medical. هذه الصلاحية تُستخدم لجدولة التذكير اليومي فقط. هل تبي تفتح إعداد النظام الآن؟');
-            if (!openExactSettings) { toast('التذكير يحتاج تفعيل «المنبّهات والتذكيرات».'); return false; }
-            if (typeof p.changeExactNotificationSetting !== 'function') {
-              toast('افتح إعدادات التطبيق وفعّل «المنبّهات والتذكيرات» يدوياً.');
-              return false;
-            }
-            await p.changeExactNotificationSetting();
-            toast('بعد تفعيل «المنبّهات والتذكيرات»، ارجع للتطبيق وسيُعاد إعداد التذكير.');
-            return false;
-          }
-        }
+        // These are convenience reminders, not alarm-clock features. We deliberately
+        // schedule them inexactly so Android's optional "Alarms & reminders" access
+        // is never a prerequisite and the OS can batch delivery when needed.
         return true;
       } catch (e) {
         console.warn('Daily reminder permission flow failed', e);
@@ -433,28 +460,50 @@
   }
   window.__shbRequestReminderAccess = requestDailyReminderAccess;
 
+  function dailyReminderAt(day) {
+    var minutes = 19 * 60 + 30; // 7:30 PM is the normal daily reminder time.
+    try {
+      var goals = JSON.parse(localStorage.getItem('shbace_exam_goals_v2') || 'null');
+      if (Array.isArray(goals)) {
+        var eligible = goals.filter(function (goal) {
+          return goal && goal.reminderEnabled && /^\d{4}-\d{2}-\d{2}$/.test(goal.date || '') &&
+            goal.date >= todayKey(day) && /^\d{2}:\d{2}$/.test(goal.reminderTime || '');
+        }).sort(function (a, b) { return a.date.localeCompare(b.date); });
+        if (eligible.length) {
+          var parts = eligible[0].reminderTime.split(':').map(Number);
+          var plannerMinutes = parts[0] * 60 + parts[1];
+          if (Number.isFinite(plannerMinutes) && Math.abs(plannerMinutes - minutes) < 15) {
+            // allowWhileIdle alarms are rate-limited by Android; keep at least 15 minutes
+            // between the planner's configured daily reminder and this generic reminder.
+            minutes = plannerMinutes + 15;
+            if (minutes > 23 * 60 + 44) minutes = plannerMinutes - 15;
+          }
+        }
+      }
+    } catch (_) {}
+    return new Date(day.getFullYear(), day.getMonth(), day.getDate(),
+      Math.floor(minutes / 60), minutes % 60, 0, 0);
+  }
   async function planDailyReminders() {
     var p = await localPlugin();
     if (!p) return;
     try {
       var perm = await p.checkPermissions();
-      if (!perm || perm.display !== 'granted') return;
-      if (typeof p.checkExactNotificationSetting === 'function') {
-        var exact = await p.checkExactNotificationSetting();
-        if (exact && exact.exact_alarm && exact.exact_alarm !== 'granted') return;
-      }
+      if (!perm || perm.display !== 'granted') { notifyReminderPermissionRequired(); return; }
+      notificationPermissionNoticeShown = false;
       try { await p.createChannel({ id: 'study-reminders', name: 'Study reminders', description: 'A single daily study reminder', importance: 2 }); } catch (_) {}
       var pend = await p.getPending(), mine = (pend.notifications || []).filter(function (n) { return n.id >= DAILY_BASE && n.id < DAILY_BASE + 100000; });
       if (mine.length) await p.cancel({ notifications: mine.map(function (n) { return { id: n.id }; }) });
       if (!reminderCategoryEnabled()) return;
       var days = getActivityDays(), notifications = [], now = new Date();
       for (var i = 0; i < 30; i++) {
-        var d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i, 19, 30, 0, 0), k = todayKey(d);
-        if (d.getTime() <= Date.now() + 30000 || days.indexOf(k) >= 0) continue;
+        var day = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i), k = todayKey(day);
+        var at = dailyReminderAt(day);
+        if (at.getTime() <= Date.now() + 30000 || days.indexOf(k) >= 0) continue;
         var totals = getTimerTotals();
         if (i === 0 && totals && totals.today >= 5 * 60000) continue;
         var id = DAILY_BASE + Number(k.replace(/-/g, '').slice(2));
-        notifications.push({ id: id, title: 'A little study today?', body: 'You have not recorded a study session today. Take a few minutes for your question bank.', schedule: { at: d, allowWhileIdle: true }, channelId: 'study-reminders' });
+        notifications.push({ id: id, title: 'A little study today?', body: 'You have not recorded a study session today. Take a few minutes for your question bank.', isExactNotification: false, schedule: { at: at, allowWhileIdle: true }, channelId: 'study-reminders' });
       }
       if (notifications.length) await p.schedule({ notifications: notifications });
     } catch (e) { console.warn('Study reminders could not be scheduled', e); }
@@ -464,11 +513,8 @@
     if (!p) return;
     try {
       var perm = await p.checkPermissions();
-      if (!perm || perm.display !== 'granted') return;
-      if (typeof p.checkExactNotificationSetting === 'function') {
-        var exact = await p.checkExactNotificationSetting();
-        if (exact && exact.exact_alarm && exact.exact_alarm !== 'granted') return;
-      }
+      if (!perm || perm.display !== 'granted') { notifyReminderPermissionRequired(); return; }
+      notificationPermissionNoticeShown = false;
       try { await p.createChannel({ id: 'exam-countdown', name: 'Exam countdown', description: 'A few reminders before your exam', importance: 3 }); } catch (_) {}
       var ids = [REMINDER_BASE + 7, REMINDER_BASE + 3, REMINDER_BASE + 1];
       await cancelReminderIds(p, ids);
@@ -496,7 +542,7 @@
     try {
       var perm = await p.checkPermissions();
       if (!perm || perm.display !== 'granted') return;
-      await p.schedule({ notifications: [{ id: id, title: 'Exam countdown · ' + days + ' day' + (days === 1 ? '' : 's') + ' left', body: body, schedule: { at: date, allowWhileIdle: true }, channelId: 'exam-countdown' }] });
+      await p.schedule({ notifications: [{ id: id, title: 'Exam countdown · ' + days + ' day' + (days === 1 ? '' : 's') + ' left', body: body, isExactNotification: false, schedule: { at: date, allowWhileIdle: true }, channelId: 'exam-countdown' }] });
     } catch (_) {}
   }
   function shareProgressCard() {
@@ -590,6 +636,8 @@
   function mountQuestionHelpersAndTop() {
     if (prefs.autoTheme) applyTheme();
     mountSettings();
+    hideLegacyDoctorSetting();
+    applyDoctorVisibility();
     mountAndroidHowToUse();
     mountPlanner();
     renderPlannerResult();
@@ -668,6 +716,12 @@
     window.setSet = function (k, v) {
       var r = oldSet.apply(this, arguments);
       if (k === 'theme') { prefs.autoTheme = false; savePrefs(); }
+      if (k === 'doctor') {
+        prefs.doctorExpressions = v === 'on';
+        savePrefs();
+        syncLegacyDoctorPreference();
+        hideLegacyDoctorSetting();
+      }
       return r;
     };
   }
@@ -773,7 +827,12 @@
       prefs[k] = !prefs[k]; savePrefs();
       if (k === 'autoTheme') applyTheme();
       if (k === 'keepScreenOn') screenAwake();
-      if (k === 'examCountdown') planExamReminders();
+      if (k === 'examCountdown') {
+        if (prefs.examCountdown) {
+          requestDailyReminderAccess().then(function (ok) { if (ok) planExamReminders(); });
+        } else planExamReminders();
+      }
+      if (k === 'doctorExpressions') syncLegacyDoctorPreference();
       if (k === 'shareQuestion' || k === 'copyQuestion' || k === 'readAloud') {
         document.querySelectorAll('#phoneContent .qcard .shb-af-qtools').forEach(function (x) { x.remove(); });
         decorateQuestionCards();
