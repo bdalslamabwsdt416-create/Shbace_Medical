@@ -55,6 +55,7 @@
         localStorage.setItem('shbace_settings_v1', JSON.stringify(saved));
       }
     } catch (_) {}
+    savePrefs();
     applyDoctorVisibility();
   }
   function applyDoctorVisibility() {
