@@ -11,6 +11,7 @@ import {
   statSync
 } from "node:fs";
 import { join, relative } from "node:path";
+import sharp from "sharp";
 
 const root = process.cwd();
 const output = join(root, "www");
@@ -31,7 +32,8 @@ const requiredFiles = [
   "pwa-version.json",
   "js/29-offline-setup.js",
   "js/33-unified-voice.js",
-  "js/34-study-countdown.js"
+  "js/34-study-countdown.js",
+  "js/35-pediatrics-collections.js"
 ];
 const requiredDirs = ["css", "js", "data"];
 const imageDirs = ["img", "img1", "img2"];
@@ -116,7 +118,7 @@ if (reviewLog && Array.isArray(reviewLog.entries)) {
   if (logChanged !== 45 || logNeedsReview !== 110) fail("Question review JSON counts do not match the master audit");
 }
 const pwaVersion = JSON.parse(readFileSync(join(root, "pwa-version.json"), "utf8"));
-if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.6-to-me.1") {
+if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.7-to-me.2") {
   fail("pwa-version.json must declare Unified Chrome PWA version 1.3.6-to-me.1");
 }
 
@@ -175,7 +177,55 @@ for (const icon of manifest.icons) {
   if (!existsSync(iconPath)) fail(`Manifest icon does not exist in the PWA output: ${icon.src}`);
 }
 
-const html = readFileSync(join(output, "index.html"), "utf8");
+const htmlPath = join(output, "index.html");
+let html = readFileSync(htmlPath, "utf8");
+
+/* Embed the two main-branch Pediatrics images as compact, self-contained WebP data.
+   The source PNGs stay outside the app bundle; only their 256px derivatives enter HTML. */
+async function toInlineWebp(sourcePath, mode) {
+  if (!existsSync(sourcePath) || !statSync(sourcePath).isFile()) {
+    console.warn("Pediatrics image not found; initials fallback will be used: " + relative(join(root, ".."), sourcePath));
+    return "";
+  }
+  try {
+    let pipeline = sharp(sourcePath).rotate();
+    if (mode === "cover") {
+      pipeline = pipeline.resize(256, 256, { fit: "cover", position: "attention", withoutEnlargement: true });
+    } else {
+      pipeline = pipeline.resize(256, 256, {
+        fit: "contain", withoutEnlargement: true,
+        background: { r: 5, g: 16, b: 35, alpha: 0 }
+      });
+    }
+    const buffer = await pipeline.webp({ quality: 82, effort: 5, alphaQuality: 85 }).toBuffer();
+    const fileName = sourcePath.slice(Math.max(sourcePath.lastIndexOf("/"), sourcePath.lastIndexOf("\\")) + 1);
+    console.log("Pediatrics image embedded: " + fileName +
+      " → 256px WebP (" + buffer.byteLength + " bytes)");
+    return "data:image/webp;base64," + buffer.toString("base64");
+  } catch (error) {
+    console.warn("Pediatrics image conversion failed; initials fallback will be used: " +
+      sourcePath + " — " + (error && error.message || error));
+    return "";
+  }
+}
+/* These paths are inside the PWA root so Vercel can resolve them reliably. The PNG
+   files reuse the exact original Git blobs from main; only the 256px WebP data URIs
+   are embedded in index.html at build time. */
+const [ajPortraitData, facultyLogoData] = await Promise.all([
+  toInlineWebp(join(root, "scripts/source-assets/pediatrics-dr-aljoaki-source.png"), "cover"),
+  toInlineWebp(join(root, "scripts/source-assets/faculty-of-medicine-tripoli-source.png"), "contain")
+]);
+const ajSlot = 'window.__SHBACE_AJ_PORTRAIT_DATA__="__SHBACE_AJ_PORTRAIT_DATA__";';
+const facultySlot = 'window.__SHBACE_FACULTY_LOGO_DATA__="__SHBACE_FACULTY_LOGO_DATA__";';
+if (!html.includes(ajSlot) || !html.includes(facultySlot)) {
+  fail("Pediatrics image slots are missing from index.html");
+}
+html = html.replace(ajSlot, "window.__SHBACE_AJ_PORTRAIT_DATA__=" + JSON.stringify(ajPortraitData) + ";");
+html = html.replace(facultySlot, "window.__SHBACE_FACULTY_LOGO_DATA__=" + JSON.stringify(facultyLogoData) + ";");
+writeFileSync(htmlPath, html);
+if (!html.includes("js/35-pediatrics-collections.js")) {
+  fail("Pediatrics collections script is not referenced by index.html");
+}
 if (!html.includes("navigator.serviceWorker.register('./sw.js'") || !html.includes("js/29-offline-setup.js") || !html.includes("js/29-reviewed-bank-controls.js") || !html.includes("qbData_reviewed_patch.json")) {
   fail("index.html does not register ./sw.js");
 }

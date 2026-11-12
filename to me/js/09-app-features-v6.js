@@ -623,7 +623,7 @@ let SR3=(()=>{
  o.spd=(Array.isArray(o.spd)?o.spd:[]).filter(Number.isFinite).slice(-40);
  if(!_o(o.seen))o.seen={};
  o.goal=Number.isFinite(o.goal)?Math.min(200,Math.max(1,Math.round(o.goal))):20;
- o.size=[10,15,20].includes(o.size)?o.size:15;
+ o.size=Number.isInteger(o.size)&&o.size>=1&&o.size<=200?o.size:15;
  if(o.sess&&!(_o(o.sess)&&Array.isArray(o.sess.queue)&&Array.isArray(o.sess.plan)&&_o(o.sess.first)&&_o(o.sess.rt)&&Array.isArray(o.sess.att)))o.sess=null;
  if(!_o(o.last))o.last=null;
  return o})();
@@ -632,7 +632,7 @@ function srSave(){srCache=null;
  try{localStorage.setItem(SR3KEY,JSON.stringify(SR3));srSaveFail=false;return true}
  catch(e){if(!srSaveFail){srSaveFail=true;try{toast('Could not save Smart Review progress (storage is full)')}catch(_){}}return false}}
 window.__sr3=()=>SR3; /* read-only handle used by the self-tests */
-window.__sr3x=()=>({SRT,SRT_Q,QB,qmap,srTopicStats,srTotals,srLevel,srIsWeak,srPickTopic,srSpeedRef,srCompose,srCalc,srAutoGrade,dueList,srPool});
+window.__sr3x=()=>({SRT,SRT_Q,QB,qmap,srTopicStats,srTotals,srLevel,srIsWeak,srSpeedRef,srCompose,srCalc,srAutoGrade,dueList,srPool});
 
 /* ---------- one-time, idempotent migration of REAL v2 reviews (never imports Question Bank history) ---------- */
 function sr3Migrate(){
@@ -759,20 +759,6 @@ function srRingCol(p,started){if(!started)return '#4b5d73';
   return 'rgb('+[0,1,2].map(k=>Math.round(a[1][k]+(b[1][k]-a[1][k])*f)).join(',')+')'}}
  return 'rgb(181,140,255)'}
 
-/* ---------- Smart Pick ---------- */
-function srPickTopic(){const M=srTopicStats(),now=Date.now();let best=null;
- M.forEach(e=>{if(!e.tot||!(e.due+e.weak+e.fresh))return;
-  const stale=e.rev&&e.last?Math.min(30,(now-e.last)/DAY)/30:0;
-  const s=.30*Math.min(1,e.due/20)+.08*Math.min(1,e.od/10)+.22*Math.min(1,e.weak/12)+.15*(1-e.pct/100)*(e.rev?1:.6)+.10*stale+.10*Math.min(1,e.fresh/20);
-  e.s=s;if(!best||s>best.s)best=e});
- if(!best)return null;
- const lines=[];if(best.due)lines.push([best.due+(best.due===1?' Question Due':' Questions Due'),'due']);
- if(best.weak)lines.push([best.weak+(best.weak===1?' Weak Question':' Weak Questions'),'weak']);
- if(best.fresh&&(lines.length<2||!best.rev))lines.push([best.fresh+(best.fresh===1?' New Question':' New Questions'),'new']);
- if(best.rev&&best.last&&lines.length<3)lines.push(['Last reviewed '+srAgo(best.last).toLowerCase(),'time']);
- const prio=best.s>=.45?'High Priority for Improvement':best.s>=.25?'Recommended Next':best.rev?'Good Place to Continue':'Good Place to Start';
- return{e:best,s:best.s,lines,prio,hi:best.s>=.45}}
-
 /* ---------- automatic question selection (nothing is added by hand) ---------- */
 function srPool(topic){const qs=topic==null?QB:(SRT_Q.get(topic)||[]),now=Date.now(),due=[],weak=[],fresh=[];
  qs.forEach(q=>{const r=SR3.q[q.id];if(!r||!r.n){if(!(r&&r.sus))fresh.push(q);return}if(r.sus)return;
@@ -809,8 +795,7 @@ function srCompose(topic,size){
  return seq.map(q=>q.id)}
 
 /* ---------- session state ---------- */
-let srTab='topics',srRun=false,SU={qid:null},SRSUM=null,SRX={open:null,lim:{}},SRH={lim:10,open:null},SRUI={filter:'all',q:'',open:{},rings:{},celebrated:null,selected:[],counts:{},hidePick:false};
-try{const saved=LS.get('shbace_sr3_ui_v1',{});if(saved&&typeof saved==='object')SRUI.hidePick=!!saved.hidePick}catch(_){};
+let srTab='topics',srRun=false,SU={qid:null},SRSUM=null,SRX={open:null,lim:{}},SRH={lim:10,open:null},SRUI={filter:'all',q:'',open:{},rings:{},celebrated:null,selected:[],counts:{}};
 let srFaceIx={};
 function srSid(){return 's'+Date.now().toString(36)+Math.floor(Math.random()*1296).toString(36)}
 function srM0(ids){const M=srTopicStats(),m={};ids.forEach(id=>{const q=qmap.get(id);if(q&&!m[q.topic]){const e=M.get(q.topic);if(e)m[q.topic]={p:e.pct,s:e.status}}});return m}
@@ -823,15 +808,35 @@ function srNewSession(o){
 window.srStart=function(topic){topic=(topic==null||topic==='')?null:Number(topic);
  const ids=srCompose(topic,SR3.size);if(!ids.length){toast(topic==null?'No questions are available right now':'No questions are available in this topic');return}
  srNewSession({mode:topic==null?'all':'topic',topic,label:topic==null?'All Topics':(SRT_BY.get(topic)||{}).name||'Topic',plan:ids})};
-window.srPickStart=function(){const p=srPickTopic();if(!p){toast('Nothing to review right now');return}window.srAddSuggested(p.e.id)};
-function srUiSave(){try{localStorage.setItem('shbace_sr3_ui_v1',JSON.stringify({hidePick:!!SRUI.hidePick}))}catch(_){}}
+function srSyncSelectionUI(changedId){
+ const chosen=srSelectedSummary(),panel=document.querySelector('.sr3-selected-panel');if(!panel)return;
+ const head=panel.querySelector('.sr3-selected-head');
+ if(head){
+  const b=head.querySelector('b'),sm=head.querySelector('small');
+  if(b)b.textContent=chosen.list.length+' topic'+(chosen.list.length===1?'':'s')+' selected';
+  if(sm)sm.textContent=chosen.total+' question'+(chosen.total===1?'':'s')+' in this session';
+ }
+ const chips=panel.querySelector('#srSelectedChips');
+ if(chips)chips.innerHTML=chosen.list.map(x=>'<span>'+esc(x.e.t.name)+' <b>'+x.count+'</b></span>').join('');
+ const start=panel.querySelector('.sr3-start-selected');
+ if(start){start.disabled=!chosen.total;start.textContent='Start session · '+chosen.total+' question'+(chosen.total===1?'':'s')}
+ if(changedId!=null){
+  const e=srTopicStats().get(Number(changedId)),field=document.getElementById('srCount-'+Number(changedId));
+  if(e&&field){
+   const count=srCountFor(e),max=srAvailable(e),controls=field.parentElement,buttons=controls?controls.querySelectorAll('button'):[];
+   field.value=String(count);field.max=String(max);
+   if(buttons[0])buttons[0].disabled=count<=1;
+   if(buttons[1])buttons[1].disabled=count>=max;
+   const help=field.closest('.sr3-qset')&&field.closest('.sr3-qset').querySelector('small');
+   if(help)help.textContent='Choose any number from 1 to '+max;
+  }
+ }
+}
 window.srToggleTopic=function(id){id=Number(id);const e=srTopicStats().get(id);if(!e||!srAvailable(e))return;const i=SRUI.selected.indexOf(id);if(i>=0){SRUI.selected.splice(i,1);delete SRUI.counts[id]}else{SRUI.selected.push(id);if(!Number.isInteger(Number(SRUI.counts[id]))||Number(SRUI.counts[id])<1)SRUI.counts[id]=Math.min(10,srAvailable(e))}renderAppDemo()};
-window.srSetTopicCount=function(id,value){id=Number(id);const e=srTopicStats().get(id);if(!e||!SRUI.selected.includes(id))return;const max=srAvailable(e),n=Number(value);if(!Number.isInteger(n)||n<1){toast('Choose at least 1 question');return}SRUI.counts[id]=Math.min(max,n);renderAppDemo()};
-window.srBumpTopicCount=function(id,delta){id=Number(id);const e=srTopicStats().get(id);if(!e)return;const n=srCountFor(e)+Number(delta||0);SRUI.counts[id]=Math.min(srAvailable(e),Math.max(1,n));renderAppDemo()};
+window.srSetTopicCount=function(id,value){id=Number(id);const e=srTopicStats().get(id);if(!e||!SRUI.selected.includes(id))return;const max=srAvailable(e),n=Number(value);if(!Number.isInteger(n)||n<1){toast('Choose a whole number from 1 to '+max);srSyncSelectionUI(id);return}SRUI.counts[id]=Math.min(max,n);srSyncSelectionUI(id)};
+window.srBumpTopicCount=function(id,delta){id=Number(id);const e=srTopicStats().get(id);if(!e||!SRUI.selected.includes(id))return;const n=srCountFor(e)+Number(delta||0);SRUI.counts[id]=Math.min(srAvailable(e),Math.max(1,n));srSyncSelectionUI(id)};
 window.srClearSelection=function(){SRUI.selected=[];SRUI.counts={};renderAppDemo()};
-window.srHidePick=function(){SRUI.hidePick=true;srUiSave();renderAppDemo()};
-window.srShowPick=function(){SRUI.hidePick=false;srUiSave();renderAppDemo()};
-window.srAddSuggested=function(id){id=Number(id);const e=srTopicStats().get(id);if(!e||!srAvailable(e))return;if(!SRUI.selected.includes(id))SRUI.selected.push(id);if(!Number.isInteger(Number(SRUI.counts[id]))||Number(SRUI.counts[id])<1)SRUI.counts[id]=Math.min(10,srAvailable(e));SRUI.hidePick=true;srUiSave();renderAppDemo();toast('Suggested topic added. Set its question count, then start when ready.')};
+
 window.srChooseTopic=function(id){id=Number(id);const e=srTopicStats().get(id);if(!e||!srAvailable(e))return;SRUI.selected=[id];SRUI.counts={[id]:Math.min(10,srAvailable(e))};srTab='topics';renderAppDemo()};
 window.srStartSelected=function(){
  const M=srTopicStats(),selected=SRUI.selected.map(id=>M.get(Number(id))).filter(e=>e&&srAvailable(e));
@@ -847,7 +852,7 @@ window.srStartSelected=function(){
 
 window.srResume=function(){if(!SR3.sess)return;SU={qid:null};SRSUM=null;srRun=true;renderAppDemo()};
 window.srPause=function(){srTPause(true);srRun=false;SU={qid:null};srSave();renderAppDemo()};
-window.srSize=function(n){n=Number(n);if(![10,15,20].includes(n))return;SR3.size=n;srSave();renderAppDemo()};
+window.srSize=function(n){n=Number(n);if(!Number.isInteger(n)||n<1||n>200)return;SR3.size=n;srSave();renderAppDemo()};
 window.srEnd=function(){const s=SR3.sess;if(!s)return;const n=Object.keys(s.first).length;
  confirmBox({title:'End this session?',text:n?`${n} answered question${n>1?'s':''} will be kept and scheduled. The rest stay as they are.`:'No questions were answered in this session.',detail:'Unanswered questions are never counted.',ok:'End session'},()=>{srFinish();renderAppDemo()})};
 window.srDrill=function(){const sum=SRSUM||SR3.last;if(!sum||!Array.isArray(sum.weak))return;
@@ -924,12 +929,6 @@ window.srSetGrade=function(g){
 window.srSuspendCur=function(){const id=SU.qid;if(id)srSuspend(id,true)};
 
 /* ---------- finishing, summary, drill source ---------- */
-function srNextAction(){const t=srTotals(),pick=srPickTopic();
- if(t.weak>0)return{k:'weak',title:'Strengthen your weak questions',text:t.weak+(t.weak===1?' question is':' questions are')+' still shaky. They return automatically — or practise them now.',btn:['Open weak topics',"srTabSet('weak')"]};
- if(t.due>0&&pick)return{k:'due',title:'Keep the momentum',text:t.due+(t.due===1?' review is':' reviews are')+' due. Smart Pick suggests '+pick.e.t.name+'.',btn:['Start recommended session','srPickStart()']};
- let nx=0,c=0;Object.keys(SR3.q).forEach(id=>{const r=SR3.q[id];if(r.sus||!qmap.has(id)||r.due<=Date.now())return;if(!nx||r.due<nx){nx=r.due;c=1}else if(dStart(r.due)===dStart(nx))c++});
- if(pick&&pick.e.fresh)return{k:'new',title:'Nothing urgent — explore',text:'You are caught up. '+pick.e.t.name+' has '+pick.e.fresh+' new question'+(pick.e.fresh>1?'s':'')+'.',btn:['Start recommended session','srPickStart()']};
- return{k:'rest',title:'You are all caught up',text:nx?'Next reviews: '+srDueTxt(nx).toLowerCase()+'.':'Nothing is scheduled right now.',btn:null}}
 function srFinish(silent){
  const s=SR3.sess;SR3.sess=null;srRun=false;SU={qid:null};
  if(!s){return}
@@ -946,10 +945,10 @@ function srFinish(silent){
  tp.sort((a,b)=>b.n-a.n||(b.to-b.from)-(a.to-a.from));
  const up=tp.filter(x=>x.s1==='Mastered'&&x.s0!=='Mastered').map(x=>x.id);
  const sum={id:s.sid,t:s.start,end:Date.now(),n,ok:okN,ms,newN,revN:n-newN,mode:s.mode,topic:s.topic,label:s.label,g,impr,weak,tp:tp.slice(0,8),up,
-  retries:Object.values(s.rt).reduce((a,x)=>a+x,0),left:s.queue.length,act:srNextAction()};
+  retries:Object.values(s.rt).reduce((a,x)=>a+x,0),left:s.queue.length};
  SR3.ses.unshift({id:sum.id,t:sum.t,end:sum.end,n,ok:okN,ms,newN,label:sum.label,mode:sum.mode,g,wk:weak.length});SR3.ses=SR3.ses.slice(0,60);
  SR3.last={id:sum.id,t:sum.t,end:sum.end,n,ok:okN,ms,newN,revN:sum.revN,mode:sum.mode,topic:sum.topic,label:sum.label,g,impr,weak,tp:sum.tp,up,retries:sum.retries,left:sum.left};
- SRSUM=Object.assign({},SR3.last,{act:sum.act});srTab='summary';srSave();
+ SRSUM=Object.assign({},SR3.last);srTab='summary';srSave();
  if(!silent)try{addNotif('src-'+s.sid,'Smart Review session complete',`${n} question${n>1?'s':''} · ${pct(okN,n)}% correct`,'review')}catch(e){}
  srNotify();updateBadges()}
 
@@ -1041,17 +1040,12 @@ function srTopicList(){const M=srTopicStats(),q=SRUI.q.trim().toLowerCase(),acti
   const due=g.items.reduce((a,e)=>a+e.due,0),avail=g.items.reduce((a,e)=>a+srAvailable(e),0);
   return `<section class="sr3-grp${open?' open':''}" data-spec="${esc(g.spec)}"><button type="button" class="sr3-gh" aria-expanded="${open}" onclick="srGroup('${esc(g.spec)}')"><span class="sr3-gt"><b>${esc(g.label)}</b><small>${g.items.length} topics · ${avail} available${selected?' · '+selected+' selected':''}</small></span><span class="sr3-gp" style="color:${srRingCol(p,cr>0)}">${p}%</span><span class="sr3-gc">${srI.chev}</span></button>
    ${open?`<div class="sr3-gb">${g.items.map(srTopicCard).join('')}</div>`:''}</section>`}).join('')}
-function srTopicsHTML(){const T=srTotals(),pick=srPickTopic(),s=SR3.sess,chosen=srSelectedSummary();let h='';
- if(s&&Object.keys(s.first).length+s.queue.length>0){const done=Object.keys(s.first).length;
-  h+=`<div class="card sr3-resume"><div><b>Session in progress</b><small>${esc(s.label)} · ${s.queue.length} left · ${done} answered</small></div><div class="sr3-rb"><button type="button" class="btn primary" onclick="srResume()">Resume</button><button type="button" class="btn" onclick="srEnd()">End</button></div></div>`}
- if(pick&&!SRUI.hidePick){const e=pick.e;
-  h+=`<div class="card sr3-pick sr3-suggestion"><div class="sr3-pk-top"><span class="sr3-kick">${srI.spark} OPTIONAL SUGGESTION</span><span class="sr3-prio">${pick.prio}</span><button type="button" class="sr3-hide-pick" onclick="srHidePick()" aria-label="Hide suggestion">×</button></div>
-   <div class="sr3-pk-body">${srRing(e.pct,e.rev>0,54,e.t.key)}<div class="sr3-pk-tx"><h3>${esc(e.t.name)}</h3><small>${esc(e.t.specLabel)}${e.t.sy?' · '+esc(e.t.sy):''}</small><ul class="sr3-why">${pick.lines.map(([l,k])=>`<li class="${k}"><i></i>${l}</li>`).join('')}</ul></div></div>
-   <button type="button" class="btn block sr3-add-suggestion" onclick="srAddSuggested(${e.t.id})">Add this topic to my selection</button></div>`}
- else if(pick&&SRUI.hidePick)h+=`<div class="sr3-suggestion-hidden"><span>Smart suggestion hidden</span><button type="button" onclick="srShowPick()">Show suggestion</button></div>`;
- h+=`<section class="sr3-builder-hero"><div><span class="sr3-builder-kicker">SMART REVIEW · SESSION BUILDER</span><h2>Build your review session</h2><p>Choose one topic or combine several. Set a different question count for every selected topic.</p></div><div class="sr3-builder-stats"><span><b>${T.due}</b><small>Due</small></span><span><b>${T.weak}</b><small>Weak</small></span><span><b>${T.fresh}</b><small>New</small></span></div></section>
+function srTopicsHTML(){const T=srTotals(),session=SR3.sess,chosen=srSelectedSummary();let h='';
+ if(session&&Object.keys(session.first).length+session.queue.length>0){const done=Object.keys(session.first).length;
+  h+=`<div class="card sr3-resume"><div><b>Session in progress</b><small>${esc(session.label)} · ${session.queue.length} left · ${done} answered</small></div><div class="sr3-rb"><button type="button" class="btn primary" onclick="srResume()">Resume</button><button type="button" class="btn" onclick="srEnd()">End</button></div></div>`}
+ h+=`<section class="sr3-builder-hero"><div><span class="sr3-builder-kicker">SMART REVIEW · SESSION BUILDER</span><h2>Build your review session</h2><p>Select one or more topics, then choose how many questions to take from each.</p></div></section>
  <section class="sr3-selected-panel"><div class="sr3-selected-head"><div><span class="sr3-builder-kicker">YOUR SESSION</span><b>${chosen.list.length} topic${chosen.list.length===1?'':'s'} selected</b><small>${chosen.total} question${chosen.total===1?'':'s'} in this session</small></div><button type="button" class="btn sr3-clear-selection" onclick="srClearSelection()" ${chosen.list.length?'':'disabled'}>Clear</button></div>
- ${chosen.list.length?`<div class="sr3-selected-chips">${chosen.list.map(x=>`<span>${esc(x.e.t.name)} <b>${x.count}</b></span>`).join('')}</div>`:`<p class="sr3-selection-empty">No topics selected yet. Select a topic below to add it to your session.</p>`}
+ ${chosen.list.length?`<div class="sr3-selected-chips" id="srSelectedChips">${chosen.list.map(x=>`<span>${esc(x.e.t.name)} <b>${x.count}</b></span>`).join('')}</div>`:`<p class="sr3-selection-empty">No topics selected yet. Select any topic below to add it to your session.</p>`}
  <button type="button" class="btn primary block sr3-start-selected" onclick="srStartSelected()" ${chosen.total?'':'disabled'}>Start session · ${chosen.total} question${chosen.total===1?'':'s'}</button>
  </section>
  <div class="sr3-sec sr3-topic-heading"><div><h2>Choose topics</h2><small>${T.topics} topics · select as many as you need</small></div></div>
@@ -1069,10 +1063,10 @@ window.srJump=function(id){const t=SRT_BY.get(id);if(!t)return;SRUI.filter='all'
 function srMapHTML(){const M=srTopicStats(),by=new Map();
  SRT.forEach(t=>{const e=M.get(t.id);if(!e)return;if(!by.has(t.spec))by.set(t.spec,{label:t.specLabel,items:[]});by.get(t.spec).items.push(e)});
  return [...by.values()].map(g=>`<div class="sr3-mg"><div class="sr3-mh">${esc(g.label)}</div><div class="sr3-mr">${g.items.map(e=>`<button type="button" class="sr3-mc${e.status==='Mastered'?' mst':''}" onclick="srJump(${e.t.id})" aria-label="${esc(e.t.name)}: ${e.status}, ${e.pct}%" title="${esc(e.t.name)} · ${e.pct}%">${srRing(e.pct,e.rev>0,34,e.t.key,{txt:false,sw:4,glow:e.status==='Mastered'})}${e.due?'<i class="dot due"></i>':''}${e.status==='Mastered'?'<i class="dot star">★</i>':''}</button>`).join('')}</div></div>`).join('')}
-function srDashHTML(){const T=srTotals(),pick=srPickTopic(),s=SR3.sess,gp=Math.min(100,pct(T.today,SR3.goal)),remain=Math.max(SR3.goal-T.today,0);
+function srDashHTML(){const T=srTotals(),s=SR3.sess,gp=Math.min(100,pct(T.today,SR3.goal)),remain=Math.max(SR3.goal-T.today,0);
  const dueT=T.dueToday;
  const hero=`<div class="card sr2-hero"><div class="sr2-big"><b>${dueT}</b><span>${dueT===1?'question':'questions'} due today${T.od?` <em>· ${T.od} overdue</em>`:''}</span></div>
-  <button type="button" class="btn primary block sr2-go" ${pick||s?'':'disabled'} onclick="${s?'srResume()':'srPickStart()'}">${srI.play} ${s?'Resume session · '+s.queue.length+' left':'Start Recommended Session'}</button>
+  <button type="button" class="btn primary block sr2-go" onclick="${s?'srResume()':"srTabSet('topics')"}">${srI.play} ${s?'Resume session · '+s.queue.length+' left':'Build a review session'}</button>
   <div class="sr2-goal"><div><b>${T.today}</b> / ${SR3.goal} questions today</div><span>${gp>=100?'Goal reached':remain+' to go'}</span></div><div class="bar"><i style="width:${gp}%"></i></div></div>`;
  const stat=(v,l,c)=>`<div class="sr2-st"><b style="${c?'color:'+c:''}">${v}</b><small>${l}</small></div>`;
  const grid=`<div class="sr2-grid">${stat(T.dueToday-T.od,'Due today','#8fc6ff')}${stat(T.od,'Overdue',T.od?'#ffb454':'')}${stat(T.upcoming,'Upcoming')}${stat(T.today,'Reviewed today','#35cf82')}${stat(T.lv.mastered,'Mastered','#b58cff')}${stat(T.weak,'Need more review',T.weak?'#ff8c8c':'')}</div>`;
@@ -1186,16 +1180,13 @@ function srSummaryHTML(){const s=SRSUM||SR3.last;if(!s)return srShell(srTopicsHT
  const impr=(s.impr||[]).slice(0,6).map(id=>item(id,`<span class="sr3-arrow">${srChip(SR_LV.find(x=>x[0]===srLevel(SR3.q[id]))[1],SR_LV_COL[srLevel(SR3.q[id])])}</span>`)).join('');
  const weak=(s.weak||[]).slice(0,6).map(id=>item(id,srChip(SR3.q[id]&&SR3.q[id].rl?'Weak':'Practise','#ff8c8c'))).join('');
  const tp=(s.tp||[]).map(x=>{const e=M.get(x.id);if(!e)return '';const d=x.to-x.from;return `<div class="sr3-tp"><span>${srRing(e.pct,e.rev>0,40,e.t.key)}</span><div><b>${esc(e.t.name)}</b><small>${x.from}% → <b style="color:${d>0?'#35cf82':d<0?'#ff8c8c':'#9aadc1'}">${x.to}%</b> ${d>0?'(+'+d+')':d<0?'('+d+')':''} · ${x.s1}${x.s0!==x.s1?' (was '+x.s0+')':''}</small></div></div>`}).join('');
- const act=s.act||srNextAction();
  const due=dueList().length;
  return srShell(`<div class="card sr2-sum sr3-sum">${docFace(face,'dr-top sr3-face')}<div class="sr3-kick2">${drill?'DRILL COMPLETE':'SESSION COMPLETE'}</div><h3>${title}</h3><p class="meta" style="margin:0 0 4px">${esc(s.label)} · ${s.n} question${s.n>1?'s':''}${s.retries?' · '+s.retries+' retr'+(s.retries>1?'ies':'y'):''}${s.left?' · '+s.left+' not reached':''}</p></div>
   <div class="sr3-sec"><h2>Your performance</h2></div>${perf}
   ${impr?`<div class="sr3-sec"><h2>What you mastered</h2><small>Questions that moved up a level</small></div>${impr}`:''}
   ${weak?`<div class="sr3-sec"><h2>Needs more practice</h2><small>Missed or still shaky — they return automatically</small></div>${weak}`:''}
   ${tp?`<div class="sr3-sec"><h2>Topic progress</h2></div><div class="card">${tp}</div>`:''}
-  <div class="card sr3-act"><div class="sr2-h">Next recommended action</div><b>${esc(act.title)}</b><p class="meta" style="margin:4px 0 0">${esc(act.text)}</p></div>
   ${(s.weak||[]).length?`<button type="button" class="btn primary block sr3-drill" onclick="srDrill()">${srI.play} Drill Weak Ones · ${Math.min(20,s.weak.length)}</button>`:''}
-  ${act.btn?`<button type="button" class="btn ${(s.weak||[]).length?'':'primary '}block" onclick="${act.btn[1]}">${act.btn[0]}</button>`:''}
   <button type="button" class="btn block" onclick="srBack()">Back to topics</button>`,false)}
 
 /* ---------- view router + hooks ---------- */
@@ -1218,8 +1209,15 @@ function srPost(){
 const __srRAD=renderAppDemo;renderAppDemo=function(){const r=__srRAD.apply(this,arguments);try{srPost()}catch(e){console.error('Smart Review post-render',e)}return r};
 
 function updateBadges(){const n=dueList().length+srList().filter(x=>x.r.due>Date.now()).length;const d=dueList().length;document.querySelectorAll('.app-nav button[data-p="review"] .nbadge').forEach(e=>e.remove());if(d){document.querySelectorAll('.app-nav button[data-p="review"]').forEach(b=>b.insertAdjacentHTML('beforeend',`<em class="nbadge">${d}</em>`))}}
-appNav=function(){const it=[['subjects','Home'],['search','Search'],['quiz','Quiz'],['review','Review']];const grp={subjects:['subjects','specialties','topics','questions','menu','saved','wrong'],quiz:['quiz','quizrun','quizresult','quizhistory']};
- return `<div class="app-nav">${it.map(([id,n])=>`<button data-p="${id}" class="${(grp[id]||[id]).includes(appPage)?'active':''}" onclick="appPage='${id}';renderAppDemo()">${NAVI[id]}<span>${n}</span>${id==='review'&&dueList().length?`<em class="nbadge">${dueList().length}</em>`:''}</button>`).join('')}</div>`};
+window.__shbNavTap=function(id){
+ if(id==='review'){
+  if(srRun&&SR3.sess){srTPause(true);srRun=false;SU={qid:null};srSave()}
+  srTab='topics';SRSUM=null;SRX.open=null;
+ }
+ appPage=id;renderAppDemo();
+};
+appNav=function(){const it=[['subjects','Home'],['search','Search'],['quiz','Quiz'],['review','Review']];const grp={subjects:['subjects','pedcollections','specialties','topics','questions','menu','saved','wrong'],quiz:['quiz','quizrun','quizresult','quizhistory']};
+ return `<div class="app-nav">${it.map(([id,n])=>`<button data-p="${id}" class="${(grp[id]||[id]).includes(appPage)?'active':''}" onclick="__shbNavTap('${id}')">${NAVI[id]}<span>${n}</span>${id==='review'&&dueList().length?`<em class="nbadge">${dueList().length}</em>`:''}</button>`).join('')}</div>`};
 /* drawer: Saved / Wrong answers work, Smart review badge is live */
 DR2[1][1][0][1]='saved';DR2[1][1][1][1]='wrong';
 const __menu=menuView;
@@ -1871,8 +1869,8 @@ function howToUseCard(){
   {title:'المراجعة الذكية Smart Review',body:
    '<p>تعمل المراجعة الذكية بذاكرة وجدولة منفصلتين عن إجابات بنك الأسئلة ونتائج الاختبارات. وهي ترتّب الأسئلة بحسب موعد المراجعة ومستوى التذكّر.</p>'+
    '<ol><li>افتح '+en('Review')+' ثم اختر '+en('Topics')+' أو '+en('Overview')+' أو '+en('Schedule')+' أو '+en('Weak')+' أو '+en('History')+'.</li>'+
-   '<li>ابدأ من '+en('Start Recommended Session')+' لمراجعة الأسئلة المقترحة، أو اختر موضوعاً محدداً، أو ابدأ جلسة لكل الموضوعات.</li>'+
-   '<li>يمكنك تغيير حجم الجلسة إلى 10 أو 15 أو 20 سؤالاً، واستخدام مرشحات '+en('Due')+' و'+en('Weak')+' و'+en('In progress')+' و'+en('Not started')+'.</li>'+
+   '<li>اختر Topic واحداً أو أكثر، وحدد عدد الأسئلة لكل موضوع من الحقل الرقمي المفتوح.</li>'+
+   '<li>يمكنك استخدام مرشحات '+en('Due')+' و'+en('Weak')+' و'+en('In progress')+' و'+en('Not started')+' لتنظيم المواضيع.</li>'+
    '<li>بعد إظهار الإجابة قيّم تذكّرك باستخدام '+en('Again')+' أو '+en('Hard')+' أو '+en('Good')+' أو '+en('Easy')+'. تستخدم المراجعة تقييمك لجدولة الموعد التالي.</li></ol>'+
    '<p class="how-tip"><b>مهم:</b> يمكنك إيقاف الجلسة واستئنافها لاحقاً، ومراجعة سجلّك من تبويب '+en('History')+'.</p>'},
   {title:'الأسئلة الخاطئة والمحفوظة',body:
@@ -2333,9 +2331,18 @@ function stBarHTML(){const c=ST.cur,run=!!(c&&c.running),state=!c?'idle':run?'ru
  const btns=!c?'<button type="button" class="go" onclick="stTimerStart()" aria-label="Start study timer">▶ Start</button>':run?'<button type="button" onclick="stTimerPause()" aria-label="Pause study timer">❚❚</button><button type="button" onclick="stTimerFinish()" aria-label="Finish and save session">■</button>':'<button type="button" class="go" onclick="stTimerStart()" aria-label="Resume study timer">▶</button><button type="button" onclick="stTimerFinish()" aria-label="Finish and save session">■</button>';
  return `<div class="sst-bar ${state}" role="group" aria-label="Study timer">${ico}<span class="sst-lab">${lab}</span><b class="sst-time">${stClock(stCurMs(c))}</b>${btns}</div>`}
 function stBarRefresh(){const o=document.querySelector('.sst-bar');if(!o)return;const t=document.createElement('div');t.innerHTML=stBarHTML();o.replaceWith(t.firstElementChild)}
-function stInject(){document.querySelectorAll('.sst-bar').forEach(n=>n.remove());if(appPage!=='questions')return;const host=document.querySelector('.phone-content .rs');if(!host)return;const t=document.createElement('div');t.innerHTML=stBarHTML();host.insertBefore(t.firstElementChild,host.firstChild)}
+function stInject(){
+ document.querySelectorAll('.sst-bar,.qb-mini-clock').forEach(n=>n.remove());
+ if(appPage!=='questions')return;
+ const host=document.querySelector('#phoneContent .rs.qb,.phone-content .rs.qb');if(!host)return;
+ host.classList.add('qb-clock-host');
+ const b=document.createElement('button');b.type='button';b.className='qb-mini-clock';b.id='qbMiniClock';b.setAttribute('aria-label','Open Study Timer');
+ b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8.2"></circle><path d="M12 8v5l3 2M9.5 2.5h5"></path></svg><span>FOCUS</span><b id="qbMiniClockDigits">'+stClock(Math.max(0,ST.goal*60000-stCurMs(ST.cur)))+'</b>';
+ b.addEventListener('click',function(){appPage='timer';renderAppDemo()});
+ host.appendChild(b);
+}
 window.stTimerStart=stStart;window.stTimerPause=()=>stPause(false);window.stTimerFinish=stFinish;
-const stTick=()=>{const c=ST.cur;if(!c||!c.running)return;const ms=stCurMs(c);if(++stN%10===0)stSave();document.querySelectorAll('.sst-time').forEach(el=>{el.textContent=stClock(ms)});try{window.stTimerTick&&window.stTimerTick(ms)}catch(e){}};
+const stTick=()=>{const c=ST.cur;if(!c||!c.running)return;const ms=stCurMs(c);if(++stN%10===0)stSave();document.querySelectorAll('.sst-time').forEach(el=>{el.textContent=stClock(ms)});const mini=document.getElementById('qbMiniClockDigits');if(mini)mini.textContent=stClock(Math.max(0,ST.goal*60000-ms));try{window.stTimerTick&&window.stTimerTick(ms)}catch(e){}};
 setInterval(stTick,500);
 ['pointerdown','keydown','scroll','touchstart'].forEach(ev=>addEventListener(ev,()=>{stIdleAt=Date.now()},{passive:true,capture:true}));
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stSave();else{stLast=Date.now();stTick()}});
