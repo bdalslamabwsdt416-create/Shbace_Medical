@@ -67,7 +67,7 @@ document.addEventListener('click',function(event){
  if(keep)setTimeout(syncWakeLock,0);
 });
 function keepAwakeEnabled(){
- try{var p=JSON.parse(localStorage.getItem('shbace_android_features_v1')||'{}');return p.keepScreenOn!==false}catch(_){return true}
+ try{var p=JSON.parse(localStorage.getItem('shbace_computer_features_v1')||'{}');return p.keepScreenOn!==false}catch(_){return true}
 }
 function questionBankOpen(){return !!document.querySelector('#phoneContent .rs.qb')}
 function releaseWakeLock(){
@@ -309,27 +309,27 @@ function computerVoiceRequestChoice(lang){
 function computerVoiceVoiceListForChoice(list){
  return list&&list.length?list:computerVoiceList;
 }
-function computerVoiceMakeUtterance(text,lang,voice,allowFallback){
+function computerVoiceMakeUtterance(text,lang,voice,allowFallback,rate){
  try{
   if(!computerVoiceApi||!text)return;
   var token=++computerVoiceSpeechToken;
   var utterance=new SpeechSynthesisUtterance(String(text));
   utterance.lang=lang==='ar'?'ar':lang;
-  utterance.rate=1;
+  var speed=Number(rate);utterance.rate=Number.isFinite(speed)?Math.max(0.7,Math.min(1.3,speed)):1;
   if(voice)utterance.voice=voice;
   utterance.onerror=function(event){
    try{
     if(token!==computerVoiceSpeechToken||!allowFallback)return;
     var reason=event&&event.error||'';
     if(reason==='canceled'||reason==='interrupted')return;
-    computerVoiceFallbackToArabic(text);
+    computerVoiceFallbackToArabic(text,rate);
    }catch(_){}
   };
   try{window.speechSynthesis.speak(utterance)}
   catch(_){if(allowFallback&&lang!=='ar')computerVoiceFallbackToArabic(text)}
  }catch(_){if(allowFallback&&lang!=='ar')computerVoiceFallbackToArabic(text)}
 }
-function computerVoiceFallbackToArabic(text){
+function computerVoiceFallbackToArabic(text,rate){
  try{
   computerVoiceSpeechToken++;
   try{window.speechSynthesis.cancel()}catch(_){}
@@ -337,10 +337,10 @@ function computerVoiceFallbackToArabic(text){
   computerVoiceFallback=computerVoicePreference!=='ar';
   computerVoiceFallbackFor=computerVoicePreference;
   computerVoiceUpdateUi();
-  computerVoiceMakeUtterance(text,'ar',computerActiveVoice,false);
+  computerVoiceMakeUtterance(text,'ar',computerActiveVoice,false,rate);
  }catch(_){}
 }
-function computerVoiceSpeak(text){
+function computerVoiceSpeak(text,rate){
  try{
   if(!computerVoiceApi||!text)return;
   var latest=computerVoiceGetVoices();
@@ -364,7 +364,7 @@ function computerVoiceSpeak(text){
   }
   try{window.speechSynthesis.cancel()}catch(_){}
   var lang=computerActiveLanguage,voice=computerActiveVoice;
-  computerVoiceMakeUtterance(String(text),lang,voice,lang!=='ar');
+  computerVoiceMakeUtterance(String(text),lang,voice,lang!=='ar',rate);
  }catch(_){
   try{computerVoiceFallbackToArabic(String(text||''))}catch(__){}
  }
@@ -417,23 +417,7 @@ function computerVoiceQuestionText(card){
   return [stemText,options.length?options.join('. '):''].filter(Boolean).join('. ');
  }catch(_){return ''}
 }
-function computerVoiceDecorateQuestions(){
- try{
-  var cards=document.querySelectorAll('#phoneContent .qcard');
-  Array.prototype.forEach.call(cards,function(card){
-   if(card.querySelector('.shb-computer-read-aloud'))return;
-   var stem=card.querySelector('.qstem');if(!stem)return;
-   var button=document.createElement('button');
-   button.type='button';button.className='shb-computer-read-aloud';
-   button.setAttribute('data-shb-computer-read-aloud','1');
-   button.setAttribute('aria-label','Read question aloud');
-   button.textContent='▶  Read aloud';
-   button.disabled=!computerVoiceApi;
-   if(!computerVoiceApi)button.title='Voice playback is not supported in this browser.';
-   stem.insertAdjacentElement('afterend',button);
-  });
- }catch(_){}
-}
+function computerVoiceDecorateQuestions(){ /* Unified Share / Copy / Read aloud toolbar is mounted by 30. */ }
 function computerVoiceInstallStyles(){
  try{
   if(document.getElementById('shbComputerVoiceStyles'))return;
@@ -495,5 +479,6 @@ function computerVoiceInit(){
   },true);
  }catch(_){}
 }
+window.__shbComputerSpeakText=function(text,rate){computerVoiceSpeak(text,rate)};
 computerVoiceInit();
 })();
