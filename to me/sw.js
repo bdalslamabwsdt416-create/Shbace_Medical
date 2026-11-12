@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'shbace-to-me-chrome-offline-v1.3.7';
+const CACHE_NAME = 'shbace-to-me-chrome-offline-v1.3.8';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
 const APP_SHELL = [
   './',
@@ -13,8 +13,12 @@ const APP_SHELL = [
   './css/core.css',
   './css/late.css',
   './css/unified-enhancements.css',
+  './css/shbace-layout-refinements.css',
   './js/29-offline-setup.js',
-  './js/35-pediatrics-collections.js'
+  './js/33-unified-voice.js',
+  './js/34-study-countdown.js',
+  './js/35-pediatrics-collections.js',
+  './js/36-exam-planner-settings-smartreview.js'
 ];
 
 function missingOfflineResponse(url) {
