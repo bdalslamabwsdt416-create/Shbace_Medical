@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'shbace-to-me-chrome-offline-v1.3.8';
+const CACHE_NAME = 'shbace-to-me-chrome-offline-v1.3.9';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
 const APP_SHELL = [
   './',
@@ -53,6 +53,14 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
   if (url.pathname.endsWith('/sw.js')) return;
+
+  // Integrity downloads must reach the network; never satisfy them from a stale
+  // cache entry matched with ignoreSearch. The installer stores verified bytes
+  // under the canonical URL after its SHA-256 check succeeds.
+  if (url.searchParams.has('__shbace_integrity')) {
+    event.respondWith(fetch(request, { cache: 'reload' }));
+    return;
+  }
 
   // Manifest + version file: network first, so an updated manifest/icons always reach Chrome.
   // Falls back to the cached copy when offline.
