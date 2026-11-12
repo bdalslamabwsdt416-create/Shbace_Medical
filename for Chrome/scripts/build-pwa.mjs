@@ -20,6 +20,7 @@ const requiredFiles = [
   "sw.js",
   "css/core.css",
   "css/late.css",
+  "css/chrome-computer.css",
   "data/qbData.json",
   "data/qbData_reviewed_patch.json",
   "data/qbData_review_log.json",
@@ -113,8 +114,8 @@ if (reviewLog && Array.isArray(reviewLog.entries)) {
   if (logChanged !== 45 || logNeedsReview !== 110) fail("Question review JSON counts do not match the master audit");
 }
 const pwaVersion = JSON.parse(readFileSync(join(root, "pwa-version.json"), "utf8"));
-if (pwaVersion.platform !== "Chrome Android PWA" || pwaVersion.version !== "1.3.4-chrome.4") {
-  fail("pwa-version.json must declare Chrome Android PWA version 1.3.4-chrome.4");
+if (pwaVersion.platform !== "Chrome PWA (Desktop + Android)" || pwaVersion.version !== "1.3.5-chrome.1") {
+  fail("pwa-version.json must declare Chrome PWA (Desktop + Android) version 1.3.5-chrome.1");
 }
 
 rmSync(output, { recursive: true, force: true });
@@ -173,8 +174,8 @@ for (const icon of manifest.icons) {
 }
 
 const html = readFileSync(join(output, "index.html"), "utf8");
-if (!html.includes("navigator.serviceWorker.register('./sw.js'") || !html.includes("js/29-offline-setup.js") || !html.includes("js/29-reviewed-bank-controls.js") || !html.includes("qbData_reviewed_patch.json")) {
-  fail("index.html does not register ./sw.js");
+if (!html.includes("navigator.serviceWorker.register('./sw.js'") || !html.includes("js/29-offline-setup.js") || !html.includes("js/29-reviewed-bank-controls.js") || !html.includes("qbData_reviewed_patch.json") || !html.includes('href="css/chrome-computer.css"')) {
+  fail("index.html is missing service-worker, reviewed-bank, offline-setup, or responsive desktop CSS wiring");
 }
 
 function listOutputFiles(dir) {
