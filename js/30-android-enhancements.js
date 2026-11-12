@@ -171,10 +171,10 @@
       if (card.querySelector('.shb-af-qtools')) return;
       var stem = card.querySelector('.qstem');
       if (!stem) return;
-      var html = '<div class="shb-af-qtools">' +
-        (prefs.shareQuestion ? '<button type="button" data-shb-question-action="share">↗ Share</button>' : '') +
-        (prefs.copyQuestion ? '<button type="button" data-shb-question-action="copy">▢ Copy</button>' : '') +
-        (prefs.readAloud ? '<button type="button" data-shb-question-action="speak">◖ Read aloud</button>' : '') +
+      var html = '<div class="shb-af-qtools" role="group" aria-label="Question tools">' +
+        (prefs.shareQuestion ? '<button type="button" class="shb-af-qtool" data-shb-question-action="share" aria-label="Share question"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4"></path><path d="m7 9 5-5 5 5"></path><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"></path></svg><span>Share</span></button>' : '') +
+        (prefs.copyQuestion ? '<button type="button" class="shb-af-qtool" data-shb-question-action="copy" aria-label="Copy question"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"></path></svg><span>Copy</span></button>' : '') +
+        (prefs.readAloud ? '<button type="button" class="shb-af-qtool" data-shb-question-action="speak" aria-label="Read question aloud"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"></path><path d="M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M18.5 5.5a9 9 0 0 1 0 13"></path></svg><span>Read aloud</span></button>' : '') +
         '</div>';
       stem.insertAdjacentHTML('afterend', html);
     });
@@ -635,6 +635,33 @@
       renderQueued = true;
       requestAnimationFrame(function () { renderQueued = false; onRender(); });
     }).observe(phoneContent, { childList: true });
+
+    // Question-bank actions can replace only one <article class="qcard"> in place.
+    // Observe those nested mutations separately so the helper buttons survive answers,
+    // save/report/note actions and switching the question view without rerendering
+    // every Android feature on each small DOM change.
+    var questionToolsQueued = false;
+    new MutationObserver(function (records) {
+      var relevant = records.some(function (record) {
+        var target = record.target;
+        if (target && target.nodeType === 1) {
+          if (target.closest && target.closest('.shb-af-qtools')) return false;
+          if ((target.matches && target.matches('#qbBody, .qcard')) ||
+              (target.closest && (target.closest('#qbBody') || target.closest('.qcard')))) return true;
+        }
+        return Array.prototype.some.call(record.addedNodes || [], function (node) {
+          if (!node || node.nodeType !== 1) return false;
+          return (node.matches && node.matches('#qbBody, .qcard')) ||
+            (node.querySelector && !!node.querySelector('#qbBody, .qcard'));
+        });
+      });
+      if (!relevant || questionToolsQueued) return;
+      questionToolsQueued = true;
+      requestAnimationFrame(function () {
+        questionToolsQueued = false;
+        decorateQuestionCards();
+      });
+    }).observe(phoneContent, { childList: true, subtree: true });
   }
   if (typeof window.setSet === 'function') {
     var oldSet = window.setSet;
@@ -828,7 +855,13 @@
     '.shb-af-settings{margin:12px 0}.shb-af-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid rgba(100,150,210,.16)}',
     '.shb-af-copy{min-width:0;flex:1}.shb-af-copy b,.shb-af-copy small{display:block}.shb-af-copy b{font-size:13px}.shb-af-copy small{font-size:11px;line-height:1.4;color:var(--muted,#8da7c5);margin-top:3px}',
     '.shb-af-speed{flex:none;max-width:210px}.shb-af-speed button{font-size:10px;padding:7px 8px}',
-    '.shb-af-qtools{display:flex;flex-wrap:wrap;gap:7px;margin:7px 0 10px}.shb-af-qtools button{border:1px solid rgba(75,160,240,.35);border-radius:10px;background:rgba(24,92,160,.13);color:inherit;padding:7px 10px;font:700 11px inherit;cursor:pointer}',
+    '.shb-af-qtools{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:10px 0 12px}',
+    '.shb-af-qtools button.shb-af-qtool{appearance:none;-webkit-appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;min-width:0;padding:8px 12px;border:1px solid rgba(91,169,255,.34);border-radius:12px;background:linear-gradient(145deg,rgba(25,81,145,.46),rgba(8,30,67,.72));color:#e7f3ff;font:700 12px/1.2 system-ui,-apple-system,BlinkMacSystemFont,sans-serif;letter-spacing:.01em;cursor:pointer;box-shadow:inset 0 1px 0 rgba(220,242,255,.12),0 3px 10px rgba(0,0,0,.15);transition:transform .16s ease,border-color .16s ease,background .16s ease,box-shadow .16s ease;-webkit-tap-highlight-color:transparent;touch-action:manipulation}',
+    '.shb-af-qtools button.shb-af-qtool svg{display:block;width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.96}',
+    '.shb-af-qtools button.shb-af-qtool:active{transform:translateY(1px) scale(.97);border-color:rgba(83,211,255,.82);background:linear-gradient(145deg,rgba(29,112,186,.64),rgba(9,44,89,.82));box-shadow:0 0 13px rgba(44,164,255,.2)}',
+    '.shb-af-qtools button.shb-af-qtool:focus-visible{outline:2px solid #69d8ff;outline-offset:2px}',
+    '.phone.light .shb-af-qtools button.shb-af-qtool{background:linear-gradient(145deg,#f7fbff,#e8f3ff);color:#174b7a;border-color:#c7def5;box-shadow:inset 0 1px 0 #fff,0 2px 7px rgba(40,100,160,.08)}',
+    '@media(max-width:360px){.shb-af-qtools{gap:6px}.shb-af-qtools button.shb-af-qtool{flex:1 1 auto;padding:8px 9px;gap:6px;font-size:11px}.shb-af-qtools button.shb-af-qtool svg{width:16px;height:16px}}',
     '.qopt.shb-struck{opacity:.32!important;text-decoration:line-through!important;filter:grayscale(1)}',
     '.shb-eg-card{margin:14px 0;padding:16px;border:1px solid rgba(79,164,255,.35);background:linear-gradient(145deg,rgba(15,54,105,.48),rgba(8,26,58,.76))}',
     '.shb-eg-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.shb-eg-kicker{font-size:9px;letter-spacing:.15em;font-weight:900;color:#71d8ff}.shb-eg-head h2{font-size:18px;margin:5px 0}.shb-eg-head p{font-size:11px;line-height:1.45;color:var(--muted,#8da7c5);margin:0}.shb-eg-icon{width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:rgba(50,151,255,.17);font-size:25px;color:#8fe2ff}',
