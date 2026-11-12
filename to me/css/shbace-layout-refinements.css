@@ -1,0 +1,84 @@
+.shb-settings-order{display:grid;gap:15px;margin-top:16px}
+.shb-settings-section{min-width:0;display:grid;gap:9px}
+.shb-settings-section>header{padding:0 2px}
+.shb-settings-section>header h2{font-size:15px;line-height:1.35;margin:0 0 3px;font-weight:850;color:inherit}
+.shb-settings-section>header p{font-size:11px;line-height:1.5;margin:0;color:var(--muted,#91a9c2)}
+.shb-settings-items{display:grid;gap:10px;min-width:0}
+.shb-settings-items>.card,.shb-settings-items>.u10-settings-card{margin:0!important;min-width:0}
+.shb-exam-planner{min-width:0}
+.egp-kicker{font-size:10px;letter-spacing:.13em;font-weight:850;color:#69d9ff;margin:4px 0 7px}
+.egp-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0}
+.egp-overview-item{min-width:0;display:grid;gap:4px;padding:12px 9px;border:1px solid rgba(95,169,225,.24);border-radius:14px;background:linear-gradient(145deg,rgba(19,49,82,.62),rgba(8,25,48,.74))}
+.egp-overview-item b{font-size:20px;line-height:1.1;color:#eaf7ff;overflow-wrap:anywhere}
+.egp-overview-item small{font-size:9px;line-height:1.35;color:#9bb8d5}
+.egp-form{display:grid;gap:8px;margin:12px 0 20px}
+.egp-form-head h2,.egp-list-heading h2{font-size:17px;margin:0 0 4px}
+.egp-form>label{font-size:12px;font-weight:750;color:inherit;margin-top:4px}
+.egp-form .field{width:100%;min-width:0;box-sizing:border-box}
+.egp-help,.egp-storage-note{font-size:10px;line-height:1.55;color:var(--muted,#91a9c2)}
+.egp-form-actions,.egp-exam-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:7px}
+.egp-form-actions .btn{flex:1}
+.egp-list-heading{margin:18px 0 10px}
+.egp-exam-list{display:grid;gap:10px}
+.egp-exam-card{min-width:0}
+.egp-exam-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.egp-exam-top>div{min-width:0}
+.egp-exam-top h3{font-size:15px;line-height:1.35;margin:4px 0;overflow-wrap:anywhere}
+.egp-date{font-size:10px;color:#69d9ff;font-weight:800}
+.egp-days{flex:none;padding:6px 9px;border-radius:9px;background:rgba(43,153,190,.13);border:1px solid rgba(70,183,216,.25);font-size:10px;color:#9be7f5}
+.egp-days.overdue{color:#ffb5ac;border-color:rgba(245,110,100,.3);background:rgba(180,55,55,.1)}
+.egp-exam-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:11px 0;padding:10px;border-radius:12px;background:rgba(40,90,130,.12)}
+.egp-exam-stats>div{display:grid;gap:3px;min-width:0}
+.egp-exam-stats b{font-size:17px;color:inherit;overflow-wrap:anywhere}
+.egp-exam-stats small{font-size:10px;color:var(--muted,#91a9c2)}
+.egp-exam-actions .btn{min-width:82px}
+.egp-empty{padding:17px}
+.egp-empty>b{font-size:14px}
+.egp-empty p{margin:6px 0 0;line-height:1.5}
+.shb-smart-recommended{display:flex;align-items:center;justify-content:space-between;gap:15px;margin:0 0 15px;padding:15px;border:1px solid rgba(85,185,255,.38);border-radius:17px;background:linear-gradient(135deg,rgba(22,80,125,.34),rgba(11,36,72,.72));box-shadow:0 9px 24px rgba(0,8,24,.16)}
+.shb-sr-rec-copy{min-width:0;flex:1}
+.shb-sr-rec-kicker{font-size:9px;letter-spacing:.1em;color:#71d9ff;font-weight:850}
+.shb-smart-recommended h3{font-size:16px;margin:5px 0;color:#f1f9ff}
+.shb-smart-recommended p{font-size:11px;line-height:1.5;color:#acc8e2;margin:0;max-width:570px}
+.shb-sr-rec-stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:9px}
+.shb-sr-rec-stats span{font-size:10px;color:#a8c8e5}
+.shb-sr-rec-stats b{color:#effaff}
+.shb-smart-recommended>.btn{flex:none;white-space:normal;max-width:210px}
+.shb-smart-recommended>.btn:disabled{opacity:.45}
+.shb-sr-specialty-action,.shb-sr-system-action{border:1px solid rgba(80,170,235,.27);border-radius:10px;background:rgba(20,80,125,.17);color:#81dfff;padding:8px 11px;font:750 10px/1.3 system-ui,sans-serif;cursor:pointer}
+.shb-sr-specialty-action{display:block;margin:0 0 9px}
+.shb-sr-system{margin:0 0 10px;padding:10px;border:1px solid rgba(97,153,202,.2);border-radius:14px;background:rgba(9,28,52,.3)}
+.shb-sr-system-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 9px}
+.shb-sr-system-head>div{display:grid;gap:3px;min-width:0}
+.shb-sr-system-head b{font-size:12px;color:#dceeff}
+.shb-sr-system-head small{font-size:9px;color:#8eabc8}
+.shb-sr-system-topics{display:grid;gap:9px}
+#phoneContent .qstem,#phoneContent .qopt,#phoneContent .qopt span,#phoneContent .qfb,#phoneContent .qfb p{min-width:0;max-width:100%;white-space:normal;word-break:normal;overflow-wrap:break-word;hyphens:none;text-wrap:pretty}
+#phoneContent .qstem{line-height:1.58}
+#phoneContent .qopt{align-items:flex-start}
+#phoneContent .qopt span{line-height:1.5}
+@media(max-width:620px){
+ .egp-overview{gap:6px}
+ .egp-overview-item{padding:10px 7px}
+ .egp-overview-item b{font-size:17px}
+ .egp-overview-item small{font-size:8px}
+ .shb-smart-recommended{display:grid;gap:12px}
+ .shb-smart-recommended>.btn{max-width:none;width:100%}
+ .shb-sr-system-head{align-items:flex-start}
+ .shb-sr-system-action,.shb-sr-specialty-action{padding:8px 9px}
+}
+.phone.light .shb-settings-section>header p,.phone.light .egp-help,.phone.light .egp-storage-note{color:#647b92}
+.phone.light .egp-overview-item{background:linear-gradient(145deg,#f0f8ff,#f9fcff);border-color:#cbddea}
+.phone.light .egp-overview-item b{color:#214867}
+.phone.light .egp-overview-item small{color:#627b91}
+.phone.light .egp-kicker,.phone.light .egp-date{color:#167c9e}
+.phone.light .egp-days{background:#eaf7fb;border-color:#c6e5ee;color:#24657c}
+.phone.light .egp-days.overdue{background:#fff0ed;border-color:#f2d1ca;color:#a84941}
+.phone.light .egp-exam-stats{background:#f0f6fa}
+.phone.light .shb-smart-recommended{background:linear-gradient(135deg,#edf7ff,#f8fcff);border-color:#b9d9ec;box-shadow:0 5px 17px rgba(38,88,125,.08)}
+.phone.light .shb-smart-recommended h3,.phone.light .shb-sr-system-head b{color:#244866}
+.phone.light .shb-smart-recommended p,.phone.light .shb-sr-rec-stats span{color:#5b7892}
+.phone.light .shb-sr-rec-stats b{color:#1e557b}
+.phone.light .shb-sr-specialty-action,.phone.light .shb-sr-system-action{background:#edf7fb;border-color:#c6e1ec;color:#186d90}
+.phone.light .shb-sr-system{background:#f5f9fc;border-color:#d3e0e9}
+.phone.light .shb-sr-system-head small{color:#698198}
