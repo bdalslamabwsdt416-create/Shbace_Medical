@@ -19,7 +19,7 @@ public class StudyTimerClockTest {
 
     @Test
     public void pausedClockDoesNotContinueGrowing() {
-        assertEquals(42_000L, StudyTimerClock.runningStart(false, 900_000L));
+        assertEquals(0L, StudyTimerClock.runningStart(false, 900_000L));
         assertEquals(42_000L, StudyTimerClock.elapsedNow(42_000L, 800_000L, 900_000L, false));
     }
 
