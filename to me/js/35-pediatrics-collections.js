@@ -107,6 +107,7 @@ subjectsView=function(){
  let html=_oldSubjectsView.apply(this,arguments);
  html=html.replace(/appPage\s*=\s*['"]specialties['"]/g,"appPage='pedcollections'");
  html=html.replace(/onclick="startPractice\(event\)"/g,'onclick="openPediatricCollections(event)"');
+ html=html.replace('onkeydown="if(event.key===\'Enter\')appPage=\'pedcollections\',renderAppDemo()"','onkeydown="if(event.key===\'Enter\')openPediatricCollections(event)"');
  return html;
 };
 window.__shbRegisterPage('pedcollections',collectionView,'subjects');
