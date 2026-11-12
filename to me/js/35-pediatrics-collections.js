@@ -161,8 +161,6 @@ topicsView=function(){
  }else if(activeCollection==='aj')html=html.replace('<div class="rs">','<div class="rs ped-bank-topics"><div class="ped-collection-kicker">DR. ABDULRAHMAN AL-JOAKI MCQ</div>');
  return html;
 };
-const _oldStartPractice=window.startPractice;
-if(typeof _oldStartPractice==='function')window.startPractice=function(ev){activeCollection='aj';activePreviousSystem='';window.__SHB_PED_COLLECTION__='aj';return _oldStartPractice(ev)};
-if(typeof qzPool==='function'){const _oldQzPool=qzPool;qzPool=function(cfg){return _oldQzPool.apply(this,arguments).filter(q=>activeCollection==='previous'?isPreviousQuestion(q):isDoctorQuestion(q))}}
+window.startPractice=function(ev){if(ev&&ev.stopPropagation)ev.stopPropagation();window.openPediatricCollections(ev)};
 window.__SHB_PED_COLLECTION__=activeCollection;
 })();
