@@ -623,7 +623,7 @@ let SR3=(()=>{
  o.spd=(Array.isArray(o.spd)?o.spd:[]).filter(Number.isFinite).slice(-40);
  if(!_o(o.seen))o.seen={};
  o.goal=Number.isFinite(o.goal)?Math.min(200,Math.max(1,Math.round(o.goal))):20;
- o.size=[10,15,20].includes(o.size)?o.size:15;
+ o.size=Number.isInteger(o.size)&&o.size>=1&&o.size<=200?o.size:15;
  if(o.sess&&!(_o(o.sess)&&Array.isArray(o.sess.queue)&&Array.isArray(o.sess.plan)&&_o(o.sess.first)&&_o(o.sess.rt)&&Array.isArray(o.sess.att)))o.sess=null;
  if(!_o(o.last))o.last=null;
  return o})();
