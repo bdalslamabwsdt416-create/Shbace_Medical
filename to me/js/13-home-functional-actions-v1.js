@@ -59,7 +59,7 @@
    window.openPediatricCollections();
    return;
   }
-  appPage='pedcollections';
+  appPage='specialties';
   renderAppDemo();
  };
 })();
