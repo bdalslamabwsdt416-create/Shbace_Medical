@@ -2,6 +2,9 @@
    Question records, IDs, answer keys and explanations are never rewritten. */
 (function(){
 'use strict';
+const B=window.__SHB_BRIDGE;
+if(!B){console.error('Pediatrics collections: bridge from 09-app-features-v6.js is missing, collections not installed.');return}
+const qs=B.qs,SYS=B.SYS,QB=B.QB,sysIcon=B.sysIcon,isPinned=B.isPinned,answeredCount=B.answeredCount,TOPIC_ICON_ASSET=B.TOPIC_ICON_ASSET;
 let activeCollection=''
 let activePreviousSystem='';
 const previousSystemByTopic=new Map();
@@ -115,9 +118,16 @@ specialtiesView=function(){if(activeCollection==='previous')return previousSyste
 const _oldOpenSpec=window.openSpec;
 if(typeof _oldOpenSpec==='function')window.openSpec=function(id){activeCollection='aj';activePreviousSystem='';window.__SHB_PED_COLLECTION__='aj';return _oldOpenSpec(id)};
 const _oldOpenTopic=window.openTopic;
-if(typeof _oldOpenTopic==='function')window.openTopic=function(spec,id){if(activeCollection!=='previous')activeCollection='aj';return _oldOpenTopic(spec,id)};
-const _oldInTopic=inTopic;
-inTopic=function(){
+if(typeof _oldOpenTopic==='function')window.openTopic=function(spec,id){if(spec==='exams'){activeCollection='previous';window.__SHB_PED_COLLECTION__='previous'}else if(activeCollection!=='previous')activeCollection='aj';return _oldOpenTopic(spec,id)};
+/* A question opened from Search, Saved, Wrong answers or Smart Review must open inside its own bank,
+   otherwise the collection filter below hides it (a Previous question would open as an empty list). */
+const _oldOpenQ=window.openQ;
+if(typeof _oldOpenQ==='function')window.openQ=function(id){
+ try{const q=allQuestions().find(x=>x&&x.id===id);
+  if(q){if(isPreviousQuestion(q)){activeCollection='previous';activePreviousSystem=previousSystemByTopic.get(q.topic)||''}else{activeCollection='aj';activePreviousSystem=''}window.__SHB_PED_COLLECTION__=activeCollection}}catch(e){}
+ return _oldOpenQ.apply(this,arguments)};
+const _oldInTopic=B.inTopic;
+B.inTopic=function(){
  if(!gradeHasPediatrics())return [];
  let list=allQuestions().filter(q=>activeCollection==='previous'?isPreviousQuestion(q):isDoctorQuestion(q));
  if(qs.spec&&qs.spec!=='all')list=list.filter(q=>q.spec===qs.spec);
@@ -205,8 +215,8 @@ const PREVIOUS_TOPIC_ICON_MATCH={
  'hypertension in children':'Hypertension in Children'
 };
 
-const _oldTopicIcon=topicIcon;
-topicIcon=function(spec,name,id){
+const _oldTopicIcon=B.topicIcon;
+const topicIcon=B.topicIcon=function(spec,name,id){
  if(spec!=='exams'||activeCollection!=='previous')return _oldTopicIcon.apply(this,arguments);
  try{
   const target=norm(name);
@@ -218,8 +228,8 @@ topicIcon=function(spec,name,id){
  }catch(e){}
  return _oldTopicIcon.apply(this,arguments);
 };
-const _oldTopicCards=topicCards;
-topicCards=function(){
+const _oldTopicCards=B.topicCards;
+B.topicCards=function(){
  if(activeCollection!=='previous')return _oldTopicCards.apply(this,arguments);
  const topics=topicListForPreviousSystem();
  if(!topics.length)return '<div class="card sc"><h3>No topics found</h3><div class="meta">No previous questions are mapped to this system.</div></div>';

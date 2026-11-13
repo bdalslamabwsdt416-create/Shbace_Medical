@@ -35,7 +35,7 @@
  window.h7ResumePediatrics=function(){
   let p=safeRead();
   if(!p||!validTopic(p.spec,p.topic)){
-   let recent=null;try{recent=(REC||[]).find(e=>e&&e.k==='topic'&&validTopic(e.spec,e.topic))}catch(e){}
+   let recent=null;try{const rec=(window.__SHB_BRIDGE&&window.__SHB_BRIDGE.REC)||[];recent=rec.find(e=>e&&e.k==='topic'&&validTopic(e.spec,e.topic))}catch(e){}
    p=recent?{spec:recent.spec,topic:Number(recent.topic),idx:0}:null;
   }
   if(!p){appPage='specialties';renderAppDemo();return}

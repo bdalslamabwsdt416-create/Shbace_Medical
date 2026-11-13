@@ -1,8 +1,8 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.9-to-me.8",
-  "displayVersion": "1.3.9.8 · Chrome (Phone + Computer)",
+  "version": "1.3.9-to-me.9",
+  "displayVersion": "1.3.9.9 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-13",
   "releaseNotes": [
     "Continues the independent unified Chrome PWA for phone and computer. Android APK, iOS and Computer deliveries remain separate.",
@@ -17,6 +17,9 @@
     "After the complete current package passes integrity verification, obsolete cache entries and older package caches are deleted. Existing answers, bookmarks, notes and study progress remain preserved.",
     "Pediatrics collection navigation now renders the registered collection chooser correctly from Start Studying, with the doctor MCQ and Previous Questions paths available.",
     "Removed the Smart Recommended card and its Start recommended action entirely from Smart Review, as requested.",
-    "Reworked Pediatrics Start Studying to use the existing Pediatrics specialties route and collection chooser; removed the unsupported custom page registration shim that could leave the Start action unresponsive."
+    "Reworked Pediatrics Start Studying to use the existing Pediatrics specialties route and collection chooser; removed the unsupported custom page registration shim that could leave the Start action unresponsive.",
+    "Pediatrics 'Start Studying' and 'Continue Studying' now work: the collection and home scripts are connected to the app core through a safe bridge (no data or markup changes).",
+    "Added a Question bank selector (All banks / Dr. Al-Joaki / Previous) to Quiz, Search and Smart Review. It is a view-only filter; question records, IDs, answer keys and explanations are unchanged.",
+    "A question opened from Search, Saved, Wrong answers or Smart Review now opens inside its own bank, so a Previous question no longer opens as an empty list."
   ]
 }

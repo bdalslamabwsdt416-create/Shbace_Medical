@@ -353,3 +353,8 @@ button.ped-collection-card:active{transform:scale(.99);border-color:rgba(88,214,
 .tm-finish-toast small{margin-top:2px;color:#a9c8df;font-size:10px;line-height:1.4}
 @media(prefers-reduced-motion:reduce){.tm-finish-toast{transition:none}}
 @media(min-width:900px){.tm-finish-toast{top:22px;width:min(390px,calc(100vw - 40px))}}
+
+/* Question-bank selector (Quiz / Search / Smart Review) */
+.sr3-fl.sr3-bank{margin:0 0 12px}
+.qz-bank-row{margin-bottom:10px}
+.phone.light .sr3-fl.sr3-bank button{background:#f4f8fc;color:#4b6680;border-color:#d4e1ec}
