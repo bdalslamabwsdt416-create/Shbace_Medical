@@ -213,29 +213,8 @@ function enhanceSmartReview(){
   var host=document.querySelector('#phoneContent');
   if(!host)return;
 
-  /* Start Build Session directly at YOUR SESSION. Smart Recommended stays available
-     as a compact action inside this panel instead of taking a separate top card. */
-  var builderIntro=host.querySelector('.sr3-builder-hero');
-  if(builderIntro)builderIntro.remove();
-  var oldRecommended=host.querySelector('[data-shb-smart-recommended]');
-  if(oldRecommended)oldRecommended.remove();
-
-  var panel=host.querySelector('.sr3-selected-panel');
-  if(panel){
-    var pool=api.srPool(null),available=pool.due.length+pool.weak.length+pool.fresh.length;
-    var store=typeof window.__sr3==='function'?window.__sr3():{};
-    var size=Math.max(1,Number(store&&store.size)||15),count=Math.min(size,available);
-    var inline=panel.querySelector('[data-shb-smart-rec-inline]');
-    if(!inline){
-      inline=document.createElement('div');
-      inline.className='shb-sr-rec-inline';
-      inline.setAttribute('data-shb-smart-rec-inline','true');
-      panel.appendChild(inline);
-    }
-    var detail=pool.due.length+' due · '+pool.weak.length+' weak · '+pool.fresh.length+' new';
-    inline.innerHTML='<div class="shb-sr-rec-inline-copy"><span class="shb-sr-rec-kicker">ALWAYS AVAILABLE · SMART REVIEW</span><b>Smart Recommended</b><small>'+detail+'</small></div>'+
-      '<button type="button" class="btn" '+(count?'':'disabled')+' onclick="srStart(null)">Start recommended · '+count+' question'+(count===1?'':'s')+'</button>';
-  }
+  /* Smart Recommended has been removed completely at the student's request. */
+  host.querySelectorAll('[data-shb-smart-recommended],[data-shb-smart-rec-inline],.shb-sr-rec-inline').forEach(function(node){node.remove()});
 
   /* Keep the Overview tab and all its stats/mastery sections; remove only the old
      due-today / 20-question hero card requested by the student. */
