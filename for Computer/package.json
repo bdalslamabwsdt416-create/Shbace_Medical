@@ -1,9 +1,0 @@
-{
-  "name": "shbace-medical-computer",
-  "version": "1.3.6",
-  "private": true,
-  "description": "SHBACE Medical — independent Computer PWA delivery.",
-  "scripts": {
-    "build:pwa": "node scripts/build-pwa.mjs"
-  }
-}

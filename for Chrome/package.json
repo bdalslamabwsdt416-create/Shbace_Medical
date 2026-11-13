@@ -1,9 +1,0 @@
-{
-  "name": "shbace-medical-chrome-android",
-  "version": "1.3.4",
-  "private": true,
-  "description": "SHBACE Medical — independent Chrome Android PWA delivery.",
-  "scripts": {
-    "build:pwa": "node scripts/build-pwa.mjs"
-  }
-}

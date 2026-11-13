@@ -1,5 +1,0 @@
-{
-  "buildCommand": "npm run build:pwa",
-  "outputDirectory": "www",
-  "installCommand": "npm install"
-}
