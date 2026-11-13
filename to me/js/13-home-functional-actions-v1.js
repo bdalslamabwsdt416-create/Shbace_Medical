@@ -35,7 +35,7 @@
  window.h7ResumePediatrics=function(){
   let p=safeRead();
   if(!p||!validTopic(p.spec,p.topic)){
-   let recent=null;try{recent=(REC||[]).find(e=>e&&e.k==='topic'&&validTopic(e.spec,e.topic))}catch(e){}
+   let recent=null;try{const rec=(window.__SHB_BRIDGE&&window.__SHB_BRIDGE.REC)||[];recent=rec.find(e=>e&&e.k==='topic'&&validTopic(e.spec,e.topic))}catch(e){}
    p=recent?{spec:recent.spec,topic:Number(recent.topic),idx:0}:null;
   }
   if(!p){appPage='specialties';renderAppDemo();return}
@@ -53,7 +53,12 @@
   saveProgress(p.spec,p.topic,p.questionId||null);
  };
  window.h7StartPediatrics=function(){
-  // The star/start action opens the Medical System picker; it never resumes or resets a topic.
+  // Start at the collection chooser so the student can choose the doctor's bank or previous exams.
+  // This preserves each collection's own system/topic filters and never changes question data.
+  if(typeof window.openPediatricCollections==='function'){
+   window.openPediatricCollections();
+   return;
+  }
   appPage='specialties';
   renderAppDemo();
  };

@@ -114,6 +114,12 @@ const DEMO_QB=[
 ['URO-001','urology',25,'Investigation','Which investigation is the gold standard for diagnosing vesicoureteral reflux?',['Micturating cystourethrogram (MCUG)','Renal ultrasound','DMSA scan','Plain abdominal X-ray','Intravenous urogram'],0,'MCUG shows and grades reflux. Ultrasound screens for hydronephrosis and DMSA detects renal scarring.']
 ].map(a=>({id:a[0],spec:a[1],topic:a[2],tag:a[3],q:a[4],o:a[5],k:a[6],ex:a[7]}));
 const QB=BANK_ON?FULL_QB:DEMO_QB;
+/* SHB-BANK-SCOPE: Dr. Al-Joaki's bank (q.py !== true) vs Previous Questions (q.py === true).
+   View-only filter used by Quiz, Search and Smart Review. Question records are never modified. */
+const BANK_OPTS=[['all','All banks'],['aj','Dr. Al-Joaki'],['previous','Previous']];
+const bankValid=b=>b==='aj'||b==='previous'?b:'all';
+const bankOk=(q,b)=>b==='previous'?q.py===true:b==='aj'?q.py!==true:true;
+const bankHas=(spec,b)=>b==='all'||QB.some(q=>q.spec===spec&&bankOk(q,b));
 const TAGS=BANK_ON?FULL_TAGS:['Clinical Case','Diagnosis','Investigation','Knowledge','Management','PDF Bank'];
 window.__bank={on:BANK_ON,total:QB.length,demo:DEMO_QB};
 const FILTERS=[['all','All Questions'],['unanswered','Unanswered'],['correct','Correct'],['incorrect','Incorrect'],['bookmarked','Bookmarked']];
@@ -126,11 +132,11 @@ window.__shbQBVersionState={
   var activeId=null;
   try{if(appPage==='questions'){var current=filtered()[qs.idx];if(current)activeId=current.id;}}catch(e){}
   var pc=document.getElementById('phoneContent');
-  var review={};try{review={tab:srTab,run:!!srRun}}catch(e){}
+  var review={};try{review={tab:srTab,run:!!srRun,bank:SRBANK}}catch(e){}
   return {
    version:1,appPage:appPage,mode:mode,slide:slide,selectedGrade:selectedGrade,guideTab:guideTab,
    qs:JSON.parse(JSON.stringify(qs)),
-   search:{gq:gq,gSpec:gSpec,gTag:gTag,gSrc:gSrc,gTopic:gTopic,gSys:gSys,gSort:gSort,gLim:gLim},
+   search:{gq:gq,gBank:gBank,gSpec:gSpec,gTag:gTag,gSrc:gSrc,gTopic:gTopic,gSys:gSys,gSort:gSort,gLim:gLim},
    review:review,activeQuestionId:activeId,
    scroll:{windowY:window.scrollY||document.documentElement.scrollTop||0,phoneY:pc?pc.scrollTop:0}
   };
@@ -139,8 +145,8 @@ window.__shbQBVersionState={
   if(!state||state.version!==1)return false;
   try{
    if(state.qs&&typeof state.qs==='object')Object.assign(qs,state.qs);
-   if(state.search){gq=String(state.search.gq||'');gSpec=state.search.gSpec||'all';gTag=state.search.gTag||'all';gSrc=state.search.gSrc||'all';gTopic=state.search.gTopic||'all';gSys=state.search.gSys||'all';gSort=state.search.gSort||'bank';gLim=Math.max(40,Number(state.search.gLim)||40);gIdx=null;}
-   if(state.review){try{if(state.review.tab)srTab=state.review.tab;if(typeof state.review.run==='boolean')srRun=state.review.run}catch(e){}}
+   if(state.search){gq=String(state.search.gq||'');gBank=bankValid(state.search.gBank);gSpec=state.search.gSpec||'all';gTag=state.search.gTag||'all';gSrc=state.search.gSrc||'all';gTopic=state.search.gTopic||'all';gSys=state.search.gSys||'all';gSort=state.search.gSort||'bank';gLim=Math.max(40,Number(state.search.gLim)||40);gIdx=null;}
+   if(state.review){try{if(state.review.tab)srTab=state.review.tab;if(typeof state.review.run==='boolean')srRun=state.review.run;SRBANK=bankValid(state.review.bank)}catch(e){}}
    if(typeof state.appPage==='string'&&state.appPage)appPage=state.appPage;
    mode='app';
    if(Number(state.selectedGrade)>=1&&Number(state.selectedGrade)<=5)selectedGrade=Number(state.selectedGrade);
@@ -182,7 +188,7 @@ const sysIcon=(img,cls='')=>img?`<img class="sysimg ${cls}" src="${IMG[img]}" al
 
 /* ---------- helpers ---------- */
 const subjectQs=()=>QB;
-const inTopic=()=>(gradeHasPediatrics()?QB:[]).filter(q=>(qs.spec==='all'||q.spec===qs.spec)&&(!qs.topic||q.topic===qs.topic));
+let inTopic=()=>(gradeHasPediatrics()?QB:[]).filter(q=>(qs.spec==='all'||q.spec===qs.spec)&&(!qs.topic||q.topic===qs.topic));
 function statusOf(q){const a=S.ans[q.id];return !a?'unanswered':(a.ok?'correct':'incorrect')}
 function filtered(){return inTopic().filter(q=>{
   if(qs.filter==='bookmarked'&&!S.saved[q.id])return false;
@@ -501,7 +507,7 @@ function topicCards(){const sp=REAL.spec[qs.spec]||{topics:[]};
 topicsView=function(){const sp=REAL.spec[qs.spec]||{q:0,topics:[]};
  return `${appHeader(SPEC_NAME[qs.spec]||'Topics')}<div class="rs"><h1>${SPEC_NAME[qs.spec]||'Topics'}</h1><p class="sub">${sp.topics.length} topics · ${sp.q} questions</p>
  <button type="button" class="btn primary block allq" onclick="openTopic('${qs.spec}',0)">All questions →</button><div id="topicList">${topicCards()}</div></div>`};
-let gq='',gSpec='all',gTag='all',gSrc='all',gTopic='all',gSys='all',gSort='bank',gLim=40,gIdx=null,gTmr=null;
+let gq='',gBank='all',gSpec='all',gTag='all',gSrc='all',gTopic='all',gSys='all',gSort='bank',gLim=40,gIdx=null,gTmr=null;
 /* ---- Unit 2: search engine (display/query only; question data is never modified) ---- */
 const AR_MARKS='\\u064B-\\u065F\\u0670\\u0640';
 const nz=s=>String(s==null?'':s).toLowerCase().replace(new RegExp('['+AR_MARKS+']','g'),'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه');
@@ -514,13 +520,13 @@ function hl(t,tok){t=String(t==null?'':t);const re=tokRe(tok);if(!re)return esc(
 const gSrcGroup=s=>String(s||'').replace(/\s*[–—-]\s*Q\s*\d+\s*$/i,'').trim()||'Unknown source';
 function gIndex(){if(!gIdx)gIdx=QB.map(q=>{const nq=nz(q.q),no=nz(q.o.join(' \n')),ne=nz(q.ex||''),ns=nz(q.src||''),nt=nz(TOPIC_NAME[q.topic]||''),ny=nz((q.sy||'')+' '+(SPEC_NAME[q.spec]||q.spec)),ng=nz(q.id+' '+q.tag);
  return {q,sg:gSrcGroup(q.src),nq,no,ne,ns,nt,ny,ng,hay:[ng,nq,no,ne,ns,nt,ny].join(' \n')}});return gIdx}
-function gSources(){const m={};gIndex().forEach(x=>m[x.sg]=(m[x.sg]||0)+1);return Object.entries(m).sort((a,b)=>b[1]-a[1])}
-function gSystems(){const m={};QB.forEach(q=>{if(q.sy)m[q.sy]=(m[q.sy]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])}
+function gSources(){const m={};gIndex().forEach(x=>{if(bankOk(x.q,gBank))m[x.sg]=(m[x.sg]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])}
+function gSystems(){const m={};QB.forEach(q=>{if(q.sy&&bankOk(q,gBank))m[q.sy]=(m[q.sy]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])}
 const gPYKEY=()=>Object.keys(REAL.spec).find(k=>/^Previous Years/.test(REAL.spec[k].label||''))||null;
 const gNeedle=()=>nz(gq.trim()).split(/\s+/).filter(Boolean);
 const gRawTok=()=>gq.trim().toLowerCase().split(/\s+/).filter(Boolean);
 const gFilterOn=()=>gTag!=='all'||gSrc!=='all'||gTopic!=='all'||gSys!=='all';
-const gAnyOn=()=>gFilterOn()||gSpec!=='all'||!!gq.trim();
+const gAnyOn=()=>gFilterOn()||gSpec!=='all'||gBank!=='all'||!!gq.trim();
 function gFields(x,n){const has=s=>n.some(w=>s.includes(w)),r=[];
  if(has(x.nq))r.push('Question');if(has(x.no))r.push('Options');if(has(x.ne))r.push('Explanation');if(has(x.ns))r.push('Source');if(has(x.nt))r.push('Topic');if(has(x.ny))r.push('System');if(has(x.ng))r.push('ID / Tag');return r}
 function gScore(x,n){let s=0;n.forEach(w=>{if(x.nq.includes(w))s+=4;if(x.no.includes(w))s+=3;if(x.nt.includes(w))s+=2;if(x.ne.includes(w))s+=1;if(x.ns.includes(w))s+=.5});return s}
@@ -540,14 +546,14 @@ function gCard(x,n,tok){const q=x.q,f=tok.length?gFields(x,n):[];
  const a=S.ans[q.id];
  return `<div class="card sc gq" role="button" tabindex="0" data-qid="${esc(q.id)}" onclick="openQ('${q.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openQ('${q.id}')}"><div class="eyebrow">${esc(q.id)} · ${esc(q.sy||SPEC_NAME[q.spec]||q.spec)}</div><h3>${prev}</h3>${ev}${f.length?`<div class="gmf">${f.map(t=>`<span>${t}</span>`).join('')}</div>`:''}<div class="meta">${esc(TOPIC_NAME[q.topic]||'')} · ${esc(q.tag)} · ${esc(x.sg)}${a?' · '+(a.ok?'answered ✓':'answered ✕'):''}${qUnsure(q)?' · ⚠ needs review':''}</div></div>`}
 function searchResults(){const n=gNeedle(),tok=gRawTok();GQ_TOK=tok.length?tok:null;
- const specs=Object.entries(REAL.spec).filter(([s])=>gSpec==='all'||s===gSpec);
+ const specs=Object.entries(REAL.spec).filter(([s])=>(gSpec==='all'||s===gSpec)&&bankHas(s,gBank));
  if(!n.length&&!gFilterOn()){
   const rows=specs.map(([sid,sp])=>{let t=sp.topics.map(([id,nm,c,sy])=>[id,nm,QB.filter(q=>q.topic===id).length,sy]);
    if(gSort==='az')t.sort((a,b)=>a[1].localeCompare(b[1]));else if(gSort==='size')t.sort((a,b)=>b[2]-a[2]);else if(gSort==='progress')t.sort((a,b)=>pct(answeredCount(QB.filter(q=>q.topic===a[0])),a[2])-pct(answeredCount(QB.filter(q=>q.topic===b[0])),b[2]));
    return `<div class="soon-h">${esc(SPEC_NAME[sid]||sp.label||sid)} · ${t.length} topics</div>`+t.map(([id,nm,c,sy])=>topicRow(sid,id,nm,c,sy)).join('')}).join('');
   return rows||'<div class="card setcard"><p class="meta">No topics.</p></div>'}
  const tops=(n.length&&!gFilterOn())?specs.flatMap(([sid,sp])=>sp.topics.filter(([id,nm,c,sy])=>n.every(w=>nz(nm+' '+(SPEC_NAME[sid]||'')+' '+(sy||'')).includes(w))).map(([id,nm,c,sy])=>[sid,id,nm,c,sy])):[];
- let qs2=gIndex().filter(x=>(gSpec==='all'||x.q.spec===gSpec)&&(gTag==='all'||x.q.tag===gTag)&&(gSrc==='all'||x.sg===gSrc)&&(gTopic==='all'||String(x.q.topic)===gTopic)&&(gSys==='all'||x.q.sy===gSys)&&n.every(w=>x.hay.includes(w)));
+ let qs2=gIndex().filter(x=>bankOk(x.q,gBank)&&(gSpec==='all'||x.q.spec===gSpec)&&(gTag==='all'||x.q.tag===gTag)&&(gSrc==='all'||x.sg===gSrc)&&(gTopic==='all'||String(x.q.topic)===gTopic)&&(gSys==='all'||x.q.sy===gSys)&&n.every(w=>x.hay.includes(w)));
  if(n.length)qs2=qs2.map((x,i)=>[x,gScore(x,n),i]).sort((a,b)=>b[1]-a[1]||a[2]-b[2]).map(a=>a[0]);
  if(!tops.length&&!qs2.length)return `<div class="card setcard" style="text-align:center">${docFace('thinking','dr-top')}<h3>No results${tok.length?` for “${esc(gq.trim())}”`:''}</h3><p class="meta">Check the spelling, use fewer words, or remove some filters.</p><button type="button" class="btn block" onclick="gClear()">Clear search and filters</button></div>`;
  let out=`<div class="qreact think">${docFace('investigating')}<div><b>${tok.length?'Investigating…':'Filtered'}</b><span>${tops.length?tops.length+' topic'+(tops.length===1?'':'s')+' · ':''}${qs2.length} question${qs2.length===1?'':'s'} found</span></div></div>`;
@@ -555,8 +561,8 @@ function searchResults(){const n=gNeedle(),tok=gRawTok();GQ_TOK=tok.length?tok:n
  if(qs2.length){const shown=qs2.slice(0,gLim);out+=`<div class="soon-h">Questions · ${qs2.length}</div>`+shown.map(x=>gCard(x,n,tok)).join('')+(qs2.length>gLim?`<button type="button" class="btn block" onclick="gMore()">Show more (${qs2.length-gLim} left)</button>`:'')}
  return out}
 window.gMore=function(){gLim+=40;const e=$('#gResults');e&&(e.innerHTML=searchResults())};
-window.gClear=function(){gq='';gSpec='all';gTag='all';gSrc='all';gTopic='all';gSys='all';gLim=40;renderAppDemo();const i=$('#gSearch');i&&i.focus()};
-window.gSet=function(k,v){if(k==='spec'){gSpec=v;gTopic='all'}else if(k==='tag')gTag=v;else if(k==='src')gSrc=v;else if(k==='topic')gTopic=v;else if(k==='sys')gSys=v;else gSort=v;gLim=40;renderAppDemo()};
+window.gClear=function(){gq='';gBank='all';gSpec='all';gTag='all';gSrc='all';gTopic='all';gSys='all';gLim=40;renderAppDemo();const i=$('#gSearch');i&&i.focus()};
+window.gSet=function(k,v){if(k==='spec'){gSpec=v;gTopic='all'}else if(k==='bank'){gBank=bankValid(v);if(gSpec!=='all'&&!bankHas(gSpec,gBank))gSpec='all';gTopic='all';gSrc='all';gSys='all'}else if(k==='tag')gTag=v;else if(k==='src')gSrc=v;else if(k==='topic')gTopic=v;else if(k==='sys')gSys=v;else gSort=v;gLim=40;renderAppDemo()};
 runSearch=function(v){gq=v;gLim=40;const c=$('#gX');if(c)c.hidden=!v;clearTimeout(gTmr);gTmr=setTimeout(()=>{const e=$('#gResults');if(e)e.innerHTML=searchResults();const k=$('#gClr');if(k)k.hidden=!gAnyOn()},v?120:0)};
 window.openQ=function(id){const q=QB.find(x=>x.id===id);if(!q)return;if(typeof recordRecent==='function')recordRecent('topic',q.spec,q.topic);qs.spec=q.spec;qs.topic=q.topic;qs.filter='all';qs.tag='all';appPage='questions';qs.idx=Math.max(0,filtered().findIndex(x=>x.id===id));renderAppDemo();
  if(qs.view!=='single')setTimeout(()=>{const el=document.getElementById('qc-'+id);if(el){el.scrollIntoView({block:'start'});el.classList.add('flash')}},80)};
@@ -566,7 +572,8 @@ searchView=function(){const chip=(k,v,l,cur)=>`<button type="button" class="chip
  const showSys=(gSpec==='all'||gSpec===gPYKEY())&&gSystems().length>0;
  return `${appHeader('Search')}<div class="rs"><h1>Search &amp; topics</h1><p class="sub">Find topics and questions — in the question, options, explanation, source, system and tags.</p>
  <div class="sbox"><input class="field" id="gSearch" type="search" placeholder="Search questions, options, explanations…" value="${esc(gq)}" oninput="runSearch(this.value)" autocomplete="off" aria-label="Search"><button type="button" id="gX" class="sx" aria-label="Clear search" ${gq?'':'hidden'} onclick="gClear()">✕</button></div>
- <div class="chips fscroll" aria-label="Specialty filter">${chip('spec','all','All specialties',gSpec)}${Object.keys(REAL.spec).map(s=>chip('spec',s,SPEC_NAME[s]||s,gSpec)).join('')}</div>
+ <div class="chips fscroll" aria-label="Question bank">${BANK_OPTS.map(([v,l])=>chip('bank',v,l,gBank)).join('')}</div>
+ <div class="chips fscroll" aria-label="Specialty filter">${chip('spec','all','All specialties',gSpec)}${Object.keys(REAL.spec).filter(s=>bankHas(s,gBank)).map(s=>chip('spec',s,SPEC_NAME[s]||s,gSpec)).join('')}</div>
  <div class="chips fscroll" aria-label="Tag filter">${chip('tag','all','All tags',gTag)}${FULL_TAGS.map(t=>chip('tag',t,t,gTag)).join('')}</div>
  <div class="gfil">${sel('src',gSrc,'All sources',gSources().map(([v,c])=>[v,v+' ('+c+')']),'Source')}${gSpec!=='all'?sel('topic',gTopic,'All topics',topicOpts,'Topic'):''}${showSys?sel('sys',gSys,'All systems',gSystems().map(([v,c])=>[v,v+' ('+c+')']),'System (exams)'):''}</div>
  <button type="button" id="gClr" class="btn gclr" ${gAnyOn()?'':'hidden'} onclick="gClear()">✕ Clear search &amp; filters</button>
@@ -599,6 +606,11 @@ const SR_HT=['review','retry','drill','postpone','resched','skip','suspend','res
 const SR_ST_COL={'Not Started':'#7b8da3','Learning':'#ffb454','Improving':'#4da3ff','Strong':'#35cf82','Mastered':'#b58cff'};
 
 /* ---------- static topic index (derived from the bank; nothing is copied or stored) ---------- */
+let SRBANK='all';
+/* Applies only while the Smart Review screens (Build / Overview / Schedule / Weak) are open and no session is running,
+   so badges, notifications and Statistics keep counting every question. */
+const srEffBank=()=>{try{return(appPage==='review'&&!srRun&&(srTab==='topics'||srTab==='dash'||srTab==='sched'||srTab==='weak'))?SRBANK:'all'}catch(e){return 'all'}};
+const srBankOk=q=>bankOk(q,srEffBank());
 const SRT=[],SRT_BY=new Map(),SRT_Q=new Map();
 Object.keys(REAL.spec).forEach(sk=>{const sp=REAL.spec[sk];(sp.topics||[]).forEach(t=>{const o={id:t[0],name:t[1],sy:t[3]||'',spec:sk,specLabel:sp.label||SPEC_NAME[sk]||sk,key:sk+'|'+(t[3]||'')+'|'+t[1]};SRT.push(o);SRT_BY.set(o.id,o);SRT_Q.set(o.id,[])})});
 QB.forEach(q=>{const a=SRT_Q.get(q.topic);if(a)a.push(q)});
@@ -623,7 +635,7 @@ let SR3=(()=>{
  o.spd=(Array.isArray(o.spd)?o.spd:[]).filter(Number.isFinite).slice(-40);
  if(!_o(o.seen))o.seen={};
  o.goal=Number.isFinite(o.goal)?Math.min(200,Math.max(1,Math.round(o.goal))):20;
- o.size=[10,15,20].includes(o.size)?o.size:15;
+ o.size=Number.isInteger(o.size)&&o.size>=1&&o.size<=200?o.size:15;
  if(o.sess&&!(_o(o.sess)&&Array.isArray(o.sess.queue)&&Array.isArray(o.sess.plan)&&_o(o.sess.first)&&_o(o.sess.rt)&&Array.isArray(o.sess.att)))o.sess=null;
  if(!_o(o.last))o.last=null;
  return o})();
@@ -632,7 +644,7 @@ function srSave(){srCache=null;
  try{localStorage.setItem(SR3KEY,JSON.stringify(SR3));srSaveFail=false;return true}
  catch(e){if(!srSaveFail){srSaveFail=true;try{toast('Could not save Smart Review progress (storage is full)')}catch(_){}}return false}}
 window.__sr3=()=>SR3; /* read-only handle used by the self-tests */
-window.__sr3x=()=>({SRT,SRT_Q,QB,qmap,srTopicStats,srTotals,srLevel,srIsWeak,srPickTopic,srSpeedRef,srCompose,srCalc,srAutoGrade,dueList,srPool});
+window.__sr3x=()=>({SRT,SRT_Q,QB,qmap,srTopicStats,srTotals,srLevel,srIsWeak,srSpeedRef,srCompose,srCalc,srAutoGrade,dueList,srPool,SRUI});
 
 /* ---------- one-time, idempotent migration of REAL v2 reviews (never imports Question Bank history) ---------- */
 function sr3Migrate(){
@@ -732,10 +744,10 @@ function srDayStat(ok,ms,wasNew,drill){const k=dkey(),d=SR3.days[k]||(SR3.days[k
 function srStatus(e){if(!e.rev)return 'Not Started';
  if(e.pct>=85&&e.fresh<=Math.ceil(e.tot*.1)&&!e.weak)return 'Mastered';
  if(e.pct>=65)return 'Strong';if(e.pct>=35)return 'Improving';return 'Learning'}
-function srTopicStats(){const now=Date.now();if(srCache&&now-srCache.t<20000)return srCache.m;
+function srTopicStats(){const now=Date.now();const eb=srEffBank();if(srCache&&srCache.b===eb&&now-srCache.t<20000)return srCache.m;
  const M=new Map(),t0=dStart(now);
  SRT.forEach(t=>M.set(t.id,{t,id:t.id,tot:0,sus:0,fresh:0,rev:0,due:0,od:0,weak:0,lv:{new:0,learning:0,reviewing:0,known:0,mastered:0},credit:0,last:0,ok:0,n:0,next:0}));
- QB.forEach(q=>{const e=M.get(q.topic);if(!e)return;const r=SR3.q[q.id];
+ QB.forEach(q=>{const e=M.get(q.topic);if(!e||!bankOk(q,eb))return;const r=SR3.q[q.id];
   if(r&&r.sus){e.sus++;return}
   e.tot++;if(!r||!r.n){e.fresh++;e.lv.new++;return}
   e.rev++;const lv=srLevel(r);e.lv[lv]++;const wk=srIsWeak(r);if(wk)e.weak++;
@@ -745,13 +757,13 @@ function srTopicStats(){const now=Date.now();if(srCache&&now-srCache.t<20000)ret
   e.credit+=c;if(r.last>e.last)e.last=r.last;
   const v=rvs(r).slice(-6);e.n+=v.length;e.ok+=v.filter(x=>x.ok).length});
  M.forEach(e=>{e.pct=e.tot?Math.round(100*e.credit/e.tot):0;e.status=srStatus(e)});
- srCache={t:now,m:M};return M}
+ srCache={t:now,m:M,b:eb};return M}
 function srTotals(){const M=srTopicStats(),o={tot:0,fresh:0,rev:0,due:0,od:0,weak:0,credit:0,lv:{new:0,learning:0,reviewing:0,known:0,mastered:0},topics:0,started:0};
  M.forEach(e=>{o.tot+=e.tot;o.fresh+=e.fresh;o.rev+=e.rev;o.due+=e.due;o.od+=e.od;o.weak+=e.weak;o.credit+=e.credit;o.topics++;if(e.rev)o.started++;for(const k in e.lv)o.lv[k]+=e.lv[k]});
  o.pct=o.tot?Math.round(100*o.credit/o.tot):0;
  const d=SR3.days[dkey()]||{n:0,ok:0,ms:0,nw:0,dr:0};o.today=d.n;o.todayOk=d.ok;o.todayNew=d.nw||0;
  const now=Date.now(),t1=dNext(now);o.dueToday=0;o.upcoming=0;o.week=0;
- Object.keys(SR3.q).forEach(id=>{const r=SR3.q[id];if(r.sus||!qmap.has(id))return;if(r.due<t1)o.dueToday++;else{o.upcoming++;if(r.due<t1+6*DAY+36e5)o.week++}});
+ Object.keys(SR3.q).forEach(id=>{const r=SR3.q[id];if(r.sus||!qmap.has(id)||!srBankOk(qmap.get(id)))return;if(r.due<t1)o.dueToday++;else{o.upcoming++;if(r.due<t1+6*DAY+36e5)o.week++}});
  return o}
 function srRingCol(p,started){if(!started)return '#4b5d73';
  const st=[[0,[255,140,107]],[35,[255,180,84]],[65,[77,163,255]],[85,[53,207,130]],[100,[181,140,255]]];
@@ -759,22 +771,8 @@ function srRingCol(p,started){if(!started)return '#4b5d73';
   return 'rgb('+[0,1,2].map(k=>Math.round(a[1][k]+(b[1][k]-a[1][k])*f)).join(',')+')'}}
  return 'rgb(181,140,255)'}
 
-/* ---------- Smart Pick ---------- */
-function srPickTopic(){const M=srTopicStats(),now=Date.now();let best=null;
- M.forEach(e=>{if(!e.tot||!(e.due+e.weak+e.fresh))return;
-  const stale=e.rev&&e.last?Math.min(30,(now-e.last)/DAY)/30:0;
-  const s=.30*Math.min(1,e.due/20)+.08*Math.min(1,e.od/10)+.22*Math.min(1,e.weak/12)+.15*(1-e.pct/100)*(e.rev?1:.6)+.10*stale+.10*Math.min(1,e.fresh/20);
-  e.s=s;if(!best||s>best.s)best=e});
- if(!best)return null;
- const lines=[];if(best.due)lines.push([best.due+(best.due===1?' Question Due':' Questions Due'),'due']);
- if(best.weak)lines.push([best.weak+(best.weak===1?' Weak Question':' Weak Questions'),'weak']);
- if(best.fresh&&(lines.length<2||!best.rev))lines.push([best.fresh+(best.fresh===1?' New Question':' New Questions'),'new']);
- if(best.rev&&best.last&&lines.length<3)lines.push(['Last reviewed '+srAgo(best.last).toLowerCase(),'time']);
- const prio=best.s>=.45?'High Priority for Improvement':best.s>=.25?'Recommended Next':best.rev?'Good Place to Continue':'Good Place to Start';
- return{e:best,s:best.s,lines,prio,hi:best.s>=.45}}
-
 /* ---------- automatic question selection (nothing is added by hand) ---------- */
-function srPool(topic){const qs=topic==null?QB:(SRT_Q.get(topic)||[]),now=Date.now(),due=[],weak=[],fresh=[];
+function srPool(topic){const qs=(topic==null?QB:(SRT_Q.get(topic)||[])).filter(srBankOk),now=Date.now(),due=[],weak=[],fresh=[];
  qs.forEach(q=>{const r=SR3.q[q.id];if(!r||!r.n){if(!(r&&r.sus))fresh.push(q);return}if(r.sus)return;
   const wk=srIsWeak(r);
   if(r.due<=now){const late=Math.min(3,Math.max(0,(now-r.due)/Math.max(DAY,r.iv||DAY)));
@@ -809,8 +807,7 @@ function srCompose(topic,size){
  return seq.map(q=>q.id)}
 
 /* ---------- session state ---------- */
-let srTab='topics',srRun=false,SU={qid:null},SRSUM=null,SRX={open:null,lim:{}},SRH={lim:10,open:null},SRUI={filter:'all',q:'',open:{},rings:{},celebrated:null,selected:[],counts:{},hidePick:false};
-try{const saved=LS.get('shbace_sr3_ui_v1',{});if(saved&&typeof saved==='object')SRUI.hidePick=!!saved.hidePick}catch(_){};
+let srTab='topics',srRun=false,SU={qid:null},SRSUM=null,SRX={open:null,lim:{}},SRH={lim:10,open:null},SRUI={filter:'all',q:'',open:{},rings:{},celebrated:null,selected:[],counts:{}};
 let srFaceIx={};
 function srSid(){return 's'+Date.now().toString(36)+Math.floor(Math.random()*1296).toString(36)}
 function srM0(ids){const M=srTopicStats(),m={};ids.forEach(id=>{const q=qmap.get(id);if(q&&!m[q.topic]){const e=M.get(q.topic);if(e)m[q.topic]={p:e.pct,s:e.status}}});return m}
@@ -823,15 +820,35 @@ function srNewSession(o){
 window.srStart=function(topic){topic=(topic==null||topic==='')?null:Number(topic);
  const ids=srCompose(topic,SR3.size);if(!ids.length){toast(topic==null?'No questions are available right now':'No questions are available in this topic');return}
  srNewSession({mode:topic==null?'all':'topic',topic,label:topic==null?'All Topics':(SRT_BY.get(topic)||{}).name||'Topic',plan:ids})};
-window.srPickStart=function(){const p=srPickTopic();if(!p){toast('Nothing to review right now');return}window.srAddSuggested(p.e.id)};
-function srUiSave(){try{localStorage.setItem('shbace_sr3_ui_v1',JSON.stringify({hidePick:!!SRUI.hidePick}))}catch(_){}}
+function srSyncSelectionUI(changedId){
+ const chosen=srSelectedSummary(),panel=document.querySelector('.sr3-selected-panel');if(!panel)return;
+ const head=panel.querySelector('.sr3-selected-head');
+ if(head){
+  const b=head.querySelector('b'),sm=head.querySelector('small');
+  if(b)b.textContent=chosen.list.length+' topic'+(chosen.list.length===1?'':'s')+' selected';
+  if(sm)sm.textContent=chosen.total+' question'+(chosen.total===1?'':'s')+' in this session';
+ }
+ const chips=panel.querySelector('#srSelectedChips');
+ if(chips)chips.innerHTML=chosen.list.map(x=>'<span>'+esc(x.e.t.name)+' <b>'+x.count+'</b></span>').join('');
+ const start=panel.querySelector('.sr3-start-selected');
+ if(start){start.disabled=!chosen.total;start.textContent='Start session · '+chosen.total+' question'+(chosen.total===1?'':'s')}
+ if(changedId!=null){
+  const e=srTopicStats().get(Number(changedId)),field=document.getElementById('srCount-'+Number(changedId));
+  if(e&&field){
+   const count=srCountFor(e),max=srAvailable(e),controls=field.parentElement,buttons=controls?controls.querySelectorAll('button'):[];
+   field.value=String(count);field.max=String(max);
+   if(buttons[0])buttons[0].disabled=count<=1;
+   if(buttons[1])buttons[1].disabled=count>=max;
+   const help=field.closest('.sr3-qset')&&field.closest('.sr3-qset').querySelector('small');
+   if(help)help.textContent='Choose any number from 1 to '+max;
+  }
+ }
+}
 window.srToggleTopic=function(id){id=Number(id);const e=srTopicStats().get(id);if(!e||!srAvailable(e))return;const i=SRUI.selected.indexOf(id);if(i>=0){SRUI.selected.splice(i,1);delete SRUI.counts[id]}else{SRUI.selected.push(id);if(!Number.isInteger(Number(SRUI.counts[id]))||Number(SRUI.counts[id])<1)SRUI.counts[id]=Math.min(10,srAvailable(e))}renderAppDemo()};
-window.srSetTopicCount=function(id,value){id=Number(id);const e=srTopicStats().get(id);if(!e||!SRUI.selected.includes(id))return;const max=srAvailable(e),n=Number(value);if(!Number.isInteger(n)||n<1){toast('Choose at least 1 question');return}SRUI.counts[id]=Math.min(max,n);renderAppDemo()};
-window.srBumpTopicCount=function(id,delta){id=Number(id);const e=srTopicStats().get(id);if(!e)return;const n=srCountFor(e)+Number(delta||0);SRUI.counts[id]=Math.min(srAvailable(e),Math.max(1,n));renderAppDemo()};
+window.srSetTopicCount=function(id,value){id=Number(id);const e=srTopicStats().get(id);if(!e||!SRUI.selected.includes(id))return;const max=srAvailable(e),n=Number(value);if(!Number.isInteger(n)||n<1){toast('Choose a whole number from 1 to '+max);srSyncSelectionUI(id);return}SRUI.counts[id]=Math.min(max,n);srSyncSelectionUI(id)};
+window.srBumpTopicCount=function(id,delta){id=Number(id);const e=srTopicStats().get(id);if(!e||!SRUI.selected.includes(id))return;const n=srCountFor(e)+Number(delta||0);SRUI.counts[id]=Math.min(srAvailable(e),Math.max(1,n));srSyncSelectionUI(id)};
 window.srClearSelection=function(){SRUI.selected=[];SRUI.counts={};renderAppDemo()};
-window.srHidePick=function(){SRUI.hidePick=true;srUiSave();renderAppDemo()};
-window.srShowPick=function(){SRUI.hidePick=false;srUiSave();renderAppDemo()};
-window.srAddSuggested=function(id){id=Number(id);const e=srTopicStats().get(id);if(!e||!srAvailable(e))return;if(!SRUI.selected.includes(id))SRUI.selected.push(id);if(!Number.isInteger(Number(SRUI.counts[id]))||Number(SRUI.counts[id])<1)SRUI.counts[id]=Math.min(10,srAvailable(e));SRUI.hidePick=true;srUiSave();renderAppDemo();toast('Suggested topic added. Set its question count, then start when ready.')};
+
 window.srChooseTopic=function(id){id=Number(id);const e=srTopicStats().get(id);if(!e||!srAvailable(e))return;SRUI.selected=[id];SRUI.counts={[id]:Math.min(10,srAvailable(e))};srTab='topics';renderAppDemo()};
 window.srStartSelected=function(){
  const M=srTopicStats(),selected=SRUI.selected.map(id=>M.get(Number(id))).filter(e=>e&&srAvailable(e));
@@ -847,7 +864,7 @@ window.srStartSelected=function(){
 
 window.srResume=function(){if(!SR3.sess)return;SU={qid:null};SRSUM=null;srRun=true;renderAppDemo()};
 window.srPause=function(){srTPause(true);srRun=false;SU={qid:null};srSave();renderAppDemo()};
-window.srSize=function(n){n=Number(n);if(![10,15,20].includes(n))return;SR3.size=n;srSave();renderAppDemo()};
+window.srSize=function(n){n=Number(n);if(!Number.isInteger(n)||n<1||n>200)return;SR3.size=n;srSave();renderAppDemo()};
 window.srEnd=function(){const s=SR3.sess;if(!s)return;const n=Object.keys(s.first).length;
  confirmBox({title:'End this session?',text:n?`${n} answered question${n>1?'s':''} will be kept and scheduled. The rest stay as they are.`:'No questions were answered in this session.',detail:'Unanswered questions are never counted.',ok:'End session'},()=>{srFinish();renderAppDemo()})};
 window.srDrill=function(){const sum=SRSUM||SR3.last;if(!sum||!Array.isArray(sum.weak))return;
@@ -924,12 +941,6 @@ window.srSetGrade=function(g){
 window.srSuspendCur=function(){const id=SU.qid;if(id)srSuspend(id,true)};
 
 /* ---------- finishing, summary, drill source ---------- */
-function srNextAction(){const t=srTotals(),pick=srPickTopic();
- if(t.weak>0)return{k:'weak',title:'Strengthen your weak questions',text:t.weak+(t.weak===1?' question is':' questions are')+' still shaky. They return automatically — or practise them now.',btn:['Open weak topics',"srTabSet('weak')"]};
- if(t.due>0&&pick)return{k:'due',title:'Keep the momentum',text:t.due+(t.due===1?' review is':' reviews are')+' due. Smart Pick suggests '+pick.e.t.name+'.',btn:['Start recommended session','srPickStart()']};
- let nx=0,c=0;Object.keys(SR3.q).forEach(id=>{const r=SR3.q[id];if(r.sus||!qmap.has(id)||r.due<=Date.now())return;if(!nx||r.due<nx){nx=r.due;c=1}else if(dStart(r.due)===dStart(nx))c++});
- if(pick&&pick.e.fresh)return{k:'new',title:'Nothing urgent — explore',text:'You are caught up. '+pick.e.t.name+' has '+pick.e.fresh+' new question'+(pick.e.fresh>1?'s':'')+'.',btn:['Start recommended session','srPickStart()']};
- return{k:'rest',title:'You are all caught up',text:nx?'Next reviews: '+srDueTxt(nx).toLowerCase()+'.':'Nothing is scheduled right now.',btn:null}}
 function srFinish(silent){
  const s=SR3.sess;SR3.sess=null;srRun=false;SU={qid:null};
  if(!s){return}
@@ -946,10 +957,10 @@ function srFinish(silent){
  tp.sort((a,b)=>b.n-a.n||(b.to-b.from)-(a.to-a.from));
  const up=tp.filter(x=>x.s1==='Mastered'&&x.s0!=='Mastered').map(x=>x.id);
  const sum={id:s.sid,t:s.start,end:Date.now(),n,ok:okN,ms,newN,revN:n-newN,mode:s.mode,topic:s.topic,label:s.label,g,impr,weak,tp:tp.slice(0,8),up,
-  retries:Object.values(s.rt).reduce((a,x)=>a+x,0),left:s.queue.length,act:srNextAction()};
+  retries:Object.values(s.rt).reduce((a,x)=>a+x,0),left:s.queue.length};
  SR3.ses.unshift({id:sum.id,t:sum.t,end:sum.end,n,ok:okN,ms,newN,label:sum.label,mode:sum.mode,g,wk:weak.length});SR3.ses=SR3.ses.slice(0,60);
  SR3.last={id:sum.id,t:sum.t,end:sum.end,n,ok:okN,ms,newN,revN:sum.revN,mode:sum.mode,topic:sum.topic,label:sum.label,g,impr,weak,tp:sum.tp,up,retries:sum.retries,left:sum.left};
- SRSUM=Object.assign({},SR3.last,{act:sum.act});srTab='summary';srSave();
+ SRSUM=Object.assign({},SR3.last);srTab='summary';srSave();
  if(!silent)try{addNotif('src-'+s.sid,'Smart Review session complete',`${n} question${n>1?'s':''} · ${pct(okN,n)}% correct`,'review')}catch(e){}
  srNotify();updateBadges()}
 
@@ -1006,7 +1017,10 @@ const srStChip=s=>`<span class="sr3-st" style="--c:${SR_ST_COL[s]}">${s}</span>`
 /* ---------- shell + tabs ---------- */
 function srTabs(){const cur=srTab==='summary'?'topics':srTab;
  return `<div class="sr2-tabs sr3-tabs" role="tablist">${[['topics','Build session'],['dash','Overview'],['sched','Schedule'],['weak','Weak'],['hist','History']].map(([k,l])=>`<button type="button" role="tab" aria-selected="${cur===k}" class="${cur===k?'on':''}" onclick="srTabSet('${k}')">${l}</button>`).join('')}</div>`}
-const srShell=(inner,tabs)=>`${appHeader('Smart review')}<div class="rs sr2 sr3"><h1>Smart review</h1><p class="sub">Choose your topics and set the question count for each one.</p>${tabs===false?'':srTabs()}<div class="sr2-in">${inner}</div></div>`;
+function srBankBar(){if(!(srTab==='topics'||srTab==='dash'||srTab==='sched'||srTab==='weak'))return '';
+ return `<div class="sr3-fl sr3-bank" role="group" aria-label="Question bank">${BANK_OPTS.map(([v,l])=>`<button type="button" class="${SRBANK===v?'on':''}" onclick="srBank('${v}')">${l}</button>`).join('')}</div>`}
+window.srBank=function(b){b=bankValid(b);if(SRBANK===b)return;SRBANK=b;srCache=null;SRUI.selected=[];SRUI.counts={};renderAppDemo()};
+const srShell=(inner,tabs)=>`${appHeader('Smart review')}<div class="rs sr2 sr3"><h1>Smart review</h1><p class="sub">Choose your topics and set the question count for each one.</p>${tabs===false?'':srTabs()+srBankBar()}<div class="sr2-in">${inner}</div></div>`;
 const srNote=()=>`<p class="meta sr2-note">Reminders appear in Notifications when you open the app. This version does not send background notifications.</p>`;
 
 /* ---------- TOPICS (home of Smart Review) ---------- */
@@ -1032,7 +1046,7 @@ function srFilterOk(e){const f=SRUI.filter;
  if(f==='due')return e.due>0;if(f==='weak')return e.weak>0;if(f==='prog')return e.rev>0&&e.status!=='Mastered';if(f==='new')return e.rev===0;return true}
 function srTopicList(){const M=srTopicStats(),q=SRUI.q.trim().toLowerCase(),active=q||SRUI.filter!=='all';
  const groups=[];const bySpec=new Map();
- SRT.forEach(t=>{const e=M.get(t.id);if(!e)return;if(q&&!(t.name+' '+t.specLabel+' '+t.sy).toLowerCase().includes(q))return;if(!srFilterOk(e))return;
+ SRT.forEach(t=>{const e=M.get(t.id);if(!e)return;if(srEffBank()!=='all'&&!(e.tot+e.sus))return;if(q&&!(t.name+' '+t.specLabel+' '+t.sy).toLowerCase().includes(q))return;if(!srFilterOk(e))return;
   if(!bySpec.has(t.spec)){const g={spec:t.spec,label:t.specLabel,items:[]};bySpec.set(t.spec,g);groups.push(g)}bySpec.get(t.spec).items.push(e)});
  if(!groups.length)return `<div class="card"><p class="meta" style="margin:0">No topics match this view.</p></div>`;
  return groups.map(g=>{const tot=g.items.reduce((a,e)=>a+e.tot,0),cr=g.items.reduce((a,e)=>a+e.credit,0),p=tot?Math.round(100*cr/tot):0;
@@ -1041,17 +1055,12 @@ function srTopicList(){const M=srTopicStats(),q=SRUI.q.trim().toLowerCase(),acti
   const due=g.items.reduce((a,e)=>a+e.due,0),avail=g.items.reduce((a,e)=>a+srAvailable(e),0);
   return `<section class="sr3-grp${open?' open':''}" data-spec="${esc(g.spec)}"><button type="button" class="sr3-gh" aria-expanded="${open}" onclick="srGroup('${esc(g.spec)}')"><span class="sr3-gt"><b>${esc(g.label)}</b><small>${g.items.length} topics · ${avail} available${selected?' · '+selected+' selected':''}</small></span><span class="sr3-gp" style="color:${srRingCol(p,cr>0)}">${p}%</span><span class="sr3-gc">${srI.chev}</span></button>
    ${open?`<div class="sr3-gb">${g.items.map(srTopicCard).join('')}</div>`:''}</section>`}).join('')}
-function srTopicsHTML(){const T=srTotals(),pick=srPickTopic(),s=SR3.sess,chosen=srSelectedSummary();let h='';
- if(s&&Object.keys(s.first).length+s.queue.length>0){const done=Object.keys(s.first).length;
-  h+=`<div class="card sr3-resume"><div><b>Session in progress</b><small>${esc(s.label)} · ${s.queue.length} left · ${done} answered</small></div><div class="sr3-rb"><button type="button" class="btn primary" onclick="srResume()">Resume</button><button type="button" class="btn" onclick="srEnd()">End</button></div></div>`}
- if(pick&&!SRUI.hidePick){const e=pick.e;
-  h+=`<div class="card sr3-pick sr3-suggestion"><div class="sr3-pk-top"><span class="sr3-kick">${srI.spark} OPTIONAL SUGGESTION</span><span class="sr3-prio">${pick.prio}</span><button type="button" class="sr3-hide-pick" onclick="srHidePick()" aria-label="Hide suggestion">×</button></div>
-   <div class="sr3-pk-body">${srRing(e.pct,e.rev>0,54,e.t.key)}<div class="sr3-pk-tx"><h3>${esc(e.t.name)}</h3><small>${esc(e.t.specLabel)}${e.t.sy?' · '+esc(e.t.sy):''}</small><ul class="sr3-why">${pick.lines.map(([l,k])=>`<li class="${k}"><i></i>${l}</li>`).join('')}</ul></div></div>
-   <button type="button" class="btn block sr3-add-suggestion" onclick="srAddSuggested(${e.t.id})">Add this topic to my selection</button></div>`}
- else if(pick&&SRUI.hidePick)h+=`<div class="sr3-suggestion-hidden"><span>Smart suggestion hidden</span><button type="button" onclick="srShowPick()">Show suggestion</button></div>`;
- h+=`<section class="sr3-builder-hero"><div><span class="sr3-builder-kicker">SMART REVIEW · SESSION BUILDER</span><h2>Build your review session</h2><p>Choose one topic or combine several. Set a different question count for every selected topic.</p></div><div class="sr3-builder-stats"><span><b>${T.due}</b><small>Due</small></span><span><b>${T.weak}</b><small>Weak</small></span><span><b>${T.fresh}</b><small>New</small></span></div></section>
+function srTopicsHTML(){const T=srTotals(),session=SR3.sess,chosen=srSelectedSummary();let h='';
+ if(session&&Object.keys(session.first).length+session.queue.length>0){const done=Object.keys(session.first).length;
+  h+=`<div class="card sr3-resume"><div><b>Session in progress</b><small>${esc(session.label)} · ${session.queue.length} left · ${done} answered</small></div><div class="sr3-rb"><button type="button" class="btn primary" onclick="srResume()">Resume</button><button type="button" class="btn" onclick="srEnd()">End</button></div></div>`}
+ h+=`<section class="sr3-builder-hero"><div><span class="sr3-builder-kicker">SMART REVIEW · SESSION BUILDER</span><h2>Build your review session</h2><p>Select one or more topics, then choose how many questions to take from each.</p></div></section>
  <section class="sr3-selected-panel"><div class="sr3-selected-head"><div><span class="sr3-builder-kicker">YOUR SESSION</span><b>${chosen.list.length} topic${chosen.list.length===1?'':'s'} selected</b><small>${chosen.total} question${chosen.total===1?'':'s'} in this session</small></div><button type="button" class="btn sr3-clear-selection" onclick="srClearSelection()" ${chosen.list.length?'':'disabled'}>Clear</button></div>
- ${chosen.list.length?`<div class="sr3-selected-chips">${chosen.list.map(x=>`<span>${esc(x.e.t.name)} <b>${x.count}</b></span>`).join('')}</div>`:`<p class="sr3-selection-empty">No topics selected yet. Select a topic below to add it to your session.</p>`}
+ ${chosen.list.length?`<div class="sr3-selected-chips" id="srSelectedChips">${chosen.list.map(x=>`<span>${esc(x.e.t.name)} <b>${x.count}</b></span>`).join('')}</div>`:`<p class="sr3-selection-empty">No topics selected yet. Select any topic below to add it to your session.</p>`}
  <button type="button" class="btn primary block sr3-start-selected" onclick="srStartSelected()" ${chosen.total?'':'disabled'}>Start session · ${chosen.total} question${chosen.total===1?'':'s'}</button>
  </section>
  <div class="sr3-sec sr3-topic-heading"><div><h2>Choose topics</h2><small>${T.topics} topics · select as many as you need</small></div></div>
@@ -1067,12 +1076,12 @@ window.srJump=function(id){const t=SRT_BY.get(id);if(!t)return;SRUI.filter='all'
 
 /* ---------- OVERVIEW ---------- */
 function srMapHTML(){const M=srTopicStats(),by=new Map();
- SRT.forEach(t=>{const e=M.get(t.id);if(!e)return;if(!by.has(t.spec))by.set(t.spec,{label:t.specLabel,items:[]});by.get(t.spec).items.push(e)});
+ SRT.forEach(t=>{const e=M.get(t.id);if(!e)return;if(srEffBank()!=='all'&&!(e.tot+e.sus))return;if(!by.has(t.spec))by.set(t.spec,{label:t.specLabel,items:[]});by.get(t.spec).items.push(e)});
  return [...by.values()].map(g=>`<div class="sr3-mg"><div class="sr3-mh">${esc(g.label)}</div><div class="sr3-mr">${g.items.map(e=>`<button type="button" class="sr3-mc${e.status==='Mastered'?' mst':''}" onclick="srJump(${e.t.id})" aria-label="${esc(e.t.name)}: ${e.status}, ${e.pct}%" title="${esc(e.t.name)} · ${e.pct}%">${srRing(e.pct,e.rev>0,34,e.t.key,{txt:false,sw:4,glow:e.status==='Mastered'})}${e.due?'<i class="dot due"></i>':''}${e.status==='Mastered'?'<i class="dot star">★</i>':''}</button>`).join('')}</div></div>`).join('')}
-function srDashHTML(){const T=srTotals(),pick=srPickTopic(),s=SR3.sess,gp=Math.min(100,pct(T.today,SR3.goal)),remain=Math.max(SR3.goal-T.today,0);
+function srDashHTML(){const T=srTotals(),s=SR3.sess,gp=Math.min(100,pct(T.today,SR3.goal)),remain=Math.max(SR3.goal-T.today,0);
  const dueT=T.dueToday;
  const hero=`<div class="card sr2-hero"><div class="sr2-big"><b>${dueT}</b><span>${dueT===1?'question':'questions'} due today${T.od?` <em>· ${T.od} overdue</em>`:''}</span></div>
-  <button type="button" class="btn primary block sr2-go" ${pick||s?'':'disabled'} onclick="${s?'srResume()':'srPickStart()'}">${srI.play} ${s?'Resume session · '+s.queue.length+' left':'Start Recommended Session'}</button>
+  <button type="button" class="btn primary block sr2-go" onclick="${s?'srResume()':"srTabSet('topics')"}">${srI.play} ${s?'Resume session · '+s.queue.length+' left':'Build a review session'}</button>
   <div class="sr2-goal"><div><b>${T.today}</b> / ${SR3.goal} questions today</div><span>${gp>=100?'Goal reached':remain+' to go'}</span></div><div class="bar"><i style="width:${gp}%"></i></div></div>`;
  const stat=(v,l,c)=>`<div class="sr2-st"><b style="${c?'color:'+c:''}">${v}</b><small>${l}</small></div>`;
  const grid=`<div class="sr2-grid">${stat(T.dueToday-T.od,'Due today','#8fc6ff')}${stat(T.od,'Overdue',T.od?'#ffb454':'')}${stat(T.upcoming,'Upcoming')}${stat(T.today,'Reviewed today','#35cf82')}${stat(T.lv.mastered,'Mastered','#b58cff')}${stat(T.weak,'Need more review',T.weak?'#ff8c8c':'')}</div>`;
@@ -1095,8 +1104,8 @@ function srRowHTML(x){const {q,r}=x,open=SRX.open===q.id,d=dkey(Math.max(Date.no
   <p class="meta" style="margin:8px 0 0">Postponing is not a review and never raises mastery. Stopping a question does not delete it from the Question Bank.</p>`}</div>`:''}</div>`}
 function srSection(title,arr,key){if(!arr.length)return '';const lim=SRX.lim[key]||8;
  return `<div class="soon-h">${title} · ${arr.length}</div>${arr.slice(0,lim).map(x=>srRowHTML(x)).join('')}${arr.length>lim?`<button type="button" class="btn block" onclick="srMore('${key}')">Show ${Math.min(12,arr.length-lim)} more</button>`:''}`}
-function srSchedHTML(){const all=srList(),now=Date.now(),t0=dStart(now),t1=dNext(now);
- const sus=Object.keys(SR3.q).filter(id=>SR3.q[id].sus&&qmap.has(id)).map(id=>({q:qmap.get(id),r:SR3.q[id]}));
+function srSchedHTML(){const all=srList().filter(x=>srBankOk(x.q)),now=Date.now(),t0=dStart(now),t1=dNext(now);
+ const sus=Object.keys(SR3.q).filter(id=>SR3.q[id].sus&&qmap.has(id)&&srBankOk(qmap.get(id))).map(id=>({q:qmap.get(id),r:SR3.q[id]}));
  if(!all.length&&!sus.length)return `<div class="card sr2-empty"><h3>Nothing is scheduled yet</h3><p class="meta">Start a topic from the Topics tab. Every question you answer gets its own review date and appears here — overdue, today and the next seven days.</p><button type="button" class="btn primary block" onclick="srTabSet('topics')">Choose a topic</button></div>`;
  const od=all.filter(x=>x.r.due<t0),td=all.filter(x=>x.r.due>=t0&&x.r.due<t1),up=all.filter(x=>x.r.due>=t1),days={};
  up.forEach(x=>{const k=dStart(x.r.due);if(x.r.due<t1+7*DAY)(days[k]||(days[k]=[])).push(x)});
@@ -1186,16 +1195,13 @@ function srSummaryHTML(){const s=SRSUM||SR3.last;if(!s)return srShell(srTopicsHT
  const impr=(s.impr||[]).slice(0,6).map(id=>item(id,`<span class="sr3-arrow">${srChip(SR_LV.find(x=>x[0]===srLevel(SR3.q[id]))[1],SR_LV_COL[srLevel(SR3.q[id])])}</span>`)).join('');
  const weak=(s.weak||[]).slice(0,6).map(id=>item(id,srChip(SR3.q[id]&&SR3.q[id].rl?'Weak':'Practise','#ff8c8c'))).join('');
  const tp=(s.tp||[]).map(x=>{const e=M.get(x.id);if(!e)return '';const d=x.to-x.from;return `<div class="sr3-tp"><span>${srRing(e.pct,e.rev>0,40,e.t.key)}</span><div><b>${esc(e.t.name)}</b><small>${x.from}% → <b style="color:${d>0?'#35cf82':d<0?'#ff8c8c':'#9aadc1'}">${x.to}%</b> ${d>0?'(+'+d+')':d<0?'('+d+')':''} · ${x.s1}${x.s0!==x.s1?' (was '+x.s0+')':''}</small></div></div>`}).join('');
- const act=s.act||srNextAction();
  const due=dueList().length;
  return srShell(`<div class="card sr2-sum sr3-sum">${docFace(face,'dr-top sr3-face')}<div class="sr3-kick2">${drill?'DRILL COMPLETE':'SESSION COMPLETE'}</div><h3>${title}</h3><p class="meta" style="margin:0 0 4px">${esc(s.label)} · ${s.n} question${s.n>1?'s':''}${s.retries?' · '+s.retries+' retr'+(s.retries>1?'ies':'y'):''}${s.left?' · '+s.left+' not reached':''}</p></div>
   <div class="sr3-sec"><h2>Your performance</h2></div>${perf}
   ${impr?`<div class="sr3-sec"><h2>What you mastered</h2><small>Questions that moved up a level</small></div>${impr}`:''}
   ${weak?`<div class="sr3-sec"><h2>Needs more practice</h2><small>Missed or still shaky — they return automatically</small></div>${weak}`:''}
   ${tp?`<div class="sr3-sec"><h2>Topic progress</h2></div><div class="card">${tp}</div>`:''}
-  <div class="card sr3-act"><div class="sr2-h">Next recommended action</div><b>${esc(act.title)}</b><p class="meta" style="margin:4px 0 0">${esc(act.text)}</p></div>
   ${(s.weak||[]).length?`<button type="button" class="btn primary block sr3-drill" onclick="srDrill()">${srI.play} Drill Weak Ones · ${Math.min(20,s.weak.length)}</button>`:''}
-  ${act.btn?`<button type="button" class="btn ${(s.weak||[]).length?'':'primary '}block" onclick="${act.btn[1]}">${act.btn[0]}</button>`:''}
   <button type="button" class="btn block" onclick="srBack()">Back to topics</button>`,false)}
 
 /* ---------- view router + hooks ---------- */
@@ -1218,8 +1224,15 @@ function srPost(){
 const __srRAD=renderAppDemo;renderAppDemo=function(){const r=__srRAD.apply(this,arguments);try{srPost()}catch(e){console.error('Smart Review post-render',e)}return r};
 
 function updateBadges(){const n=dueList().length+srList().filter(x=>x.r.due>Date.now()).length;const d=dueList().length;document.querySelectorAll('.app-nav button[data-p="review"] .nbadge').forEach(e=>e.remove());if(d){document.querySelectorAll('.app-nav button[data-p="review"]').forEach(b=>b.insertAdjacentHTML('beforeend',`<em class="nbadge">${d}</em>`))}}
-appNav=function(){const it=[['subjects','Home'],['search','Search'],['quiz','Quiz'],['review','Review']];const grp={subjects:['subjects','specialties','topics','questions','menu','saved','wrong'],quiz:['quiz','quizrun','quizresult','quizhistory']};
- return `<div class="app-nav">${it.map(([id,n])=>`<button data-p="${id}" class="${(grp[id]||[id]).includes(appPage)?'active':''}" onclick="appPage='${id}';renderAppDemo()">${NAVI[id]}<span>${n}</span>${id==='review'&&dueList().length?`<em class="nbadge">${dueList().length}</em>`:''}</button>`).join('')}</div>`};
+window.__shbNavTap=function(id){
+ if(id==='review'){
+  if(srRun&&SR3.sess){srTPause(true);srRun=false;SU={qid:null};srSave()}
+  srTab='topics';SRSUM=null;SRX.open=null;
+ }
+ appPage=id;renderAppDemo();
+};
+appNav=function(){const it=[['subjects','Home'],['search','Search'],['quiz','Quiz'],['review','Review']];const grp={subjects:['subjects','pedcollections','specialties','topics','questions','menu','saved','wrong'],quiz:['quiz','quizrun','quizresult','quizhistory']};
+ return `<div class="app-nav">${it.map(([id,n])=>`<button data-p="${id}" class="${(grp[id]||[id]).includes(appPage)?'active':''}" onclick="__shbNavTap('${id}')">${NAVI[id]}<span>${n}</span>${id==='review'&&dueList().length?`<em class="nbadge">${dueList().length}</em>`:''}</button>`).join('')}</div>`};
 /* drawer: Saved / Wrong answers work, Smart review badge is live */
 DR2[1][1][0][1]='saved';DR2[1][1][1][1]='wrong';
 const __menu=menuView;
@@ -1871,8 +1884,8 @@ function howToUseCard(){
   {title:'المراجعة الذكية Smart Review',body:
    '<p>تعمل المراجعة الذكية بذاكرة وجدولة منفصلتين عن إجابات بنك الأسئلة ونتائج الاختبارات. وهي ترتّب الأسئلة بحسب موعد المراجعة ومستوى التذكّر.</p>'+
    '<ol><li>افتح '+en('Review')+' ثم اختر '+en('Topics')+' أو '+en('Overview')+' أو '+en('Schedule')+' أو '+en('Weak')+' أو '+en('History')+'.</li>'+
-   '<li>ابدأ من '+en('Start Recommended Session')+' لمراجعة الأسئلة المقترحة، أو اختر موضوعاً محدداً، أو ابدأ جلسة لكل الموضوعات.</li>'+
-   '<li>يمكنك تغيير حجم الجلسة إلى 10 أو 15 أو 20 سؤالاً، واستخدام مرشحات '+en('Due')+' و'+en('Weak')+' و'+en('In progress')+' و'+en('Not started')+'.</li>'+
+   '<li>اختر Topic واحداً أو أكثر، وحدد عدد الأسئلة لكل موضوع من الحقل الرقمي المفتوح.</li>'+
+   '<li>يمكنك استخدام مرشحات '+en('Due')+' و'+en('Weak')+' و'+en('In progress')+' و'+en('Not started')+' لتنظيم المواضيع.</li>'+
    '<li>بعد إظهار الإجابة قيّم تذكّرك باستخدام '+en('Again')+' أو '+en('Hard')+' أو '+en('Good')+' أو '+en('Easy')+'. تستخدم المراجعة تقييمك لجدولة الموعد التالي.</li></ol>'+
    '<p class="how-tip"><b>مهم:</b> يمكنك إيقاف الجلسة واستئنافها لاحقاً، ومراجعة سجلّك من تبويب '+en('History')+'.</p>'},
   {title:'الأسئلة الخاطئة والمحفوظة',body:
@@ -2054,8 +2067,8 @@ const qzSave=()=>LS.set(QKEY,QZ);
 const QBY=new Map(QB.map(q=>[q.id,q]));
 QZ.attempts.forEach(a=>{a.items=a.items.filter(i=>isObj(i)&&QBY.has(i.id))});
 if(QZ.active)QZ.active.ids=QZ.active.ids.filter(id=>QBY.has(id));if(QZ.active&&!QZ.active.ids.length)QZ.active=null;
-let QC=Object.assign({scope:'all',specs:[],topics:[],filt:'any',mode:'practice',fb:'instant',order:'random',count:20,mins:0},(()=>{const v=LS.get(QCKEY,{});return isObj(v)?v:{}})());
-(()=>{const E={scope:['all','sel','custom'],filt:['any','new','wrong','saved'],mode:['practice','timed'],fb:['instant','end'],order:['random','bank']};Object.keys(E).forEach(k=>{if(!E[k].includes(QC[k]))QC[k]=E[k][0]});
+let QC=Object.assign({scope:'all',bank:'all',specs:[],topics:[],filt:'any',mode:'practice',fb:'instant',order:'random',count:20,mins:0},(()=>{const v=LS.get(QCKEY,{});return isObj(v)?v:{}})());
+(()=>{const E={scope:['all','sel','custom'],bank:['all','aj','previous'],filt:['any','new','wrong','saved'],mode:['practice','timed'],fb:['instant','end'],order:['random','bank']};Object.keys(E).forEach(k=>{if(!E[k].includes(QC[k]))QC[k]=E[k][0]});
  QC.specs=Array.isArray(QC.specs)?QC.specs.filter(s=>REAL.spec[s]):[];QC.topics=Array.isArray(QC.topics)?QC.topics.filter(t=>TOPIC_NAME[t]):[];
  QC.count=Number.isInteger(QC.count)&&QC.count>0?QC.count:20;QC.mins=Number.isInteger(QC.mins)&&QC.mins>0?QC.mins:0})();
 const qcSave=()=>LS.set(QCKEY,QC);
@@ -2068,7 +2081,7 @@ function qzPool(cfg=QC){if(!gradeHasPediatrics())return [];let l=QB;
  }else if(cfg.scope==='custom'){
   l=QB.filter(q=>cfg.filt==='any'||(cfg.filt==='new'&&!S.ans[q.id])||(cfg.filt==='wrong'&&S.ans[q.id]&&!S.ans[q.id].ok)||(cfg.filt==='saved'&&S.saved[q.id]));
  }
- return l;
+ return cfg.bank&&cfg.bank!=='all'?l.filter(q=>bankOk(q,cfg.bank)):l;
 }
 const qzEff=(p,cfg=QC)=>Math.max(1,Math.min(cfg.count,p));
 const qzClone=cfg=>Object.assign({},cfg,{specs:(cfg.specs||[]).slice(),topics:(cfg.topics||[]).slice()});
@@ -2076,7 +2089,7 @@ let QCD=qzClone(QC),QCD_DIRTY=false;
 function qcdPool(){return qzPool(QCD)}
 function qcdUpdateUI(){
  document.querySelectorAll('[data-qcd-key]').forEach(el=>{const k=el.dataset.qcdKey,v=el.dataset.qcdValue;el.classList.toggle('on',Array.isArray(QCD[k])?QCD[k].includes(v):String(QCD[k])===String(v));});
- document.querySelectorAll('[data-qcd-spec]').forEach(el=>el.classList.toggle('on',QCD.specs.includes(el.dataset.qcdSpec)));
+ document.querySelectorAll('[data-qcd-spec]').forEach(el=>{el.classList.toggle('on',QCD.specs.includes(el.dataset.qcdSpec));el.style.display=bankHas(el.dataset.qcdSpec,QCD.bank)?'':'none'});
  document.querySelectorAll('[data-qcd-topic-panel]').forEach(el=>{el.hidden=!QCD.specs.includes(el.dataset.qcdTopicPanel)});
  document.querySelectorAll('[data-qcd-topic]').forEach(el=>{el.checked=QCD.topics.includes(Number(el.dataset.qcdTopic));});
  document.querySelectorAll('[data-qcd-panel]').forEach(el=>{el.hidden=el.dataset.qcdPanel!==QCD.scope});
@@ -2087,7 +2100,9 @@ function qcdUpdateUI(){
  const apply=document.getElementById('qcd-apply');if(apply)apply.classList.toggle('pending',QCD_DIRTY);
  const begin=document.getElementById('qcd-start');if(begin){begin.disabled=QCD_DIRTY||!available;begin.textContent=`Start quiz · ${chosen} questions${QCD.mode==='timed'?' · '+(QCD.mins||chosen)+' min':''}`;}
 }
-window.qcDraftSet=function(k,v){if(!['scope','mode','fb','order','filt'].includes(k))return;QCD[k]=v;QCD_DIRTY=true;qcdUpdateUI()};
+window.qcDraftSet=function(k,v){if(!['scope','bank','mode','fb','order','filt'].includes(k))return;if(k==='bank')v=bankValid(v);QCD[k]=v;
+ if(k==='bank'){QCD.specs=QCD.specs.filter(sp=>bankHas(sp,v));const okT=new Set();QCD.specs.forEach(sp=>REAL.spec[sp].topics.forEach(t=>okT.add(t[0])));QCD.topics=QCD.topics.filter(t=>okT.has(t))}
+ QCD_DIRTY=true;qcdUpdateUI()};
 window.qcDraftToggle=function(k,v){if(k==='specs'){
   const i=QCD.specs.indexOf(v);if(i<0)QCD.specs.push(v);else{QCD.specs.splice(i,1);const ids=REAL.spec[v].topics.map(t=>t[0]);QCD.topics=QCD.topics.filter(t=>!ids.includes(t));}
  }else if(k==='topics'){const n=Number(v),i=QCD.topics.indexOf(n);if(i<0)QCD.topics.push(n);else QCD.topics.splice(i,1);}else return;
@@ -2107,12 +2122,13 @@ quizView=function(){
  const act=QZ.active,pool=qcdPool(),n=pool.length?qzEff(pool.length,QCD):0,mins=QCD.mins||n;
  let resume='';if(act){const done=Object.keys(act.ans).length;resume=`<div class="card setcard qz-resume"><h3>Quiz in progress</h3><p class="meta">${act.ids.length} questions · ${done} answered · ${act.mode==='timed'?'Timed':'Practice'}</p><div class="setbtns"><button type="button" class="btn primary" onclick="qzResume()">Resume</button><button type="button" class="btn danger" onclick="qzDiscard()">Discard</button></div></div>`}
  const specs=gradeHasPediatrics()?Object.keys(REAL.spec):[];
- const specButtons=specs.map(sp=>`<button type="button" class="chip qcd-spec${QCD.specs.includes(sp)?' on':''}" data-qcd-spec="${sp}" onclick="qcDraftToggle('specs','${sp}')">${esc(SPEC_NAME[sp]||sp)}</button>`).join('');
+ const specButtons=specs.map(sp=>`<button type="button" class="chip qcd-spec${QCD.specs.includes(sp)?' on':''}" data-qcd-spec="${sp}"${bankHas(sp,QCD.bank)?'':' style="display:none"'} onclick="qcDraftToggle('specs','${sp}')">${esc(SPEC_NAME[sp]||sp)}</button>`).join('');
  const topicPanels=specs.map(sp=>`<details class="qzd qcd-topics" data-qcd-topic-panel="${sp}" ${QCD.specs.includes(sp)?'':'hidden'}><summary>${esc(SPEC_NAME[sp]||sp)} topics <small>${REAL.spec[sp].topics.filter(t=>QCD.topics.includes(t[0])).length||'all'} selected</small></summary>${REAL.spec[sp].topics.map(t=>`<label class="qzt"><input type="checkbox" data-qcd-topic="${t[0]}" ${QCD.topics.includes(t[0])?'checked':''} onchange="qcDraftToggle('topics',${t[0]})"><span>${esc(t[1])}</span></label>`).join('')}<p class="meta">No topic selected in this specialty means all its topics are included.</p></details>`).join('');
  return `${appHeader('Quiz')}<div class="rs quiz-premium"><h1>Quiz mode</h1><p class="sub">Choose everything first. Your selections are saved together only when you confirm.</p>${resume}${QZ.attempts.length?`<button type="button" class="btn block qz-history" style="margin-bottom:10px" onclick="appPage='quizhistory';renderAppDemo()">Quiz history · ${QZ.attempts.length}</button>`:''}
  <section class="card setcard qz-config"><div class="qz-section-head"><span class="qz-step">01</span><div><h3>Question source</h3><small>Choose where your questions come from</small></div></div>
+  <div class="setrow qz-bank-row"><b>Question bank</b>${qcdSeg('bank',BANK_OPTS)}</div>
   ${qcdSeg('scope',[['all','All questions'],['sel','By Specialty'],['custom','My study list']])}
-  <div class="qcd-panel" data-qcd-panel="all"><p class="qz-help">Use the complete Question Bank. No specialty or topic filter will be applied.</p></div>
+  <div class="qcd-panel" data-qcd-panel="all"><p class="qz-help">Use every question in the selected bank. No specialty or topic filter will be applied.</p></div>
   <div class="qcd-panel" data-qcd-panel="sel" hidden><p class="qz-help">Select one or more specialties, then open a specialty to choose topics. Leave its topics unchecked to include all of them.</p><div class="chips qcd-specs">${specButtons}</div>${topicPanels}</div>
   <div class="qcd-panel" data-qcd-panel="custom" hidden><p class="qz-help">Build a quiz from your own study state.</p>${qcdSeg('filt',[['any','Any'],['new','Unanswered'],['wrong','Answered wrong'],['saved','Saved']])}</div>
   <div class="setrow qz-count-row"><div><b>Number of questions</b><small id="qcd-available">${pool.length} questions available · ${n} selected</small></div><div class="qz-count-controls"><input class="field" id="qzCount" type="number" inputmode="numeric" min="1" max="5000" value="${QCD.count}" oninput="qcDraftInput('count',this)" aria-label="Number of questions"><button type="button" class="btn" onclick="qcDraftAll()">All</button></div></div>
@@ -2205,8 +2221,8 @@ function qzBegin(ids,base,kind){const go=()=>{const now=Date.now(),timed=base.mo
 window.qzRetake=function(id){const a=QZ.attempts.find(x=>x.id===id);if(!a)return;const ids=a.items.map(i=>i.id).filter(i=>QBY.has(i));if(!ids.length)return;qzBegin(a.order==='random'?shuffle(ids):ids,a,'retake')};
 window.qzRetryWrong=function(id){const a=QZ.attempts.find(x=>x.id===id);if(!a)return;const ids=a.items.filter(i=>i.sel>=0&&!i.ok&&QBY.has(i.id)).map(i=>i.id);if(!ids.length)return;qzBegin(a.order==='random'?shuffle(ids):ids,a,'retry')};
 window.qzRevMarked=function(){qzRevF='mk';renderAppDemo();setTimeout(()=>{const e=$('#qzRevTop');e&&e.scrollIntoView({block:'start'})},60)};
-window.qzTopicQuiz=function(spec,topic){QC.scope='sel';QC.specs=[spec];QC.topics=[topic];qcSave();appPage='quiz';renderAppDemo()};
-window.qzWeakQuiz=function(id){const a=QZ.attempts.find(x=>x.id===id);if(!a)return;const g=qzAgg(a.items),w=Object.values(g.tp).filter(o=>qzTier(o)==='weak');if(!w.length)return;QC.scope='sel';QC.specs=[...new Set(w.map(o=>o.spec))];QC.topics=w.map(o=>o.id);qcSave();appPage='quiz';renderAppDemo()};
+window.qzTopicQuiz=function(spec,topic){QC.scope='sel';QC.bank='all';QC.specs=[spec];QC.topics=[topic];qcSave();appPage='quiz';renderAppDemo()};
+window.qzWeakQuiz=function(id){const a=QZ.attempts.find(x=>x.id===id);if(!a)return;const g=qzAgg(a.items),w=Object.values(g.tp).filter(o=>qzTier(o)==='weak');if(!w.length)return;QC.scope='sel';QC.bank='all';QC.specs=[...new Set(w.map(o=>o.spec))];QC.topics=w.map(o=>o.id);qcSave();appPage='quiz';renderAppDemo()};
 window.qzOpen=function(id,from){if(!QZ.attempts.some(a=>a.id===id))return;qzViewId=id;qzRevF='all';qzBack=from||null;appPage='quizresult';renderAppDemo()};
 const qzRowHTML=(name,o,extra)=>{const p=pct(o.c,o.n),t=qzTier(o);return `<div class="strow"><div><b>${esc(name)}</b><small>${o.c}/${o.n} correct${o.w?` · ${o.w} incorrect`:''}${o.u?` · ${o.u} unanswered`:''}${extra||''}</small></div><span>${p}%</span><div class="bar"><span style="width:${p}%"></span></div>${t==='few'?'':`<small class="qtier ${t}">${QZ_TIER_LBL[t]}</small>`}</div>`};
 quizResultView=function(){const at=QZ.attempts.find(a=>a.id===qzViewId)||QZ.attempts[0];if(!at)return `${appHeader('Quiz result')}<div class="rs"><h1>Quiz result</h1><div class="card setcard"><p class="meta">No completed quiz yet.</p><button type="button" class="btn primary block" onclick="appPage='quiz';renderAppDemo()">Build a quiz</button></div></div>`;
@@ -2333,9 +2349,18 @@ function stBarHTML(){const c=ST.cur,run=!!(c&&c.running),state=!c?'idle':run?'ru
  const btns=!c?'<button type="button" class="go" onclick="stTimerStart()" aria-label="Start study timer">▶ Start</button>':run?'<button type="button" onclick="stTimerPause()" aria-label="Pause study timer">❚❚</button><button type="button" onclick="stTimerFinish()" aria-label="Finish and save session">■</button>':'<button type="button" class="go" onclick="stTimerStart()" aria-label="Resume study timer">▶</button><button type="button" onclick="stTimerFinish()" aria-label="Finish and save session">■</button>';
  return `<div class="sst-bar ${state}" role="group" aria-label="Study timer">${ico}<span class="sst-lab">${lab}</span><b class="sst-time">${stClock(stCurMs(c))}</b>${btns}</div>`}
 function stBarRefresh(){const o=document.querySelector('.sst-bar');if(!o)return;const t=document.createElement('div');t.innerHTML=stBarHTML();o.replaceWith(t.firstElementChild)}
-function stInject(){document.querySelectorAll('.sst-bar').forEach(n=>n.remove());if(appPage!=='questions')return;const host=document.querySelector('.phone-content .rs');if(!host)return;const t=document.createElement('div');t.innerHTML=stBarHTML();host.insertBefore(t.firstElementChild,host.firstChild)}
+function stInject(){
+ document.querySelectorAll('.sst-bar,.qb-mini-clock').forEach(n=>n.remove());
+ if(appPage!=='questions')return;
+ const host=document.querySelector('#phoneContent .rs.qb,.phone-content .rs.qb');if(!host)return;
+ host.classList.add('qb-clock-host');
+ const b=document.createElement('button');b.type='button';b.className='qb-mini-clock';b.id='qbMiniClock';b.setAttribute('aria-label','Open Study Timer');
+ b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8.2"></circle><path d="M12 8v5l3 2M9.5 2.5h5"></path></svg><span>FOCUS</span><b id="qbMiniClockDigits">'+stClock(Math.max(0,ST.goal*60000-stCurMs(ST.cur)))+'</b>';
+ b.addEventListener('click',function(){appPage='timer';renderAppDemo()});
+ host.appendChild(b);
+}
 window.stTimerStart=stStart;window.stTimerPause=()=>stPause(false);window.stTimerFinish=stFinish;
-const stTick=()=>{const c=ST.cur;if(!c||!c.running)return;const ms=stCurMs(c);if(++stN%10===0)stSave();document.querySelectorAll('.sst-time').forEach(el=>{el.textContent=stClock(ms)});try{window.stTimerTick&&window.stTimerTick(ms)}catch(e){}};
+const stTick=()=>{const c=ST.cur;if(!c||!c.running)return;const ms=stCurMs(c);if(++stN%10===0)stSave();document.querySelectorAll('.sst-time').forEach(el=>{el.textContent=stClock(ms)});const mini=document.getElementById('qbMiniClockDigits');if(mini)mini.textContent=stClock(Math.max(0,ST.goal*60000-ms));try{window.stTimerTick&&window.stTimerTick(ms)}catch(e){}};
 setInterval(stTick,500);
 ['pointerdown','keydown','scroll','touchstart'].forEach(ev=>addEventListener(ev,()=>{stIdleAt=Date.now()},{passive:true,capture:true}));
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stSave();else{stLast=Date.now();stTick()}});
@@ -2450,7 +2475,7 @@ PAGES.notifs=notifsView;PAGES.quizhistory=qzHistoryView;PAGES.timer=timerView;
 window.wkPractice=function(){const tp=stTopicPerf();if(!tp.length)return;
  let pick=tp.filter(t=>t.acc<75);if(!pick.length)pick=tp.slice(0,3);pick=pick.slice(0,5);
  const specs=[...new Set(pick.map(t=>(QB.find(q=>q.topic===t.id)||{}).spec).filter(Boolean))];
- QC.scope='sel';QC.specs=specs;QC.topics=pick.map(t=>t.id);qcSave();appPage='quiz';renderAppDemo()};
+ QC.scope='sel';QC.bank='all';QC.specs=specs;QC.topics=pick.map(t=>t.id);qcSave();appPage='quiz';renderAppDemo()};
 window.wkTopic=function(id){const q=QB.find(x=>x.topic===id);if(q)qzTopicQuiz(q.spec,id)};
 function weakView(){const tp=stTopicPerf(),n=tp.length,wk=tp.filter(t=>t.acc<50).length,mid=tp.filter(t=>t.acc>=50&&t.acc<75).length,ok=n-wk-mid;
  const tier=a=>a<50?['Weak','#ff8c8c']:a<75?['Needs work','#ffb454']:['Strong','#5fe0cf'];
@@ -2748,6 +2773,19 @@ const __fontScaleRender=renderAppDemo;
 renderAppDemo=function(){const result=__fontScaleRender.apply(this,arguments);applyAppFontScaleStage();return result};
 /* Apply once if an app screen was already mounted before this hook was registered. */
 applyAppFontScaleStage();
+
+/*SHB-BRIDGE-START*/
+/* Bridge for the separate scripts 13 and 35. This file is one closed IIFE, so QB, SYS, qs, REC, inTopic,
+   topicIcon, topicCards ... were invisible to them: 35 threw ReferenceError and "Start Studying" /
+   "Continue Studying" did nothing. Nothing here changes data, logic or markup. */
+window.__SHB_BRIDGE={
+ qs:qs,SYS:SYS,QB:QB,sysIcon:sysIcon,isPinned:isPinned,answeredCount:answeredCount,TOPIC_ICON_ASSET:TOPIC_ICON_ASSET,
+ get REC(){return REC},
+ get inTopic(){return inTopic},set inTopic(f){inTopic=f},
+ get topicIcon(){return topicIcon},set topicIcon(f){topicIcon=f},
+ get topicCards(){return topicCards},set topicCards(f){topicCards=f}
+};
+/*SHB-BRIDGE-END*/
 
 /* =====================================================================
    SHBACE_STUDENT_MODULES_V2

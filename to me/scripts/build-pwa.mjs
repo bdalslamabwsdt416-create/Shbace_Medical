@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { Script } from "node:vm";
 import {
   cpSync,
   copyFileSync,
@@ -11,6 +12,7 @@ import {
   statSync
 } from "node:fs";
 import { join, relative } from "node:path";
+import sharp from "sharp";
 
 const root = process.cwd();
 const output = join(root, "www");
@@ -21,17 +23,21 @@ const requiredFiles = [
   "css/core.css",
   "css/late.css",
   "css/unified-enhancements.css",
+  "css/shbace-layout-refinements.css",
   "data/qbData.json",
   "data/qbData_reviewed_patch.json",
   "data/qbData_review_log.json",
   "data/audit/Question_Review_Log_1718.csv",
   "data/audit/Question_Review_Log_636.csv",
   "data/audit/Reviewed_Copy_Status.json",
+  "data/audit/Question_Explanation_Audit_1718.json",
   "js/29-reviewed-bank-controls.js",
   "pwa-version.json",
   "js/29-offline-setup.js",
   "js/33-unified-voice.js",
-  "js/34-study-countdown.js"
+  "js/34-study-countdown.js",
+  "js/35-pediatrics-collections.js",
+  "js/36-exam-planner-settings-smartreview.js"
 ];
 const requiredDirs = ["css", "js", "data"];
 const imageDirs = ["img", "img1", "img2"];
@@ -59,11 +65,26 @@ if (!manifest.start_url || !manifest.scope || !Array.isArray(manifest.icons) || 
   fail("manifest.webmanifest is missing start_url, scope, or icons");
 }
 const baseBank = JSON.parse(readFileSync(join(root, "data/qbData.json"), "utf8"));
+const explanationAudit = JSON.parse(readFileSync(join(root, "data/audit/Question_Explanation_Audit_1718.json"), "utf8"));
 const reviewedPatch = JSON.parse(readFileSync(join(root, "data/qbData_reviewed_patch.json"), "utf8"));
 const reviewLog = JSON.parse(readFileSync(join(root, "data/qbData_review_log.json"), "utf8"));
 const reviewStatus = JSON.parse(readFileSync(join(root, "data/audit/Reviewed_Copy_Status.json"), "utf8"));
 if (!Array.isArray(baseBank.questions) || baseBank.questions.length !== 1718) {
   fail("Original question bank must remain the 1,718-question base");
+}
+const explanationMissing = baseBank.questions.filter(q => !String(q && q.e || "").trim()).length;
+const shortExplanationQuestions = baseBank.questions.filter(q => String(q && q.e || "").trim().length < 20).map(q => q.id);
+const auditedExplanationIds = Array.isArray(explanationAudit.manualReviewQueue)
+  ? explanationAudit.manualReviewQueue.map(q => q && q.id) : [];
+if (explanationAudit.schema !== "shbace-question-explanation-audit-v1" ||
+    explanationAudit.questionCount !== baseBank.questions.length ||
+    !explanationAudit.result ||
+    explanationAudit.result.missingExplanation !== explanationMissing ||
+    explanationAudit.result.explanationsUnder20Characters !== shortExplanationQuestions.length ||
+    auditedExplanationIds.length !== shortExplanationQuestions.length ||
+    new Set(auditedExplanationIds).size !== shortExplanationQuestions.length ||
+    shortExplanationQuestions.some(id => !auditedExplanationIds.includes(id))) {
+  fail("Question explanation audit does not match the unchanged 1,718-question bank");
 }
 if (reviewedPatch.schema !== "shbace-question-bank-patch-v1" ||
     reviewedPatch.baseFile !== "qbData.json" ||
@@ -116,8 +137,8 @@ if (reviewLog && Array.isArray(reviewLog.entries)) {
   if (logChanged !== 45 || logNeedsReview !== 110) fail("Question review JSON counts do not match the master audit");
 }
 const pwaVersion = JSON.parse(readFileSync(join(root, "pwa-version.json"), "utf8"));
-if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.6-to-me.1") {
-  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.6-to-me.1");
+if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.9-to-me.9") {
+  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.9-to-me.9");
 }
 
 rmSync(output, { recursive: true, force: true });
@@ -175,7 +196,57 @@ for (const icon of manifest.icons) {
   if (!existsSync(iconPath)) fail(`Manifest icon does not exist in the PWA output: ${icon.src}`);
 }
 
-const html = readFileSync(join(output, "index.html"), "utf8");
+const htmlPath = join(output, "index.html");
+let html = readFileSync(htmlPath, "utf8");
+
+/* Embed the two main-branch Pediatrics images as compact, self-contained WebP data.
+   The source PNGs stay outside the app bundle; only their 256px derivatives enter HTML. */
+async function toInlineWebp(sourcePath, mode) {
+  if (!existsSync(sourcePath) || !statSync(sourcePath).isFile()) {
+    console.warn("Pediatrics image not found; initials fallback will be used: " + relative(join(root, ".."), sourcePath));
+    return "";
+  }
+  try {
+    let pipeline = sharp(sourcePath).rotate();
+    if (mode === "cover") {
+      pipeline = pipeline.resize(256, 256, { fit: "cover", position: "attention", withoutEnlargement: true });
+    } else {
+      pipeline = pipeline.resize(256, 256, {
+        fit: "contain", withoutEnlargement: true,
+        background: { r: 5, g: 16, b: 35, alpha: 0 }
+      });
+    }
+    const buffer = await pipeline.webp({ quality: 82, effort: 5, alphaQuality: 85 }).toBuffer();
+    const fileName = sourcePath.slice(Math.max(sourcePath.lastIndexOf("/"), sourcePath.lastIndexOf("\\")) + 1);
+    console.log("Pediatrics image embedded: " + fileName +
+      " → 256px WebP (" + buffer.byteLength + " bytes)");
+    return "data:image/webp;base64," + buffer.toString("base64");
+  } catch (error) {
+    console.warn("Pediatrics image conversion failed; initials fallback will be used: " +
+      sourcePath + " — " + (error && error.message || error));
+    return "";
+  }
+}
+/* These paths are inside the PWA root so Vercel can resolve them reliably. The PNG
+   files reuse the exact original Git blobs from main; only the 256px WebP data URIs
+   are embedded in index.html at build time. */
+const [ajPortraitData, facultyLogoData] = await Promise.all([
+  toInlineWebp(join(root, "scripts/source-assets/pediatrics-dr-aljoaki-source.png"), "cover"),
+  toInlineWebp(join(root, "scripts/source-assets/faculty-of-medicine-tripoli-source.png"), "contain")
+]);
+const ajSlot = 'window.__SHBACE_AJ_PORTRAIT_DATA__="__SHBACE_AJ_PORTRAIT_DATA__";';
+const facultySlot = 'window.__SHBACE_FACULTY_LOGO_DATA__="__SHBACE_FACULTY_LOGO_DATA__";';
+if (!html.includes(ajSlot) || !html.includes(facultySlot)) {
+  fail("Pediatrics image slots are missing from index.html");
+}
+html = html.replace(ajSlot, "window.__SHBACE_AJ_PORTRAIT_DATA__=" + JSON.stringify(ajPortraitData) + ";");
+html = html.replace(facultySlot, "window.__SHBACE_FACULTY_LOGO_DATA__=" + JSON.stringify(facultyLogoData) + ";");
+writeFileSync(htmlPath, html);
+if (!html.includes("js/35-pediatrics-collections.js") ||
+    !html.includes("js/36-exam-planner-settings-smartreview.js") ||
+    !html.includes("css/shbace-layout-refinements.css")) {
+  fail("Pediatrics, Exam Planner/Smart Review or layout refinement assets are not referenced by index.html");
+}
 if (!html.includes("navigator.serviceWorker.register('./sw.js'") || !html.includes("js/29-offline-setup.js") || !html.includes("js/29-reviewed-bank-controls.js") || !html.includes("qbData_reviewed_patch.json")) {
   fail("index.html does not register ./sw.js");
 }
@@ -208,6 +279,11 @@ if (missingAssets.size) {
 const scriptRefs = [...html.matchAll(/data-src=["']([^"']+\.js)["']/g)].map(m => m[1]);
 for (const script of scriptRefs) {
   if (!existsSync(join(output, script))) fail(`Deferred application script is missing: ${script}`);
+  try {
+    new Script(readFileSync(join(output, script), "utf8"), { filename: script });
+  } catch (error) {
+    fail(`JavaScript syntax check failed in ${script}: ${error.message}`);
+  }
 }
 if (!existsSync(join(output, "data/qbData.json"))) fail("Question bank JSON was not copied");
 
@@ -280,7 +356,7 @@ console.log("PWA release: " + pwaVersion.displayVersion + " (" + pwaVersion.vers
 console.log(`Output: ${relative(root, output)}`);
 console.log(`Images copied: ${copiedImages.size} (${(imageBytes / 1024 / 1024).toFixed(2)} MiB)`);
 console.log(`Image references verified: ${referencedAssets.size}`);
-console.log(`Deferred scripts verified: ${scriptRefs.length}`);
+console.log(`Deferred scripts verified and syntax-checked: ${scriptRefs.length}`);
 console.log(`Question bank: ${(statSync(join(output, "data/qbData.json")).size / 1024 / 1024).toFixed(2)} MiB`);
 console.log("Offline inventory: " + offlineManifest.fileCount + " files (" + (offlineManifest.totalBytes / 1024 / 1024).toFixed(2) + " MiB)");
 console.log("Offline manifest version: " + offlineVersion.slice(0, 16));
