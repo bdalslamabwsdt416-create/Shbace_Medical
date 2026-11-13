@@ -2,7 +2,7 @@
    Question records, IDs, answer keys and explanations are never rewritten. */
 (function(){
 'use strict';
-let activeCollection='aj';
+let activeCollection=''
 let activePreviousSystem='';
 const previousSystemByTopic=new Map();
 const norm=v=>String(v==null?'':v).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
@@ -57,7 +57,7 @@ function collectionView(){
   <div class="ped-collection-footnote">The two banks remain separate. Question records and source labels are preserved.</div>
  </div>`;
 }
-window.openPediatricCollections=function(ev){if(ev&&ev.stopPropagation)ev.stopPropagation();activeCollection='aj';activePreviousSystem='';appPage='pedcollections';renderAppDemo()};
+window.openPediatricCollections=function(ev){if(ev&&ev.stopPropagation)ev.stopPropagation();activeCollection='';activePreviousSystem='';appPage='specialties';renderAppDemo()};
 window.selectPediatricCollection=function(which){
  activeCollection=which==='previous'?'previous':'aj';activePreviousSystem='';window.__SHB_PED_COLLECTION__=activeCollection;
  qs.spec=activeCollection==='previous'?'exams':'endocrinology';qs.topic=0;qs.filter='all';qs.tag='all';qs.idx=0;
@@ -107,29 +107,11 @@ function previousSystemsView(){
 const _oldSubjectsView=subjectsView;
 subjectsView=function(){
  let html=_oldSubjectsView.apply(this,arguments);
- html=html.replace(/appPage\s*=\s*['"]specialties['"]/g,"appPage='pedcollections'");
  html=html.replace(/onclick="startPractice\(event\)"/g,'onclick="openPediatricCollections(event)"');
- html=html.replace('onkeydown="if(event.key===\'Enter\')appPage=\'pedcollections\',renderAppDemo()"','onkeydown="if(event.key===\'Enter\')openPediatricCollections(event)"');
  return html;
 };
-/* Register custom Pediatrics page with the app renderer. The core renderer only knows built-in pages. */
-window.__shbRegisterPage=window.__shbRegisterPage||function(id,view){
- const previousRender=window.renderAppDemo;
- window.renderAppDemo=function(){
-  if(appPage===id){
-   document.getElementById('previewLabel').textContent='INSIDE THE APP · PEDIATRICS';
-   document.getElementById('previewCount').textContent='QUESTION COLLECTIONS';
-   phoneContent.innerHTML=`<div class="device-status"><span>9:41</span><span>● ● ● ▰</span></div><section class="screen" style="padding-top:11px;padding-bottom:10px">${view()}${appNav()}</section>`;
-   renderGuide();
-   return;
-  }
-  return previousRender.apply(this,arguments);
- };
-};
-window.__shbRegisterPage('pedcollections',collectionView,'subjects');
-if(typeof BACKP!=='undefined')BACKP.specialties='pedcollections';
 const _oldSpecialtiesView=specialtiesView;
-specialtiesView=function(){if(activeCollection==='previous')return previousSystemsView();if(activeCollection==='aj')return doctorSystemsView();return _oldSpecialtiesView.apply(this,arguments)};
+specialtiesView=function(){if(activeCollection==='previous')return previousSystemsView();if(activeCollection==='aj')return doctorSystemsView();return collectionView()};
 const _oldOpenSpec=window.openSpec;
 if(typeof _oldOpenSpec==='function')window.openSpec=function(id){activeCollection='aj';activePreviousSystem='';window.__SHB_PED_COLLECTION__='aj';return _oldOpenSpec(id)};
 const _oldOpenTopic=window.openTopic;
