@@ -1,15 +1,25 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.6-to-me.1",
-  "displayVersion": "1.3.6 · Chrome (Phone + Computer)",
-  "releaseDate": "2026-11-12",
+  "version": "1.3.9-to-me.9",
+  "displayVersion": "1.3.9.9 · Chrome (Phone + Computer)",
+  "releaseDate": "2026-11-13",
   "releaseNotes": [
-    "Created an independent adaptive Chrome PWA for phone and computer; the original Chrome Android, iOS and Computer deliveries remain separate.",
-    "Smart Review now lets students select multiple topics and set a separate question count for each selected topic; the Smart Pick is optional and can be hidden.",
-    "Added English (US), English (UK) and Arabic question-reading voice selection; English (US) is the default.",
-    "Exam Goal Planner now accepts custom exam names and multiple separate exam dates.",
-    "Study Timer presents a countdown using the configured focus duration, with browser notification and sound alerts when the page is running; browser alarms cannot be guaranteed after the browser or device fully closes the app.",
-    "The existing 1,718-question bank and its explanations are preserved unchanged."
+    "Continues the independent unified Chrome PWA for phone and computer. Android APK, iOS and Computer deliveries remain separate.",
+    "Smart Review opens directly at Your Session; Smart Recommended remains available as a compact action within the session panel.",
+    "Overview keeps its statistics, topic mastery map and mastery journey while removing the due-today / 20-question hero card only.",
+    "Empty Schedule state no longer displays the redundant Choose a topic button.",
+    "Pediatrics Start Studying opens the collection chooser first. The doctor MCQ bank and Previous Questions remain separate and are grouped by their existing system/topic mapping.",
+    "The side menu keeps the existing Exam Goal Planner under Your Progress and removes the duplicate extension entry.",
+    "Question bank records, stable question IDs, question wording, option labels, answer keys and explanations are preserved.",
+    "Fixes offline installation integrity retries by bypassing stale Service Worker cache responses for hash-versioned verification requests, while storing verified bytes under canonical local cache URLs.",
+    "Offline retry reuses the previously saved package cache, rechecks existing files against the current byte sizes and SHA-256 hashes, and downloads only missing or changed assets. The latest Service Worker is checked and activated before integrity downloads.",
+    "After the complete current package passes integrity verification, obsolete cache entries and older package caches are deleted. Existing answers, bookmarks, notes and study progress remain preserved.",
+    "Pediatrics collection navigation now renders the registered collection chooser correctly from Start Studying, with the doctor MCQ and Previous Questions paths available.",
+    "Removed the Smart Recommended card and its Start recommended action entirely from Smart Review, as requested.",
+    "Reworked Pediatrics Start Studying to use the existing Pediatrics specialties route and collection chooser; removed the unsupported custom page registration shim that could leave the Start action unresponsive.",
+    "Pediatrics 'Start Studying' and 'Continue Studying' now work: the collection and home scripts are connected to the app core through a safe bridge (no data or markup changes).",
+    "Added a Question bank selector (All banks / Dr. Al-Joaki / Previous) to Quiz, Search and Smart Review. It is a view-only filter; question records, IDs, answer keys and explanations are unchanged.",
+    "A question opened from Search, Saved, Wrong answers or Smart Review now opens inside its own bank, so a Previous question no longer opens as an empty list."
   ]
 }

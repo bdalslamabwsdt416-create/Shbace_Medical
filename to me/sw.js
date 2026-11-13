@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'shbace-to-me-chrome-offline-v1.3.6';
+const CACHE_NAME = 'shbace-to-me-chrome-offline-v1.3.9-to-me.9';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
 const APP_SHELL = [
   './',
@@ -13,7 +13,12 @@ const APP_SHELL = [
   './css/core.css',
   './css/late.css',
   './css/unified-enhancements.css',
-  './js/29-offline-setup.js'
+  './css/shbace-layout-refinements.css',
+  './js/29-offline-setup.js',
+  './js/33-unified-voice.js',
+  './js/34-study-countdown.js',
+  './js/35-pediatrics-collections.js',
+  './js/36-exam-planner-settings-smartreview.js'
 ];
 
 function missingOfflineResponse(url) {
@@ -38,8 +43,15 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  // Preserve older caches; they may still contain files needed by an already-open app.
-  event.waitUntil(self.clients.claim());
+  // The new worker is activated only after its complete APP_SHELL cache was installed.
+  // It is therefore safe to remove obsolete worker-shell caches; student data is not stored here.
+  event.waitUntil((async () => {
+    await self.clients.claim();
+    const names = await caches.keys();
+    await Promise.all(names
+      .filter(name => name.startsWith('shbace-to-me-chrome-offline-') && name !== CACHE_NAME)
+      .map(name => caches.delete(name)));
+  })());
 });
 
 self.addEventListener('fetch', event => {
@@ -48,6 +60,14 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
   if (url.pathname.endsWith('/sw.js')) return;
+
+  // Integrity downloads must reach the network; never satisfy them from a stale
+  // cache entry matched with ignoreSearch. The installer stores verified bytes
+  // under the canonical URL after its SHA-256 check succeeds.
+  if (url.searchParams.has('__shbace_integrity')) {
+    event.respondWith(fetch(request, { cache: 'reload' }));
+    return;
+  }
 
   // Manifest + version file: network first, so an updated manifest/icons always reach Chrome.
   // Falls back to the cached copy when offline.
