@@ -1,6 +1,6 @@
 # Clinical Case — Genetics
 
-Detailed explanations shown through Read More in SHBACE Medical. Original question wording and provenance are retained.
+Detailed explanations shown through Read More in SHBACE Medical. Original question wording and source provenance are retained.
 
 ## CC-0014 — Down syndrome & chromosomal disorders
 
@@ -13,7 +13,7 @@ area. One of the common complications of this condition is:
 3. Leukemia
 4. Pyloric stensis
 
-**Answer status:** No verified selectable answer is encoded; no answer has been guessed.
+**Model answer:** C — Leukemia.
 
 Clinical explanation:
 The flat occiput, transverse palmar crease and congenital heart murmur suggest Down syndrome (trisomy 21). Children with Down syndrome have an increased risk of acute leukemia, including acute lymphoblastic and acute megakaryoblastic leukemia.
@@ -28,8 +28,8 @@ High-Yield:
 A child with Down syndrome and new pallor, bruising, bone pain or organomegaly needs prompt hematologic assessment.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 2`.
-- NMT10 PDF · PDF page(s): 8
+- Q3 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 2`.
+- NMT10 · NMT10 — Section 3 · Original Question 5: The mother of a 4 months old boy complains her child still cant support his head. On · NMT10 PDF · PDF page(s): 8
 
 ---
 
@@ -70,6 +70,6 @@ High-Yield:
 Hypotonia/delayed milestones, flat occiput and a single transverse palmar crease suggest trisomy 21; congenital heart disease is also common. Children with Down syndrome have increased risk of acute leukemia, particularly acute lymphoblastic and acute megakaryoblastic leukemia.
 
 **Source provenance:**
-- NMT11 PDF · PDF page: 11 · Original source case: 19
+- NMT11 · NMT11 — Original Question 19: The mother of a 4-month-old boy complains her child still can’t · NMT11 PDF · PDF page: 11 · Original source case: 19
 
 ---
