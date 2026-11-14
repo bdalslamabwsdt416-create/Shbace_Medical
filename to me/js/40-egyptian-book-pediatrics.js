@@ -20,7 +20,7 @@ function systemsView(){
   const sys=SYS.find(s=>s[0]===iconFor[row.id]);
   const icon=sys&&typeof B.sysIcon==='function'?B.sysIcon(sys[2],'lg'):'<div class="tno ti"><span>📘</span></div>';
   return '<div class="card sc spc ped-system-card" dir="rtl" onclick="openEgyptianBookSystem(\''+row.id+'\')">'+icon+
-   '<div class="spc-tx"><h3>'+escText(row.name)+'</h3><div class="meta"><b>'+row.count.toLocaleString('ar')}</b> سؤال</div></div><span class="chev">‹</span></div>';
+   '<div class="spc-tx"><h3>'+escText(row.name)+'</h3><div class="meta"><b>'+row.count.toLocaleString('ar')+'</b> سؤال</div></div><span class="chev">‹</span></div>';
  }).join('');
  return appHeader('Egyptian book')+'<div class="rs ped-systems-page eb-systems-page" dir="rtl"><div class="ped-collection-kicker">SHBACE MEDICAL · PEDIATRICS</div><h1>اختر النظام الطبي</h1><p class="sub">'+rows.length.toLocaleString('ar')+' أنظمة · '+list.length.toLocaleString('ar')+' سؤال</p><div class="ped-systems-grid">'+(cards||'<div class="card setcard"><p class="meta">لا توجد أسئلة متاحة حالياً.</p></div>')+'</div></div>';
 }
