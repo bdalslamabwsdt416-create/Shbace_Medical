@@ -256,7 +256,7 @@ window.ddPick=function(id,v,e){e&&e.stopPropagation();qs.dd=null;
 
 const exName=e=>String((EXAMS[e]||e)).replace("Previous Years' Exam Questions \u2014 ",'Exam ');
 const repRef=a=>{const g={};a.forEach(([e,n])=>(g[e]=g[e]||[]).push(n));return Object.keys(g).map(e=>`<bdi>${esc(exName(e))}</bdi> \u2013 ${g[e].map(n=>'Q'+n).join(', ')}`).join(' \u00b7 ')};
-function nelsonDetails(q){if(!q||(!q.nl&&!q.ao)||!q.more)return '';const source=q.ao?(q.aoSource||'Source details unavailable'):'Nelson Textbook of Pediatrics.';return `<details class="nl-more"><summary>Read More</summary><div class="nl-more-body">${esc(q.more)}<p class="nl-source">Source: ${esc(source)}</p></div></details>`}
+function nelsonDetails(q){if(!q||(!q.nl&&!q.ao)||!q.more)return '';const source=q.ao?(q.aoSource||'Source details unavailable'):'Nelson Textbook of Pediatrics.';const alt=q.ao&&q.aoAltSource?`<p class="nl-source">Also found in: ${esc(q.aoAltSource)}</p>`:'';return `<details class="nl-more"><summary>Read More</summary><div class="nl-more-body">${esc(q.more)}<p class="nl-source">Source: ${esc(source)}</p>${alt}</div></details>`}
 function qExtra(q){if(!BANK_ON||q.nl||q.ao)return '';let x='';
  if(q.py){if(q.src)x+=`<div class="qsrc">Source: <bdi>${esc(q.src)}</bdi></div>`;if(q.cs)x+=`<div class="qcase"><b>${esc(q.cs[0])}</b>\n${esc(q.cs[1])}</div>`;if(q.cm)x+='<div class="qrep"><span class="qflag w">Case text not in source file \u2013 classified by explanation</span></div>';
   if(q.rq.length)x+=`<div class="qrep"><span class="qflag r">Repeated Question</span> also appears in: ${repRef(q.rq)}</div>`;if(q.rc.length)x+=`<div class="qrep"><span class="qflag w">Repeated Topic/Concept</span> also tested in: ${repRef(q.rc)}</div>`}
