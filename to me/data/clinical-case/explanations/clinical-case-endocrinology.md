@@ -1,6 +1,6 @@
 # Clinical Case — Endocrinology
 
-Detailed explanations shown through Read More in SHBACE Medical. Original question wording and provenance are retained.
+Detailed explanations shown through Read More in SHBACE Medical. Original question wording and source provenance are retained.
 
 ## CC-0005 — Congenital hypothyroidism
 
@@ -31,9 +31,9 @@ High-Yield:
 Early diagnosis and levothyroxine treatment are crucial for neurodevelopment.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 19`.
-- NMT10 PDF · PDF page(s): 6
-- NMT11 PDF · PDF page: 9 · Original source case: 16
+- Q63 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 19`.
+- NMT10 · NMT10 — Section 2 · Original Question 8: A 5-month-old girl presented with history of constipation and delayed · NMT10 PDF · PDF page(s): 6
+- NMT11 · NMT11 — Original Question 16: A 5-month-old girl presented with history of constipation and · NMT11 PDF · PDF page: 9 · Original source case: 16
 
 ---
 
@@ -66,7 +66,7 @@ High-Yield:
 Newborn-screening abnormalities require confirmatory serum TSH and free T4 without delay.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 19`.
+- Q64 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 19`.
 
 ---
 
@@ -98,7 +98,7 @@ High-Yield:
 Kussmaul breathing is a compensatory response to metabolic acidosis.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 19`.
+- Q65 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 19`.
 
 ---
 
@@ -129,7 +129,7 @@ High-Yield:
 DKA is metabolic acidosis with ketonaemia/ketonuria and hyperglycaemia; assess electrolytes and potassium before insulin.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 19`.
+- Q66 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 19`.
 
 ---
 
@@ -167,7 +167,7 @@ High-Yield:
 Rapid deep breathing (Kussmaul-type pattern), vomiting and a normal chest radiograph suggest compensatory hyperventilation from metabolic acidosis, including possible diabetic ketoacidosis. Obtain blood gas and urgently check glucose, ketones and electrolytes.
 
 **Source provenance:**
-- NMT10 PDF · PDF page(s): 7
+- NMT10 · NMT10 — Section 3 · Original Question 1: A 7 year old boy arrives at the emergency department, complaining of rapid breathing · NMT10 PDF · PDF page(s): 7
 
 ---
 
@@ -213,6 +213,6 @@ High-Yield:
 Rapid deep breathing (Kussmaul-type pattern), vomiting and a normal chest radiograph suggest compensatory hyperventilation from metabolic acidosis, including possible diabetic ketoacidosis. Obtain blood gas and urgently check glucose, ketones and electrolytes.
 
 **Source provenance:**
-- NMT11 PDF · PDF page: 13 · Original source case: 24
+- NMT11 · NMT11 — Original Question 24: A 7 year old boy arrives at the emergency department, complaining of · NMT11 PDF · PDF page: 13 · Original source case: 24
 
 ---
