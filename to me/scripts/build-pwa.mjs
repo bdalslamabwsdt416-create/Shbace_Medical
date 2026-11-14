@@ -177,7 +177,7 @@ if (reviewLog && Array.isArray(reviewLog.entries)) {
 }
 const pwaVersion = JSON.parse(readFileSync(join(root, "pwa-version.json"), "utf8"));
 if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.10-to-me.19") {
-  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.10-to-me.19");
+  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.10-to-me.20");
 }
 
 rmSync(output, { recursive: true, force: true });
