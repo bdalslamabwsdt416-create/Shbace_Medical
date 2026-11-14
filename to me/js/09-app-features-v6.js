@@ -281,7 +281,7 @@ function cardHTML(q,n,single){
 </div>`;
  const note=qs.noteOpen[q.id]?`<div class="qnote"><textarea placeholder="Write your note…" oninput="qNoteSave('${q.id}',this.value)">${esc(S.notes[q.id]||'')}</textarea></div>`:'';
  const sname=a?(a.ok?'Correct':'Incorrect'):'Unanswered';
- return `<article class="qcard${(q.nl||q.ao)?' nl-clean':''}" id="qc-${q.id}" data-id="${q.id}"><div class="qtop"><span class="qid">${q.id} · mcq</span><span class="qstat s-${st}">${sname}</span><span class="qtag">${esc(q.tag)}</span>${q.kind?`<span class="qtag">${esc(q.kind)}</span>`:''}${q.nlClass?`<span class="qtag">${esc(q.nlClass)}</span>`:''}</div>${(q.nl||q.ao)?'':`<div class="qtopic">${esc(TOPIC_NAME[q.topic]||'')}</div>`}${qExtra(q)}<h3 class="qstem">Q${n}. ${esc(QSTEM(q))}</h3><div class="qopts">${opts}</div>${react}${acts}${note}</article>`}
+ return `<article class="qcard${(q.nl||q.ao)?' nl-clean':''}" id="qc-${q.id}" data-id="${q.id}">${q.ao?'':`<div class="qtop"><span class="qid">${q.id} · mcq</span><span class="qstat s-${st}">${sname}</span><span class="qtag">${esc(q.tag)}</span>${q.kind?`<span class="qtag">${esc(q.kind)}</span>`:''}${q.nlClass?`<span class="qtag">${esc(q.nlClass)}</span>`:''}</div>`}${(q.nl||q.ao)?'':`<div class="qtopic">${esc(TOPIC_NAME[q.topic]||'')}</div>`}${qExtra(q)}<h3 class="qstem">Q${n}. ${esc(QSTEM(q))}</h3><div class="qopts">${opts}</div>${react}${acts}${note}</article>`}
 
 function bankBody(){
  const list=filtered();
