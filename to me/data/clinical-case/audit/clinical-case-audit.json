@@ -21,18 +21,18 @@
     "Cardiovascular System": 6,
     "Endocrinology": 6,
     "Gastroenterology": 3,
-    "Growth & Development": 11,
-    "Emergency & Fluid Balance": 3,
+    "Infectious Diseases": 7,
+    "Emergency & Fluid Balance": 2,
     "Genetics": 2,
-    "Nephrology": 8,
+    "Growth & Development": 11,
     "Hematology": 8,
-    "Infectious Diseases": 6,
-    "Neonatology": 16,
-    "Neurology": 7,
-    "Respiratory": 9
+    "Neonatology": 15,
+    "Neurology": 8,
+    "Nephrology": 7,
+    "Respiratory": 10
   },
   "topic_counts": {
-    "Approach to fever and arthritis": 1,
+    "Approach to fever and arthritis": 2,
     "Rheumatic fever & carditis": 2,
     "Infective endocarditis": 2,
     "Congenital hypothyroidism": 2,
@@ -42,36 +42,40 @@
     "Dehydration, shock & fluid balance": 2,
     "IgA vasculitis & renal involvement": 3,
     "Down syndrome & chromosomal disorders": 2,
-    "Developmental milestones": 1,
-    "Gastro-oesophageal reflux": 2,
+    "Developmental milestones": 2,
+    "Gastro-oesophageal reflux": 1,
     "Malnutrition & feeding": 4,
-    "Iron deficiency & childhood anemia": 10,
+    "Vitamin D toxicity & renal manifestations": 1,
     "Sickle cell disease & complications": 2,
+    "Iron deficiency & childhood anemia": 5,
     "G6PD deficiency & haemolysis": 1,
-    "Measles & viral exanthems": 2,
+    "Measles & viral exanthems": 1,
     "Roseola & febrile seizures": 2,
+    "Rubella & viral exanthems": 1,
     "Neonatal jaundice & cholestasis": 6,
+    "Heart failure in infancy": 2,
     "Neonatal sepsis & meningitis": 2,
-    "Neonatal birth injury": 2,
-    "Neonatal hypothermia & thermal care": 1,
-    "Febrile seizures & epilepsy": 1,
+    "Neonatal birth injury": 1,
+    "Neonatal hypothermia & thermal care": 2,
+    "Neonatal hypocalcemia in an infant of a diabetic mother": 1,
     "Neonatal skin findings": 1,
-    "Prematurity & neonatal respiratory disease": 2,
+    "Prematurity & neonatal respiratory disease": 1,
+    "Cerebral palsy & developmental delay": 1,
     "Guillain–Barré syndrome": 4,
     "Urinary tract infection": 4,
     "Hypertensive encephalopathy": 3,
     "Chronic kidney disease & renal function": 3,
-    "Gastroenteritis & diarrhea": 2,
+    "Viral upper respiratory infection": 2,
     "Retropharyngeal abscess & upper-airway obstruction": 1,
-    "Pneumothorax & air leak": 1,
+    "Pneumothorax & air leak": 2,
     "Tuberculosis & chronic cough": 1,
     "Bronchiolitis & viral wheeze": 4,
-    "Pneumonia & lower respiratory infection": 2,
-    "Congenital heart disease": 1,
+    "Pneumonia complicated by sepsis": 1,
+    "Respiratory syncytial virus & bronchiolitis": 1,
     "Intussusception & acute abdominal pain": 1,
-    "Growth & Development": 1,
-    "Acute infections & immunization": 1,
-    "Neonatology": 1
+    "Infant feeding & overfeeding": 1,
+    "Infant feeding & nutritional assessment": 2,
+    "Congenital diaphragmatic hernia": 1
   },
   "pending_record_headings": [
     "Cardiovascular_System_Accepted.md: C1",
@@ -142,5 +146,85 @@
     "Only exact stem-and-option duplicates were merged; all recorded source appearances were retained.",
     "59 Accepted sections without a dedicated question block are preserved in unmapped-accepted-records.md and are not fabricated or silently discarded.",
     "No production deployment or Android changes were made."
-  ]
+  ],
+  "source_occurrences_preserved": 108,
+  "cards_with_multiple_source_appearances": 16,
+  "manual_content_classification_overrides": {
+    "CC-0011": {
+      "system": "Infectious Diseases",
+      "topic": "Candidiasis & mucocutaneous infection"
+    },
+    "CC-0020": {
+      "system": "Growth & Development",
+      "topic": "Vitamin D toxicity & renal manifestations"
+    },
+    "CC-0028": {
+      "system": "Infectious Diseases",
+      "topic": "Rubella & viral exanthems"
+    },
+    "CC-0031": {
+      "system": "Cardiovascular System",
+      "topic": "Heart failure in infancy"
+    },
+    "CC-0035": {
+      "system": "Neonatology",
+      "topic": "Neonatal hypocalcemia in an infant of a diabetic mother"
+    },
+    "CC-0038": {
+      "system": "Neurology",
+      "topic": "Cerebral palsy & developmental delay"
+    },
+    "CC-0046": {
+      "system": "Infectious Diseases",
+      "topic": "Viral upper respiratory infection"
+    },
+    "CC-0052": {
+      "system": "Respiratory",
+      "topic": "Pneumonia complicated by sepsis"
+    },
+    "CC-0053": {
+      "system": "Respiratory",
+      "topic": "Respiratory syncytial virus & bronchiolitis"
+    },
+    "CC-0054": {
+      "system": "Cardiovascular System",
+      "topic": "Heart failure in infancy"
+    },
+    "CC-0061": {
+      "system": "Growth & Development",
+      "topic": "Developmental milestones"
+    },
+    "CC-0062": {
+      "system": "Growth & Development",
+      "topic": "Infant feeding & overfeeding"
+    },
+    "CC-0064": {
+      "system": "Growth & Development",
+      "topic": "Infant feeding & nutritional assessment"
+    },
+    "CC-0065": {
+      "system": "Growth & Development",
+      "topic": "Infant feeding & nutritional assessment"
+    },
+    "CC-0066": {
+      "system": "Rheumatology",
+      "topic": "Approach to fever and arthritis"
+    },
+    "CC-0071": {
+      "system": "Infectious Diseases",
+      "topic": "Viral upper respiratory infection"
+    },
+    "CC-0077": {
+      "system": "Neonatology",
+      "topic": "Neonatal hypothermia & thermal care"
+    },
+    "CC-0079": {
+      "system": "Neonatology",
+      "topic": "Congenital diaphragmatic hernia"
+    },
+    "CC-0089": {
+      "system": "Respiratory",
+      "topic": "Pneumothorax & air leak"
+    }
+  }
 }
