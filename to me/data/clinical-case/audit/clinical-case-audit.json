@@ -144,8 +144,8 @@
     "All 11 A4_Corrected copies were confirmed text-identical to their corresponding base Accepted files and were not double-counted.",
     "Progress and Rejected sources were excluded.",
     "Only exact stem-and-option duplicates were merged; all recorded source appearances were retained.",
-    "59 Accepted sections without a recoverable dedicated question block remain preserved in unmapped-accepted-records.md and are excluded from the student-facing bank.",
-    "All 90 student-facing records are explicitly marked matched; all have complete option arrays and a valid verified answer key.",
+    "59 Accepted sections without a recoverable dedicated question stem are excluded from the student-facing matched bank and preserved separately; they are not labelled as incorrect or rejected.",
+    "All 90 student-facing records are explicitly marked matched; all have complete option arrays and a valid answer key traceable to the Accepted source record.",
     "Nine incomplete option arrays were reconstructed from their verbatim Accepted source question blocks and their source-provided answers; no answer was inferred from proximity or guessed.",
     "No production deployment or Android changes were made."
   ],
@@ -230,6 +230,6 @@
     }
   },
   "matched_student_facing_cards": 90,
-  "unmatched_or_unreconstructable_accepted_sections_excluded": 59,
-  "option_arrays_reconstructed_from_accepted_source": 9
+  "option_arrays_reconstructed_from_accepted_source": 9,
+  "accepted_sections_without_recoverable_stem_excluded": 59
 }
