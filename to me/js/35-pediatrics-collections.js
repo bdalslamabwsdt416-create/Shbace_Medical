@@ -11,7 +11,7 @@ incomingNelson.forEach(q=>{if(q&&q.nl===true&&q.id&&!knownQuestionIds.has(q.id))
 if(window.__bank){window.__bank.total=QB.length;window.__bank.nelson=incomingNelson.length}
 let activeCollection='';let activePreviousSystem='';const previousSystemByTopic=new Map();
 const norm=v=>String(v==null?'':v).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
-const isPreviousQuestion=q=>!!q&&q.py===true;const isNelsonQuestion=q=>!!q&&q.nl===true;const isDoctorQuestion=q=>!!q&&!isPreviousQuestion(q)&&!isNelsonQuestion(q);
+const isPreviousQuestion=q=>!!q&&q.py===true;const isNelsonQuestion=q=>!!q&&q.nl===true;const isAllOnceQuestion=q=>!!q&&q.ao===true;const isDoctorQuestion=q=>!!q&&!isPreviousQuestion(q)&&!isNelsonQuestion(q)&&!isAllOnceQuestion(q);
 const allQuestions=()=>Array.isArray(QB)?QB:[];const doctorQuestions=()=>allQuestions().filter(isDoctorQuestion);const previousQuestions=()=>allQuestions().filter(isPreviousQuestion);const nelsonQuestions=()=>allQuestions().filter(isNelsonQuestion);
 function refreshPreviousTopicMap(){
  previousSystemByTopic.clear();
