@@ -1,0 +1,43 @@
+name: Fix layout once
+
+on:
+  push:
+    branches: [update/to-me-final-20261114-v2]
+    paths: ['.github/workflows/fix-layout-once.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  move:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Move flattened files into "to me" and restore root files
+        run: |
+          set -e
+          D="to me"
+          mkdir -p "$D/js" "$D/css" "$D/scripts/source-assets" "$D/data/audit"
+          for f in 07-returning-student-migration 09-app-features-v6 29-offline-setup 30-android-enhancements 33-unified-voice 34-study-countdown 35-pediatrics-collections 36-exam-planner-settings-smartreview 37-study-hub-linkage; do
+            git mv -f "$f.js" "$D/js/$f.js"
+          done
+          git mv -f shbace-layout-refinements.css "$D/css/"
+          git mv -f Question_Explanation_Audit_1718.json "$D/data/audit/"
+          git mv -f build-pwa.mjs "$D/scripts/"
+          git mv -f check-bank.mjs "$D/scripts/"
+          git mv -f faculty-of-medicine-tripoli-source.png "$D/scripts/source-assets/"
+          git mv -f pediatrics-dr-aljoaki-source.png "$D/scripts/source-assets/"
+          git mv -f package.json "$D/"
+          git mv -f sw.js "$D/"
+          git mv -f README.md "$D/README.md"
+          git mv -f index.html "$D/index.html"
+          git fetch origin main
+          git checkout origin/main -- README.md index.html
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Move uploaded files into 'to me' and restore root README/index"
+          git push
