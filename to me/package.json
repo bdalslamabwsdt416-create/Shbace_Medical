@@ -1,9 +1,13 @@
 {
   "name": "shbace-medical-chrome",
-  "version": "1.3.6",
+  "version": "1.3.9-to-me.9",
   "private": true,
-  "description": "SHBACE Medical — unified adaptive Chrome PWA for phone and computer.",
+  "description": "SHBACE Medical \u2014 unified adaptive Chrome PWA for phone and computer.",
   "scripts": {
-    "build:pwa": "node scripts/build-pwa.mjs"
+    "build:pwa": "node scripts/build-pwa.mjs",
+    "check:bank": "node scripts/check-bank.mjs"
+  },
+  "dependencies": {
+    "sharp": "0.35.5"
   }
 }

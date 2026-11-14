@@ -37,7 +37,8 @@ const requiredFiles = [
   "js/33-unified-voice.js",
   "js/34-study-countdown.js",
   "js/35-pediatrics-collections.js",
-  "js/36-exam-planner-settings-smartreview.js"
+  "js/36-exam-planner-settings-smartreview.js",
+  "js/37-study-hub-linkage.js"
 ];
 const requiredDirs = ["css", "js", "data"];
 const imageDirs = ["img", "img1", "img2"];
@@ -244,7 +245,8 @@ html = html.replace(facultySlot, "window.__SHBACE_FACULTY_LOGO_DATA__=" + JSON.s
 writeFileSync(htmlPath, html);
 if (!html.includes("js/35-pediatrics-collections.js") ||
     !html.includes("js/36-exam-planner-settings-smartreview.js") ||
-    !html.includes("css/shbace-layout-refinements.css")) {
+    !html.includes("css/shbace-layout-refinements.css") ||
+    !html.includes("js/37-study-hub-linkage.js")) {
   fail("Pediatrics, Exam Planner/Smart Review or layout refinement assets are not referenced by index.html");
 }
 if (!html.includes("navigator.serviceWorker.register('./sw.js'") || !html.includes("js/29-offline-setup.js") || !html.includes("js/29-reviewed-bank-controls.js") || !html.includes("qbData_reviewed_patch.json")) {

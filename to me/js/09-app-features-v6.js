@@ -35,6 +35,31 @@ const VERIFY_RE=/needs?\s+(?:review|verification)|needs?\s+to\s+be\s+verified|(?
 const qUnsure=q=>!!(q&&(q.f||q.kx||VERIFY_RE.test(String(q.note||'')+' '+String(q.ex||''))));
 const FULL_KEY={'Respiratory':'respiratory','Cardiovascular System':'cardio','Gastrointestinal Tract':'git','Nephrology':'nephrology','Endocrinology':'endocrinology','Central Nervous System':'cns','Neonatology':'neonatology','Infectious Diseases & Vaccines':'infectious','Haematology':'haematology','Growth and Nutrition':'growth','Genetics & Dermatology':'genetics','Rheumatology / Metabolic / Poisoning / Immunology':'rheum',"Previous Years' Exam Questions":'exams'};
 const FULL_TAGS=['PDF Bank','Previous Years','Repeated Question','Repeated Topic'];
+/* Question-type tag (what the question asks), derived from the stem; shown next to the source tag. */
+const CUE=/\?|\b(which|what|how|why|when|all of the following|all the following|the following|except|most|best|correct|incorrect|true|false|choose|select|regarding|concerning|about|is|are)\b|:\s*$/i;
+function shbLastAsk(stem){
+  const t=String(stem||'').replace(/\s+/g,' ').trim();
+  const parts=t.split(/(?<=[.?!:])\s+/).filter(Boolean);
+  if(!parts.length)return t;
+  for(let i=parts.length-1;i>=0;i--){
+    if(/\b(which|what|how|why|when|following|except|choose|select|regarding|concerning)\b|\?|:\s*$/i.test(parts[i]))return parts[i];
+  }
+  return parts[parts.length-1];
+}
+const MGMT=/\b(treatment|treat|treated|drug of choice|therapy|next step|initial step|best initial|first[- ]line|prophylaxis|prophylactic|vaccin\w*|antidote|should be (given|started|done|avoided|used)|management (is|of|line|plan|includes|steps?)|managed|management)\b/i;
+const INV=/\b(investigations?|diagnostic test|test of choice|best test|gold standard|confirm|confirms|confirmed|confirmatory|screening|biopsy|x-?ray|chest film|imaging|ultrasound|ultrasonography|echocardiograph\w*|ecg|eeg|mri|ct scan|laboratory|lab (finding|result|test)s?|csf|culture|serum|blood (test|gas|film|picture)|urinalysis|would (show|reveal)|will show|radiolog\w*)\b/i;
+const DX=/\b((most likely|probable|likely|provisional|differential|final|working|clinical)\s+(diagnosis|dx)|diagnosis (is|of this)|what is the diagnosis|the diagnosis|dx)\b/i;
+const CASE=/(\b\d+(\.\d+)?[- ]?(year|yr|month|mo|week|wk|day|hour|h)s?[- ]?(-| )?(old)?\b|\b(newborn|neonate|infant|toddler|preterm|term baby|boy|girl|adolescent|school[- ]aged?)\b)/i;
+const CASE2=/\b(presents?|presented|presenting|brought|complain\w*|admitted|referred|came|history of|on examination|examination (shows|reveals|of)|is found|was found|has had|developed|noted|o\/e)\b/i;
+function shbKind(q){
+  const ask=shbLastAsk(q.q);
+  if(DX.test(ask))return 'Diagnosis';
+  if(MGMT.test(ask))return 'Management';
+  if(INV.test(ask))return 'Investigation';
+  if(CASE.test(q.q)&&CASE2.test(q.q)&&String(q.q).length>90)return 'Clinical Case';
+  return 'Knowledge';
+}
+
 let EXAMS={};
 if(USE_FULL_BANK){try{
  const QD=JSON.parse(document.getElementById('qbData').textContent),D=QD.questions,ORD=QD.order,PX=ORD.py,PYS="Previous Years' Exam Questions";EXAMS=PX.exams||{};
@@ -51,7 +76,7 @@ if(USE_FULL_BANK){try{
    let e='';if(q.c)e+='The answer key was revised (solved with AI). The original explanation below may refer to the previous key.\n';
    if(q.ai&&q.f)e+='AI review: multiple, none or undetermined correct answers. Check your textbook.\n';
    e+=q.e||'';if(q.note)e+='\n'+q.note;
-   FULL_QB.push({id:q.id,spec:key,topic:TID[(q.sy||'')+'\u0001'+q.t],tag:q.py?((q.rq||[]).length?'Repeated Question':(q.rc||[]).length?'Repeated Topic':'Previous Years'):'PDF Bank',
+   FULL_QB.push({id:q.id,spec:key,topic:TID[(q.sy||'')+'\u0001'+q.t],tag:q.py?((q.rq||[]).length?'Repeated Question':(q.rc||[]).length?'Repeated Topic':'Previous Years'):'PDF Bank',kind:shbKind(q),
     q:q.q,o:q.o.map(o=>o[1]),ol:ltr,kx,k,ex:e.trim(),no:n+1,src:q.src||'',cs:q.cs||null,cm:!!q.cm,rq:q.rq||[],rc:q.rc||[],ai:!!q.ai,f:!!q.f,py:!!q.py})});
   spec[key]={q:L.length,label:sub,topics}});
  if(!FULL_QB.length)throw new Error('empty bank');
@@ -125,7 +150,7 @@ window.__bank={on:BANK_ON,total:QB.length,demo:DEMO_QB};
 const FILTERS=[['all','All Questions'],['unanswered','Unanswered'],['correct','Correct'],['incorrect','Incorrect'],['bookmarked','Bookmarked']];
 
 /* ---------- state ---------- */
-const qs={spec:'endocrinology',topic:0,filter:'all',tag:'all',view:'single',idx:0,full:false,noteOpen:{},streak:0,dd:null};
+const qs={spec:'endocrinology',topic:0,filter:'all',tag:'all',view:'all',lim:30,idx:0,full:false,noteOpen:{},streak:0,dd:null};
 window.__qs=qs;
 window.__shbQBVersionState={
  capture:function(){
@@ -193,7 +218,7 @@ function statusOf(q){const a=S.ans[q.id];return !a?'unanswered':(a.ok?'correct':
 function filtered(){return inTopic().filter(q=>{
   if(qs.filter==='bookmarked'&&!S.saved[q.id])return false;
   if(['unanswered','correct','incorrect'].includes(qs.filter)&&statusOf(q)!==qs.filter)return false;
-  if(qs.tag!=='all'&&q.tag!==qs.tag)return false;return true})}
+  if(qs.tag!=='all'&&q.tag!==qs.tag&&q.kind!==qs.tag)return false;return true})}
 const answeredCount=list=>list.filter(q=>S.ans[q.id]).length;
 const topicTitle=()=>qs.topic?TOPIC_NAME[qs.topic]:'All topics';
 function pct(n,d){return d?Math.round(n*100/d):0}
@@ -211,13 +236,20 @@ const PRAISE2=['Excellent work. Keep building on what you know.','Well done — 
 /* ============================================================
    QUESTION BANK
    ============================================================ */
+const KIND_ORDER=['Clinical Case','Diagnosis','Investigation','Management','Knowledge'];
+function filterItems(){const L=inTopic(),c={unanswered:0,correct:0,incorrect:0,bookmarked:0};L.forEach(q=>{c[statusOf(q)]++;if(S.saved[q.id])c.bookmarked++});
+ const out=[['all','All Questions ('+L.length+')']];[['unanswered','Unanswered'],['correct','Correct'],['incorrect','Incorrect'],['bookmarked','Bookmarked']].forEach(([k,l])=>{if(c[k]||qs.filter===k)out.push([k,l+' ('+c[k]+')'])});return out}
+function tagItems(){const L=inTopic(),c={};L.forEach(q=>{[q.tag,q.kind].forEach(t=>{if(t)c[t]=(c[t]||0)+1})});
+ const order=[...KIND_ORDER,...FULL_TAGS];Object.keys(c).forEach(t=>{if(!order.includes(t))order.push(t)});
+ const out=[['all','All Tags ('+L.length+')']];order.forEach(t=>{if(c[t]||qs.tag===t)out.push([t,t+' ('+(c[t]||0)+')'])});return out}
+function filtersHTML(){return ddHTML('filter',filterItems(),qs.filter)+ddHTML('tag',tagItems(),qs.tag)}
 function ddHTML(id,items,val,label){const cur=(items.find(i=>i[0]===val)||items[0])[1];return `<div class="dd ${qs.dd===id?'open':''}" id="dd-${id}"><button type="button" class="dd-btn" aria-haspopup="listbox" aria-expanded="${qs.dd===id}" onclick="ddToggle('${id}',event)"><span>${esc(label||cur)}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="dd-list" role="listbox">${items.map(([v,l])=>`<button type="button" role="option" class="dd-item ${v===val?'sel':''}" onclick="ddPick('${id}','${String(v).replace(/'/g,"\\'")}',event)"><i></i><span>${esc(l)}</span></button>`).join('')}</div></div>`}
 window.ddToggle=function(id,e){e&&e.stopPropagation();qs.dd=qs.dd===id?null:id;refreshDD()};
 function refreshDD(){document.querySelectorAll('.dd').forEach(d=>{const o=d.id==='dd-'+qs.dd;d.classList.toggle('open',o);const b=d.querySelector('.dd-btn');b&&b.setAttribute('aria-expanded',o)})}
 document.addEventListener('click',e=>{if(qs.dd&&!e.target.closest('.dd')){qs.dd=null;refreshDD()}});
 window.ddPick=function(id,v,e){e&&e.stopPropagation();qs.dd=null;
- if(id==='filter'){qs.filter=v;qs.idx=0;paintBank()}
- else if(id==='tag'){qs.tag=v;qs.idx=0;paintBank()}
+ if(id==='filter'){qs.filter=v;qs.idx=0;qs.lim=30;paintBank()}
+ else if(id==='tag'){qs.tag=v;qs.idx=0;qs.lim=30;paintBank()}
  else if(id==='xscope'){exp.scope=v;paintExport()}
  else if(id==='xlayout'){exp.layout=v;paintExport()}
  refreshDD()};
@@ -247,16 +279,17 @@ function cardHTML(q,n,single){
 </div>`;
  const note=qs.noteOpen[q.id]?`<div class="qnote"><textarea placeholder="Write your note…" oninput="qNoteSave('${q.id}',this.value)">${esc(S.notes[q.id]||'')}</textarea></div>`:'';
  const sname=a?(a.ok?'Correct':'Incorrect'):'Unanswered';
- return `<article class="qcard" id="qc-${q.id}" data-id="${q.id}"><div class="qtop"><span class="qid">${q.id} · mcq</span><span class="qstat s-${st}">${sname}</span><span class="qtag">${esc(q.tag)}</span></div><div class="qtopic">${esc(TOPIC_NAME[q.topic])}</div>${qExtra(q)}<h3 class="qstem">Q${n}. ${esc(QSTEM(q))}</h3><div class="qopts">${opts}</div>${react}${acts}${note}</article>`}
+ return `<article class="qcard" id="qc-${q.id}" data-id="${q.id}"><div class="qtop"><span class="qid">${q.id} · mcq</span><span class="qstat s-${st}">${sname}</span><span class="qtag">${esc(q.tag)}</span>${q.kind?`<span class="qtag">${esc(q.kind)}</span>`:''}</div><div class="qtopic">${esc(TOPIC_NAME[q.topic])}</div>${qExtra(q)}<h3 class="qstem">Q${n}. ${esc(QSTEM(q))}</h3><div class="qopts">${opts}</div>${react}${acts}${note}</article>`}
 
 function bankBody(){
  const list=filtered();
  if(!list.length){const none=!inTopic().length;return `<div class="qempty"><img src="${IMG.f_think}" alt=""><b>${none?'No questions here yet':'No questions match this filter'}</b><span>${none?'Questions for this topic will appear here.':'Try another filter or tag.'}</span></div>`}
  if(qs.view==='single'){qs.idx=Math.min(Math.max(qs.idx,0),list.length-1);const q=list[qs.idx];
   return cardHTML(q,qs.idx+1,true)+`<div class="qnav"><button type="button" class="btn" onclick="qStep(-1)" ${qs.idx===0?'disabled':''}>← Previous</button><span>${qs.idx+1} / ${list.length}</span><button type="button" class="btn primary" onclick="qStep(1)" ${qs.idx>=list.length-1?'disabled':''}>Next →</button></div>`}
- return list.map((q,i)=>cardHTML(q,i+1,false)).join('')}
+ const lim=Math.max(qs.lim||30,(qs.idx||0)+12),shown=list.slice(0,lim);
+ return shown.map((q,i)=>cardHTML(q,i+1,false)).join('')+(list.length>lim?`<button type="button" class="btn block" onclick="qMore()">Show more (${list.length-lim} left)</button>`:'')}
 function progHTML(){const base=filtered();const t=inTopic();const n=answeredCount(base);const p=pct(n,base.length);return `<div class="qprog"><span>${n} / ${base.length} answered in this view</span><b>${p}%</b></div><div class="qbar"><i style="width:${p}%"></i></div>`}
-window.paintBank=function(){const b=$('#qbBody'),p=$('#qbProg');if(b)b.innerHTML=bankBody();if(p)p.innerHTML=progHTML();document.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.v===qs.view));const dd1=$('#dd-filter .dd-btn span'),dd2=$('#dd-tag .dd-btn span');if(dd1)dd1.textContent=(FILTERS.find(f=>f[0]===qs.filter)||FILTERS[0])[1];if(dd2)dd2.textContent=qs.tag==='all'?'All Tags':qs.tag;document.querySelectorAll('#dd-filter .dd-item').forEach(x=>x.classList.toggle('sel',x.textContent===(FILTERS.find(f=>f[0]===qs.filter)||[0,''])[1]));document.querySelectorAll('#dd-tag .dd-item').forEach(x=>x.classList.toggle('sel',x.textContent===(qs.tag==='all'?'All Tags':qs.tag)))};
+window.paintBank=function(){const b=$('#qbBody'),p=$('#qbProg');if(b)b.innerHTML=bankBody();if(p)p.innerHTML=progHTML();document.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.v===qs.view));const qf=$('.qfilters');if(qf)qf.innerHTML=filtersHTML()};
 function repaintCard(id){const q=QB.find(x=>x.id===id);const el=document.getElementById('qc-'+id);if(!q||!el)return null;const list=filtered();let n=list.findIndex(x=>x.id===id)+1;if(qs.view==='single')n=qs.idx+1;const wrap=document.createElement('div');wrap.innerHTML=cardHTML(q,n||1,qs.view==='single');el.replaceWith(wrap.firstElementChild);return document.getElementById('qc-'+id)}
 window.qAnswer=function(id,i){const q=QB.find(x=>x.id===id);if(!q||S.ans[id])return;const ok=i===q.k;
  S.ans[id]={sel:i,ok,t:Date.now()};if(ok){qs.streak=0;S.ans[id].pr=PRAISE[Math.floor(Math.random()*PRAISE.length)];S.ans[id].msg=PRAISE2[Math.floor(Math.random()*PRAISE2.length)]}else{qs.streak++;DOCF[id]=qs.streak>=3?'encouraging':qs.streak===2?'angry':'sad'}save();
@@ -270,7 +303,8 @@ window.qReport=function(id){if(!REPORT_ERROR_ENABLED)return;S.rep[id]?delete S.r
 window.qNote=function(id){qs.noteOpen[id]=!qs.noteOpen[id];repaintCard(id);if(qs.noteOpen[id]){const t=document.querySelector('#qc-'+id+' textarea');t&&t.focus()}};
 window.qNoteSave=function(id,v){v.trim()?S.notes[id]=v:delete S.notes[id];save()};
 
-window.setView=function(v){qs.view=v;qs.idx=0;paintBank()};
+window.setView=function(v){qs.view=v;qs.idx=0;qs.lim=30;paintBank()};
+window.qMore=function(){qs.lim=(qs.lim||30)+30;const b=$('#qbBody');if(b)b.innerHTML=bankBody()};
 window.qFull=function(){qs.full=!qs.full;const ph=$('.phone');ph&&ph.classList.toggle('qfull',qs.full);const b=$('#fsBtn');b&&(b.innerHTML=fsLabel());
  try{if(qs.full){const e=document.documentElement;(e.requestFullscreen||e.webkitRequestFullscreen||(()=>{})).call(e)}else if(document.fullscreenElement||document.webkitFullscreenElement){(document.exitFullscreen||document.webkitExitFullscreen).call(document)}}catch(e){}
  renderFullExit()};
@@ -469,11 +503,13 @@ window.xCreate=function(){const list=pdfList();window.__lastPDF=buildPDF(list,ex
 
 /* ---------- question bank view ---------- */
 questionBankView=function(){
+ if(qs.filter!=='all'&&!filterItems().some(x=>x[0]===qs.filter&&!/\(0\)$/.test(x[1])))qs.filter='all';
+ if(qs.tag!=='all'&&!tagItems().some(x=>x[0]===qs.tag&&!/\(0\)$/.test(x[1])))qs.tag='all';
  const sp=qs.spec==='all'?'All specialties':SPEC_NAME[qs.spec];
  return `${appHeader('Question bank')}<div class="rs qb"><h1>Question Bank</h1><p class="sub">Pediatrics · ${esc(sp)} · ${esc(topicTitle())}</p>
  <div class="qtools"><button type="button" class="btn" id="fsBtn" onclick="qFull()">${fsLabel()}</button><button type="button" class="btn" onclick="xOpen()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg>Export PDF</button></div>
- <div class="seg wide" style="margin:4px 0 8px"><button type="button" data-v="single" class="on" onclick="setView('single')">Single</button><button type="button" data-v="all" onclick="setView('all')">All</button></div>
- <div class="qfilters">${ddHTML('filter',FILTERS,qs.filter)}${ddHTML('tag',[['all','All Tags'],...TAGS.map(t=>[t,t])],qs.tag)}</div>
+ <div class="seg wide" style="margin:4px 0 8px"><button type="button" data-v="all" class="${qs.view==='all'?'on':''}" onclick="setView('all')">All</button><button type="button" data-v="single" class="${qs.view==='single'?'on':''}" onclick="setView('single')">Single</button></div>
+ <div class="qfilters">${filtersHTML()}</div>
  <div id="qbProg">${progHTML()}</div><div id="qbBody">${bankBody()}</div></div>`};
 
 /* ============================================================

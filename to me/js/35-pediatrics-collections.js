@@ -68,7 +68,7 @@ window.selectPediatricCollection=function(which){
 };
 window.openPreviousSystem=function(name){
  activeCollection='previous';activePreviousSystem=String(name||'Other / Mixed Questions');window.__SHB_PED_COLLECTION__='previous';
- qs.spec='exams';qs.topic=0;qs.filter='all';qs.tag='all';qs.idx=0;qs.view='single';appPage='topics';renderAppDemo();
+ qs.spec='exams';qs.topic=0;qs.filter='all';qs.tag='all';qs.idx=0;qs.view='all';appPage='topics';renderAppDemo();
 };
 window.openPreviousSystemFromCard=function(el){if(el)window.openPreviousSystem(el.getAttribute('data-ped-system')||'Other / Mixed Questions')};
 function doctorSystemsView(){
