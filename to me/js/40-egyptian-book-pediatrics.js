@@ -18,18 +18,11 @@ function systemsView(){
  return '<div class="card sc spc ped-system-card" onclick="openEgyptianBookSystem(\''+row.id+'\')">'+icon+'<div class="spc-tx"><h3>'+escText(row.name)+'</h3><div class="meta"><b>'+row.count.toLocaleString()+'</b> questions</div></div><span class="chev">›</span></div>';}).join('');
  return appHeader('Egyptian Book')+'<div class="rs ped-systems-page eb-systems-page"><div class="ped-collection-kicker">SHBACE MEDICAL · PEDIATRICS</div><h1>Choose a medical system</h1><p class="sub">'+rows.length+' systems · '+list.length.toLocaleString()+' questions</p><div class="ped-systems-grid">'+(cards||'<div class="card setcard"><p class="meta">No accepted, answer-verified questions are available.</p></div>')+'</div></div>';
 }
-function topicsView(){
- const list=bankQuestions().filter(q=>q.spec===ebSystem),groups=new Map();list.forEach(q=>{const name=topicName(q);if(!groups.has(name))groups.set(name,{name,count:0});groups.get(name).count++;});
- const rows=[...groups.values()].sort((a,b)=>a.name.localeCompare(b.name));
- const cards=rows.map((row,i)=>{const sys=SYS.find(s=>s[0]===iconFor[ebSystem]),icon=sys&&typeof B.sysIcon==='function'?B.sysIcon(sys[2],'lg'):'<div class="tno ti"><span>✚</span></div>';
- return '<div class="card sc spc ped-system-card" onclick="openEgyptianBookTopic('+i+')">'+icon+'<div class="spc-tx"><h3>'+escText(row.name)+'</h3><div class="meta"><b>'+row.count.toLocaleString()+'</b> questions</div></div><span class="chev">›</span></div>';}).join('');
- return appHeader('Egyptian Book')+'<div class="rs ped-systems-page eb-systems-page"><button type="button" class="btn" onclick="openEgyptianBookHome()">← All systems</button><div class="ped-collection-kicker">EGYPTIAN BOOK · '+escText(systemNames[ebSystem]||'PEDIATRICS')+'</div><h1>Choose a topic</h1><p class="sub">'+list.length.toLocaleString()+' questions · '+rows.length+' topics</p><div class="ped-systems-grid">'+(cards||'<div class="card setcard"><p class="meta">No topics are available in this system.</p></div>')+'</div></div>';
-}
 const oldSpecialtiesView=specialtiesView;specialtiesView=function(){
- if(ebActive==='egyptian')return ebSystem?topicsView():systemsView();
+ if(ebActive==='egyptian')return systemsView();
  let html=oldSpecialtiesView.apply(this,arguments);
  if(!ebActive&&html.indexOf('ped-collection-footnote')>=0&&html.indexOf('ped-collection-egyptian')<0){
- const card='<button type="button" class="ped-collection-card ped-collection-egyptian" onclick="selectPediatricCollection(\'egyptian\')"><div class="ped-collection-avatar ped-avatar-allonce"><span aria-hidden="true">📘</span></div><span class="ped-collection-copy"><span class="eyebrow">INDEPENDENT QUESTION BANK</span><b>Egyptian Book</b><small>Accepted questions, organized by medical system and topic.</small><span class="ped-collection-count">'+bankQuestions().length.toLocaleString()+' questions</span></span><span class="ped-collection-arrow">›</span></button>';
+ const card='<button type="button" class="ped-collection-card ped-collection-egyptian" onclick="selectPediatricCollection(\'egyptian\')"><div class="ped-collection-avatar ped-avatar-allonce"><span aria-hidden="true">📘</span></div><span class="ped-collection-copy"><span class="eyebrow">INDEPENDENT QUESTION BANK</span><b>Egyptian Book</b><small>Accepted questions, organized by medical system.</small><span class="ped-collection-count">'+bankQuestions().length.toLocaleString()+' questions</span></span><span class="ped-collection-arrow">›</span></button>';
  html=html.replace('</div><div class="ped-collection-footnote">',card+'</div><div class="ped-collection-footnote">');html=html.replace('The five collections remain separate.','The six collections remain separate.');
  }return html;
 };
@@ -39,19 +32,18 @@ const oldSelect=window.selectPediatricCollection;window.selectPediatricCollectio
 };
 const oldChooser=window.openPediatricCollections;if(typeof oldChooser==='function')window.openPediatricCollections=function(){ebActive='';ebSystem='';ebTopic='';document.body.classList.remove('eb-bank-mode');return oldChooser.apply(this,arguments);};
 window.openEgyptianBookHome=function(){ebActive='egyptian';ebSystem='';ebTopic='';document.body.classList.remove('eb-bank-mode');window.__SHB_PED_COLLECTION__='egyptianbook';appPage='specialties';renderAppDemo();};
-window.openEgyptianBookSystem=function(spec){ebActive='egyptian';ebSystem=String(spec||'');ebTopic='';window.__SHB_PED_COLLECTION__='egyptianbook';appPage='specialties';renderAppDemo();};
+window.openEgyptianBookSystem=function(spec){ebActive='egyptian';ebSystem=String(spec||'');ebTopic='';qs.spec=ebSystem;qs.topic=0;qs.filter='all';qs.tag='all';qs.idx=0;qs.lim=30;qs.view='all';window.__SHB_PED_COLLECTION__='egyptianbook';document.body.classList.add('eb-bank-mode');appPage='questions';renderAppDemo();};
 window.openEgyptianBookTopic=function(index){
- const rows=[...new Set(bankQuestions().filter(q=>q.spec===ebSystem).map(topicName))].sort((a,b)=>a.localeCompare(b)),topic=rows[Number(index)];if(!topic)return;
- ebActive='egyptian';ebTopic=topic;qs.spec=ebSystem;qs.topic=0;qs.filter='all';qs.tag='all';qs.idx=0;qs.lim=30;qs.view='all';
+ if(!ebSystem)return;ebActive='egyptian';ebTopic='';qs.spec=ebSystem;qs.topic=0;qs.filter='all';qs.tag='all';qs.idx=0;qs.lim=30;qs.view='all';
  window.__SHB_PED_COLLECTION__='egyptianbook';document.body.classList.add('eb-bank-mode');appPage='questions';renderAppDemo();
 };
 const oldInTopic=B.inTopic;B.inTopic=function(){
- if(ebActive==='egyptian'){document.body.classList.add('eb-bank-mode');if(typeof gradeHasPediatrics==='function'&&!gradeHasPediatrics())return [];return bankQuestions().filter(q=>q.spec===ebSystem&&(!ebTopic||topicName(q)===ebTopic));}
+ if(ebActive==='egyptian'){document.body.classList.add('eb-bank-mode');if(typeof gradeHasPediatrics==='function'&&!gradeHasPediatrics())return [];return bankQuestions().filter(q=>q.spec===ebSystem);}
  document.body.classList.remove('eb-bank-mode');return oldInTopic.apply(this,arguments).filter(q=>!q.eb);
 };
 const oldOpenQ=window.openQ;if(typeof oldOpenQ==='function')window.openQ=function(id){
  const q=QB.find(x=>x&&x.id===id);ebActive=q&&q.eb?'egyptian':'';
- if(q&&q.eb){ebSystem=q.spec;ebTopic=topicName(q);qs.spec=q.spec;qs.topic=0;qs.filter='all';qs.tag='all';window.__SHB_PED_COLLECTION__='egyptianbook';document.body.classList.add('eb-bank-mode');}
+ if(q&&q.eb){ebSystem=q.spec;ebTopic='';qs.spec=q.spec;qs.topic=0;qs.filter='all';qs.tag='all';window.__SHB_PED_COLLECTION__='egyptianbook';document.body.classList.add('eb-bank-mode');}
  else{ebSystem='';ebTopic='';document.body.classList.remove('eb-bank-mode');}
  const result=oldOpenQ.apply(this,arguments);if(q&&q.eb)window.__SHB_PED_COLLECTION__='egyptianbook';return result;
 };

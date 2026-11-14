@@ -71,7 +71,7 @@ B.inTopic=function(){
   if(ccSystem)list=list.filter(q=>q.spec===ccSystem);
   return list;
  }
- return oldInTopic.apply(this,arguments).filter(q=>!q.ao&&!q.cc);
+ return oldInTopic.apply(this,arguments).filter(q=>!q.cc);
 };
 const oldOpenQ=window.openQ;
 if(typeof oldOpenQ==='function')window.openQ=function(id){
