@@ -208,7 +208,7 @@ const SYS=[
  ['haematology','Haematology','s_haematology',0],['growth','Growth and Nutrition','s_growth',0],['genetics','Genetics & Dermatology','s_genetics',0],
  ['rheum','Rheumatology / Metabolic / Poisoning / Immunology','s_rheum',0],['exams','Previous Years\u2019 Exam Questions','s_exams',0]
 ];
-if(BANK_ON){/* demo-only specialty (Urology) has no questions in the full bank -> disabled with the demo set */for(let i=SYS.length-1;i>=0;i--)if(!REAL.spec[SYS[i][0]]&&SYS[i][0]==='urology')SYS.splice(i,1);SYS.forEach(r=>{r[3]=REAL.spec[r[0]]?1:0});SPEC_NAME={};SYS.forEach(r=>SPEC_NAME[r[0]]=r[1])}
+if(BANK_ON){/* Keep Urology when the separate Nelson collection supplies Urology questions, even if the main bank has none. */const hasNelsonUrology=Array.isArray(window.__SHB_NELSON_QUESTIONS__)&&window.__SHB_NELSON_QUESTIONS__.some(q=>q&&q.nl===true&&q.spec==='urology');for(let i=SYS.length-1;i>=0;i--)if(!REAL.spec[SYS[i][0]]&&SYS[i][0]==='urology'&&!hasNelsonUrology)SYS.splice(i,1);SYS.forEach(r=>{r[3]=REAL.spec[r[0]]?1:0});SPEC_NAME={};SYS.forEach(r=>SPEC_NAME[r[0]]=r[1])}
 const sysIcon=(img,cls='')=>img?`<img class="sysimg ${cls}" src="${IMG[img]}" alt="">`:`<span class="sysimg ${cls} uro">${URO_SVG}</span>`;
 
 /* ---------- helpers ---------- */
