@@ -1,7 +1,7 @@
 'use strict';
 
 /* One stable cache shared with js/29-offline-setup.js. It is not versioned: app updates replace only the changed files. */
-const CACHE_NAME = 'shbace-chrome-offline-v1.3.10.15';
+const CACHE_NAME = 'shbace-chrome-offline-v1.3.10.16';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
 const APP_SHELL = [
   './',
@@ -9,7 +9,8 @@ const APP_SHELL = [
   './manifest.webmanifest',
   './pwa-version.json',
   './assets/img/shbace-pwa-192.png',
-  './assets/img/shbace-pwa-512.png',
+  './assets/img/shbace-pwa-512.png,
+  './assets/img/all-once-pediatrics-cover.svg'',
   './offline-assets-manifest.json',
   './data/nelson/nelson-textbook-bank-01.js',
   './data/nelson/nelson-textbook-bank-02.js',
@@ -18,6 +19,16 @@ const APP_SHELL = [
   './data/nelson/nelson-textbook-bank-05.js',
   './data/nelson/nelson-textbook-bank-06.js',
   './data/nelson/nelson-textbook-bank-07.js',
+  './data/all-once/all-once-bank-01.js',
+  './data/all-once/all-once-bank-02.js',
+  './data/all-once/all-once-bank-03.js',
+  './data/all-once/all-once-bank-04.js',
+  './data/all-once/all-once-bank-05.js',
+  './data/all-once/all-once-bank-06.js',
+  './data/all-once/all-once-bank-07.js',
+  './data/all-once/all-once-bank-08.js',
+  './data/all-once/all-once-bank-09.js',
+  './data/all-once/all-once-bank-10.js',
   './css/core.css',
   './css/late.css',
   './css/unified-enhancements.css',
@@ -27,7 +38,8 @@ const APP_SHELL = [
   './js/34-study-countdown.js',
   './js/35-pediatrics-collections.js',
   './js/36-exam-planner-settings-smartreview.js',
-  './js/37-study-hub-linkage.js'
+  './js/37-study-hub-linkage.js',
+  './js/38-all-once-pediatrics.js'
 ];
 
 function missingOfflineResponse(url) {
