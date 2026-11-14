@@ -46,6 +46,7 @@ window.selectPediatricCollection=function(which){
  ccActive='clinicalcase';ccSystem='';;
  const result=oldSelect('aj');
  window.__SHB_PED_COLLECTION__='clinicalcase';
+ if(typeof window.__SHBACE_HISTORY_SNAPSHOT__==='function')window.__SHBACE_HISTORY_SNAPSHOT__();
  return result;
 };
 const oldOpenChooser=window.openPediatricCollections;
