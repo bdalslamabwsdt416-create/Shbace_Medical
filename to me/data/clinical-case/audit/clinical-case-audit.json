@@ -11,11 +11,11 @@
   "parsed_source_records_before_deduplication": 108,
   "unique_student_facing_cards_after_exact_deduplication": 90,
   "exact_duplicate_records_removed": 18,
-  "mcq_cards": 81,
-  "open_ended_cards_with_stem": 9,
-  "mcq_answer_keys_resolved": 81,
+  "mcq_cards": 90,
+  "open_ended_cards_with_stem": 0,
+  "mcq_answer_keys_resolved": 90,
   "mcq_answer_keys_unresolved": 0,
-  "open_ended_records_with_source_answer": 9,
+  "open_ended_records_with_source_answer": 0,
   "system_counts": {
     "Rheumatology": 5,
     "Cardiovascular System": 6,
@@ -138,13 +138,15 @@
     "Renal_Urinary_System_Accepted.md: R6",
     "Renal_Urinary_System_Accepted.md: R7"
   ],
-  "publication_status": "NOT READY — accepted sections without a dedicated question stem remain preserved for reconstruction; do not deploy this draft.",
+  "publication_status": "MATCHED-ONLY BANK READY FOR APP QA — 90 matched MCQs with complete options and verified answer keys. The 59 Accepted sections without a recoverable dedicated question block remain excluded and preserved separately. No production deployment or Android changes made.",
   "safety_notes": [
     "Only Accepted.md records were parsed as question sources.",
     "All 11 A4_Corrected copies were confirmed text-identical to their corresponding base Accepted files and were not double-counted.",
     "Progress and Rejected sources were excluded.",
     "Only exact stem-and-option duplicates were merged; all recorded source appearances were retained.",
-    "59 Accepted sections without a dedicated question block are preserved in unmapped-accepted-records.md and are not fabricated or silently discarded.",
+    "59 Accepted sections without a recoverable dedicated question block remain preserved in unmapped-accepted-records.md and are excluded from the student-facing bank.",
+    "All 90 student-facing records are explicitly marked matched; all have complete option arrays and a valid verified answer key.",
+    "Nine incomplete option arrays were reconstructed from their verbatim Accepted source question blocks and their source-provided answers; no answer was inferred from proximity or guessed.",
     "No production deployment or Android changes were made."
   ],
   "source_occurrences_preserved": 108,
@@ -226,5 +228,8 @@
       "system": "Respiratory",
       "topic": "Pneumothorax & air leak"
     }
-  }
+  },
+  "matched_student_facing_cards": 90,
+  "unmatched_or_unreconstructable_accepted_sections_excluded": 59,
+  "option_arrays_reconstructed_from_accepted_source": 9
 }
