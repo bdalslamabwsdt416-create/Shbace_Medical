@@ -422,7 +422,11 @@
    markReady();
    return JSON.stringify(base);
   }
-  return (window.caches?caches.open('shbace-data-v1-1').catch(function(){return null}):Promise.resolve(null)).then(function(cache){
+  /* When the service worker controls the page, the verified offline package is the only source of question-bank data.
+     The old second cache kept serving the previous questions for one extra launch after an update, so it is retired. */
+  var swOwnsData=!!(navigator.serviceWorker&&navigator.serviceWorker.controller);
+  if(swOwnsData&&window.caches)caches.delete('shbace-data-v1-1').catch(function(){});
+  return ((window.caches&&!swOwnsData)?caches.open('shbace-data-v1-1').catch(function(){return null}):Promise.resolve(null)).then(function(cache){
    var baseURL='data/qbData.json';
    if(selectedQB!=='reviewed')return fetchText(baseURL,cache).then(function(t){dataText=t;markReady();});
    return Promise.all([
@@ -546,6 +550,7 @@
 <!-- ═══════════ 4) LATE STYLES (feature & theme layers, in original cascade order) ═══════════ -->
 <!-- home7css -->
 <link rel="stylesheet" href="css/late.css">
+<link rel="stylesheet" href="css/offline-window.css">
 <!-- shell7css -->
 
 <!-- sp7css -->

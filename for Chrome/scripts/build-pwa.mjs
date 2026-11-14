@@ -113,8 +113,15 @@ if (reviewLog && Array.isArray(reviewLog.entries)) {
   if (logChanged !== 45 || logNeedsReview !== 110) fail("Question review JSON counts do not match the master audit");
 }
 const pwaVersion = JSON.parse(readFileSync(join(root, "pwa-version.json"), "utf8"));
-if (pwaVersion.platform !== "Chrome Android PWA" || pwaVersion.version !== "1.3.4-chrome.4") {
-  fail("pwa-version.json must declare Chrome Android PWA version 1.3.4-chrome.4");
+if (pwaVersion.platform !== "Chrome Android PWA" || !/^1\.3\.4-chrome\.\d+$/.test(String(pwaVersion.version))) {
+  fail("pwa-version.json must declare platform \"Chrome Android PWA\" and a version like 1.3.4-chrome.N");
+}
+// The service worker and the installer must read and write the SAME cache, otherwise the verified offline
+// package would be downloaded into a cache the worker never looks at.
+const swCacheName = /const\s+CACHE_NAME\s*=\s*'([^']+)'/.exec(readFileSync(join(root, "sw.js"), "utf8"));
+const installerCacheName = /var\s+CACHE_NAME\s*=\s*'([^']+)'/.exec(readFileSync(join(root, "js/29-offline-setup.js"), "utf8"));
+if (!swCacheName || !installerCacheName || swCacheName[1] !== installerCacheName[1]) {
+  fail("CACHE_NAME in sw.js (" + (swCacheName && swCacheName[1]) + ") must equal CACHE_NAME in js/29-offline-setup.js (" + (installerCacheName && installerCacheName[1]) + ")");
 }
 
 rmSync(output, { recursive: true, force: true });
@@ -214,6 +221,8 @@ const inventoryFiles = listOutputFiles(output)
     full
   }))
   .filter(file => file.path !== "offline-assets-manifest.json")
+  // Review/audit material is only needed to validate the build; the app never opens it, so students do not download it.
+  .filter(file => file.path !== "data/qbData_reviewed.json" && !file.path.startsWith("data/audit/") && file.path !== "data/README.md")
   .sort((a, b) => a.path.localeCompare(b.path));
 
 const offlineFiles = inventoryFiles.map(file => {

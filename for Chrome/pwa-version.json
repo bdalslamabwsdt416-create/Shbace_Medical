@@ -1,13 +1,16 @@
 {
   "app": "Shbace Medical",
   "platform": "Chrome Android PWA",
-  "version": "1.3.4-chrome.4",
+  "version": "1.3.4-chrome.5",
   "displayVersion": "1.3.4 · Chrome Android",
-  "releaseDate": "2026-11-12",
+  "releaseDate": "2026-11-13",
   "releaseNotes": [
-    "Offline readiness and update checks now run silently in the background while the seven-second splash screen is visible.",
-    "The offline setup overlay is not created at all when every current asset is already cached and passes byte-length and SHA-256 verification, preventing a post-splash flash.",
-    "First-time setup and genuine missing/changed-file recovery screens still appear after the splash screen.",
-    "Previously verified cached files are reused; the full offline package is not downloaded again when the current assets are already present and valid."
+    "The offline setup / update window is now built in the background while the seven-second splash screen is visible and appears the moment the splash ends, with no lag. When the installed package is current nothing is shown.",
+    "Updates download only the changed files into a staging area, verify every one (size + SHA-256) and only then swap them in, so the installed app is never left half old and half new. A Restart button applies the update.",
+    "The window can always be postponed with Later; a slow or missing connection can no longer lock the student out of the app. The server check times out after four seconds.",
+    "The saved package list is no longer overwritten before an update finishes, so an unfinished update cannot break offline launch.",
+    "Question-bank data now comes only from the verified offline package, so updated questions appear immediately instead of one launch later.",
+    "The app no longer reloads itself in the middle of studying; updates are applied only from the update window.",
+    "Review/audit files that the app never opens are no longer part of the offline download (about 2.7 MB smaller)."
   ]
 }

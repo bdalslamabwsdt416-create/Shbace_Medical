@@ -1,0 +1,12 @@
+/* Offline window: built hidden under the splash, revealed the moment the splash is gone; always dismissible. */
+.shb-offline-setup.is-revealed{animation:shbOfflineIn .2s ease-out both}
+@keyframes shbOfflineIn{from{opacity:0}to{opacity:1}}
+.shb-offline-intro:empty{display:none}
+.shb-offline-later{display:block;width:100%;min-height:44px;margin-top:6px;padding:0 16px;border:0;background:transparent;color:#8fb4dc;font-size:14px;font-weight:700;cursor:pointer}
+.shb-offline-later[hidden],.shb-offline-action[hidden]{display:none}
+.shb-offline-setup.is-light .shb-offline-later{color:#3c6794}
+.shb-offline-setup.is-light .shb-offline-warning{background:rgba(28,94,160,.1);color:#35566f}
+.shb-offline-setup.is-light .shb-offline-track{background:#dbe7f3;border-color:#c3d6e9}
+.shb-offline-setup.is-light .shb-offline-progress-head,.shb-offline-setup.is-light .shb-offline-bytes{color:#4f6e8d}
+.shb-offline-setup.is-light .shb-offline-progress-head b{color:#1f6fbf}
+@media(prefers-reduced-motion:reduce){.shb-offline-setup.is-revealed{animation:none}}
