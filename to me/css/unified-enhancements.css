@@ -373,3 +373,10 @@ button.ped-collection-card:active{transform:scale(.99);border-color:rgba(88,214,
 
 /* Nelson Textbook cards: keep the question clean and hide source-status metadata. */
 .qcard.nl-clean .qtop .qstat,.qcard.nl-clean .qtop .qtag,.qcard.nl-clean .qwarn,.qcard.nl-clean .qflag,.qcard.nl-clean .qrep,.qcard.nl-clean .qunsure{display:none!important}
+
+
+/* All Once Pediatrics collection card */
+.ped-collection-card.ped-collection-allonce{border-color:rgba(183,157,255,.38);background:radial-gradient(ellipse at 0 0,rgba(122,91,210,.18),transparent 58%),linear-gradient(145deg,rgba(28,27,65,.97),rgba(7,18,42,.99))}
+.ped-collection-allonce .ped-collection-copy>.eyebrow{color:#c8b6ff}
+.ped-collection-allonce .ped-collection-count{border-color:rgba(177,151,255,.28);background:rgba(112,82,197,.16);color:#d4c8ff}
+.ped-collection-avatar.ped-avatar-allonce{border-color:rgba(190,164,255,.78);background:radial-gradient(circle at 50% 35%,#493b83,#10152f 76%);box-shadow:0 0 0 3px rgba(146,117,238,.13),0 0 19px rgba(146,117,238,.22)}
