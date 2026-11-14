@@ -108,5 +108,3 @@ if(typeof oldOpenQ==='function')window.openQ=function(id){
 };
 window.__SHB_PED_COLLECTION__=window.__SHB_PED_COLLECTION__||'';
 })();
-
-[executed on device: DESKTOP-E32SKJN (fae67a54-2987-49df-9a33-67ef9b7940bf)]
