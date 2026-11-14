@@ -78,7 +78,7 @@
     "toxicology.md"
   ],
   "notes": [
-    "Original stems, options and explanations remain English to preserve accepted source wording; bank navigation and labels are Arabic.",
+    "Question stems/options received spacing-only OCR normalization; English source spelling and explanations are preserved. Navigation and labels are Arabic.",
     "Questions without a source key remain included with answer selection disabled.",
     "Missing High-Yield points are summarized from the Accepted explanation."
   ]
