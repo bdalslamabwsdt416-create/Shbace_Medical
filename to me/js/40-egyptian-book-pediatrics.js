@@ -15,7 +15,7 @@ function systemsView(){
  const list=bankQuestions(),groups=new Map();list.forEach(q=>{if(!groups.has(q.spec))groups.set(q.spec,{id:q.spec,name:systemNames[q.spec]||'Other / Mixed Questions',count:0});groups.get(q.spec).count++;});
  const rows=[...groups.values()].sort((a,b)=>a.name.localeCompare(b.name));
  const cards=rows.map(row=>{const sys=SYS.find(s=>s[0]===iconFor[row.id]),icon=sys&&typeof B.sysIcon==='function'?B.sysIcon(sys[2],'lg'):'<div class="tno ti"><span>✚</span></div>';
- return '<div class="card sc spc ped-system-card" onclick="openEgyptianBookSystem(\\''+row.id+'\\')">'+icon+'<div class="spc-tx"><h3>'+escText(row.name)+'</h3><div class="meta"><b>'+row.count.toLocaleString()+'</b> questions</div></div><span class="chev">›</span></div>';}).join('');
+ return '<div class="card sc spc ped-system-card" onclick="openEgyptianBookSystem(\''+row.id+'\')">'+icon+'<div class="spc-tx"><h3>'+escText(row.name)+'</h3><div class="meta"><b>'+row.count.toLocaleString()+'</b> questions</div></div><span class="chev">›</span></div>';}).join('');
  return appHeader('Egyptian Book')+'<div class="rs ped-systems-page eb-systems-page"><div class="ped-collection-kicker">SHBACE MEDICAL · PEDIATRICS</div><h1>Choose a medical system</h1><p class="sub">'+rows.length+' systems · '+list.length.toLocaleString()+' questions</p><div class="ped-systems-grid">'+(cards||'<div class="card setcard"><p class="meta">No accepted, answer-verified questions are available.</p></div>')+'</div></div>';
 }
 function topicsView(){
@@ -29,7 +29,7 @@ const oldSpecialtiesView=specialtiesView;specialtiesView=function(){
  if(ebActive==='egyptian')return ebSystem?topicsView():systemsView();
  let html=oldSpecialtiesView.apply(this,arguments);
  if(!ebActive&&html.indexOf('ped-collection-footnote')>=0&&html.indexOf('ped-collection-egyptian')<0){
- const card='<button type="button" class="ped-collection-card ped-collection-egyptian" onclick="selectPediatricCollection(\\'egyptian\\')"><div class="ped-collection-avatar ped-avatar-allonce"><span aria-hidden="true">📘</span></div><span class="ped-collection-copy"><span class="eyebrow">INDEPENDENT QUESTION BANK</span><b>Egyptian Book</b><small>Accepted questions, organized by medical system and topic.</small><span class="ped-collection-count">'+bankQuestions().length.toLocaleString()+' questions</span></span><span class="ped-collection-arrow">›</span></button>';
+ const card='<button type="button" class="ped-collection-card ped-collection-egyptian" onclick="selectPediatricCollection(\'egyptian\')"><div class="ped-collection-avatar ped-avatar-allonce"><span aria-hidden="true">📘</span></div><span class="ped-collection-copy"><span class="eyebrow">INDEPENDENT QUESTION BANK</span><b>Egyptian Book</b><small>Accepted questions, organized by medical system and topic.</small><span class="ped-collection-count">'+bankQuestions().length.toLocaleString()+' questions</span></span><span class="ped-collection-arrow">›</span></button>';
  html=html.replace('</div><div class="ped-collection-footnote">',card+'</div><div class="ped-collection-footnote">');html=html.replace('The five collections remain separate.','The six collections remain separate.');
  }return html;
 };

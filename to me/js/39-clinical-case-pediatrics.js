@@ -25,7 +25,7 @@ function clinicalCaseView(){
  const cards=rows.map(row=>{
   const sys=SYS.find(s=>s[0]===iconFor[row.name]);
   const icon=sys&&typeof B.sysIcon==='function'?B.sysIcon(sys[2],'lg'):'<div class="tno ti"><span>✚</span></div>';
-  return '<div class="card sc spc ped-system-card" onclick="openClinicalCaseSystem(\\''+row.id+'\\')">'+icon+'<div class="spc-tx"><h3>'+escText(row.name)+'</h3><div class="meta"><b>'+row.count.toLocaleString()+'</b> questions</div></div><span class="chev">›</span></div>';
+  return '<div class="card sc spc ped-system-card" onclick="openClinicalCaseSystem(\''+row.id+'\')">'+icon+'<div class="spc-tx"><h3>'+escText(row.name)+'</h3><div class="meta"><b>'+row.count.toLocaleString()+'</b> questions</div></div><span class="chev">›</span></div>';
  }).join('');
  return appHeader('Clinical Cases')+'<div class="rs ped-systems-page"><div class="ped-collection-kicker">CLINICAL CASE · PEDIATRICS</div><h1>Choose a medical system</h1><p class="sub">'+rows.length+' systems · '+list.length.toLocaleString()+' questions</p><div class="ped-systems-grid">'+(cards||'<div class="card setcard"><p class="meta">No Clinical Case questions are available.</p></div>')+'</div></div>';
 }
