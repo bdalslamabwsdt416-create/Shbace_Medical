@@ -1,6 +1,6 @@
 # Clinical Case — Neonatology
 
-Detailed explanations shown through Read More in SHBACE Medical. Original question wording and provenance are retained.
+Detailed explanations shown through Read More in SHBACE Medical. Original question wording and source provenance are retained.
 
 ## CC-0029 — Neonatal jaundice & cholestasis
 
@@ -31,7 +31,7 @@ High-Yield:
 Any conjugated hyperbilirubinaemia in an infant is pathological and warrants prompt work-up.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 2`.
+- Q4 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 2`.
 
 ---
 
@@ -65,7 +65,7 @@ High-Yield:
 Interpret bilirubin fraction, age at onset, rate of rise and haemolysis markers together.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 2`.
+- Q5 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 2`.
 
 ---
 
@@ -97,8 +97,8 @@ High-Yield:
 A young febrile infant is high risk even without neck stiffness.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 3`.
-- NMT10 PDF · PDF page(s): 2
+- Q7 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 3`.
+- NMT10 · NMT10 — Section 1 · Original Question 4: A 2 week old infant develops fever, 38.9 C, vomiting, and irritability. His heart rate · NMT10 PDF · PDF page(s): 2
 
 ---
 
@@ -112,7 +112,7 @@ extended and pronated. Which of the following is an expected clinical finding?
 3. Intact Moro and lost grasp reflex
 4. Lost Moro and intact grasp reflex.
 
-**Answer status:** No verified selectable answer is encoded; no answer has been guessed.
+**Model answer:** 4 — Lost Moro reflex with intact grasp reflex (Erb palsy).
 
 Clinical explanation:
 The internally rotated, adducted arm with extended/pronated forearm after difficult delivery is the classic C5–C6 upper brachial plexus injury (Erb palsy). Moro is impaired on the affected side while grasp is usually preserved.
@@ -127,7 +127,7 @@ High-Yield:
 Erb palsy: “waiter’s tip” posture with absent Moro but preserved grasp.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source pp. 3–4`.
+- Q9 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source pp. 3–4`.
 
 ---
 
@@ -142,7 +142,7 @@ Which of the following is the most important first step in evaluating this infan
 4. Place infant under warmer
 5. Administer oxygen
 
-**Answer status:** No verified selectable answer is encoded; no answer has been guessed.
+**Model answer:** 4 — Place the infant under a warmer.
 
 Clinical explanation:
 The preterm, low-birth-weight infant is hypothermic at 35°C. Thermal stabilization is an immediate priority; hypothermia can worsen respiratory distress, hypoglycaemia and metabolic instability.
@@ -157,12 +157,12 @@ High-Yield:
 Prevent heat loss during initial stabilization of every preterm or low-birth-weight infant.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 4`.
-- NMT10 PDF · PDF page(s): 9
+- Q10 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 4`.
+- NMT10 · NMT10 — Section 3 · Original Question 7: An infant weighing 1400 gm is born at 32 weeks.HR:140, RR:80, temp:35 C. the lungs · NMT10 PDF · PDF page(s): 9
 
 ---
 
-## CC-0035 — Febrile seizures & epilepsy
+## CC-0035 — Neonatal hypocalcemia in an infant of a diabetic mother
 
 **Question:** A 1 day old infant develops jitteriness and convulsions . He was born at 34 weeks
 gestation to a woman whose pregnancy was complicated by diabetes mellitus and
@@ -173,7 +173,7 @@ his condition?
 3. Serum glucose of 45 mg/dl
 4. Serum sodium of 138 mEq/dl.
 
-**Answer status:** No verified selectable answer is encoded; no answer has been guessed.
+**Model answer:** 2 — Serum calcium 6.2 mg/dL.
 
 Clinical explanation:
 A symptomatic preterm infant of a diabetic mother is at risk of early neonatal hypocalcaemia. A calcium of 6.2 mg/dL is low and can cause jitteriness and seizures.
@@ -188,7 +188,7 @@ High-Yield:
 Check glucose, calcium and magnesium in a symptomatic neonate.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 4`.
+- Q11 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 4`.
 
 ---
 
@@ -220,7 +220,7 @@ High-Yield:
 Document congenital dermal melanocytosis to distinguish it from later bruising or inflicted injury.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 4`.
+- Q12 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 4`.
 
 ---
 
@@ -235,7 +235,7 @@ the diagnosis is:
 3- Meconium aspiration
 4- Pneumonia
 
-**Answer status:** No verified selectable answer is encoded; no answer has been guessed.
+**Model answer:** 2 — Transient tachypnoea of the newborn (TTN).
 
 Clinical explanation:
 A term infant delivered by caesarean section develops respiratory distress after birth. Fluid in fissures and prominent bronchovascular markings are characteristic of retained fetal lung fluid.
@@ -250,40 +250,7 @@ High-Yield:
 TTN is more common after caesarean delivery and usually improves over 24–72 hours.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source pp. 4–5`.
-
----
-
-## CC-0038 — Neonatal birth injury
-
-**Question:** A 6-month-old boy is brought by his mother because he is floppy when placed in a
-sitting position. He does not seem to be interested in reaching for toys. At 4 month
-visit, his head support was weak and had a persistent Moro reflex. What is the
-most likely diagnosis?
-
-**Options:**
-- A. Duchenne muscular dystrophy
-- B. Cerebral palsy
-- C. Brain tumor
-- D. Meningitis
-
-**Answer:** B — Cerebral palsy
-
-Clinical explanation:
-Persistent primitive Moro reflex, poor head control and absent reaching at 6 months indicate abnormal motor development and central motor dysfunction. Cerebral palsy is plausible, but hypotonia has a broad differential and requires full history/examination.
-
-Options analysis:
-A: Duchenne muscular dystrophy usually presents later with progressive proximal weakness. B: plausible/correct among options. C: brain tumour is less likely without raised ICP/progression signs. D: meningitis is an acute illness, not a chronic developmental pattern.
-
-Curriculum alignment:
-SHETS: CNS and Developmental Assessment; motor delay and red flags.
-
-High-Yield:
-Persistent primitive reflexes and delayed head control warrant formal developmental and neurologic evaluation.
-
-**Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 18`.
-- NMT11 PDF · PDF page: 10 · Original source case: 17
+- Q13 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source pp. 4–5`.
 
 ---
 
@@ -322,7 +289,7 @@ High-Yield:
 At day 3, unconjugated jaundice with direct bilirubin 0.2 mg/dL, normal hemoglobin/reticulocytes and no blood-group incompatibility supports physiological jaundice. However, bilirubin interpretation requires exact age in hours, gestational age, rate of rise and neurotoxicity risk
 
 **Source provenance:**
-- NMT10 PDF · PDF page(s): 5
+- NMT10 · NMT10 — Section 2 · Original Question 3: A 3 day old infant presents with the complaint of yellowish skin. Both the mother and the · NMT10 PDF · PDF page(s): 5
 
 ---
 
@@ -366,7 +333,7 @@ High-Yield:
 At 4 weeks, persistent jaundice with direct bilirubin 9 of total 12 mg/dL and hepatomegaly is conjugated hyperbilirubinemia/cholestasis, not breast-milk jaundice. Biliary atresia is a time-critical cause and must be excluded urgently; other cholestatic causes remain possible.
 
 **Source provenance:**
-- NMT10 PDF · PDF page(s): 6
+- NMT10 · NMT10 — Section 2 · Original Question 6: A 4week-old, fullterm, breast fed girl has worsening yellowish discolouration of the skin, · NMT10 PDF · PDF page(s): 6
 
 ---
 
@@ -419,7 +386,7 @@ High-Yield:
 At day 3, unconjugated jaundice with direct bilirubin 0.2 mg/dL, normal hemoglobin/reticulocytes and no blood-group incompatibility supports physiological jaundice. However, bilirubin interpretation requires exact age in hours, gestational age, rate of rise and neurotoxicity risk
 
 **Source provenance:**
-- NMT11 PDF · PDF page: 4 · Original source case: 7
+- NMT11 · NMT11 — Original Question 7: A 3 day old infant presents with the complaint of yellowish skin. Both · NMT11 PDF · PDF page: 4 · Original source case: 7
 
 ---
 
@@ -472,11 +439,11 @@ High-Yield:
 At 4 weeks, persistent jaundice with direct bilirubin 9 of total 12 mg/dL and hepatomegaly is conjugated hyperbilirubinemia/cholestasis, not breast-milk jaundice. Biliary atresia is a time-critical cause and must be excluded urgently; other cholestatic causes remain possible.
 
 **Source provenance:**
-- NMT11 PDF · PDF page: 8 · Original source case: 14
+- NMT11 · NMT11 — Original Question 14: A 4week-old, fullterm, and breast fed girl has worsening yellowish · NMT11 PDF · PDF page: 8 · Original source case: 14
 
 ---
 
-## CC-0077 — Prematurity & neonatal respiratory disease
+## CC-0077 — Neonatal hypothermia & thermal care
 
 **Question:** An infant weighing 1400 gm is born at 32 weeks.HR:140, RR:80,
 temp:35 C. the lungs are clear with bilateral breath sounds, there is
@@ -518,7 +485,7 @@ High-Yield:
 A 32-week, 1400-g infant with temperature 35°C is hypothermic. With clear lungs and no murmur, immediate thermal support is the priority while monitoring glucose, oxygenation and vital signs.
 
 **Source provenance:**
-- NMT11 PDF · PDF page: 12 · Original source case: 22
+- NMT11 · NMT11 — Original Question 22: An infant weighing 1400 gm is born at 32 weeks.HR:140, RR:80, · NMT11 PDF · PDF page: 12 · Original source case: 22
 
 ---
 
@@ -574,11 +541,11 @@ High-Yield:
 A 2-week-old with fever, vomiting, irritability and a full fontanelle is high risk for invasive bacterial infection/meningitis. Absence of neck stiffness does not exclude meningitis in a neonate. Stabilize, obtain cultures and age-appropriate investigations, and start empiric IV
 
 **Source provenance:**
-- NMT11 PDF · PDF page: 1 · Original source case: 2
+- NMT11 · NMT11 — Original Question 2: A 2 week old infant develops fever, 38.9 C, vomiting, and irritability. · NMT11 PDF · PDF page: 1 · Original source case: 2
 
 ---
 
-## CC-0079 — Neonatology
+## CC-0079 — Congenital diaphragmatic hernia
 
 **Question:** New born baby shortly after birth, noted to have respiratory distress.
 The infant has diminshed breath sounds on the left, the apex is on the
@@ -619,6 +586,6 @@ High-Yield:
 Respiratory distress immediately after birth, unilateral reduced breath sounds, contralateral mediastinal shift and a scaphoid abdomen strongly indicate congenital diaphragmatic hernia, usually left-sided. Stabilize the airway and avoid bag-mask ventilation where possible; urgent
 
 **Source provenance:**
-- NMT11 PDF · PDF page: 15 · Original source case: 28
+- NMT11 · NMT11 — Original Question 28: New born baby shortly after birth, noted to have respiratory distress. · NMT11 PDF · PDF page: 15 · Original source case: 28
 
 ---
