@@ -75,6 +75,7 @@ const oldOpenQ=window.openQ;
 if(typeof oldOpenQ==='function')window.openQ=function(id){
  const q=QB.find(x=>x&&x.id===id);
  aoActive=q&&q.ao?'allonce':'';
+ if(q&&q.ao){qs.spec=q.spec;qs.topic=0;qs.filter='all';qs.tag='all';}
  const result=oldOpenQ.apply(this,arguments);
  if(q&&q.ao)window.__SHB_PED_COLLECTION__='allonce';
  return result;
