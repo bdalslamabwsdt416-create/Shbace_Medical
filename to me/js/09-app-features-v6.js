@@ -280,7 +280,7 @@ function cardHTML(q,n,single){
   <div class="qfb ${ok?'ok':'no'}"><b>${ok?'Correct':'Incorrect'} · Correct answer: ${L(q.k)}. ${esc(q.o[q.k])}${qUnsure(q)&&!q.nl&&!q.ao?' <em class="qunsure">(unconfirmed key)</em>':''}</b><p>Explanation:  ${esc(cleanExplanationText(q.ex))}</p>${nelsonDetails(q)}</div>`}
  else if(q.cc&&q.ccOpen){react=`<div class="qfb"><b>Open-ended case. Think through your response before revealing the model answer.</b>${nelsonDetails(q)}</div>`}
  else if(q.cc&&q.kx){react=`<div class="qfb no"><b>No verified answer key is available for this question; answer selection is disabled.</b>${nelsonDetails(q)}</div>`}
- else if((q.nl||q.ao||q.eb)&&q.kx){react=`<div class="qfb no"><b>Question data is incomplete, so answer selection is unavailable.</b><p>${q.eb?"الشرح الأولي:":"Explanation:"} ${esc(cleanExplanationText(q.ex))}</p>${nelsonDetails(q)}</div>`}
+ else if((q.nl||q.ao||q.eb)&&q.kx){react=`<div class="qfb no"><b>Question data is incomplete, so answer selection is unavailable.</b><p>Explanation: ${esc(cleanExplanationText(q.ex))}</p>${nelsonDetails(q)}</div>`}
  else if(single){react=`<div class="qreact think"><div><b>Take your time</b><span>Think it through, then choose an answer.</span></div></div>`}
  const acts=`<div class="qacts">
   <button type="button" class="qa ${S.saved[q.id]?'on':''}" onclick="qSave('${q.id}')"><span>${S.saved[q.id]?'★':'☆'}</span>${S.saved[q.id]?'Saved':'Save'}</button>
