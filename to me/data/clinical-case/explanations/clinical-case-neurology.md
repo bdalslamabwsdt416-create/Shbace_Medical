@@ -1,6 +1,39 @@
 # Clinical Case — Neurology
 
-Detailed explanations shown through Read More in SHBACE Medical. Original question wording and provenance are retained.
+Detailed explanations shown through Read More in SHBACE Medical. Original question wording and source provenance are retained.
+
+## CC-0038 — Cerebral palsy & developmental delay
+
+**Question:** A 6-month-old boy is brought by his mother because he is floppy when placed in a
+sitting position. He does not seem to be interested in reaching for toys. At 4 month
+visit, his head support was weak and had a persistent Moro reflex. What is the
+most likely diagnosis?
+
+**Options:**
+- A. Duchenne muscular dystrophy
+- B. Cerebral palsy
+- C. Brain tumor
+- D. Meningitis
+
+**Answer:** B — Cerebral palsy
+
+Clinical explanation:
+Persistent primitive Moro reflex, poor head control and absent reaching at 6 months indicate abnormal motor development and central motor dysfunction. Cerebral palsy is plausible, but hypotonia has a broad differential and requires full history/examination.
+
+Options analysis:
+A: Duchenne muscular dystrophy usually presents later with progressive proximal weakness. B: plausible/correct among options. C: brain tumour is less likely without raised ICP/progression signs. D: meningitis is an acute illness, not a chronic developmental pattern.
+
+Curriculum alignment:
+SHETS: CNS and Developmental Assessment; motor delay and red flags.
+
+High-Yield:
+Persistent primitive reflexes and delayed head control warrant formal developmental and neurologic evaluation.
+
+**Source provenance:**
+- Q58 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 18`.
+- NMT11 · NMT11 — Original Question 17: A 6-month-old boy is brought by his mother because he is floppy · NMT11 PDF · PDF page: 10 · Original source case: 17
+
+---
 
 ## CC-0039 — Guillain–Barré syndrome
 
@@ -31,7 +64,7 @@ High-Yield:
 Monitor respiratory function and autonomic instability in suspected GBS.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 18`.
+- Q59 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 18`.
 
 ---
 
@@ -64,7 +97,7 @@ High-Yield:
 Albuminocytologic dissociation supports GBS, particularly after the first week.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 18`.
+- Q60 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 18`.
 
 ---
 
@@ -96,7 +129,7 @@ High-Yield:
 Always measure blood pressure in a child with a first seizure, after immediate stabilization and glucose assessment.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 17`.
+- Q54 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 17`.
 
 ---
 
@@ -135,7 +168,7 @@ High-Yield:
 After stabilization and termination of convulsions, blood pressure is an important immediate assessment for hypertensive encephalopathy. However, real-world seizure care also requires airway/breathing/circulation, bedside glucose and assessment for ongoing status epilepticus; glu
 
 **Source provenance:**
-- NMT10 PDF · PDF page(s): 7
+- NMT10 · NMT10 — Section 3 · Original Question 2: A 9 year old child comes to the hospital with an acute onset of generalized convulsions · NMT10 PDF · PDF page(s): 7
 
 ---
 
@@ -184,7 +217,7 @@ High-Yield:
 Symmetric progressive weakness beginning in the lower limbs, hypotonia and hyporeflexia following a respiratory infection are characteristic of acute inflammatory demyelinating polyradiculoneuropathy/GBS. Assess respiratory function and autonomic instability urgently.
 
 **Source provenance:**
-- NMT10 PDF · PDF page(s): 8
+- NMT10 · NMT10 — Section 3 · Original Question 6: A 9 year old child suffers from an acute onset weakness which initially started in the · NMT10 PDF · PDF page(s): 8
 
 ---
 
@@ -238,7 +271,7 @@ High-Yield:
 Symmetric progressive weakness beginning in the lower limbs, hypotonia and hyporeflexia following a respiratory infection are characteristic of acute inflammatory demyelinating polyradiculoneuropathy/GBS. Assess respiratory function and autonomic instability urgently.
 
 **Source provenance:**
-- NMT11 PDF · PDF page: 11 · Original source case: 20
+- NMT11 · NMT11 — Original Question 20: A 9 year old child suffers from an acute onset weakness which · NMT11 PDF · PDF page: 11 · Original source case: 20
 
 ---
 
@@ -283,6 +316,6 @@ High-Yield:
 After stabilization and termination of convulsions, blood pressure is an important immediate assessment for hypertensive encephalopathy. However, real-world seizure care also requires airway/breathing/circulation, bedside glucose and assessment for ongoing status epilepticus; glu
 
 **Source provenance:**
-- NMT11 PDF · PDF page: 14 · Original source case: 25
+- NMT11 · NMT11 — Original Question 25: A 9 year old child comes to the hospital with an acute onset of · NMT11 PDF · PDF page: 14 · Original source case: 25
 
 ---
