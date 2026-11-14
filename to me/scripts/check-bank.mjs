@@ -69,13 +69,13 @@ if ((pending.match(/^## Pending /gm) || []).length !== 59) errors.push("Clinical
 
 
 const egyptianDir = join(root, "data/egyptian-book");
-const egyptianFiles = readdirSync(egyptianDir).filter(name => /^egyptian-book-bank-\\d{2}\\.js$/.test(name)).sort();
+const egyptianFiles = readdirSync(egyptianDir).filter(name => /^egyptian-book-bank-\d{2}\.js$/.test(name)).sort();
 if (egyptianFiles.length !== 16) errors.push(`Egyptian Book expected 16 data shards, found ${egyptianFiles.length}`);
 const egyptianIds = new Set();
 let egyptianTotal = 0, egyptianReady = 0, egyptianUnresolved = 0;
 for (const name of egyptianFiles) {
   const source = readFileSync(join(egyptianDir, name), "utf8");
-  const match = source.match(/\\.concat\\(([\\s\\S]*)\\);\\s*$/);
+  const match = source.match(/\.concat\(([\s\S]*)\);\s*$/);
   if (!match) { errors.push(`Egyptian Book ${name}: missing JSON concat payload`); continue; }
   let records = [];
   try { records = JSON.parse(match[1]); }
