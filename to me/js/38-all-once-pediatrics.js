@@ -9,7 +9,7 @@ const known=new Set(QB.map(q=>q&&q.id).filter(Boolean));
 incoming.forEach(q=>{if(q&&q.ao===true&&q.id&&!known.has(q.id)){QB.push(q);known.add(q.id);}});
 if(window.__bank){window.__bank.total=QB.length;window.__bank.allonce=incoming.length;}
 let aoActive='';
-const allOnceQuestions=()=>QB.filter(q=>q&&q.ao===true);
+const allOnceQuestions=()=>QB.filter(q=>q&&q.ao===true&&q.eb!==true);
 const escText=v=>typeof esc==='function'?esc(String(v==null?'':v)):String(v==null?'':v).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
 const iconFor={
  'Allergy':'genetics','Endocrine':'endocrinology','Emergency':'growth',

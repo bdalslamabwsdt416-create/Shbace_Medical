@@ -256,7 +256,13 @@ window.ddPick=function(id,v,e){e&&e.stopPropagation();qs.dd=null;
 
 const exName=e=>String((EXAMS[e]||e)).replace("Previous Years' Exam Questions \u2014 ",'Exam ');
 const repRef=a=>{const g={};a.forEach(([e,n])=>(g[e]=g[e]||[]).push(n));return Object.keys(g).map(e=>`<bdi>${esc(exName(e))}</bdi> \u2013 ${g[e].map(n=>'Q'+n).join(', ')}`).join(' \u00b7 ')};
-function nelsonDetails(q){if(!q||(!q.nl&&!q.ao&&!q.cc)||!q.more)return '';const source=q.cc?(q.ccSource||'Accepted Clinical Case source'):q.ao?(q.aoSource||'Source details unavailable'):'Nelson Textbook of Pediatrics.';const alt=q.ao&&q.aoAltSource?`<p class="nl-source">Also found in: ${esc(q.aoAltSource)}</p>`:'';const modelAnswer=q.cc&&q.ccOpen&&q.ccAnswer?`<p class="nl-source"><b>Model answer:</b> ${esc(q.ccAnswer)}</p>`:'';return `<details class="nl-more"><summary>Read More</summary><div class="nl-more-body">${modelAnswer}${esc(q.more)}<p class="nl-source">Source: ${esc(source)}</p>${alt}</div></details>`}
+function nelsonDetails(q){
+ if(!q||(!q.nl&&!q.ao&&!q.cc)||!q.more)return '';
+ const source=q.eb?(q.aoSource||'مصدر السؤال'):q.cc?(q.ccSource||'Accepted Clinical Case source'):q.ao?(q.aoSource||'Source details unavailable'):'Nelson Textbook of Pediatrics.';
+ const alt=q.ao&&q.aoAltSource?'<p class="nl-source">'+(q.eb?'ظهور آخر للمصدر: ':'Also found in: ')+esc(q.aoAltSource)+'</p>':'';
+ const modelAnswer=q.cc&&q.ccOpen&&q.ccAnswer?'<p class="nl-source"><b>Model answer:</b> '+esc(q.ccAnswer)+'</p>':'';
+ return '<details class="nl-more"><summary>'+(q.eb?'اقرأ المزيد':'Read More')+'</summary><div class="nl-more-body">'+modelAnswer+esc(q.more)+'<p class="nl-source">'+(q.eb?'المصدر: ':'Source: ')+esc(source)+'</p>'+alt+'</div></details>';
+}
 function qExtra(q){if(!BANK_ON||q.nl||q.ao||q.cc)return '';let x='';
  if(q.py){if(q.src)x+=`<div class="qsrc">Source: <bdi>${esc(q.src)}</bdi></div>`;if(q.cs)x+=`<div class="qcase"><b>${esc(q.cs[0])}</b>\n${esc(q.cs[1])}</div>`;if(q.cm)x+='<div class="qrep"><span class="qflag w">Case text not in source file \u2013 classified by explanation</span></div>';
   if(q.rq.length)x+=`<div class="qrep"><span class="qflag r">Repeated Question</span> also appears in: ${repRef(q.rq)}</div>`;if(q.rc.length)x+=`<div class="qrep"><span class="qflag w">Repeated Topic/Concept</span> also tested in: ${repRef(q.rc)}</div>`}
@@ -271,15 +277,15 @@ function cardHTML(q,n,single){
  if(a){const ok=a.ok;const face=ok?'happy':(DOCF[q.id]||'sad');
   const msg=ok?(a.msg||PRAISE2[0]):(face==='angry'?'Let’s pause and review this one carefully.':face==='encouraging'?'A tough run — keep going, every mistake teaches you something.':'Not quite — the explanation below will help.');
   react=`<div class="qreact ${ok?'ok':'no'}">${docFace(face)}<div><b>${ok?(a.pr||'Excellent!'):(face==='angry'?'Careful!':face==='encouraging'?'Keep going!':'Incorrect')}</b><span>${esc(msg)}</span></div></div>
-  <div class="qfb ${ok?'ok':'no'}"><b>${ok?'Correct':'Incorrect'} · Correct answer: ${L(q.k)}. ${esc(q.o[q.k])}${qUnsure(q)&&!q.nl&&!q.ao?' <em class="qunsure">(unconfirmed key)</em>':''}</b><p>Explanation: ${esc(q.ex)}</p>${nelsonDetails(q)}</div>`}
+  <div class="qfb ${ok?'ok':'no'}"><b>${q.eb?(ok?'إجابة صحيحة':'إجابة غير صحيحة'):(ok?'Correct':'Incorrect')} · ${q.eb?'الإجابة الصحيحة: ':'Correct answer: '}${L(q.k)}. ${esc(q.o[q.k])}${qUnsure(q)&&!q.nl&&!q.ao?' <em class="qunsure">(unconfirmed key)</em>':''}</b><p>${q.eb?"الشرح الأولي:":"Explanation:"} ${esc(q.ex)}</p>${nelsonDetails(q)}</div>`}
  else if(q.cc&&q.ccOpen){react=`<div class="qfb"><b>Open-ended case. Think through your response before revealing the model answer.</b>${nelsonDetails(q)}</div>`}
  else if(q.cc&&q.kx){react=`<div class="qfb no"><b>No verified answer key is available for this question; answer selection is disabled.</b>${nelsonDetails(q)}</div>`}
- else if((q.nl||q.ao)&&q.kx){react=`<div class="qfb no"><b>Question data is incomplete, so answer selection is unavailable.</b><p>Explanation: ${esc(q.ex)}</p>${nelsonDetails(q)}</div>`}
+ else if((q.nl||q.ao||q.eb)&&q.kx){react=`<div class="qfb no"><b>${q.eb?"لا يتوفر مفتاح إجابة موثّق لهذا السؤال؛ تم تعطيل اختيار الإجابة.":"Question data is incomplete, so answer selection is unavailable."}</b><p>${q.eb?"الشرح الأولي:":"Explanation:"} ${esc(q.ex)}</p>${nelsonDetails(q)}</div>`}
  else if(single){react=`<div class="qreact think"><div><b>Take your time</b><span>Think it through, then choose an answer.</span></div></div>`}
  const acts=`<div class="qacts">
-  <button type="button" class="qa ${S.saved[q.id]?'on':''}" onclick="qSave('${q.id}')"><span>${S.saved[q.id]?'★':'☆'}</span>${S.saved[q.id]?'Saved':'Save'}</button>
+  <button type="button" class="qa ${S.saved[q.id]?'on':''}" onclick="qSave('${q.id}')"><span>${S.saved[q.id]?'★':'☆'}</span>${q.eb?(S.saved[q.id]?'محفوظ':'حفظ'):(S.saved[q.id]?'Saved':'Save')}</button>
   ${REPORT_ERROR_ENABLED?`<button type="button" class="qa ${S.rep[q.id]?'on':''}" onclick="qReport('${q.id}')"><span>⚑</span>${S.rep[q.id]?'Reported':'Report error'}</button>`:''}
-  <button type="button" class="qa ${S.notes[q.id]?'on':''}" onclick="qNote('${q.id}')"><span>✎</span>Personal note</button>
+  <button type="button" class="qa ${S.notes[q.id]?'on':''}" onclick="qNote('${q.id}')"><span>✎</span>${q.eb?'ملاحظة شخصية':'Personal note'}</button>
 </div>`;
  const note=qs.noteOpen[q.id]?`<div class="qnote"><textarea placeholder="Write your note…" oninput="qNoteSave('${q.id}',this.value)">${esc(S.notes[q.id]||'')}</textarea></div>`:'';
  const sname=a?(a.ok?'Correct':'Incorrect'):'Unanswered';

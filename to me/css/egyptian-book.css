@@ -1,0 +1,15 @@
+.eb-systems-page{direction:rtl;text-align:right}
+.eb-systems-page .ped-system-card{direction:rtl;text-align:right}
+.eb-systems-page .ped-system-card .spc-tx{direction:rtl;text-align:right}
+.ped-collection-egyptian{direction:rtl;text-align:right}
+.ped-collection-egyptian .ped-collection-copy{direction:rtl;text-align:right}
+.ped-collection-egyptian .ped-collection-arrow{transform:scaleX(-1)}
+body.eb-bank-mode .qcard.nl-clean{direction:rtl;text-align:right}
+body.eb-bank-mode .qcard.nl-clean .qstem{direction:ltr;text-align:left;unicode-bidi:plaintext;line-height:1.65}
+body.eb-bank-mode .qcard.nl-clean .qopts{direction:rtl}
+body.eb-bank-mode .qcard.nl-clean .qopt{direction:rtl;text-align:right}
+body.eb-bank-mode .qcard.nl-clean .qopt span{direction:ltr;text-align:left;unicode-bidi:plaintext;flex:1}
+body.eb-bank-mode .qcard.nl-clean .qfb,body.eb-bank-mode .qcard.nl-clean .qreact,body.eb-bank-mode .qcard.nl-clean .qacts,body.eb-bank-mode .qcard.nl-clean .qnote{direction:rtl;text-align:right}
+body.eb-bank-mode .qcard.nl-clean .qfb p,body.eb-bank-mode .qcard.nl-clean .nl-more-body{direction:ltr;text-align:left;unicode-bidi:plaintext;line-height:1.75}
+body.eb-bank-mode .qcard.nl-clean .nl-more summary{direction:rtl;text-align:right}
+body.eb-bank-mode .qcard.nl-clean .qacts .qa{direction:rtl}
