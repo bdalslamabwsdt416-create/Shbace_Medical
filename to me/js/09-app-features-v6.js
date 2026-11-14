@@ -256,12 +256,12 @@ window.ddPick=function(id,v,e){e&&e.stopPropagation();qs.dd=null;
 
 const exName=e=>String((EXAMS[e]||e)).replace("Previous Years' Exam Questions \u2014 ",'Exam ');
 const repRef=a=>{const g={};a.forEach(([e,n])=>(g[e]=g[e]||[]).push(n));return Object.keys(g).map(e=>`<bdi>${esc(exName(e))}</bdi> \u2013 ${g[e].map(n=>'Q'+n).join(', ')}`).join(' \u00b7 ')};
-function nelsonDetails(q){
+function cleanExplanationText(value){return String(value==null?'':value).replace(/(^|\r?\n)[ \t]*Curriculum alignment:[^\r\n]*/gi,'$1').replace(/\n{3,}/g,'\n\n').trim();}\nfunction nelsonDetails(q){
  if(!q||(!q.nl&&!q.ao&&!q.cc)||!q.more)return '';
- const source=q.eb?(q.aoSource||'مصدر السؤال'):q.cc?(q.ccSource||'Accepted Clinical Case source'):q.ao?(q.aoSource||'Source details unavailable'):'Nelson Textbook of Pediatrics.';
- const alt=q.ao&&q.aoAltSource?'<p class="nl-source">'+(q.eb?'ظهور آخر للمصدر: ':'Also found in: ')+esc(q.aoAltSource)+'</p>':'';
+ const source=q.eb?(q.ebSourceFile||'Egyptian Book source'):q.cc?(q.ccSource||'Accepted Clinical Case source'):q.ao?(q.aoSource||'Source details unavailable'):'Nelson Textbook of Pediatrics.';
+ const alt=q.ao&&!q.eb&&q.aoAltSource?'<p class="nl-source">Also found in: '+esc(q.aoAltSource)+'</p>':'';
  const modelAnswer=q.cc&&q.ccOpen&&q.ccAnswer?'<p class="nl-source"><b>Model answer:</b> '+esc(q.ccAnswer)+'</p>':'';
- return '<details class="nl-more"><summary>'+(q.eb?'اقرأ المزيد':'Read More')+'</summary><div class="nl-more-body">'+modelAnswer+esc(q.more)+'<p class="nl-source">'+(q.eb?'المصدر: ':'Source: ')+esc(source)+'</p>'+alt+'</div></details>';
+ return '<details class="nl-more"><summary>'+'Read More'+'</summary><div class="nl-more-body">'+modelAnswer+esc(cleanExplanationText(q.more))+'<p class="nl-source">'+'Source: '+esc(source)+'</p>'+alt+'</div></details>';
 }
 function qExtra(q){if(!BANK_ON||q.nl||q.ao||q.cc)return '';let x='';
  if(q.py){if(q.src)x+=`<div class="qsrc">Source: <bdi>${esc(q.src)}</bdi></div>`;if(q.cs)x+=`<div class="qcase"><b>${esc(q.cs[0])}</b>\n${esc(q.cs[1])}</div>`;if(q.cm)x+='<div class="qrep"><span class="qflag w">Case text not in source file \u2013 classified by explanation</span></div>';
@@ -277,15 +277,15 @@ function cardHTML(q,n,single){
  if(a){const ok=a.ok;const face=ok?'happy':(DOCF[q.id]||'sad');
   const msg=ok?(a.msg||PRAISE2[0]):(face==='angry'?'Let’s pause and review this one carefully.':face==='encouraging'?'A tough run — keep going, every mistake teaches you something.':'Not quite — the explanation below will help.');
   react=`<div class="qreact ${ok?'ok':'no'}">${docFace(face)}<div><b>${ok?(a.pr||'Excellent!'):(face==='angry'?'Careful!':face==='encouraging'?'Keep going!':'Incorrect')}</b><span>${esc(msg)}</span></div></div>
-  <div class="qfb ${ok?'ok':'no'}"><b>${q.eb?(ok?'إجابة صحيحة':'إجابة غير صحيحة'):(ok?'Correct':'Incorrect')} · ${q.eb?'الإجابة الصحيحة: ':'Correct answer: '}${L(q.k)}. ${esc(q.o[q.k])}${qUnsure(q)&&!q.nl&&!q.ao?' <em class="qunsure">(unconfirmed key)</em>':''}</b><p>${q.eb?"الشرح الأولي:":"Explanation:"} ${esc(q.ex)}</p>${nelsonDetails(q)}</div>`}
+  <div class="qfb ${ok?'ok':'no'}"><b>${ok?'Correct':'Incorrect'} · Correct answer: ${L(q.k)}. ${esc(q.o[q.k])}${qUnsure(q)&&!q.nl&&!q.ao?' <em class="qunsure">(unconfirmed key)</em>':''}</b><p>Explanation:  ${esc(cleanExplanationText(q.ex))}</p>${nelsonDetails(q)}</div>`}
  else if(q.cc&&q.ccOpen){react=`<div class="qfb"><b>Open-ended case. Think through your response before revealing the model answer.</b>${nelsonDetails(q)}</div>`}
  else if(q.cc&&q.kx){react=`<div class="qfb no"><b>No verified answer key is available for this question; answer selection is disabled.</b>${nelsonDetails(q)}</div>`}
- else if((q.nl||q.ao||q.eb)&&q.kx){react=`<div class="qfb no"><b>${q.eb?"لا يتوفر مفتاح إجابة موثّق لهذا السؤال؛ تم تعطيل اختيار الإجابة.":"Question data is incomplete, so answer selection is unavailable."}</b><p>${q.eb?"الشرح الأولي:":"Explanation:"} ${esc(q.ex)}</p>${nelsonDetails(q)}</div>`}
+ else if((q.nl||q.ao||q.eb)&&q.kx){react=`<div class="qfb no"><b>Question data is incomplete, so answer selection is unavailable.</b><p>${q.eb?"الشرح الأولي:":"Explanation:"} ${esc(cleanExplanationText(q.ex))}</p>${nelsonDetails(q)}</div>`}
  else if(single){react=`<div class="qreact think"><div><b>Take your time</b><span>Think it through, then choose an answer.</span></div></div>`}
  const acts=`<div class="qacts">
-  <button type="button" class="qa ${S.saved[q.id]?'on':''}" onclick="qSave('${q.id}')"><span>${S.saved[q.id]?'★':'☆'}</span>${q.eb?(S.saved[q.id]?'محفوظ':'حفظ'):(S.saved[q.id]?'Saved':'Save')}</button>
+  <button type="button" class="qa ${S.saved[q.id]?'on':''}" onclick="qSave('${q.id}')"><span>${S.saved[q.id]?'★':'☆'}</span>${S.saved[q.id]?'Saved':'Save'}</button>
   ${REPORT_ERROR_ENABLED?`<button type="button" class="qa ${S.rep[q.id]?'on':''}" onclick="qReport('${q.id}')"><span>⚑</span>${S.rep[q.id]?'Reported':'Report error'}</button>`:''}
-  <button type="button" class="qa ${S.notes[q.id]?'on':''}" onclick="qNote('${q.id}')"><span>✎</span>${q.eb?'ملاحظة شخصية':'Personal note'}</button>
+  <button type="button" class="qa ${S.notes[q.id]?'on':''}" onclick="qNote('${q.id}')"><span>✎</span>Personal note</button>
 </div>`;
  const note=qs.noteOpen[q.id]?`<div class="qnote"><textarea placeholder="Write your note…" oninput="qNoteSave('${q.id}',this.value)">${esc(S.notes[q.id]||'')}</textarea></div>`:'';
  const sname=a?(a.ok?'Correct':'Incorrect'):'Unanswered';
@@ -333,9 +333,9 @@ window.xOpen=function(){exp.open=true;let h=$('#xwrap');if(!h){h=document.create
 window.xClose=function(){exp.open=false;qs.dd=null;const h=$('#xwrap');h&&h.remove()};
 function pdfList(){return exp.scope==='subject'?QB:exp.scope==='topic'?inTopic():filtered()}
 function buildPDF(list,layout){const L=(q,i)=>QLT(q,i);const title='Shbace Medical — Question Bank';const sub=`Pediatrics · ${qs.spec==='all'?'All specialties':SPEC_NAME[qs.spec]} · ${exp.scope==='subject'?'Entire subject':topicTitle()}`;
- const q1=(q,i)=>`<section class="q"><div class="meta">${q.id} · ${esc(TOPIC_NAME[q.topic])} · ${esc(q.tag)}</div><p class="stem"><b>Q${i+1}.</b> ${esc(QSTEM(q))}</p><ol type="A" style="list-style:none;padding-left:0">${q.o.map((t,j)=>`<li class="${layout==='study'&&j===q.k?'key':''}"><b>${L(q,j)}.</b> ${esc(t)}${layout==='study'&&j===q.k?' ✓':''}</li>`).join('')}</ol>${layout==='study'?`<div class="ans"><b>Correct answer: ${L(q,q.k)}. ${esc(q.o[q.k])}</b><p>${esc(q.ex)}</p></div>`:''}</section>`;
+ const q1=(q,i)=>`<section class="q"><div class="meta">${q.id} · ${esc(TOPIC_NAME[q.topic])} · ${esc(q.tag)}</div><p class="stem"><b>Q${i+1}.</b> ${esc(QSTEM(q))}</p><ol type="A" style="list-style:none;padding-left:0">${q.o.map((t,j)=>`<li class="${layout==='study'&&j===q.k?'key':''}"><b>${L(q,j)}.</b> ${esc(t)}${layout==='study'&&j===q.k?' ✓':''}</li>`).join('')}</ol>${layout==='study'?`<div class="ans"><b>Correct answer: ${L(q,q.k)}. ${esc(q.o[q.k])}</b><p>${esc(cleanExplanationText(q.ex))}</p></div>`:''}</section>`;
  let body=list.map(q1).join('');
- if(layout==='exam')body+=`<section class="keys"><h2>Answer key &amp; explanations</h2>${list.map((q,i)=>`<div class="k"><b>Q${i+1}. ${L(q,q.k)}. ${esc(q.o[q.k])}</b><p>${esc(q.ex)}</p></div>`).join('')}</section>`;
+ if(layout==='exam')body+=`<section class="keys"><h2>Answer key &amp; explanations</h2>${list.map((q,i)=>`<div class="k"><b>Q${i+1}. ${L(q,q.k)}. ${esc(q.o[q.k])}</b><p>${esc(cleanExplanationText(q.ex))}</p></div>`).join('')}</section>`;
  if(!list.length)body='<p>No questions in this selection.</p>';
  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><style>@page{margin:16mm}*{box-sizing:border-box}body{font:14px/1.55 Georgia,'Times New Roman',serif;color:#111;background:#DCE8F2;margin:0;padding:20px;max-width:800px;margin:0 auto}h1{font:700 22px/1.2 system-ui,sans-serif;margin:0 0 4px;color:#123a8f}.sub{font:13px system-ui,sans-serif;color:#555;margin:0 0 18px;padding-bottom:10px;border-bottom:2px solid #2b7bff}.q{break-inside:avoid;margin:0 0 18px}.meta{font:600 11px system-ui,sans-serif;color:#2b5fc2;letter-spacing:.04em}.stem{margin:4px 0 6px;font-size:15px}ol{margin:0;padding-left:26px}li{margin:2px 0}li.key{font-weight:700;color:#0a6b3a}.ans{margin-top:8px;padding:8px 10px;border-left:3px solid #2b7bff;background:#eef4ff;font-size:13px}.ans p{margin:3px 0 0}.keys{break-before:page}.keys h2{font:700 18px system-ui,sans-serif;color:#123a8f}.k{margin:0 0 10px;break-inside:avoid;font-size:13px}.k p{margin:2px 0 0;color:#333}.foot{font:11px system-ui,sans-serif;color:#777;margin-top:24px;text-align:center}</style><style id="doctor-mascot-tuning">
 /* Subtle doctor-character polish; the supplied expressions and doctor-off preference remain intact. */
