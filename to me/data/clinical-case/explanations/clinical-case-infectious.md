@@ -1,6 +1,38 @@
 # Clinical Case — Infectious Diseases
 
-Detailed explanations shown through Read More in SHBACE Medical. Original question wording and provenance are retained.
+Detailed explanations shown through Read More in SHBACE Medical. Original question wording and source provenance are retained.
+
+## CC-0011 — Candidiasis & mucocutaneous infection
+
+**Question:** A 4 month infant is brought to the pediatrician by his mother because he is not
+feeding well. Examination of the mouth reveals curd like plaques on the tongue and
+buccal mucosa that don’t scrape off easily. Which of the following sites may be
+involved with this condition ?
+
+**Options:**
+- A. Eyes
+- B. Scalp.
+- C. Perineum.
+- D. Umbilicus.
+
+**Answer:** C — Perineum.
+
+Clinical explanation:
+Curd-like oral plaques in an infant suggest Candida infection. Candida can also involve the diaper/perineal area.
+
+Options analysis:
+A: not the typical associated site. B: scalp is not typical. C: correct. D: umbilicus is not the classic associated site.
+
+Curriculum alignment:
+SHETS: Infectious/GIT/Dermatology; candidiasis.
+
+High-Yield:
+Oral thrush and candidal diaper dermatitis may coexist.
+
+**Source provenance:**
+- Q50 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 15`.
+
+---
 
 ## CC-0026 — Measles & viral exanthems
 
@@ -30,9 +62,9 @@ High-Yield:
 Remember the “3 Cs”: cough, coryza and conjunctivitis.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source pp. 7–8`.
-- NMT10 PDF · PDF page(s): 1
-- NMT11 PDF · PDF page: 2 · Original source case: 3
+- Q21 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source pp. 7–8`.
+- NMT10 · NMT10 — Section 1 · Original Question 1: A 10 months old infant presents with a day history of blanching confluent rash · NMT10 PDF · PDF page(s): 1
+- NMT11 · NMT11 — Original Question 3: A 10 months old infant presents with a day history of blanching · NMT11 PDF · PDF page: 2 · Original source case: 3
 
 ---
 
@@ -64,11 +96,11 @@ High-Yield:
 Roseola rash classically appears as the fever resolves.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 7`.
+- Q22 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 7`.
 
 ---
 
-## CC-0028 — Measles & viral exanthems
+## CC-0028 — Rubella & viral exanthems
 
 **Question:** An 8 years old girl present with low grade fever and a diffuse maculopapular rash.
 On examination her physician notes mild tenderness and marked swelling of her
@@ -96,11 +128,11 @@ High-Yield:
 Posterior auricular, posterior cervical and occipital nodes are characteristic clues to rubella.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 8`.
+- Q23 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 8`.
 
 ---
 
-## CC-0046 — Gastroenteritis & diarrhea
+## CC-0046 — Viral upper respiratory infection
 
 **Question:** A 3 years old boy came to the outpatient's clinic complaining of mild fever, runny,
 nose, malaise and vomiting. On throat examination there was hyperemia of the throat.
@@ -110,7 +142,7 @@ What is the most likely medicine to be given?
 3- Multivitamin.
 4-Acetylsalicylic acid.
 
-**Answer status:** No verified selectable answer is encoded; no answer has been guessed.
+**Model answer:** 2 — Paracetamol (supportive care).
 
 Clinical explanation:
 A mild febrile upper respiratory illness with coryza and pharyngeal hyperaemia is usually viral. Treat discomfort/fever and provide supportive care; antibiotics are not indicated without evidence of bacterial disease.
@@ -125,11 +157,11 @@ High-Yield:
 A viral URTI does not need antibiotics; avoid aspirin in children.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 8`.
+- Q25 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 8`.
 
 ---
 
-## CC-0071 — Gastroenteritis & diarrhea
+## CC-0071 — Viral upper respiratory infection
 
 **Question:** A 3 years old boy came to the outpatient's clinic complaining of
 mild fever, runny, nose, malaise and vomiting. On throat
@@ -173,7 +205,7 @@ High-Yield:
 Mild fever, coryza, malaise and pharyngeal erythema without bacterial features suggest a viral illness. Treatment is supportive, with paracetamol for discomfort/fever and hydration.
 
 **Source provenance:**
-- NMT11 PDF · PDF page: 7 · Original source case: 12
+- NMT11 · NMT11 — Original Question 12: A 3 years old boy came to the outpatient's clinic complaining of · NMT11 PDF · PDF page: 7 · Original source case: 12
 
 ---
 
@@ -215,7 +247,7 @@ High-Yield:
 A young child with several days of high fever without a localizing source who develops a maculopapular rash on the trunk as the fever resolves is typical of roseola, usually due to HHV-6/7. Febrile seizures can occur during the fever phase.
 
 **Source provenance:**
-- NMT10 PDF · PDF page(s): 5
-- NMT11 PDF · PDF page: 5 · Original source case: 8
+- NMT10 · NMT10 — Section 2 · Original Question 4: A 15 months old infant presents to the emergency department with a 4-day history of · NMT10 PDF · PDF page(s): 5
+- NMT11 · NMT11 — Original Question 8: A 15 months old infant presents to the emergency department with a · NMT11 PDF · PDF page: 5 · Original source case: 8
 
 ---
