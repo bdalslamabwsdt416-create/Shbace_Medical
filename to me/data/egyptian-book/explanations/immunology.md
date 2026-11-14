@@ -593,5 +593,3 @@ Oral typhoid vaccine (live attenuated Ty21a) is a bacterial vaccine. Oral polio 
 Curriculum alignment: Pediatric vaccination, pp.2–4 (live attenuated vaccines and schedules).
 
 High-yield point: Oral route does not determine whether a vaccine targets a bacterium or virus.
-
-[executed on device: DESKTOP-E32SKJN (fae67a54-2987-49df-9a33-67ef9b7940bf)]

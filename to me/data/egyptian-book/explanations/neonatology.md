@@ -833,5 +833,3 @@ Apnoea of prematurity is commonly defined as a pause in breathing lasting at lea
 Curriculum alignment: Neonatology 2024–2025: neonatal apnea, respiratory distress and monitoring. **High-yield point / Review Notes:** Evaluate recurrent apnoea for prematurity, infection, metabolic disturbance, respiratory or neurological causes.
 
 High-yield point: Apnoea of prematurity is commonly defined as a pause in breathing lasting at least 20 seconds, or a shorter pause associated with bradycardia, cyanosis or oxygen desaturation.
-
-[executed on device: DESKTOP-E32SKJN (fae67a54-2987-49df-9a33-67ef9b7940bf)]

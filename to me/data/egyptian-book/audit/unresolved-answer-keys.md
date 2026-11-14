@@ -85,5 +85,3 @@ Options:
 - Sabin
 - Bacillus
 - Calamite
-
-[executed on device: DESKTOP-E32SKJN (fae67a54-2987-49df-9a33-67ef9b7940bf)]

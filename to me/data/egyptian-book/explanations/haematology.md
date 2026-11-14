@@ -641,5 +641,3 @@ Leukaemia is the most common childhood malignancy overall. Retinoblastoma and Wi
 Curriculum alignment: Pediatric dermatology/allergy/hepatology/tumors/child abuse module: childhood tumours; Haematology 2024: leukaemia. **High-yield point / Review Notes:** If asked for the most common solid tumour, the answer differs from the most common malignancy overall.
 
 High-yield point: Leukaemia is the most common childhood malignancy overall.
-
-[executed on device: DESKTOP-E32SKJN (fae67a54-2987-49df-9a33-67ef9b7940bf)]

@@ -561,5 +561,3 @@ Both pulmonary consolidation and pleural effusion produce a dull or impaired per
 Curriculum alignment: Respiratory 2024: percussion in consolidation and pleural effusion. **High-yield point / Review Notes:** Auscultation and tactile vocal fremitus help distinguish consolidation from effusion.
 
 High-yield point: Both pulmonary consolidation and pleural effusion produce a dull or impaired percussion note because they replace or separate normally air-filled lung from the chest wall.
-
-[executed on device: DESKTOP-E32SKJN (fae67a54-2987-49df-9a33-67ef9b7940bf)]

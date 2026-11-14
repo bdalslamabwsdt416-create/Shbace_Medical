@@ -529,5 +529,3 @@ Spastic cerebral palsy is the most common motor phenotype. It is characterized b
 Curriculum alignment: CNS 2024: cerebral palsy types and clinical features. **High-yield point / Review Notes:** Classify CP by motor type and distribution; also assess associated epilepsy, vision, hearing, feeding and development.
 
 High-yield point: Spastic cerebral palsy is the most common motor phenotype.
-
-[executed on device: DESKTOP-E32SKJN (fae67a54-2987-49df-9a33-67ef9b7940bf)]

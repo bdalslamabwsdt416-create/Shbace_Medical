@@ -657,5 +657,3 @@ Infants with heart failure may sweat excessively, particularly during feeding, b
 Curriculum alignment: CVS 2024: paediatric heart failure symptoms and signs in infants. **High-yield point / Review Notes:** Sweating with feeds plus tachypnoea and poor weight gain should prompt assessment for congenital heart disease.
 
 High-yield point: Infants with heart failure may sweat excessively, particularly during feeding, because feeding increases metabolic demand and cardiac workload.
-
-[executed on device: DESKTOP-E32SKJN (fae67a54-2987-49df-9a33-67ef9b7940bf)]

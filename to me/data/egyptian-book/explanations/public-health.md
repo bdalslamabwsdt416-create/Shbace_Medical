@@ -81,5 +81,3 @@ Prevalence describes the proportion or number of people in a defined population 
 Curriculum alignment: Curriculum match: no explicit incidence/prevalence definition was found in the supplied 19 course sources. This is foundational epidemiology rather than a clearly indexed pediatric lecture topic.
 
 High-yield point: Distinguish point prevalence (at one moment) from period prevalence (at any time during a defined period).
-
-[executed on device: DESKTOP-E32SKJN (fae67a54-2987-49df-9a33-67ef9b7940bf)]

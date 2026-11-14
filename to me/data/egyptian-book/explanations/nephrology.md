@@ -353,5 +353,3 @@ Diarrhoea causes gastrointestinal potassium loss; Cushing syndrome can cause ren
 Curriculum alignment: Nephrology 2024: potassium homeostasis, acid–base disturbances and hypokalaemia. **High-yield point / Review Notes:** Always interpret serum potassium with acid–base status, renal function, and gastrointestinal losses.
 
 High-yield point: Diarrhoea causes gastrointestinal potassium loss; Cushing syndrome can cause renal potassium wasting and mineralocorticoid effects; metabolic alkalosis promotes intracellular potassium shift and renal potassium loss.
-
-[executed on device: DESKTOP-E32SKJN (fae67a54-2987-49df-9a33-67ef9b7940bf)]

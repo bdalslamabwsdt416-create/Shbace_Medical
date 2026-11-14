@@ -897,5 +897,3 @@ Humans synthesize vitamin D3 in the skin with UVB exposure; intestinal microbiot
 Curriculum alignment: Growth & Nutrition 2024, pp.9 and 19 (vitamins and vitamin D synthesis).
 
 High-yield point: Vitamin D production depends on UVB exposure; vitamin A must be obtained from the diet.
-
-[executed on device: DESKTOP-E32SKJN (fae67a54-2987-49df-9a33-67ef9b7940bf)]

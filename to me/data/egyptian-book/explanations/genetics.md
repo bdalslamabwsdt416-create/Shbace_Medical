@@ -17,5 +17,3 @@ Turner syndrome classically results from complete or partial absence of one X ch
 Curriculum alignment: Genetics 2024: sex chromosome aneuploidy and Turner syndrome. **High-yield point / Review Notes:** Turner syndrome may be mosaic or structural; not every patient has a uniform 45,X karyotype.
 
 High-yield point: Turner syndrome classically results from complete or partial absence of one X chromosome; the classic karyotype is 45,X (monosomy X).
-
-[executed on device: DESKTOP-E32SKJN (fae67a54-2987-49df-9a33-67ef9b7940bf)]

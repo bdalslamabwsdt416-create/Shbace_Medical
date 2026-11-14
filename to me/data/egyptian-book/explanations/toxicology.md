@@ -65,5 +65,3 @@ Salicylates stimulate the respiratory centre, causing hyperventilation and early
 Curriculum alignment: Rheumatology/metabolic/poisoning 2024: poisoning and acid–base effects; pharmacology. **High-yield point / Review Notes:** Salicylate poisoning can be life-threatening; interpret blood gases and salicylate concentrations with clinical status.
 
 High-yield point: Salicylates stimulate the respiratory centre, causing hyperventilation and early respiratory alkalosis.
-
-[executed on device: DESKTOP-E32SKJN (fae67a54-2987-49df-9a33-67ef9b7940bf)]

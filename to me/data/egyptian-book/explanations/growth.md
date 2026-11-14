@@ -849,5 +849,3 @@ Encopresis is recurrent passage of faeces in inappropriate places in a child bey
 Curriculum alignment: Developmental Assessment and Developmental milestones; paediatric history/continence. **High-yield point / Review Notes:** Assess constipation, stool withholding, painful defecation, psychosocial factors, and red flags.
 
 High-yield point: Encopresis is recurrent passage of faeces in inappropriate places in a child beyond the developmental age at which bowel control is expected.
-
-[executed on device: DESKTOP-E32SKJN (fae67a54-2987-49df-9a33-67ef9b7940bf)]

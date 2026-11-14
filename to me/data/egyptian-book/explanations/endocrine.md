@@ -113,5 +113,3 @@ In iodine-sufficient settings, thyroid dysgenesis (agenesis, ectopy or hypoplasi
 Curriculum alignment: Endocrine 2025: congenital hypothyroidism and thyroid dysgenesis. **High-yield point / Review Notes:** Clarify local iodine status when applying “most common cause” epidemiologically. ## EXTENDED ACCEPTED
 
 High-yield point: In iodine-sufficient settings, thyroid dysgenesis (agenesis, ectopy or hypoplasia) is the most common cause of permanent congenital hypothyroidism.
-
-[executed on device: DESKTOP-E32SKJN (fae67a54-2987-49df-9a33-67ef9b7940bf)]

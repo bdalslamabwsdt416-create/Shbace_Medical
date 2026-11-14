@@ -17,5 +17,3 @@ ESR is a nonspecific marker that is often elevated in acute rheumatic fever, con
 Curriculum alignment: Rheumatology 2024: acute rheumatic fever, connective-tissue disease and inflammatory markers; Infectious 2024: tuberculosis. **High-yield point / Review Notes:** In Jones criteria, ESR/CRP are inflammatory minor criteria; isolated chorea is a special presentation and can occur late.
 
 High-yield point: ESR is a nonspecific marker that is often elevated in acute rheumatic fever, connective-tissue diseases, and tuberculosis.
-
-[executed on device: DESKTOP-E32SKJN (fae67a54-2987-49df-9a33-67ef9b7940bf)]

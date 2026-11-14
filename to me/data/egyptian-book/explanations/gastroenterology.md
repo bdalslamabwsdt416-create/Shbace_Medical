@@ -481,5 +481,3 @@ Severe dehydration and reduced renal perfusion can predispose infants to renal v
 Curriculum alignment: Nephrology 2024, pp.17–20: renal disease, hematuria/proteinuria and nephrotic/nephritic differentials; GIT 2024–2025, pp.22–27: severe diarrheal dehydration.
 
 High-yield point: Source wording “Lower nephrosis” is retained; its intended meaning is unclear from the transcription.
-
-[executed on device: DESKTOP-E32SKJN (fae67a54-2987-49df-9a33-67ef9b7940bf)]

@@ -897,5 +897,3 @@ Carbenicillin is a historical antipseudomonal carboxypenicillin. It was used aga
 Curriculum alignment: Infectious 2024: Pseudomonas aeruginosa and antipseudomonal antimicrobial choices. Carbenicillin is an older penicillin; this specific historic drug detail is beyond contemporary core practice. **High-yield point / Review Notes:** Extended Accepted: retain for pharmacology history and antimicrobial-spectrum reasoning.
 
 High-yield point: Carbenicillin is a historical antipseudomonal carboxypenicillin.
-
-[executed on device: DESKTOP-E32SKJN (fae67a54-2987-49df-9a33-67ef9b7940bf)]
