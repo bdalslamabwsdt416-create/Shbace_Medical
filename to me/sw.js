@@ -1,6 +1,7 @@
 'use strict';
 
-const CACHE_NAME = 'shbace-to-me-chrome-offline-v1.3.9-to-me.9';
+/* One stable cache shared with js/29-offline-setup.js. It is not versioned: app updates replace only the changed files. */
+const CACHE_NAME = 'shbace-chrome-offline-v1.3.8';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
 const APP_SHELL = [
   './',
@@ -18,7 +19,8 @@ const APP_SHELL = [
   './js/33-unified-voice.js',
   './js/34-study-countdown.js',
   './js/35-pediatrics-collections.js',
-  './js/36-exam-planner-settings-smartreview.js'
+  './js/36-exam-planner-settings-smartreview.js',
+  './js/37-study-hub-linkage.js'
 ];
 
 function missingOfflineResponse(url) {
@@ -35,21 +37,25 @@ function missingOfflineResponse(url) {
 }
 
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    /* Fetch only the shell files that are not already stored; the offline updater owns every later change. */
+    const missing = [];
+    for (const url of APP_SHELL) {
+      if (!(await cache.match(url))) missing.push(url);
+    }
+    if (missing.length) await cache.addAll(missing);
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener('activate', event => {
-  // The new worker is activated only after its complete APP_SHELL cache was installed.
-  // It is therefore safe to remove obsolete worker-shell caches; student data is not stored here.
   event.waitUntil((async () => {
     await self.clients.claim();
     const names = await caches.keys();
+    /* Remove only the old per-version worker caches from earlier releases. */
     await Promise.all(names
-      .filter(name => name.startsWith('shbace-to-me-chrome-offline-') && name !== CACHE_NAME)
+      .filter(name => name.startsWith('shbace-to-me-chrome-offline-'))
       .map(name => caches.delete(name)));
   })());
 });
@@ -89,7 +95,8 @@ self.addEventListener('fetch', event => {
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
     const ready = await cache.match(READY_URL);
-    const cached = await cache.match(request, { ignoreSearch: true });
+    let cached = await cache.match(request, { ignoreSearch: true });
+    if (!cached && request.mode === 'navigate') cached = await cache.match(new URL('index.html', self.registration.scope).href);
     if (cached) return cached;
     if (ready) return missingOfflineResponse(request.url);
     try {

@@ -244,9 +244,15 @@
     if (navigator.share) navigator.share({ title: 'Shbace Medical question', text: text }).catch(function () {});
     else copyText(text);
   }
-  function speak(text) {
+  function speak(text, card, button) {
     if (!prefs.readAloud || !text) return;
-    var rates = { slow: 0.82, normal: 1, fast: 1.18 };
+    /* Chrome PWA uses the unified language-aware engine, which prefers a clear male voice
+       and toggles the same control between Play and Stop. Native Android keeps its bridge. */
+    if (window.__SHBACE_CHROME_PWA__ && typeof window.__shbUnifiedToggleQuestionReadAloud === 'function') {
+      window.__shbUnifiedToggleQuestionReadAloud(card, text, button);
+      return;
+    }
+    var rates = { slow: 0.82, normal: 0.92, fast: 1.08 };
     try {
       if (window.ShbaceNative && window.ShbaceNative.speakText) {
         window.ShbaceNative.speakText(text, 'en-US', rates[prefs.readingSpeed] || 1);
@@ -257,9 +263,13 @@
       if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) { toast('Speech is not available on this device'); return; }
       window.speechSynthesis.cancel();
       var u = new SpeechSynthesisUtterance(text);
-      u.rate = rates[prefs.readingSpeed] || 1;
+      u.rate = rates[prefs.readingSpeed] || 0.92;
+      u.pitch = 0.96;
+      u.volume = 1;
       var voices = window.speechSynthesis.getVoices() || [];
-      var voice = voices.find(function (v) { return /male/i.test(v.name) && /^en/i.test(v.lang); }) ||
+      var maleNames = /\b(david|mark|guy|james|daniel|alex|fred|thomas|tom|george|oliver|ryan|aaron|jason|matthew|andrew|brian|arthur|liam|nathan|john|michael|christopher|eric|peter|paul|stephen|richard|william|henry|bruce)\b/i;
+      var voice = voices.find(function (v) { return maleNames.test(String(v.name || '')) && /^en/i.test(v.lang); }) ||
+        voices.find(function (v) { return /^en-US$/i.test(v.lang); }) ||
         voices.find(function (v) { return /^en/i.test(v.lang); });
       if (voice) u.voice = voice;
       window.speechSynthesis.speak(u);
@@ -877,7 +887,7 @@
       var card = action.closest('.qcard'), text = cardQuestion(card), type = action.getAttribute('data-shb-question-action');
       if (type === 'copy') copyText(text);
       if (type === 'share') shareText(text);
-      if (type === 'speak') speak(text);
+      if (type === 'speak') speak(text, card, action);
     }
     if (t.closest && t.closest('#shbCopyAppInfo')) {
       try {
