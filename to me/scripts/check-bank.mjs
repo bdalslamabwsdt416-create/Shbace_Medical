@@ -55,13 +55,15 @@ for (const q of clinical) {
   } catch { errors.push(q.id + ": missing system explanation Markdown file"); }
 }
 const ccAudit = JSON.parse(readFileSync(join(root, "data/clinical-case/audit/clinical-case-audit.json"), "utf8"));
-if (clinical.length !== 90 || ccAudit.unique_student_facing_cards_after_exact_deduplication !== 90) errors.push("Clinical Case expected 90 draft cards");
-if (clinical.filter(q => q.o.length).length !== 81) errors.push("Clinical Case expected 81 MCQ cards");
-if (clinical.filter(q => q.ccOpen).length !== 9) errors.push("Clinical Case expected 9 open-ended cards");
+if (clinical.length !== 90 || ccAudit.unique_student_facing_cards_after_exact_deduplication !== 90) errors.push("Clinical Case expected 90 matched student-facing cards");
+if (clinical.filter(q => q.o.length).length !== 90) errors.push("Clinical Case expected 90 complete MCQ cards");
+if (clinical.filter(q => q.ccOpen || q.kx || q.ccMatchStatus !== "matched").length !== 0) errors.push("Clinical Case contains an unmatched, unverified, or disabled record");
+if (ccAudit.mcq_cards !== 90 || ccAudit.mcq_answer_keys_resolved !== 90 || ccAudit.mcq_answer_keys_unresolved !== 0) errors.push("Clinical Case matched answer-key audit counts do not agree");
+if (ccAudit.option_arrays_reconstructed_from_accepted_source !== 9) errors.push("Clinical Case source-option reconstruction audit count mismatch");
 if (ccAudit.exact_duplicate_records_removed !== 18) errors.push("Clinical Case exact duplicate audit count mismatch");
 if (clinical.reduce((sum, q) => sum + (q.ccOccurrences?.length || 0), 0) !== 108 || ccAudit.source_occurrences_preserved !== 108) errors.push("Clinical Case source occurrence provenance count mismatch");
 if (ccAudit.accepted_sections_without_dedicated_question_block !== 59) errors.push("Clinical Case pending Accepted record count mismatch");
-if (!String(ccAudit.publication_status || "").startsWith("NOT READY")) errors.push("Clinical Case audit must block production while Accepted stems are pending");
+if (!String(ccAudit.publication_status || "").startsWith("MATCHED-ONLY BANK READY")) errors.push("Clinical Case audit must identify the matched-only bank status");
 const pending = readFileSync(join(root, "data/clinical-case/audit/unmapped-accepted-records.md"), "utf8");
 if ((pending.match(/^## Pending /gm) || []).length !== 59) errors.push("Clinical Case pending audit file does not preserve all 59 Accepted sections");
 
@@ -74,7 +76,7 @@ for (const file of jsFiles) {
   if (r.status !== 0) errors.push(`${file.replace(root + "/", "")}: syntax error\n${r.stderr}`);
 }
 console.log(`Checked ${bank.length} base questions and ${clinical.length} Clinical Case cards.`);
-console.log(`Clinical Case: ${clinical.filter(q => q.o.length).length} MCQ, ${clinical.filter(q => q.ccOpen).length} open-ended, ${ccAudit.exact_duplicate_records_removed} exact duplicates removed, ${ccAudit.accepted_sections_without_dedicated_question_block} Accepted sections pending reconstruction.`);
+console.log(`Clinical Case: ${clinical.filter(q => q.o.length).length} matched MCQ, ${clinical.filter(q => q.ccOpen).length} open-ended, ${ccAudit.exact_duplicate_records_removed} exact duplicates removed, ${ccAudit.accepted_sections_without_dedicated_question_block} unmatched Accepted sections excluded.`);
 warnings.forEach(w => console.log("WARN  " + w));
 errors.forEach(e => console.log("ERROR " + e));
 console.log(`${warnings.length} warning(s), ${errors.length} error(s).`);
