@@ -28,7 +28,7 @@ const oldSpecialtiesView=specialtiesView;specialtiesView=function(){
 };
 const oldSelect=window.selectPediatricCollection;window.selectPediatricCollection=function(which){
  if(which!=='egyptian'){ebActive='';ebSystem='';ebTopic='';document.body.classList.remove('eb-bank-mode');return oldSelect.apply(this,arguments);}
- ebActive='egyptian';ebSystem='';ebTopic='';const result=oldSelect('aj');window.__SHB_PED_COLLECTION__='egyptianbook';return result;
+ ebActive='egyptian';ebSystem='';ebTopic='';const result=oldSelect('aj');window.__SHB_PED_COLLECTION__='egyptianbook';if(typeof window.__SHBACE_HISTORY_SNAPSHOT__==='function')window.__SHBACE_HISTORY_SNAPSHOT__();return result;
 };
 const oldChooser=window.openPediatricCollections;if(typeof oldChooser==='function')window.openPediatricCollections=function(){ebActive='';ebSystem='';ebTopic='';document.body.classList.remove('eb-bank-mode');return oldChooser.apply(this,arguments);};
 window.openEgyptianBookHome=function(){ebActive='egyptian';ebSystem='';ebTopic='';document.body.classList.remove('eb-bank-mode');window.__SHB_PED_COLLECTION__='egyptianbook';appPage='specialties';renderAppDemo();};
