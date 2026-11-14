@@ -39,6 +39,7 @@ for (const q of clinical) {
   if (!String(q.ex || "").trim()) errors.push(q.id + ": missing Initial Explanation");
   if (!String(q.more || "").trim() || !q.more.includes("High-Yield:")) errors.push(q.id + ": missing Read More / High-Yield");
   if (!String(q.ccSource || "").trim() || !Array.isArray(q.ccSources) || !q.ccSources.length) errors.push(q.id + ": missing source provenance");
+  if (!Array.isArray(q.ccOccurrences) || !q.ccOccurrences.length) errors.push(q.id + ": missing original exam/question occurrence provenance");
   if (!String(q.ccSystem || "").trim() || !String(q.ccTopic || "").trim()) errors.push(q.id + ": missing system/topic");
   if (q.o.length) {
     if (!Array.isArray(q.ol) || q.ol.length !== q.o.length) errors.push(q.id + ": option labels do not match options");
@@ -50,6 +51,7 @@ for (const q of clinical) {
   try {
     const md = readFileSync(mdPath, "utf8");
     if (!md.includes(q.id)) errors.push(q.id + ": missing from system explanation Markdown");
+    for (const occurrence of (q.ccOccurrences || [])) if (!md.includes(occurrence.heading)) errors.push(q.id + ": lost source heading " + occurrence.heading);
   } catch { errors.push(q.id + ": missing system explanation Markdown file"); }
 }
 const ccAudit = JSON.parse(readFileSync(join(root, "data/clinical-case/audit/clinical-case-audit.json"), "utf8"));
@@ -57,6 +59,7 @@ if (clinical.length !== 90 || ccAudit.unique_student_facing_cards_after_exact_de
 if (clinical.filter(q => q.o.length).length !== 81) errors.push("Clinical Case expected 81 MCQ cards");
 if (clinical.filter(q => q.ccOpen).length !== 9) errors.push("Clinical Case expected 9 open-ended cards");
 if (ccAudit.exact_duplicate_records_removed !== 18) errors.push("Clinical Case exact duplicate audit count mismatch");
+if (clinical.reduce((sum, q) => sum + (q.ccOccurrences?.length || 0), 0) !== 108 || ccAudit.source_occurrences_preserved !== 108) errors.push("Clinical Case source occurrence provenance count mismatch");
 if (ccAudit.accepted_sections_without_dedicated_question_block !== 59) errors.push("Clinical Case pending Accepted record count mismatch");
 if (!String(ccAudit.publication_status || "").startsWith("NOT READY")) errors.push("Clinical Case audit must block production while Accepted stems are pending");
 const pending = readFileSync(join(root, "data/clinical-case/audit/unmapped-accepted-records.md"), "utf8");
