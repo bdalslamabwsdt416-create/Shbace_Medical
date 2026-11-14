@@ -29,14 +29,14 @@ function allOnceSystemsView(){
   return '<div class="card sc spc ped-system-card" onclick="openAllOnceSystem(\''+row.id+'\')">'+icon+
    '<div class="spc-tx"><h3>'+escText(row.name)+'</h3><div class="meta"><b>'+row.count.toLocaleString()+'</b> questions</div></div><span class="chev">›</span></div>';
  }).join('');
- return appHeader('All Once')+'<div class="rs ped-systems-page"><div class="ped-collection-kicker">ALL ONCE · PEDIATRICS</div><h1>Choose a medical system</h1><p class="sub">'+rows.length+' systems · '+list.length.toLocaleString()+' questions</p><div class="ped-systems-grid">'+(cards||'<div class="card setcard"><p class="meta">No All Once questions are available.</p></div>')+'</div></div>';
+ return appHeader('Kasr Al-Ainy')+'<div class="rs ped-systems-page"><div class="ped-collection-kicker">KASR AL-AINY · PEDIATRICS</div><h1>Choose a medical system</h1><p class="sub">'+rows.length+' systems · '+list.length.toLocaleString()+' questions</p><div class="ped-systems-grid">'+(cards||'<div class="card setcard"><p class="meta">No All Once questions are available.</p></div>')+'</div></div>';
 }
 const oldSpecialtiesView=specialtiesView;
 specialtiesView=function(){
  if(aoActive==='allonce')return allOnceSystemsView();
  let html=oldSpecialtiesView.apply(this,arguments);
  if(!aoActive&&html.indexOf('ped-collection-footnote')>=0){
-  const card='<button type="button" class="ped-collection-card ped-collection-allonce" onclick="selectPediatricCollection(\'allonce\')"><div class="ped-collection-avatar ped-avatar-allonce"><img src="/assets/img/all-once-pediatrics-cover.svg" alt="All Once Pediatrics question bank" decoding="async"></div><span class="ped-collection-copy"><span class="eyebrow">CURATED QUESTION BANK</span><b>All Once</b><small>Accepted and Needs Review questions, arranged by medical system.</small><span class="ped-collection-count">'+allOnceQuestions().length.toLocaleString()+' questions</span></span><span class="ped-collection-arrow">›</span></button>';
+  const card='<button type="button" class="ped-collection-card ped-collection-allonce" onclick="selectPediatricCollection(\'allonce\')"><div class="ped-collection-avatar ped-avatar-allonce"><img src="/assets/img/all-once-pediatrics-cover.svg" alt="All Once Pediatrics question bank" decoding="async"></div><span class="ped-collection-copy"><span class="eyebrow">KASR AL-AINY QUESTION BANK</span><b>Kasr Al-Ainy</b><small>Accepted and Needs Review questions, arranged by medical system.</small><span class="ped-collection-count">'+allOnceQuestions().length.toLocaleString()+' questions</span></span><span class="ped-collection-arrow">›</span></button>';
   html=html.replace('</div><div class="ped-collection-footnote">',card+'</div><div class="ped-collection-footnote">');
   html=html.replace('The three collections remain separate.','The four collections remain separate.');
  }
@@ -48,6 +48,7 @@ window.selectPediatricCollection=function(which){
  aoActive='allonce';
  const result=oldSelect('aj');
  window.__SHB_PED_COLLECTION__='allonce';
+ if(typeof window.__SHBACE_HISTORY_SNAPSHOT__==='function')window.__SHBACE_HISTORY_SNAPSHOT__();
  return result;
 };
 const oldOpenChooser=window.openPediatricCollections;
