@@ -1,6 +1,6 @@
 # Clinical Case — Cardiovascular System
 
-Detailed explanations shown through Read More in SHBACE Medical. Original question wording and provenance are retained.
+Detailed explanations shown through Read More in SHBACE Medical. Original question wording and source provenance are retained.
 
 ## CC-0002 — Rheumatic fever & carditis
 
@@ -30,7 +30,7 @@ High-Yield:
 Treat heart failure first in a child with suspected rheumatic carditis and congestion.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 12`.
+- Q36 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 12`.
 
 ---
 
@@ -62,7 +62,7 @@ High-Yield:
 Blood cultures should be obtained before antibiotics when this does not delay emergency treatment.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 12`.
+- Q37 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 12`.
 
 ---
 
@@ -92,11 +92,11 @@ High-Yield:
 Endocarditis can cause embolic complications; imaging and culture are both important.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 12`.
+- Q38 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 12`.
 
 ---
 
-## CC-0031 — Iron deficiency & childhood anemia
+## CC-0031 — Heart failure in infancy
 
 **Question:** A 3 week old baby, who was full term, Is brought to the hospital. He has recently
 been having problems completing his feeds and today appears short of breath. On
@@ -125,12 +125,12 @@ High-Yield:
 In infants, poor feeding, tachypnoea, tachycardia and hepatomegaly can be the main manifestations of heart failure.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 3`.
-- NMT10 PDF · PDF page(s): 4
+- Q6 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 3`.
+- NMT10 · NMT10 — Section 2 · Original Question 2: A 3 week old baby, who was full term, Is brought to the hospital. He has recently been · NMT10 PDF · PDF page(s): 4
 
 ---
 
-## CC-0054 — Congenital heart disease
+## CC-0054 — Heart failure in infancy
 
 **Question:** A 3 week old baby, who was full term, Is brought to the hospital. He
 has recently been having problems completing his feeds and today
@@ -180,7 +180,7 @@ High-Yield:
 Poor feeding, tachypnea, marked tachycardia and hepatomegaly form a classic infant heart-failure pattern. A normal temperature and normal blood tests do not exclude cardiac failure; consider congenital heart disease or cardiomyopathy and assess urgently.
 
 **Source provenance:**
-- NMT11 PDF · PDF page: 4 · Original source case: 6
+- NMT11 · NMT11 — Original Question 6: A 3 week old baby, who was full term, Is brought to the hospital. He · NMT11 PDF · PDF page: 4 · Original source case: 6
 
 ---
 
@@ -233,6 +233,6 @@ High-Yield:
 Fever, migratory large-joint pain, tachycardia, tachypnea, effort intolerance and tender hepatomegaly suggest acute rheumatic fever with carditis and congestive heart failure. The first priority is stabilization and treatment of heart failure; obtain ECG/echocardiography and evid
 
 **Source provenance:**
-- NMT11 PDF · PDF page: 7 · Original source case: 11
+- NMT11 · NMT11 — Original Question 11: A 12 years old female came to hospital with fever, difficulty in · NMT11 PDF · PDF page: 7 · Original source case: 11
 
 ---
