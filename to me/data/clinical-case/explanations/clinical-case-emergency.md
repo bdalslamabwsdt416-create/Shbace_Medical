@@ -1,6 +1,6 @@
 # Clinical Case — Emergency & Fluid Balance
 
-Detailed explanations shown through Read More in SHBACE Medical. Original question wording and provenance are retained.
+Detailed explanations shown through Read More in SHBACE Medical. Original question wording and source provenance are retained.
 
 ## CC-0012 — Dehydration, shock & fluid balance
 
@@ -30,41 +30,8 @@ High-Yield:
 Treat shock before pursuing non-urgent diagnostics; reassess after each fluid intervention.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 15`.
-- NMT10 PDF · PDF page(s): 5
-
----
-
-## CC-0052 — Pneumonia & lower respiratory infection
-
-**Question:** A 1 year previously healthy male was admitted to the hospital in the last evening, he
-presented with cough, high fever, and mild hypoxia. CXR revealed right upper lobar
-consolidation. Approximately 20 hours after hospitalization. the patient deteriorates;
-developing severe respiratory distress, hypotension, poor perfusion and his color
-becomesdusky.What is the most likely diagnosis?
-
-**Options:**
-- A. Uncomplicated pneumonia
-- B. Pneumonia complicated by sepsis
-- C. Pneumonia complicated by heart failure
-- D. Pneumonia complicated by pneumothorax
-
-**Answer:** B — Pneumonia complicated by sepsis
-
-Clinical explanation:
-Deterioration after lobar pneumonia with hypotension, poor perfusion and dusky colour indicates systemic shock/sepsis.
-
-Options analysis:
-A: uncomplicated pneumonia does not explain shock. B: correct. C: heart failure is not the best fit without supporting signs. D: pneumothorax would usually have asymmetric breath sounds/acute pleural signs.
-
-Curriculum alignment:
-SHETS: Respiratory/Infectious; pneumonia, sepsis and shock.
-
-High-Yield:
-Hypotension and poor perfusion in a child with pneumonia indicate severe disease and require urgent resuscitation.
-
-**Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 10`.
+- Q51 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 15`.
+- NMT10 · NMT10 — Section 2 · Original Question 5: An 18 months old boy came to the emergency department with rapid respiration, · NMT10 PDF · PDF page(s): 5
 
 ---
 
@@ -115,6 +82,6 @@ High-Yield:
 Three days of vomiting/diarrhea with tachycardia, hypotension, tachypnea, drowsiness and delayed capillary refill indicates decompensated shock from fluid loss. Establish IV/IO access and give isotonic crystalloid boluses with frequent reassessment; do not delay resuscitation for
 
 **Source provenance:**
-- NMT11 PDF · PDF page: 8 · Original source case: 13
+- NMT11 · NMT11 — Original Question 13: An 18 months old boy came to the emergency department with · NMT11 PDF · PDF page: 8 · Original source case: 13
 
 ---
