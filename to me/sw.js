@@ -1,7 +1,7 @@
 'use strict';
 
 /* One stable cache shared with js/29-offline-setup.js. It is not versioned: app updates replace only the changed files. */
-const CACHE_NAME = 'shbace-chrome-offline-v1.3.10.16';
+const CACHE_NAME = 'shbace-chrome-offline-v1.3.10.17';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
 const APP_SHELL = [
   './',
@@ -29,6 +29,7 @@ const APP_SHELL = [
   './data/all-once/all-once-bank-08.js',
   './data/all-once/all-once-bank-09.js',
   './data/all-once/all-once-bank-10.js',
+  './data/clinical-case/clinical-case-bank-01.js',
   './css/core.css',
   './css/late.css',
   './css/unified-enhancements.css',
@@ -39,7 +40,8 @@ const APP_SHELL = [
   './js/35-pediatrics-collections.js',
   './js/36-exam-planner-settings-smartreview.js',
   './js/37-study-hub-linkage.js',
-  './js/38-all-once-pediatrics.js'
+  './js/38-all-once-pediatrics.js',
+  './js/39-clinical-case-pediatrics.js'
 ];
 
 function missingOfflineResponse(url) {

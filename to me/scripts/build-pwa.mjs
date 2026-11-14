@@ -42,6 +42,7 @@ const requiredFiles = [
   "data/all-once/all-once-bank-08.js",
   "data/all-once/all-once-bank-09.js",
   "data/all-once/all-once-bank-10.js",
+  "data/clinical-case/clinical-case-bank-01.js",
   "data/qbData_reviewed_patch.json",
   "data/qbData_review_log.json",
   "data/audit/Question_Review_Log_1718.csv",
@@ -56,7 +57,8 @@ const requiredFiles = [
   "js/35-pediatrics-collections.js",
   "js/36-exam-planner-settings-smartreview.js",
   "js/37-study-hub-linkage.js",
-  "js/38-all-once-pediatrics.js"
+  "js/38-all-once-pediatrics.js",
+  "js/39-clinical-case-pediatrics.js"
 ];
 const requiredDirs = ["css", "js", "data"];
 const imageDirs = ["img", "img1", "img2"];
@@ -156,8 +158,8 @@ if (reviewLog && Array.isArray(reviewLog.entries)) {
   if (logChanged !== 45 || logNeedsReview !== 110) fail("Question review JSON counts do not match the master audit");
 }
 const pwaVersion = JSON.parse(readFileSync(join(root, "pwa-version.json"), "utf8"));
-if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.10-to-me.16") {
-  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.10-to-me.16");
+if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.10-to-me.17") {
+  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.10-to-me.17");
 }
 
 rmSync(output, { recursive: true, force: true });
@@ -264,7 +266,8 @@ writeFileSync(htmlPath, html);
 if (!html.includes("js/35-pediatrics-collections.js") ||
     !html.includes("js/36-exam-planner-settings-smartreview.js") ||
     !html.includes("css/shbace-layout-refinements.css") ||
-    !html.includes("js/37-study-hub-linkage.js")) {
+    !html.includes("js/37-study-hub-linkage.js") ||
+    !html.includes("js/38-all-once-pediatrics.js") || !html.includes("js/39-clinical-case-pediatrics.js")) {
   fail("Pediatrics, Exam Planner/Smart Review or layout refinement assets are not referenced by index.html");
 }
 if (!html.includes("navigator.serviceWorker.register('./sw.js'") || !html.includes("js/29-offline-setup.js") || !html.includes("js/29-reviewed-bank-controls.js") || !html.includes("qbData_reviewed_patch.json")) {
