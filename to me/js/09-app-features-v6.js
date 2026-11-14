@@ -256,8 +256,8 @@ window.ddPick=function(id,v,e){e&&e.stopPropagation();qs.dd=null;
 
 const exName=e=>String((EXAMS[e]||e)).replace("Previous Years' Exam Questions \u2014 ",'Exam ');
 const repRef=a=>{const g={};a.forEach(([e,n])=>(g[e]=g[e]||[]).push(n));return Object.keys(g).map(e=>`<bdi>${esc(exName(e))}</bdi> \u2013 ${g[e].map(n=>'Q'+n).join(', ')}`).join(' \u00b7 ')};
-function nelsonDetails(q){if(!q||!q.nl||!q.more)return '';return `<details class="nl-more"><summary>Read More</summary><div class="nl-more-body">${esc(q.more)}<p class="nl-source">Source: Nelson Textbook of Pediatrics.</p></div></details>`}
-function qExtra(q){if(!BANK_ON||q.nl)return '';let x='';
+function nelsonDetails(q){if(!q||(!q.nl&&!q.ao)||!q.more)return '';const source=q.ao?(q.aoSource||'Source details unavailable'):'Nelson Textbook of Pediatrics.';return `<details class="nl-more"><summary>Read More</summary><div class="nl-more-body">${esc(q.more)}<p class="nl-source">Source: ${esc(source)}</p></div></details>`}
+function qExtra(q){if(!BANK_ON||q.nl||q.ao)return '';let x='';
  if(q.py){if(q.src)x+=`<div class="qsrc">Source: <bdi>${esc(q.src)}</bdi></div>`;if(q.cs)x+=`<div class="qcase"><b>${esc(q.cs[0])}</b>\n${esc(q.cs[1])}</div>`;if(q.cm)x+='<div class="qrep"><span class="qflag w">Case text not in source file \u2013 classified by explanation</span></div>';
   if(q.rq.length)x+=`<div class="qrep"><span class="qflag r">Repeated Question</span> also appears in: ${repRef(q.rq)}</div>`;if(q.rc.length)x+=`<div class="qrep"><span class="qflag w">Repeated Topic/Concept</span> also tested in: ${repRef(q.rc)}</div>`}
  if(q.f)x+='<span class="qflag w">Needs review</span>';if(q.ai)x+='<span class="qflag">Solved with AI</span>';
@@ -271,8 +271,8 @@ function cardHTML(q,n,single){
  if(a){const ok=a.ok;const face=ok?'happy':(DOCF[q.id]||'sad');
   const msg=ok?(a.msg||PRAISE2[0]):(face==='angry'?'Let’s pause and review this one carefully.':face==='encouraging'?'A tough run — keep going, every mistake teaches you something.':'Not quite — the explanation below will help.');
   react=`<div class="qreact ${ok?'ok':'no'}">${docFace(face)}<div><b>${ok?(a.pr||'Excellent!'):(face==='angry'?'Careful!':face==='encouraging'?'Keep going!':'Incorrect')}</b><span>${esc(msg)}</span></div></div>
-  <div class="qfb ${ok?'ok':'no'}"><b>${ok?'Correct':'Incorrect'} · Correct answer: ${L(q.k)}. ${esc(q.o[q.k])}${qUnsure(q)&&!q.nl?' <em class="qunsure">(unconfirmed key)</em>':''}</b><p>Explanation: ${esc(q.ex)}</p>${nelsonDetails(q)}</div>`}
- else if(q.nl&&q.kx){react=`<div class="qfb no"><b>Question data is incomplete, so answer selection is unavailable.</b><p>Explanation: ${esc(q.ex)}</p>${nelsonDetails(q)}</div>`}
+  <div class="qfb ${ok?'ok':'no'}"><b>${ok?'Correct':'Incorrect'} · Correct answer: ${L(q.k)}. ${esc(q.o[q.k])}${qUnsure(q)&&!q.nl&&!q.ao?' <em class="qunsure">(unconfirmed key)</em>':''}</b><p>Explanation: ${esc(q.ex)}</p>${nelsonDetails(q)}</div>`}
+ else if((q.nl||q.ao)&&q.kx){react=`<div class="qfb no"><b>Question data is incomplete, so answer selection is unavailable.</b><p>Explanation: ${esc(q.ex)}</p>${nelsonDetails(q)}</div>`}
  else if(single){react=`<div class="qreact think"><div><b>Take your time</b><span>Think it through, then choose an answer.</span></div></div>`}
  const acts=`<div class="qacts">
   <button type="button" class="qa ${S.saved[q.id]?'on':''}" onclick="qSave('${q.id}')"><span>${S.saved[q.id]?'★':'☆'}</span>${S.saved[q.id]?'Saved':'Save'}</button>
@@ -281,7 +281,7 @@ function cardHTML(q,n,single){
 </div>`;
  const note=qs.noteOpen[q.id]?`<div class="qnote"><textarea placeholder="Write your note…" oninput="qNoteSave('${q.id}',this.value)">${esc(S.notes[q.id]||'')}</textarea></div>`:'';
  const sname=a?(a.ok?'Correct':'Incorrect'):'Unanswered';
- return `<article class="qcard${q.nl?' nl-clean':''}" id="qc-${q.id}" data-id="${q.id}"><div class="qtop"><span class="qid">${q.id} · mcq</span><span class="qstat s-${st}">${sname}</span><span class="qtag">${esc(q.tag)}</span>${q.kind?`<span class="qtag">${esc(q.kind)}</span>`:''}${q.nlClass?`<span class="qtag">${esc(q.nlClass)}</span>`:''}</div>${q.nl?'':`<div class="qtopic">${esc(TOPIC_NAME[q.topic]||'')}</div>`}${qExtra(q)}<h3 class="qstem">Q${n}. ${esc(QSTEM(q))}</h3><div class="qopts">${opts}</div>${react}${acts}${note}</article>`}
+ return `<article class="qcard${(q.nl||q.ao)?' nl-clean':''}" id="qc-${q.id}" data-id="${q.id}"><div class="qtop"><span class="qid">${q.id} · mcq</span><span class="qstat s-${st}">${sname}</span><span class="qtag">${esc(q.tag)}</span>${q.kind?`<span class="qtag">${esc(q.kind)}</span>`:''}${q.nlClass?`<span class="qtag">${esc(q.nlClass)}</span>`:''}</div>${(q.nl||q.ao)?'':`<div class="qtopic">${esc(TOPIC_NAME[q.topic]||'')}</div>`}${qExtra(q)}<h3 class="qstem">Q${n}. ${esc(QSTEM(q))}</h3><div class="qopts">${opts}</div>${react}${acts}${note}</article>`}
 
 function bankBody(){
  const list=filtered();
