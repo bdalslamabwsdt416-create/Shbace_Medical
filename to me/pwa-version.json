@@ -1,10 +1,14 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.9-to-me.9",
-  "displayVersion": "1.3.9.9 · Chrome (Phone + Computer)",
-  "releaseDate": "2026-11-13",
+  "version": "1.3.10-to-me.10",
+  "displayVersion": "1.3.10.10 · Chrome (Phone + Computer)",
+  "releaseDate": "2026-11-14",
   "releaseNotes": [
+    "Adds the separate Nelson Textbook Pediatrics question collection from the curated Markdown files in Nelson.zip, including Core, Extended, Accepted and Review material.",
+    "Nelson questions are grouped by medical system only; selecting a system opens its questions directly, reusing existing system icons.",
+    "Nelson explanations show an initial beginner-friendly explanation and an expandable Read More section, with the Nelson source at the end of the expanded explanation.",
+    "Incomplete OCR questions remain flagged and answer selection is disabled when the stem or options are incomplete.",
     "Continues the independent unified Chrome PWA for phone and computer. Android APK, iOS and Computer deliveries remain separate.",
     "Smart Review opens directly at Your Session; Smart Recommended remains available as a compact action within the session panel.",
     "Overview keeps its statistics, topic mastery map and mastery journey while removing the due-today / 20-question hero card only.",

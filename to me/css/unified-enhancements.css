@@ -358,3 +358,15 @@ button.ped-collection-card:active{transform:scale(.99);border-color:rgba(88,214,
 .sr3-fl.sr3-bank{margin:0 0 12px}
 .qz-bank-row{margin-bottom:10px}
 .phone.light .sr3-fl.sr3-bank button{background:#f4f8fc;color:#4b6680;border-color:#d4e1ec}
+
+/* Nelson Textbook MCQ collection and expandable explanation */
+.ped-collection-nelson{border-color:rgba(89,164,255,.42)!important;background:radial-gradient(ellipse at 0 0,rgba(49,117,218,.23),transparent 58%),linear-gradient(145deg,rgba(14,37,83,.97),rgba(5,17,39,.99))!important}
+.ped-avatar-nelson{border-color:rgba(112,174,255,.78);background:radial-gradient(circle at 42% 32%,#3975c4,#102b5b 58%,#07162f 100%);box-shadow:0 0 0 3px rgba(65,133,245,.14),0 0 20px rgba(72,144,255,.24)}
+.ped-avatar-nelson .ped-avatar-initials{font-family:Georgia,serif;font-size:43px;font-weight:800;letter-spacing:-.08em;color:#eff7ff;text-shadow:0 2px 9px rgba(0,0,0,.35)}
+.rs.qb .nl-more{margin-top:12px;padding-top:10px;border-top:1px solid rgba(100,165,230,.22)}
+.rs.qb .nl-more summary{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:7px 12px;border:1px solid rgba(77,157,245,.38);border-radius:11px;background:rgba(37,103,190,.13);color:#8ecaff;font-size:12px;font-weight:800;cursor:pointer;list-style:none}
+.rs.qb .nl-more summary::-webkit-details-marker{display:none}
+.rs.qb .nl-more summary:after{content:"+";font-size:17px;line-height:1;color:#b7dcff}
+.rs.qb .nl-more[open] summary:after{content:"−"}
+.rs.qb .nl-more-body{margin-top:10px;padding:12px 13px;border:1px solid rgba(87,143,207,.2);border-radius:12px;background:rgba(5,20,45,.34);color:#c4d8ee;font-size:12.5px;line-height:1.75;white-space:pre-line;overflow-wrap:anywhere}
+.rs.qb .nl-source{margin:11px 0 0;padding-top:8px;border-top:1px solid rgba(100,165,230,.18);color:#83afd8;font-size:10.5px;font-weight:750;letter-spacing:.015em}

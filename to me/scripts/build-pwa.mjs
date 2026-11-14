@@ -25,6 +25,13 @@ const requiredFiles = [
   "css/unified-enhancements.css",
   "css/shbace-layout-refinements.css",
   "data/qbData.json",
+  "data/nelson/nelson-textbook-bank-01.js",
+  "data/nelson/nelson-textbook-bank-02.js",
+  "data/nelson/nelson-textbook-bank-03.js",
+  "data/nelson/nelson-textbook-bank-04.js",
+  "data/nelson/nelson-textbook-bank-05.js",
+  "data/nelson/nelson-textbook-bank-06.js",
+  "data/nelson/nelson-textbook-bank-07.js",
   "data/qbData_reviewed_patch.json",
   "data/qbData_review_log.json",
   "data/audit/Question_Review_Log_1718.csv",
@@ -138,8 +145,8 @@ if (reviewLog && Array.isArray(reviewLog.entries)) {
   if (logChanged !== 45 || logNeedsReview !== 110) fail("Question review JSON counts do not match the master audit");
 }
 const pwaVersion = JSON.parse(readFileSync(join(root, "pwa-version.json"), "utf8"));
-if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.9-to-me.9") {
-  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.9-to-me.9");
+if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.10-to-me.10") {
+  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.10-to-me.10");
 }
 
 rmSync(output, { recursive: true, force: true });

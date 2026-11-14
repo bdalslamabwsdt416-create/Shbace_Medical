@@ -1,6 +1,6 @@
 {
   "name": "shbace-medical-chrome",
-  "version": "1.3.9-to-me.9",
+  "version": "1.3.10-to-me.10",
   "private": true,
   "description": "SHBACE Medical \u2014 unified adaptive Chrome PWA for phone and computer.",
   "scripts": {

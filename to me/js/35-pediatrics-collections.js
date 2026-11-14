@@ -5,15 +5,14 @@
 const B=window.__SHB_BRIDGE;
 if(!B){console.error('Pediatrics collections: bridge from 09-app-features-v6.js is missing, collections not installed.');return}
 const qs=B.qs,SYS=B.SYS,QB=B.QB,sysIcon=B.sysIcon,isPinned=B.isPinned,answeredCount=B.answeredCount,TOPIC_ICON_ASSET=B.TOPIC_ICON_ASSET;
-let activeCollection=''
-let activePreviousSystem='';
-const previousSystemByTopic=new Map();
+const incomingNelson=Array.isArray(window.__SHB_NELSON_QUESTIONS__)?window.__SHB_NELSON_QUESTIONS__:[];
+const knownQuestionIds=new Set(QB.map(q=>q&&q.id).filter(Boolean));
+incomingNelson.forEach(q=>{if(q&&q.nl===true&&q.id&&!knownQuestionIds.has(q.id)){QB.push(q);knownQuestionIds.add(q.id)}});
+if(window.__bank){window.__bank.total=QB.length;window.__bank.nelson=incomingNelson.length}
+let activeCollection='';let activePreviousSystem='';const previousSystemByTopic=new Map();
 const norm=v=>String(v==null?'':v).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
-const isPreviousQuestion=q=>!!q&&q.py===true;
-const isDoctorQuestion=q=>!!q&&!isPreviousQuestion(q);
-const allQuestions=()=>Array.isArray(QB)?QB:[];
-const doctorQuestions=()=>allQuestions().filter(isDoctorQuestion);
-const previousQuestions=()=>allQuestions().filter(isPreviousQuestion);
+const isPreviousQuestion=q=>!!q&&q.py===true;const isNelsonQuestion=q=>!!q&&q.nl===true;const isDoctorQuestion=q=>!!q&&!isPreviousQuestion(q)&&!isNelsonQuestion(q);
+const allQuestions=()=>Array.isArray(QB)?QB:[];const doctorQuestions=()=>allQuestions().filter(isDoctorQuestion);const previousQuestions=()=>allQuestions().filter(isPreviousQuestion);const nelsonQuestions=()=>allQuestions().filter(isNelsonQuestion);
 function refreshPreviousTopicMap(){
  previousSystemByTopic.clear();
  try{(REAL&&REAL.spec&&REAL.spec.exams&&REAL.spec.exams.topics||[]).forEach(t=>{if(Array.isArray(t)&&t.length>=4)previousSystemByTopic.set(t[0],String(t[3]||'Other / Mixed Questions'))})}catch(e){}
@@ -39,34 +38,23 @@ function imageCircle(data,kind,initials,alt){
  return `<div class="${cls}"><img src="${data}" alt="${alt}" decoding="async" onerror="this.hidden=true;this.parentElement.classList.add('is-fallback')"><span class="ped-avatar-initials" hidden>${initials}</span></div>`;
 }
 function collectionView(){
- const doctorCount=doctorQuestions().length,previousCount=previousQuestions().length;
+ const doctorCount=doctorQuestions().length,previousCount=previousQuestions().length,nelsonCount=nelsonQuestions().length;
  const ajData=window.__SHBACE_AJ_PORTRAIT_DATA__||'',facultyData=window.__SHBACE_FACULTY_LOGO_DATA__||'';
- return `${appHeader('Pediatrics')}<div class="rs ped-collection-page">
-  <div class="ped-collection-kicker">SHBACE MEDICAL · PEDIATRICS</div>
-  <h1>Choose your question collection</h1>
-  <p class="sub">Select the source you want to study. Each collection has its own systems and topics.</p>
-  <div class="ped-collections-grid">
-   <button type="button" class="ped-collection-card ped-collection-aj" onclick="selectPediatricCollection('aj')">
-    ${imageCircle(ajData,'ped-avatar-doctor','AJ','Dr. Abdulrahman Al-Joaki')}
-    <span class="ped-collection-copy"><span class="eyebrow">DOCTOR'S QUESTION BANK</span><b>Dr. Abdulrahman Al-Joaki MCQ</b><small>Study the doctor's MCQs, arranged by medical system and topic.</small><span class="ped-collection-count">${doctorCount.toLocaleString()} questions</span></span>
-    <span class="ped-collection-arrow" aria-hidden="true">›</span>
-   </button>
-   <button type="button" class="ped-collection-card ped-collection-previous" onclick="selectPediatricCollection('previous')">
-    ${imageCircle(facultyData,'ped-avatar-faculty','FM','Faculty of Medicine, University of Tripoli')}
-    <span class="ped-collection-copy"><span class="eyebrow">FACULTY QUESTION ARCHIVE</span><b>Previous Questions</b><small>Browse previous exam questions by the same medical systems and topic icons.</small><span class="ped-collection-count">${previousCount.toLocaleString()} questions</span></span>
-    <span class="ped-collection-arrow" aria-hidden="true">›</span>
-   </button>
-  </div>
-  <div class="ped-collection-footnote">The two banks remain separate. Question records and source labels are preserved.</div>
- </div>`;
-}
-window.openPediatricCollections=function(ev){if(ev&&ev.stopPropagation)ev.stopPropagation();activeCollection='';activePreviousSystem='';appPage='specialties';renderAppDemo()};
+ return `
+${appHeader('Pediatrics')}<div class="rs ped-collection-page"><div class="ped-collection-kicker">SHBACE MEDICAL · PEDIATRICS</div><h1>Choose your question collection</h1><p class="sub">Select the source you want to study. Each collection has its own medical systems.</p><div class="ped-collections-grid">
+<button type="button" class="ped-collection-card ped-collection-aj" onclick="selectPediatricCollection('aj')">${imageCircle(ajData,'ped-avatar-doctor','AJ','Dr. Abdulrahman Al-Joaki')}<span class="ped-collection-copy"><span class="eyebrow">DOCTOR'S QUESTION BANK</span><b>Dr. Abdulrahman Al-Joaki MCQ</b><small>Study the doctor's MCQs, arranged by medical system and topic.</small><span class="ped-collection-count">${doctorCount.toLocaleString()} questions</span></span><span class="ped-collection-arrow">›</span></button>
+<button type="button" class="ped-collection-card ped-collection-previous" onclick="selectPediatricCollection('previous')">${imageCircle(facultyData,'ped-avatar-faculty','FM','Faculty of Medicine, University of Tripoli')}<span class="ped-collection-copy"><span class="eyebrow">FACULTY QUESTION ARCHIVE</span><b>Previous Questions</b><small>Browse previous exam questions by the same medical systems and topic icons.</small><span class="ped-collection-count">${previousCount.toLocaleString()} questions</span></span><span class="ped-collection-arrow">›</span></button>
+<button type="button" class="ped-collection-card ped-collection-nelson" onclick="selectPediatricCollection('nelson')"><div class="ped-collection-avatar ped-avatar-nelson"><span class="ped-avatar-initials">N</span></div><span class="ped-collection-copy"><span class="eyebrow">TEXTBOOK QUESTION BANK</span><b>Nelson Textbook</b><small>Curated questions from Nelson, arranged by medical system.</small><span class="ped-collection-count">${nelsonCount.toLocaleString()} questions</span></span><span class="ped-collection-arrow">›</span></button>
+</div><div class="ped-collection-footnote">The three collections remain separate. Question records, answer keys and source labels are preserved.</div></div>`;
+}window.openPediatricCollections=function(ev){if(ev&&ev.stopPropagation)ev.stopPropagation();activeCollection='';activePreviousSystem='';appPage='specialties';renderAppDemo()};
 window.selectPediatricCollection=function(which){
- activeCollection=which==='previous'?'previous':'aj';activePreviousSystem='';window.__SHB_PED_COLLECTION__=activeCollection;
- qs.spec=activeCollection==='previous'?'exams':'endocrinology';qs.topic=0;qs.filter='all';qs.tag='all';qs.idx=0;
- appPage='specialties';renderAppDemo();
+ activeCollection=which==='previous'?'previous':which==='nelson'?'nelson':'aj';activePreviousSystem='';window.__SHB_PED_COLLECTION__=activeCollection;
+ qs.spec=activeCollection==='previous'?'exams':activeCollection==='nelson'?'all':'endocrinology';qs.topic=0;qs.filter='all';qs.tag='all';qs.idx=0;qs.view='all';appPage='specialties';renderAppDemo();
 };
-window.openPreviousSystem=function(name){
+window.openNelsonSystem=function(spec){
+ activeCollection='nelson';activePreviousSystem='';window.__SHB_PED_COLLECTION__='nelson';
+ qs.spec=String(spec||'all');qs.topic=0;qs.filter='all';qs.tag='all';qs.idx=0;qs.lim=30;qs.view='all';appPage='questions';renderAppDemo();
+};window.openPreviousSystem=function(name){
  activeCollection='previous';activePreviousSystem=String(name||'Other / Mixed Questions');window.__SHB_PED_COLLECTION__='previous';
  qs.spec='exams';qs.topic=0;qs.filter='all';qs.tag='all';qs.idx=0;qs.view='all';appPage='topics';renderAppDemo();
 };
@@ -113,28 +101,23 @@ subjectsView=function(){
  html=html.replace(/onclick="startPractice\(event\)"/g,'onclick="openPediatricCollections(event)"');
  return html;
 };
+function nelsonSystemsView(){
+ const rows=SYS.filter(s=>s[0]!=='exams').map(s=>{const list=nelsonQuestions().filter(q=>q.spec===s[0]);return {id:s[0],label:s[1],image:s[2],count:list.length,review:list.filter(q=>q.nlNeedsReview).length,answered:typeof answeredCount==='function'?answeredCount(list):0}}).filter(s=>s.count>0);
+ const total=nelsonQuestions().length;
+ const cards=rows.map(s=>{const progress=s.count?Math.round(s.answered*100/s.count):0;return `<div class="card sc spc ped-system-card" onclick="openNelsonSystem('${s.id}')">${sysIcon(s.image,'lg')}<div class="spc-tx"><h3>${escHtml(s.label)}</h3><div class="meta"><b>${s.count}</b> questions${s.review?` · <span class="ped-review-count">${s.review} flagged for review</span>`:''}</div><div class="bar"><span style="width:${progress}%"></span></div></div><span class="chev">›</span></div>`}).join('');
+ return `${appHeader('Nelson Textbook')}<div class="rs ped-systems-page"><div class="ped-collection-kicker">NELSON TEXTBOOK · PEDIATRICS</div><h1>Choose a medical system</h1><p class="sub">${rows.length} systems · ${total.toLocaleString()} questions</p><div class="ped-systems-grid">${cards||'<div class="card setcard"><p class="meta">No Nelson questions are available yet.</p></div>'}</div></div>`;
+}
 const _oldSpecialtiesView=specialtiesView;
-specialtiesView=function(){if(activeCollection==='previous')return previousSystemsView();if(activeCollection==='aj')return doctorSystemsView();return collectionView()};
-const _oldOpenSpec=window.openSpec;
+specialtiesView=function(){if(activeCollection==='previous')return previousSystemsView();if(activeCollection==='nelson')return nelsonSystemsView();if(activeCollection==='aj')return doctorSystemsView();return collectionView()};const _oldOpenSpec=window.openSpec;
 if(typeof _oldOpenSpec==='function')window.openSpec=function(id){activeCollection='aj';activePreviousSystem='';window.__SHB_PED_COLLECTION__='aj';return _oldOpenSpec(id)};
 const _oldOpenTopic=window.openTopic;
 if(typeof _oldOpenTopic==='function')window.openTopic=function(spec,id){if(spec==='exams'){activeCollection='previous';window.__SHB_PED_COLLECTION__='previous'}else if(activeCollection!=='previous')activeCollection='aj';return _oldOpenTopic(spec,id)};
 /* A question opened from Search, Saved, Wrong answers or Smart Review must open inside its own bank,
    otherwise the collection filter below hides it (a Previous question would open as an empty list). */
 const _oldOpenQ=window.openQ;
-if(typeof _oldOpenQ==='function')window.openQ=function(id){
- try{const q=allQuestions().find(x=>x&&x.id===id);
-  if(q){if(isPreviousQuestion(q)){activeCollection='previous';activePreviousSystem=previousSystemByTopic.get(q.topic)||''}else{activeCollection='aj';activePreviousSystem=''}window.__SHB_PED_COLLECTION__=activeCollection}}catch(e){}
- return _oldOpenQ.apply(this,arguments)};
+if(typeof _oldOpenQ==='function')window.openQ=function(id){try{const q=allQuestions().find(x=>x&&x.id===id);if(q){if(isPreviousQuestion(q)){activeCollection='previous';activePreviousSystem=previousSystemByTopic.get(q.topic)||''}else if(isNelsonQuestion(q)){activeCollection='nelson';activePreviousSystem=''}else{activeCollection='aj';activePreviousSystem=''}window.__SHB_PED_COLLECTION__=activeCollection}}catch(e){}return _oldOpenQ.apply(this,arguments)};
 const _oldInTopic=B.inTopic;
-B.inTopic=function(){
- if(!gradeHasPediatrics())return [];
- let list=allQuestions().filter(q=>activeCollection==='previous'?isPreviousQuestion(q):isDoctorQuestion(q));
- if(qs.spec&&qs.spec!=='all')list=list.filter(q=>q.spec===qs.spec);
- if(qs.topic)list=list.filter(q=>q.topic===qs.topic);
- if(activeCollection==='previous'&&activePreviousSystem)list=list.filter(q=>previousSystemByTopic.get(q.topic)===activePreviousSystem);
- return list;
-};
+B.inTopic=function(){if(!gradeHasPediatrics())return [];let list=allQuestions().filter(q=>activeCollection==='previous'?isPreviousQuestion(q):activeCollection==='nelson'?isNelsonQuestion(q):isDoctorQuestion(q));if(qs.spec&&qs.spec!=='all')list=list.filter(q=>q.spec===qs.spec);if(qs.topic)list=list.filter(q=>q.topic===qs.topic);if(activeCollection==='previous'&&activePreviousSystem)list=list.filter(q=>previousSystemByTopic.get(q.topic)===activePreviousSystem);return list};
 /* Conservative semantic matching: only equivalent/closely related topics reuse another bank's topic artwork. */
 const PREVIOUS_TOPIC_ICON_MATCH={
  'respiratory distress syndrome & neonatal lung disease':'Prematurity & Respiratory Distress',
