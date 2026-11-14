@@ -102,9 +102,9 @@ subjectsView=function(){
  return html;
 };
 function nelsonSystemsView(){
- const rows=SYS.filter(s=>s[0]!=='exams').map(s=>{const list=nelsonQuestions().filter(q=>q.spec===s[0]);return {id:s[0],label:s[1],image:s[2],count:list.length,review:list.filter(q=>q.nlNeedsReview).length,answered:typeof answeredCount==='function'?answeredCount(list):0}}).filter(s=>s.count>0);
+ const rows=SYS.filter(s=>s[0]!=='exams').map(s=>{const list=nelsonQuestions().filter(q=>q.spec===s[0]);return {id:s[0],label:s[1],image:s[2],count:list.length,answered:typeof answeredCount==='function'?answeredCount(list):0}}).filter(s=>s.count>0);
  const total=nelsonQuestions().length;
- const cards=rows.map(s=>{const progress=s.count?Math.round(s.answered*100/s.count):0;return `<div class="card sc spc ped-system-card" onclick="openNelsonSystem('${s.id}')">${sysIcon(s.image,'lg')}<div class="spc-tx"><h3>${escHtml(s.label)}</h3><div class="meta"><b>${s.count}</b> questions${s.review?` · <span class="ped-review-count">${s.review} flagged for review</span>`:''}</div><div class="bar"><span style="width:${progress}%"></span></div></div><span class="chev">›</span></div>`}).join('');
+ const cards=rows.map(s=>{const progress=s.count?Math.round(s.answered*100/s.count):0;return `<div class="card sc spc ped-system-card" onclick="openNelsonSystem('${s.id}')">${sysIcon(s.image,'lg')}<div class="spc-tx"><h3>${escHtml(s.label)}</h3><div class="meta"><b>${s.count}</b> questions</div><div class="bar"><span style="width:${progress}%"></span></div></div><span class="chev">›</span></div>`}).join('');
  return `${appHeader('Nelson Textbook')}<div class="rs ped-systems-page"><div class="ped-collection-kicker">NELSON TEXTBOOK · PEDIATRICS</div><h1>Choose a medical system</h1><p class="sub">${rows.length} systems · ${total.toLocaleString()} questions</p><div class="ped-systems-grid">${cards||'<div class="card setcard"><p class="meta">No Nelson questions are available yet.</p></div>'}</div></div>`;
 }
 const _oldSpecialtiesView=specialtiesView;
