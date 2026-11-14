@@ -1,6 +1,6 @@
 # Clinical Case — Hematology
 
-Detailed explanations shown through Read More in SHBACE Medical. Original question wording and provenance are retained.
+Detailed explanations shown through Read More in SHBACE Medical. Original question wording and source provenance are retained.
 
 ## CC-0021 — Sickle cell disease & complications
 
@@ -30,7 +30,7 @@ High-Yield:
 Chronic haemolysis increases unconjugated bilirubin and pigment gallstone risk.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 13`.
+- Q39 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 13`.
 
 ---
 
@@ -62,7 +62,7 @@ High-Yield:
 Dietary history is a first-line part of evaluating childhood microcytic anemia.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 13`.
+- Q40 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 13`.
 
 ---
 
@@ -94,7 +94,7 @@ High-Yield:
 Excess cow’s milk intake is a common nutritional risk for iron deficiency in toddlers.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 13`.
+- Q42 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 13`.
 
 ---
 
@@ -126,7 +126,7 @@ High-Yield:
 G6PD testing can be falsely normal during acute haemolysis because older deficient cells have been destroyed; repeat after recovery if suspicion remains.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 14`.
+- Q45 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 14`.
 
 ---
 
@@ -173,7 +173,7 @@ High-Yield:
 In sickle cell disease, increased jaundice plus right-upper-quadrant pain and guarding raises concern for gallstones/cholecystitis or other hepatobiliary disease. Abdominal ultrasound is the first-line imaging test. A normal chest radiograph makes acute chest syndrome less likely
 
 **Source provenance:**
-- NMT11 PDF · PDF page: 12 · Original source case: 21
+- NMT11 · NMT11 — Original Question 21: A 14 years old boy has sickle cell disease. He presents to the · NMT11 PDF · PDF page: 12 · Original source case: 21
 
 ---
 
@@ -227,7 +227,7 @@ High-Yield:
 A 10-month-old receiving large quantities of whole cow’s milk is at risk of iron deficiency due to low iron content, displacement of iron-rich foods and possible occult intestinal blood loss. Hemoglobin 7.5 g/dL indicates significant anemia and warrants CBC indices/ferritin and m
 
 **Source provenance:**
-- NMT10 PDF · PDF page(s): 3
+- NMT10 · NMT10 — Section 1 · Original Question 8: A 10 month old female infant is brought to a clinic for routine health evaluation. · NMT10 PDF · PDF page(s): 3
 
 ---
 
@@ -272,7 +272,7 @@ High-Yield:
 A pale 1-year-old with anemia and otherwise normal examination should be evaluated for nutritional iron deficiency; dietary history, including milk intake and iron-rich foods, is highly informative. Hematocrit 24% confirms significant anemia and requires CBC indices and iron stud
 
 **Source provenance:**
-- NMT11 PDF · PDF page: 13 · Original source case: 23
+- NMT11 · NMT11 — Original Question 23: On a routine well child examination, a 1 year old boy is noted to be · NMT11 PDF · PDF page: 13 · Original source case: 23
 
 ---
 
@@ -334,6 +334,6 @@ High-Yield:
 A 10-month-old receiving large quantities of whole cow’s milk is at risk of iron deficiency due to low iron content, displacement of iron-rich foods and possible occult intestinal blood loss. Hemoglobin 7.5 g/dL indicates significant anemia and warrants CBC indices/ferritin and m
 
 **Source provenance:**
-- NMT11 PDF · PDF page: 18 · Original source case: 33
+- NMT11 · NMT11 — Original Question 33: A 10-month-old female infant is brought to a clinic for routine health · NMT11 PDF · PDF page: 18 · Original source case: 33
 
 ---
