@@ -132,8 +132,7 @@ function inject(){
     var root=document.querySelector('.rs');if(!root)return;
     root.querySelectorAll('[data-hub37]').forEach(function(n){n.remove()});
     if(appPage==='subjects'){
-      var cont=root.querySelector('.h7-cont');if(!cont)return;
-      cont.insertAdjacentHTML('afterend',hubHtml());
+      /* Home intentionally stays clean; the Study Hub is not injected here. */
     }else if(appPage==='quizresult'){
       root.insertAdjacentHTML('beforeend',resultHtml());
     }else if(STRIP_PAGES[appPage]){
