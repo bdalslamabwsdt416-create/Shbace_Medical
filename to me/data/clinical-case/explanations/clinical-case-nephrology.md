@@ -1,36 +1,6 @@
 # Clinical Case — Nephrology
 
-Detailed explanations shown through Read More in SHBACE Medical. Original question wording and provenance are retained.
-
-## CC-0020 — Iron deficiency & childhood anemia
-
-**Question:** A 1 year old infant is complaining of delayed sitting and repeated chest infection, on
-examination there is prominent costochondral junction, he is exclusively breast fed,
-He received multiple injections for treatment of his condition. All of the following
-are expected complication for his condition except:
-1. Anorexia
-2. Vomiting
-3. Oliguria
-4. Nephrocalcinosis
-
-**Answer status:** No verified selectable answer is encoded; no answer has been guessed.
-
-Clinical explanation:
-Excess vitamin D can cause hypercalcaemia and hypercalciuria, presenting with anorexia, vomiting, polyuria, dehydration and nephrocalcinosis. Oliguria is not the typical early expected feature; severe renal injury may later reduce urine output.
-
-Options analysis:
-1 and 2: common hypercalcaemia symptoms. 3: intended “except” answer, though severe renal injury can eventually cause oliguria. 4: recognized complication of hypercalciuria.
-
-Curriculum alignment:
-SHETS Growth and Nutrition/Nephrology; vitamin D toxicity and renal complications.
-
-High-Yield:
-Vitamin D toxicity causes hypercalcaemia and hypercalciuria; monitor calcium and renal function.
-
-**Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 1`.
-
----
+Detailed explanations shown through Read More in SHBACE Medical. Original question wording and source provenance are retained.
 
 ## CC-0041 — Urinary tract infection
 
@@ -61,7 +31,7 @@ High-Yield:
 A catheterized sample is useful for culture in infants; do not delay sepsis treatment.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 17`.
+- Q53 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 17`.
 
 ---
 
@@ -92,7 +62,7 @@ High-Yield:
 New secondary enuresis with growth failure or anaemia is a medical red flag, not simple bedwetting.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 17`.
+- Q55 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 17`.
 
 ---
 
@@ -123,7 +93,7 @@ High-Yield:
 A normal renal ultrasound does not exclude VUR; imaging decisions depend on age and recurrence/atypical features.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 17`.
+- Q56 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 17`.
 
 ---
 
@@ -156,7 +126,7 @@ High-Yield:
 UTI is an important occult source of fever in infants and toddlers.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 17`.
+- Q57 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 17`.
 
 ---
 
@@ -194,7 +164,7 @@ High-Yield:
 Secondary enuresis with severe anemia and marked short stature raises concern for chronic kidney disease, which can cause growth failure and reduced erythropoietin production. Renal function testing is the best option offered. The reported Hb unit/value should be checked against
 
 **Source provenance:**
-- NMT10 PDF · PDF page(s): 8
+- NMT10 · NMT10 — Section 3 · Original Question 3: An 8 year old boy comes complaining of bedwetting for the past 2 weeks. He has · NMT10 PDF · PDF page(s): 8
 
 ---
 
@@ -255,7 +225,7 @@ High-Yield:
 Secondary enuresis with severe anemia and marked short stature raises concern for chronic kidney disease, which can cause growth failure and reduced erythropoietin production. Renal function testing is the best option offered. The reported Hb unit/value should be checked against
 
 **Source provenance:**
-- NMT11 PDF · PDF page: 14 · Original source case: 26
+- NMT11 · NMT11 — Original Question 26: An 8 year old boy comes complaining of bedwetting for the past 2 · NMT11 PDF · PDF page: 14 · Original source case: 26
 
 ---
 
@@ -300,6 +270,6 @@ High-Yield:
 Recurrent UTIs, bilateral renal scars and hypertension suggest reflux nephropathy. VCUG can identify vesicoureteral reflux; prevention requires prompt diagnosis and treatment of UTIs and selected reflux-directed strategies. Antibiotic prophylaxis is not automatic for every child
 
 **Source provenance:**
-- NMT11 PDF · PDF page: 16 · Original source case: 29
+- NMT11 · NMT11 — Original Question 29: A 4 year old boy, whose past medical history is positive for 3 UTI.now · NMT11 PDF · PDF page: 16 · Original source case: 29
 
 ---
