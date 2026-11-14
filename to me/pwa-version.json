@@ -1,10 +1,14 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.10-to-me.15",
-  "displayVersion": "1.3.10.15 · Chrome (Phone + Computer)",
+  "version": "1.3.10-to-me.16",
+  "displayVersion": "1.3.10.16 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-14",
   "releaseNotes": [
+    "Question cards are cleaner: question ID, status chip, source tag (PDF Bank) and topic title are hidden; the question type (e.g. Knowledge) sits beside the question number. Answer status stays in the system under All Questions → Unanswered / Correct / Incorrect.",
+    "Tags filter no longer lists PDF Bank or Nelson. Nelson now has the same All Questions and Tags filters, and is shown simply as 'Nelson' in Quiz, Search and Smart Review.",
+    "Nelson Urology questions are now part of Nephrology (the main system); the separate Urology system is removed. New Nelson cover image.",
+    "Tapping Later on the update sheet keeps the update available in Settings → Downloads & updates.",
     "Refreshes the offline cache again so all installed Chrome copies load the corrected 13-system Nelson list.",
     "Restores Nelson Urology as the 13th medical system, showing its 14 questions instead of leaving them out of the system list.",
     "Rotates the Chrome offline cache so previously installed copies stop serving stale Pediatrics scripts and receive the current Nelson bank UI.",
