@@ -1,6 +1,6 @@
 # Clinical Case — Gastroenterology
 
-Detailed explanations shown through Read More in SHBACE Medical. Original question wording and provenance are retained.
+Detailed explanations shown through Read More in SHBACE Medical. Original question wording and source provenance are retained.
 
 ## CC-0009 — Pyloric stenosis
 
@@ -30,7 +30,7 @@ High-Yield:
 Pyloric stenosis causes hypochloraemic, hypokalaemic metabolic alkalosis; correct fluids/electrolytes before surgery.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 15`.
+- Q47 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 15`.
 
 ---
 
@@ -60,7 +60,7 @@ High-Yield:
 The classic triad is projectile non-bilious vomiting, visible gastric peristalsis and palpable olive (not always all present).
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 15`.
+- Q48 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 15`.
 
 ---
 
@@ -121,7 +121,7 @@ High-Yield:
 The age, episodic colicky pain, irritability, vomiting and sausage-shaped abdominal mass strongly indicate ileocolic intussusception. The child needs urgent assessment; ultrasound is the preferred diagnostic test and pneumatic/hydrostatic enema is usually first-line reduction if
 
 **Source provenance:**
-- NMT10 PDF · PDF page(s): 1
-- NMT11 PDF · PDF page: 1 · Original source case: 1
+- NMT10 · NMT10 — Section 1 · Original Question 3: A 12 months old boy presents to the emergency department with a 6 hour history · NMT10 PDF · PDF page(s): 1
+- NMT11 · NMT11 — Original Question 1: A 12 months old boy presents to the emergency department with a 6 · NMT11 PDF · PDF page: 1 · Original source case: 1
 
 ---
