@@ -1,6 +1,6 @@
 # Clinical Case — Rheumatology
 
-Detailed explanations shown through Read More in SHBACE Medical. Original question wording and provenance are retained.
+Detailed explanations shown through Read More in SHBACE Medical. Original question wording and source provenance are retained.
 
 ## CC-0001 — Approach to fever and arthritis
 
@@ -29,8 +29,8 @@ High-Yield:
 In a child with bone/joint pain and systemic symptoms, exclude infection and malignancy early.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 12`.
-- NMT10 PDF · PDF page(s): 1
+- Q35 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 12`.
+- NMT10 · NMT10 — Section 1 · Original Question 2: A mother brings to the clinic her 4 years old son who began complaining of Rt knee · NMT10 PDF · PDF page(s): 1
 
 ---
 
@@ -62,7 +62,7 @@ High-Yield:
 Normal platelets with palpable purpura helps distinguish vasculitis from thrombocytopenic purpura.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 16`.
+- Q52 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 16`.
 
 ---
 
@@ -94,12 +94,12 @@ High-Yield:
 Check urinalysis and blood pressure because renal involvement may be silent.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 13`.
-- NMT11 PDF · PDF page: 6 · Original source case: 9
+- Q41 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 13`.
+- NMT11 · NMT11 — Original Question 9: A 7 year old boy was limping for 3 days presented to the surgical · NMT11 PDF · PDF page: 6 · Original source case: 9
 
 ---
 
-## CC-0066 — Acute infections & immunization
+## CC-0066 — Approach to fever and arthritis
 
 **Question:** A mother brings to the clinic her 4-year-old son who began
 complaining of Rt knee pain 2 weeks ago, is limping slightly, is
@@ -147,7 +147,7 @@ High-Yield:
 A febrile child with a limp and persistent unilateral knee symptoms needs prompt assessment. CBC can identify cytopenias/blasts or leukocytosis and is the best initial option offered, but it does not diagnose septic arthritis or osteomyelitis. In practice add ESR/CRP, blood cultu
 
 **Source provenance:**
-- NMT11 PDF · PDF page: 3 · Original source case: 4
+- NMT11 · NMT11 — Original Question 4: A mother brings to the clinic her 4-year-old son who began · NMT11 PDF · PDF page: 3 · Original source case: 4
 
 ---
 
@@ -192,6 +192,6 @@ High-Yield:
 Palpable purpura over the dependent lower limbs with colicky abdominal pain and arthralgia/limp is characteristic of IgA vasculitis. Abdominal involvement can mimic an acute surgical abdomen; assess for intussusception and renal involvement.
 
 **Source provenance:**
-- NMT10 PDF · PDF page(s): 3
+- NMT10 · NMT10 — Section 1 · Original Question 7: A 7 year old boy was limping for 3 days presented to the surgical department · NMT10 PDF · PDF page(s): 3
 
 ---
