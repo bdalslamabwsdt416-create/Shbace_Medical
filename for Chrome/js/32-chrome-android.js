@@ -3,7 +3,7 @@
 'use strict';
 if(!window.__SHBACE_CHROME_PWA__||!/Android/i.test(navigator.userAgent||''))return;
 
-var deferredInstall=null,screenLock=null,lockBusy=false,reloadPending=false,reloadStarted=false;
+var deferredInstall=null,screenLock=null,lockBusy=false;
 var VERSION_KEY='shbace_chrome_seen_version_v1';
 function installed(){
  try{return !!(window.matchMedia&&(
@@ -95,33 +95,22 @@ try{new MutationObserver(onDomChange).observe(document.body,{childList:true,subt
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',onDomChange,{once:true});
 else onDomChange();
 
-/* Quiet update checks. New files apply only after the Question Bank screen is left. */
-function safeToReload(){return document.hidden||!questionBankOpen()}
-function applyPendingReload(){
- if(!reloadPending||reloadStarted||!safeToReload())return;
- reloadStarted=true;setTimeout(function(){location.reload()},180);
-}
+/* Quiet background checks. The app never reloads itself: new files reach the device only through the verified
+   update window (js/29-offline-setup.js), which the student can accept or postpone. A new service worker leaves the
+   installed package untouched, so a worker update needs no reload either. */
 function checkVersion(){
  if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;
- fetch('./pwa-version.json?shbcheck='+Date.now(),{cache:'no-store'})
+ fetch('./pwa-version.json',{cache:'no-store'})
   .then(function(r){if(!r.ok)throw new Error('version unavailable');return r.json()})
   .then(function(v){
    if(!v||!v.version)return;
-   var previous=null;try{previous=localStorage.getItem(VERSION_KEY)}catch(_){}
    try{localStorage.setItem(VERSION_KEY,String(v.version))}catch(_){}
-   if(previous&&previous!==String(v.version))reloadPending=true;
-   applyPendingReload();
   }).catch(function(){});
 }
 if('serviceWorker' in navigator){
- var hadController=!!navigator.serviceWorker.controller;
- navigator.serviceWorker.addEventListener('controllerchange',function(){
-  if(!hadController){hadController=true;return}
-  reloadPending=true;applyPendingReload();
- });
  navigator.serviceWorker.ready.then(function(reg){reg.update().catch(function(){});checkVersion()}).catch(function(){});
  window.addEventListener('online',checkVersion);
- document.addEventListener('visibilitychange',function(){if(!document.hidden){checkVersion();applyPendingReload()}});
+ document.addEventListener('visibilitychange',function(){if(!document.hidden)checkVersion()});
  setInterval(function(){
   if(document.hidden)return;
   navigator.serviceWorker.getRegistration('./').then(function(reg){if(reg)return reg.update()}).catch(function(){});
