@@ -2,7 +2,7 @@
 'use strict';
 
 /* One stable cache shared with sw.js. It is NOT versioned: an app update only replaces the files that changed. */
-var CACHE_NAME='shbace-chrome-offline-v1.3.10.14';
+var CACHE_NAME='shbace-chrome-offline-v1.3.10.15';
 var STAGING_NAME='shbace-staging-offline';
 var INSTALLED_KEY='installed';
 var manifestFromNetwork=false,plan=null;
