@@ -32,6 +32,16 @@ const requiredFiles = [
   "data/nelson/nelson-textbook-bank-05.js",
   "data/nelson/nelson-textbook-bank-06.js",
   "data/nelson/nelson-textbook-bank-07.js",
+  "data/all-once/all-once-bank-01.js",
+  "data/all-once/all-once-bank-02.js",
+  "data/all-once/all-once-bank-03.js",
+  "data/all-once/all-once-bank-04.js",
+  "data/all-once/all-once-bank-05.js",
+  "data/all-once/all-once-bank-06.js",
+  "data/all-once/all-once-bank-07.js",
+  "data/all-once/all-once-bank-08.js",
+  "data/all-once/all-once-bank-09.js",
+  "data/all-once/all-once-bank-10.js",
   "data/qbData_reviewed_patch.json",
   "data/qbData_review_log.json",
   "data/audit/Question_Review_Log_1718.csv",
@@ -45,7 +55,8 @@ const requiredFiles = [
   "js/34-study-countdown.js",
   "js/35-pediatrics-collections.js",
   "js/36-exam-planner-settings-smartreview.js",
-  "js/37-study-hub-linkage.js"
+  "js/37-study-hub-linkage.js",
+  "js/38-all-once-pediatrics.js"
 ];
 const requiredDirs = ["css", "js", "data"];
 const imageDirs = ["img", "img1", "img2"];
@@ -145,8 +156,8 @@ if (reviewLog && Array.isArray(reviewLog.entries)) {
   if (logChanged !== 45 || logNeedsReview !== 110) fail("Question review JSON counts do not match the master audit");
 }
 const pwaVersion = JSON.parse(readFileSync(join(root, "pwa-version.json"), "utf8"));
-if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.10-to-me.15") {
-  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.10-to-me.15");
+if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.10-to-me.16") {
+  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.10-to-me.16");
 }
 
 rmSync(output, { recursive: true, force: true });
