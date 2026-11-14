@@ -1,10 +1,12 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.10-to-me.14",
-  "displayVersion": "1.3.10.14 · Chrome (Phone + Computer)",
+  "version": "1.3.10-to-me.15",
+  "displayVersion": "1.3.10.15 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-14",
   "releaseNotes": [
+    "Refreshes the offline cache again so all installed Chrome copies load the corrected 13-system Nelson list.",
+    "Restores Nelson Urology as the 13th medical system, showing its 14 questions instead of leaving them out of the system list.",
     "Rotates the Chrome offline cache so previously installed copies stop serving stale Pediatrics scripts and receive the current Nelson bank UI.",
     "Refreshes the Nelson collection UI and offline content manifest so installed Chrome copies can receive the latest verified files.",
     "Adds a dedicated Nelson Textbook of Pediatrics cover image and removes the empty topic label from Nelson's system-only question cards.",
