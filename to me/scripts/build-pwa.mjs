@@ -24,6 +24,7 @@ const requiredFiles = [
   "css/late.css",
   "css/unified-enhancements.css",
   "css/shbace-layout-refinements.css",
+  "css/egyptian-book.css",
   "data/qbData.json",
   "data/nelson/nelson-textbook-bank-01.js",
   "data/nelson/nelson-textbook-bank-02.js",
@@ -43,6 +44,22 @@ const requiredFiles = [
   "data/all-once/all-once-bank-09.js",
   "data/all-once/all-once-bank-10.js",
   "data/clinical-case/clinical-case-bank-01.js",
+  "data/egyptian-book/egyptian-book-bank-01.js",
+  "data/egyptian-book/egyptian-book-bank-02.js",
+  "data/egyptian-book/egyptian-book-bank-03.js",
+  "data/egyptian-book/egyptian-book-bank-04.js",
+  "data/egyptian-book/egyptian-book-bank-05.js",
+  "data/egyptian-book/egyptian-book-bank-06.js",
+  "data/egyptian-book/egyptian-book-bank-07.js",
+  "data/egyptian-book/egyptian-book-bank-08.js",
+  "data/egyptian-book/egyptian-book-bank-09.js",
+  "data/egyptian-book/egyptian-book-bank-10.js",
+  "data/egyptian-book/egyptian-book-bank-11.js",
+  "data/egyptian-book/egyptian-book-bank-12.js",
+  "data/egyptian-book/egyptian-book-bank-13.js",
+  "data/egyptian-book/egyptian-book-bank-14.js",
+  "data/egyptian-book/egyptian-book-bank-15.js",
+  "data/egyptian-book/egyptian-book-bank-16.js",
   "data/qbData_reviewed_patch.json",
   "data/qbData_review_log.json",
   "data/audit/Question_Review_Log_1718.csv",
@@ -58,7 +75,8 @@ const requiredFiles = [
   "js/36-exam-planner-settings-smartreview.js",
   "js/37-study-hub-linkage.js",
   "js/38-all-once-pediatrics.js",
-  "js/39-clinical-case-pediatrics.js"
+  "js/39-clinical-case-pediatrics.js",
+  "js/40-egyptian-book-pediatrics.js"
 ];
 const requiredDirs = ["css", "js", "data"];
 const imageDirs = ["img", "img1", "img2"];
@@ -158,8 +176,8 @@ if (reviewLog && Array.isArray(reviewLog.entries)) {
   if (logChanged !== 45 || logNeedsReview !== 110) fail("Question review JSON counts do not match the master audit");
 }
 const pwaVersion = JSON.parse(readFileSync(join(root, "pwa-version.json"), "utf8"));
-if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.10-to-me.17") {
-  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.10-to-me.17");
+if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.10-to-me.18") {
+  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.10-to-me.18");
 }
 
 rmSync(output, { recursive: true, force: true });
@@ -267,7 +285,7 @@ if (!html.includes("js/35-pediatrics-collections.js") ||
     !html.includes("js/36-exam-planner-settings-smartreview.js") ||
     !html.includes("css/shbace-layout-refinements.css") ||
     !html.includes("js/37-study-hub-linkage.js") ||
-    !html.includes("js/38-all-once-pediatrics.js") || !html.includes("js/39-clinical-case-pediatrics.js")) {
+    !html.includes("js/38-all-once-pediatrics.js") || !html.includes("js/39-clinical-case-pediatrics.js") || !html.includes("js/40-egyptian-book-pediatrics.js") || !html.includes("css/egyptian-book.css")) {
   fail("Pediatrics, Exam Planner/Smart Review or layout refinement assets are not referenced by index.html");
 }
 if (!html.includes("navigator.serviceWorker.register('./sw.js'") || !html.includes("js/29-offline-setup.js") || !html.includes("js/29-reviewed-bank-controls.js") || !html.includes("qbData_reviewed_patch.json")) {
