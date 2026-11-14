@@ -67,9 +67,39 @@ if (!String(ccAudit.publication_status || "").startsWith("MATCHED-ONLY BANK READ
 const pending = readFileSync(join(root, "data/clinical-case/audit/unmapped-accepted-records.md"), "utf8");
 if ((pending.match(/^## Pending /gm) || []).length !== 59) errors.push("Clinical Case pending audit file does not preserve all 59 Accepted sections");
 
+
+const egyptianDir = join(root, "data/egyptian-book");
+const egyptianFiles = readdirSync(egyptianDir).filter(name => /^egyptian-book-bank-\\d{2}\\.js$/.test(name)).sort();
+if (egyptianFiles.length !== 16) errors.push(`Egyptian Book expected 16 data shards, found ${egyptianFiles.length}`);
+const egyptianIds = new Set();
+let egyptianTotal = 0, egyptianReady = 0, egyptianUnresolved = 0;
+for (const name of egyptianFiles) {
+  const source = readFileSync(join(egyptianDir, name), "utf8");
+  const match = source.match(/\\.concat\\(([\\s\\S]*)\\);\\s*$/);
+  if (!match) { errors.push(`Egyptian Book ${name}: missing JSON concat payload`); continue; }
+  let records = [];
+  try { records = JSON.parse(match[1]); }
+  catch (e) { errors.push(`Egyptian Book ${name}: invalid JSON — ${e.message}`); continue; }
+  for (const q of records) {
+    egyptianTotal++;
+    if (!q || q.eb !== true || q.aoClass !== "Accepted") errors.push(`Egyptian Book ${q?.id || "(missing id)"}: not an Accepted Egyptian Book record`);
+    if (!q.id || egyptianIds.has(q.id)) errors.push(`Egyptian Book duplicate/missing id: ${q.id || "(empty)"}`);
+    egyptianIds.add(q.id);
+    if (!String(q.q || "").trim() || !Array.isArray(q.o) || q.o.length < 2) errors.push(`Egyptian Book ${q.id}: missing stem or options`);
+    if (Array.isArray(q.o) && q.o.length >= 2 && Number.isInteger(q.k) && q.k >= 0 && q.k < q.o.length) egyptianReady++;
+    else egyptianUnresolved++;
+  }
+}
+if (egyptianTotal !== 473 || egyptianIds.size !== 473) errors.push(`Egyptian Book expected 473 unique Accepted records, found ${egyptianTotal}/${egyptianIds.size}`);
+if (egyptianReady !== 466 || egyptianUnresolved !== 7) errors.push(`Egyptian Book expected 466 answer-verified records and 7 unresolved records, found ${egyptianReady}/${egyptianUnresolved}`);
+const appHtml = readFileSync(join(root, "index.html"), "utf8");
+for (const name of egyptianFiles) if (!appHtml.includes(`data/egyptian-book/${name}`)) errors.push(`index.html does not load ${name}`);
+if (!appHtml.includes("js/40-egyptian-book-pediatrics.js") || !appHtml.includes("css/egyptian-book.css")) errors.push("index.html is missing Egyptian Book UI or stylesheet registration");
+
 const jsFiles = [
   ...readdirSync(join(root, "js")).filter(f => f.endsWith(".js")).map(f => join(root, "js", f)),
-  clinicalPath
+  clinicalPath,
+  join(root, "js/40-egyptian-book-pediatrics.js")
 ];
 for (const file of jsFiles) {
   const r = spawnSync(process.execPath, ["--check", file], { encoding: "utf8" });
