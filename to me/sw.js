@@ -1,7 +1,7 @@
 'use strict';
 
 /* One stable cache shared with js/29-offline-setup.js. It is not versioned: app updates replace only the changed files. */
-const CACHE_NAME = 'shbace-chrome-offline-v1.3.8';
+const CACHE_NAME = 'shbace-chrome-offline-v1.3.10.14';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
 const APP_SHELL = [
   './',
