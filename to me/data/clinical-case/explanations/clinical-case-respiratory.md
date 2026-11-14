@@ -1,6 +1,6 @@
 # Clinical Case — Respiratory
 
-Detailed explanations shown through Read More in SHBACE Medical. Original question wording and provenance are retained.
+Detailed explanations shown through Read More in SHBACE Medical. Original question wording and source provenance are retained.
 
 ## CC-0047 — Retropharyngeal abscess & upper-airway obstruction
 
@@ -30,8 +30,8 @@ High-Yield:
 Stridor is an upper-airway warning sign; prioritize airway safety over routine investigations.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source pp. 8–9`.
-- NMT11 PDF · PDF page: 6 · Original source case: 10
+- Q26 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source pp. 8–9`.
+- NMT11 · NMT11 — Original Question 10: A 3 years old fully immunized child presents with fever and difficulty · NMT11 PDF · PDF page: 6 · Original source case: 10
 
 ---
 
@@ -63,8 +63,8 @@ High-Yield:
 Treat the immediate threat first; do not delay decompression for imaging in an unstable tension pneumothorax.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 9`.
-- NMT10 PDF · PDF page(s): 2
+- Q27 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 9`.
+- NMT10 · NMT10 — Section 1 · Original Question 5: A 2 month old boy with a 3 day history of mild fever and runny nose suddenly · NMT10 PDF · PDF page(s): 2
 
 ---
 
@@ -97,7 +97,7 @@ High-Yield:
 Persistent lymphadenopathy with constitutional symptoms needs structured TB and malignancy evaluation.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source pp. 9–10`.
+- Q28 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source pp. 9–10`.
 
 ---
 
@@ -129,7 +129,7 @@ High-Yield:
 Bronchiolitis is common in infants and usually follows a viral upper respiratory prodrome.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 10`.
+- Q29 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 10`.
 
 ---
 
@@ -163,11 +163,44 @@ High-Yield:
 Wheeze in an infant after a viral prodrome is most often bronchiolitis.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 10`.
+- Q30 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 10`.
 
 ---
 
-## CC-0053 — Iron deficiency & childhood anemia
+## CC-0052 — Pneumonia complicated by sepsis
+
+**Question:** A 1 year previously healthy male was admitted to the hospital in the last evening, he
+presented with cough, high fever, and mild hypoxia. CXR revealed right upper lobar
+consolidation. Approximately 20 hours after hospitalization. the patient deteriorates;
+developing severe respiratory distress, hypotension, poor perfusion and his color
+becomesdusky.What is the most likely diagnosis?
+
+**Options:**
+- A. Uncomplicated pneumonia
+- B. Pneumonia complicated by sepsis
+- C. Pneumonia complicated by heart failure
+- D. Pneumonia complicated by pneumothorax
+
+**Answer:** B — Pneumonia complicated by sepsis
+
+Clinical explanation:
+Deterioration after lobar pneumonia with hypotension, poor perfusion and dusky colour indicates systemic shock/sepsis.
+
+Options analysis:
+A: uncomplicated pneumonia does not explain shock. B: correct. C: heart failure is not the best fit without supporting signs. D: pneumothorax would usually have asymmetric breath sounds/acute pleural signs.
+
+Curriculum alignment:
+SHETS: Respiratory/Infectious; pneumonia, sepsis and shock.
+
+High-Yield:
+Hypotension and poor perfusion in a child with pneumonia indicate severe disease and require urgent resuscitation.
+
+**Source provenance:**
+- Q31 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 10`.
+
+---
+
+## CC-0053 — Respiratory syncytial virus & bronchiolitis
 
 **Question:** Patient 1 year old having rhinorrhea and sneezing for 4 days then developed cough
 difficulty in breathing examination revealed moderate distress and x- ray shows
@@ -194,7 +227,7 @@ High-Yield:
 RSV is a leading cause of bronchiolitis in infants.
 
 **Source provenance:**
-- A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 11`.
+- Q33 · A4 merged MD; original source: `problem_solving-with-answers.pdf, source p. 11`.
 
 ---
 
@@ -235,7 +268,7 @@ High-Yield:
 A 1-year-old with viral upper-respiratory prodrome, sick contacts, wheeze, hyperinflation and respiratory distress is most consistent with bronchiolitis, particularly a first episode. Management is mainly supportive with oxygen/hydration when indicated.
 
 **Source provenance:**
-- NMT10 PDF · PDF page(s): 9
+- NMT10 · NMT10 — Section 3 · Original Question 8: A previously well 1 year old infant has had a runny nose and has been sneezing and · NMT10 PDF · PDF page(s): 9
 
 ---
 
@@ -286,11 +319,11 @@ High-Yield:
 A 1-year-old with viral upper-respiratory prodrome, sick contacts, wheeze, hyperinflation and respiratory distress is most consistent with bronchiolitis, particularly a first episode. Management is mainly supportive with oxygen/hydration when indicated.
 
 **Source provenance:**
-- NMT11 PDF · PDF page: 16 · Original source case: 30
+- NMT11 · NMT11 — Original Question 30: A previously well 1 year old infant has had a runny nose and has been · NMT11 PDF · PDF page: 16 · Original source case: 30
 
 ---
 
-## CC-0089 — Pneumonia & lower respiratory infection
+## CC-0089 — Pneumothorax & air leak
 
 **Question:** A 2-month-old boy with a 3 day history of mild fever and runny nose
 suddenly develops high fever, cough and respiratory distress. Within
@@ -337,6 +370,6 @@ High-Yield:
 A pneumatocele with a new pneumothorax and respiratory distress after severe pneumonia is an emergency. Chest drainage is the intended first action among the choices; if tension pneumothorax is clinically suspected, immediate needle/finger decompression precedes tube thoracostomy
 
 **Source provenance:**
-- NMT11 PDF · PDF page: 17 · Original source case: 31
+- NMT11 · NMT11 — Original Question 31: A 2-month-old boy with a 3 day history of mild fever and runny nose · NMT11 PDF · PDF page: 17 · Original source case: 31
 
 ---
