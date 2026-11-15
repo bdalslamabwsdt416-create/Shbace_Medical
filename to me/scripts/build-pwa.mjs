@@ -180,8 +180,11 @@ if (reviewLog && Array.isArray(reviewLog.entries)) {
   if (logChanged !== 45 || logNeedsReview !== 110) fail("Question review JSON counts do not match the master audit");
 }
 const pwaVersion = JSON.parse(readFileSync(join(root, "pwa-version.json"), "utf8"));
-if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.10-to-me.24") {
-  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.10-to-me.24");
+if (pwaVersion.platform !== "Unified Chrome PWA" || !/^\d+\.\d+\.\d+-to-me\.\d+$/.test(String(pwaVersion.version))) {
+  fail("pwa-version.json must declare a Unified Chrome PWA version like 1.3.10-to-me.24");
+}
+if (pwaVersion.displayVersion !== pwaVersion.version.replace("-to-me.", ".") + " · Chrome (Phone + Computer)") {
+  fail("pwa-version.json displayVersion must match version (" + pwaVersion.version + ")");
 }
 const packageMeta = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 const expectedCacheName = "shbace-chrome-offline-v" + pwaVersion.version.replace("-to-me.", ".");
