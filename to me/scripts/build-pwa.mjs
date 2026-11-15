@@ -177,8 +177,16 @@ if (reviewLog && Array.isArray(reviewLog.entries)) {
   if (logChanged !== 45 || logNeedsReview !== 110) fail("Question review JSON counts do not match the master audit");
 }
 const pwaVersion = JSON.parse(readFileSync(join(root, "pwa-version.json"), "utf8"));
-if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.10-to-me.22") {
-  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.10-to-me.22");
+if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.10-to-me.23") {
+  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.10-to-me.23");
+}
+const packageMeta = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+const expectedCacheName = "shbace-chrome-offline-v" + pwaVersion.version.replace("-to-me.", ".");
+const swSource = readFileSync(join(root, "sw.js"), "utf8");
+const offlineSetupSource = readFileSync(join(root, "js/29-offline-setup.js"), "utf8");
+if (packageMeta.version !== pwaVersion.version) fail("package.json and pwa-version.json must declare the same release");
+if (!swSource.includes(expectedCacheName) || !offlineSetupSource.includes(expectedCacheName)) {
+  fail("Service Worker and offline installer cache namespaces must match " + expectedCacheName);
 }
 
 rmSync(output, { recursive: true, force: true });
