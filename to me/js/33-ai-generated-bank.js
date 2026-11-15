@@ -98,5 +98,3 @@ const priorRender=renderAppDemo;
 renderAppDemo=function(){let p=appPage,res=priorRender.apply(this,arguments);if(String(p).startsWith('ai08')){try{let screen=document.querySelector('#phoneContent .screen'),scroll=screen&&(screen.querySelector(':scope > .app-scroll')||screen);if(scroll)scroll.innerHTML=appHeader('AI Generated')+current()+appNav();}catch(e){console.error('AI Generated Bank 08 render failed',e);}}return res;};
 window.__shbAiGeneratedBank08={count:()=>data?all().length:TOTAL,systems:()=>data?data.systems.length:null,topics:()=>data?data.systems.reduce((n,s)=>n+s.topics.length,0):null,answered:()=>count(all()),dataLoaded:()=>!!data,validation:()=>data?data.validation:null};
 })();
-
-[executed on device: DESKTOP-E32SKJN (fae67a54-2987-49df-9a33-67ef9b7940bf)]
