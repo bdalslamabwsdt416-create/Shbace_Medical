@@ -10,6 +10,10 @@ This is an independent Google Chrome / Android Progressive Web App delivery copi
 - Separate service-worker cache and resumable offline package with SHA-256 verification.
 - Background update checks that defer reloads while the Question Bank is open.
 
+## Bank 07 ? Clinical Case
+
+- Independent Bank 07: Clinical Case ? 10 medical systems, 1,598 case-based questions, topic/case navigation, post-answer explanations, Read More details and source sheet/page references.
+
 ## Browser limitations
 
 Capacitor notifications, exact Android alarms and the native foreground study-timer service belong to the APK. Chrome does not expose these services to a website; this PWA does not display them as if they were working. Wake Lock, Web Share, clipboard, vibration and speech depend on Chrome support and permissions.
