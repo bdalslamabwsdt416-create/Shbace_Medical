@@ -83,15 +83,15 @@ function ensure(){
  }).catch(e=>{error=e&&e.message?e.message:'Unknown data loading error';promise=null;throw e;});
  return promise;
 }
-window.openAiGeneratedBank08=function(){appPage='ai08Systems';renderAppDemo();ensure().then(()=>renderAppDemo()).catch(()=>renderAppDemo());};
+window.openAiGeneratedBank08=function(){window.__SHB_PED_COLLECTION__='ai-generated-bank08';appPage='ai08Systems';renderAppDemo();ensure().then(()=>renderAppDemo()).catch(()=>renderAppDemo());};
 window.bank08RetryAiGeneratedData=function(){promise=null;error='';renderAppDemo();ensure().then(()=>renderAppDemo()).catch(()=>renderAppDemo());};
 window.bank08OpenAiGeneratedSystem=function(id){if(!data||!safe(id)||!data.systems.some(s=>s.id===id))return;systemId=id;topicId='';appPage='ai08Topics';renderAppDemo();};
 window.bank08OpenAiGeneratedTopic=function(id){let s=sys();if(!s||!safe(id)||!s.topics.some(t=>t.id===id))return;topicId=id;appPage='ai08Questions';renderAppDemo();};
-window.bank08AiGeneratedBack=function(){if(appPage==='ai08Questions')appPage='ai08Topics';else if(appPage==='ai08Topics')appPage='ai08Systems';else appPage='subjects';renderAppDemo();};
+window.bank08AiGeneratedBack=function(){if(appPage==='ai08Questions')appPage='ai08Topics';else if(appPage==='ai08Topics')appPage='ai08Systems';else{appPage='specialties';window.__SHB_PED_COLLECTION__='';}renderAppDemo();};
 window.bank08AnswerAiGeneratedQuestion=function(id,label){if(!safe(id)||!'ABCDE'.includes(label))return;let q=all().find(x=>x.id===id);if(!q||answers[id])return;answers[id]={selected:label,correct:label===q.correctAnswer,answeredAt:Date.now(),readMore:false};save();renderAppDemo();};
 window.bank08ToggleAiGeneratedReadMore=function(id){let a=answers[id];if(!a)return;a.readMore=!a.readMore;save();renderAppDemo();};
-const priorSubjects=subjectsView;
-subjectsView=function(){let html=priorSubjects.apply(this,arguments);let card='<button type="button" class="card sc ai08-home-entry" onclick="openAiGeneratedBank08()"><span class="ai08-home-icon">08</span><span class="ai08-home-copy"><span class="eyebrow">QUESTION BANK 08</span><strong>AI Generated</strong><small>AI-generated single-best-answer MCQs organized by medical system and topic.</small><span class="ai08-home-count">'+TOTAL.toLocaleString()+' questions · 16 source files</span></span><span class="chev">›</span></button>';let p=html.lastIndexOf('</div>');return p>=0?html.slice(0,p)+card+html.slice(p):html+card;};
+const priorSpecialties=typeof specialtiesView==='function'?specialtiesView:null;
+if(priorSpecialties)specialtiesView=function(){let html=priorSpecialties.apply(this,arguments);if(!String(html).includes('ped-collections-grid')||String(html).includes('ped-collection-bank08'))return html;let card='<button type="button" class="ped-collection-card ped-collection-allonce ped-collection-bank08" onclick="openAiGeneratedBank08()"><div class="ped-collection-avatar ped-avatar-allonce ped-avatar-icon"><span class="ped-avatar-initials">08</span></div><span class="ped-collection-copy"><span class="eyebrow">AI-GENERATED MCQ BANK</span><b>AI Generated</b><small>AI-generated single-best-answer MCQs, organized by medical system and topic.</small><span class="ped-collection-count">'+TOTAL.toLocaleString()+' questions · 16 source files</span></span><span class="ped-collection-arrow">›</span></button>';html=html.replace('</div><div class="ped-collection-footnote">',card+'</div><div class="ped-collection-footnote">');html=html.replace('The seven collections remain separate.','The eight collections remain separate.');return html;};
 const priorNav=appNav;
 appNav=function(){let p=appPage;if(String(p).startsWith('ai08'))appPage='subjects';try{return priorNav.apply(this,arguments);}finally{appPage=p;}};
 const priorRender=renderAppDemo;
