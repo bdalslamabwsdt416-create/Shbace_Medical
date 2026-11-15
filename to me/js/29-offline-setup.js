@@ -2,7 +2,7 @@
 'use strict';
 
 /* Rotate this cache namespace with every PWA release. It must match sw.js so installed copies can replace stale files. */
-var CACHE_NAME='shbace-chrome-offline-v1.3.10.23';
+var CACHE_NAME='shbace-chrome-offline-v1.3.10.24';
 var STAGING_NAME='shbace-staging-offline';
 var INSTALLED_KEY='installed';
 var manifestFromNetwork=false,plan=null;
