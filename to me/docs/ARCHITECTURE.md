@@ -40,7 +40,7 @@ One normaliser, `nz` (lower-case, strip Arabic diacritics/tatweel, unify أ/إ/�
 `npm run test:unit` (node:test), `npm run check:bank` (ids, answer keys, syntax of every script), `npm run build:pwa`. The `PWA checks` workflow runs all three on every push to a non-main branch and on pull requests.
 
 ## Additional independent Pediatrics banks
-- Clinical Cases: data/clinicalCaseBank.json, system → topic → case → questions (1,598 questions).
-- AI Generated: the 16 JSON files in data/ai-generated/, system → topic → questions (1,881 questions).
-- AI Clinical Cases is a separate question collection integrated through js/39-clinical-case-pediatrics.js.
-- Each independent bank uses its own answer/progress store. The chooser and icon ordering are finalized by js/42-pediatrics-collection-polish.js.
+- Bank 07, Clinical Case: data/clinicalCaseBank.json, **system → topic → questions** (a topic opens straight to its questions; every case's shared history is shown once before that case's questions).
+- Bank 08, AI Generated: the 16 JSON files in data/ai-generated/, system → topic → questions.
+- Both use separate local answer stores.
+- One design for every bank: Banks 07 and 08 render the **same markup and classes as the Dr. Al-Joaki bank** (`.card.sc.spc.ped-system-card` for systems, `.card.sc.tpc` for topics, Back button first, then kicker, title and sub-line). The large icons come from `window.__SHB_BANK_ICONS__.system(name)` / `.topic(systemName, topicName)`, defined in `js/42-pediatrics-collection-polish.js`; they return the same `sysIcon(...,'lg')` / `.tno.ti` markup the core uses, so the core CSS sizes them identically. Change icon size once in the core CSS and every bank follows.
