@@ -1,10 +1,11 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.10-to-me.24",
-  "displayVersion": "1.3.10.24 · Chrome (Phone + Computer)",
+  "version": "1.3.10-to-me.25",
+  "displayVersion": "1.3.10.25 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-15",
   "releaseNotes": [
+    "Adds Bank 08: AI Generated — 1,881 standard MCQs across 31 medical systems and 295 topics, assembled from 16 MSQ source files. Navigation is Medical System → Topic → Questions, with no clinical-case stage. Answer feedback and initial explanations appear after selection; Read More expands the detailed explanation, high-yield points and source. Progress is stored separately from every other bank. Difficulty-classification fields and UI are not included.",
     "Adds Bank 07: Clinical Case to the live unified Chrome PWA: 1,598 validated questions across 10 medical systems, 284 source-organized topics and 330 case groups. Navigation is Medical System → Topic → Clinical Case → Questions. Bank 07 has a separate answer-progress store and preserves the existing Pediatrics Clinical Cases collection and all other bank progress.",
     "Forces a clean offline-cache refresh for this release. The Service Worker and offline installer now share cache shbace-chrome-offline-v1.3.10.23, so installed copies download the current application shell instead of retaining files from the previous release.",
     "Quiz: choose several banks, several systems and several topics together (a topic is also matched in banks that have no topic labels, by its name). Clear icons for Nelson, Clinical Cases, Kasr Al-Ainy and Egyptian Book. Arabic exam labels and Arabic reviewer notes are no longer shown in explanations or sources.",
