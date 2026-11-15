@@ -1,1 +1,13 @@
 /for Chrome/www/
+# dependencies and build output
+node_modules/
+to me/node_modules/
+to me/www/
+.vercel/
+
+# editor / OS noise
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/

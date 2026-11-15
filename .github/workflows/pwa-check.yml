@@ -17,5 +17,6 @@ jobs:
         with:
           node-version: 20
       - run: npm install
+      - run: npm run test:unit
       - run: npm run check:bank
       - run: npm run build:pwa

@@ -1,10 +1,14 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.10-to-me.25",
-  "displayVersion": "1.3.10.25 · Chrome (Phone + Computer)",
+  "version": "1.3.10-to-me.26",
+  "displayVersion": "1.3.10.26 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-15",
   "releaseNotes": [
+    "Places Clinical Case (1,598 questions across 10 medical systems) third and AI Generated (1,881 single-best-answer MCQs from 16 source files) fourth in the Pediatrics collection chooser; remaining collections stay available.",
+    "Uses the supplied University of Tripoli, Clinical Cases, AI Generated, Nelson, Kasr Al-Ainy, AI Clinical Cases and Egyptian Book badge artwork as optimized WebP bank icons.",
+    "Reuses the Dr. Al-Joaki system and disease/topic artwork in the Clinical Case and AI Generated banks wherever a matching topic exists, with semantic icons retained as a fallback.",
+    "Adds Arabic-aware shared search normalisation, removes redundant search-index text duplication, groups search controls into a collapsible Filters panel, and adds unit tests plus a PWA GitHub Actions check.",
     "Adds Bank 08: AI Generated — 1,881 standard MCQs across 31 medical systems and 295 topics, assembled from 16 MSQ source files. Navigation is Medical System → Topic → Questions, with no clinical-case stage. Answer feedback and initial explanations appear after selection; Read More expands the detailed explanation, high-yield points and source. Progress is stored separately from every other bank. Difficulty-classification fields and UI are not included.",
     "Adds Bank 07: Clinical Case to the live unified Chrome PWA: 1,598 validated questions across 10 medical systems, 284 source-organized topics and 330 case groups. Navigation is Medical System → Topic → Clinical Case → Questions. Bank 07 has a separate answer-progress store and preserves the existing Pediatrics Clinical Cases collection and all other bank progress.",
     "Forces a clean offline-cache refresh for this release. The Service Worker and offline installer now share cache shbace-chrome-offline-v1.3.10.23, so installed copies download the current application shell instead of retaining files from the previous release.",

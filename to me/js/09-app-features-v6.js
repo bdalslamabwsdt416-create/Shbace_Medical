@@ -574,7 +574,8 @@ topicsView=function(){const sp=REAL.spec[qs.spec]||{q:0,topics:[]};
 let gq='',gBank='all',gSpec='all',gTag='all',gSrc='all',gTopic='all',gSys='all',gSort='bank',gLim=40,gIdx=null,gTmr=null;
 /* ---- Unit 2: search engine (display/query only; question data is never modified) ---- */
 const AR_MARKS='\\u064B-\\u065F\\u0670\\u0640';
-const nz=s=>String(s==null?'':s).toLowerCase().replace(new RegExp('['+AR_MARKS+']','g'),'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه');
+const AR_MARKS_RE=new RegExp('['+AR_MARKS+']','g');
+const nz=s=>String(s==null?'':s).toLowerCase().replace(AR_MARKS_RE,'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه');
 const gEsc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 const AR_CLS={'ا':'[اأإآٱ]','ي':'[يى]','ه':'[هة]'};
 function tokRe(tok){const w=tok.filter(x=>x.length>1).map(nz);if(!w.length)return null;
@@ -583,7 +584,8 @@ function tokRe(tok){const w=tok.filter(x=>x.length>1).map(nz);if(!w.length)retur
 function hl(t,tok){t=String(t==null?'':t);const re=tokRe(tok);if(!re)return esc(t);return t.split(re).map((p,i)=>i%2?'<mark>'+esc(p)+'</mark>':esc(p)).join('')}
 const gSrcGroup=s=>enSrc(s).replace(/\s*[–—-]\s*Q\s*\d+\s*$/i,'').trim()||'Unknown source';
 function gIndex(){if(!gIdx)gIdx=QB.map(q=>{const nq=nz(q.q),no=nz(q.o.join(' \n')),ne=nz(q.ex||''),ns=nz(q.src||''),nt=nz(TOPIC_NAME[q.topic]||''),ny=nz((q.sy||'')+' '+(SPEC_NAME[q.spec]||q.spec)),ng=nz(q.id+' '+q.tag);
- return {q,sg:gSrcGroup(q.src),nq,no,ne,ns,nt,ny,ng,hay:[ng,nq,no,ne,ns,nt,ny].join(' \n')}});return gIdx}
+ return {q,sg:gSrcGroup(q.src),nq,no,ne,ns,nt,ny,ng}});return gIdx}
+function gHas(x,w){return x.ng.includes(w)||x.nq.includes(w)||x.no.includes(w)||x.ne.includes(w)||x.ns.includes(w)||x.nt.includes(w)||x.ny.includes(w)}
 function gSources(){const m={};gIndex().forEach(x=>{if(bankOk(x.q,gBank))m[x.sg]=(m[x.sg]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])}
 function gSystems(){const m={};QB.forEach(q=>{if(q.sy&&bankOk(q,gBank))m[q.sy]=(m[q.sy]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])}
 const gPYKEY=()=>Object.keys(REAL.spec).find(k=>/^Previous Years/.test(REAL.spec[k].label||''))||null;
@@ -599,9 +601,8 @@ function gSnip(t,tok,len){len=len||170;t=String(t==null?'':t);const re=tokRe(tok
 function topicRow(sid,id,n,c,sy){const l=QB.filter(q=>q.topic===id),d=answeredCount(l),p=pct(d,l.length);return `<div class="card sc tpc" role="button" tabindex="0" onclick="openTopic('${sid}',${id})">${topicIcon(sid,n,id)}<div class="tpc-tx"><div class="eyebrow">${esc(SPEC_NAME[sid]||sid)}</div><h3>${GQ_TOK?hl(n,GQ_TOK):esc(n)}</h3><div class="meta">${l.length} questions${d?` · ${d} answered`:''}</div><div class="bar"><span style="width:${p}%"></span></div></div><span class="chev">›</span></div>`}
 let GQ_TOK=null;
 function gCard(x,n,tok){const q=x.q,f=tok.length?gFields(x,n):[];
- let prev;
- if(!tok.length||x.nq&&n.some(w=>x.nq.includes(w))||!tok.length)prev=hl(tok.length?gSnip(q.q,tok,200):(q.q.length>200?q.q.slice(0,198)+'…':q.q),tok);
- else prev=hl(q.q.length>200?q.q.slice(0,198)+'…':q.q,tok);
+ const inQ=tok.length&&n.some(w=>x.nq.includes(w));
+ const prev=hl(inQ?gSnip(q.q,tok,200):(q.q.length>200?q.q.slice(0,198)+'…':q.q),tok);
  let ev='';
  if(tok.length){const oi=q.o.findIndex(o=>n.some(w=>nz(o).includes(w)));
   if(oi>=0&&!n.some(w=>x.nq.includes(w)))ev=`<div class="gmatch"><b>Option ${esc(QLT(q,oi))}</b>: ${hl(gSnip(q.o[oi],tok),tok)}</div>`;
@@ -617,7 +618,7 @@ function searchResults(){const n=gNeedle(),tok=gRawTok();GQ_TOK=tok.length?tok:n
    return `<div class="soon-h">${esc(SPEC_NAME[sid]||sp.label||sid)} · ${t.length} topics</div>`+t.map(([id,nm,c,sy])=>topicRow(sid,id,nm,c,sy)).join('')}).join('');
   return rows||'<div class="card setcard"><p class="meta">No topics.</p></div>'}
  const tops=(n.length&&!gFilterOn())?specs.flatMap(([sid,sp])=>sp.topics.filter(([id,nm,c,sy])=>n.every(w=>nz(nm+' '+(SPEC_NAME[sid]||'')+' '+(sy||'')).includes(w))).map(([id,nm,c,sy])=>[sid,id,nm,c,sy])):[];
- let qs2=gIndex().filter(x=>bankOk(x.q,gBank)&&(gSpec==='all'||x.q.spec===gSpec)&&(gTag==='all'||x.q.tag===gTag)&&(gSrc==='all'||x.sg===gSrc)&&(gTopic==='all'||String(x.q.topic)===gTopic)&&(gSys==='all'||x.q.sy===gSys)&&n.every(w=>x.hay.includes(w)));
+ let qs2=gIndex().filter(x=>bankOk(x.q,gBank)&&(gSpec==='all'||x.q.spec===gSpec)&&(gTag==='all'||x.q.tag===gTag)&&(gSrc==='all'||x.sg===gSrc)&&(gTopic==='all'||String(x.q.topic)===gTopic)&&(gSys==='all'||x.q.sy===gSys)&&n.every(w=>gHas(x,w)));
  if(n.length)qs2=qs2.map((x,i)=>[x,gScore(x,n),i]).sort((a,b)=>b[1]-a[1]||a[2]-b[2]).map(a=>a[0]);
  if(!tops.length&&!qs2.length)return `<div class="card setcard" style="text-align:center">${docFace('thinking','dr-top')}<h3>No results${tok.length?` for “${esc(gq.trim())}”`:''}</h3><p class="meta">Check the spelling, use fewer words, or remove some filters.</p><button type="button" class="btn block" onclick="gClear()">Clear search and filters</button></div>`;
  let out=`<div class="qreact think">${docFace('investigating')}<div><b>${tok.length?'Investigating…':'Filtered'}</b><span>${tops.length?tops.length+' topic'+(tops.length===1?'':'s')+' · ':''}${qs2.length} question${qs2.length===1?'':'s'} found</span></div></div>`;
@@ -1108,9 +1109,9 @@ function srTopicCard(e){const t=e.t,selected=(SRUI.selected||[]).includes(t.id),
  </article>`}
 function srFilterOk(e){const f=SRUI.filter;
  if(f==='due')return e.due>0;if(f==='weak')return e.weak>0;if(f==='prog')return e.rev>0&&e.status!=='Mastered';if(f==='new')return e.rev===0;return true}
-function srTopicList(){const M=srTopicStats(),q=SRUI.q.trim().toLowerCase(),active=q||SRUI.filter!=='all';
+function srTopicList(){const M=srTopicStats(),q=nz(SRUI.q.trim()),active=q||SRUI.filter!=='all';
  const groups=[];const bySpec=new Map();
- SRT.forEach(t=>{const e=M.get(t.id);if(!e)return;if(srEffBank()!=='all'&&!(e.tot+e.sus))return;if(q&&!(t.name+' '+t.specLabel+' '+t.sy).toLowerCase().includes(q))return;if(!srFilterOk(e))return;
+ SRT.forEach(t=>{const e=M.get(t.id);if(!e)return;if(srEffBank()!=='all'&&!(e.tot+e.sus))return;if(q&&!nz(t.name+' '+t.specLabel+' '+t.sy).includes(q))return;if(!srFilterOk(e))return;
   if(!bySpec.has(t.spec)){const g={spec:t.spec,label:t.specLabel,items:[]};bySpec.set(t.spec,g);groups.push(g)}bySpec.get(t.spec).items.push(e)});
  if(!groups.length)return `<div class="card"><p class="meta" style="margin:0">No topics match this view.</p></div>`;
  return groups.map(g=>{const tot=g.items.reduce((a,e)=>a+e.tot,0),cr=g.items.reduce((a,e)=>a+e.credit,0),p=tot?Math.round(100*cr/tot):0;
@@ -2927,7 +2928,7 @@ const u7Q=id=>QBY.get(String(id))||QB.find(q=>String(q.id)===String(id))||null;
 const u7Spec=q=>q?(SPEC_NAME[q.spec]||REAL.spec[q.spec]?.label||q.spec):'';
 const u7Topic=q=>q?(TOPIC_NAME[q.topic]||'Topic'):'';
 const u7Source=q=>q?(q.tag||q.src||'Question Bank'):'Question Bank';
-const u7Text=q=>q?[q.id,q.q,(q.o||[]).join(' '),q.ex,q.src,q.tag,u7Spec(q),u7Topic(q)].join(' ').toLowerCase():'';
+const u7Text=q=>q?nz([q.id,q.q,(q.o||[]).join(' '),q.ex,q.src,q.tag,u7Spec(q),u7Topic(q)].join(' ')):'';
 const u7Option=(v,label,cur)=>`<option value="${esc(String(v))}"${String(v)===String(cur)?' selected':''}>${esc(label)}</option>`;
 const u7Specs=()=>[...new Set(QB.map(q=>q.spec))].sort((a,b)=>u7Spec({spec:a}).localeCompare(u7Spec({spec:b})));
 const u7Topics=(spec)=>[...new Map(QB.filter(q=>spec==='all'||q.spec===spec).map(q=>[String(q.topic),u7Topic(q)])).entries()].sort((a,b)=>a[1].localeCompare(b[1]));
@@ -2993,11 +2994,10 @@ function u7GetQuestionItems(kind){
  else ids=Object.keys(U7_WRONG).filter(id=>U7_WRONG[id]&&!U7_WRONG[id].hidden&&u7Q(id));
  let rows=ids.map(id=>({id,q:u7Q(id)})).filter(x=>x.q);
  const st=u7State[kind];
- rows=rows.filter(({q})=>(st.spec==='all'||q.spec===st.spec)&&(st.topic==='all'||String(q.topic)===String(st.topic))&&(st.source==='all'||u7Source(q)===st.source)&&(!st.search||u7Text(q).includes(st.search.toLowerCase())));
+ rows=rows.filter(({q})=>(st.spec==='all'||q.spec===st.spec)&&(st.topic==='all'||String(q.topic)===String(st.topic))&&(st.source==='all'||u7Source(q)===st.source)&&(!st.search||u7Text(q).includes(nz(st.search))));
  rows.sort((a,b)=>{
   if(st.sort==='az')return a.q.q.localeCompare(b.q.q);
-  const ta=kind==='saved'?(Number(U7_SAVED_META[a.id]?.savedAt)||0):(Number(U7_WRONG[a.id]?.lastAt)||Number(S.ans[a.id]?.t)||0);
-  const tb=kind==='saved'?(Number(U7_SAVED_META[b.id]?.savedAt)||0):(Number(U7_WRONG[b.id]?.lastAt)||Number(S.ans[b.id]?.t)||0);
+  const ta=kind==='saved'?(Number(U7_SAVED_META[a.id]?.savedAt)||0):(Number(U7_WRONG[a.id]?.lastAt)||Number(S.ans[a.id]?.t)||0);  const tb=kind==='saved'?(Number(U7_SAVED_META[b.id]?.savedAt)||0):(Number(U7_WRONG[b.id]?.lastAt)||Number(S.ans[b.id]?.t)||0);
   return st.sort==='old'?ta-tb:tb-ta;
  });
  return rows;
@@ -3033,7 +3033,7 @@ window.u7BulkDelete=function(kind){const ids=[...u7Selected[kind]];if(!ids.lengt
 function u8Notes(){
  const rows=Object.entries(S.notes||{}).filter(([id,text])=>typeof text==='string'&&text.trim()&&u7Q(id)).map(([id,text])=>{const q=u7Q(id),m=U8_NOTE_META[id]||{};return{id,text,q,meta:m}});
  const st=u7State.notes;
- return rows.filter(x=>(st.spec==='all'||x.q.spec===st.spec)&&(st.topic==='all'||String(x.q.topic)===String(st.topic))&&(st.source==='all'||u7Source(x.q)===st.source)&&(!st.search||(x.text+' '+x.id+' '+x.q.q+' '+u7Spec(x.q)+' '+u7Topic(x.q)+' '+u7Source(x.q)).toLowerCase().includes(st.search.toLowerCase()))).sort((a,b)=>{
+ return rows.filter(x=>(st.spec==='all'||x.q.spec===st.spec)&&(st.topic==='all'||String(x.q.topic)===String(st.topic))&&(st.source==='all'||u7Source(x.q)===st.source)&&(!st.search||nz(x.text+' '+x.id+' '+x.q.q+' '+u7Spec(x.q)+' '+u7Topic(x.q)+' '+u7Source(x.q)).includes(nz(st.search)))).sort((a,b)=>{
   const ta=Number(st.sort==='added'?a.meta.createdAt:a.meta.updatedAt)||0,tb=Number(st.sort==='added'?b.meta.createdAt:b.meta.updatedAt)||0;return tb-ta;
  });
 }
@@ -3047,7 +3047,7 @@ function myNotesView(){
  <div class="u7-filters"><input class="field" type="search" placeholder="Search note text…" value="${esc(st.search)}" oninput="u7SetFilter('notes','search',this.value)"><select class="field" onchange="u7SetFilter('notes','spec',this.value)">${u7Option('all','All specialties',st.spec)}${systems.map(x=>u7Option(x,u7Spec({spec:x}),st.spec)).join('')}</select><select class="field" onchange="u7SetFilter('notes','topic',this.value)">${u7Option('all','All topics',st.topic)}${topics.map(([id,nm])=>u7Option(id,nm,st.topic)).join('')}</select><select class="field" onchange="u7SetFilter('notes','source',this.value)">${u7Option('all','All sources',st.source)}${sources.map(x=>u7Option(x,x,st.source)).join('')}</select><select class="field" onchange="u7SetFilter('notes','sort',this.value)">${u7Option('updated','Last modified',st.sort)}${u7Option('added','Date added',st.sort)}</select></div>
  <div id="u8-note-results">${u8NoteRows()}</div></div>`;
 }
-window.u8SearchQuestions=function(value){const box=document.getElementById('u8-question-matches');if(!box)return;const s=String(value||'').trim().toLowerCase();if(s.length<2){box.innerHTML='<small class="meta">Type at least 2 characters to find a Question Bank item.</small>';return}const rows=QB.filter(q=>u7Text(q).includes(s)).slice(0,8);box.innerHTML=rows.length?rows.map(q=>`<div class="u8-match"><div><b>${esc(q.id)}</b><small>${esc(u7Spec(q))} · ${esc(u7Topic(q))}</small><span>${esc(String(q.q).slice(0,120))}</span></div><button type="button" class="btn primary" onclick="u8OpenQuestion('${esc(q.id)}')">Add / edit note</button></div>`).join(''):'<small class="meta">No matching Question Bank question.</small>'};
+window.u8SearchQuestions=function(value){const box=document.getElementById('u8-question-matches');if(!box)return;const s=nz(String(value||'').trim());if(s.length<2){box.innerHTML='<small class="meta">Type at least 2 characters to find a Question Bank item.</small>';return}const rows=QB.filter(q=>u7Text(q).includes(s)).slice(0,8);box.innerHTML=rows.length?rows.map(q=>`<div class="u8-match"><div><b>${esc(q.id)}</b><small>${esc(u7Spec(q))} · ${esc(u7Topic(q))}</small><span>${esc(String(q.q).slice(0,120))}</span></div><button type="button" class="btn primary" onclick="u8OpenQuestion('${esc(q.id)}')">Add / edit note</button></div>`).join(''):'<small class="meta">No matching Question Bank question.</small>'};
 window.u8OpenQuestion=function(id){const q=u7Q(id);if(!q)return;openQ(id);setTimeout(()=>{const card=document.getElementById('qc-'+id);if(card){if(!S.notes[id]&&!qs.noteOpen[id])qNote(id);card.scrollIntoView({block:'start',behavior:'smooth'})}},140)};
 window.u8DeleteNote=function(id){if(typeof S.notes[id]!=='string')return;confirmBox({title:'Delete this note?',text:`Delete the note linked to ${id}?`,detail:'The original Question Bank question is not affected. This action cannot be undone.',ok:'Delete note',danger:true},()=>{delete S.notes[id];delete U8_NOTE_META[id];save();u7SaveObj(U8_NOTE_META_KEY,U8_NOTE_META);renderAppDemo()})};
 window.u8BulkDeleteNotes=function(ids){ids=Array.isArray(ids)?ids:[];if(!ids.length)return;confirmBox({title:'Delete selected notes?',text:`Delete ${ids.length} selected note${ids.length===1?'':'s'}?`,detail:'Original Question Bank questions remain unchanged.',ok:'Delete notes',danger:true},()=>{ids.forEach(id=>{delete S.notes[id];delete U8_NOTE_META[id]});save();u7SaveObj(U8_NOTE_META_KEY,U8_NOTE_META);renderAppDemo()})};
@@ -3055,8 +3055,8 @@ window.u7SetFilter=function(kind,key,value){if(!u7State[kind])return;u7State[kin
 
 /* Unit 7: separate Pinned and Recent collections backed by the original PKEY/RKEY stores. */
 function u7PinKey(e){return `${e.k}:${e.spec}:${e.topic}`}
-function u7PinRows(kind){const list=kind==='pins'?(PINS||[]):(REC||[]);const q=u7State;const search=(kind==='pins'?q.pinSearch:q.recentSearch).toLowerCase();const spec=kind==='pins'?q.pinSpec:q.recentSpec;return list.filter(e=>{
- const sp=SPEC_NAME[e.spec]||e.spec;const topic=e.k==='spec'?'All topics':(e.topic===0?'All questions':TOPIC_NAME[e.topic]||'Topic');return (spec==='all'||e.spec===spec)&&(!search||(sp+' '+topic).toLowerCase().includes(search));
+function u7PinRows(kind){const list=kind==='pins'?(PINS||[]):(REC||[]);const q=u7State;const search=nz(kind==='pins'?q.pinSearch:q.recentSearch);const spec=kind==='pins'?q.pinSpec:q.recentSpec;return list.filter(e=>{
+ const sp=SPEC_NAME[e.spec]||e.spec;const topic=e.k==='spec'?'All topics':(e.topic===0?'All questions':TOPIC_NAME[e.topic]||'Topic');return (spec==='all'||e.spec===spec)&&(!search||nz(sp+' '+topic).includes(search));
  }).sort((a,b)=>(b.t||0)-(a.t||0));}
 function u7PinMarkup(kind){const rows=u7PinRows(kind),sel=u7Selected[kind];if(!rows.length)return `<div class="card setcard u7-empty"><h3>${kind==='pins'?'No pinned items':'No recent topics'}</h3><p class="meta">${kind==='pins'?'Use the star beside a specialty or topic to pin it.':'Recently opened specialties and topics appear here automatically.'}</p><button type="button" class="btn block" onclick="appPage='subjects';renderAppDemo()">Browse specialties</button></div>`;
  return rows.map(e=>{const key=u7PinKey(e),sp=SPEC_NAME[e.spec]||e.spec,title=e.k==='spec'?sp:(e.topic===0?'All questions':TOPIC_NAME[e.topic]||'Topic');const n=QB.filter(x=>x.spec===e.spec&&(e.k==='spec'||e.topic===0||x.topic===e.topic)).length;const selected=sel.has(key);return `<article class="u7-pinrow"><label class="u7-check"><input type="checkbox" ${selected?'checked':''} onchange="u7PinSelect('${kind}','${esc(key)}',this.checked)"></label><button type="button" class="u7-pin-main" onclick="${e.k==='spec'?`openSpec('${esc(e.spec)}')`:`openTopic('${esc(e.spec)}',${Number(e.topic)||0})`}"><b>${esc(title)}</b><span>${esc(sp)} · ${n} questions</span><small>${kind==='recent'?'Visited':'Pinned'} · ${e.t?fmtDT(e.t):'Date not recorded'}</small></button>${kind==='pins'?`<button class="btn" type="button" onclick="u7Unpin('${esc(key)}')">Unpin</button>`:`<button class="btn danger" type="button" onclick="u7RemoveRecent('${esc(key)}')">Remove</button>`}</article>`}).join('')}
@@ -3369,4 +3369,3 @@ PAGES.notifs=notifsView;PAGES.settings=settingsView;
 
 })();
 })();
-
