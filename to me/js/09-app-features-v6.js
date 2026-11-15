@@ -2997,7 +2997,8 @@ function u7GetQuestionItems(kind){
  rows=rows.filter(({q})=>(st.spec==='all'||q.spec===st.spec)&&(st.topic==='all'||String(q.topic)===String(st.topic))&&(st.source==='all'||u7Source(q)===st.source)&&(!st.search||u7Text(q).includes(nz(st.search))));
  rows.sort((a,b)=>{
   if(st.sort==='az')return a.q.q.localeCompare(b.q.q);
-  const ta=kind==='saved'?(Number(U7_SAVED_META[a.id]?.savedAt)||0):(Number(U7_WRONG[a.id]?.lastAt)||Number(S.ans[a.id]?.t)||0);  const tb=kind==='saved'?(Number(U7_SAVED_META[b.id]?.savedAt)||0):(Number(U7_WRONG[b.id]?.lastAt)||Number(S.ans[b.id]?.t)||0);
+  const ta=kind==='saved'?(Number(U7_SAVED_META[a.id]?.savedAt)||0):(Number(U7_WRONG[a.id]?.lastAt)||Number(S.ans[a.id]?.t)||0);
+  const tb=kind==='saved'?(Number(U7_SAVED_META[b.id]?.savedAt)||0):(Number(U7_WRONG[b.id]?.lastAt)||Number(S.ans[b.id]?.t)||0);
   return st.sort==='old'?ta-tb:tb-ta;
  });
  return rows;
