@@ -437,8 +437,8 @@ function syncHeartbeat(){
 const __renderSlide=renderSlide;
 renderSlide=function(){__renderSlide.apply(this,arguments);syncHeartbeat();};
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopHeartbeat();else syncHeartbeat();});
-function applyAppMode(){document.body.classList.toggle('app-mode',location.hash!=='#notes');}
-window.addEventListener('hashchange',applyAppMode);applyAppMode();
+function applyAppMode(){document.body.classList.add('app-mode');}
+applyAppMode();
 
 /* ===================== v8 SWIPE-ONLY ONBOARDING ===================== */
 (function(){

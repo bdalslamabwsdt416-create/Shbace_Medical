@@ -1,10 +1,14 @@
-(function(){
+﻿(function(){
 'use strict';
 
 /* Rotate this cache namespace with every PWA release. It must match sw.js so installed copies can replace stale files. */
-var CACHE_NAME='shbace-chrome-offline-v1.3.10.26';
+var CACHE_NAME='shbace-chrome-offline-v1.3.10.31';
 var STAGING_NAME='shbace-staging-offline';
 var INSTALLED_KEY='installed';
+/* Update checks are throttled: one successful network check every 7 days; after a failed attempt (offline) retry no sooner than 2 hours. */
+var CHECK_OK_KEY='shbace_pkg_check_ok_v1',CHECK_TRY_KEY='shbace_pkg_check_try_v1';
+var CHECK_EVERY=7*24*60*60*1000,CHECK_RETRY=2*60*60*1000;
+var PENDING_KEY='shbace_pkg_update_pending_v1',NOTIF_ID='update-available';
 var manifestFromNetwork=false,plan=null;
 var DB_NAME='shbace-medical-offline-state-v1';
 var MANIFEST_URL=new URL('./offline-assets-manifest.json',location.href).href;
@@ -19,6 +23,53 @@ var STAGES=[
  {id:'verify',label:'Integrity verification'}
 ];
 
+function lsNum(key){try{return Number(localStorage.getItem(key))||0}catch(e){return 0}}
+function lsSet(key,value){try{localStorage.setItem(key,String(value))}catch(e){}}
+function setPending(n){
+ if(n>0)lsSet(PENDING_KEY,n);else{try{localStorage.removeItem(PENDING_KEY)}catch(e){}}
+ try{
+  if(n>0){if(typeof window.shbAddNotif==='function')window.shbAddNotif(NOTIF_ID,'A new update is available',n+' file'+(n===1?'':'s')+' changed. Open Settings → App updates → Check for updates to install it. Your progress is kept.','settings')}
+  else if(typeof window.shbRemoveNotif==='function')window.shbRemoveNotif(NOTIF_ID);
+ }catch(e){}
+}
+var VER_KEY='shbace_pkg_version_installed_v1',VER_AVAIL_KEY='shbace_pkg_version_available_v1',EXAM_KEY='shbace_exam_goal_planner_v1',SNOOZE_DAYS=2,EXAM_QUIET_DAYS=7;
+function lsGetJson(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}}
+function lsSetJson(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function lsDel(k){try{localStorage.removeItem(k)}catch(e){}}
+/* Version + short release summary from pwa-version.json (network first, 6 s limit). Uses "summary" when present, otherwise the 3 newest releaseNotes. */
+function fetchVersionInfo(){
+ return new Promise(function(resolve){
+  var done=false;function fin(v){if(!done){done=true;resolve(v)}}
+  setTimeout(function(){fin(null)},6000);
+  try{
+   fetch(new URL('./pwa-version.json',location.href).href,{cache:'no-store',credentials:'same-origin'}).then(function(r){if(!r.ok)throw new Error('http');return r.json()}).then(function(j){
+    var notes=Array.isArray(j.summary)?j.summary:(typeof j.summary==='string'&&j.summary?[j.summary]:(Array.isArray(j.releaseNotes)?j.releaseNotes.slice(0,3):[]));
+    fin({version:String(j.version||''),displayVersion:String(j.displayVersion||j.version||''),releaseDate:String(j.releaseDate||''),
+     notes:notes.slice(0,3).map(function(x){x=String(x);return x.length>150?x.slice(0,147)+'…':x})});
+   }).catch(function(){fin(null)});
+  }catch(e){fin(null)}
+ });
+}
+function rememberInstalled(info){if(info)lsSetJson(VER_KEY,{displayVersion:info.displayVersion,releaseDate:info.releaseDate})}
+function markInstalledNow(){
+ var av=lsGetJson(VER_AVAIL_KEY);
+ if(av){rememberInstalled(av);lsDel(VER_AVAIL_KEY)}else fetchVersionInfo().then(rememberInstalled);
+}
+/* True when any saved exam is today or within the next EXAM_QUIET_DAYS days: the automatic window stays quiet (the bell still shows the update). */
+function examSoon(){
+ var items=lsGetJson(EXAM_KEY);if(!Array.isArray(items))return false;
+ var n=new Date(),t=Date.UTC(n.getFullYear(),n.getMonth(),n.getDate());
+ return items.some(function(x){
+  var p=String(x&&x.date||'').split('-').map(Number);if(p.length!==3||p.some(isNaN))return false;
+  var d=Math.round((Date.UTC(p[0],p[1]-1,p[2])-t)/86400000);return d>=0&&d<=EXAM_QUIET_DAYS;
+ });
+}
+function checkDue(){
+ var now=Date.now(),ok=lsNum(CHECK_OK_KEY),tried=lsNum(CHECK_TRY_KEY);
+ if(ok&&ok<=now&&now-ok<CHECK_EVERY)return false;
+ if(tried&&tried<=now&&now-tried<CHECK_RETRY)return false;
+ return true;
+}
 function standalone(){
  try{return !!(navigator.standalone===true || (window.matchMedia&&(
   window.matchMedia('(display-mode: standalone)').matches ||
@@ -93,7 +144,11 @@ function mount(){
   foot:root.querySelector('#shbOfflineFootnote')
  };
  ui.button.addEventListener('click',function(){
-  if(ui.button.dataset.done==='1'){if(plan&&plan.mode==='update'){location.reload();return}removeSetupOverlay();return}
+  if(ui.button.dataset.done==='1'){if(plan&&plan.mode==='update'){
+   /* Restart after an update: forget "splash already shown this session" so the reload goes through the normal splash.
+      Otherwise 04-app-main.js removes the splash at once and the old prototype Home is visible until the app scripts finish loading. */
+   try{sessionStorage.removeItem('shbace_splash_completed_session_v1')}catch(e){}
+   location.reload();return}removeSetupOverlay();return}
   if(ui.button.dataset.retryCheck==='1'){location.reload();return}
   runPlan();
  });
@@ -197,13 +252,17 @@ function loadManifest(){
   /* Network first: a stale cached copy of the file list makes size/SHA checks fail against newer files.
      The cached copy is only a fallback for when the device is offline. */
   manifestFromNetwork=false;
-  return fetch(MANIFEST_URL,{credentials:'same-origin',cache:'no-store'}).then(function(r){
+  var ctl=null,timer=null;
+  try{ctl=new AbortController();timer=setTimeout(function(){try{ctl.abort()}catch(e){}},10000)}catch(e){}
+  return fetch(MANIFEST_URL,{credentials:'same-origin',cache:'no-store',signal:ctl?ctl.signal:undefined}).then(function(r){
+   if(timer)clearTimeout(timer);
    if(!r.ok)throw new Error('Offline asset manifest returned HTTP '+r.status+'.');
    var copy=r.clone();
    return r.json().then(function(data){manifestFromNetwork=true;
     return c.put(MANIFEST_URL,copy).catch(function(){}).then(function(){return data});
    });
   }).catch(function(err){
+   if(timer)clearTimeout(timer);
    return c.match(MANIFEST_URL).then(function(hit){
     if(hit)return hit.json();
     throw err;
@@ -493,6 +552,8 @@ function runPlan(){
   if(errors.length)throw new Error('The final integrity check found missing or unreadable files.');
   return commitPlan(target);
  }).then(function(){return cleanupPreviousCaches()}).then(function(){
+  /* A fully verified package counts as an up-to-date check: the 48-hour timer restarts now. */
+  lsSet(CHECK_OK_KEY,Date.now());setPending(0);markInstalledNow();
   ui.percent.textContent='100%';ui.count.textContent=plan.files.length+' / '+plan.files.length+' files';
   ui.track.setAttribute('aria-valuenow','100');ui.bar.style.width='100%';
   ui.bytes.textContent=fmtBytes(plan.bytes)+' / '+fmtBytes(plan.bytes);
@@ -528,18 +589,22 @@ function showPlanNeeded(p){
  ui.bytes.textContent='0 B / '+fmtBytes(p.bytes);
  ui.percent.textContent='0%';paintProgress('prepare',false);
 }
-function showUpdateSheet(p){
+function showUpdateSheet(p,info){
  if(document.getElementById('shbaceUpdateSheet'))return;
  plan=p;
  var st=document.createElement('style');
- st.textContent='#shbaceUpdateSheet{position:fixed;left:12px;right:12px;bottom:calc(86px + env(safe-area-inset-bottom,0px));z-index:99990;max-width:520px;margin:0 auto;padding:14px 16px;border-radius:18px;border:1px solid rgba(95,169,225,.4);background:linear-gradient(150deg,#0e2a4e,#071a33);color:#eaf4ff;box-shadow:0 10px 30px rgba(0,0,0,.45);font:14px system-ui,sans-serif}'+
+ st.textContent='#shbaceUpdateSheet{position:fixed;left:12px;right:12px;bottom:calc(86px + env(safe-area-inset-bottom,0px));z-index:99990;max-width:520px;max-height:70vh;overflow:auto;margin:0 auto;padding:14px 16px;border-radius:18px;border:1px solid rgba(95,169,225,.4);background:linear-gradient(150deg,#0e2a4e,#071a33);color:#eaf4ff;box-shadow:0 10px 30px rgba(0,0,0,.45);font:14px system-ui,sans-serif}'+
   '#shbaceUpdateSheet b{display:block;font-size:15px;margin-bottom:4px}#shbaceUpdateSheet span{display:block;color:#a9c4de;line-height:1.45;font-size:12.5px}'+
   '#shbaceUpdateSheet div{display:flex;gap:8px;margin-top:12px}#shbaceUpdateSheet button{flex:1;min-height:42px;border-radius:12px;border:1px solid rgba(95,169,225,.4);background:rgba(8,25,48,.7);color:#eaf4ff;font:inherit;font-weight:700;cursor:pointer}'+
   '#shbaceUpdateSheet button.go{background:#1f6fe0;border-color:#3b8bff}';
  var el=document.createElement('div');el.id='shbaceUpdateSheet';el.setAttribute('role','dialog');
- el.innerHTML='<b>Update available</b><span>'+p.files.length+' changed file'+(p.files.length===1?'':'s')+' · '+fmtBytes(p.bytes)+'. Only the changes are downloaded; your progress is kept.</span><div><button type="button" id="shbUpdLater">Later</button><button type="button" class="go" id="shbUpdNow">Update now</button></div>';
+ var notesHtml=(info&&info.notes&&info.notes.length)?'<ul style="margin:8px 0 0;padding-left:18px;color:#a9c4de;font-size:12px;line-height:1.45">'+info.notes.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul>':'';
+ el.innerHTML='<b>Update available'+(info&&info.displayVersion?' · '+esc(info.displayVersion):'')+'</b><span>'+p.files.length+' changed file'+(p.files.length===1?'':'s')+' · '+fmtBytes(p.bytes)+'. Only the changes are downloaded; your progress is kept.</span>'+notesHtml+'<div><button type="button" id="shbUpdLater">Later</button><button type="button" class="go" id="shbUpdNow">Update now</button></div>';
  el.appendChild(st);document.body.appendChild(el);
- el.querySelector('#shbUpdLater').addEventListener('click',function(){el.remove()});
+ el.querySelector('#shbUpdLater').addEventListener('click',function(){
+  /* "Later": ask again after SNOOZE_DAYS (the next check becomes due then). The bell notification stays. */
+  lsSet(CHECK_OK_KEY,Date.now()-(CHECK_EVERY-SNOOZE_DAYS*86400000));el.remove();
+ });
  el.querySelector('#shbUpdNow').addEventListener('click',function(){
   el.remove();showPlanNeeded(p);runPlan();
  });
@@ -570,6 +635,69 @@ function showSetupError(error){
  ui.button.disabled=false;ui.button.textContent='Retry setup';ui.button.dataset.done='0';ui.button.dataset.retryCheck='1';
 }
 
+/* Network check (reads the file list from the server). Runs only when it is due, on first install, or when local files are missing. */
+function runFullCheck(splashFinished){
+ lsSet(CHECK_TRY_KEY,Date.now());
+ return decide().then(function(res){
+  if(!res||res.kind==='none'){
+   /* Only a check that really reached the server counts; offline attempts leave the timer alone. */
+   if(manifestFromNetwork){lsSet(CHECK_OK_KEY,Date.now());setPending(0);lsDel(VER_AVAIL_KEY);fetchVersionInfo().then(rememberInstalled)}
+   return;
+  }
+  if(res.kind==='prompt'){
+   /* Automatic 7-day check: bell notification + the update window (Later / Update now). The timer restarts now either way. */
+   lsSet(CHECK_OK_KEY,Date.now());setPending(res.plan.files.length);
+   return fetchVersionInfo().then(function(info){
+    if(info)lsSetJson(VER_AVAIL_KEY,info);
+    if(examSoon())return;   /* exam within a week: bell only, no window */
+    return splashFinished.then(function(){showUpdateSheet(res.plan,info)});
+   });
+  }
+  return splashFinished.then(function(){showPlanNeeded(res.plan)});
+ }).catch(function(error){
+  /* Offline (or manifest unreachable) after a completed install: stay silent and keep using the saved copy. */
+  return dbGet('meta',INSTALLED_KEY).catch(function(){return null}).then(function(rec){
+   if(rec&&rec.files)return;
+   return dbGet('meta','ready').catch(function(){return null}).then(function(ready){
+    if(ready&&ready.verified)return;
+    return splashFinished.then(function(){showSetupError(error)});
+   });
+  });
+ });
+}
+/* Local-only look (no network): are saved files missing from this device? Uses the manifest already stored on the device. */
+function localRepairNeeded(){
+ return caches.open(CACHE_NAME).then(function(c){
+  cache=c;
+  return c.match(MANIFEST_URL).then(function(hit){
+   if(!hit)return false;
+   return hit.json().then(function(data){
+    if(!data||data.schema!==1||!Array.isArray(data.files)||!data.files.length)return false;
+    return cacheUrlSet().then(function(have){
+     return data.files.some(function(f){return !have[urlFor(f.path)]});
+    });
+   });
+  });
+ }).catch(function(){return false});
+}
+/* Manual "Check for updates" (Settings). Ignores the 48-hour timer and reports what happened. */
+function manualCheck(){
+ if(!standalone()||!('caches' in window)||!window.crypto||!crypto.subtle||!window.indexedDB)return Promise.resolve({state:'unsupported'});
+ if(started)return Promise.resolve({state:'busy'});
+ lsSet(CHECK_TRY_KEY,Date.now());
+ return decide().then(function(res){
+  if(!manifestFromNetwork)return {state:'offline'};
+  if(!res||res.kind==='none'){lsSet(CHECK_OK_KEY,Date.now());setPending(0);lsDel(VER_AVAIL_KEY);fetchVersionInfo().then(rememberInstalled);return {state:'latest'}}
+  if(res.kind==='prompt'){lsSet(CHECK_OK_KEY,Date.now());setPending(res.plan.files.length);
+   return fetchVersionInfo().then(function(info){if(info)lsSetJson(VER_AVAIL_KEY,info);showUpdateSheet(res.plan,info);return {state:'update'}})}
+  showPlanNeeded(res.plan);return {state:'setup'};
+ }).catch(function(){return {state:'offline'}});
+}
+window.shbaceCheckForUpdate=manualCheck;
+window.shbaceLastUpdateCheck=function(){return lsNum(CHECK_OK_KEY)};
+window.shbaceUpdatePending=function(){return lsNum(PENDING_KEY)};
+window.shbaceVersionInfo=function(){return {installed:lsGetJson(VER_KEY),available:lsGetJson(VER_AVAIL_KEY)}};
+
 function start(){
  if(!standalone()){
   waitForSplash().then(showInstallHint);
@@ -581,19 +709,13 @@ function start(){
   splashFinished.then(showSetupUnavailable);
   return;
  }
- decide().then(function(res){
-  if(!res||res.kind==='none')return;
-  return splashFinished.then(function(){
-   if(res.kind==='prompt')showUpdateSheet(res.plan);else showPlanNeeded(res.plan);
-  });
- }).catch(function(error){
-  /* Offline (or manifest unreachable) after a completed install: stay silent and keep using the saved copy. */
-  return dbGet('meta',INSTALLED_KEY).catch(function(){return null}).then(function(rec){
-   if(rec&&rec.files)return;
-   return dbGet('meta','ready').catch(function(){return null}).then(function(ready){
-    if(ready&&ready.verified)return;
-    return splashFinished.then(function(){showSetupError(error)});
-   });
+ dbGet('meta',INSTALLED_KEY).catch(function(){return null}).then(function(rec){
+  var hasRecord=!!(rec&&rec.files);
+  /* First install, legacy install, or a check that is due: do the full network check. */
+  if(!hasRecord||checkDue())return runFullCheck(splashFinished);
+  /* Otherwise stay off the network. Only repair when files are really missing and the device is online. */
+  return localRepairNeeded().then(function(needs){
+   if(needs&&navigator.onLine!==false)return runFullCheck(splashFinished);
   });
  });
 }

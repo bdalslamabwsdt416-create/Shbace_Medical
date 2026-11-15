@@ -18,7 +18,66 @@ for(const id of Object.keys(S.ans)){const r=S.ans[id];if(!isO(r)||!Number.isInte
 for(const id of Object.keys(S.sr))if(!isO(S.sr[id]))delete S.sr[id];
 for(const id of Object.keys(S.notes))if(typeof S.notes[id]!=='string')delete S.notes[id];
 for(const f of ['saved','rep'])for(const id of Object.keys(S[f]))if(S[f][id]===null||S[f][id]===undefined)delete S[f][id]}catch(e){console.warn('State sanitise failed',e)}})();
-const save=()=>LS.set(KEY,S);
+const QB_PROGRESS_DB='shbace-student-progress-v1';
+let qbProgressDbPromise=null,qbProgressWrite=Promise.resolve(),qbProgressWarned=false,qbProgressLastError=null;
+function qbProgressDB(){
+ if(!window.indexedDB)return Promise.reject(new Error('IndexedDB unavailable'));
+ if(qbProgressDbPromise)return qbProgressDbPromise;
+ qbProgressDbPromise=new Promise((resolve,reject)=>{
+  const request=indexedDB.open(QB_PROGRESS_DB,1);
+  request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains('progress'))db.createObjectStore('progress',{keyPath:'key'})};
+  request.onsuccess=()=>{const db=request.result;db.onversionchange=()=>{try{db.close()}catch(e){}qbProgressDbPromise=null};resolve(db)};
+  request.onerror=()=>{qbProgressDbPromise=null;reject(request.error||new Error('Could not open progress storage'))};
+  request.onblocked=()=>{qbProgressDbPromise=null;reject(new Error('Progress storage upgrade is blocked'))};
+ });
+ return qbProgressDbPromise;
+}
+function qbProgressPut(value){
+ const snapshot=JSON.parse(JSON.stringify(value));
+ qbProgressWrite=qbProgressWrite.catch(()=>{}).then(()=>{qbProgressLastError=null;return qbProgressDB()}).then(db=>new Promise((resolve,reject)=>{
+  const tx=db.transaction('progress','readwrite');
+  tx.objectStore('progress').put({key:KEY,schema:1,updatedAt:Date.now(),value:snapshot});
+  tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error||new Error('Could not mirror progress'));tx.onabort=()=>reject(tx.error||new Error('Progress mirror transaction aborted'));
+ }));
+ qbProgressWrite=qbProgressWrite.catch(error=>{qbProgressLastError=String(error&&error.message||error);if(!qbProgressWarned){qbProgressWarned=true;console.warn('IndexedDB progress mirror unavailable; localStorage remains active.',error)} });
+ return qbProgressWrite;
+}
+function qbProgressValid(value){
+ if(!value||typeof value!=='object'||Array.isArray(value))return false;
+ if(!['ans','saved','notes','rep','sr'].every(k=>value[k]&&typeof value[k]==='object'&&!Array.isArray(value[k])))return false;
+ if(Object.values(value.ans).some(r=>!r||typeof r!=='object'||!Number.isInteger(r.sel)||typeof r.ok!=='boolean'))return false;
+ if(Object.values(value.sr).some(r=>!r||typeof r!=='object'||Array.isArray(r)))return false;
+ if(Object.values(value.notes).some(r=>typeof r!=='string'))return false;
+ if(['saved','rep'].some(k=>Object.values(value[k]).some(r=>r===null||r===undefined)))return false;
+ return true;
+}
+function qbProgressRecover(){
+ let hasLocal=true;try{hasLocal=localStorage.getItem(KEY)!==null}catch(e){}
+ if(hasLocal)return Promise.resolve({state:'local-data-present'});
+ return qbProgressDB().then(db=>new Promise((resolve,reject)=>{
+  const tx=db.transaction('progress','readonly'),request=tx.objectStore('progress').get(KEY);
+  request.onsuccess=()=>resolve(request.result||null);request.onerror=()=>reject(request.error||new Error('Could not read progress mirror'));
+ })).then(record=>{
+  if(!record||record.schema!==1||!qbProgressValid(record.value))return {state:'no-recovery-copy'};
+  let stillMissing=false;try{stillMissing=localStorage.getItem(KEY)===null}catch(e){}
+  const empty=['ans','saved','notes','rep','sr'].every(k=>!Object.keys(S[k]||{}).length);
+  if(!stillMissing||!empty)return {state:'current-data-preserved'};
+  Object.assign(S,record.value);
+  if(!LS.set(KEY,S))return {state:'recovery-write-failed'};
+  qbProgressPut(S);
+  console.info('Question Bank progress recovered from the IndexedDB mirror.');
+  return {state:'recovered',updatedAt:record.updatedAt||0};
+ }).catch(error=>({state:'unavailable',error:String(error&&error.message||error)}));
+}
+function qbProgressInit(){
+ let hasLocal=true;try{hasLocal=localStorage.getItem(KEY)!==null}catch(e){}
+ if(!hasLocal)return qbProgressRecover().then(result=>{window.shbaceProgressStatus=result;return result});
+ return qbProgressPut(S).then(()=>{const result=qbProgressLastError?{state:'local-only',error:qbProgressLastError}:{state:'mirrored'};window.shbaceProgressStatus=result;return result});
+}
+const save=()=>{const ok=LS.set(KEY,S);if(ok)qbProgressPut(S);return ok};
+window.shbaceRecoverProgress=qbProgressRecover;
+window.shbaceProgressStorageInfo=()=>({database:QB_PROGRESS_DB,primary:'localStorage',mirror:'IndexedDB',ready:!!window.indexedDB,status:window.shbaceProgressStatus&&window.shbaceProgressStatus.state||'initializing'});
+window.shbaceProgressReady=qbProgressInit();
 
 
 /* ===== QUESTION SOURCE SWITCH =====
@@ -77,7 +136,7 @@ if(USE_FULL_BANK){try{
    if(q.ai&&q.f)e+='AI review: multiple, none or undetermined correct answers. Check your textbook.\n';
    e+=q.e||'';if(q.note&&!/[\u0600-\u06FF]/.test(q.note))e+='\n'+q.note;
    FULL_QB.push({id:q.id,spec:key,topic:TID[(q.sy||'')+'\u0001'+q.t],tag:q.py?((q.rq||[]).length?'Repeated Question':(q.rc||[]).length?'Repeated Topic':'Previous Years'):'PDF Bank',kind:shbKind(q),
-    q:q.q,o:q.o.map(o=>o[1]),ol:ltr,kx,k,ex:e.trim(),no:n+1,src:q.src||'',cs:q.cs||null,cm:!!q.cm,rq:q.rq||[],rc:q.rc||[],ai:!!q.ai,f:!!q.f,py:!!q.py})});
+    q:q.q,o:q.o.map(o=>o[1]),ol:ltr,kx,k,ex:e.trim(),no:n+1,src:q.src||'',cs:q.cs||null,cm:!!q.cm,rq:q.rq||[],rc:q.rc||[],ai:!!q.ai,f:!!q.f,py:!!q.py,bank:q.py===true?"previous":"aj"})});
   spec[key]={q:L.length,label:sub,topics}});
  if(!FULL_QB.length)throw new Error('empty bank');
  REAL.total=FULL_QB.length;REAL.spec=spec;
@@ -139,10 +198,17 @@ const DEMO_QB=[
 ['URO-001','urology',25,'Investigation','Which investigation is the gold standard for diagnosing vesicoureteral reflux?',['Micturating cystourethrogram (MCUG)','Renal ultrasound','DMSA scan','Plain abdominal X-ray','Intravenous urogram'],0,'MCUG shows and grades reflux. Ultrasound screens for hydronephrosis and DMSA detects renal scarring.']
 ].map(a=>({id:a[0],spec:a[1],topic:a[2],tag:a[3],q:a[4],o:a[5],k:a[6],ex:a[7]}));
 const QB=BANK_ON?FULL_QB:DEMO_QB;
-/* SHB-BANK-SCOPE: Dr. Al-Joaki's bank (q.py !== true) vs Previous Questions (q.py === true).
-   View-only filter used by Quiz, Search and Smart Review. Question records are never modified. */
+/* SHB-BANK-SCOPE: canonical identity across the shared question banks.
+   View-only filter used by Quiz, Search and Smart Review. The bank field is attached during collection loading; original question content and legacy source flags remain intact. */
 const BANK_OPTS=[['all','All banks'],['aj','Dr. Al-Joaki'],['previous','Previous Questions'],['nelson','Nelson Textbook'],['kasr','Kasr Al-Ainy'],['clinical','Clinical Cases'],['egyptian','Egyptian Book']];
-const bankOf=q=>!q?'aj':q.nl===true?'nelson':q.py===true?'previous':q.eb===true?'egyptian':q.cc===true?'clinical':q.ao===true?'kasr':'aj';
+const BANK_KEYS=new Set(BANK_OPTS.map(option=>option[0]).filter(key=>key!=='all'));
+const bankOf=q=>{
+ if(!q)return 'aj';
+ const legacy=q.nl===true?'nelson':q.py===true?'previous':q.eb===true?'egyptian':q.cc===true?'clinical':q.ao===true?'kasr':'aj';
+ const canonical=BANK_KEYS.has(q.bank)?q.bank:legacy;
+ if(q.bank!==canonical){try{q.bank=canonical}catch(e){}}
+ return canonical;
+};
 const bankValid=b=>BANK_OPTS.some(o=>o[0]===b&&b!=='all')?b:'all';
 const bankOk=(q,b)=>b==='all'||bankOf(q)===b;
 const bankHas=(spec,b)=>b==='all'||QB.some(q=>q.spec===spec&&bankOk(q,b));
@@ -209,7 +275,7 @@ const SYS=[
  ['haematology','Haematology','s_haematology',0],['growth','Growth and Nutrition','s_growth',0],['genetics','Genetics & Dermatology','s_genetics',0],
  ['rheum','Rheumatology / Metabolic / Poisoning / Immunology','s_rheum',0],['exams','Previous Years\u2019 Exam Questions','s_exams',0]
 ];
-if(BANK_ON){/* Keep Urology when the separate Nelson collection supplies Urology questions, even if the main bank has none. */const hasNelsonUrology=Array.isArray(window.__SHB_NELSON_QUESTIONS__)&&window.__SHB_NELSON_QUESTIONS__.some(q=>q&&q.nl===true&&q.spec==='urology');for(let i=SYS.length-1;i>=0;i--)if(!REAL.spec[SYS[i][0]]&&SYS[i][0]==='urology'&&!hasNelsonUrology)SYS.splice(i,1);SYS.forEach(r=>{r[3]=REAL.spec[r[0]]?1:0});SPEC_NAME={};SYS.forEach(r=>SPEC_NAME[r[0]]=r[1])}
+if(BANK_ON){/* Keep Urology when the separate Nelson collection supplies Urology questions, even if the main bank has none. */const hasNelsonUrology=Array.isArray(window.__SHB_NELSON_QUESTIONS__)&&window.__SHB_NELSON_QUESTIONS__.some(q=>q&&bankOf(q)==="nelson"&&q.spec==='urology');for(let i=SYS.length-1;i>=0;i--)if(!REAL.spec[SYS[i][0]]&&SYS[i][0]==='urology'&&!hasNelsonUrology)SYS.splice(i,1);SYS.forEach(r=>{r[3]=REAL.spec[r[0]]?1:0});SPEC_NAME={};SYS.forEach(r=>SPEC_NAME[r[0]]=r[1])}
 const sysIcon=(img,cls='')=>img?`<img class="sysimg ${cls}" src="${IMG[img]}" alt="">`:`<span class="sysimg ${cls} uro">${URO_SVG}</span>`;
 
 /* ---------- helpers ---------- */
@@ -273,16 +339,16 @@ function fmtExplanationHTML(text){
   return rest?'<p class="nl-sec"><b class="nl-lbl">'+esc(m[1])+'</b>'+esc(rest)+'</p>':''}).join('');
 }
 function nelsonDetails(q){
- if(!q||(!q.nl&&!q.ao&&!q.cc)||!q.more)return '';
- const source=q.eb?(q.ebSourceFile||'Egyptian Book source'):q.cc?(q.ccSource||'Accepted Clinical Case source'):q.ao?(q.aoSource||'Source details unavailable'):'Nelson Textbook of Pediatrics.';
+ if(!q||!["nelson","kasr","clinical","egyptian"].includes(bankOf(q))||!q.more)return '';
+ const source=bankOf(q)==='egyptian'?(q.ebSourceFile||'Egyptian Book source'):bankOf(q)==='clinical'?(q.ccSource||'Accepted Clinical Case source'):bankOf(q)==='kasr'?(q.aoSource||'Source details unavailable'):'Nelson Textbook of Pediatrics.';
  let moreBody=cleanExplanationText(q.more).replace(/^Explanation\s*:\s*/i,'');const lead=cleanExplanationText(q.ex).replace(/^Explanation\s*:\s*/i,'');
  if(lead&&moreBody.startsWith(lead))moreBody=moreBody.slice(lead.length).trim();
- const alt=q.ao&&!q.eb&&q.aoAltSource?'<p class="nl-source">Also found in: '+esc(q.aoAltSource)+'</p>':'';
- const modelAnswer=q.cc&&q.ccOpen&&q.ccAnswer?'<p class="nl-source"><b>Model answer:</b> '+esc(q.ccAnswer)+'</p>':'';
+ const alt=bankOf(q)==="kasr"&&q.aoAltSource?'<p class="nl-source">Also found in: '+esc(q.aoAltSource)+'</p>':'';
+ const modelAnswer=bankOf(q)==="clinical"&&q.ccOpen&&q.ccAnswer?'<p class="nl-source"><b>Model answer:</b> '+esc(q.ccAnswer)+'</p>':'';
  return '<details class="nl-more"><summary>'+'Read More'+'</summary><div class="nl-more-body">'+modelAnswer+fmtExplanationHTML(moreBody)+'<p class="nl-source">'+'Source: '+esc(source)+'</p>'+alt+'</div></details>';
 }
-function qExtra(q){if(!BANK_ON||q.nl||q.ao||q.cc)return '';let x='';
- if(q.py){if(q.src)x+=`<div class="qsrc">Source: <bdi>${esc(enSrc(q.src))}</bdi></div>`;if(q.cs)x+=`<div class="qcase"><b>${esc(q.cs[0])}</b>\n${esc(q.cs[1])}</div>`;if(q.cm)x+='<div class="qrep"><span class="qflag w">Case text not in source file \u2013 classified by explanation</span></div>';
+function qExtra(q){if(!BANK_ON||["nelson","kasr","clinical","egyptian"].includes(bankOf(q)))return '';let x='';
+ if(bankOf(q)==="previous"){if(q.src)x+=`<div class="qsrc">Source: <bdi>${esc(enSrc(q.src))}</bdi></div>`;if(q.cs)x+=`<div class="qcase"><b>${esc(q.cs[0])}</b>\n${esc(q.cs[1])}</div>`;if(q.cm)x+='<div class="qrep"><span class="qflag w">Case text not in source file \u2013 classified by explanation</span></div>';
   if(q.rq.length)x+=`<div class="qrep"><span class="qflag r">Repeated Question</span> also appears in: ${repRef(q.rq)}</div>`;if(q.rc.length)x+=`<div class="qrep"><span class="qflag w">Repeated Topic/Concept</span> also tested in: ${repRef(q.rc)}</div>`}
  if(q.f)x+='<span class="qflag w">Needs review</span>';if(q.ai)x+='<span class="qflag">Solved with AI</span>';
  if(qUnsure(q))x+=`<div class="qwarn" role="note"><b>\u26a0 Needs Review / Verification</b><span>${q.kx?'The answer key does not match any option \u2014 do not rely on it.':'This question or its answer key is not confirmed. Check your textbook before relying on the answer.'}</span></div>`;
@@ -295,10 +361,10 @@ function cardHTML(q,n,single){
  if(a){const ok=a.ok;const face=ok?'happy':(DOCF[q.id]||'sad');
   const msg=ok?(a.msg||PRAISE2[0]):(face==='angry'?'Let’s pause and review this one carefully.':face==='encouraging'?'A tough run — keep going, every mistake teaches you something.':'Not quite — the explanation below will help.');
   react=`<div class="qreact ${ok?'ok':'no'}">${docFace(face)}<div><b>${ok?(a.pr||'Excellent!'):(face==='angry'?'Careful!':face==='encouraging'?'Keep going!':'Incorrect')}</b><span>${esc(msg)}</span></div></div>
-  <div class="qfb ${ok?'ok':'no'}"><b>${ok?'Correct':'Incorrect'} · Correct answer: ${L(q.k)}. ${esc(q.o[q.k])}${qUnsure(q)&&!q.nl&&!q.ao?' <em class="qunsure">(unconfirmed key)</em>':''}</b><p>Explanation:  ${esc(cleanExplanationText(q.ex))}</p>${nelsonDetails(q)}</div>`}
- else if(q.cc&&q.ccOpen){react=`<div class="qfb"><b>Open-ended case. Think through your response before revealing the model answer.</b>${nelsonDetails(q)}</div>`}
- else if(q.cc&&q.kx){react=`<div class="qfb no"><b>No verified answer key is available for this question; answer selection is disabled.</b>${nelsonDetails(q)}</div>`}
- else if((q.nl||q.ao||q.eb)&&q.kx){react=`<div class="qfb no"><b>Question data is incomplete, so answer selection is unavailable.</b><p>Explanation: ${esc(cleanExplanationText(q.ex))}</p>${nelsonDetails(q)}</div>`}
+  <div class="qfb ${ok?'ok':'no'}"><b>${ok?'Correct':'Incorrect'} · Correct answer: ${L(q.k)}. ${esc(q.o[q.k])}${qUnsure(q)&&bankOf(q)!=='nelson'&&bankOf(q)!=='kasr'?' <em class="qunsure">(unconfirmed key)</em>':''}</b><p>Explanation:  ${esc(cleanExplanationText(q.ex))}</p>${nelsonDetails(q)}</div>`}
+ else if(bankOf(q)==="clinical"&&q.ccOpen){react=`<div class="qfb"><b>Open-ended case. Think through your response before revealing the model answer.</b>${nelsonDetails(q)}</div>`}
+ else if(bankOf(q)==="clinical"&&q.kx){react=`<div class="qfb no"><b>No verified answer key is available for this question; answer selection is disabled.</b>${nelsonDetails(q)}</div>`}
+ else if(["nelson","kasr","egyptian"].includes(bankOf(q))&&q.kx){react=`<div class="qfb no"><b>Question data is incomplete, so answer selection is unavailable.</b><p>Explanation: ${esc(cleanExplanationText(q.ex))}</p>${nelsonDetails(q)}</div>`}
  else if(single){react=`<div class="qreact think"><div><b>Take your time</b><span>Think it through, then choose an answer.</span></div></div>`}
  const acts=`<div class="qacts">
   <button type="button" class="qa ${S.saved[q.id]?'on':''}" onclick="qSave('${q.id}')"><span>${S.saved[q.id]?'★':'☆'}</span>${S.saved[q.id]?'Saved':'Save'}</button>
@@ -307,7 +373,7 @@ function cardHTML(q,n,single){
 </div>`;
  const note=qs.noteOpen[q.id]?`<div class="qnote"><textarea placeholder="Write your note…" oninput="qNoteSave('${q.id}',this.value)">${esc(S.notes[q.id]||'')}</textarea></div>`:'';
  const sname=a?(a.ok?'Correct':'Incorrect'):'Unanswered';
- return `<article class="qcard${(q.nl||q.ao)?' nl-clean':''}" id="qc-${q.id}" data-id="${q.id}">${qExtra(q)}<h3 class="qstem">Q${n}. ${esc(QSTEM(q))}</h3><div class="qopts">${opts}</div>${react}${acts}${note}</article>`}
+ return `<article class="qcard${(['nelson','kasr'].includes(bankOf(q)))?' nl-clean':''}" id="qc-${q.id}" data-id="${q.id}">${qExtra(q)}<h3 class="qstem">Q${n}. ${esc(QSTEM(q))}</h3><div class="qopts">${opts}</div>${react}${acts}${note}</article>`}
 
 function bankBody(){
  const list=filtered();
@@ -2886,7 +2952,7 @@ applyAppFontScaleStage();
    topicIcon, topicCards ... were invisible to them: 35 threw ReferenceError and "Start Studying" /
    "Continue Studying" did nothing. Nothing here changes data, logic or markup. */
 window.__SHB_BRIDGE={
- qs:qs,SYS:SYS,QB:QB,sysIcon:sysIcon,isPinned:isPinned,answeredCount:answeredCount,TOPIC_ICON_ASSET:TOPIC_ICON_ASSET,
+ qs:qs,SYS:SYS,QB:QB,bankOf:bankOf,sysIcon:sysIcon,isPinned:isPinned,answeredCount:answeredCount,TOPIC_ICON_ASSET:TOPIC_ICON_ASSET,
  get REC(){return REC},
  get SPEC_NAME(){return SPEC_NAME},
  get inTopic(){return inTopic},set inTopic(f){inTopic=f},

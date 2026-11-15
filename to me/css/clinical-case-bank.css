@@ -1,7 +1,7 @@
 /* Clinical Case — Bank 07. Uses the existing Shbace Medical component palette. */
 .cc-page{padding:8px 0 24px}
-.cc-topline{display:flex;align-items:center;gap:9px;margin:3px 0 9px}
-.cc-bank-number{display:inline-flex;align-items:center;border:1px solid rgba(77,211,187,.34);border-radius:999px;padding:4px 9px;color:#75e0c6;background:rgba(26,153,131,.11);font-size:9px;font-weight:900;letter-spacing:.1em}
+.cc-topline{display:flex;align-items:center;gap:0;margin:3px 0 5px}
+
 .cc-kicker{font-size:9px;font-weight:800;letter-spacing:.11em;color:#8ca6bc}
 .cc-home-entry{width:100%;display:flex!important;flex-direction:row!important;align-items:center!important;gap:13px!important;min-height:0!important;text-align:left;cursor:pointer;padding:15px!important;border-color:rgba(85,205,183,.25)!important;background:linear-gradient(120deg,rgba(23,73,79,.42),rgba(15,32,49,.96))!important}
 .cc-home-icon{width:46px;height:46px;flex:0 0 46px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(145deg,#164e54,#123046);border:1px solid rgba(115,224,198,.28);color:#9cf0dc;font-size:16px;font-weight:900;letter-spacing:-.04em}
@@ -26,6 +26,7 @@
 .cc-list-card .bar{width:100%;height:4px;margin:2px 0 0;background:rgba(125,157,177,.16)}
 .cc-list-card .bar span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#2ea990,#83e0c7)}
 .cc-sys-icon,.cc-topic-number,.cc-case-icon{width:40px;height:40px;flex:0 0 40px;display:grid;place-items:center;border-radius:12px;background:#142b40;border:1px solid rgba(102,156,188,.2);color:#98dacc;font-size:11px;font-weight:900}
+.cc-sys-icon>img.sysimg{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;border-radius:10px}
 .cc-topic-number{font-size:13px;color:#a9c7e2}
 .cc-case-icon{background:#183c45;color:#a3ead6}
 .cc-back{margin:0 0 7px}

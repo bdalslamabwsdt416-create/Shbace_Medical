@@ -40,6 +40,7 @@ One normaliser, `nz` (lower-case, strip Arabic diacritics/tatweel, unify أ/إ/�
 `npm run test:unit` (node:test), `npm run check:bank` (ids, answer keys, syntax of every script), `npm run build:pwa`. The `PWA checks` workflow runs all three on every push to a non-main branch and on pull requests.
 
 ## Additional independent Pediatrics banks
-- Bank 07, Clinical Case: data/clinicalCaseBank.json, system → topic → case → questions.
-- Bank 08, AI Generated: the 16 JSON files in data/ai-generated/, system → topic → questions.
-- Both use separate local answer stores. The final chooser/icon layer is js/42-pediatrics-collection-polish.js.
+- Clinical Cases: data/clinicalCaseBank.json, system → topic → case → questions (1,598 questions).
+- AI Generated: the 16 JSON files in data/ai-generated/, system → topic → questions (1,881 questions).
+- AI Clinical Cases is a separate question collection integrated through js/39-clinical-case-pediatrics.js.
+- Each independent bank uses its own answer/progress store. The chooser and icon ordering are finalized by js/42-pediatrics-collection-polish.js.

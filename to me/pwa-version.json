@@ -1,17 +1,28 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.10-to-me.26",
-  "displayVersion": "1.3.10.26 · Chrome (Phone + Computer)",
-  "releaseDate": "2026-11-15",
+  "version": "1.3.10-to-me.31",
+  "displayVersion": "1.3.10.31 · Chrome (Phone + Computer)",
+  "releaseDate": "2026-11-16",
   "releaseNotes": [
+    "Fixes the Exam Goal Planner ? Study Hub storage-key mismatch so saved exam dates and daily targets appear consistently. Repairs corrupted punctuation in offline-install and update messages.",
+    "Pre-caches all 16 AI Generated MCQ data shards and its bank renderer with the new release, so the complete 1,881-question bank is available from one consistent offline cache.",
+    "Loads AI Generated shards four at a time, applies an 18-second per-file timeout and one network-bypassing retry, and validates the assembled 1,881-question bank before rendering. This prevents indefinite loading while preserving every question and saved answer.",
+    "Keeps startup fail-closed: if a required deferred app script fails twice, the app shows a recovery screen rather than exposing a partially loaded legacy interface.",
+    "Prevents intermittent legacy/mixed-version screens: Chrome now checks the Service Worker on app launch, reloads once when a new worker takes control, and fetches the current HTML, JavaScript and CSS before falling back to verified offline copies. The offline cache namespace is rotated; question data and student progress are preserved.",
+    "Retires the obsolete #notes design-handoff route; the production app opens directly without exposing prototype navigation or handoff panels. All app screens, banks, progress storage and offline assets remain intact.",
+    "Restores all eight named Pediatrics collections: Dr. Abdulrahman Al-Joaki MCQ, Previous Questions, Clinical Cases, AI Generated, Nelson Textbook, Kasr Al-Ainy, AI Clinical Cases, and Egyptian Book. The first four appear first; each collection opens its own content.",
+    "Preserves the original Faculty of Medicine, University of Tripoli logo for Previous Questions and restores the supplied emblems for the other collections.",
+    "Completes short and cross-reference explanations in the base question bank. The question checker now reports zero warnings and zero errors; original missing option letters and duplicated options remain unchanged and are explicitly documented as source-faithful exceptions.",
+    "Removes numeric bank labels from the student-facing Clinical Cases and AI Generated screens. Internal file identifiers remain unchanged.",
+    "Updates the offline cache version so installed Chrome PWA copies can receive the corrected collection chooser and question explanations.",
     "Places Clinical Case (1,598 questions across 10 medical systems) third and AI Generated (1,881 single-best-answer MCQs from 16 source files) fourth in the Pediatrics collection chooser; remaining collections stay available.",
     "Uses the supplied University of Tripoli, Clinical Cases, AI Generated, Nelson, Kasr Al-Ainy, AI Clinical Cases and Egyptian Book badge artwork as optimized WebP bank icons.",
     "Reuses the Dr. Al-Joaki system and disease/topic artwork in the Clinical Case and AI Generated banks wherever a matching topic exists, with semantic icons retained as a fallback.",
     "Adds Arabic-aware shared search normalisation, removes redundant search-index text duplication, groups search controls into a collapsible Filters panel, and adds unit tests plus a PWA GitHub Actions check.",
-    "Adds Bank 08: AI Generated — 1,881 standard MCQs across 31 medical systems and 295 topics, assembled from 16 MSQ source files. Navigation is Medical System → Topic → Questions, with no clinical-case stage. Answer feedback and initial explanations appear after selection; Read More expands the detailed explanation, high-yield points and source. Progress is stored separately from every other bank. Difficulty-classification fields and UI are not included.",
-    "Adds Bank 07: Clinical Case to the live unified Chrome PWA: 1,598 validated questions across 10 medical systems, 284 source-organized topics and 330 case groups. Navigation is Medical System → Topic → Clinical Case → Questions. Bank 07 has a separate answer-progress store and preserves the existing Pediatrics Clinical Cases collection and all other bank progress.",
-    "Forces a clean offline-cache refresh for this release. The Service Worker and offline installer now share cache shbace-chrome-offline-v1.3.10.23, so installed copies download the current application shell instead of retaining files from the previous release.",
+    "Adds AI Generated collection: AI Generated — 1,881 standard MCQs across 31 medical systems and 295 topics, assembled from 16 MSQ source files. Navigation is Medical System → Topic → Questions, with no clinical-case stage. Answer feedback and initial explanations appear after selection; Read More expands the detailed explanation, high-yield points and source. Progress is stored separately from every other bank. Difficulty-classification fields and UI are not included.",
+    "Adds Clinical Cases collection: Clinical Case to the live unified Chrome PWA: 1,598 validated questions across 10 medical systems, 284 source-organized topics and 330 case groups. Navigation is Medical System → Topic → Clinical Case → Questions. Clinical Cases collection has a separate answer-progress store and preserves the existing Pediatrics Clinical Cases collection and all other bank progress.",
+    "Forces a clean offline-cache refresh for this release. The Service Worker and offline installer share the cache namespace derived from the current release version, so installed copies download the current application shell instead of retaining files from the previous release.",
     "Quiz: choose several banks, several systems and several topics together (a topic is also matched in banks that have no topic labels, by its name). Clear icons for Nelson, Clinical Cases, Kasr Al-Ainy and Egyptian Book. Arabic exam labels and Arabic reviewer notes are no longer shown in explanations or sources.",
     "Fixes a syntax error in js/09-app-features-v6.js that stopped the main app script from loading. Fixes the build version guard. Question cards no longer show the id/status/tag chips or topic title; the All Questions and All Tags filters now work in every bank; Quiz, Search and Smart Review use six separate banks (Dr. Al-Joaki, Previous Questions, Nelson Textbook, Kasr Al-Ainy, Clinical Cases, Egyptian Book); progress can be reset by bank, then system, then topic; the Smart Review intro shows only until the first session; explanations are organised and keep their High-yield notes; Back from a system list returns to the list of banks; Egyptian Book has its own icon.",
     "Renames All Once to Kasr Al-Ainy; removes Curriculum alignment paragraphs from displayed explanations across question banks; makes Egyptian Book answer UI English-only; fixes Phone/Browser Back to return from a medical system to its collection list.",
@@ -49,5 +60,10 @@
     "Pediatrics 'Start Studying' and 'Continue Studying' now work: the collection and home scripts are connected to the app core through a safe bridge (no data or markup changes).",
     "Added a Question bank selector (All banks / Dr. Al-Joaki / Previous) to Quiz, Search and Smart Review. It is a view-only filter; question records, IDs, answer keys and explanations are unchanged.",
     "A question opened from Search, Saved, Wrong answers or Smart Review now opens inside its own bank, so a Previous question no longer opens as an empty list."
+  ],
+  "summary": [
+    "Keeps the live app shell and all JavaScript/CSS assets on one release; prevents stale bank screens from reappearing when Chrome has an older cached copy.",
+    "Service Worker updates are checked on launch and a controlled page reloads once when the new worker takes control.",
+    "Offline fallback remains available; answers, bookmarks, notes and study progress are not cleared."
   ]
 }

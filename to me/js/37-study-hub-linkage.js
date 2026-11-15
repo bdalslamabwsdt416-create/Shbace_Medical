@@ -5,7 +5,7 @@
 'use strict';
 if(window.__shbHub37)return;window.__shbHub37=true;
 
-var GOALS_KEY='shbace_exam_goals_v2',QB_KEY='shbace_qb_v6',QUIZ_KEY='shbace_quiz_v1',WRONG_KEY='shbace_qb_wrong_v1',DAY=86400000;
+var GOALS_KEY='shbace_exam_goal_planner_v1',QB_KEY='shbace_qb_v6',QUIZ_KEY='shbace_quiz_v1',WRONG_KEY='shbace_qb_wrong_v1',DAY=86400000;
 var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
 function read(k,d){try{var v=JSON.parse(localStorage.getItem(k)||'null');return v==null?d:v}catch(_){return d}}
 function pad(n){return String(n).padStart(2,'0')}

@@ -1,4 +1,4 @@
-/* Shbace Medical · Bank 08 · AI Generated */
+/* Shbace Medical · AI Generated */
 (function(){
 'use strict';
 const TOTAL=1881, STORE='shbace_ai_generated_answers_v1';
@@ -50,7 +50,7 @@ function txt(v){return esc(v||'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>'
     return '<svg class="shb-bank-line-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M14 7h14l8 8v26H14a3 3 0 0 1-3-3V10a3 3 0 0 1 3-3Z"/><path d="M28 7v9h8M17 25h16M17 31h12M17 19h5"/><path d="m23 13 3 3-3 3"/></svg>';
   }
 
-function shell(k,title,sub,body){return '<div class="rs ai08-page"><div class="ai08-topline"><span class="ai08-bank-number">BANK 08</span><span class="ai08-kicker">'+esc(k)+'</span></div><h1>'+esc(title)+'</h1>'+(sub?'<p class="sub">'+esc(sub)+'</p>':'')+body+'</div>';}
+function shell(k,title,sub,body){return '<div class="rs ai08-page"><div class="ai08-topline"><span class="ai08-kicker">'+esc(k)+'</span></div><h1>'+esc(title)+'</h1>'+(sub?'<p class="sub">'+esc(sub)+'</p>':'')+body+'</div>';}
 function bar(done,total){let p=pct(done,total);return '<div class="ai08-progress"><div class="ai08-progress-meta"><span>'+done+' / '+total+' answered</span><b>'+p+'%</b></div><div class="bar"><span style="width:'+p+'%"></span></div></div>';}
 function back(label){return '<button type="button" class="backb ai08-back" onclick="bank08AiGeneratedBack()"><span aria-hidden="true">‹</span> '+esc(label||'Back')+'</button>';}
 function loading(){return shell('AI-GENERATED MCQ BANK','AI Generated','Single-best-answer questions organized by medical system and topic.','<div class="card setcard ai08-loading"><div class="ai08-loader"></div><h3>Loading questions…</h3><p class="meta">The bank is being prepared on this device.</p></div>');}
@@ -59,7 +59,7 @@ function systemsPage(){
  if(!data)return error?fail():loading();
  let cards=data.systems.map(s=>{let qs=s.topics.reduce((a,t)=>a.concat(t.questions),[]),done=count(qs),p=pct(done,qs.length);return '<button type="button" class="card sc ai08-list-card" onclick="bank08OpenAiGeneratedSystem(\''+s.id+'\')"><span class="ai08-sys-icon ai08-icon-art">'+shbSystemIcon(s.name)+'</span><span class="ai08-list-copy"><strong>'+esc(s.name)+'</strong><small>'+s.topics.length+' topics · '+qs.length+' questions</small><span class="bar"><span style="width:'+p+'%"></span></span></span><span class="chev">›</span></button>';}).join('');
  let qs=all(),done=count(qs);
- return shell('EIGHTH QUESTION BANK','AI Generated',data.systems.length+' medical systems · '+qs.length+' questions',bar(done,qs.length)+'<div class="ai08-description card"><b>How this bank is organized</b><p>Choose a medical system, open a topic, then answer its MCQs. Submit an answer to see the correct option and initial explanation. Use Read More for detailed explanation, high-yield points and source reference.</p></div><div class="ai08-section-heading">Medical Systems <span>'+data.systems.length+'</span></div><div class="ai08-list">'+cards+'</div>');
+ return shell('AI-GENERATED MCQ BANK','AI Generated',data.systems.length+' medical systems · '+qs.length+' questions',bar(done,qs.length)+'<div class="ai08-description card"><b>How this bank is organized</b><p>Choose a medical system, open a topic, then answer its MCQs. Submit an answer to see the correct option and initial explanation. Use Read More for detailed explanation, high-yield points and source reference.</p></div><div class="ai08-section-heading">Medical Systems <span>'+data.systems.length+'</span></div><div class="ai08-list">'+cards+'</div>');
 }
 function topicsPage(){
  let s=sys();if(!s)return systemsPage();
@@ -93,9 +93,34 @@ const SHARDS=[
 'data/ai-generated/13-pediatric-genetics.json','data/ai-generated/14-pediatric-vaccination.json',
 'data/ai-generated/15-respiratory.json','data/ai-generated/16-rheumatology-metabolic-poisoning-immunology.json'
 ];
+function fetchShard(path){
+ let attempt=0;
+ function request(){
+  const url=new URL(path,document.baseURI);
+  if(attempt)url.searchParams.set('__shbace_reload',String(Date.now()));
+  const controller=window.AbortController?new AbortController():null;
+  let timer=null;
+  const timeout=new Promise(function(_,reject){
+   timer=setTimeout(function(){if(controller)controller.abort();reject(new Error(path+' timed out while loading'));},18000);
+  });
+  const network=fetch(url.href,{cache:'no-cache',signal:controller?controller.signal:undefined})
+   .then(function(r){if(!r.ok)throw new Error(path+' HTTP '+r.status);return r.json();});
+  return Promise.race([network,timeout]).then(function(value){if(timer)clearTimeout(timer);return value;})
+   .catch(function(err){if(timer)clearTimeout(timer);if(attempt<1){attempt++;return request();}throw err;});
+ }
+ return request();
+}
+function loadShards(){
+ const result=new Array(SHARDS.length);let cursor=0;
+ function worker(){
+  const index=cursor++;if(index>=SHARDS.length)return Promise.resolve();
+  return fetchShard(SHARDS[index]).then(function(part){result[index]=part;return worker();});
+ }
+ return Promise.all([worker(),worker(),worker(),worker()]).then(function(){return result;});
+}
 function ensure(){
  if(data)return Promise.resolve(data);if(promise)return promise;
- promise=Promise.all(SHARDS.map(path=>fetch(new URL(path,document.baseURI).href,{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error(path+' HTTP '+r.status);return r.json();}))).then(parts=>{
+ promise=loadShards().then(parts=>{
   const map=new Map();let total=0;
   parts.forEach(part=>{
    if(!part||part.schema!=='shbace-ai-generated-mcq-source-v1'||part.bankNumber!==8||!Array.isArray(part.systems))throw new Error('AI Generated source shard validation failed.');
@@ -132,6 +157,6 @@ if(priorSpecialties)specialtiesView=function(){let html=priorSpecialties.apply(t
 const priorNav=appNav;
 appNav=function(){let p=appPage;if(String(p).startsWith('ai08'))appPage='subjects';try{return priorNav.apply(this,arguments);}finally{appPage=p;}};
 const priorRender=renderAppDemo;
-renderAppDemo=function(){let p=appPage,res=priorRender.apply(this,arguments);if(String(p).startsWith('ai08')){try{let screen=document.querySelector('#phoneContent .screen'),scroll=screen&&(screen.querySelector(':scope > .app-scroll')||screen);if(scroll)scroll.innerHTML=appHeader('AI Generated')+current();}catch(e){console.error('AI Generated Bank 08 render failed',e);}}return res;};
+renderAppDemo=function(){let p=appPage;if(String(p).startsWith('ai08'))appPage='subjects';let res;try{res=priorRender.apply(this,arguments);}finally{appPage=p;}if(String(p).startsWith('ai08')){try{let screen=document.querySelector('#phoneContent .screen');if(screen)screen.innerHTML=appHeader('AI Generated')+'<div class="app-scroll">'+current()+'</div>'+appNav();}catch(e){console.error('AI Generated render failed',e);}}return res;};
 window.__shbAiGeneratedBank08={count:()=>data?all().length:TOTAL,systems:()=>data?data.systems.length:null,topics:()=>data?data.systems.reduce((n,s)=>n+s.topics.length,0):null,answered:()=>count(all()),dataLoaded:()=>!!data,validation:()=>data?data.validation:null};
 })();

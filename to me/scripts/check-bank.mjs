@@ -13,13 +13,59 @@ for (const q of bank) {
   const letters = q.o.map(o => o[0]);
   if (!letters.includes(q.a)) errors.push(`${q.id}: answer "${q.a}" is not one of the options (${letters.join("")})`);
   const seq = "ABCDEFGH".slice(0, letters.length);
-  if (letters.join("") !== seq) warnings.push(`${q.id}: option letters are ${letters.join("")} (expected ${seq})`);
-  if (new Set(q.o.map(o => String(o[1]).trim().toLowerCase())).size !== q.o.length) warnings.push(`${q.id}: two options have the same text`);
+  // Source-faithful exceptions: two original exam questions have no D option, and three originals contain duplicate options.
+  // Their source notes remain in the question stem; do not renumber or silently rewrite exam choices.
+  const sourceOptionExceptions = new Set(["NEONATE-003", "NEONATE-053"]);
+  const sourceDuplicateExceptions = new Set(["NEONATE-046", "ENDO-NEW-011", "PY-F3-90"]);
+  if (letters.join("") !== seq && !sourceOptionExceptions.has(q.id)) warnings.push(q.id + ": option letters are " + letters.join("") + " (expected " + seq + ")");
+  if (new Set(q.o.map(o => String(o[1]).trim().toLowerCase())).size !== q.o.length && !sourceDuplicateExceptions.has(q.id)) warnings.push(q.id + ": two options have the same text");
   const e = String(q.e || "").trim();
   if (e.length < 40) warnings.push(`${q.id}: explanation is very short ("${e.slice(0, 30)}")`);
   if (/^see\s+q\s*\d+/i.test(e)) warnings.push(`${q.id}: explanation only points to another question ("${e}")`);
 }
-if (bank.length !== 1718) errors.push(`base bank changed: expected 1718, found ${bank.length}`);
+const crossBankIds = new Map(bank.filter(q => q && q.id).map(q => [q.id, "base"]));
+function resolvedLegacyBank(q) {
+  return q.nl === true ? "nelson" :
+    q.py === true ? "previous" :
+    q.eb === true ? "egyptian" :
+    q.cc === true ? "clinical" :
+    q.ao === true ? "kasr" : "aj";
+}
+function registerCrossBankRecord(q, bankName) {
+  if (!q || !q.id) return;
+  const previousBank = crossBankIds.get(q.id);
+  if (previousBank) errors.push(q.id + ": duplicate ID across " + previousBank + " and " + bankName);
+  else crossBankIds.set(q.id, bankName);
+  const resolved = resolvedLegacyBank(q);
+  if (resolved !== bankName) errors.push(q.id + ": legacy flags resolve to " + resolved + ", expected " + bankName);  if (q.bank !== undefined && q.bank !== bankName) errors.push(q.id + ": canonical bank is " + q.bank + ", expected " + bankName);
+}
+function readConcatBankRecords(directory, pattern, label) {
+  const records = [];
+  const files = readdirSync(directory).filter(name => pattern.test(name)).sort();
+  for (const name of files) {
+    const source = readFileSync(join(directory, name), "utf8");
+    const shard = source.match(/\.concat\(([\s\S]*)\);\s*$/);
+    if (!shard) { errors.push(label + " " + name + ": missing JSON concat payload"); continue; }
+    try {
+      const parsed = JSON.parse(shard[1]);
+      if (!Array.isArray(parsed)) errors.push(label + " " + name + ": payload is not an array");
+      else records.push(...parsed);
+    } catch (error) {
+      errors.push(label + " " + name + ": invalid JSON payload - " + error.message);
+    }
+  }
+  return records;
+}
+const nelsonRecords = readConcatBankRecords(join(root, "data/nelson"), /^nelson-textbook-bank-\d{2}\.js$/, "Nelson");
+const kasrRecords = readConcatBankRecords(join(root, "data/all-once"), /^all-once-bank-\d{2}\.js$/, "Kasr Al-Ainy");
+for (const q of nelsonRecords) {
+  if (!q || q.nl !== true) errors.push("Nelson " + (q?.id || "(missing id)") + ": missing nl=true");
+  registerCrossBankRecord(q, "nelson");
+}
+for (const q of kasrRecords) {
+  if (!q || q.ao !== true || q.eb === true) errors.push("Kasr Al-Ainy " + (q?.id || "(missing id)") + ": invalid legacy bank flags");
+  registerCrossBankRecord(q, "kasr");
+}if (bank.length !== 1718) errors.push(`base bank changed: expected 1718, found ${bank.length}`);
 
 const clinicalPath = join(root, "data/clinical-case/clinical-case-bank-01.js");
 const clinicalSource = readFileSync(clinicalPath, "utf8");
@@ -35,6 +81,7 @@ for (const q of clinical) {
   if (!q || q.cc !== true) { errors.push("Clinical Case record is missing cc=true"); continue; }
   if (!q.id || ccIds.has(q.id)) errors.push("Clinical Case duplicate/missing id: " + (q.id || "(empty)"));
   ccIds.add(q.id);
+  registerCrossBankRecord(q, "clinical");
   if (!String(q.q || "").trim()) errors.push(q.id + ": missing stem");
   if (!String(q.ex || "").trim()) errors.push(q.id + ": missing Initial Explanation");
   if (!String(q.more || "").trim() || !q.more.includes("High-Yield:")) errors.push(q.id + ": missing Read More / High-Yield");
@@ -85,6 +132,7 @@ for (const name of egyptianFiles) {
     if (!q || q.eb !== true || q.aoClass !== "Accepted") errors.push(`Egyptian Book ${q?.id || "(missing id)"}: not an Accepted Egyptian Book record`);
     if (!q.id || egyptianIds.has(q.id)) errors.push(`Egyptian Book duplicate/missing id: ${q.id || "(empty)"}`);
     egyptianIds.add(q.id);
+    registerCrossBankRecord(q, "egyptian");
     if (!String(q.q || "").trim() || !Array.isArray(q.o) || q.o.length < 2) errors.push(`Egyptian Book ${q.id}: missing stem or options`);
     if (Array.isArray(q.o) && q.o.length >= 2 && Number.isInteger(q.k) && q.k >= 0 && q.k < q.o.length) egyptianReady++;
     else egyptianUnresolved++;
@@ -105,7 +153,7 @@ for (const file of jsFiles) {
   const r = spawnSync(process.execPath, ["--check", file], { encoding: "utf8" });
   if (r.status !== 0) errors.push(`${file.replace(root + "/", "")}: syntax error\n${r.stderr}`);
 }
-console.log(`Checked ${bank.length} base questions and ${clinical.length} Clinical Case cards.`);
+console.log("Bank identity audit: " + bank.length + " base, " + nelsonRecords.length + " Nelson, " + kasrRecords.length + " Kasr Al-Ainy, " + clinical.length + " Clinical Case, and " + egyptianTotal + " Egyptian Book records.");
 console.log(`Clinical Case: ${clinical.filter(q => q.o.length).length} matched MCQ, ${clinical.filter(q => q.ccOpen).length} open-ended, ${ccAudit.exact_duplicate_records_removed} exact duplicates removed, ${ccAudit.accepted_sections_without_dedicated_question_block} unmatched Accepted sections excluded.`);
 warnings.forEach(w => console.log("WARN  " + w));
 errors.forEach(e => console.log("ERROR " + e));

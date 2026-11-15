@@ -6,10 +6,10 @@ if(!B){console.error('Kasr Al-Ainy: Pediatrics bridge is missing.');return;}
 const QB=B.QB,qs=B.qs,SYS=B.SYS;
 const incoming=Array.isArray(window.__SHB_ALLONCE_QUESTIONS__)?window.__SHB_ALLONCE_QUESTIONS__:[];
 const known=new Set(QB.map(q=>q&&q.id).filter(Boolean));
-incoming.forEach(q=>{if(q&&q.ao===true&&q.id&&!known.has(q.id)){QB.push(q);known.add(q.id);}});
+incoming.forEach(q=>{if(q&&B.bankOf(q)==="kasr"){q.bank='kasr';if(q.id&&!known.has(q.id)){QB.push(q);known.add(q.id);}}});
 if(window.__bank){window.__bank.total=QB.length;window.__bank.allonce=incoming.length;}
 let aoActive='';
-const allOnceQuestions=()=>QB.filter(q=>q&&q.ao===true&&q.eb!==true);
+const allOnceQuestions=()=>QB.filter(q=>q&&B.bankOf(q)==="kasr");
 const escText=v=>typeof esc==='function'?esc(String(v==null?'':v)):String(v==null?'':v).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
 const iconFor={
  'Allergy':'genetics','Endocrine':'endocrinology','Emergency':'growth',
@@ -38,7 +38,7 @@ specialtiesView=function(){
  if(!aoActive&&html.indexOf('ped-collection-footnote')>=0){
   const card='<button type="button" class="ped-collection-card ped-collection-allonce" onclick="selectPediatricCollection(\'allonce\')"><div class="ped-collection-avatar ped-avatar-allonce ped-avatar-icon ped-avatar-kasr" role="img" aria-label="Kasr Al-Ainy question bank">'+(window.__shbBankIcon?window.__shbBankIcon('kasr'):'')+'</div><span class="ped-collection-copy"><span class="eyebrow">KASR AL-AINY QUESTION BANK</span><b>Kasr Al-Ainy</b><small>Accepted and Needs Review questions, arranged by medical system.</small><span class="ped-collection-count">'+allOnceQuestions().length.toLocaleString()+' questions</span></span><span class="ped-collection-arrow">›</span></button>';
   html=html.replace('</div><div class="ped-collection-footnote">',card+'</div><div class="ped-collection-footnote">');
-  html=html.replace('The three collections remain separate.','The four collections remain separate.');
+  html=html.replace('The four collections remain separate.','The five collections remain separate.');
  }
  return html;
 };
@@ -70,15 +70,15 @@ B.inTopic=function(){
   if(qs.topic)list=list.filter(q=>q.topic===qs.topic);
   return list;
  }
- return oldInTopic.apply(this,arguments).filter(q=>!q.ao);
+ return oldInTopic.apply(this,arguments).filter(q=>B.bankOf(q)!=="kasr");
 };
 const oldOpenQ=window.openQ;
 if(typeof oldOpenQ==='function')window.openQ=function(id){
  const q=QB.find(x=>x&&x.id===id);
- aoActive=q&&q.ao&&!q.eb?'allonce':'';
- if(q&&q.ao&&!q.eb){qs.spec=q.spec;qs.topic=0;qs.filter='all';qs.tag='all';}
+ aoActive=q&&B.bankOf(q)==='kasr'?'allonce':'';
+ if(q&&B.bankOf(q)==='kasr'){qs.spec=q.spec;qs.topic=0;qs.filter='all';qs.tag='all';}
  const result=oldOpenQ.apply(this,arguments);
- if(q&&q.ao&&!q.eb)window.__SHB_PED_COLLECTION__='allonce';
+ if(q&&B.bankOf(q)==='kasr')window.__SHB_PED_COLLECTION__='allonce';
  return result;
 };
 window.__SHB_PED_COLLECTION__=window.__SHB_PED_COLLECTION__||'';

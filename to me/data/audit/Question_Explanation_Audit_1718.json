@@ -5,9 +5,9 @@
   "auditType": "non-destructive automated text audit",
   "result": {
     "missingExplanation": 0,
-    "explanationsUnder20Characters": 11,
-    "crossQuestionReferenceOnly": 10,
-    "placeholderOnly": 1,
+    "explanationsUnder20Characters": 0,
+    "crossQuestionReferenceOnly": 0,
+    "placeholderOnly": 0,
     "explanationsWithAnExplicitOptionLetterMention": 845,
     "explanationsMatchingAnOptionByOptionTextPattern": 128,
     "separateStructuredOptionExplanationFields": 0
@@ -66,90 +66,12 @@
       "count": 44
     }
   ],
-  "manualReviewQueue": [
-    {
-      "id": "INFECT-068",
-      "spec": "Infectious Diseases & Vaccines",
-      "topic": "Exanthems & Viral Infections",
-      "answer": "D",
-      "explanation": "Explanation"
-    },
-    {
-      "id": "NEONATE-126",
-      "spec": "Neonatology",
-      "topic": "Birth Asphyxia, Resuscitation & Apgar",
-      "answer": "A",
-      "explanation": "See Q68."
-    },
-    {
-      "id": "NEONATE-127",
-      "spec": "Neonatology",
-      "topic": "Prematurity & Respiratory Distress",
-      "answer": "B",
-      "explanation": "See Q69."
-    },
-    {
-      "id": "NEONATE-128",
-      "spec": "Neonatology",
-      "topic": "Newborn Examination & Normal Care",
-      "answer": "C",
-      "explanation": "See Q70."
-    },
-    {
-      "id": "NEONATE-130",
-      "spec": "Neonatology",
-      "topic": "Newborn Examination & Normal Care",
-      "answer": "D",
-      "explanation": "See Q72."
-    },
-    {
-      "id": "NEONATE-131",
-      "spec": "Neonatology",
-      "topic": "Birth Asphyxia, Resuscitation & Apgar",
-      "answer": "D",
-      "explanation": "See Q73."
-    },
-    {
-      "id": "NEONATE-152",
-      "spec": "Neonatology",
-      "topic": "Birth Asphyxia, Resuscitation & Apgar",
-      "answer": "B",
-      "explanation": "See Q8."
-    },
-    {
-      "id": "NEPH-NEW-057",
-      "spec": "Nephrology",
-      "topic": "Nephrotic Syndrome",
-      "answer": "D",
-      "explanation": "See Q13."
-    },
-    {
-      "id": "NEPH-NEW-117",
-      "spec": "Nephrology",
-      "topic": "Urinary Tract Infection & Vesicoureteral Reflux",
-      "answer": "A",
-      "explanation": "See Q35."
-    },
-    {
-      "id": "NEPH-NEW-128",
-      "spec": "Nephrology",
-      "topic": "Glomerulonephritis (Post-Streptococcal, IgA & Others)",
-      "answer": "C",
-      "explanation": "See Q27."
-    },
-    {
-      "id": "RESP-144",
-      "spec": "Respiratory",
-      "topic": "Cystic Fibrosis & Chronic Lung Disease",
-      "answer": "D",
-      "explanation": "Same as Q68."
-    }
-  ],
+  "manualReviewQueue": [],
   "limitations": [
-    "A text pattern is only an audit signal. It does not prove that an explanation fully discusses every distractor.",
+    "A text pattern is an audit signal only; it does not prove that an explanation fully discusses every distractor.",
     "An explanation without A–E labels may still explain the clinical reasoning correctly.",
     "This report does not validate medical accuracy, answer keys, or source authenticity.",
-    "No question text, option, answer key, or explanation was modified by this audit."
+    "This report records the current expanded explanations; original question stems, option labels, answer keys, and source references are preserved."
   ],
-  "recommendation": "Review the 11 short/reference-only explanations first, then perform source-backed option-by-option expansion in controlled batches. Preserve each original question ID, wording, answer key, and source reference unless a verified correction is approved."
+  "recommendation": "All 11 previously short or cross-reference-only explanations in the manual review queue have been expanded. Continue source-backed review in controlled batches and preserve original question IDs, wording, answer keys, and source references."
 }

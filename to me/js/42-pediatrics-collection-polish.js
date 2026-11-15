@@ -7,12 +7,12 @@
   if (!B) { console.error('PWA collection polish: SHB bridge is missing.'); return; }
 
   const BANK_ICONS = [
-    ['.ped-collection-previous', 'bank-university-tripoli.webp', 'University of Tripoli Medicine'],
+    ['.ped-collection-previous', 'bank-university-tripoli.webp', 'Faculty of Medicine, University of Tripoli'],
     ['.ped-collection-bank07', 'bank-clinical-case.webp', 'Clinical Cases'],
     ['.ped-collection-bank08', 'bank-ai-generated.webp', 'AI Generated'],
     ['.ped-collection-nelson', 'bank-nelson-textbook.webp', 'Nelson Textbook'],
     ['.ped-collection-allonce:not(.ped-collection-clinicalcase):not(.ped-collection-bank08)', 'bank-kasr-alainy.webp', 'Kasr Al-Ainy'],
-    ['.ped-collection-clinicalcase:not(.ped-collection-bank07)', 'bank-ai-clinical-cases.webp', 'Clinical Cases'],
+    ['.ped-collection-clinicalcase:not(.ped-collection-bank07)', 'bank-ai-clinical-cases.webp', 'AI Clinical Cases'],
     ['.ped-collection-egyptian', 'bank-egyptian-book.webp', 'Egyptian Book']
   ];
   const FIRST_FOUR = ['ped-collection-aj', 'ped-collection-previous', 'ped-collection-bank07', 'ped-collection-bank08'];
@@ -87,7 +87,7 @@
     [/rheumat|metabolic|poison/, 'rheum']
   ];
   function systemKey(name) {
-    const value = String(name || '');
+    const value = String(name || '').toLowerCase();
     if (/dermatol|allerg|hepatology|child protection/.test(value)) return 'genetics';
     if (/inborn errors|metabolic|poison|environmental/.test(value)) return 'rheum';
     if (/general pediatrics|clinical skills|supplementary|curriculum gaps/.test(value)) return 'growth';

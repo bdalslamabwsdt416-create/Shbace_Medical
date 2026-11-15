@@ -14,8 +14,8 @@ try{
  const names=B.SPEC_NAME;
  if(names&&typeof names==='object')QB.forEach(q=>{
   if(!q||!q.spec||names[q.spec])return;
-  if(q.eb===true&&EB_NAMES[q.spec])names[q.spec]=EB_NAMES[q.spec];
-  else if(q.ao===true&&q.aoSystem&&!/[؀-ۿ]/.test(q.aoSystem))names[q.spec]=q.aoSystem;
+  if(B.bankOf(q)==="egyptian"&&EB_NAMES[q.spec])names[q.spec]=EB_NAMES[q.spec];
+  else if(B.bankOf(q)==="kasr"&&q.aoSystem&&!/[؀-ۿ]/.test(q.aoSystem))names[q.spec]=q.aoSystem;
  });
 }catch(e){console.error(e)}
 

@@ -3,8 +3,8 @@
 'use strict';
 const B=window.__SHB_BRIDGE;if(!B){console.error('Egyptian Book: Pediatrics bridge is missing.');return;}
 const QB=B.QB,qs=B.qs,SYS=B.SYS,incoming=Array.isArray(window.__SHB_EGYPTIAN_BOOK_QUESTIONS__)?window.__SHB_EGYPTIAN_BOOK_QUESTIONS__:[];
-const known=new Set(QB.map(q=>q&&q.id).filter(Boolean));incoming.forEach(q=>{if(q&&q.eb===true&&q.id&&!known.has(q.id)){QB.push(q);known.add(q.id);}});
-const validQuestion=q=>!!q&&q.eb===true&&q.aoClass==='Accepted'&&Array.isArray(q.o)&&q.o.length>=2&&Number.isInteger(q.k)&&q.k>=0&&q.k<q.o.length;
+const known=new Set(QB.map(q=>q&&q.id).filter(Boolean));incoming.forEach(q=>{if(q&&B.bankOf(q)==="egyptian"){q.bank='egyptian';if(q.id&&!known.has(q.id)){QB.push(q);known.add(q.id);}}});
+const validQuestion=q=>!!q&&B.bankOf(q)==="egyptian"&&q.aoClass==='Accepted'&&Array.isArray(q.o)&&q.o.length>=2&&Number.isInteger(q.k)&&q.k>=0&&q.k<q.o.length;
 const bankQuestions=()=>QB.filter(validQuestion);if(window.__bank){window.__bank.total=QB.length;window.__bank.egyptianbook=bankQuestions().length;}
 let ebActive='',ebSystem='',ebTopic='';
 const escText=v=>typeof esc==='function'?esc(String(v==null?'':v)):String(v==null?'':v).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
@@ -23,7 +23,7 @@ const oldSpecialtiesView=specialtiesView;specialtiesView=function(){
  let html=oldSpecialtiesView.apply(this,arguments);
  if(!ebActive&&html.indexOf('ped-collection-footnote')>=0&&html.indexOf('ped-collection-egyptian')<0){
  const card='<button type="button" class="ped-collection-card ped-collection-egyptian" onclick="selectPediatricCollection(\'egyptian\')"><div class="ped-collection-avatar ped-avatar-allonce ped-avatar-icon ped-avatar-egbook" role="img" aria-label="Egyptian Book question bank">'+(window.__shbBankIcon?window.__shbBankIcon('egyptian'):'')+'</div><span class="ped-collection-copy"><span class="eyebrow">INDEPENDENT QUESTION BANK</span><b>Egyptian Book</b><small>Accepted questions, organized by medical system.</small><span class="ped-collection-count">'+bankQuestions().length.toLocaleString()+' questions</span></span><span class="ped-collection-arrow">›</span></button>';
- html=html.replace('</div><div class="ped-collection-footnote">',card+'</div><div class="ped-collection-footnote">');html=html.replace('The five collections remain separate.','The six collections remain separate.');
+ html=html.replace('</div><div class="ped-collection-footnote">',card+'</div><div class="ped-collection-footnote">');html=html.replace('The six collections remain separate.','The seven collections remain separate.');
  }return html;
 };
 const oldSelect=window.selectPediatricCollection;window.selectPediatricCollection=function(which){
@@ -39,13 +39,13 @@ window.openEgyptianBookTopic=function(index){
 };
 const oldInTopic=B.inTopic;B.inTopic=function(){
  if(ebActive==='egyptian'){document.body.classList.add('eb-bank-mode');if(typeof gradeHasPediatrics==='function'&&!gradeHasPediatrics())return [];return bankQuestions().filter(q=>q.spec===ebSystem);}
- document.body.classList.remove('eb-bank-mode');return oldInTopic.apply(this,arguments).filter(q=>!q.eb);
+ document.body.classList.remove('eb-bank-mode');return oldInTopic.apply(this,arguments).filter(q=>B.bankOf(q)!=="egyptian");
 };
 const oldOpenQ=window.openQ;if(typeof oldOpenQ==='function')window.openQ=function(id){
- const q=QB.find(x=>x&&x.id===id);ebActive=q&&q.eb?'egyptian':'';
- if(q&&q.eb){ebSystem=q.spec;ebTopic='';qs.spec=q.spec;qs.topic=0;qs.filter='all';qs.tag='all';window.__SHB_PED_COLLECTION__='egyptianbook';document.body.classList.add('eb-bank-mode');}
+ const q=QB.find(x=>x&&x.id===id);ebActive=q&&B.bankOf(q)==='egyptian'?'egyptian':'';
+ if(q&&B.bankOf(q)==="egyptian"){ebSystem=q.spec;ebTopic='';qs.spec=q.spec;qs.topic=0;qs.filter='all';qs.tag='all';window.__SHB_PED_COLLECTION__='egyptianbook';document.body.classList.add('eb-bank-mode');}
  else{ebSystem='';ebTopic='';document.body.classList.remove('eb-bank-mode');}
- const result=oldOpenQ.apply(this,arguments);if(q&&q.eb)window.__SHB_PED_COLLECTION__='egyptianbook';return result;
+ const result=oldOpenQ.apply(this,arguments);if(q&&B.bankOf(q)==="egyptian")window.__SHB_PED_COLLECTION__='egyptianbook';return result;
 };
 window.__SHB_PED_COLLECTION__=window.__SHB_PED_COLLECTION__||'';
 })();

@@ -145,7 +145,7 @@ if (explanationAudit.schema !== "shbace-question-explanation-audit-v1" ||
     auditedExplanationIds.length !== shortExplanationQuestions.length ||
     new Set(auditedExplanationIds).size !== shortExplanationQuestions.length ||
     shortExplanationQuestions.some(id => !auditedExplanationIds.includes(id))) {
-  fail("Question explanation audit does not match the unchanged 1,718-question bank");
+  fail("Question explanation audit does not match the 1,718-question base");
 }
 if (reviewedPatch.schema !== "shbace-question-bank-patch-v1" ||
     reviewedPatch.baseFile !== "qbData.json" ||
@@ -198,8 +198,9 @@ if (reviewLog && Array.isArray(reviewLog.entries)) {
   if (logChanged !== 45 || logNeedsReview !== 110) fail("Question review JSON counts do not match the master audit");
 }
 const pwaVersion = JSON.parse(readFileSync(join(root, "pwa-version.json"), "utf8"));
-if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.10-to-me.26") {
-  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.10-to-me.26");
+if (pwaVersion.platform !== "Unified Chrome PWA" ||
+    !/^\d+\.\d+\.\d+-to-me\.\d+$/.test(String(pwaVersion.version || ""))) {
+  fail("pwa-version.json must declare a valid Unified Chrome PWA release version");
 }
 const packageMeta = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 const expectedCacheName = "shbace-chrome-offline-v" + pwaVersion.version.replace("-to-me.", ".");

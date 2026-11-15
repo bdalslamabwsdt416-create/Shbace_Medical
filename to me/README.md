@@ -16,7 +16,7 @@ See `docs/ARCHITECTURE.md` for a short map of the code (start-up order, the clos
 - Exam Goal Planner entries with free-text names and multiple independent exam dates.
 - A countdown display for the Study Timer, with browser notifications/sound when the page is able to run.
 
-- A Study hub on Home (exam countdown, bank readiness, due Smart Review, unfinished quiz, weakest topic, wrong answers, timer), a status strip on Review / Timer / Statistics / Quiz, and a "What next?" panel on quiz results. It only reads existing data (`js/37-study-hub-linkage.js`).
+- A compact study status strip on Review / Timer / Statistics / Quiz, and a "What next?" panel on quiz results. Home remains uncluttered; these panels only read existing data (`js/37-study-hub-linkage.js`).
 - Bank readiness = correct answers (latest attempt on each question) divided by the whole bank; it appears after 20 answered questions.
 - Daily Medical Insight notifications run only in the Android app (Capacitor); the Chrome PWA shows the daily fact on Home.
 
@@ -36,13 +36,13 @@ The timer uses the saved session's wall-clock elapsed time to calculate the rema
 
 ## Question explanations
 
-The existing 1,718-question bank, its answer keys and explanations are preserved unchanged. The original explanations are general question-level explanations; the bank did not contain partially completed A/B/C/D option-by-option explanations to fill in.
+The 1,718-question bank and answer keys remain intact. Short and cross-reference explanations were expanded for clarity; original exam option labels and duplicate options were preserved where they are present in the source, with explicit QA exceptions rather than silent edits.
 
 ## Build
 
 - Run `npm run build:pwa` from this folder.
 - Vercel root directory: `to me`
 - Output directory: `www/`
-- PWA release: `1.3.10-to-me.26` (single source of truth: `pwa-version.json`; the `sw.js` cache name, `js/29-offline-setup.js` and `package.json` must match)
+- PWA release: declared in `pwa-version.json` (single source of truth; the `sw.js` cache name, `js/29-offline-setup.js` and `package.json` are checked against it).
 
 This is a separate deployment. It does not replace the original Chrome Android, iOS or Computer versions.

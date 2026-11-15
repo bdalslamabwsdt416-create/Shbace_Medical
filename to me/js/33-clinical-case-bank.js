@@ -1,4 +1,4 @@
-/* Shbace Medical · Bank 07 · Clinical Case
+/* Shbace Medical · Clinical Cases
    Separate case-based collection. Original Pediatrics QB state and records are never mutated. */
 (function () {
   'use strict';
@@ -57,7 +57,7 @@
   }
   function pageShell(kicker, title, subtitle, inner) {
     return `<div class="rs cc-page">
-      <div class="cc-topline"><span class="cc-bank-number">BANK 07</span><span class="cc-kicker">${$esc(kicker)}</span></div>
+      <div class="cc-topline"><span class="cc-kicker">${$esc(kicker)}</span></div>
       <h1>${$esc(title)}</h1>${subtitle ? `<p class="sub">${$esc(subtitle)}</p>` : ''}
       ${inner}
     </div>`;
@@ -107,11 +107,11 @@
     return `<button type="button" class="backb cc-back" onclick="bank07ClinicalCaseBack()"><span aria-hidden="true">‹</span> ${$esc(label || 'Back')}</button>`;
   }
   function loadingPage() {
-    return pageShell('CLINICAL CASE-BASED QUESTION BANK','Clinical Case','Based on Dr. Abdulrahman Al-Juaiki’s course sheets and teaching materials.',
+    return pageShell('CLINICAL CASES','Clinical Cases','Based on Dr. Abdulrahman Al-Juaiki’s course sheets and teaching materials.',
       `<div class="card setcard cc-loading"><div class="cc-loader"></div><h3>Loading clinical cases…</h3><p class="meta">The bank is being prepared on this device.</p></div>`);
   }
   function errorPage() {
-    return pageShell('CLINICAL CASE-BASED QUESTION BANK','Clinical Case','The source data could not be loaded.',
+    return pageShell('CLINICAL CASES','Clinical Cases','The source data could not be loaded.',
       `<div class="card setcard"><h3>Clinical Case bank unavailable</h3><p class="meta">${$esc(dataError || 'The data file could not be opened.')}</p><button type="button" class="btn primary block" onclick="bank07RetryClinicalCaseData()">Try again</button></div>`);
   }
   function systemsPage() {
@@ -124,9 +124,9 @@
         <span class="bar"><span style="width:${p}%"></span></span></span><span class="chev">›</span></button>`;
     }).join('');
     const total=allQuestions(),done=answerCount(total);
-    return pageShell('SEVENTH QUESTION BANK','Clinical Case',
-      'A clinical case-based question bank developed from Dr. Abdulrahman Al-Juaiki’s course sheets and teaching materials.',
-      `${progress(done,total)}
+    return pageShell('CLINICAL CASES','Clinical Cases',
+      'Choose a medical system to browse its topics and clinical cases.',
+      `${progress(done,total.length)}
        <div class="cc-description card"><b>How this bank is organized</b><p>Choose a medical system, open a topic, then study each clinical case and its linked questions. The shared case history is shown once before its questions.</p></div>
        <div class="cc-section-heading">Medical Systems <span>${data.systems.length}</span></div>
        <div class="cc-list">${cards}</div>`);
@@ -142,7 +142,7 @@
         <span class="bar"><span style="width:${p}%"></span></span></span><span class="chev">›</span></button>`;
     }).join('');
     const qs=systemQuestions(system),done=answerCount(qs);
-    return pageShell(system.name.toUpperCase(),system.name,
+    return pageShell('MEDICAL SYSTEM',system.name,
       `${system.topics.length} topics · ${qs.length} clinical case questions`,
       `${backButton('Medical Systems')}${progress(done,qs.length)}
        <div class="cc-section-heading">Topics <span>${system.topics.length}</span></div><div class="cc-list">${cards}</div>`);
@@ -152,14 +152,14 @@
     if (!system || !topic) return topicsPage();
     const cards=topic.cases.map(item=>{
       const qs=item.questions,done=answerCount(qs),p=percent(done,qs.length);
-      const label=item.sourceHeadingPresent ? item.title : 'Topic Questions';
+      const label=item.sourceHeadingPresent ? item.title : 'Questions';
       return `<button type="button" class="card sc cc-case-card" onclick="bank07OpenClinicalCase('${item.id}')">
         <span class="cc-case-icon cc-icon-art" aria-hidden="true">${shbCaseIcon()}</span>
-        <span class="cc-list-copy"><strong>${$esc(label)}</strong><small>${qs.length} questions${item.hasSharedCaseText ? ' · Shared clinical history' : ' · No separate case narrative in source'}</small>
+        <span class="cc-list-copy"><strong>${$esc(label)}</strong><small>${qs.length} questions${item.hasSharedCaseText ? ' · Shared clinical history' : ' · Topic questions'}</small>
         <span class="bar"><span style="width:${p}%"></span></span></span><span class="chev">›</span></button>`;
     }).join('');
     const qs=topicQuestions(topic),done=answerCount(qs);
-    return pageShell(topic.name.toUpperCase(),topic.name,
+    return pageShell('TOPIC',topic.name,
       `${topic.cases.length} clinical cases · ${qs.length} questions`,
       `${backButton(system.name)}${progress(done,qs.length)}
        <div class="cc-section-heading">Clinical Cases <span>${topic.cases.length}</span></div><div class="cc-list">${cards}</div>`);
@@ -206,8 +206,8 @@
     const qs=item.questions,done=answerCount(qs);
     const vignette=item.hasSharedCaseText
       ? `<div class="cc-vignette"><div class="cc-vignette-title"><span>CLINICAL CASE</span>${item.number ? `<b>CASE ${String(item.number).padStart(2,'0')}</b>`:''}</div><h2>${$esc(item.title)}</h2><div class="cc-rich">${formatText(item.vignette)}</div></div>`
-      : `<div class="cc-vignette cc-vignette-note"><div class="cc-vignette-title"><span>TOPIC QUESTIONS</span></div><p>The supplied Markdown file contains these questions under this topic but does not provide a separate shared clinical case narrative.</p></div>`;
-    return pageShell(system.name.toUpperCase()+' · '+topic.name.toUpperCase(),item.title,
+      : '';
+    return pageShell(system.name.toUpperCase()+' · '+topic.name.toUpperCase(),item.hasSharedCaseText?item.title:'Questions',
       `${qs.length} questions · ${done} answered`,
       `${backButton('Clinical Cases')}${progress(done,qs.length)}
        ${vignette}<div class="cc-section-heading">Questions <span>${qs.length}</span></div>
@@ -316,13 +316,15 @@
   const oldRender=renderAppDemo;
   renderAppDemo=function() {
     const page=appPage;
-    const result=oldRender.apply(this,arguments);
+    if(String(page).startsWith('clinical'))appPage='subjects';
+    let result;
+    try { result=oldRender.apply(this,arguments); }
+    finally { appPage=page; }
     if(String(page).startsWith('clinical')) {
       try {
         const screen=document.querySelector('#phoneContent .screen');
-        const scroll=screen && (screen.querySelector(':scope > .app-scroll') || screen);
-        if(scroll)scroll.innerHTML=appHeader('Clinical Case')+currentView();
-      } catch(error) { console.error('Clinical Case render failed',error); }
+        if(screen)screen.innerHTML=appHeader('Clinical Cases')+'<div class="app-scroll">'+currentView()+'</div>'+appNav();
+      } catch(error) { console.error('Clinical Cases render failed',error); }
     }
     return result;
   };

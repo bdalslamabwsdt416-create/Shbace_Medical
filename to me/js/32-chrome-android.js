@@ -5,6 +5,17 @@ if(!window.__SHBACE_CHROME_PWA__||!/Chrome\//i.test(navigator.userAgent||''))ret
 
 var deferredInstall=null,screenLock=null,lockBusy=false,reloadPending=false,reloadStarted=false;
 var VERSION_KEY='shbace_chrome_seen_version_v1';
+/* Update checks are throttled: one successful check every 7 days; after a failed attempt (offline) retry no sooner than 2 hours. */
+var VCHECK_OK_KEY='shbace_ver_check_ok_v1',VCHECK_TRY_KEY='shbace_ver_check_try_v1';
+var VCHECK_EVERY=7*24*60*60*1000,VCHECK_RETRY=2*60*60*1000;
+function lsNum(key){try{return Number(localStorage.getItem(key))||0}catch(_){return 0}}
+function lsSet(key,value){try{localStorage.setItem(key,String(value))}catch(_){}}
+function checkDue(){
+ var now=Date.now(),ok=lsNum(VCHECK_OK_KEY),tried=lsNum(VCHECK_TRY_KEY);
+ if(ok&&ok<=now&&now-ok<VCHECK_EVERY)return false;
+ if(tried&&tried<=now&&now-tried<VCHECK_RETRY)return false;
+ return true;
+}
 function installed(){
  try{return !!(window.matchMedia&&(
   window.matchMedia('(display-mode: fullscreen)').matches||
@@ -30,7 +41,42 @@ function mountSettings(){
    '<p class="shb-chrome-meta">Screen wake lock is applied automatically while the Question Bank is open when “Keep screen awake” is enabled. Browser reminders are not scheduled as native Android alarms.</p>';
   root.appendChild(box);
  }
+ mountUpdateCard(root);
  refreshSettings();
+}
+/* Manual update check. The app also checks by itself, but never more than once every 7 days. */
+function updateNote(){
+ var t=0,p=0,vi=null;try{t=Number(window.shbaceLastUpdateCheck&&window.shbaceLastUpdateCheck())||0;p=Number(window.shbaceUpdatePending&&window.shbaceUpdatePending())||0;vi=window.shbaceVersionInfo&&window.shbaceVersionInfo()}catch(_){}
+ var inst=vi&&vi.installed,av=vi&&vi.available;
+ var ver=inst&&inst.displayVersion?'Version '+inst.displayVersion+(inst.releaseDate?' · '+inst.releaseDate:'')+'. ':'';
+ var base=ver+(t?'Last successful check: '+new Date(t).toLocaleString()+'. ':'')+'The app checks automatically every 7 days.';
+ return p?'A new update'+(av&&av.displayVersion?' ('+av.displayVersion+')':'')+' is available ('+p+' changed file'+(p===1?'':'s')+'). Tap Check for updates, then Update now. '+base:base;
+}
+function mountUpdateCard(root){
+ if(!installed()||typeof window.shbaceCheckForUpdate!=='function')return;
+ var existing=root.querySelector('#shbUpdateSettings');
+ if(existing){var note=existing.querySelector('#shbUpdateNote');if(note&&!existing.dataset.busy)note.textContent=updateNote();return}
+ var box=document.createElement('section');
+ box.className='card setcard';box.id='shbUpdateSettings';
+ box.innerHTML='<h3>App updates</h3>'+
+  '<p class="meta">Only changed files are downloaded, and only after you choose Update now. Your progress is never touched.</p>'+
+  '<div class="shb-chrome-tools"><button type="button" id="shbUpdateCheck">Check for updates</button></div>'+
+  '<p class="shb-chrome-meta" id="shbUpdateNote">'+updateNote()+'</p>';
+ root.appendChild(box);
+ var button=box.querySelector('#shbUpdateCheck'),note=box.querySelector('#shbUpdateNote');
+ button.addEventListener('click',function(){
+  if(box.dataset.busy)return;
+  box.dataset.busy='1';button.disabled=true;button.textContent='Checking…';
+  Promise.resolve(window.shbaceCheckForUpdate()).then(function(r){
+   var s=r&&r.state;
+   note.textContent=s==='latest'?'You already have the latest version.':
+    s==='update'?'An update is available. Tap Update now below to install it.':
+    s==='setup'?'Some files need to be downloaded. Follow the on-screen steps.':
+    s==='offline'?'Could not reach the server. Check your internet connection and try again.':
+    s==='busy'?'An update is already in progress.':'Update checks are available in the installed app.';
+  }).catch(function(){note.textContent='The check could not be completed. Try again later.'})
+  .then(function(){delete box.dataset.busy;button.disabled=false;button.textContent='Check for updates'});
+ });
 }
 function refreshSettings(){
  var root=document.getElementById('shbChromeSettings');if(!root)return;
@@ -99,7 +145,10 @@ else onDomChange();
 function safeToReload(){return document.hidden||!questionBankOpen()}
 function applyPendingReload(){
  if(!reloadPending||reloadStarted||!safeToReload())return;
- reloadStarted=true;setTimeout(function(){location.reload()},180);
+ reloadStarted=true;
+ /* Forget "splash already shown" so the reload runs the normal splash instead of flashing the old prototype Home. */
+ try{sessionStorage.removeItem('shbace_splash_completed_session_v1')}catch(_){}
+ setTimeout(function(){location.reload()},180);
 }
 function checkVersion(){
  if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;
@@ -107,11 +156,21 @@ function checkVersion(){
   .then(function(r){if(!r.ok)throw new Error('version unavailable');return r.json()})
   .then(function(v){
    if(!v||!v.version)return;
+   /* Only a successful check resets the 48-hour timer. */
+   lsSet(VCHECK_OK_KEY,Date.now());
    var previous=null;try{previous=localStorage.getItem(VERSION_KEY)}catch(_){}
    try{localStorage.setItem(VERSION_KEY,String(v.version))}catch(_){}
    if(previous&&previous!==String(v.version))reloadPending=true;
    applyPendingReload();
   }).catch(function(){});
+}
+/* Single entry point for every trigger below. It does nothing unless a check is due. */
+function scheduledCheck(){
+ if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;
+ if(!checkDue())return;
+ lsSet(VCHECK_TRY_KEY,Date.now());
+ navigator.serviceWorker.getRegistration('./').then(function(reg){if(reg)return reg.update()}).catch(function(){});
+ checkVersion();
 }
 if('serviceWorker' in navigator){
  var hadController=!!navigator.serviceWorker.controller;
@@ -119,13 +178,12 @@ if('serviceWorker' in navigator){
   if(!hadController){hadController=true;return}
   reloadPending=true;applyPendingReload();
  });
- navigator.serviceWorker.ready.then(function(reg){reg.update().catch(function(){});checkVersion()}).catch(function(){});
- window.addEventListener('online',checkVersion);
- document.addEventListener('visibilitychange',function(){if(!document.hidden){checkVersion();applyPendingReload()}});
+ navigator.serviceWorker.ready.then(function(){scheduledCheck()}).catch(function(){});
+ window.addEventListener('online',scheduledCheck);
+ document.addEventListener('visibilitychange',function(){if(!document.hidden){scheduledCheck();applyPendingReload()}});
  setInterval(function(){
   if(document.hidden)return;
-  navigator.serviceWorker.getRegistration('./').then(function(reg){if(reg)return reg.update()}).catch(function(){});
-  checkVersion();
+  scheduledCheck();
  },30*60*1000);
 }
 })();

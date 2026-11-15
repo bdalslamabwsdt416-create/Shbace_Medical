@@ -103,7 +103,7 @@
 @keyframes stepGlow{50%{box-shadow:0 0 30px rgba(94,182,255,.6);filter:brightness(1.25)}}
 
 
-/* v4.1: app-mode — after the splash the app opens as a real full-screen app (no handoff panels). Add #notes to the URL to see the design notes. */
+/* v4.1: app-mode opens the actual app full-screen; legacy design-handoff panels are not exposed. */
 body.app-mode{background:#0d0e11}
 body.app-mode .rail,body.app-mode .topbar,body.app-mode .guide-panel,body.app-mode .preview-head,body.app-mode .footer-note{display:none!important}
 body.app-mode .device-status{display:none}
