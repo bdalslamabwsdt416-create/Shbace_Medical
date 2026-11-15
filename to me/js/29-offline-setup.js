@@ -1,8 +1,8 @@
 (function(){
 'use strict';
 
-/* One stable cache shared with sw.js. It is NOT versioned: an app update only replaces the files that changed. */
-var CACHE_NAME='shbace-chrome-offline-v1.3.10.15';
+/* Rotate this cache namespace with every PWA release. It must match sw.js so installed copies can replace stale files. */
+var CACHE_NAME='shbace-chrome-offline-v1.3.10.23';
 var STAGING_NAME='shbace-staging-offline';
 var INSTALLED_KEY='installed';
 var manifestFromNetwork=false,plan=null;
