@@ -1,1 +1,14 @@
 /for Chrome/www/
+/to me/www/
+/for Computer/www/
+
+# Dependencies and OS noise
+node_modules/
+.DS_Store
+Thumbs.db
+
+# Release archives belong in GitHub Releases, not in the tree
+/*.zip
+/to me/*.zip
+/for Chrome/*.zip
+/for Computer/*.zip
