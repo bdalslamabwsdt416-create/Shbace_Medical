@@ -36,6 +36,7 @@ The existing 1,718-question bank, its answer keys and explanations are preserved
 - Run `npm run build:pwa` from this folder.
 - Vercel root directory: `to me`
 - Output directory: `www/`
-- PWA release: `1.3.9-to-me.9` (single source of truth: `pwa-version.json`; `sw.js` cache name and `package.json` must match)
+- PWA release: see `pwa-version.json` (single source of truth). `package.json`, the `sw.js` cache name and `js/29-offline-setup.js` must match it; `npm run build:pwa` fails if they drift. The version number is intentionally not repeated in this README so it cannot go stale.
+- Release archives (zip files) do not belong in the repository tree; attach them to GitHub Releases instead.
 
 This is a separate deployment. It does not replace the original Chrome Android, iOS or Computer versions.
