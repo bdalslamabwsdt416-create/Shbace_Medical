@@ -76,9 +76,9 @@ function ensure(){
   const systems=Array.from(map.values());
   const questions=systems.flatMap(s=>s.topics.flatMap(t=>t.questions));
   const ids=questions.map(q=>q.id);
-  const invalid=questions.filter(q=>!q||!Array.isArray(q.options)||q.options.length!==5||!q.options.some(o=>o.label===q.correctAnswer)||'difficulty' in q).length;
+  const invalid=questions.filter(q=>!q||!Array.isArray(q.options)||q.options.length!==5||!q.options.some(o=>o.label===q.correctAnswer)).length;
   if(total!==1881||questions.length!==1881||new Set(ids).size!==1881||invalid)throw new Error('AI Generated bank integrity check failed.');
-  data={schema:'shbace-ai-generated-mcq-bank-v1',bankNumber:8,totalQuestions:total,systems:systems,validation:{passed:true,questionCount:total,uniqueQuestionIds:new Set(ids).size,invalidQuestionRecords:invalid,difficultyClassificationIncluded:false}};
+  data={schema:'shbace-ai-generated-mcq-bank-v1',bankNumber:8,totalQuestions:total,systems:systems,validation:{passed:true,questionCount:total,uniqueQuestionIds:new Set(ids).size,invalidQuestionRecords:invalid}};
   error='';return data;
  }).catch(e=>{error=e&&e.message?e.message:'Unknown data loading error';promise=null;throw e;});
  return promise;
