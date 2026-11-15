@@ -13,6 +13,49 @@ function topic(){let s=sys();return s&&s.topics.find(t=>t.id===topicId);}
 function count(a){return a.reduce((n,q)=>n+(answers[q.id]&&answers[q.id].selected?1:0),0);}
 function pct(a,b){return b?Math.round(a*100/b):0;}
 function txt(v){return esc(v||'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/^- /gm,'• ').replace(/\n/g,'<br>');}
+
+  function shbSystemIcon(name) {
+    const n=String(name||'').toLowerCase(), B=window.__SHB_BRIDGE;
+    const map=[
+      [/central nervous|neurolog|\bcns\b/,'cns'],
+      [/cardio|cardiovascular|heart/,'cardio'],
+      [/respirat|lung/,'respiratory'],
+      [/gastro|digestive|hepat|\bgit\b/,'git'],
+      [/nephro|renal|kidney/,'nephrology'],
+      [/endocrin|hormone/,'endocrinology'],
+      [/neonat|newborn/,'neonatology'],
+      [/infect|vaccin|immuniz/,'infectious'],
+      [/haemat|hemat|blood/,'haematology'],
+      [/growth|development|nutrition/,'growth'],
+      [/genetic|dermat/,'genetics'],
+      [/rheumat|metabolic|poison|immunolog|musculoskeletal/,'rheum'],
+      [/urolog/,'urology']
+    ];
+    const row=map.find(x=>x[0].test(n)),code=row?row[1]:'growth';
+    if(B&&typeof B.sysIcon==='function'&&B.SYS){
+      const sys=B.SYS.find(x=>x[0]===code);
+      if(sys&&sys[2])return B.sysIcon(sys[2],'lg');
+    }
+    return '<svg class="shb-bank-line-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5 39 14v20L24 43 9 34V14L24 5Z"/><path d="M15 24h18M24 15v18"/><circle cx="24" cy="24" r="5"/></svg>';
+  }
+  function shbTopicIcon(name,systemName) {
+    const n=String(name||'').toLowerCase(),sys=String(systemName||'').toLowerCase(),B=window.__SHB_BRIDGE;
+    const map=[
+      [/central nervous|neurolog|\bcns\b/,'cns'],[/cardio|cardiovascular|heart/,'cardio'],
+      [/respirat|lung/,'respiratory'],[/gastro|digestive|hepat|\bgit\b/,'git'],
+      [/nephro|renal|kidney/,'nephrology'],[/endocrin|hormone/,'endocrinology'],
+      [/neonat|newborn/,'neonatology'],[/infect|vaccin|immuniz/,'infectious'],
+      [/haemat|hemat|blood/,'haematology'],[/growth|development|nutrition/,'growth'],
+      [/genetic|dermat/,'genetics'],[/rheumat|metabolic|poison|immunolog/,'rheum']
+    ];
+    const row=map.find(x=>x[0].test(sys)),code=row?row[1]:'growth';
+    if(B&&typeof B.topicIcon==='function')return B.topicIcon(code,String(name||''),0);
+    return '<svg class="shb-bank-line-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5 39 14v20L24 43 9 34V14L24 5Z"/><path d="M17 24h14M24 17v14"/></svg>';
+  }
+  function shbCaseIcon() {
+    return '<svg class="shb-bank-line-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M14 7h14l8 8v26H14a3 3 0 0 1-3-3V10a3 3 0 0 1 3-3Z"/><path d="M28 7v9h8M17 25h16M17 31h12M17 19h5"/><path d="m23 13 3 3-3 3"/></svg>';
+  }
+
 function shell(k,title,sub,body){return '<div class="rs ai08-page"><div class="ai08-topline"><span class="ai08-bank-number">BANK 08</span><span class="ai08-kicker">'+esc(k)+'</span></div><h1>'+esc(title)+'</h1>'+(sub?'<p class="sub">'+esc(sub)+'</p>':'')+body+'</div>';}
 function bar(done,total){let p=pct(done,total);return '<div class="ai08-progress"><div class="ai08-progress-meta"><span>'+done+' / '+total+' answered</span><b>'+p+'%</b></div><div class="bar"><span style="width:'+p+'%"></span></div></div>';}
 function back(label){return '<button type="button" class="backb ai08-back" onclick="bank08AiGeneratedBack()"><span aria-hidden="true">‹</span> '+esc(label||'Back')+'</button>';}
@@ -20,13 +63,13 @@ function loading(){return shell('AI-GENERATED MCQ BANK','AI Generated','Single-b
 function fail(){return shell('AI-GENERATED MCQ BANK','AI Generated','The source data could not be loaded.','<div class="card setcard"><h3>AI Generated bank unavailable</h3><p class="meta">'+esc(error||'The data file could not be opened.')+'</p><button type="button" class="btn primary block" onclick="bank08RetryAiGeneratedData()">Try again</button></div>');}
 function systemsPage(){
  if(!data)return error?fail():loading();
- let cards=data.systems.map(s=>{let qs=s.topics.reduce((a,t)=>a.concat(t.questions),[]),done=count(qs),p=pct(done,qs.length);return '<button type="button" class="card sc ai08-list-card" onclick="bank08OpenAiGeneratedSystem(\''+s.id+'\')"><span class="ai08-sys-icon">'+esc(s.name.split(/\s+/).map(w=>w[0]).slice(0,2).join(''))+'</span><span class="ai08-list-copy"><strong>'+esc(s.name)+'</strong><small>'+s.topics.length+' topics · '+qs.length+' questions</small><span class="bar"><span style="width:'+p+'%"></span></span></span><span class="chev">›</span></button>';}).join('');
+ let cards=data.systems.map(s=>{let qs=s.topics.reduce((a,t)=>a.concat(t.questions),[]),done=count(qs),p=pct(done,qs.length);return '<button type="button" class="card sc ai08-list-card" onclick="bank08OpenAiGeneratedSystem(\''+s.id+'\')"><span class="ai08-sys-icon ai08-icon-art">'+shbSystemIcon(s.name)+'</span><span class="ai08-list-copy"><strong>'+esc(s.name)+'</strong><small>'+s.topics.length+' topics · '+qs.length+' questions</small><span class="bar"><span style="width:'+p+'%"></span></span></span><span class="chev">›</span></button>';}).join('');
  let qs=all(),done=count(qs);
  return shell('EIGHTH QUESTION BANK','AI Generated',data.systems.length+' medical systems · '+qs.length+' questions',bar(done,qs.length)+'<div class="ai08-description card"><b>How this bank is organized</b><p>Choose a medical system, open a topic, then answer its MCQs. Submit an answer to see the correct option and initial explanation. Use Read More for detailed explanation, high-yield points and source reference.</p></div><div class="ai08-section-heading">Medical Systems <span>'+data.systems.length+'</span></div><div class="ai08-list">'+cards+'</div>');
 }
 function topicsPage(){
  let s=sys();if(!s)return systemsPage();
- let cards=s.topics.map(t=>{let qs=t.questions,done=count(qs),p=pct(done,qs.length);return '<button type="button" class="card sc ai08-list-card" onclick="bank08OpenAiGeneratedTopic(\''+t.id+'\')"><span class="ai08-topic-number">•</span><span class="ai08-list-copy"><strong>'+esc(t.name)+'</strong><small>'+qs.length+' questions</small><span class="bar"><span style="width:'+p+'%"></span></span></span><span class="chev">›</span></button>';}).join('');
+ let cards=s.topics.map(t=>{let qs=t.questions,done=count(qs),p=pct(done,qs.length);return '<button type="button" class="card sc ai08-list-card" onclick="bank08OpenAiGeneratedTopic(\''+t.id+'\')"><span class="ai08-topic-number ai08-icon-art">'+shbTopicIcon(t.name,s.name)+'</span><span class="ai08-list-copy"><strong>'+esc(t.name)+'</strong><small>'+qs.length+' questions</small><span class="bar"><span style="width:'+p+'%"></span></span></span><span class="chev">›</span></button>';}).join('');
  let qs=s.topics.reduce((a,t)=>a.concat(t.questions),[]),done=count(qs);
  return shell(s.name.toUpperCase(),s.name,s.topics.length+' topics · '+qs.length+' questions',back('Medical Systems')+bar(done,qs.length)+'<div class="ai08-section-heading">Topics <span>'+s.topics.length+'</span></div><div class="ai08-list">'+cards+'</div>');
 }
@@ -95,6 +138,6 @@ if(priorSpecialties)specialtiesView=function(){let html=priorSpecialties.apply(t
 const priorNav=appNav;
 appNav=function(){let p=appPage;if(String(p).startsWith('ai08'))appPage='subjects';try{return priorNav.apply(this,arguments);}finally{appPage=p;}};
 const priorRender=renderAppDemo;
-renderAppDemo=function(){let p=appPage,res=priorRender.apply(this,arguments);if(String(p).startsWith('ai08')){try{let screen=document.querySelector('#phoneContent .screen'),scroll=screen&&(screen.querySelector(':scope > .app-scroll')||screen);if(scroll)scroll.innerHTML=appHeader('AI Generated')+current()+appNav();}catch(e){console.error('AI Generated Bank 08 render failed',e);}}return res;};
+renderAppDemo=function(){let p=appPage,res=priorRender.apply(this,arguments);if(String(p).startsWith('ai08')){try{let screen=document.querySelector('#phoneContent .screen'),scroll=screen&&(screen.querySelector(':scope > .app-scroll')||screen);if(scroll)scroll.innerHTML=appHeader('AI Generated')+current();}catch(e){console.error('AI Generated Bank 08 render failed',e);}}return res;};
 window.__shbAiGeneratedBank08={count:()=>data?all().length:TOTAL,systems:()=>data?data.systems.length:null,topics:()=>data?data.systems.reduce((n,s)=>n+s.topics.length,0):null,answered:()=>count(all()),dataLoaded:()=>!!data,validation:()=>data?data.validation:null};
 })();

@@ -62,6 +62,49 @@
       ${inner}
     </div>`;
   }
+
+  function shbSystemIcon(name) {
+    const n=String(name||'').toLowerCase(), B=window.__SHB_BRIDGE;
+    const map=[
+      [/central nervous|neurolog|\bcns\b/,'cns'],
+      [/cardio|cardiovascular|heart/,'cardio'],
+      [/respirat|lung/,'respiratory'],
+      [/gastro|digestive|hepat|\bgit\b/,'git'],
+      [/nephro|renal|kidney/,'nephrology'],
+      [/endocrin|hormone/,'endocrinology'],
+      [/neonat|newborn/,'neonatology'],
+      [/infect|vaccin|immuniz/,'infectious'],
+      [/haemat|hemat|blood/,'haematology'],
+      [/growth|development|nutrition/,'growth'],
+      [/genetic|dermat/,'genetics'],
+      [/rheumat|metabolic|poison|immunolog|musculoskeletal/,'rheum'],
+      [/urolog/,'urology']
+    ];
+    const row=map.find(x=>x[0].test(n)),code=row?row[1]:'growth';
+    if(B&&typeof B.sysIcon==='function'&&B.SYS){
+      const sys=B.SYS.find(x=>x[0]===code);
+      if(sys&&sys[2])return B.sysIcon(sys[2],'lg');
+    }
+    return '<svg class="shb-bank-line-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5 39 14v20L24 43 9 34V14L24 5Z"/><path d="M15 24h18M24 15v18"/><circle cx="24" cy="24" r="5"/></svg>';
+  }
+  function shbTopicIcon(name,systemName) {
+    const n=String(name||'').toLowerCase(),sys=String(systemName||'').toLowerCase(),B=window.__SHB_BRIDGE;
+    const map=[
+      [/central nervous|neurolog|\bcns\b/,'cns'],[/cardio|cardiovascular|heart/,'cardio'],
+      [/respirat|lung/,'respiratory'],[/gastro|digestive|hepat|\bgit\b/,'git'],
+      [/nephro|renal|kidney/,'nephrology'],[/endocrin|hormone/,'endocrinology'],
+      [/neonat|newborn/,'neonatology'],[/infect|vaccin|immuniz/,'infectious'],
+      [/haemat|hemat|blood/,'haematology'],[/growth|development|nutrition/,'growth'],
+      [/genetic|dermat/,'genetics'],[/rheumat|metabolic|poison|immunolog/,'rheum']
+    ];
+    const row=map.find(x=>x[0].test(sys)),code=row?row[1]:'growth';
+    if(B&&typeof B.topicIcon==='function')return B.topicIcon(code,String(name||''),0);
+    return '<svg class="shb-bank-line-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5 39 14v20L24 43 9 34V14L24 5Z"/><path d="M17 24h14M24 17v14"/></svg>';
+  }
+  function shbCaseIcon() {
+    return '<svg class="shb-bank-line-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M14 7h14l8 8v26H14a3 3 0 0 1-3-3V10a3 3 0 0 1 3-3Z"/><path d="M28 7v9h8M17 25h16M17 31h12M17 19h5"/><path d="m23 13 3 3-3 3"/></svg>';
+  }
+
   function progress(done, total) {
     const p=percent(done,total);
     return `<div class="cc-progress"><div class="cc-progress-meta"><span>${done} / ${total} answered</span><b>${p}%</b></div><div class="bar"><span style="width:${p}%"></span></div></div>`;
@@ -82,7 +125,7 @@
     const cards=data.systems.map(system=>{
       const qs=systemQuestions(system),done=answerCount(qs),p=percent(done,qs.length);
       return `<button type="button" class="card sc cc-list-card" onclick="bank07OpenClinicalCaseSystem('${system.id}')">
-        <span class="cc-sys-icon" aria-hidden="true">${$esc(system.name.split(/\s+/).map(w=>w[0]).slice(0,2).join(''))}</span>
+        <span class="cc-sys-icon cc-icon-art" aria-hidden="true">${shbSystemIcon(system.name)}</span>
         <span class="cc-list-copy"><strong>${$esc(system.name)}</strong><small>${system.topics.length} topics · ${qs.length} questions</small>
         <span class="bar"><span style="width:${p}%"></span></span></span><span class="chev">›</span></button>`;
     }).join('');
@@ -100,7 +143,7 @@
     const cards=system.topics.map(topic=>{
       const qs=topicQuestions(topic),done=answerCount(qs),p=percent(done,qs.length);
       return `<button type="button" class="card sc cc-list-card" onclick="bank07OpenClinicalCaseTopic('${topic.id}')">
-        <span class="cc-topic-number">${String(topic.number || 0).padStart(2,'0')}</span>
+        <span class="cc-topic-number cc-icon-art" aria-hidden="true">${shbTopicIcon(topic.name,system.name)}</span>
         <span class="cc-list-copy"><strong>${$esc(topic.name)}</strong><small>${topic.cases.length} clinical cases · ${qs.length} questions</small>
         <span class="bar"><span style="width:${p}%"></span></span></span><span class="chev">›</span></button>`;
     }).join('');
@@ -117,7 +160,7 @@
       const qs=item.questions,done=answerCount(qs),p=percent(done,qs.length);
       const label=item.sourceHeadingPresent ? item.title : 'Topic Questions';
       return `<button type="button" class="card sc cc-case-card" onclick="bank07OpenClinicalCase('${item.id}')">
-        <span class="cc-case-icon" aria-hidden="true">${item.number ? String(item.number).padStart(2,'0') : 'Q'}</span>
+        <span class="cc-case-icon cc-icon-art" aria-hidden="true">${shbCaseIcon()}</span>
         <span class="cc-list-copy"><strong>${$esc(label)}</strong><small>${qs.length} questions${item.hasSharedCaseText ? ' · Shared clinical history' : ' · No separate case narrative in source'}</small>
         <span class="bar"><span style="width:${p}%"></span></span></span><span class="chev">›</span></button>`;
     }).join('');
@@ -284,7 +327,7 @@
       try {
         const screen=document.querySelector('#phoneContent .screen');
         const scroll=screen && (screen.querySelector(':scope > .app-scroll') || screen);
-        if(scroll)scroll.innerHTML=appHeader('Clinical Case')+currentView()+appNav();
+        if(scroll)scroll.innerHTML=appHeader('Clinical Case')+currentView();
       } catch(error) { console.error('Clinical Case render failed',error); }
     }
     return result;
