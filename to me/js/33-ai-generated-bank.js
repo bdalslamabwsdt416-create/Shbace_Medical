@@ -14,44 +14,38 @@ function count(a){return a.reduce((n,q)=>n+(answers[q.id]&&answers[q.id].selecte
 function pct(a,b){return b?Math.round(a*100/b):0;}
 function txt(v){return esc(v||'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/^- /gm,'• ').replace(/\n/g,'<br>');}
 
-  function shbSystemIcon(name) {
-    const n=String(name||'').toLowerCase(), B=window.__SHB_BRIDGE;
-    const map=[
-      [/central nervous|neurolog|\bcns\b/,'cns'],
-      [/cardio|cardiovascular|heart/,'cardio'],
-      [/respirat|lung/,'respiratory'],
-      [/gastro|digestive|hepat|\bgit\b/,'git'],
-      [/nephro|renal|kidney/,'nephrology'],
-      [/endocrin|hormone/,'endocrinology'],
-      [/neonat|newborn/,'neonatology'],
-      [/infect|vaccin|immuniz/,'infectious'],
-      [/haemat|hemat|blood/,'haematology'],
-      [/growth|development|nutrition/,'growth'],
-      [/genetic|dermat/,'genetics'],
-      [/rheumat|metabolic|poison|immunolog|musculoskeletal/,'rheum'],
-      [/urolog/,'urology']
+
+  function shbIconShape(name) {
+    const n=String(name||'').toLowerCase();
+    const shapes=[
+      [/central nervous|neurolog|cns|seizure|epilep|mening|brain/,'<path d="M24 8c-3-4-10-2-10 4-5 1-6 8-2 11-3 5 1 11 6 11 2 5 8 5 10 1 3 4 9 3 10-2 5-1 7-7 3-11 3-5 0-10-5-10-1-6-8-7-12-4Z"/><path d="M24 9v29M14 17c4 0 6 3 6 6m-8 2c4-1 7 1 8 5m14-14c-4 0-6 3-6 6m9 3c-4-1-7 1-8 5m-5-17c-3 2-3 5 0 7"/>'],
+      [/cardio|cardiovascular|heart|cardiac|septal|tetralogy|endocard/,'<path d="M24 39S7 29 7 17c0-8 10-12 17-3 7-9 17-5 17 3 0 12-17 22-17 22Z"/><path d="M10 23h8l4-8 5 16 4-8h7"/>'],
+      [/respirat|lung|asthma|pneumonia|bronchi|croup/,'<path d="M23 10v13m2-13v13M23 19c-5 0-8 4-10 10l-3 8c-1 3 2 5 5 4l9-4V19Zm2 0c5 0 8 4 10 10l3 8c1 3-2 5-5 4l-9-4V19Z"/><path d="M23 23 17 29m8-6 6 6"/>'],
+      [/gastro|digestive|hepat|liver|stomach|intestinal|diarr|coeliac|celiac|git/,'<path d="M17 8c-2 7 1 9 5 11 3 2 2 6-1 7-4 1-5 5-2 9 3 4 11 4 15 0 3-3 2-7-2-9-4-2-3-6 0-9 3-3 2-7-1-9"/><path d="M17 14c-4 0-7 3-7 7m24 5c4 1 6 4 5 8M17 34c-3 1-5 3-5 6"/>'],
+      [/nephro|renal|kidney|urinary|urolog/,'<path d="M18 9c-7 0-11 8-9 17 1 7 6 11 11 8 4-2 3-7 2-11-1-5 1-14-4-14Zm12 0c7 0 11 8 9 17-1 7-6 11-11 8-4-2-3-7-2-11 1-5-1-14 4-14Z"/><path d="M19 31c1 5 3 7 5 9m5-9c-1 5-3 7-5 9"/>'],
+      [/endocrin|hormone|thyroid|diabet|adrenal/,'<path d="M24 8c-4 5-9 9-9 16a9 9 0 0 0 18 0c0-7-5-11-9-16Z"/><path d="M18 25c3-3 9-3 12 0m-6-5v11"/>'],
+      [/neonat|newborn|infant|prematur|birth/,'<circle cx="24" cy="19" r="10"/><path d="M19 19h.1m10 0h.1m-8 5c2 2 4 2 6 0M12 39c2-7 7-10 12-10s10 3 12 10M17 11c2-5 12-6 16 0"/>'],
+      [/infect|vaccin|immun|virus|bacter|fever|sepsis/,'<path d="M24 6 39 12v11c0 9-6 15-15 19C15 38 9 32 9 23V12l15-6Z"/><circle cx="24" cy="23" r="7"/><path d="m24 12 0 4m0 14v4m-11-11h4m14 0h4m-19-8 3 3m10 10 3 3m0-16-3 3m-10 10-3 3"/>'],
+      [/haemat|hemat|blood|anaemia|anemia|iron|sickle/,'<path d="M24 6c-5 8-13 15-13 23a13 13 0 0 0 26 0C37 21 29 14 24 6Z"/><path d="M17 29c1 5 4 7 8 7m-1-19 0 5"/>'],
+      [/growth|development|nutrition|milestone|feeding|obesity/,'<path d="M10 39V9m0 30h29M17 33V25h6v8m5 0V17h6v16m5 0V11h4v22"/><path d="m15 18 7-5 6 2 9-8"/>'],
+      [/genetic|dna|chromosom|inherit|dermat/,'<path d="M14 8c0 12 20 20 20 32M34 8C34 20 14 28 14 40"/><path d="M17 13h14M17 22h14M17 31h14M17 36h14"/>'],
+      [/rheumat|metabolic|poison|joint|arthritis|musculoskeletal/,'<path d="m12 12 10 10m4 4 10 10M10 10l5-3 8 8-3 5-8-8Zm28 28-5 3-8-8 3-5 8 8Z"/><circle cx="24" cy="24" r="5"/><path d="M24 14v5m0 10v5m-10-10h5m10 0h5"/>']
     ];
-    const row=map.find(x=>x[0].test(n)),code=row?row[1]:'growth';
-    if(B&&typeof B.sysIcon==='function'&&B.SYS){
-      const sys=B.SYS.find(x=>x[0]===code);
-      if(sys&&sys[2])return B.sysIcon(sys[2],'lg');
-    }
-    return '<svg class="shb-bank-line-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5 39 14v20L24 43 9 34V14L24 5Z"/><path d="M15 24h18M24 15v18"/><circle cx="24" cy="24" r="5"/></svg>';
+    const hit=shapes.find(x=>x[0].test(n));
+    return hit?hit[1]:'<path d="M24 6 39 15v18l-15 9L9 33V15l15-9Z"/><path d="M16 24h16m-8-8v16"/>';
   }
-  function shbTopicIcon(name,systemName) {
-    const n=String(name||'').toLowerCase(),sys=String(systemName||'').toLowerCase(),B=window.__SHB_BRIDGE;
-    const map=[
-      [/central nervous|neurolog|\bcns\b/,'cns'],[/cardio|cardiovascular|heart/,'cardio'],
-      [/respirat|lung/,'respiratory'],[/gastro|digestive|hepat|\bgit\b/,'git'],
-      [/nephro|renal|kidney/,'nephrology'],[/endocrin|hormone/,'endocrinology'],
-      [/neonat|newborn/,'neonatology'],[/infect|vaccin|immuniz/,'infectious'],
-      [/haemat|hemat|blood/,'haematology'],[/growth|development|nutrition/,'growth'],
-      [/genetic|dermat/,'genetics'],[/rheumat|metabolic|poison|immunolog/,'rheum']
-    ];
-    const row=map.find(x=>x[0].test(sys)),code=row?row[1]:'growth';
-    if(B&&typeof B.topicIcon==='function')return B.topicIcon(code,String(name||''),0);
-    return '<svg class="shb-bank-line-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5 39 14v20L24 43 9 34V14L24 5Z"/><path d="M17 24h14M24 17v14"/></svg>';
+  function shbSvgIcon(name,extra) {
+    return '<svg class="shb-bank-line-icon '+(extra||'')+'" viewBox="0 0 48 48" role="img" aria-hidden="true">'+shbIconShape(name)+'</svg>';
   }
+  function shbSystemIcon(name) { return shbSvgIcon(name,'shb-system-icon'); }
+  function shbTopicIcon(name,systemName) { return shbSvgIcon(name+' '+systemName,'shb-topic-icon'); }
+  function shbBankEmblem07() {
+    return '<svg class="shb-bank-emblem shb-bank-emblem-07" viewBox="0 0 80 80" role="img" aria-label="Clinical Case"><defs><linearGradient id="shb07g" x1="8" y1="8" x2="70" y2="72"><stop stop-color="#C8FFF0"/><stop offset=".55" stop-color="#55D9BC"/><stop offset="1" stop-color="#278FA5"/></linearGradient></defs><path d="M24 10h23l12 12v40a6 6 0 0 1-6 6H24a6 6 0 0 1-6-6V16a6 6 0 0 1 6-6Z" fill="#102F42" stroke="url(#shb07g)" stroke-width="2.4"/><path d="M47 11v11h11" fill="none" stroke="#C8FFF0" stroke-width="2.2" stroke-linejoin="round"/><path d="M24 39h9l5-11 7 22 5-11h7" fill="none" stroke="#D9FFF5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 54h26M27 60h17" stroke="#6FDAC6" stroke-width="2" stroke-linecap="round"/></svg>';
+  }
+  function shbBankEmblem08() {
+    return '<svg class="shb-bank-emblem shb-bank-emblem-08" viewBox="0 0 80 80" role="img" aria-label="AI Generated"><defs><linearGradient id="shb08g" x1="10" y1="8" x2="69" y2="71"><stop stop-color="#C9E9FF"/><stop offset=".55" stop-color="#6BCBFF"/><stop offset="1" stop-color="#9A8CFF"/></linearGradient></defs><ellipse cx="40" cy="40" rx="28" ry="12" transform="rotate(-34 40 40)" fill="none" stroke="url(#shb08g)" stroke-width="2.2"/><ellipse cx="40" cy="40" rx="28" ry="12" transform="rotate(38 40 40)" fill="none" stroke="url(#shb08g)" stroke-width="2.2" opacity=".7"/><path d="m40 23 15 17-15 17-15-17 15-17Z" fill="#153D5C" stroke="url(#shb08g)" stroke-width="2.5"/><path d="m40 31 7 9-7 9-7-9 7-9Z" fill="#A8E8FF" fill-opacity=".2" stroke="#D4F4FF" stroke-width="1.8"/><path d="m17 19 2.5 5.5L25 27l-5.5 2.5L17 35l-2.5-5.5L9 27l5.5-2.5L17 19Zm47 24 2 4 4 2-4 2-2 4-2-4-4-2 4-2 2-4Z" fill="#B9E7FF"/></svg>';
+  }
+
   function shbCaseIcon() {
     return '<svg class="shb-bank-line-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M14 7h14l8 8v26H14a3 3 0 0 1-3-3V10a3 3 0 0 1 3-3Z"/><path d="M28 7v9h8M17 25h16M17 31h12M17 19h5"/><path d="m23 13 3 3-3 3"/></svg>';
   }
@@ -134,7 +128,7 @@ window.bank08AiGeneratedBack=function(){if(appPage==='ai08Questions')appPage='ai
 window.bank08AnswerAiGeneratedQuestion=function(id,label){if(!safe(id)||!'ABCDE'.includes(label))return;let q=all().find(x=>x.id===id);if(!q||answers[id])return;answers[id]={selected:label,correct:label===q.correctAnswer,answeredAt:Date.now(),readMore:false};save();renderAppDemo();};
 window.bank08ToggleAiGeneratedReadMore=function(id){let a=answers[id];if(!a)return;a.readMore=!a.readMore;save();renderAppDemo();};
 const priorSpecialties=typeof specialtiesView==='function'?specialtiesView:null;
-if(priorSpecialties)specialtiesView=function(){let html=priorSpecialties.apply(this,arguments);if(!String(html).includes('ped-collections-grid')||String(html).includes('ped-collection-bank08'))return html;let card='<button type="button" class="ped-collection-card ped-collection-allonce ped-collection-bank08" onclick="openAiGeneratedBank08()"><div class="ped-collection-avatar ped-avatar-allonce ped-avatar-icon"><span class="ped-avatar-initials">08</span></div><span class="ped-collection-copy"><span class="eyebrow">AI-GENERATED MCQ BANK</span><b>AI Generated</b><small>AI-generated single-best-answer MCQs, organized by medical system and topic.</small><span class="ped-collection-count">'+TOTAL.toLocaleString()+' questions · 16 source files</span></span><span class="ped-collection-arrow">›</span></button>';html=html.replace('</div><div class="ped-collection-footnote">',card+'</div><div class="ped-collection-footnote">');html=html.replace('The seven collections remain separate.','The eight collections remain separate.');return html;};
+if(priorSpecialties)specialtiesView=function(){let html=priorSpecialties.apply(this,arguments);if(!String(html).includes('ped-collections-grid')||String(html).includes('ped-collection-bank08'))return html;let card='<button type="button" class="ped-collection-card ped-collection-allonce ped-collection-bank08" onclick="openAiGeneratedBank08()"><div class="ped-collection-avatar ped-avatar-allonce ped-avatar-icon">'+shbBankEmblem08()+'</div><span class="ped-collection-copy"><span class="eyebrow">AI-GENERATED MCQ BANK</span><b>AI Generated</b><small>AI-generated single-best-answer MCQs, organized by medical system and topic.</small><span class="ped-collection-count">'+TOTAL.toLocaleString()+' questions · 16 source files</span></span><span class="ped-collection-arrow">›</span></button>';html=html.replace('</div><div class="ped-collection-footnote">',card+'</div><div class="ped-collection-footnote">');html=html.replace('The seven collections remain separate.','The eight collections remain separate.');return html;};
 const priorNav=appNav;
 appNav=function(){let p=appPage;if(String(p).startsWith('ai08'))appPage='subjects';try{return priorNav.apply(this,arguments);}finally{appPage=p;}};
 const priorRender=renderAppDemo;
