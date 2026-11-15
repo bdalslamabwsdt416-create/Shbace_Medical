@@ -1,10 +1,13 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.10-to-me.31",
-  "displayVersion": "1.3.10.31 · Chrome (Phone + Computer)",
+  "version": "1.3.10-to-me.32",
+  "displayVersion": "1.3.10.32 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-16",
   "releaseNotes": [
+    "Replaces the empty Previous Questions (0 questions) entry with one AI Clinical Case collection: 1,598 validated questions across 10 medical systems, 284 topics and 330 case groups.",
+    "Suppresses the empty legacy AI Clinical Cases tile so the chooser shows one populated AI Clinical Case entry, opening Medical System -> Topic -> Clinical Case -> Questions with its separate answer-progress store.",
+    "Preserves the archived Previous Questions source data and all existing student progress. No question records, answer keys, bookmarks, notes or saved progress were cleared.",
     "Fixes the Exam Goal Planner ? Study Hub storage-key mismatch so saved exam dates and daily targets appear consistently. Repairs corrupted punctuation in offline-install and update messages.",
     "Pre-caches all 16 AI Generated MCQ data shards and its bank renderer with the new release, so the complete 1,881-question bank is available from one consistent offline cache.",
     "Loads AI Generated shards four at a time, applies an 18-second per-file timeout and one network-bypassing retry, and validates the assembled 1,881-question bank before rendering. This prevents indefinite loading while preserving every question and saved answer.",
@@ -62,8 +65,8 @@
     "A question opened from Search, Saved, Wrong answers or Smart Review now opens inside its own bank, so a Previous question no longer opens as an empty list."
   ],
   "summary": [
-    "Keeps the live app shell and all JavaScript/CSS assets on one release; prevents stale bank screens from reappearing when Chrome has an older cached copy.",
-    "Service Worker updates are checked on launch and a controlled page reloads once when the new worker takes control.",
-    "Offline fallback remains available; answers, bookmarks, notes and study progress are not cleared."
+    "Pediatrics now opens AI Clinical Case (1,598 questions) in place of the empty Previous Questions card.",
+    "One collection entry opens the validated clinical-case bank: Medical System -> Topic -> Clinical Case -> Questions.",
+    "Existing questions, answer keys and student progress remain preserved; no local student data was cleared."
   ]
 }

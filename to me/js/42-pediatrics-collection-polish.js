@@ -8,8 +8,8 @@
   if (!B) { console.error('PWA collection polish: SHB bridge is missing.'); return; }
 
   const BANK_ICONS = [
-    ['.ped-collection-previous', 'bank-university-tripoli.webp', 'Faculty of Medicine, University of Tripoli'],
-    ['.ped-collection-bank07', 'bank-clinical-case.webp', 'Clinical Cases'],
+    ['.ped-collection-previous:not(.ped-collection-bank07)', 'bank-university-tripoli.webp', 'Faculty of Medicine, University of Tripoli'],
+    ['.ped-collection-bank07', 'bank-ai-clinical-cases.webp', 'AI Clinical Case'],
     ['.ped-collection-bank08', 'bank-ai-generated.webp', 'AI Generated'],
     ['.ped-collection-nelson', 'bank-nelson-textbook.webp', 'Nelson Textbook'],
     ['.ped-collection-allonce:not(.ped-collection-clinicalcase):not(.ped-collection-bank08)', 'bank-kasr-alainy.webp', 'Kasr Al-Ainy'],

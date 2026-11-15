@@ -204,8 +204,10 @@ const BANK_OPTS=[['all','All banks'],['aj','Dr. Al-Joaki'],['previous','Previous
 const BANK_KEYS=new Set(BANK_OPTS.map(option=>option[0]).filter(key=>key!=='all'));
 const bankOf=q=>{
  if(!q)return 'aj';
- const legacy=q.nl===true?'nelson':q.py===true?'previous':q.eb===true?'egyptian':q.cc===true?'clinical':q.ao===true?'kasr':'aj';
- const canonical=BANK_KEYS.has(q.bank)?q.bank:legacy;
+ const hasBankFlag=value=>value===true||value===1||value==='1';
+ const legacy=hasBankFlag(q.nl)?'nelson':hasBankFlag(q.py)?'previous':hasBankFlag(q.eb)?'egyptian':hasBankFlag(q.cc)?'clinical':hasBankFlag(q.ao)?'kasr':'aj';
+ const flagged=legacy!=='aj'?legacy:null;
+ const canonical=flagged||(BANK_KEYS.has(q.bank)?q.bank:legacy);
  if(q.bank!==canonical){try{q.bank=canonical}catch(e){}}
  return canonical;
 };
