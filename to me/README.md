@@ -2,6 +2,8 @@
 
 This independent delivery lives in the `to me/` folder and is built as a single adaptive Chrome PWA for Android phones and desktop computers.
 
+See `docs/ARCHITECTURE.md` for a short map of the code (start-up order, the closed core script and its bridge, the question-bank flags, search).
+
 ## What is included
 
 - A full-screen installed-app experience with responsive phone and wide-screen layouts.
@@ -18,10 +20,12 @@ This independent delivery lives in the `to me/` folder and is built as a single 
 - Offline: the full package is downloaded once (Chrome installed app). On every launch only the small manifest is fetched; if files changed, an "Update available" sheet shows how many files and how many MB, and only those files are downloaded (staged, verified, then swapped in). Without internet nothing is shown and the saved copy keeps working.
 - Question Bank opens in the All view by default (30 cards at a time, "Show more"); the Tags and All Questions lists show only what exists in the current topic, with counts. Each question also has a type tag (Clinical Case, Diagnosis, Investigation, Management, Knowledge) derived from its wording.
 - Question voice: English only, prefers the clearest male voice the device offers.
+- Search: the search box and the bank chips stay on top; specialty, tag, source, topic, system and sort are in one collapsible "Filters" panel.
 
 ## Checks
 
-- `npm run check:bank` validates ids, answer keys, option letters and explanations and syntax-checks every script. The GitHub Action `PWA checks` runs it together with `npm run build:pwa` on every pull request.
+- `npm run test:unit` runs the unit tests in `tests/` (search normaliser).
+- `npm run check:bank` validates ids, answer keys, option letters and explanations and syntax-checks every script. The GitHub Action `PWA checks` runs the unit tests, `check:bank` and `npm run build:pwa` on every pull request and on every push to a non-main branch.
 
 ## Study Timer browser limitation
 
@@ -36,6 +40,6 @@ The existing 1,718-question bank, its answer keys and explanations are preserved
 - Run `npm run build:pwa` from this folder.
 - Vercel root directory: `to me`
 - Output directory: `www/`
-- PWA release: `1.3.9-to-me.9` (single source of truth: `pwa-version.json`; `sw.js` cache name and `package.json` must match)
+- PWA release: `1.3.10-to-me.23` (single source of truth: `pwa-version.json`; the `sw.js` cache name, `js/29-offline-setup.js` and `package.json` must match)
 
 This is a separate deployment. It does not replace the original Chrome Android, iOS or Computer versions.
