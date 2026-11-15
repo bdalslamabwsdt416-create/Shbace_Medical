@@ -1,10 +1,12 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.10-to-me.20",
-  "displayVersion": "1.3.10.20 · Chrome (Phone + Computer)",
+  "version": "1.3.10-to-me.22",
+  "displayVersion": "1.3.10.22 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-15",
   "releaseNotes": [
+    "Quiz: choose several banks, several systems and several topics together (a topic is also matched in banks that have no topic labels, by its name). Clear icons for Nelson, Clinical Cases, Kasr Al-Ainy and Egyptian Book. Arabic exam labels and Arabic reviewer notes are no longer shown in explanations or sources.",
+    "Fixes a syntax error in js/09-app-features-v6.js that stopped the main app script from loading. Fixes the build version guard. Question cards no longer show the id/status/tag chips or topic title; the All Questions and All Tags filters now work in every bank; Quiz, Search and Smart Review use six separate banks (Dr. Al-Joaki, Previous Questions, Nelson Textbook, Kasr Al-Ainy, Clinical Cases, Egyptian Book); progress can be reset by bank, then system, then topic; the Smart Review intro shows only until the first session; explanations are organised and keep their High-yield notes; Back from a system list returns to the list of banks; Egyptian Book has its own icon.",
     "Renames All Once to Kasr Al-Ainy; removes Curriculum alignment paragraphs from displayed explanations across question banks; makes Egyptian Book answer UI English-only; fixes Phone/Browser Back to return from a medical system to its collection list.",
     "Fixes All Once question filtering after Clinical Case integration. Egyptian Book now opens all questions directly after selecting a medical system, without a Topics screen.",
     "Adds the independent English-language Egyptian Book Pediatrics collection, organized by medical system and topic. 466 Accepted questions with complete answer keys are student-facing; 7 Accepted records with unresolved answer keys remain excluded.",

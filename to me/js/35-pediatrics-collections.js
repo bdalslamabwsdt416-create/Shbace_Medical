@@ -4,6 +4,14 @@
 'use strict';
 const B=window.__SHB_BRIDGE;
 if(!B){console.error('Pediatrics collections: bridge from 09-app-features-v6.js is missing, collections not installed.');return}
+/* Shared line icons for the four extra question banks (no text, so they stay sharp inside the round avatars). */
+const BANK_ICON_PATHS={
+ nelson:'<path d="M18 9h28a4 4 0 0 1 4 4v38a4 4 0 0 1-4 4H18z"/><path d="M18 9a6 6 0 0 0-6 6v34a6 6 0 0 0 6 6"/><path d="M26 21h16M26 29h11"/><path d="M37 40v11l4.5-3.2L46 51V40" fill="currentColor" fill-opacity=".28"/>',
+ clinical:'<rect x="13" y="11" width="38" height="47" rx="5"/><path d="M24 11V9.5A2.5 2.5 0 0 1 26.500 7h11A2.500 2.500 0 0 1 40 9.500V11"/><path d="M32 22v12M26 28h12"/><path d="M19 47h8l3-6 5 9 3-3h7"/>',
+ kasr:'<path d="M9 57V23l23-12 23 12v34"/><path d="M4 57h56"/><path d="M32 24v12M26 30h12" /><path d="M25 57V45h14v12"/><path d="M15 33v6M49 33v6M15 45v6M49 45v6"/>',
+ egyptian:'<path d="M6 14c8-3 17-2 26 3 9-5 18-6 26-3v35c-8-3-17-2-26 3-9-5-18-6-26-3z"/><path d="M32 17v35"/><path d="M40 33l7-12 7 12z" fill="currentColor" fill-opacity=".25"/>'
+};
+window.__shbBankIcon=function(key){const d=BANK_ICON_PATHS[key];return d?'<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'+d+'</svg>':''};
 const qs=B.qs,SYS=B.SYS,QB=B.QB,sysIcon=B.sysIcon,isPinned=B.isPinned,answeredCount=B.answeredCount,TOPIC_ICON_ASSET=B.TOPIC_ICON_ASSET;
 const incomingNelson=Array.isArray(window.__SHB_NELSON_QUESTIONS__)?window.__SHB_NELSON_QUESTIONS__:[];
 const knownQuestionIds=new Set(QB.map(q=>q&&q.id).filter(Boolean));
@@ -11,7 +19,7 @@ incomingNelson.forEach(q=>{if(q&&q.nl===true&&q.id&&!knownQuestionIds.has(q.id))
 if(window.__bank){window.__bank.total=QB.length;window.__bank.nelson=incomingNelson.length}
 let activeCollection='';let activePreviousSystem='';const previousSystemByTopic=new Map();
 const norm=v=>String(v==null?'':v).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
-const isPreviousQuestion=q=>!!q&&q.py===true;const isNelsonQuestion=q=>!!q&&q.nl===true;const isAllOnceQuestion=q=>!!q&&q.ao===true;const isDoctorQuestion=q=>!!q&&!isPreviousQuestion(q)&&!isNelsonQuestion(q)&&!isAllOnceQuestion(q);
+const isPreviousQuestion=q=>!!q&&q.py===true;const isNelsonQuestion=q=>!!q&&q.nl===true;const isAllOnceQuestion=q=>!!q&&q.ao===true;const isDoctorQuestion=q=>!!q&&!isPreviousQuestion(q)&&!isNelsonQuestion(q)&&!isAllOnceQuestion(q)&&q.cc!==true&&q.eb!==true;
 const allQuestions=()=>Array.isArray(QB)?QB:[];const doctorQuestions=()=>allQuestions().filter(isDoctorQuestion);const previousQuestions=()=>allQuestions().filter(isPreviousQuestion);const nelsonQuestions=()=>allQuestions().filter(isNelsonQuestion);
 function refreshPreviousTopicMap(){
  previousSystemByTopic.clear();
@@ -44,7 +52,7 @@ function collectionView(){
 ${appHeader('Pediatrics')}<div class="rs ped-collection-page"><div class="ped-collection-kicker">SHBACE MEDICAL · PEDIATRICS</div><h1>Choose your question collection</h1><p class="sub">Select the source you want to study. Each collection has its own medical systems.</p><div class="ped-collections-grid">
 <button type="button" class="ped-collection-card ped-collection-aj" onclick="selectPediatricCollection('aj')">${imageCircle(ajData,'ped-avatar-doctor','AJ','Dr. Abdulrahman Al-Joaki')}<span class="ped-collection-copy"><span class="eyebrow">DOCTOR'S QUESTION BANK</span><b>Dr. Abdulrahman Al-Joaki MCQ</b><small>Study the doctor's MCQs, arranged by medical system and topic.</small><span class="ped-collection-count">${doctorCount.toLocaleString()} questions</span></span><span class="ped-collection-arrow">›</span></button>
 <button type="button" class="ped-collection-card ped-collection-previous" onclick="selectPediatricCollection('previous')">${imageCircle(facultyData,'ped-avatar-faculty','FM','Faculty of Medicine, University of Tripoli')}<span class="ped-collection-copy"><span class="eyebrow">FACULTY QUESTION ARCHIVE</span><b>Previous Questions</b><small>Browse previous exam questions by the same medical systems and topic icons.</small><span class="ped-collection-count">${previousCount.toLocaleString()} questions</span></span><span class="ped-collection-arrow">›</span></button>
-<button type="button" class="ped-collection-card ped-collection-nelson" onclick="selectPediatricCollection('nelson')"><div class="ped-collection-avatar ped-avatar-nelson"><img src="/assets/img/nelson-textbook-cover.svg" alt="Nelson Textbook of Pediatrics" decoding="async"></div><span class="ped-collection-copy"><span class="eyebrow">TEXTBOOK QUESTION BANK</span><b>Nelson Textbook</b><small>Curated questions from Nelson, arranged by medical system.</small><span class="ped-collection-count">${nelsonCount.toLocaleString()} questions</span></span><span class="ped-collection-arrow">›</span></button>
+<button type="button" class="ped-collection-card ped-collection-nelson" onclick="selectPediatricCollection('nelson')"><div class="ped-collection-avatar ped-avatar-nelson ped-avatar-icon" role="img" aria-label="Nelson Textbook of Pediatrics">${window.__shbBankIcon('nelson')}</div><span class="ped-collection-copy"><span class="eyebrow">TEXTBOOK QUESTION BANK</span><b>Nelson Textbook</b><small>Curated questions from Nelson, arranged by medical system.</small><span class="ped-collection-count">${nelsonCount.toLocaleString()} questions</span></span><span class="ped-collection-arrow">›</span></button>
 </div><div class="ped-collection-footnote">The three collections remain separate. Question records, answer keys and source labels are preserved.</div></div>`;
 }window.openPediatricCollections=function(ev){if(ev&&ev.stopPropagation)ev.stopPropagation();activeCollection='';activePreviousSystem='';appPage='specialties';renderAppDemo()};
 window.selectPediatricCollection=function(which){

@@ -76,7 +76,8 @@ const requiredFiles = [
   "js/37-study-hub-linkage.js",
   "js/38-all-once-pediatrics.js",
   "js/39-clinical-case-pediatrics.js",
-  "js/40-egyptian-book-pediatrics.js"
+  "js/40-egyptian-book-pediatrics.js",
+  "js/41-collections-integration.js"
 ];
 const requiredDirs = ["css", "js", "data"];
 const imageDirs = ["img", "img1", "img2"];
@@ -176,8 +177,8 @@ if (reviewLog && Array.isArray(reviewLog.entries)) {
   if (logChanged !== 45 || logNeedsReview !== 110) fail("Question review JSON counts do not match the master audit");
 }
 const pwaVersion = JSON.parse(readFileSync(join(root, "pwa-version.json"), "utf8"));
-if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.10-to-me.19") {
-  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.10-to-me.20");
+if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.10-to-me.22") {
+  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.10-to-me.22");
 }
 
 rmSync(output, { recursive: true, force: true });

@@ -22,7 +22,7 @@ const oldSpecialtiesView=specialtiesView;specialtiesView=function(){
  if(ebActive==='egyptian')return systemsView();
  let html=oldSpecialtiesView.apply(this,arguments);
  if(!ebActive&&html.indexOf('ped-collection-footnote')>=0&&html.indexOf('ped-collection-egyptian')<0){
- const card='<button type="button" class="ped-collection-card ped-collection-egyptian" onclick="selectPediatricCollection(\'egyptian\')"><div class="ped-collection-avatar ped-avatar-allonce"><span aria-hidden="true">📘</span></div><span class="ped-collection-copy"><span class="eyebrow">INDEPENDENT QUESTION BANK</span><b>Egyptian Book</b><small>Accepted questions, organized by medical system.</small><span class="ped-collection-count">'+bankQuestions().length.toLocaleString()+' questions</span></span><span class="ped-collection-arrow">›</span></button>';
+ const card='<button type="button" class="ped-collection-card ped-collection-egyptian" onclick="selectPediatricCollection(\'egyptian\')"><div class="ped-collection-avatar ped-avatar-allonce ped-avatar-icon ped-avatar-egbook" role="img" aria-label="Egyptian Book question bank">'+(window.__shbBankIcon?window.__shbBankIcon('egyptian'):'')+'</div><span class="ped-collection-copy"><span class="eyebrow">INDEPENDENT QUESTION BANK</span><b>Egyptian Book</b><small>Accepted questions, organized by medical system.</small><span class="ped-collection-count">'+bankQuestions().length.toLocaleString()+' questions</span></span><span class="ped-collection-arrow">›</span></button>';
  html=html.replace('</div><div class="ped-collection-footnote">',card+'</div><div class="ped-collection-footnote">');html=html.replace('The five collections remain separate.','The six collections remain separate.');
  }return html;
 };

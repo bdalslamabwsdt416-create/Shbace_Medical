@@ -75,7 +75,7 @@ if(USE_FULL_BANK){try{
   L.forEach((q,n)=>{const ltr=q.o.map(o=>o[0]);const kx=ltr.indexOf(q.a)<0;const k=Math.max(0,ltr.indexOf(q.a));
    let e='';if(q.c)e+='The answer key was revised (solved with AI). The original explanation below may refer to the previous key.\n';
    if(q.ai&&q.f)e+='AI review: multiple, none or undetermined correct answers. Check your textbook.\n';
-   e+=q.e||'';if(q.note)e+='\n'+q.note;
+   e+=q.e||'';if(q.note&&!/[\u0600-\u06FF]/.test(q.note))e+='\n'+q.note;
    FULL_QB.push({id:q.id,spec:key,topic:TID[(q.sy||'')+'\u0001'+q.t],tag:q.py?((q.rq||[]).length?'Repeated Question':(q.rc||[]).length?'Repeated Topic':'Previous Years'):'PDF Bank',kind:shbKind(q),
     q:q.q,o:q.o.map(o=>o[1]),ol:ltr,kx,k,ex:e.trim(),no:n+1,src:q.src||'',cs:q.cs||null,cm:!!q.cm,rq:q.rq||[],rc:q.rc||[],ai:!!q.ai,f:!!q.f,py:!!q.py})});
   spec[key]={q:L.length,label:sub,topics}});
@@ -141,9 +141,10 @@ const DEMO_QB=[
 const QB=BANK_ON?FULL_QB:DEMO_QB;
 /* SHB-BANK-SCOPE: Dr. Al-Joaki's bank (q.py !== true) vs Previous Questions (q.py === true).
    View-only filter used by Quiz, Search and Smart Review. Question records are never modified. */
-const BANK_OPTS=[['all','All banks'],['aj','Dr. Al-Joaki'],['previous','Previous'],['nelson','Nelson Textbook']];
-const bankValid=b=>['aj','previous','nelson'].includes(b)?b:'all';
-const bankOk=(q,b)=>b==='previous'?q.py===true:b==='nelson'?q.nl===true:b==='aj'?!q.py&&!q.nl:true;
+const BANK_OPTS=[['all','All banks'],['aj','Dr. Al-Joaki'],['previous','Previous Questions'],['nelson','Nelson Textbook'],['kasr','Kasr Al-Ainy'],['clinical','Clinical Cases'],['egyptian','Egyptian Book']];
+const bankOf=q=>!q?'aj':q.nl===true?'nelson':q.py===true?'previous':q.eb===true?'egyptian':q.cc===true?'clinical':q.ao===true?'kasr':'aj';
+const bankValid=b=>BANK_OPTS.some(o=>o[0]===b&&b!=='all')?b:'all';
+const bankOk=(q,b)=>b==='all'||bankOf(q)===b;
 const bankHas=(spec,b)=>b==='all'||QB.some(q=>q.spec===spec&&bankOk(q,b));
 const TAGS=BANK_ON?FULL_TAGS:['Clinical Case','Diagnosis','Investigation','Knowledge','Management','PDF Bank'];
 window.__bank={on:BANK_ON,total:QB.length,demo:DEMO_QB};
@@ -242,7 +243,7 @@ function filterItems(){const L=inTopic(),c={unanswered:0,correct:0,incorrect:0,b
 function tagItems(){const L=inTopic(),c={};L.forEach(q=>{[q.tag,q.kind].forEach(t=>{if(t)c[t]=(c[t]||0)+1})});
  const order=[...KIND_ORDER,...FULL_TAGS];Object.keys(c).forEach(t=>{if(!order.includes(t))order.push(t)});
  const out=[['all','All Tags ('+L.length+')']];order.forEach(t=>{if(c[t]||qs.tag===t)out.push([t,t+' ('+(c[t]||0)+')'])});return out}
-function filtersHTML(){return window.__SHB_PED_COLLECTION__==='nelson'?'':ddHTML('filter',filterItems(),qs.filter)+ddHTML('tag',tagItems(),qs.tag)}
+function filtersHTML(){return ddHTML('filter',filterItems(),qs.filter)+ddHTML('tag',tagItems(),qs.tag)}
 function ddHTML(id,items,val,label){const cur=(items.find(i=>i[0]===val)||items[0])[1];return `<div class="dd ${qs.dd===id?'open':''}" id="dd-${id}"><button type="button" class="dd-btn" aria-haspopup="listbox" aria-expanded="${qs.dd===id}" onclick="ddToggle('${id}',event)"><span>${esc(label||cur)}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="dd-list" role="listbox">${items.map(([v,l])=>`<button type="button" role="option" class="dd-item ${v===val?'sel':''}" onclick="ddPick('${id}','${String(v).replace(/'/g,"\\'")}',event)"><i></i><span>${esc(l)}</span></button>`).join('')}</div></div>`}
 window.ddToggle=function(id,e){e&&e.stopPropagation();qs.dd=qs.dd===id?null:id;refreshDD()};
 function refreshDD(){document.querySelectorAll('.dd').forEach(d=>{const o=d.id==='dd-'+qs.dd;d.classList.toggle('open',o);const b=d.querySelector('.dd-btn');b&&b.setAttribute('aria-expanded',o)})}
@@ -254,17 +255,34 @@ window.ddPick=function(id,v,e){e&&e.stopPropagation();qs.dd=null;
  else if(id==='xlayout'){exp.layout=v;paintExport()}
  refreshDD()};
 
-const exName=e=>String((EXAMS[e]||e)).replace("Previous Years' Exam Questions \u2014 ",'Exam ');
+/* Display-only: Arabic exam labels are shown in English; stored question data is never changed. */
+const AR_LBL={'فاينل':'Final','مقلوبة':'Reversed','مفاضلة':'Selection'};
+const enSrc=t=>String(t==null?'':t).replace(/فاينل|مقلوبة|مفاضلة/g,m=>AR_LBL[m]).replace(/\s{2,}/g,' ').trim();
+const exName=e=>enSrc(String((EXAMS[e]||e)).replace("Previous Years' Exam Questions \u2014 ",'Exam '));
 const repRef=a=>{const g={};a.forEach(([e,n])=>(g[e]=g[e]||[]).push(n));return Object.keys(g).map(e=>`<bdi>${esc(exName(e))}</bdi> \u2013 ${g[e].map(n=>'Q'+n).join(', ')}`).join(' \u00b7 ')};
-function cleanExplanationText(value){return String(value==null?'':value).replace(/(^|\r?\n)[ \t]*Curriculum alignment:[^\r\n]*/gi,'$1').replace(/\n{3,}/g,'\n\n').trim();}\nfunction nelsonDetails(q){
+/* Removes the "Curriculum alignment: ..." sentence from displayed explanations but keeps any "High-yield point / Review Notes" text that shares its line. */
+function cleanExplanationText(value){
+ return String(value==null?'':value).split(/\r?\n/).map(line=>/^[ \t]*Curriculum alignment:/i.test(line)?line.replace(/^[ \t]*Curriculum alignment:[\s\S]*?(?=\*\*High-yield|High-yield point|Review Notes:|$)/i,'').trim():line).join('\n').replace(/\*\*([^*\n]+)\*\*/g,'$1').replace(/\n{3,}/g,'\n\n').trim();
+}
+const EX_LABEL_RE=/^(High-yield point(?:\s*\/\s*Review Notes)?|Review Notes|Key point|Clinical pearl|Exam tip|Explanation)\s*:\s*/i;
+function fmtExplanationHTML(text){
+ return String(text||'').split(/\n{2,}/).map(p=>p.trim()).filter(Boolean).map(p=>{const m=p.match(EX_LABEL_RE);
+  if(!m)return '<p>'+esc(p)+'</p>';
+  const rest=p.slice(m[0].length).trim();
+  if(/^explanation$/i.test(m[1]))return rest?'<p>'+esc(rest)+'</p>':'';
+  return rest?'<p class="nl-sec"><b class="nl-lbl">'+esc(m[1])+'</b>'+esc(rest)+'</p>':''}).join('');
+}
+function nelsonDetails(q){
  if(!q||(!q.nl&&!q.ao&&!q.cc)||!q.more)return '';
  const source=q.eb?(q.ebSourceFile||'Egyptian Book source'):q.cc?(q.ccSource||'Accepted Clinical Case source'):q.ao?(q.aoSource||'Source details unavailable'):'Nelson Textbook of Pediatrics.';
+ let moreBody=cleanExplanationText(q.more).replace(/^Explanation\s*:\s*/i,'');const lead=cleanExplanationText(q.ex).replace(/^Explanation\s*:\s*/i,'');
+ if(lead&&moreBody.startsWith(lead))moreBody=moreBody.slice(lead.length).trim();
  const alt=q.ao&&!q.eb&&q.aoAltSource?'<p class="nl-source">Also found in: '+esc(q.aoAltSource)+'</p>':'';
  const modelAnswer=q.cc&&q.ccOpen&&q.ccAnswer?'<p class="nl-source"><b>Model answer:</b> '+esc(q.ccAnswer)+'</p>':'';
- return '<details class="nl-more"><summary>'+'Read More'+'</summary><div class="nl-more-body">'+modelAnswer+esc(cleanExplanationText(q.more))+'<p class="nl-source">'+'Source: '+esc(source)+'</p>'+alt+'</div></details>';
+ return '<details class="nl-more"><summary>'+'Read More'+'</summary><div class="nl-more-body">'+modelAnswer+fmtExplanationHTML(moreBody)+'<p class="nl-source">'+'Source: '+esc(source)+'</p>'+alt+'</div></details>';
 }
 function qExtra(q){if(!BANK_ON||q.nl||q.ao||q.cc)return '';let x='';
- if(q.py){if(q.src)x+=`<div class="qsrc">Source: <bdi>${esc(q.src)}</bdi></div>`;if(q.cs)x+=`<div class="qcase"><b>${esc(q.cs[0])}</b>\n${esc(q.cs[1])}</div>`;if(q.cm)x+='<div class="qrep"><span class="qflag w">Case text not in source file \u2013 classified by explanation</span></div>';
+ if(q.py){if(q.src)x+=`<div class="qsrc">Source: <bdi>${esc(enSrc(q.src))}</bdi></div>`;if(q.cs)x+=`<div class="qcase"><b>${esc(q.cs[0])}</b>\n${esc(q.cs[1])}</div>`;if(q.cm)x+='<div class="qrep"><span class="qflag w">Case text not in source file \u2013 classified by explanation</span></div>';
   if(q.rq.length)x+=`<div class="qrep"><span class="qflag r">Repeated Question</span> also appears in: ${repRef(q.rq)}</div>`;if(q.rc.length)x+=`<div class="qrep"><span class="qflag w">Repeated Topic/Concept</span> also tested in: ${repRef(q.rc)}</div>`}
  if(q.f)x+='<span class="qflag w">Needs review</span>';if(q.ai)x+='<span class="qflag">Solved with AI</span>';
  if(qUnsure(q))x+=`<div class="qwarn" role="note"><b>\u26a0 Needs Review / Verification</b><span>${q.kx?'The answer key does not match any option \u2014 do not rely on it.':'This question or its answer key is not confirmed. Check your textbook before relying on the answer.'}</span></div>`;
@@ -289,7 +307,7 @@ function cardHTML(q,n,single){
 </div>`;
  const note=qs.noteOpen[q.id]?`<div class="qnote"><textarea placeholder="Write your note…" oninput="qNoteSave('${q.id}',this.value)">${esc(S.notes[q.id]||'')}</textarea></div>`:'';
  const sname=a?(a.ok?'Correct':'Incorrect'):'Unanswered';
- return `<article class="qcard${(q.nl||q.ao)?' nl-clean':''}" id="qc-${q.id}" data-id="${q.id}">${q.ao?'':`<div class="qtop"><span class="qid">${q.id} · ${q.cc?(q.ccOpen?'open-ended':'clinical case'):'mcq'}</span><span class="qstat s-${st}">${sname}</span><span class="qtag">${esc(q.tag)}</span>${q.kind?`<span class="qtag">${esc(q.kind)}</span>`:''}${q.nlClass?`<span class="qtag">${esc(q.nlClass)}</span>`:''}</div>`}${(q.nl||q.ao)?'':`<div class="qtopic">${esc(q.cc?(q.ccTopic||'Clinical Case'):(TOPIC_NAME[q.topic]||''))}</div>`}${qExtra(q)}<h3 class="qstem">Q${n}. ${esc(QSTEM(q))}</h3><div class="qopts">${opts}</div>${react}${acts}${note}</article>`}
+ return `<article class="qcard${(q.nl||q.ao)?' nl-clean':''}" id="qc-${q.id}" data-id="${q.id}">${qExtra(q)}<h3 class="qstem">Q${n}. ${esc(QSTEM(q))}</h3><div class="qopts">${opts}</div>${react}${acts}${note}</article>`}
 
 function bankBody(){
  const list=filtered();
@@ -563,7 +581,7 @@ function tokRe(tok){const w=tok.filter(x=>x.length>1).map(nz);if(!w.length)retur
  const alt=w.map(t=>/[؀-ۿ]/.test(t)?[...t].map(c=>(AR_CLS[c]||gEsc(c))+'['+AR_MARKS+']*').join(''):gEsc(t));
  return new RegExp('('+alt.join('|')+')','ig')}
 function hl(t,tok){t=String(t==null?'':t);const re=tokRe(tok);if(!re)return esc(t);return t.split(re).map((p,i)=>i%2?'<mark>'+esc(p)+'</mark>':esc(p)).join('')}
-const gSrcGroup=s=>String(s||'').replace(/\s*[–—-]\s*Q\s*\d+\s*$/i,'').trim()||'Unknown source';
+const gSrcGroup=s=>enSrc(s).replace(/\s*[–—-]\s*Q\s*\d+\s*$/i,'').trim()||'Unknown source';
 function gIndex(){if(!gIdx)gIdx=QB.map(q=>{const nq=nz(q.q),no=nz(q.o.join(' \n')),ne=nz(q.ex||''),ns=nz(q.src||''),nt=nz(TOPIC_NAME[q.topic]||''),ny=nz((q.sy||'')+' '+(SPEC_NAME[q.spec]||q.spec)),ng=nz(q.id+' '+q.tag);
  return {q,sg:gSrcGroup(q.src),nq,no,ne,ns,nt,ny,ng,hay:[ng,nq,no,ne,ns,nt,ny].join(' \n')}});return gIdx}
 function gSources(){const m={};gIndex().forEach(x=>{if(bankOk(x.q,gBank))m[x.sg]=(m[x.sg]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])}
@@ -859,7 +877,7 @@ function srSid(){return 's'+Date.now().toString(36)+Math.floor(Math.random()*129
 function srM0(ids){const M=srTopicStats(),m={};ids.forEach(id=>{const q=qmap.get(id);if(q&&!m[q.topic]){const e=M.get(q.topic);if(e)m[q.topic]={p:e.pct,s:e.status}}});return m}
 function srNewSession(o){
  if(SR3.sess&&Object.keys(SR3.sess.first).length)srFinish(true); /* never lose a half-finished session */
- SR3.sess=Object.assign({sid:srSid(),start:Date.now(),mode:'topic',topic:null,label:'Review',plan:[],queue:[],first:{},rt:{},att:[],n0:0,m0:{},cur:null},o);
+ srIntroMark();SR3.sess=Object.assign({sid:srSid(),start:Date.now(),mode:'topic',topic:null,label:'Review',plan:[],queue:[],first:{},rt:{},att:[],n0:0,m0:{},cur:null},o);
  SR3.sess.n0=SR3.sess.plan.length;SR3.sess.queue=SR3.sess.plan.slice();SR3.sess.m0=srM0(SR3.sess.plan);
  SU={qid:null};SRSUM=null;srRun=true;srTab='topics';srSave();renderAppDemo();
  requestAnimationFrame(()=>{const sc=document.getElementById('phoneContent');if(sc)sc.scrollTop=0})}
@@ -1101,10 +1119,12 @@ function srTopicList(){const M=srTopicStats(),q=SRUI.q.trim().toLowerCase(),acti
   const due=g.items.reduce((a,e)=>a+e.due,0),avail=g.items.reduce((a,e)=>a+srAvailable(e),0);
   return `<section class="sr3-grp${open?' open':''}" data-spec="${esc(g.spec)}"><button type="button" class="sr3-gh" aria-expanded="${open}" onclick="srGroup('${esc(g.spec)}')"><span class="sr3-gt"><b>${esc(g.label)}</b><small>${g.items.length} topics · ${avail} available${selected?' · '+selected+' selected':''}</small></span><span class="sr3-gp" style="color:${srRingCol(p,cr>0)}">${p}%</span><span class="sr3-gc">${srI.chev}</span></button>
    ${open?`<div class="sr3-gb">${g.items.map(srTopicCard).join('')}</div>`:''}</section>`}).join('')}
+function srIntroSeen(){try{return localStorage.getItem('shb_sr_intro_seen_v1')==='1'||Object.keys(SR3.q||{}).length>0}catch(e){return false}}
+function srIntroMark(){try{localStorage.setItem('shb_sr_intro_seen_v1','1')}catch(e){}}
 function srTopicsHTML(){const T=srTotals(),session=SR3.sess,chosen=srSelectedSummary();let h='';
  if(session&&Object.keys(session.first).length+session.queue.length>0){const done=Object.keys(session.first).length;
   h+=`<div class="card sr3-resume"><div><b>Session in progress</b><small>${esc(session.label)} · ${session.queue.length} left · ${done} answered</small></div><div class="sr3-rb"><button type="button" class="btn primary" onclick="srResume()">Resume</button><button type="button" class="btn" onclick="srEnd()">End</button></div></div>`}
- h+=`<section class="sr3-builder-hero"><div><span class="sr3-builder-kicker">SMART REVIEW · SESSION BUILDER</span><h2>Build your review session</h2><p>Select one or more topics, then choose how many questions to take from each.</p></div></section>
+ h+=(srIntroSeen()?'':`<section class="sr3-builder-hero"><div><span class="sr3-builder-kicker">SMART REVIEW · SESSION BUILDER</span><h2>Build your review session</h2><p>Select one or more topics, then choose how many questions to take from each.</p></div></section>`)+`
  <section class="sr3-selected-panel"><div class="sr3-selected-head"><div><span class="sr3-builder-kicker">YOUR SESSION</span><b>${chosen.list.length} topic${chosen.list.length===1?'':'s'} selected</b><small>${chosen.total} question${chosen.total===1?'':'s'} in this session</small></div><button type="button" class="btn sr3-clear-selection" onclick="srClearSelection()" ${chosen.list.length?'':'disabled'}>Clear</button></div>
  ${chosen.list.length?`<div class="sr3-selected-chips" id="srSelectedChips">${chosen.list.map(x=>`<span>${esc(x.e.t.name)} <b>${x.count}</b></span>`).join('')}</div>`:`<p class="sr3-selection-empty">No topics selected yet. Select any topic below to add it to your session.</p>`}
  <button type="button" class="btn primary block sr3-start-selected" onclick="srStartSelected()" ${chosen.total?'':'disabled'}>Start session · ${chosen.total} question${chosen.total===1?'':'s'}</button>
@@ -1805,13 +1825,11 @@ function confirmBox(o,fn){const old=$('#cfwrap');old&&old.remove();const h=docum
  ($('.phone')||document.body).appendChild(h);$('#cfOk').onclick=()=>{cfClose();fn()}}
 window.cfClose=function(){const h=$('#cfwrap');h&&h.remove()};
 
-let rTopic=1;
+let rBank='all',rSys='all',rTop=0;
 function settingsView(){
  const answers=Object.values(S.ans),n=answers.length,ok=answers.filter(a=>a.ok).length;
  const seg=(k,items)=>`<div class="seg wide">${items.map(([v,l])=>`<button type="button" class="${SET[k]===v?'on':''}" onclick="setSet('${k}','${v}')">${l}</button>`).join('')}</div>`;
  const row=(t,d,c)=>`<div class="setrow"><b>${t}</b><small>${d}</small>${c}</div>`;
- const topics=[];Object.values(REAL.spec).forEach(sp=>sp.topics.forEach(t=>topics.push([String(t[0]),t[1]])));
- const tn=QB.filter(q=>q.topic===rTopic&&S.ans[q.id]).length;
  const last=SET.lastBackup?'Last backup: '+new Date(SET.lastBackup).toLocaleString():'No backup created yet.';
  return `${appHeader('Settings')}<div class="rs"><h1>Settings</h1><p class="sub">Appearance, backup and study progress</p>
  <div class="card setcard"><h3>Appearance</h3>
@@ -1823,11 +1841,25 @@ function settingsView(){
   <div class="setrow"><b>Last Onboarding Page</b><small>When ON, the final “Your journey starts here” page is shown at app start. Turn it OFF to skip it.</small><button type="button" class="drsw ${SET.obLast==='on'?'on':''}" role="switch" aria-checked="${SET.obLast==='on'}" aria-label="Last Onboarding Page" onclick="setSet('obLast','${SET.obLast==='on'?'off':'on'}')"><i></i><span>${SET.obLast==='on'?'ON':'OFF'}</span></button></div></div>
  <input type="file" id="bkFile" accept=".json,application/json" hidden onchange="restoreBackup(this)">
  <div class="card setcard"><h3>Study progress</h3><p class="meta">${n} answered · ${ok} correct</p><p class="meta">Reset clears answers and progress only. Saved questions, notes, reports and Smart Review are kept.</p>
-  <div class="setrow"><b>Reset one topic</b>${ddHTML('rtopic',topics,String(rTopic))}<button type="button" class="btn danger block" style="margin-top:10px" ${tn?'':'disabled'} onclick="resetTopicAsk()">Reset topic progress${tn?` (${tn})`:''}</button></div>
+  ${resetScopeHTML()}
   <div class="setrow"><b>Reset everything</b><button type="button" class="btn danger block" style="margin-top:10px" ${n?'':'disabled'} onclick="resetAllAsk()">Reset all study progress${n?` (${n})`:''}</button></div></div></div>`}
-const __dp=window.ddPick;window.ddPick=function(id,v,e){if(id==='rtopic'){e&&e.stopPropagation();qs.dd=null;rTopic=+v;renderAppDemo();return}__dp(id,v,e)};
-window.resetTopicAsk=function(){const ids=QB.filter(q=>q.topic===rTopic&&S.ans[q.id]).map(q=>q.id);if(!ids.length)return;
- confirmBox({title:'Reset topic progress?',text:`This clears ${ids.length} answer${ids.length>1?'s':''} in “${TOPIC_NAME[rTopic]}”.`,detail:'Saved questions, notes, reports and Smart Review are kept. This cannot be undone.',ok:'Reset topic',danger:true},()=>{ids.forEach(i=>delete S.ans[i]);qs.streak=0;save();renderAppDemo();toast(`Topic progress reset (${ids.length})`)})};
+const rsPool=()=>QB.filter(q=>bankOk(q,rBank)&&(rSys==='all'||q.spec===rSys)&&(!rTop||q.topic===rTop));
+const rsSort=(a,b)=>String(a[1]).localeCompare(String(b[1]));
+function rsSystems(){const m=new Map();QB.forEach(q=>{if(bankOk(q,rBank)&&!m.has(q.spec))m.set(q.spec,SPEC_NAME[q.spec]||q.spec)});return [...m].sort(rsSort)}
+function rsTopics(){if(rSys==='all')return [];const m=new Map();QB.forEach(q=>{if(bankOk(q,rBank)&&q.spec===rSys&&q.topic&&TOPIC_NAME[q.topic])m.set(q.topic,TOPIC_NAME[q.topic])});return [...m].sort(rsSort)}
+function rsScope(){return rTop?(TOPIC_NAME[rTop]||'this topic'):rSys!=='all'?(SPEC_NAME[rSys]||rSys):rBank==='all'?'all banks':((BANK_OPTS.find(o=>o[0]===rBank)||[0,rBank])[1])}
+function resetScopeHTML(){
+ const sys=rsSystems();if(rSys!=='all'&&!sys.some(x=>x[0]===rSys)){rSys='all';rTop=0}
+ const top=rsTopics(),n=rsPool().filter(q=>S.ans[q.id]).length;
+ return `<div class="setrow"><b>Reset by bank, system or topic</b><small>Pick a bank first, then a system and, where the bank has topics, a topic.</small>
+  <small class="rs-lbl">Bank</small>${ddHTML('rbank',BANK_OPTS,rBank)}
+  <small class="rs-lbl">System</small>${ddHTML('rsys',[['all','All systems']].concat(sys),rSys)}
+  ${top.length?`<small class="rs-lbl">Topic</small>${ddHTML('rtop',[['0','All topics']].concat(top.map(x=>[String(x[0]),x[1]])),String(rTop))}`:''}
+  <button type="button" class="btn danger block" style="margin-top:10px" ${n?'':'disabled'} onclick="resetScopeAsk()">Reset ${esc(rsScope())} progress${n?` (${n})`:''}</button></div>`}
+const __dp=window.ddPick;window.ddPick=function(id,v,e){if(id==='rbank'||id==='rsys'||id==='rtop'){e&&e.stopPropagation();qs.dd=null;if(id==='rbank'){rBank=bankValid(v);rSys='all';rTop=0}else if(id==='rsys'){rSys=String(v);rTop=0}else rTop=Number(v)||0;renderAppDemo();return}__dp(id,v,e)};
+window.resetScopeAsk=function(){const ids=rsPool().filter(q=>S.ans[q.id]).map(q=>q.id);if(!ids.length)return;const scope=rsScope();
+ confirmBox({title:'Reset progress?',text:`This clears ${ids.length} answer${ids.length>1?'s':''} in “${scope}”.`,detail:'Saved questions, notes, reports and Smart Review are kept. This cannot be undone.',ok:'Reset',danger:true},()=>{ids.forEach(i=>delete S.ans[i]);qs.streak=0;save();renderAppDemo();toast(`Progress reset (${ids.length})`)})};
+window.resetTopicAsk=window.resetScopeAsk;
 window.resetAllAsk=function(){const n=Object.keys(S.ans).length;if(!n)return;
  confirmBox({title:'Reset all study progress?',text:`This clears all ${n} answer${n>1?'s':''} and your progress.`,detail:'Saved questions, notes, reports and Smart Review are kept. This cannot be undone. Export a backup first if unsure.',ok:'Reset all',danger:true},()=>{S.ans={};qs.streak=0;save();renderAppDemo();toast('All study progress reset')})};
 
@@ -2113,30 +2145,55 @@ const qzSave=()=>LS.set(QKEY,QZ);
 const QBY=new Map(QB.map(q=>[q.id,q]));
 QZ.attempts.forEach(a=>{a.items=a.items.filter(i=>isObj(i)&&QBY.has(i.id))});
 if(QZ.active)QZ.active.ids=QZ.active.ids.filter(id=>QBY.has(id));if(QZ.active&&!QZ.active.ids.length)QZ.active=null;
-let QC=Object.assign({scope:'all',bank:'all',specs:[],topics:[],filt:'any',mode:'practice',fb:'instant',order:'random',count:20,mins:0},(()=>{const v=LS.get(QCKEY,{});return isObj(v)?v:{}})());
-(()=>{const E={scope:['all','sel','custom'],bank:['all','aj','previous'],filt:['any','new','wrong','saved'],mode:['practice','timed'],fb:['instant','end'],order:['random','bank']};Object.keys(E).forEach(k=>{if(!E[k].includes(QC[k]))QC[k]=E[k][0]});
- QC.specs=Array.isArray(QC.specs)?QC.specs.filter(s=>REAL.spec[s]):[];QC.topics=Array.isArray(QC.topics)?QC.topics.filter(t=>TOPIC_NAME[t]):[];
+let QC=Object.assign({scope:'all',bank:'all',banks:[],specs:[],topics:[],filt:'any',mode:'practice',fb:'instant',order:'random',count:20,mins:0},(()=>{const v=LS.get(QCKEY,{});return isObj(v)?v:{}})());
+(()=>{const E={scope:['all','sel','custom'],filt:['any','new','wrong','saved'],mode:['practice','timed'],fb:['instant','end'],order:['random','bank']};Object.keys(E).forEach(k=>{if(!E[k].includes(QC[k]))QC[k]=E[k][0]});
+ QC.banks=Array.isArray(QC.banks)?[...new Set(QC.banks.filter(b=>bankValid(b)===b&&b!=='all'))]:((QC.bank&&bankValid(QC.bank)===QC.bank&&QC.bank!=='all')?[QC.bank]:[]);QC.bank=QC.banks.length===1?QC.banks[0]:'all';
+ QC.specs=Array.isArray(QC.specs)?QC.specs.filter(s=>typeof s==='string'&&s):[];QC.topics=Array.isArray(QC.topics)?QC.topics.filter(t=>TOPIC_NAME[t]):[];
  QC.count=Number.isInteger(QC.count)&&QC.count>0?QC.count:20;QC.mins=Number.isInteger(QC.mins)&&QC.mins>0?QC.mins:0})();
 const qcSave=()=>LS.set(QCKEY,QC);
 let qzViewId=null,qzPal=false,qzRevF='all',qzAnim=false,qzBack=null;
-function qzPool(cfg=QC){if(!gradeHasPediatrics())return [];let l=QB;
+/* ---- Quiz scope helpers: several banks, systems and topics can be combined ---- */
+const SYS_CANON=[['cardio','Cardiovascular System',/cardio/i],['respiratory','Respiratory System',/respir/i],['endocrine','Endocrinology',/endocr/i],['git','Gastrointestinal Tract',/gastro|(^|-)git$/i],['hepatology','Hepatology',/hepat/i],['heme','Haematology',/ha?emat/i],['neonatology','Neonatology',/neonat/i],['nephrology','Nephrology',/nephro/i],['neuro','Neurology / CNS',/neuro|^cns$/i],['genetics','Genetics',/genet/i],['growth','Growth & Development',/growth/i],['nutrition','Nutrition',/nutrit/i],['infectious','Infectious Diseases',/infect/i],['rheum','Rheumatology',/rheum/i],['immunology','Immunology & Allergy',/immun|allerg/i],['emergency','Emergency & Toxicology',/emerg|toxic/i]];
+const sysGroupKey=sp=>{const m=SYS_CANON.find(c=>c[2].test(String(sp)));return m?m[0]:String(sp)};
+const cfgBanks=cfg=>Array.isArray(cfg.banks)?cfg.banks:((cfg.bank&&cfg.bank!=='all')?[cfg.bank]:[]);
+const bankIn=(q,banks)=>!banks.length||banks.includes(bankOf(q));
+let _qsg=null,_qsgN=-1;
+function quizGroups(){ /* canonical systems across every bank: {key,name,ids:[raw spec ids],topics:[[id,name]]} */
+ if(_qsg&&_qsgN===QB.length)return _qsg;const m=new Map();
+ QB.forEach(q=>{if(!q||!q.spec)return;const k=sysGroupKey(q.spec);if(!m.has(k)){const c=SYS_CANON.find(x=>x[0]===k);m.set(k,{key:k,name:c?c[1]:(SPEC_NAME[q.spec]||q.spec),ids:[],topics:[]})}const g=m.get(k);if(!g.ids.includes(q.spec))g.ids.push(q.spec)});
+ m.forEach(g=>{g.ids.forEach(id=>{const sp=REAL.spec[id];if(sp)sp.topics.forEach(t=>{if(!g.topics.some(x=>x[0]===t[0]))g.topics.push([t[0],t[1]])})})});
+ _qsg=[...m.values()].sort((a,b)=>a.name.localeCompare(b.name));_qsgN=QB.length;return _qsg}
+const groupHas=(g,banks)=>QB.some(q=>g.ids.includes(q.spec)&&bankIn(q,banks));
+/* Banks that carry no topic labels are matched to a chosen topic by its name inside the question text. */
+const _kw=new Map(),_hay=new WeakMap();
+const KW_STOP=new Set(['disorders','disease','diseases','other','general','management','syndrome','infections','infection','children','congenital','acquired','problems']);
+function topicKw(id){if(_kw.has(id))return _kw.get(id);const nm=String(TOPIC_NAME[id]||'');
+ const parts=nm.split(/[,&\/()\u2013\u2014:;]| and /i).map(x=>x.trim().toLowerCase()).filter(x=>x.length>=4&&!KW_STOP.has(x));
+ const re=parts.length?new RegExp('(^|[^a-z])('+parts.map(x=>x.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')'):null;_kw.set(id,re);return re}
+function qHay(q){let h=_hay.get(q);if(h==null){h=[q.q,(q.o||[]).join(' '),q.ex||'',q.aoTitle||'',q.ccTopic||''].join(' \n ').toLowerCase();_hay.set(q,h)}return h}
+function topicMatch(q,tids){return tids.some(t=>{const re=topicKw(t);return re&&re.test(qHay(q))})}
+const topicSpecOf=t=>Object.keys(REAL.spec).find(k=>REAL.spec[k].topics.some(x=>x[0]===t));
+function qzPool(cfg=QC){if(!gradeHasPediatrics())return [];let l=QB;const banks=cfgBanks(cfg);
  if(cfg.scope==='sel'){
-  const tsp=new Set((cfg.topics||[]).filter(t=>(cfg.specs||[]).some(sp=>REAL.spec[sp]&&REAL.spec[sp].topics.some(x=>x[0]===t))));
-  const hasT=sp=>REAL.spec[sp].topics.some(x=>tsp.has(x[0]));
-  l=QB.filter(q=>(cfg.specs||[]).includes(q.spec)&&(!hasT(q.spec)||tsp.has(q.topic)));
+  const specs=new Set((cfg.specs||[]).map(sysGroupKey)),by={};
+  (cfg.topics||[]).forEach(t=>{const sp=topicSpecOf(t);if(!sp)return;const k=sysGroupKey(sp);if(specs.has(k))(by[k]=by[k]||[]).push(t)});
+  l=QB.filter(q=>{if(!specs.has(sysGroupKey(q.spec)))return false;const sel=by[sysGroupKey(q.spec)];if(!sel)return true;if(sel.includes(q.topic))return true;if(TOPIC_NAME[q.topic])return false;return topicMatch(q,sel)});
  }else if(cfg.scope==='custom'){
   l=QB.filter(q=>cfg.filt==='any'||(cfg.filt==='new'&&!S.ans[q.id])||(cfg.filt==='wrong'&&S.ans[q.id]&&!S.ans[q.id].ok)||(cfg.filt==='saved'&&S.saved[q.id]));
  }
- return cfg.bank&&cfg.bank!=='all'?l.filter(q=>bankOk(q,cfg.bank)):l;
+ return banks.length?l.filter(q=>bankIn(q,banks)):l;
 }
 const qzEff=(p,cfg=QC)=>Math.max(1,Math.min(cfg.count,p));
-const qzClone=cfg=>Object.assign({},cfg,{specs:(cfg.specs||[]).slice(),topics:(cfg.topics||[]).slice()});
+const qzClone=cfg=>Object.assign({},cfg,{banks:(cfg.banks||[]).slice(),specs:(cfg.specs||[]).slice(),topics:(cfg.topics||[]).slice()});
 let QCD=qzClone(QC),QCD_DIRTY=false;
 function qcdPool(){return qzPool(QCD)}
 function qcdUpdateUI(){
  document.querySelectorAll('[data-qcd-key]').forEach(el=>{const k=el.dataset.qcdKey,v=el.dataset.qcdValue;el.classList.toggle('on',Array.isArray(QCD[k])?QCD[k].includes(v):String(QCD[k])===String(v));});
- document.querySelectorAll('[data-qcd-spec]').forEach(el=>{el.classList.toggle('on',QCD.specs.includes(el.dataset.qcdSpec));el.style.display=bankHas(el.dataset.qcdSpec,QCD.bank)?'':'none'});
- document.querySelectorAll('[data-qcd-topic-panel]').forEach(el=>{el.hidden=!QCD.specs.includes(el.dataset.qcdTopicPanel)});
+ const QG=quizGroups(),QB_=cfgBanks(QCD),gOn=g=>g.ids.some(id=>QCD.specs.includes(id));
+ document.querySelectorAll('[data-qcd-bank]').forEach(el=>{const k=el.dataset.qcdBank;el.classList.toggle('on',k==='all'?!QB_.length:QB_.includes(k))});
+ document.querySelectorAll('[data-qcd-group]').forEach(el=>{const g=QG.find(x=>x.key===el.dataset.qcdGroup);if(!g)return;el.classList.toggle('on',gOn(g));el.style.display=groupHas(g,QB_)?'':'none'});
+ document.querySelectorAll('[data-qcd-topic-panel]').forEach(el=>{const g=QG.find(x=>x.key===el.dataset.qcdTopicPanel);el.hidden=!(g&&gOn(g)&&groupHas(g,QB_))});
+ document.querySelectorAll('[data-qcd-topic-count]').forEach(el=>{const g=QG.find(x=>x.key===el.dataset.qcdTopicCount);if(!g)return;const n=g.topics.filter(t=>QCD.topics.includes(t[0])).length;el.textContent=n?n+' selected':'all'});
  document.querySelectorAll('[data-qcd-topic]').forEach(el=>{el.checked=QCD.topics.includes(Number(el.dataset.qcdTopic));});
  document.querySelectorAll('[data-qcd-panel]').forEach(el=>{el.hidden=el.dataset.qcdPanel!==QCD.scope});
  const timer=document.getElementById('qcd-timer');if(timer)timer.hidden=QCD.mode!=='timed';
@@ -2146,12 +2203,13 @@ function qcdUpdateUI(){
  const apply=document.getElementById('qcd-apply');if(apply)apply.classList.toggle('pending',QCD_DIRTY);
  const begin=document.getElementById('qcd-start');if(begin){begin.disabled=QCD_DIRTY||!available;begin.textContent=`Start quiz · ${chosen} questions${QCD.mode==='timed'?' · '+(QCD.mins||chosen)+' min':''}`;}
 }
-window.qcDraftSet=function(k,v){if(!['scope','bank','mode','fb','order','filt'].includes(k))return;if(k==='bank')v=bankValid(v);QCD[k]=v;
- if(k==='bank'){QCD.specs=QCD.specs.filter(sp=>bankHas(sp,v));const okT=new Set();QCD.specs.forEach(sp=>REAL.spec[sp].topics.forEach(t=>okT.add(t[0])));QCD.topics=QCD.topics.filter(t=>okT.has(t))}
- QCD_DIRTY=true;qcdUpdateUI()};
-window.qcDraftToggle=function(k,v){if(k==='specs'){
-  const i=QCD.specs.indexOf(v);if(i<0)QCD.specs.push(v);else{QCD.specs.splice(i,1);const ids=REAL.spec[v].topics.map(t=>t[0]);QCD.topics=QCD.topics.filter(t=>!ids.includes(t));}
- }else if(k==='topics'){const n=Number(v),i=QCD.topics.indexOf(n);if(i<0)QCD.topics.push(n);else QCD.topics.splice(i,1);}else return;
+window.qcDraftSet=function(k,v){if(!['scope','mode','fb','order','filt'].includes(k))return;QCD[k]=v;QCD_DIRTY=true;qcdUpdateUI()};
+function qcdPrune(){const QG=quizGroups(),b=cfgBanks(QCD),keep=new Set();QG.forEach(g=>{if(groupHas(g,b))g.ids.forEach(id=>keep.add(id))});QCD.specs=QCD.specs.filter(id=>keep.has(id));const okT=new Set();QG.forEach(g=>{if(g.ids.some(id=>QCD.specs.includes(id)))g.topics.forEach(t=>okT.add(t[0]))});QCD.topics=QCD.topics.filter(t=>okT.has(t))}
+window.qcDraftToggle=function(k,v){
+ if(k==='banks'){if(v==='all')QCD.banks=[];else{const i=QCD.banks.indexOf(v);if(i<0)QCD.banks.push(v);else QCD.banks.splice(i,1)}QCD.bank=QCD.banks.length===1?QCD.banks[0]:'all';qcdPrune()}
+ else if(k==='group'){const g=quizGroups().find(x=>x.key===v);if(!g)return;if(g.ids.some(id=>QCD.specs.includes(id))){QCD.specs=QCD.specs.filter(id=>!g.ids.includes(id));const tids=g.topics.map(t=>t[0]);QCD.topics=QCD.topics.filter(t=>!tids.includes(t))}else g.ids.forEach(id=>{if(!QCD.specs.includes(id))QCD.specs.push(id)})}
+ else if(k==='topics'){const n=Number(v),i=QCD.topics.indexOf(n);if(i<0)QCD.topics.push(n);else QCD.topics.splice(i,1)}
+ else return;
  QCD_DIRTY=true;qcdUpdateUI();
 };
 window.qcDraftInput=function(k,el){const v=String(el.value||'').trim();if(k==='count')QCD.count=v?Math.max(1,Math.min(5000,parseInt(v,10)||1)):1;else if(k==='mins')QCD.mins=v?Math.max(1,Math.min(600,parseInt(v,10)||1)):0;else return;QCD_DIRTY=true;qcdUpdateUI()};
@@ -2162,20 +2220,22 @@ window.qcApplyDraft=function(){
  QC=qzClone(QCD);qcSave();QCD=qzClone(QC);QCD_DIRTY=false;const countInput=document.getElementById('qzCount');if(countInput)countInput.value=QCD.count;qcdUpdateUI();
  const st=document.getElementById('qcd-status');if(st)st.textContent='✓ Settings applied and saved. Your quiz is ready.';
 };
-const qcdSeg=(key,items)=>`<div class="seg wide">${items.map(([v,l])=>`<button type="button" data-qcd-key="${key}" data-qcd-value="${v}" class="${QCD[key]===v?'on':''}" onclick="qcDraftSet('${key}','${v}')">${l}</button>`).join('')}</div>`;
+const qcdSeg=(key,items,wrap)=>`<div class="seg wide"${wrap?' style="flex-wrap:wrap"':''}>${items.map(([v,l])=>`<button type="button" data-qcd-key="${key}" data-qcd-value="${v}" class="${QCD[key]===v?'on':''}" onclick="qcDraftSet('${key}','${v}')">${l}</button>`).join('')}</div>`;
 quizView=function(){
  QCD=qzClone(QC);QCD_DIRTY=false;
  const act=QZ.active,pool=qcdPool(),n=pool.length?qzEff(pool.length,QCD):0,mins=QCD.mins||n;
  let resume='';if(act){const done=Object.keys(act.ans).length;resume=`<div class="card setcard qz-resume"><h3>Quiz in progress</h3><p class="meta">${act.ids.length} questions · ${done} answered · ${act.mode==='timed'?'Timed':'Practice'}</p><div class="setbtns"><button type="button" class="btn primary" onclick="qzResume()">Resume</button><button type="button" class="btn danger" onclick="qzDiscard()">Discard</button></div></div>`}
- const specs=gradeHasPediatrics()?Object.keys(REAL.spec):[];
- const specButtons=specs.map(sp=>`<button type="button" class="chip qcd-spec${QCD.specs.includes(sp)?' on':''}" data-qcd-spec="${sp}"${bankHas(sp,QCD.bank)?'':' style="display:none"'} onclick="qcDraftToggle('specs','${sp}')">${esc(SPEC_NAME[sp]||sp)}</button>`).join('');
- const topicPanels=specs.map(sp=>`<details class="qzd qcd-topics" data-qcd-topic-panel="${sp}" ${QCD.specs.includes(sp)?'':'hidden'}><summary>${esc(SPEC_NAME[sp]||sp)} topics <small>${REAL.spec[sp].topics.filter(t=>QCD.topics.includes(t[0])).length||'all'} selected</small></summary>${REAL.spec[sp].topics.map(t=>`<label class="qzt"><input type="checkbox" data-qcd-topic="${t[0]}" ${QCD.topics.includes(t[0])?'checked':''} onchange="qcDraftToggle('topics',${t[0]})"><span>${esc(t[1])}</span></label>`).join('')}<p class="meta">No topic selected in this specialty means all its topics are included.</p></details>`).join('');
+const QG=gradeHasPediatrics()?quizGroups():[],QBK=cfgBanks(QCD),gOn=g=>g.ids.some(id=>QCD.specs.includes(id));
+ const bankIcon=k=>{const i=window.__shbBankIcon?window.__shbBankIcon(k):'';return i?`<i class="qbk-ic">${i}</i>`:''};
+ const bankChips=[['all','All banks']].concat(BANK_OPTS.filter(o=>o[0]!=='all')).map(([k,l])=>`<button type="button" class="chip qcd-bank${(k==='all'?!QBK.length:QBK.includes(k))?' on':''}" data-qcd-bank="${k}" aria-pressed="${k==='all'?!QBK.length:QBK.includes(k)}" onclick="qcDraftToggle('banks','${k}')">${bankIcon(k)}<span>${esc(l)}</span></button>`).join('');
+ const specButtons=QG.map(g=>`<button type="button" class="chip qcd-spec${gOn(g)?' on':''}" data-qcd-group="${esc(g.key)}"${groupHas(g,QBK)?'':' style="display:none"'} onclick="qcDraftToggle('group','${esc(g.key)}')">${esc(g.name)}</button>`).join('');
+ const topicPanels=QG.filter(g=>g.topics.length).map(g=>`<details class="qzd qcd-topics" data-qcd-topic-panel="${esc(g.key)}" ${gOn(g)&&groupHas(g,QBK)?'':'hidden'}><summary>${esc(g.name)} topics <small data-qcd-topic-count="${esc(g.key)}">${g.topics.filter(t=>QCD.topics.includes(t[0])).length||'all'}${g.topics.some(t=>QCD.topics.includes(t[0]))?' selected':''}</small></summary>${g.topics.map(t=>`<label class="qzt"><input type="checkbox" data-qcd-topic="${t[0]}" ${QCD.topics.includes(t[0])?'checked':''} onchange="qcDraftToggle('topics',${t[0]})"><span>${esc(t[1])}</span></label>`).join('')}<p class="meta">No topic selected means the whole system. Banks without topic labels are matched by the topic name inside the question.</p></details>`).join('');
  return `${appHeader('Quiz')}<div class="rs quiz-premium"><h1>Quiz mode</h1><p class="sub">Choose everything first. Your selections are saved together only when you confirm.</p>${resume}${QZ.attempts.length?`<button type="button" class="btn block qz-history" style="margin-bottom:10px" onclick="appPage='quizhistory';renderAppDemo()">Quiz history · ${QZ.attempts.length}</button>`:''}
  <section class="card setcard qz-config"><div class="qz-section-head"><span class="qz-step">01</span><div><h3>Question source</h3><small>Choose where your questions come from</small></div></div>
-  <div class="setrow qz-bank-row"><b>Question bank</b>${qcdSeg('bank',BANK_OPTS)}</div>
-  ${qcdSeg('scope',[['all','All questions'],['sel','By Specialty'],['custom','My study list']])}
-  <div class="qcd-panel" data-qcd-panel="all"><p class="qz-help">Use every question in the selected bank. No specialty or topic filter will be applied.</p></div>
-  <div class="qcd-panel" data-qcd-panel="sel" hidden><p class="qz-help">Select one or more specialties, then open a specialty to choose topics. Leave its topics unchecked to include all of them.</p><div class="chips qcd-specs">${specButtons}</div>${topicPanels}</div>
+  <div class="setrow qz-bank-row"><b>Question banks</b><small>Pick one or more banks, or keep All banks.</small><div class="chips qcd-banks">${bankChips}</div></div>
+  ${qcdSeg('scope',[['all','All questions'],['sel','By System'],['custom','My study list']])}
+  <div class="qcd-panel" data-qcd-panel="all"><p class="qz-help">Use every question in the selected banks. No system or topic filter will be applied.</p></div>
+  <div class="qcd-panel" data-qcd-panel="sel" hidden><p class="qz-help">Select one or more systems, then open a system to choose one or more topics. Leave its topics unchecked to include the whole system. Systems and topics are combined across all the banks you picked.</p><div class="chips qcd-specs">${specButtons}</div>${topicPanels}</div>
   <div class="qcd-panel" data-qcd-panel="custom" hidden><p class="qz-help">Build a quiz from your own study state.</p>${qcdSeg('filt',[['any','Any'],['new','Unanswered'],['wrong','Answered wrong'],['saved','Saved']])}</div>
   <div class="setrow qz-count-row"><div><b>Number of questions</b><small id="qcd-available">${pool.length} questions available · ${n} selected</small></div><div class="qz-count-controls"><input class="field" id="qzCount" type="number" inputmode="numeric" min="1" max="5000" value="${QCD.count}" oninput="qcDraftInput('count',this)" aria-label="Number of questions"><button type="button" class="btn" onclick="qcDraftAll()">All</button></div></div>
  </section>
@@ -2193,7 +2253,7 @@ window.qzStart=function(){
  const pool=qzPool(QC);if(!pool.length)return;
  const go=()=>{const n=qzEff(pool.length,QC);const ids=(QC.order==='random'?shuffle(pool).slice(0,n):pool.slice(0,n)).map(q=>q.id);
   const now=Date.now(),mins=QC.mins||n;
-  QZ.active={id:'A'+now.toString(36),start:now,scope:QC.scope,mode:QC.mode,fb:QC.fb,order:QC.order,ids,ans:{},mark:{},idx:0,limit:QC.mode==='timed'?mins*60000:0,deadline:QC.mode==='timed'?now+mins*60000:0,spent:0,kind:'new',cfg:{scope:QC.scope,specs:QC.scope==='sel'?QC.specs.slice():[],topics:QC.scope==='sel'?QC.topics.slice():[],filt:QC.scope==='custom'?QC.filt:null}};
+  QZ.active={id:'A'+now.toString(36),start:now,scope:QC.scope,mode:QC.mode,fb:QC.fb,order:QC.order,ids,ans:{},mark:{},idx:0,limit:QC.mode==='timed'?mins*60000:0,deadline:QC.mode==='timed'?now+mins*60000:0,spent:0,kind:'new',cfg:{scope:QC.scope,banks:QC.banks.slice(),specs:QC.scope==='sel'?QC.specs.slice():[],topics:QC.scope==='sel'?QC.topics.slice():[],filt:QC.scope==='custom'?QC.filt:null}};
   qcSave();qzSave();qzPal=false;appPage='quizrun';renderAppDemo()};
  if(QZ.active)confirmBox({title:'Replace the quiz in progress?',text:'Starting a new quiz discards the unfinished one. It will not be counted in your statistics.',ok:'Start new',danger:true},go);else go();};
 window.qzResume=function(){if(QZ.active){appPage='quizrun';renderAppDemo()}};
@@ -2267,8 +2327,8 @@ function qzBegin(ids,base,kind){const go=()=>{const now=Date.now(),timed=base.mo
 window.qzRetake=function(id){const a=QZ.attempts.find(x=>x.id===id);if(!a)return;const ids=a.items.map(i=>i.id).filter(i=>QBY.has(i));if(!ids.length)return;qzBegin(a.order==='random'?shuffle(ids):ids,a,'retake')};
 window.qzRetryWrong=function(id){const a=QZ.attempts.find(x=>x.id===id);if(!a)return;const ids=a.items.filter(i=>i.sel>=0&&!i.ok&&QBY.has(i.id)).map(i=>i.id);if(!ids.length)return;qzBegin(a.order==='random'?shuffle(ids):ids,a,'retry')};
 window.qzRevMarked=function(){qzRevF='mk';renderAppDemo();setTimeout(()=>{const e=$('#qzRevTop');e&&e.scrollIntoView({block:'start'})},60)};
-window.qzTopicQuiz=function(spec,topic){QC.scope='sel';QC.bank='all';QC.specs=[spec];QC.topics=[topic];qcSave();appPage='quiz';renderAppDemo()};
-window.qzWeakQuiz=function(id){const a=QZ.attempts.find(x=>x.id===id);if(!a)return;const g=qzAgg(a.items),w=Object.values(g.tp).filter(o=>qzTier(o)==='weak');if(!w.length)return;QC.scope='sel';QC.bank='all';QC.specs=[...new Set(w.map(o=>o.spec))];QC.topics=w.map(o=>o.id);qcSave();appPage='quiz';renderAppDemo()};
+window.qzTopicQuiz=function(spec,topic){QC.scope='sel';QC.bank='all';QC.banks=[];QC.specs=[spec];QC.topics=[topic];qcSave();appPage='quiz';renderAppDemo()};
+window.qzWeakQuiz=function(id){const a=QZ.attempts.find(x=>x.id===id);if(!a)return;const g=qzAgg(a.items),w=Object.values(g.tp).filter(o=>qzTier(o)==='weak');if(!w.length)return;QC.scope='sel';QC.bank='all';QC.banks=[];QC.specs=[...new Set(w.map(o=>o.spec))];QC.topics=w.map(o=>o.id);qcSave();appPage='quiz';renderAppDemo()};
 window.qzOpen=function(id,from){if(!QZ.attempts.some(a=>a.id===id))return;qzViewId=id;qzRevF='all';qzBack=from||null;appPage='quizresult';renderAppDemo()};
 const qzRowHTML=(name,o,extra)=>{const p=pct(o.c,o.n),t=qzTier(o);return `<div class="strow"><div><b>${esc(name)}</b><small>${o.c}/${o.n} correct${o.w?` · ${o.w} incorrect`:''}${o.u?` · ${o.u} unanswered`:''}${extra||''}</small></div><span>${p}%</span><div class="bar"><span style="width:${p}%"></span></div>${t==='few'?'':`<small class="qtier ${t}">${QZ_TIER_LBL[t]}</small>`}</div>`};
 quizResultView=function(){const at=QZ.attempts.find(a=>a.id===qzViewId)||QZ.attempts[0];if(!at)return `${appHeader('Quiz result')}<div class="rs"><h1>Quiz result</h1><div class="card setcard"><p class="meta">No completed quiz yet.</p><button type="button" class="btn primary block" onclick="appPage='quiz';renderAppDemo()">Build a quiz</button></div></div>`;
@@ -2521,7 +2581,7 @@ PAGES.notifs=notifsView;PAGES.quizhistory=qzHistoryView;PAGES.timer=timerView;
 window.wkPractice=function(){const tp=stTopicPerf();if(!tp.length)return;
  let pick=tp.filter(t=>t.acc<75);if(!pick.length)pick=tp.slice(0,3);pick=pick.slice(0,5);
  const specs=[...new Set(pick.map(t=>(QB.find(q=>q.topic===t.id)||{}).spec).filter(Boolean))];
- QC.scope='sel';QC.bank='all';QC.specs=specs;QC.topics=pick.map(t=>t.id);qcSave();appPage='quiz';renderAppDemo()};
+ QC.scope='sel';QC.bank='all';QC.banks=[];QC.specs=specs;QC.topics=pick.map(t=>t.id);qcSave();appPage='quiz';renderAppDemo()};
 window.wkTopic=function(id){const q=QB.find(x=>x.topic===id);if(q)qzTopicQuiz(q.spec,id)};
 function weakView(){const tp=stTopicPerf(),n=tp.length,wk=tp.filter(t=>t.acc<50).length,mid=tp.filter(t=>t.acc>=50&&t.acc<75).length,ok=n-wk-mid;
  const tier=a=>a<50?['Weak','#ff8c8c']:a<75?['Needs work','#ffb454']:['Strong','#5fe0cf'];
@@ -2827,6 +2887,7 @@ applyAppFontScaleStage();
 window.__SHB_BRIDGE={
  qs:qs,SYS:SYS,QB:QB,sysIcon:sysIcon,isPinned:isPinned,answeredCount:answeredCount,TOPIC_ICON_ASSET:TOPIC_ICON_ASSET,
  get REC(){return REC},
+ get SPEC_NAME(){return SPEC_NAME},
  get inTopic(){return inTopic},set inTopic(f){inTopic=f},
  get topicIcon(){return topicIcon},set topicIcon(f){topicIcon=f},
  get topicCards(){return topicCards},set topicCards(f){topicCards=f}
