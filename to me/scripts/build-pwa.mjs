@@ -25,6 +25,7 @@ const requiredFiles = [
   "css/unified-enhancements.css",
   "css/shbace-layout-refinements.css",
   "css/egyptian-book.css",
+  "css/clinical-case-bank.css",
   "data/qbData.json",
   "data/nelson/nelson-textbook-bank-01.js",
   "data/nelson/nelson-textbook-bank-02.js",
@@ -44,6 +45,7 @@ const requiredFiles = [
   "data/all-once/all-once-bank-09.js",
   "data/all-once/all-once-bank-10.js",
   "data/clinical-case/clinical-case-bank-01.js",
+  "data/clinicalCaseBank.json",
   "data/egyptian-book/egyptian-book-bank-01.js",
   "data/egyptian-book/egyptian-book-bank-02.js",
   "data/egyptian-book/egyptian-book-bank-03.js",
@@ -77,6 +79,7 @@ const requiredFiles = [
   "js/38-all-once-pediatrics.js",
   "js/39-clinical-case-pediatrics.js",
   "js/40-egyptian-book-pediatrics.js",
+  "js/33-clinical-case-bank.js",
   "js/41-collections-integration.js"
 ];
 const requiredDirs = ["css", "js", "data"];
@@ -177,8 +180,8 @@ if (reviewLog && Array.isArray(reviewLog.entries)) {
   if (logChanged !== 45 || logNeedsReview !== 110) fail("Question review JSON counts do not match the master audit");
 }
 const pwaVersion = JSON.parse(readFileSync(join(root, "pwa-version.json"), "utf8"));
-if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.10-to-me.23") {
-  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.10-to-me.23");
+if (pwaVersion.platform !== "Unified Chrome PWA" || pwaVersion.version !== "1.3.10-to-me.24") {
+  fail("pwa-version.json must declare Unified Chrome PWA version 1.3.10-to-me.24");
 }
 const packageMeta = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 const expectedCacheName = "shbace-chrome-offline-v" + pwaVersion.version.replace("-to-me.", ".");

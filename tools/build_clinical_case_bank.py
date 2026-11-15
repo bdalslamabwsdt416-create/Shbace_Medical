@@ -187,5 +187,8 @@ def main():
         "validation":{"passed":len(report["errors"])==0,"errorCount":len(report["errors"]),"systemReports":report["systemReports"],"errors":report["errors"][:200]}
     }
     OUT.write_text(json.dumps(data,ensure_ascii=False,separators=(",",":")),encoding="utf-8")
+    DEPLOYED_OUT = ROOT / "to me" / "data" / "clinicalCaseBank.json"
+    DEPLOYED_OUT.parent.mkdir(parents=True, exist_ok=True)
+    DEPLOYED_OUT.write_text(json.dumps(data,ensure_ascii=False,separators=(",",":")),encoding="utf-8")
     print(json.dumps({"out":str(OUT),"totalQuestions":len(allq),"systems":report["systemReports"],"errorCount":len(report["errors"]),"errors":report["errors"][:30]},ensure_ascii=False,indent=2))
 if __name__=="__main__": main()
