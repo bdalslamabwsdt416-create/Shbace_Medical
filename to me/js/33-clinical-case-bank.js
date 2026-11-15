@@ -204,6 +204,7 @@
   }
 
   window.openClinicalCaseBank07=function() {
+    window.__SHB_PED_COLLECTION__='clinicalcase-bank07';
     appPage='clinicalSystems';
     renderAppDemo();
     ensureData().then(()=>renderAppDemo()).catch(()=>renderAppDemo());
@@ -235,7 +236,7 @@
     if(appPage==='clinicalQuestions')appPage='clinicalCases';
     else if(appPage==='clinicalCases')appPage='clinicalTopics';
     else if(appPage==='clinicalTopics')appPage='clinicalSystems';
-    else appPage='subjects';
+    else { appPage='specialties'; window.__SHB_PED_COLLECTION__=''; }
     renderAppDemo();
   };
   window.bank07AnswerClinicalCaseQuestion=function(id,label) {
@@ -254,17 +255,18 @@
     renderAppDemo();
   };
 
-  const oldSubjectsView=subjectsView;
-  subjectsView=function() {
-    const html=oldSubjectsView.apply(this,arguments);
-    const card=`<button type="button" class="card sc cc-home-entry" onclick="openClinicalCaseBank07()">
-      <span class="cc-home-icon">07</span><span class="cc-home-copy">
-        <span class="eyebrow">QUESTION BANK 07</span><strong>Clinical Case</strong>
-        <small>Clinical case-based questions from Dr. Abdulrahman Al-Juaiki’s course sheets.</small>
-        <span class="cc-home-count">${BANK_TOTAL.toLocaleString()} questions · 10 medical systems</span>
-      </span><span class="chev">›</span></button>`;
-    const pos=html.lastIndexOf('</div>');
-    return pos>=0?html.slice(0,pos)+card+html.slice(pos):html+card;
+  const oldSpecialtiesView=typeof specialtiesView==='function'?specialtiesView:null;
+  if(oldSpecialtiesView) specialtiesView=function() {
+    let html=oldSpecialtiesView.apply(this,arguments);
+    if(!String(html).includes('ped-collections-grid') || String(html).includes('ped-collection-bank07')) return html;
+    const card=`<button type="button" class="ped-collection-card ped-collection-clinicalcase ped-collection-bank07" onclick="openClinicalCaseBank07()">
+      <div class="ped-collection-avatar ped-avatar-allonce ped-avatar-icon ped-avatar-clinical" role="img" aria-label="Clinical Case question bank"><span class="ped-avatar-initials">07</span></div>
+      <span class="ped-collection-copy"><span class="eyebrow">CLINICAL CASE QUESTION BANK</span><b>Clinical Case</b>
+      <small>Clinical case-based questions, organized by medical system, topic and case.</small>
+      <span class="ped-collection-count">${BANK_TOTAL.toLocaleString()} questions · 10 medical systems</span></span><span class="ped-collection-arrow">›</span></button>`;
+    html=html.replace('</div><div class="ped-collection-footnote">',card+'</div><div class="ped-collection-footnote">');
+    html=html.replace('The six collections remain separate.','The seven collections remain separate.');
+    return html;
   };
 
   const oldAppNav=appNav;
