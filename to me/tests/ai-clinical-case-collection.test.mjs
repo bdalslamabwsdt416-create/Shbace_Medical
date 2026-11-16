@@ -139,7 +139,7 @@ test('The adapter registers real AI bank records in the shared engine and migrat
   };
   const generatedMap = Object.fromEntries(shardPaths.map((name,i)=>['data/ai-generated/'+name,shardData[i]]));
   const fetch = async url => {
-    const path = new URL(url).pathname.replace(/^\\//,'');
+    const path = new URL(url).pathname.replace(/^\//,'');
     const json = path==='data/clinicalCaseBank.json'?clinical:generatedMap[path];
     assert.ok(json,path);
     return {ok:true,json:async()=>json};
