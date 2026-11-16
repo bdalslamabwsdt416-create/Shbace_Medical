@@ -80,6 +80,13 @@ test('Shared case vignette is shown in the first question card and marked contin
   assert.ok(mainBank.includes('CONTINUED — Same clinical case'));
 });
 
+test('Deferred startup has a global 60-second fail-closed cap', () => {
+  assert.ok(index.includes('var BOOT_MAX_MS=60000'));
+  assert.ok(index.includes('overall startup timeout'));
+  assert.ok(index.includes('if(bootFailed)return'));
+  assert.ok(index.includes('if(activeNode){try{activeNode.onload=null'));
+});
+
 test('First app render and splash dismissal wait for all deferred scripts', () => {
   assert.ok(appMain.includes('const bootReady=window.__shbBooted===true'));
   assert.ok(appMain.includes('window.__shbBooted!==true'));
