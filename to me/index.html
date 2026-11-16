@@ -651,6 +651,7 @@
 
 <!-- ═══════════ 5) SCRIPTS: data first, then app code, then feature patches (original execution order; run by the boot loader) ═══════════ -->
 <!-- Embedded images (IMG) -->
+<script type="text/shb-deferred" id="shbace-offline-setup" data-src="js/29-offline-setup.js"></script>
 <!-- 5) SCRIPTS: data first, then app code, then feature patches (original execution order; run by the boot loader) ═══════════ --> <!-- Embedded images (IMG) -->
 <script type="text/shb-deferred" data-src="js/01-ui-images.js"></script>
 <!-- Embedded doctor images (DOC_EMB) -->
@@ -773,7 +774,7 @@
 <!-- grade-sync-v46 -->
 <script type="text/shb-deferred" id="grade-sync-v46" data-src="js/28-grade-sync-v46.js"></script>
 <script type="text/shb-deferred" data-src="js/29-reviewed-bank-controls.js"></script>
-<script type="text/shb-deferred" id="shbace-offline-setup" data-src="js/29-offline-setup.js"></script>
+
 <script type="text/shb-deferred" id="android-enhancements-v1" data-src="js/30-android-enhancements.js"></script>
 <script type="text/shb-deferred" id="android-v13-enhancements" data-src="js/31-android-v13.js"></script>
 <script type="text/shb-deferred" id="chrome-android-enhancements" data-src="js/32-chrome-android.js"></script>
@@ -799,8 +800,11 @@ window.__SHBACE_FACULTY_LOGO_DATA__="__SHBACE_FACULTY_LOGO_DATA__";
   if(window.Capacitor || !('serviceWorker' in navigator)) return;
   if(location.protocol!=='https:' && location.hostname!=='localhost') return;
   var reloading=false,reloadKey='shbace-sw-controller-reload-v1';
+  var hadController=!!navigator.serviceWorker.controller;
   try{sessionStorage.removeItem(reloadKey)}catch(e){}
   navigator.serviceWorker.addEventListener('controllerchange',function(){
+    /* First install: the page is already complete, no reload needed (it restarted the splash and the whole boot). */
+    if(!hadController){hadController=true;return}
     if(reloading)return;reloading=true;
     try{if(sessionStorage.getItem(reloadKey)==='1')return;sessionStorage.setItem(reloadKey,'1')}catch(e){}
     location.reload();

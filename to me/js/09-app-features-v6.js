@@ -18,66 +18,7 @@ for(const id of Object.keys(S.ans)){const r=S.ans[id];if(!isO(r)||!Number.isInte
 for(const id of Object.keys(S.sr))if(!isO(S.sr[id]))delete S.sr[id];
 for(const id of Object.keys(S.notes))if(typeof S.notes[id]!=='string')delete S.notes[id];
 for(const f of ['saved','rep'])for(const id of Object.keys(S[f]))if(S[f][id]===null||S[f][id]===undefined)delete S[f][id]}catch(e){console.warn('State sanitise failed',e)}})();
-const QB_PROGRESS_DB='shbace-student-progress-v1';
-let qbProgressDbPromise=null,qbProgressWrite=Promise.resolve(),qbProgressWarned=false,qbProgressLastError=null;
-function qbProgressDB(){
- if(!window.indexedDB)return Promise.reject(new Error('IndexedDB unavailable'));
- if(qbProgressDbPromise)return qbProgressDbPromise;
- qbProgressDbPromise=new Promise((resolve,reject)=>{
-  const request=indexedDB.open(QB_PROGRESS_DB,1);
-  request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains('progress'))db.createObjectStore('progress',{keyPath:'key'})};
-  request.onsuccess=()=>{const db=request.result;db.onversionchange=()=>{try{db.close()}catch(e){}qbProgressDbPromise=null};resolve(db)};
-  request.onerror=()=>{qbProgressDbPromise=null;reject(request.error||new Error('Could not open progress storage'))};
-  request.onblocked=()=>{qbProgressDbPromise=null;reject(new Error('Progress storage upgrade is blocked'))};
- });
- return qbProgressDbPromise;
-}
-function qbProgressPut(value){
- const snapshot=JSON.parse(JSON.stringify(value));
- qbProgressWrite=qbProgressWrite.catch(()=>{}).then(()=>{qbProgressLastError=null;return qbProgressDB()}).then(db=>new Promise((resolve,reject)=>{
-  const tx=db.transaction('progress','readwrite');
-  tx.objectStore('progress').put({key:KEY,schema:1,updatedAt:Date.now(),value:snapshot});
-  tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error||new Error('Could not mirror progress'));tx.onabort=()=>reject(tx.error||new Error('Progress mirror transaction aborted'));
- }));
- qbProgressWrite=qbProgressWrite.catch(error=>{qbProgressLastError=String(error&&error.message||error);if(!qbProgressWarned){qbProgressWarned=true;console.warn('IndexedDB progress mirror unavailable; localStorage remains active.',error)} });
- return qbProgressWrite;
-}
-function qbProgressValid(value){
- if(!value||typeof value!=='object'||Array.isArray(value))return false;
- if(!['ans','saved','notes','rep','sr'].every(k=>value[k]&&typeof value[k]==='object'&&!Array.isArray(value[k])))return false;
- if(Object.values(value.ans).some(r=>!r||typeof r!=='object'||!Number.isInteger(r.sel)||typeof r.ok!=='boolean'))return false;
- if(Object.values(value.sr).some(r=>!r||typeof r!=='object'||Array.isArray(r)))return false;
- if(Object.values(value.notes).some(r=>typeof r!=='string'))return false;
- if(['saved','rep'].some(k=>Object.values(value[k]).some(r=>r===null||r===undefined)))return false;
- return true;
-}
-function qbProgressRecover(){
- let hasLocal=true;try{hasLocal=localStorage.getItem(KEY)!==null}catch(e){}
- if(hasLocal)return Promise.resolve({state:'local-data-present'});
- return qbProgressDB().then(db=>new Promise((resolve,reject)=>{
-  const tx=db.transaction('progress','readonly'),request=tx.objectStore('progress').get(KEY);
-  request.onsuccess=()=>resolve(request.result||null);request.onerror=()=>reject(request.error||new Error('Could not read progress mirror'));
- })).then(record=>{
-  if(!record||record.schema!==1||!qbProgressValid(record.value))return {state:'no-recovery-copy'};
-  let stillMissing=false;try{stillMissing=localStorage.getItem(KEY)===null}catch(e){}
-  const empty=['ans','saved','notes','rep','sr'].every(k=>!Object.keys(S[k]||{}).length);
-  if(!stillMissing||!empty)return {state:'current-data-preserved'};
-  Object.assign(S,record.value);
-  if(!LS.set(KEY,S))return {state:'recovery-write-failed'};
-  qbProgressPut(S);
-  console.info('Question Bank progress recovered from the IndexedDB mirror.');
-  return {state:'recovered',updatedAt:record.updatedAt||0};
- }).catch(error=>({state:'unavailable',error:String(error&&error.message||error)}));
-}
-function qbProgressInit(){
- let hasLocal=true;try{hasLocal=localStorage.getItem(KEY)!==null}catch(e){}
- if(!hasLocal)return qbProgressRecover().then(result=>{window.shbaceProgressStatus=result;return result});
- return qbProgressPut(S).then(()=>{const result=qbProgressLastError?{state:'local-only',error:qbProgressLastError}:{state:'mirrored'};window.shbaceProgressStatus=result;return result});
-}
-const save=()=>{const ok=LS.set(KEY,S);if(ok)qbProgressPut(S);return ok};
-window.shbaceRecoverProgress=qbProgressRecover;
-window.shbaceProgressStorageInfo=()=>({database:QB_PROGRESS_DB,primary:'localStorage',mirror:'IndexedDB',ready:!!window.indexedDB,status:window.shbaceProgressStatus&&window.shbaceProgressStatus.state||'initializing'});
-window.shbaceProgressReady=qbProgressInit();
+const save=()=>LS.set(KEY,S);
 
 
 /* ===== QUESTION SOURCE SWITCH =====
@@ -136,7 +77,7 @@ if(USE_FULL_BANK){try{
    if(q.ai&&q.f)e+='AI review: multiple, none or undetermined correct answers. Check your textbook.\n';
    e+=q.e||'';if(q.note&&!/[\u0600-\u06FF]/.test(q.note))e+='\n'+q.note;
    FULL_QB.push({id:q.id,spec:key,topic:TID[(q.sy||'')+'\u0001'+q.t],tag:q.py?((q.rq||[]).length?'Repeated Question':(q.rc||[]).length?'Repeated Topic':'Previous Years'):'PDF Bank',kind:shbKind(q),
-    q:q.q,o:q.o.map(o=>o[1]),ol:ltr,kx,k,ex:e.trim(),no:n+1,src:q.src||'',cs:q.cs||null,cm:!!q.cm,rq:q.rq||[],rc:q.rc||[],ai:!!q.ai,f:!!q.f,py:!!q.py,bank:q.py===true?"previous":"aj"})});
+    q:q.q,o:q.o.map(o=>o[1]),ol:ltr,kx,k,ex:e.trim(),no:n+1,src:q.src||'',cs:q.cs||null,cm:!!q.cm,rq:q.rq||[],rc:q.rc||[],ai:!!q.ai,f:!!q.f,py:!!q.py})});
   spec[key]={q:L.length,label:sub,topics}});
  if(!FULL_QB.length)throw new Error('empty bank');
  REAL.total=FULL_QB.length;REAL.spec=spec;
@@ -198,8 +139,8 @@ const DEMO_QB=[
 ['URO-001','urology',25,'Investigation','Which investigation is the gold standard for diagnosing vesicoureteral reflux?',['Micturating cystourethrogram (MCUG)','Renal ultrasound','DMSA scan','Plain abdominal X-ray','Intravenous urogram'],0,'MCUG shows and grades reflux. Ultrasound screens for hydronephrosis and DMSA detects renal scarring.']
 ].map(a=>({id:a[0],spec:a[1],topic:a[2],tag:a[3],q:a[4],o:a[5],k:a[6],ex:a[7]}));
 const QB=BANK_ON?FULL_QB:DEMO_QB;
-/* SHB-BANK-SCOPE: canonical identity across the shared question banks.
-   View-only filter used by Quiz, Search and Smart Review. The bank field is attached during collection loading; original question content and legacy source flags remain intact. */
+/* SHB-BANK-SCOPE: Dr. Al-Joaki's bank (q.py !== true) vs Previous Questions (q.py === true).
+   View-only filter used by Quiz, Search and Smart Review. Question records are never modified. */
 const BANK_OPTS=[['all','All banks'],['aj','Dr. Al-Joaki'],['previous','Previous Questions'],['nelson','Nelson Textbook'],['kasr','Kasr Al-Ainy'],['clinical','Clinical Cases'],['egyptian','Egyptian Book']];
 const BANK_KEYS=new Set(BANK_OPTS.map(option=>option[0]).filter(key=>key!=='all'));
 const bankOf=q=>{
@@ -277,7 +218,7 @@ const SYS=[
  ['haematology','Haematology','s_haematology',0],['growth','Growth and Nutrition','s_growth',0],['genetics','Genetics & Dermatology','s_genetics',0],
  ['rheum','Rheumatology / Metabolic / Poisoning / Immunology','s_rheum',0],['exams','Previous Years\u2019 Exam Questions','s_exams',0]
 ];
-if(BANK_ON){/* Keep Urology when the separate Nelson collection supplies Urology questions, even if the main bank has none. */const hasNelsonUrology=Array.isArray(window.__SHB_NELSON_QUESTIONS__)&&window.__SHB_NELSON_QUESTIONS__.some(q=>q&&bankOf(q)==="nelson"&&q.spec==='urology');for(let i=SYS.length-1;i>=0;i--)if(!REAL.spec[SYS[i][0]]&&SYS[i][0]==='urology'&&!hasNelsonUrology)SYS.splice(i,1);SYS.forEach(r=>{r[3]=REAL.spec[r[0]]?1:0});SPEC_NAME={};SYS.forEach(r=>SPEC_NAME[r[0]]=r[1])}
+if(BANK_ON){/* Keep Urology when the separate Nelson collection supplies Urology questions, even if the main bank has none. */const hasNelsonUrology=Array.isArray(window.__SHB_NELSON_QUESTIONS__)&&window.__SHB_NELSON_QUESTIONS__.some(q=>q&&q.nl===true&&q.spec==='urology');for(let i=SYS.length-1;i>=0;i--)if(!REAL.spec[SYS[i][0]]&&SYS[i][0]==='urology'&&!hasNelsonUrology)SYS.splice(i,1);SYS.forEach(r=>{r[3]=REAL.spec[r[0]]?1:0});SPEC_NAME={};SYS.forEach(r=>SPEC_NAME[r[0]]=r[1])}
 const sysIcon=(img,cls='')=>img?`<img class="sysimg ${cls}" src="${IMG[img]}" alt="">`:`<span class="sysimg ${cls} uro">${URO_SVG}</span>`;
 
 /* ---------- helpers ---------- */
@@ -341,16 +282,16 @@ function fmtExplanationHTML(text){
   return rest?'<p class="nl-sec"><b class="nl-lbl">'+esc(m[1])+'</b>'+esc(rest)+'</p>':''}).join('');
 }
 function nelsonDetails(q){
- if(!q||!["nelson","kasr","clinical","egyptian"].includes(bankOf(q))||!q.more)return '';
- const source=bankOf(q)==='egyptian'?(q.ebSourceFile||'Egyptian Book source'):bankOf(q)==='clinical'?(q.ccSource||'Accepted Clinical Case source'):bankOf(q)==='kasr'?(q.aoSource||'Source details unavailable'):'Nelson Textbook of Pediatrics.';
+ if(!q||(!q.nl&&!q.ao&&!q.cc)||!q.more)return '';
+ const source=q.eb?(q.ebSourceFile||'Egyptian Book source'):q.cc?(q.ccSource||'Accepted Clinical Case source'):q.ao?(q.aoSource||'Source details unavailable'):'Nelson Textbook of Pediatrics.';
  let moreBody=cleanExplanationText(q.more).replace(/^Explanation\s*:\s*/i,'');const lead=cleanExplanationText(q.ex).replace(/^Explanation\s*:\s*/i,'');
  if(lead&&moreBody.startsWith(lead))moreBody=moreBody.slice(lead.length).trim();
- const alt=bankOf(q)==="kasr"&&q.aoAltSource?'<p class="nl-source">Also found in: '+esc(q.aoAltSource)+'</p>':'';
- const modelAnswer=bankOf(q)==="clinical"&&q.ccOpen&&q.ccAnswer?'<p class="nl-source"><b>Model answer:</b> '+esc(q.ccAnswer)+'</p>':'';
+ const alt=q.ao&&!q.eb&&q.aoAltSource?'<p class="nl-source">Also found in: '+esc(q.aoAltSource)+'</p>':'';
+ const modelAnswer=q.cc&&q.ccOpen&&q.ccAnswer?'<p class="nl-source"><b>Model answer:</b> '+esc(q.ccAnswer)+'</p>':'';
  return '<details class="nl-more"><summary>'+'Read More'+'</summary><div class="nl-more-body">'+modelAnswer+fmtExplanationHTML(moreBody)+'<p class="nl-source">'+'Source: '+esc(source)+'</p>'+alt+'</div></details>';
 }
-function qExtra(q){if(!BANK_ON||["nelson","kasr","clinical","egyptian"].includes(bankOf(q)))return '';let x='';
- if(bankOf(q)==="previous"){if(q.src)x+=`<div class="qsrc">Source: <bdi>${esc(enSrc(q.src))}</bdi></div>`;if(q.cs)x+=`<div class="qcase"><b>${esc(q.cs[0])}</b>\n${esc(q.cs[1])}</div>`;if(q.cm)x+='<div class="qrep"><span class="qflag w">Case text not in source file \u2013 classified by explanation</span></div>';
+function qExtra(q){if(!BANK_ON||q.nl||q.ao||q.cc)return '';let x='';
+ if(q.py){if(q.src)x+=`<div class="qsrc">Source: <bdi>${esc(enSrc(q.src))}</bdi></div>`;if(q.cs)x+=`<div class="qcase"><b>${esc(q.cs[0])}</b>\n${esc(q.cs[1])}</div>`;if(q.cm)x+='<div class="qrep"><span class="qflag w">Case text not in source file \u2013 classified by explanation</span></div>';
   if(q.rq.length)x+=`<div class="qrep"><span class="qflag r">Repeated Question</span> also appears in: ${repRef(q.rq)}</div>`;if(q.rc.length)x+=`<div class="qrep"><span class="qflag w">Repeated Topic/Concept</span> also tested in: ${repRef(q.rc)}</div>`}
  if(q.f)x+='<span class="qflag w">Needs review</span>';if(q.ai)x+='<span class="qflag">Solved with AI</span>';
  if(qUnsure(q))x+=`<div class="qwarn" role="note"><b>\u26a0 Needs Review / Verification</b><span>${q.kx?'The answer key does not match any option \u2014 do not rely on it.':'This question or its answer key is not confirmed. Check your textbook before relying on the answer.'}</span></div>`;
@@ -363,10 +304,10 @@ function cardHTML(q,n,single){
  if(a){const ok=a.ok;const face=ok?'happy':(DOCF[q.id]||'sad');
   const msg=ok?(a.msg||PRAISE2[0]):(face==='angry'?'Let’s pause and review this one carefully.':face==='encouraging'?'A tough run — keep going, every mistake teaches you something.':'Not quite — the explanation below will help.');
   react=`<div class="qreact ${ok?'ok':'no'}">${docFace(face)}<div><b>${ok?(a.pr||'Excellent!'):(face==='angry'?'Careful!':face==='encouraging'?'Keep going!':'Incorrect')}</b><span>${esc(msg)}</span></div></div>
-  <div class="qfb ${ok?'ok':'no'}"><b>${ok?'Correct':'Incorrect'} · Correct answer: ${L(q.k)}. ${esc(q.o[q.k])}${qUnsure(q)&&bankOf(q)!=='nelson'&&bankOf(q)!=='kasr'?' <em class="qunsure">(unconfirmed key)</em>':''}</b><p>Explanation:  ${esc(cleanExplanationText(q.ex))}</p>${nelsonDetails(q)}</div>`}
- else if(bankOf(q)==="clinical"&&q.ccOpen){react=`<div class="qfb"><b>Open-ended case. Think through your response before revealing the model answer.</b>${nelsonDetails(q)}</div>`}
- else if(bankOf(q)==="clinical"&&q.kx){react=`<div class="qfb no"><b>No verified answer key is available for this question; answer selection is disabled.</b>${nelsonDetails(q)}</div>`}
- else if(["nelson","kasr","egyptian"].includes(bankOf(q))&&q.kx){react=`<div class="qfb no"><b>Question data is incomplete, so answer selection is unavailable.</b><p>Explanation: ${esc(cleanExplanationText(q.ex))}</p>${nelsonDetails(q)}</div>`}
+  <div class="qfb ${ok?'ok':'no'}"><b>${ok?'Correct':'Incorrect'} · Correct answer: ${L(q.k)}. ${esc(q.o[q.k])}${qUnsure(q)&&!q.nl&&!q.ao?' <em class="qunsure">(unconfirmed key)</em>':''}</b><p>Explanation:  ${esc(cleanExplanationText(q.ex))}</p>${nelsonDetails(q)}</div>`}
+ else if(q.cc&&q.ccOpen){react=`<div class="qfb"><b>Open-ended case. Think through your response before revealing the model answer.</b>${nelsonDetails(q)}</div>`}
+ else if(q.cc&&q.kx){react=`<div class="qfb no"><b>No verified answer key is available for this question; answer selection is disabled.</b>${nelsonDetails(q)}</div>`}
+ else if((q.nl||q.ao||q.eb)&&q.kx){react=`<div class="qfb no"><b>Question data is incomplete, so answer selection is unavailable.</b><p>Explanation: ${esc(cleanExplanationText(q.ex))}</p>${nelsonDetails(q)}</div>`}
  else if(single){react=`<div class="qreact think"><div><b>Take your time</b><span>Think it through, then choose an answer.</span></div></div>`}
  const acts=`<div class="qacts">
   <button type="button" class="qa ${S.saved[q.id]?'on':''}" onclick="qSave('${q.id}')"><span>${S.saved[q.id]?'★':'☆'}</span>${S.saved[q.id]?'Saved':'Save'}</button>
@@ -375,7 +316,7 @@ function cardHTML(q,n,single){
 </div>`;
  const note=qs.noteOpen[q.id]?`<div class="qnote"><textarea placeholder="Write your note…" oninput="qNoteSave('${q.id}',this.value)">${esc(S.notes[q.id]||'')}</textarea></div>`:'';
  const sname=a?(a.ok?'Correct':'Incorrect'):'Unanswered';
- return `<article class="qcard${(['nelson','kasr'].includes(bankOf(q)))?' nl-clean':''}" id="qc-${q.id}" data-id="${q.id}">${qExtra(q)}<h3 class="qstem">Q${n}. ${esc(QSTEM(q))}</h3><div class="qopts">${opts}</div>${react}${acts}${note}</article>`}
+ return `<article class="qcard${(q.nl||q.ao)?' nl-clean':''}" id="qc-${q.id}" data-id="${q.id}">${qExtra(q)}<h3 class="qstem">Q${n}. ${esc(QSTEM(q))}</h3><div class="qopts">${opts}</div>${react}${acts}${note}</article>`}
 
 function bankBody(){
  const list=filtered();
@@ -642,8 +583,7 @@ topicsView=function(){const sp=REAL.spec[qs.spec]||{q:0,topics:[]};
 let gq='',gBank='all',gSpec='all',gTag='all',gSrc='all',gTopic='all',gSys='all',gSort='bank',gLim=40,gIdx=null,gTmr=null;
 /* ---- Unit 2: search engine (display/query only; question data is never modified) ---- */
 const AR_MARKS='\\u064B-\\u065F\\u0670\\u0640';
-const AR_MARKS_RE=new RegExp('['+AR_MARKS+']','g');
-const nz=s=>String(s==null?'':s).toLowerCase().replace(AR_MARKS_RE,'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه');
+const nz=s=>String(s==null?'':s).toLowerCase().replace(new RegExp('['+AR_MARKS+']','g'),'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه');
 const gEsc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 const AR_CLS={'ا':'[اأإآٱ]','ي':'[يى]','ه':'[هة]'};
 function tokRe(tok){const w=tok.filter(x=>x.length>1).map(nz);if(!w.length)return null;
@@ -652,8 +592,7 @@ function tokRe(tok){const w=tok.filter(x=>x.length>1).map(nz);if(!w.length)retur
 function hl(t,tok){t=String(t==null?'':t);const re=tokRe(tok);if(!re)return esc(t);return t.split(re).map((p,i)=>i%2?'<mark>'+esc(p)+'</mark>':esc(p)).join('')}
 const gSrcGroup=s=>enSrc(s).replace(/\s*[–—-]\s*Q\s*\d+\s*$/i,'').trim()||'Unknown source';
 function gIndex(){if(!gIdx)gIdx=QB.map(q=>{const nq=nz(q.q),no=nz(q.o.join(' \n')),ne=nz(q.ex||''),ns=nz(q.src||''),nt=nz(TOPIC_NAME[q.topic]||''),ny=nz((q.sy||'')+' '+(SPEC_NAME[q.spec]||q.spec)),ng=nz(q.id+' '+q.tag);
- return {q,sg:gSrcGroup(q.src),nq,no,ne,ns,nt,ny,ng}});return gIdx}
-function gHas(x,w){return x.ng.includes(w)||x.nq.includes(w)||x.no.includes(w)||x.ne.includes(w)||x.ns.includes(w)||x.nt.includes(w)||x.ny.includes(w)}
+ return {q,sg:gSrcGroup(q.src),nq,no,ne,ns,nt,ny,ng,hay:[ng,nq,no,ne,ns,nt,ny].join(' \n')}});return gIdx}
 function gSources(){const m={};gIndex().forEach(x=>{if(bankOk(x.q,gBank))m[x.sg]=(m[x.sg]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])}
 function gSystems(){const m={};QB.forEach(q=>{if(q.sy&&bankOk(q,gBank))m[q.sy]=(m[q.sy]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])}
 const gPYKEY=()=>Object.keys(REAL.spec).find(k=>/^Previous Years/.test(REAL.spec[k].label||''))||null;
@@ -669,8 +608,9 @@ function gSnip(t,tok,len){len=len||170;t=String(t==null?'':t);const re=tokRe(tok
 function topicRow(sid,id,n,c,sy){const l=QB.filter(q=>q.topic===id),d=answeredCount(l),p=pct(d,l.length);return `<div class="card sc tpc" role="button" tabindex="0" onclick="openTopic('${sid}',${id})">${topicIcon(sid,n,id)}<div class="tpc-tx"><div class="eyebrow">${esc(SPEC_NAME[sid]||sid)}</div><h3>${GQ_TOK?hl(n,GQ_TOK):esc(n)}</h3><div class="meta">${l.length} questions${d?` · ${d} answered`:''}</div><div class="bar"><span style="width:${p}%"></span></div></div><span class="chev">›</span></div>`}
 let GQ_TOK=null;
 function gCard(x,n,tok){const q=x.q,f=tok.length?gFields(x,n):[];
- const inQ=tok.length&&n.some(w=>x.nq.includes(w));
- const prev=hl(inQ?gSnip(q.q,tok,200):(q.q.length>200?q.q.slice(0,198)+'…':q.q),tok);
+ let prev;
+ if(!tok.length||x.nq&&n.some(w=>x.nq.includes(w))||!tok.length)prev=hl(tok.length?gSnip(q.q,tok,200):(q.q.length>200?q.q.slice(0,198)+'…':q.q),tok);
+ else prev=hl(q.q.length>200?q.q.slice(0,198)+'…':q.q,tok);
  let ev='';
  if(tok.length){const oi=q.o.findIndex(o=>n.some(w=>nz(o).includes(w)));
   if(oi>=0&&!n.some(w=>x.nq.includes(w)))ev=`<div class="gmatch"><b>Option ${esc(QLT(q,oi))}</b>: ${hl(gSnip(q.o[oi],tok),tok)}</div>`;
@@ -686,7 +626,7 @@ function searchResults(){const n=gNeedle(),tok=gRawTok();GQ_TOK=tok.length?tok:n
    return `<div class="soon-h">${esc(SPEC_NAME[sid]||sp.label||sid)} · ${t.length} topics</div>`+t.map(([id,nm,c,sy])=>topicRow(sid,id,nm,c,sy)).join('')}).join('');
   return rows||'<div class="card setcard"><p class="meta">No topics.</p></div>'}
  const tops=(n.length&&!gFilterOn())?specs.flatMap(([sid,sp])=>sp.topics.filter(([id,nm,c,sy])=>n.every(w=>nz(nm+' '+(SPEC_NAME[sid]||'')+' '+(sy||'')).includes(w))).map(([id,nm,c,sy])=>[sid,id,nm,c,sy])):[];
- let qs2=gIndex().filter(x=>bankOk(x.q,gBank)&&(gSpec==='all'||x.q.spec===gSpec)&&(gTag==='all'||x.q.tag===gTag)&&(gSrc==='all'||x.sg===gSrc)&&(gTopic==='all'||String(x.q.topic)===gTopic)&&(gSys==='all'||x.q.sy===gSys)&&n.every(w=>gHas(x,w)));
+ let qs2=gIndex().filter(x=>bankOk(x.q,gBank)&&(gSpec==='all'||x.q.spec===gSpec)&&(gTag==='all'||x.q.tag===gTag)&&(gSrc==='all'||x.sg===gSrc)&&(gTopic==='all'||String(x.q.topic)===gTopic)&&(gSys==='all'||x.q.sy===gSys)&&n.every(w=>x.hay.includes(w)));
  if(n.length)qs2=qs2.map((x,i)=>[x,gScore(x,n),i]).sort((a,b)=>b[1]-a[1]||a[2]-b[2]).map(a=>a[0]);
  if(!tops.length&&!qs2.length)return `<div class="card setcard" style="text-align:center">${docFace('thinking','dr-top')}<h3>No results${tok.length?` for “${esc(gq.trim())}”`:''}</h3><p class="meta">Check the spelling, use fewer words, or remove some filters.</p><button type="button" class="btn block" onclick="gClear()">Clear search and filters</button></div>`;
  let out=`<div class="qreact think">${docFace('investigating')}<div><b>${tok.length?'Investigating…':'Filtered'}</b><span>${tops.length?tops.length+' topic'+(tops.length===1?'':'s')+' · ':''}${qs2.length} question${qs2.length===1?'':'s'} found</span></div></div>`;
@@ -1177,9 +1117,9 @@ function srTopicCard(e){const t=e.t,selected=(SRUI.selected||[]).includes(t.id),
  </article>`}
 function srFilterOk(e){const f=SRUI.filter;
  if(f==='due')return e.due>0;if(f==='weak')return e.weak>0;if(f==='prog')return e.rev>0&&e.status!=='Mastered';if(f==='new')return e.rev===0;return true}
-function srTopicList(){const M=srTopicStats(),q=nz(SRUI.q.trim()),active=q||SRUI.filter!=='all';
+function srTopicList(){const M=srTopicStats(),q=SRUI.q.trim().toLowerCase(),active=q||SRUI.filter!=='all';
  const groups=[];const bySpec=new Map();
- SRT.forEach(t=>{const e=M.get(t.id);if(!e)return;if(srEffBank()!=='all'&&!(e.tot+e.sus))return;if(q&&!nz(t.name+' '+t.specLabel+' '+t.sy).includes(q))return;if(!srFilterOk(e))return;
+ SRT.forEach(t=>{const e=M.get(t.id);if(!e)return;if(srEffBank()!=='all'&&!(e.tot+e.sus))return;if(q&&!(t.name+' '+t.specLabel+' '+t.sy).toLowerCase().includes(q))return;if(!srFilterOk(e))return;
   if(!bySpec.has(t.spec)){const g={spec:t.spec,label:t.specLabel,items:[]};bySpec.set(t.spec,g);groups.push(g)}bySpec.get(t.spec).items.push(e)});
  if(!groups.length)return `<div class="card"><p class="meta" style="margin:0">No topics match this view.</p></div>`;
  return groups.map(g=>{const tot=g.items.reduce((a,e)=>a+e.tot,0),cr=g.items.reduce((a,e)=>a+e.credit,0),p=tot?Math.round(100*cr/tot):0;
@@ -2954,7 +2894,7 @@ applyAppFontScaleStage();
    topicIcon, topicCards ... were invisible to them: 35 threw ReferenceError and "Start Studying" /
    "Continue Studying" did nothing. Nothing here changes data, logic or markup. */
 window.__SHB_BRIDGE={
- qs:qs,SYS:SYS,QB:QB,bankOf:bankOf,sysIcon:sysIcon,isPinned:isPinned,answeredCount:answeredCount,TOPIC_ICON_ASSET:TOPIC_ICON_ASSET,
+ qs:qs,SYS:SYS,QB:QB,sysIcon:sysIcon,isPinned:isPinned,answeredCount:answeredCount,TOPIC_ICON_ASSET:TOPIC_ICON_ASSET,
  get REC(){return REC},
  get SPEC_NAME(){return SPEC_NAME},
  get inTopic(){return inTopic},set inTopic(f){inTopic=f},
@@ -2996,7 +2936,7 @@ const u7Q=id=>QBY.get(String(id))||QB.find(q=>String(q.id)===String(id))||null;
 const u7Spec=q=>q?(SPEC_NAME[q.spec]||REAL.spec[q.spec]?.label||q.spec):'';
 const u7Topic=q=>q?(TOPIC_NAME[q.topic]||'Topic'):'';
 const u7Source=q=>q?(q.tag||q.src||'Question Bank'):'Question Bank';
-const u7Text=q=>q?nz([q.id,q.q,(q.o||[]).join(' '),q.ex,q.src,q.tag,u7Spec(q),u7Topic(q)].join(' ')):'';
+const u7Text=q=>q?[q.id,q.q,(q.o||[]).join(' '),q.ex,q.src,q.tag,u7Spec(q),u7Topic(q)].join(' ').toLowerCase():'';
 const u7Option=(v,label,cur)=>`<option value="${esc(String(v))}"${String(v)===String(cur)?' selected':''}>${esc(label)}</option>`;
 const u7Specs=()=>[...new Set(QB.map(q=>q.spec))].sort((a,b)=>u7Spec({spec:a}).localeCompare(u7Spec({spec:b})));
 const u7Topics=(spec)=>[...new Map(QB.filter(q=>spec==='all'||q.spec===spec).map(q=>[String(q.topic),u7Topic(q)])).entries()].sort((a,b)=>a[1].localeCompare(b[1]));
@@ -3062,7 +3002,7 @@ function u7GetQuestionItems(kind){
  else ids=Object.keys(U7_WRONG).filter(id=>U7_WRONG[id]&&!U7_WRONG[id].hidden&&u7Q(id));
  let rows=ids.map(id=>({id,q:u7Q(id)})).filter(x=>x.q);
  const st=u7State[kind];
- rows=rows.filter(({q})=>(st.spec==='all'||q.spec===st.spec)&&(st.topic==='all'||String(q.topic)===String(st.topic))&&(st.source==='all'||u7Source(q)===st.source)&&(!st.search||u7Text(q).includes(nz(st.search))));
+ rows=rows.filter(({q})=>(st.spec==='all'||q.spec===st.spec)&&(st.topic==='all'||String(q.topic)===String(st.topic))&&(st.source==='all'||u7Source(q)===st.source)&&(!st.search||u7Text(q).includes(st.search.toLowerCase())));
  rows.sort((a,b)=>{
   if(st.sort==='az')return a.q.q.localeCompare(b.q.q);
   const ta=kind==='saved'?(Number(U7_SAVED_META[a.id]?.savedAt)||0):(Number(U7_WRONG[a.id]?.lastAt)||Number(S.ans[a.id]?.t)||0);
@@ -3102,7 +3042,7 @@ window.u7BulkDelete=function(kind){const ids=[...u7Selected[kind]];if(!ids.lengt
 function u8Notes(){
  const rows=Object.entries(S.notes||{}).filter(([id,text])=>typeof text==='string'&&text.trim()&&u7Q(id)).map(([id,text])=>{const q=u7Q(id),m=U8_NOTE_META[id]||{};return{id,text,q,meta:m}});
  const st=u7State.notes;
- return rows.filter(x=>(st.spec==='all'||x.q.spec===st.spec)&&(st.topic==='all'||String(x.q.topic)===String(st.topic))&&(st.source==='all'||u7Source(x.q)===st.source)&&(!st.search||nz(x.text+' '+x.id+' '+x.q.q+' '+u7Spec(x.q)+' '+u7Topic(x.q)+' '+u7Source(x.q)).includes(nz(st.search)))).sort((a,b)=>{
+ return rows.filter(x=>(st.spec==='all'||x.q.spec===st.spec)&&(st.topic==='all'||String(x.q.topic)===String(st.topic))&&(st.source==='all'||u7Source(x.q)===st.source)&&(!st.search||(x.text+' '+x.id+' '+x.q.q+' '+u7Spec(x.q)+' '+u7Topic(x.q)+' '+u7Source(x.q)).toLowerCase().includes(st.search.toLowerCase()))).sort((a,b)=>{
   const ta=Number(st.sort==='added'?a.meta.createdAt:a.meta.updatedAt)||0,tb=Number(st.sort==='added'?b.meta.createdAt:b.meta.updatedAt)||0;return tb-ta;
  });
 }
@@ -3116,7 +3056,7 @@ function myNotesView(){
  <div class="u7-filters"><input class="field" type="search" placeholder="Search note text…" value="${esc(st.search)}" oninput="u7SetFilter('notes','search',this.value)"><select class="field" onchange="u7SetFilter('notes','spec',this.value)">${u7Option('all','All specialties',st.spec)}${systems.map(x=>u7Option(x,u7Spec({spec:x}),st.spec)).join('')}</select><select class="field" onchange="u7SetFilter('notes','topic',this.value)">${u7Option('all','All topics',st.topic)}${topics.map(([id,nm])=>u7Option(id,nm,st.topic)).join('')}</select><select class="field" onchange="u7SetFilter('notes','source',this.value)">${u7Option('all','All sources',st.source)}${sources.map(x=>u7Option(x,x,st.source)).join('')}</select><select class="field" onchange="u7SetFilter('notes','sort',this.value)">${u7Option('updated','Last modified',st.sort)}${u7Option('added','Date added',st.sort)}</select></div>
  <div id="u8-note-results">${u8NoteRows()}</div></div>`;
 }
-window.u8SearchQuestions=function(value){const box=document.getElementById('u8-question-matches');if(!box)return;const s=nz(String(value||'').trim());if(s.length<2){box.innerHTML='<small class="meta">Type at least 2 characters to find a Question Bank item.</small>';return}const rows=QB.filter(q=>u7Text(q).includes(s)).slice(0,8);box.innerHTML=rows.length?rows.map(q=>`<div class="u8-match"><div><b>${esc(q.id)}</b><small>${esc(u7Spec(q))} · ${esc(u7Topic(q))}</small><span>${esc(String(q.q).slice(0,120))}</span></div><button type="button" class="btn primary" onclick="u8OpenQuestion('${esc(q.id)}')">Add / edit note</button></div>`).join(''):'<small class="meta">No matching Question Bank question.</small>'};
+window.u8SearchQuestions=function(value){const box=document.getElementById('u8-question-matches');if(!box)return;const s=String(value||'').trim().toLowerCase();if(s.length<2){box.innerHTML='<small class="meta">Type at least 2 characters to find a Question Bank item.</small>';return}const rows=QB.filter(q=>u7Text(q).includes(s)).slice(0,8);box.innerHTML=rows.length?rows.map(q=>`<div class="u8-match"><div><b>${esc(q.id)}</b><small>${esc(u7Spec(q))} · ${esc(u7Topic(q))}</small><span>${esc(String(q.q).slice(0,120))}</span></div><button type="button" class="btn primary" onclick="u8OpenQuestion('${esc(q.id)}')">Add / edit note</button></div>`).join(''):'<small class="meta">No matching Question Bank question.</small>'};
 window.u8OpenQuestion=function(id){const q=u7Q(id);if(!q)return;openQ(id);setTimeout(()=>{const card=document.getElementById('qc-'+id);if(card){if(!S.notes[id]&&!qs.noteOpen[id])qNote(id);card.scrollIntoView({block:'start',behavior:'smooth'})}},140)};
 window.u8DeleteNote=function(id){if(typeof S.notes[id]!=='string')return;confirmBox({title:'Delete this note?',text:`Delete the note linked to ${id}?`,detail:'The original Question Bank question is not affected. This action cannot be undone.',ok:'Delete note',danger:true},()=>{delete S.notes[id];delete U8_NOTE_META[id];save();u7SaveObj(U8_NOTE_META_KEY,U8_NOTE_META);renderAppDemo()})};
 window.u8BulkDeleteNotes=function(ids){ids=Array.isArray(ids)?ids:[];if(!ids.length)return;confirmBox({title:'Delete selected notes?',text:`Delete ${ids.length} selected note${ids.length===1?'':'s'}?`,detail:'Original Question Bank questions remain unchanged.',ok:'Delete notes',danger:true},()=>{ids.forEach(id=>{delete S.notes[id];delete U8_NOTE_META[id]});save();u7SaveObj(U8_NOTE_META_KEY,U8_NOTE_META);renderAppDemo()})};
@@ -3124,8 +3064,8 @@ window.u7SetFilter=function(kind,key,value){if(!u7State[kind])return;u7State[kin
 
 /* Unit 7: separate Pinned and Recent collections backed by the original PKEY/RKEY stores. */
 function u7PinKey(e){return `${e.k}:${e.spec}:${e.topic}`}
-function u7PinRows(kind){const list=kind==='pins'?(PINS||[]):(REC||[]);const q=u7State;const search=nz(kind==='pins'?q.pinSearch:q.recentSearch);const spec=kind==='pins'?q.pinSpec:q.recentSpec;return list.filter(e=>{
- const sp=SPEC_NAME[e.spec]||e.spec;const topic=e.k==='spec'?'All topics':(e.topic===0?'All questions':TOPIC_NAME[e.topic]||'Topic');return (spec==='all'||e.spec===spec)&&(!search||nz(sp+' '+topic).includes(search));
+function u7PinRows(kind){const list=kind==='pins'?(PINS||[]):(REC||[]);const q=u7State;const search=(kind==='pins'?q.pinSearch:q.recentSearch).toLowerCase();const spec=kind==='pins'?q.pinSpec:q.recentSpec;return list.filter(e=>{
+ const sp=SPEC_NAME[e.spec]||e.spec;const topic=e.k==='spec'?'All topics':(e.topic===0?'All questions':TOPIC_NAME[e.topic]||'Topic');return (spec==='all'||e.spec===spec)&&(!search||(sp+' '+topic).toLowerCase().includes(search));
  }).sort((a,b)=>(b.t||0)-(a.t||0));}
 function u7PinMarkup(kind){const rows=u7PinRows(kind),sel=u7Selected[kind];if(!rows.length)return `<div class="card setcard u7-empty"><h3>${kind==='pins'?'No pinned items':'No recent topics'}</h3><p class="meta">${kind==='pins'?'Use the star beside a specialty or topic to pin it.':'Recently opened specialties and topics appear here automatically.'}</p><button type="button" class="btn block" onclick="appPage='subjects';renderAppDemo()">Browse specialties</button></div>`;
  return rows.map(e=>{const key=u7PinKey(e),sp=SPEC_NAME[e.spec]||e.spec,title=e.k==='spec'?sp:(e.topic===0?'All questions':TOPIC_NAME[e.topic]||'Topic');const n=QB.filter(x=>x.spec===e.spec&&(e.k==='spec'||e.topic===0||x.topic===e.topic)).length;const selected=sel.has(key);return `<article class="u7-pinrow"><label class="u7-check"><input type="checkbox" ${selected?'checked':''} onchange="u7PinSelect('${kind}','${esc(key)}',this.checked)"></label><button type="button" class="u7-pin-main" onclick="${e.k==='spec'?`openSpec('${esc(e.spec)}')`:`openTopic('${esc(e.spec)}',${Number(e.topic)||0})`}"><b>${esc(title)}</b><span>${esc(sp)} · ${n} questions</span><small>${kind==='recent'?'Visited':'Pinned'} · ${e.t?fmtDT(e.t):'Date not recorded'}</small></button>${kind==='pins'?`<button class="btn" type="button" onclick="u7Unpin('${esc(key)}')">Unpin</button>`:`<button class="btn danger" type="button" onclick="u7RemoveRecent('${esc(key)}')">Remove</button>`}</article>`}).join('')}
@@ -3167,6 +3107,9 @@ addNotif=function(id,title,body,page,ref){
   })}catch(e){console.warn('Android notification mirror unavailable',e)}
  }
 };
+/* Bridge for js/29-offline-setup.js: lets the update checker add one in-app bell notification. Calls the current addNotif (de-duplicated by id). */
+window.shbAddNotif=function(id,title,body,page,ref){addNotif(id,title,body,page,ref);try{if(appPage==='subjects'||appPage==='notifs'||appPage==='settings')renderAppDemo()}catch(e){}};
+window.shbRemoveNotif=function(id){const i=NOTIF.findIndex(n=>n.id===id);if(i<0)return;NOTIF.splice(i,1);LS.set(NKEY,NOTIF);try{if(appPage==='subjects'||appPage==='notifs'||appPage==='settings')renderAppDemo()}catch(e){}};
 NOTIF.forEach(n=>{if(!n.kind)n.kind=u10Kind(n.id,n.title);if(!n.priority)n.priority=u10Priority[n.kind]||1;if(!n.updatedAt)n.updatedAt=n.t});
 LS.set(NKEY,NOTIF);
 window.nToggle=function(id,ev){ev&&ev.stopPropagation();const n=NOTIF.find(x=>x.id===id);if(!n)return;n.read=!n.read;n.readAt=n.read?Date.now():0;LS.set(NKEY,NOTIF);renderAppDemo()};
@@ -3438,3 +3381,4 @@ PAGES.notifs=notifsView;PAGES.settings=settingsView;
 
 })();
 })();
+
