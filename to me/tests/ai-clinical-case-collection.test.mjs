@@ -79,6 +79,7 @@ test('Quiz and Smart Review include both AI banks and legacy AI routes are block
   assert.ok(adapter.includes('function ensureStudyToolBanks()'));
   assert.ok(adapter.includes("if(id==='quiz'||id==='review')ensureStudyToolBanks()"));
   assert.ok(adapter.includes('LEGACY_AI_PAGES'));
+  assert.ok(adapter.includes("else if(currentBank&&['specialties','topics','questions'].indexOf(page)<0)"));
   assert.ok(adapter.includes("document.addEventListener('shb-scripts-ready'"));
   assert.ok(adapter.includes('clinicalSystems'));
   assert.ok(adapter.includes('ai08Systems'));

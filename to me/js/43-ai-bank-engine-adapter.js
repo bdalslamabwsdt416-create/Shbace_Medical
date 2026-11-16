@@ -286,7 +286,9 @@ window.specialtiesView=function(){if(currentBank)return systemPage();return addB
 var coreRender=window.renderAppDemo;
 var LEGACY_AI_PAGES=['clinicalSystems','clinicalTopics','clinicalCases','clinicalQuestions','ai08Systems','ai08Topics','ai08Questions'];
 window.renderAppDemo=function(){
- if(LEGACY_AI_PAGES.indexOf(String(appPage))>=0){currentBank='';currentSystem='';B.setActiveBank('all');window.__SHB_PED_COLLECTION__='';appPage='subjects';}
+ var page=String(appPage||'');
+ if(LEGACY_AI_PAGES.indexOf(page)>=0){currentBank='';currentSystem='';B.setActiveBank('all');window.__SHB_PED_COLLECTION__='';appPage='subjects';}
+ else if(currentBank&&['specialties','topics','questions'].indexOf(page)<0){currentBank='';currentSystem='';B.setActiveBank('all');window.__SHB_PED_COLLECTION__='';}
  var result=coreRender.apply(this,arguments);
  if(appPage==='quiz'||appPage==='quizrun'||appPage==='quizresult'||appPage==='quizhistory'||appPage==='review')ensureStudyToolBanks();
  return result;
