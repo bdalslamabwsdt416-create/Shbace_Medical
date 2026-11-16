@@ -1,10 +1,11 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.10-to-me.43",
-  "displayVersion": "1.3.10.43 · Chrome (Phone + Computer)",
+  "version": "1.3.10-to-me.44",
+  "displayVersion": "1.3.10.44 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-16",
   "releaseNotes": [
+    "Serves the verified offline package locally first for the page, scripts, styles and assets; successful network fallbacks are cached. Only the scheduled/manual updater checks and integrity downloads bypass the local copy. Shortens the Splash-to-app portal handoff from about 2.86 s to about 0.85 s.",
     "Prevents the startup splash from revealing Home before every deferred app script has completed; startup stays behind the splash until the complete renderer is ready, and the duplicate late Home redraw is removed.",
     "Removes the retired design-prototype interface: sidebar, handoff panels, guide/document views, mock in-app screens and intermediate legacy Subjects renderer. The live Home and question-bank engine are now the only in-app render path. Splash, first-run onboarding, student data, offline package and update storage remain preserved.",
     "AI Clinical Cases and AI Generated now feed the same Dr. Al-Joaki question engine, question cards, answer state, Save and Personal note controls; their source data and separate progress remain independent.",
@@ -90,7 +91,8 @@
     "A question opened from Search, Saved, Wrong answers or Smart Review now opens inside its own bank, so a Previous question no longer opens as an empty list."
   ],
   "summary": [
-    "Home and onboarding are routed only after the full ordered startup script sequence is ready; slow network startup can no longer expose intermediate placeholder or partially enhanced screens.",
-    "The single startup path now owns the first Home render. Existing question banks, student progress and offline storage are preserved."
+    "Startup now serves the verified offline package locally first, avoiding network round-trips for cached HTML, JavaScript, CSS and assets; missing files are fetched once and saved locally.",
+    "Shortens the final Splash-to-Onboarding/Home portal transition to about 0.85 seconds while still waiting for every app module to be ready before revealing the first screen.",
+    "The existing seven-day automatic update schedule and manual Check for updates flow remain the only routine update checks. The verified cache name and all student data stores are preserved."
   ]
 }
