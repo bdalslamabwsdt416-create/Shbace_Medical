@@ -29,7 +29,7 @@ function topicTiles(sysName,names){const I=icons();return I?I.topics(sysName,nam
   }
 
 /* One shell for every page: Back on top, then kicker, title and sub-line (same as the Dr. Al-Joaki screens). */
-function shell(k,title,sub,body,cls,backHtml){return '<div class="rs '+(cls||'ped-bank-topics')+'">'+(backHtml||'')+'<div class="ped-collection-kicker">'+esc(k)+'</div><h1>'+esc(title)+'</h1>'+(sub?'<p class="sub">'+esc(sub)+'</p>':'')+body+'</div>';}
+function shell(k,title,sub,body,cls,backHtml){return '<div class="rs '+(cls||'ped-bank-topics')+' ai08-page">'+(backHtml||'')+'<div class="ped-collection-kicker">'+esc(k)+'</div><h1>'+esc(title)+'</h1>'+(sub?'<p class="sub">'+esc(sub)+'</p>':'')+body+'</div>';}
 function bar(done,total){let p=pct(done,total);return '<div class="cc-progress"><div class="cc-progress-meta"><span>'+done+' / '+total+' answered</span><b>'+p+'%</b></div><div class="bar"><span style="width:'+p+'%"></span></div></div>';}
 function back(label){return '<button type="button" class="backb cc-back" onclick="bank08AiGeneratedBack()"><span aria-hidden="true">‹</span> '+esc(label||'Back')+'</button>';}
 function loading(){return shell('AI-GENERATED MCQ BANK','AI Generated','Single-best-answer questions organized by medical system and topic.','<div class="card setcard ai08-loading"><div class="ai08-loader"></div><h3>Loading questions…</h3><p class="meta">The bank is being prepared on this device.</p></div>','ped-systems-page',back('Back'));}
@@ -37,7 +37,7 @@ function fail(){return shell('AI-GENERATED MCQ BANK','AI Generated','The source 
 function systemsPage(){
  if(!data)return error?fail():loading();
  const tiles=systemTiles(data.systems);
- let cards=data.systems.map((s,i)=>{let qs=systemQs(s),done=count(qs),p=pct(done,qs.length);return '<div class="card sc spc ped-system-card" onclick="bank08OpenAiGeneratedSystem(\''+s.id+'\')">'+tiles[i]+'<div class="spc-tx"><h3>'+esc(sysLabel(s))+'</h3><div class="meta"><b>'+qs.length+'</b> questions · <b>'+s.topics.length+'</b> topics</div><div class="bar"><span style="width:'+p+'%"></span></div></div><span class="chev">›</span></div>';}).join('');
+ let cards=data.systems.map((s,i)=>{let qs=systemQs(s),done=count(qs),p=pct(done,qs.length);return '<div class="card sc spc ped-system-card ai08-list-card" onclick="bank08OpenAiGeneratedSystem(\''+s.id+'\')">'+tiles[i]+'<div class="spc-tx"><h3>'+esc(sysLabel(s))+'</h3><div class="meta"><b>'+qs.length+'</b> questions · <b>'+s.topics.length+'</b> topics</div><div class="bar"><span style="width:'+p+'%"></span></div></div><span class="chev">›</span></div>';}).join('');
  let total=all().length;
  return shell('AI-GENERATED MCQ BANK','Choose a medical system',data.systems.length+' systems · '+total.toLocaleString()+' questions','<div class="ped-systems-grid">'+cards+'</div>','ped-systems-page',back('Back'));
 }
@@ -45,7 +45,7 @@ function topicsPage(){
  let s=sys();if(!s)return systemsPage();
  const label=sysLabel(s);
  const tiles=topicTiles(label,s.topics.map(t=>t.name));
- let cards=s.topics.map((t,i)=>{let qs=t.questions,done=count(qs),p=pct(done,qs.length);return '<div class="card sc tpc" onclick="bank08OpenAiGeneratedTopic(\''+t.id+'\')">'+tiles[i]+'<div class="tpc-tx"><h3>'+esc(topicLabel(t.name))+'</h3><div class="meta">'+qs.length+' questions'+(done?' · '+done+' answered':'')+'</div><div class="bar"><span style="width:'+p+'%"></span></div></div><span class="chev">›</span></div>';}).join('');
+ let cards=s.topics.map((t,i)=>{let qs=t.questions,done=count(qs),p=pct(done,qs.length);return '<div class="card sc tpc ai08-list-card" onclick="bank08OpenAiGeneratedTopic(\''+t.id+'\')">'+tiles[i]+'<div class="tpc-tx"><h3>'+esc(topicLabel(t.name))+'</h3><div class="meta">'+qs.length+' questions'+(done?' · '+done+' answered':'')+'</div><div class="bar"><span style="width:'+p+'%"></span></div></div><span class="chev">›</span></div>';}).join('');
  let qs=systemQs(s);
  return shell('AI-GENERATED MCQ BANK',label,s.topics.length+' topics · '+qs.length+' questions','<div class="ped-topics-grid">'+cards+'</div>','ped-bank-topics',back('Medical Systems'));
 }
@@ -61,12 +61,12 @@ function questionCard(q,i){
   '<section><h4>Detailed Explanation</h4><div>'+txt(q.detailedExplanation)+'</div></section>'+
   (q.highYieldPoints?'<section><h4>High-Yield Points</h4><div>'+txt(q.highYieldPoints)+'</div></section>':'')+
   '<p class="nl-source">Source: '+esc(source.sheet||source.raw||'Course sheet')+pages+(source.raw?'<br><small>'+esc(source.raw)+'</small>':'')+'</p></div></details>':'';
- return '<article class="qcard" id="ai08q-'+q.id+'" data-id="'+q.id+'"><div class="qtop"><span class="qid">QUESTION '+(i+1)+'</span></div><h3 class="qstem">'+esc(q.stem)+'</h3><div class="qopts">'+opts+'</div>'+initial+more+'</article>';
+ return '<article class="qcard ai08-question" id="ai08q-'+q.id+'" data-id="'+q.id+'"><div class="qtop"><span class="qid">QUESTION '+(i+1)+'</span></div><h3 class="qstem">'+esc(q.stem)+'</h3><div class="qopts ai08-options">'+opts+'</div>'+initial+more+'</article>';
 }
 function questionsPage(){
  let s=sys(),t=topic();if(!s||!t)return topicsPage();
  let qs=t.questions,done=count(qs);
- return shell('AI-GENERATED MCQ BANK · '+sysLabel(s).toUpperCase(),topicLabel(t.name),qs.length+' questions · '+done+' answered',bar(done,qs.length)+'<div class="cc-question-list">'+qs.map(questionCard).join('')+'</div>','qb ped-bank-topics',back(sysLabel(s)));
+ return shell('AI-GENERATED MCQ BANK · '+sysLabel(s).toUpperCase(),topicLabel(t.name),qs.length+' questions · '+done+' answered',bar(done,qs.length)+'<div class="ai08-question-list">'+qs.map(questionCard).join('')+'</div>','qb ped-bank-topics',back(sysLabel(s)));
 }
 function current(){if(appPage==='ai08Systems')return systemsPage();if(appPage==='ai08Topics')return topicsPage();if(appPage==='ai08Questions')return questionsPage();return '';}
 const SHARDS=[

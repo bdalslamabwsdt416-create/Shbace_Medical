@@ -20,15 +20,17 @@ See `docs/ARCHITECTURE.md` for a short map of the code (start-up order, the clos
 - Bank readiness = correct answers (latest attempt on each question) divided by the whole bank; it appears after 20 answered questions.
 - Daily Medical Insight notifications run only in the Android app (Capacitor); the Chrome PWA shows the daily fact on Home.
 
-- Offline: the full package is downloaded once (Chrome installed app). On every launch only the small manifest is fetched; if files changed, an "Update available" sheet shows how many files and how many MB, and only those files are downloaded (staged, verified, then swapped in). Without internet nothing is shown and the saved copy keeps working.
+- Offline: the full package is downloaded once (Chrome installed app). Automatic update checks run every seven days; Settings → Check for updates can be used at any time. If files changed, an "Update available" sheet shows the changed-file count and size. After acceptance, only changed files are downloaded to a staging cache, checked by byte size and SHA-256, and committed. The app requests one safe restart after the verified commit. First Service Worker control does not reload the page. Without internet, the saved copy keeps working.
 - Question Bank opens in the All view by default (30 cards at a time, "Show more"); the Tags and All Questions lists show only what exists in the current topic, with counts. Each question also has a type tag (Clinical Case, Diagnosis, Investigation, Management, Knowledge) derived from its wording.
 - Question voice: English only, prefers the clearest male voice the device offers.
 - Search: the search box and the bank chips stay on top; specialty, tag, source, topic, system and sort are in one collapsible "Filters" panel.
 
 ## Checks
 
-- `npm run test:unit` runs the unit tests in `tests/` (search normaliser).
-- `npm run check:bank` validates ids, answer keys, option letters and explanations and syntax-checks every script. The GitHub Action `PWA checks` runs the unit tests, `check:bank` and `npm run build:pwa` on every pull request and on every push to a non-main branch.
+- `npm run test:unit` runs the unit tests in `tests/`.
+- `npm run check:bank` checks root-level duplicate JS/CSS names, validates ids, answer keys, option letters and explanations, and syntax-checks every runtime script.
+- `npm run build:pwa` repeats the duplicate-name and bank checks before producing the offline package.
+- The repository's `PWA checks` GitHub Action runs the unit tests, `check:bank` and `build:pwa` for pull requests and non-main pushes that change `to me/**`.
 
 ## Study Timer browser limitation
 

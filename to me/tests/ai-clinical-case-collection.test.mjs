@@ -63,15 +63,30 @@ test('All three banks share the same question-card presentation language', () =>
   assert.match(integration90, /return oldInTopic\.apply\(this,arguments\)\.filter/);
 });
 
-test('Bank 07 opens a topic directly to all its case histories and linked questions', () => {
+test('Bank 07 opens a topic into its case list and each case into its own linked questions', () => {
   const topicAction = bank07.slice(bank07.indexOf('window.bank07OpenClinicalCaseTopic=function(id)'), bank07.indexOf('window.bank07OpenClinicalCase=function(id)'));
-  assert.match(topicAction, /appPage='clinicalQuestions'/);
+  assert.match(topicAction, /selectedTopic=id;selectedCase='';/);
+  assert.match(topicAction, /appPage='clinicalCases'/);
+
+  const caseAction = bank07.slice(bank07.indexOf('window.bank07OpenClinicalCase=function(id)'), bank07.indexOf('window.bank07ClinicalCaseBack=function()'));
+  assert.match(caseAction, /selectedCase=id;/);
+  assert.match(caseAction, /appPage='clinicalQuestions'/);
+
+  const caseList = bank07.slice(bank07.indexOf('function casesPage() {'), bank07.indexOf('function questionCard(q,index) {'));
+  assert.match(caseList, /topic\.cases\.map/);
+  assert.match(caseList, /bank07OpenClinicalCase/);
+
   const page = bank07.slice(bank07.indexOf('function questionsPage() {'), bank07.indexOf('function currentView() {'));
-  assert.match(page, /topic\.cases\.map/);
+  assert.match(page, /const selected=selectedCase \? topic\.cases\.find/);
+  assert.match(page, /const cases=selected \? \[selected\] : topic\.cases/);
   assert.match(page, /item\.hasSharedCaseText/);
+  assert.match(page, /class="cc-case-group"/);
+  assert.match(page, /item\.questions\.map/);
   assert.match(page, /'qb ped-bank-topics'/);
+
   const back = bank07.slice(bank07.indexOf('window.bank07ClinicalCaseBack=function()'), bank07.indexOf('window.bank07AnswerClinicalCaseQuestion=function'));
-  assert.match(back, /if\(appPage==='clinicalQuestions'\)appPage='clinicalTopics'/);
+  assert.match(back, /if\(appPage==='clinicalQuestions'\)\{selectedCase='';appPage='clinicalCases';\}/);
+  assert.match(back, /else if\(appPage==='clinicalCases'\)\{selectedCase='';appPage='clinicalTopics';\}/);
 });
 
 test('The collection icons distinguish the two case banks', () => {

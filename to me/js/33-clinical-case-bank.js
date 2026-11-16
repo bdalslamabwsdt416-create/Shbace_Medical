@@ -161,24 +161,27 @@
       '<section><h4>Detailed Explanation</h4><div>'+formatText(q.detailedExplanation)+'</div></section>'+
       '<section><h4>High-Yield Points</h4><div>'+formatText(q.highYieldPoints)+'</div></section>'+
       '<p class="nl-source">Source: '+$esc(source.sheet||source.raw||'Course sheet')+pages+(source.raw?'<br><small>'+$esc(source.raw)+'</small>':'')+'</p></div></details>':'';
-    return '<article class="qcard" id="qc-'+q.id+'" data-id="'+q.id+'"><div class="qtop"><span class="qid">QUESTION '+(index+1)+'</span></div>'+
+    return '<article class="qcard cc-question" id="qc-'+q.id+'" data-id="'+q.id+'"><div class="qtop"><span class="qid">QUESTION '+(index+1)+'</span></div>'+
       '<h3 class="qstem">'+$esc(q.stem)+'</h3><div class="qopts">'+optionHtml+'</div>'+initial+readMore+'</article>';
   }
   function questionsPage() {
     const system=findSystem(),topic=findTopic();
     if (!system || !topic) return topicsPage();
-    const qs=topicQuestions(topic),done=answerCount(qs);
+    const selected=selectedCase ? topic.cases.find(item=>item.id===selectedCase) : null;
+    const cases=selected ? [selected] : topic.cases;
+    const qs=cases.flatMap(item=>item.questions);
+    const done=answerCount(qs);
     let questionNumber=0;
-    const blocks=topic.cases.map(item=>{
-      const heading=item.hasSharedCaseText
-        ? '<div class="cc-vignette"><div class="cc-vignette-title"><span>CLINICAL CASE</span>'+(item.number?'<b>CASE '+String(item.number).padStart(2,'0')+'</b>':'')+'</div><h2>'+$esc(item.title)+'</h2><div class="cc-rich">'+formatText(item.vignette)+'</div></div>'
-        : (item.sourceHeadingPresent&&topic.cases.length>1?'<div class="cc-section-heading">'+$esc(item.title)+'</div>':'');
-      return heading+'<div class="cc-question-list">'+item.questions.map(q=>questionCard(q,questionNumber++)).join('')+'</div>';
+    const blocks=cases.map(item=>{
+      const heading='<div class="cc-vignette'+(item.hasSharedCaseText?'':' cc-vignette-note')+'"><div class="cc-vignette-title"><span>'+(item.hasSharedCaseText?'CLINICAL CASE':'CASE QUESTIONS')+'</span>'+(item.number?'<b>CASE '+String(item.number).padStart(2,'0')+'</b>':'')+'</div><h2>'+$esc(item.title||'Questions')+'</h2>'+(item.hasSharedCaseText?'<div class="cc-rich">'+formatText(item.vignette)+'</div>':'<div class="cc-rich">Questions linked to this case</div>')+'</div>';
+      return '<section class="cc-case-group" data-case-id="'+$esc(item.id)+'">'+heading+'<div class="cc-question-list">'+item.questions.map(q=>questionCard(q,questionNumber++)).join('')+'</div></section>';
     }).join('');
-    return pageShell('AI CLINICAL CASES · '+systemLabel(system).toUpperCase(),topicLabel(topic.name),
+    const title=selected ? (selected.title||'Clinical Case') : topicLabel(topic.name);
+    const back=selected ? backButton('Clinical cases') : backButton(systemLabel(system));
+    return pageShell('AI CLINICAL CASES · '+systemLabel(system).toUpperCase(),title,
       qs.length+' questions · '+done+' answered',
       progress(done,qs.length)+blocks,
-      'qb ped-bank-topics', backButton(systemLabel(system)));
+      'qb ped-bank-topics',back);
   }
   function currentView() {
     if (appPage==='clinicalSystems') return systemsPage();
@@ -228,7 +231,7 @@
     const system=findSystem();
     if(!system || !safeId(id) || !system.topics.some(x=>x.id===id))return;
     selectedTopic=id;selectedCase='';
-    appPage='clinicalQuestions';renderAppDemo();
+    appPage='clinicalCases';renderAppDemo();
   };
   window.bank07OpenClinicalCase=function(id) {
     const topic=findTopic();
@@ -237,8 +240,8 @@
     appPage='clinicalQuestions';renderAppDemo();
   };
   window.bank07ClinicalCaseBack=function() {
-    if(appPage==='clinicalQuestions')appPage='clinicalTopics';
-    else if(appPage==='clinicalCases')appPage='clinicalTopics';
+    if(appPage==='clinicalQuestions'){selectedCase='';appPage='clinicalCases';}
+    else if(appPage==='clinicalCases'){selectedCase='';appPage='clinicalTopics';}
     else if(appPage==='clinicalTopics')appPage='clinicalSystems';
     else { appPage='specialties'; window.__SHB_PED_COLLECTION__=''; }
     renderAppDemo();

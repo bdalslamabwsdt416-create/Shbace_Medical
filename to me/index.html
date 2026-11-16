@@ -23,8 +23,8 @@
 <link rel="preload" as="image" href="/assets/img/d407f81c5a39.webp" fetchpriority="high">
 <link rel="preload" as="image" href="/assets/img/4f7815b2e6df.webp" fetchpriority="high">
 <link rel="preload" as="image" href="/assets/img/e5a5775b19e8.webp" fetchpriority="high">
-<link rel="preload" as="style" href="css/core.css">
-<link rel="preload" as="style" href="css/late.css">
+<link rel="preload" as="style" href="css/bundle-core.css">
+<link rel="preload" as="style" href="css/bundle-late.css">
 <link rel="preload" as="script" href="js/01-ui-images.js">
 <link rel="preload" as="script" href="js/02-doctor-images.js">
 <link rel="preload" as="script" href="js/03-completion-scene.js">
@@ -100,9 +100,7 @@
 
 <!-- ═══════════ CORE STYLES (needed by the splash and the first screen) ═══════════ -->
 <!-- Base theme, layout, splash & onboarding -->
-<link rel="stylesheet" href="css/core.css">
-<link rel="stylesheet" href="css/android-v13.css">
-<link rel="stylesheet" href="css/chrome-android.css">
+<link rel="stylesheet" href="css/bundle-core.css">
 <!-- Owner credit & small additions -->
 
 <!-- v6css -->
@@ -557,13 +555,7 @@
 </div>
 <!-- ═══════════ 4) LATE STYLES (feature & theme layers, in original cascade order) ═══════════ -->
 <!-- home7css -->
-<link rel="stylesheet" href="css/late.css">
-<link rel="stylesheet" href="css/unified-enhancements.css">
-<link rel="stylesheet" href="css/shbace-layout-refinements.css">
-<link rel="stylesheet" href="css/egyptian-book.css">
-<link rel="stylesheet" href="css/clinical-case-bank.css">
-<link rel="stylesheet" href="css/ai-generated-bank.css">
-<link rel="stylesheet" href="css/banks-07-08-parity.css">
+<link rel="stylesheet" href="css/bundle-late.css">
 <!-- shell7css -->
 
 <!-- sp7css -->
@@ -799,16 +791,7 @@ window.__SHBACE_FACULTY_LOGO_DATA__="__SHBACE_FACULTY_LOGO_DATA__";
 (function(){
   if(window.Capacitor || !('serviceWorker' in navigator)) return;
   if(location.protocol!=='https:' && location.hostname!=='localhost') return;
-  var reloading=false,reloadKey='shbace-sw-controller-reload-v1';
-  var hadController=!!navigator.serviceWorker.controller;
-  try{sessionStorage.removeItem(reloadKey)}catch(e){}
-  navigator.serviceWorker.addEventListener('controllerchange',function(){
-    /* First install: the page is already complete, no reload needed (it restarted the splash and the whole boot). */
-    if(!hadController){hadController=true;return}
-    if(reloading)return;reloading=true;
-    try{if(sessionStorage.getItem(reloadKey)==='1')return;sessionStorage.setItem(reloadKey,'1')}catch(e){}
-    location.reload();
-  });
+  /* Worker activation is not a page-reload trigger. The offline updater requests one reload after the accepted package is verified and committed. */
   window.addEventListener('load',function(){
     navigator.serviceWorker.getRegistration('./').then(function(reg){
       if(!reg)return navigator.serviceWorker.register('./sw.js',{scope:'./'});

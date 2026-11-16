@@ -142,7 +142,12 @@ if (egyptianTotal !== 473 || egyptianIds.size !== 473) errors.push(`Egyptian Boo
 if (egyptianReady !== 466 || egyptianUnresolved !== 7) errors.push(`Egyptian Book expected 466 answer-verified records and 7 unresolved records, found ${egyptianReady}/${egyptianUnresolved}`);
 const appHtml = readFileSync(join(root, "index.html"), "utf8");
 for (const name of egyptianFiles) if (!appHtml.includes(`data/egyptian-book/${name}`)) errors.push(`index.html does not load ${name}`);
-if (!appHtml.includes("js/40-egyptian-book-pediatrics.js") || !appHtml.includes("css/egyptian-book.css")) errors.push("index.html is missing Egyptian Book UI or stylesheet registration");
+const hasEgyptianBookStyles = appHtml.includes("css/egyptian-book.css") ||
+  (appHtml.includes("css/bundle-late.css") &&
+    readFileSync(join(root, "css/bundle-late.css"), "utf8").includes(".eb-systems-page"));
+if (!appHtml.includes("js/40-egyptian-book-pediatrics.js") || !hasEgyptianBookStyles) {
+  errors.push("index.html is missing Egyptian Book UI or stylesheet registration");
+}
 
 const jsFiles = [
   ...readdirSync(join(root, "js")).filter(f => f.endsWith(".js")).map(f => join(root, "js", f)),
