@@ -162,7 +162,7 @@
       '<section><h4>High-Yield Points</h4><div>'+formatText(q.highYieldPoints)+'</div></section>'+
       '<p class="nl-source">Source: '+$esc(source.sheet||source.raw||'Course sheet')+pages+(source.raw?'<br><small>'+$esc(source.raw)+'</small>':'')+'</p></div></details>':'';
     return '<article class="qcard cc-question" id="qc-'+q.id+'" data-id="'+q.id+'"><div class="qtop"><span class="qid">QUESTION '+(index+1)+'</span></div>'+
-      '<h3 class="qstem">'+$esc(q.stem)+'</h3><div class="qopts cc-options">'+optionHtml+'</div>'+initial+readMore+'</article>';
+      '<h3 class="qstem">'+$esc(q.stem)+'</h3><div class="qopts">'+optionHtml+'</div>'+initial+readMore+'</article>';
   }
   function questionsPage() {
     const system=findSystem(),topic=findTopic();
