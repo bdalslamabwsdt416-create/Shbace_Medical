@@ -1,10 +1,13 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.10-to-me.35",
-  "displayVersion": "1.3.10.35 · Chrome (Phone + Computer)",
+  "version": "1.3.10-to-me.36",
+  "displayVersion": "1.3.10.36 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-16",
   "releaseNotes": [
+    "Starts the offline setup script immediately after the Embedded images marker so offline-state detection and package-list loading begin during the splash.",
+    "Prevents a page reload when the Service Worker first takes control; later controller changes retain the normal reload behavior.",
+    "Reduces the Service Worker install shell to the nine essential files. Remaining verified package assets are handled by the offline setup screen.",
     "AI Clinical Cases and AI Generated now use the Dr. Al-Joaki layout with unique icons and unified system names.",
     "Restores the independent Previous Questions collection with all 399 original exam questions; the numeric source marker is respected and stale cached bank labels cannot hide them.",
     "Keeps the three independent collections correctly identified: Previous Questions (399), Clinical Cases (90) and AI Clinical Cases (1,598).",
