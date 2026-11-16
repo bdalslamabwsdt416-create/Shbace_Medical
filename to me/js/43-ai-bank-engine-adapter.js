@@ -164,9 +164,9 @@ function loadGenerated(){
   var i=cursor++;if(i>=generatedShards.length)return Promise.resolve();
   return fetchShard(generatedShards[i]).then(function(part){result[i]=part;return worker();});
  }
- return Promise.all([worker(),worker(),worker(),worker()]).then(function(parts){
+ return Promise.all([worker(),worker(),worker(),worker()]).then(function(){
   var map=new Map(),total=0;
-  parts.forEach(function(part){
+  result.forEach(function(part){
    if(!part||part.schema!=='shbace-ai-generated-mcq-source-v1'||part.bankNumber!==8||!Array.isArray(part.systems))throw new Error('AI Generated source shard validation failed.');
    total+=Number(part.totalQuestions||0);
    part.systems.forEach(function(s){
