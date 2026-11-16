@@ -1,8 +1,9 @@
 'use strict';
 
-/* Persistent offline-package cache. Keep this name identical to js/29-offline-setup.js across releases; rotating it would discard the 28 MB verified package and force a full restore. */
+/* Keep this cache name identical to js/29-offline-setup.js. Never rotate it for a routine app release: doing so would discard the verified 28 MB package. */
 const CACHE_NAME = 'shbace-chrome-offline-v1.3.10.37';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
+const INDEX_URL = new URL('index.html', self.registration.scope).href;
 const APP_SHELL = [
   './',
   './index.html',
@@ -31,7 +32,7 @@ function missingOfflineResponse(url) {
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
-    /* Fetch only the shell files that are not already stored; the offline updater owns every later change. */
+    /* Fetch only missing shell files; the offline updater owns subsequent release changes. */
     const missing = [];
     for (const url of APP_SHELL) {
       if (!(await cache.match(url))) missing.push(url);
@@ -45,12 +46,38 @@ self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     await self.clients.claim();
     const names = await caches.keys();
-    /* Remove only the old per-version worker caches from earlier releases. */
+    /* Remove only obsolete caches from the retired naming scheme. Keep the verified current package. */
     await Promise.all(names
       .filter(name => name.startsWith('shbace-to-me-chrome-offline-'))
       .map(name => caches.delete(name)));
   })());
 });
+
+/* Local-first: after the updater verifies and stores the package, startup uses those local bytes.
+   A genuinely missing file gets one network fallback and is saved locally after a successful response. */
+async function localFirst(request) {
+  const cache = await caches.open(CACHE_NAME);
+  let hit = null;
+  if (request.mode === 'navigate') {
+    /* The updater stores the canonical index.html path. Do not serve an older cached './' entry first. */
+    hit = await cache.match(INDEX_URL) || await cache.match(request, { ignoreSearch: true });
+  } else {
+    hit = await cache.match(request, { ignoreSearch: true });
+  }
+  if (hit) return hit;
+  try {
+    const fresh = await fetch(request);
+    if (fresh && fresh.ok) {
+      try {
+        const cacheKey = request.mode === 'navigate' ? INDEX_URL : request;
+        await cache.put(cacheKey, fresh.clone());
+      } catch (_) {}
+    }
+    return fresh;
+  } catch (_) {
+    return missingOfflineResponse(request.url);
+  }
+}
 
 self.addEventListener('fetch', event => {
   const request = event.request;
@@ -59,14 +86,13 @@ self.addEventListener('fetch', event => {
   if (url.origin !== self.location.origin) return;
   if (url.pathname.endsWith('/sw.js')) return;
 
-  // Integrity downloads must reach the network; never satisfy them from a stale
-  // cache entry matched with ignoreSearch. The installer stores verified bytes
-  // under the canonical URL after its SHA-256 check succeeds.
+  /* Integrity downloads must reach the network; hash verification belongs to the updater. */
   if (url.searchParams.has('__shbace_integrity')) {
     event.respondWith(fetch(request, { cache: 'reload' }));
     return;
   }
-  // A bounded retry from the boot loader bypasses a stale cache entry and refreshes the canonical offline copy.
+
+  /* Explicit boot retry bypasses a stale cached copy, then refreshes its canonical cache entry. */
   if (url.searchParams.has('__shbace_reload')) {
     event.respondWith((async () => {
       const cache = await caches.open(CACHE_NAME);
@@ -74,7 +100,9 @@ self.addEventListener('fetch', event => {
       canonical.searchParams.delete('__shbace_reload');
       try {
         const fresh = await fetch(request, { cache: 'reload' });
-        if (fresh && fresh.ok) { try { await cache.put(canonical.href, fresh.clone()); } catch (_) {} }
+        if (fresh && fresh.ok) {
+          try { await cache.put(canonical.href, fresh.clone()); } catch (_) {}
+        }
         return fresh;
       } catch (_) {
         const hit = await cache.match(canonical.href);
@@ -84,15 +112,21 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-
-  // Manifest + version file: network first, so an updated manifest/icons always reach Chrome.
-  // Falls back to the cached copy when offline.
-  if (url.pathname.endsWith('/manifest.webmanifest') || url.pathname.endsWith('/pwa-version.json') || url.pathname.endsWith('/offline-assets-manifest.json')) {
+  /* The updater marks version/manifest checks with cache:'no-store'. Only those checks go to the network. */
+  if (url.pathname.endsWith('/manifest.webmanifest') ||
+      url.pathname.endsWith('/pwa-version.json') ||
+      url.pathname.endsWith('/offline-assets-manifest.json')) {
+    if (request.cache !== 'no-store') {
+      event.respondWith(localFirst(request));
+      return;
+    }
     event.respondWith((async () => {
       const cache = await caches.open(CACHE_NAME);
       try {
         const fresh = await fetch(request, { cache: 'no-store' });
-        if (fresh && fresh.ok) { try { await cache.put(request, fresh.clone()); } catch (_) {} }
+        if (fresh && fresh.ok) {
+          try { await cache.put(request, fresh.clone()); } catch (_) {}
+        }
         return fresh;
       } catch (_) {
         const hit = await cache.match(request, { ignoreSearch: true });
@@ -102,35 +136,20 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Keep the application shell on one coherent release. Online, navigations and executable
-  // assets are refreshed from the origin; offline, the verified current-version cache is used.
-  // This avoids serving an old bank script beside a newer index.html (or vice versa).
-  if (request.mode === 'navigate' || request.destination === 'script' || request.destination === 'style') {
-    event.respondWith((async () => {
-      const cache = await caches.open(CACHE_NAME);
-      try {
-        const fresh = await fetch(request, { cache: 'no-store' });
-        if (fresh && fresh.ok) { try { await cache.put(request, fresh.clone()); } catch (_) {} }
-        return fresh;
-      } catch (_) {
-        const cached = await cache.match(request, { ignoreSearch: true });
-        if (cached) return cached;
-        if (request.mode === 'navigate') {
-          const shell = await cache.match(new URL('index.html', self.registration.scope).href);
-          if (shell) return shell;
-        }
-        const ready = await cache.match(READY_URL);
-        return ready ? missingOfflineResponse(request.url) : missingOfflineResponse(request.url);
-      }
-    })());
+  /* HTML, JavaScript and CSS are local-first and therefore do not wait on network round-trips. */
+  if (request.mode === 'navigate' ||
+      request.destination === 'script' ||
+      request.destination === 'style') {
+    event.respondWith(localFirst(request));
     return;
   }
 
+  /* Other same-origin resources: prefer the verified package, then fetch/cache a missing resource. */
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
     const ready = await cache.match(READY_URL);
     let cached = await cache.match(request, { ignoreSearch: true });
-    if (!cached && request.mode === 'navigate') cached = await cache.match(new URL('index.html', self.registration.scope).href);
+    if (!cached && request.mode === 'navigate') cached = await cache.match(INDEX_URL);
     if (cached) return cached;
     if (ready) return missingOfflineResponse(request.url);
     try {
@@ -140,8 +159,7 @@ self.addEventListener('fetch', event => {
       }
       return response;
     } catch (_) {
-      const fallback = await cache.match('./index.html');
-      return fallback || missingOfflineResponse(request.url);
+      return missingOfflineResponse(request.url);
     }
   })());
 });
