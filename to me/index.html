@@ -812,7 +812,8 @@ window.__SHBACE_FACULTY_LOGO_DATA__="__SHBACE_FACULTY_LOGO_DATA__";
   window.addEventListener('load',function(){
     navigator.serviceWorker.getRegistration('./').then(function(reg){
       if(!reg)return navigator.serviceWorker.register('./sw.js',{scope:'./'});
-      return reg.update().then(function(){return reg;});
+      /* Existing registrations are checked by the seven-day scheduler in js/32-chrome-android.js, not on every app launch. */
+      return reg;
     }).catch(function(e){
       console.warn('Shbace Medical offline support update check failed:',e);
     });
