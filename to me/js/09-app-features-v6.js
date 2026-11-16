@@ -142,7 +142,16 @@ const QB=BANK_ON?FULL_QB:DEMO_QB;
 /* SHB-BANK-SCOPE: Dr. Al-Joaki's bank (q.py !== true) vs Previous Questions (q.py === true).
    View-only filter used by Quiz, Search and Smart Review. Question records are never modified. */
 const BANK_OPTS=[['all','All banks'],['aj','Dr. Al-Joaki'],['previous','Previous Questions'],['nelson','Nelson Textbook'],['kasr','Kasr Al-Ainy'],['clinical','Clinical Cases'],['egyptian','Egyptian Book']];
-const bankOf=q=>!q?'aj':q.nl===true?'nelson':q.py===true?'previous':q.eb===true?'egyptian':q.cc===true?'clinical':q.ao===true?'kasr':'aj';
+const BANK_KEYS=new Set(BANK_OPTS.map(option=>option[0]).filter(key=>key!=='all'));
+const bankOf=q=>{
+ if(!q)return 'aj';
+ const hasBankFlag=value=>value===true||value===1||value==='1';
+ const legacy=hasBankFlag(q.nl)?'nelson':hasBankFlag(q.py)?'previous':hasBankFlag(q.eb)?'egyptian':hasBankFlag(q.cc)?'clinical':hasBankFlag(q.ao)?'kasr':'aj';
+ const flagged=legacy!=='aj'?legacy:null;
+ const canonical=flagged||(BANK_KEYS.has(q.bank)?q.bank:legacy);
+ if(q.bank!==canonical){try{q.bank=canonical}catch(e){}}
+ return canonical;
+};
 const bankValid=b=>BANK_OPTS.some(o=>o[0]===b&&b!=='all')?b:'all';
 const bankOk=(q,b)=>b==='all'||bankOf(q)===b;
 const bankHas=(spec,b)=>b==='all'||QB.some(q=>q.spec===spec&&bankOk(q,b));
