@@ -9,6 +9,7 @@ const integration90 = read('../js/39-clinical-case-pediatrics.js');
 const adapter = read('../js/43-ai-bank-engine-adapter.js');
 const mainBank = read('../js/09-app-features-v6.js');
 const polish = read('../js/42-pediatrics-collection-polish.js');
+const motion = read('../js/17-motion-v2.js');
 const index = read('../index.html');
 const appMain = read('../js/04-app-main.js');
 const build = read('../scripts/build-pwa.mjs');
@@ -102,9 +103,15 @@ test('Quiz and Smart Review include both AI banks and legacy AI routes are block
   assert.ok(mainBank.includes('ACTIVE_QBANK_TOPICS'));
 });
 
+test('Home and bank routes do not display an outgoing-page ghost', () => {
+  assert.ok(motion.includes("function isBankRoute(page)"));
+  assert.ok(motion.includes("var motionAllowed=!isBankRoute(page)&&!isBankRoute(last)"));
+});
+
 test('The collection icons distinguish the two case banks', () => {
   assert.match(polish, /\.ped-collection-bank07', 'bank-ai-clinical-cases\.webp', 'AI Clinical Cases'/);
   assert.match(polish, /\.ped-collection-clinicalcase:not\(\.ped-collection-bank07\)', 'bank-clinical-case\.webp', 'Clinical Cases'/);
+  assert.ok(polish.includes("img.loading = 'eager'"));
 });
 
 
