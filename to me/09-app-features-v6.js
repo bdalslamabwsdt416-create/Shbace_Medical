@@ -3098,6 +3098,9 @@ addNotif=function(id,title,body,page,ref){
   })}catch(e){console.warn('Android notification mirror unavailable',e)}
  }
 };
+/* Bridge for js/29-offline-setup.js: lets the update checker add one in-app bell notification. Calls the current addNotif (de-duplicated by id). */
+window.shbAddNotif=function(id,title,body,page,ref){addNotif(id,title,body,page,ref);try{if(appPage==='subjects'||appPage==='notifs'||appPage==='settings')renderAppDemo()}catch(e){}};
+window.shbRemoveNotif=function(id){const i=NOTIF.findIndex(n=>n.id===id);if(i<0)return;NOTIF.splice(i,1);LS.set(NKEY,NOTIF);try{if(appPage==='subjects'||appPage==='notifs'||appPage==='settings')renderAppDemo()}catch(e){}};
 NOTIF.forEach(n=>{if(!n.kind)n.kind=u10Kind(n.id,n.title);if(!n.priority)n.priority=u10Priority[n.kind]||1;if(!n.updatedAt)n.updatedAt=n.t});
 LS.set(NKEY,NOTIF);
 window.nToggle=function(id,ev){ev&&ev.stopPropagation();const n=NOTIF.find(x=>x.id===id);if(!n)return;n.read=!n.read;n.readAt=n.read?Date.now():0;LS.set(NKEY,NOTIF);renderAppDemo()};
