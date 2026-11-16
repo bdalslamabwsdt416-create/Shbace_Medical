@@ -1,4 +1,4 @@
-/* AI Clinical Cases Pediatrics — independent case-question collection. */
+/* Clinical Cases Pediatrics — independent case-question collection. */
 (function(){
 'use strict';
 const B=window.__SHB_BRIDGE;
@@ -27,16 +27,16 @@ function clinicalCaseView(){
   const icon=sys&&typeof B.sysIcon==='function'?B.sysIcon(sys[2],'lg'):'<div class="tno ti"><span>✚</span></div>';
   return '<div class="card sc spc ped-system-card" onclick="openClinicalCaseSystem(\''+row.id+'\')">'+icon+'<div class="spc-tx"><h3>'+escText(row.name)+'</h3><div class="meta"><b>'+row.count.toLocaleString()+'</b> questions</div></div><span class="chev">›</span></div>';
  }).join('');
- return appHeader('AI Clinical Cases')+'<div class="rs ped-systems-page"><div class="ped-collection-kicker">AI CLINICAL CASES · PEDIATRICS</div><h1>Choose a medical system</h1><p class="sub">'+rows.length+' systems · '+list.length.toLocaleString()+' questions</p><div class="ped-systems-grid">'+(cards||'<div class="card setcard"><p class="meta">No AI Clinical Cases questions are available.</p></div>')+'</div></div>';
+ return appHeader('Clinical Cases')+'<div class="rs ped-systems-page"><div class="ped-collection-kicker">CLINICAL CASES · PEDIATRICS</div><h1>Choose a medical system</h1><p class="sub">'+rows.length+' systems · '+list.length.toLocaleString()+' questions</p><div class="ped-systems-grid">'+(cards||'<div class="card setcard"><p class="meta">No Clinical Cases questions are available.</p></div>')+'</div></div>';
 }
 const oldSpecialtiesView=specialtiesView;
 specialtiesView=function(){
  if(ccActive==='clinicalcase')return clinicalCaseView();
  let html=oldSpecialtiesView.apply(this,arguments);
  if(!ccActive&&html.indexOf('ped-collection-footnote')>=0&&html.indexOf('ped-collection-clinicalcase')<0){
-  const card='<button type="button" class="ped-collection-card ped-collection-allonce ped-collection-clinicalcase" onclick="selectPediatricCollection(\'clinicalcase\')"><div class="ped-collection-avatar ped-avatar-allonce ped-avatar-icon ped-avatar-clinical" role="img" aria-label="Clinical Cases question bank">'+(window.__shbBankIcon?window.__shbBankIcon('clinical'):'')+'</div><span class="ped-collection-copy"><span class="eyebrow">AI CLINICAL CASES QUESTION BANK</span><b>AI Clinical Cases</b><small>AI-assisted clinical case questions, organized by medical system and topic.</small><span class="ped-collection-count">'+clinicalCaseQuestions().length.toLocaleString()+' questions</span></span><span class="ped-collection-arrow">›</span></button>';
+  const card='<button type="button" class="ped-collection-card ped-collection-allonce ped-collection-clinicalcase" onclick="selectPediatricCollection(\'clinicalcase\')"><div class="ped-collection-avatar ped-avatar-allonce ped-avatar-icon ped-avatar-clinical" role="img" aria-label="Clinical Cases question bank">'+(window.__shbBankIcon?window.__shbBankIcon('clinical'):'')+'</div><span class="ped-collection-copy"><span class="eyebrow">CLINICAL CASES QUESTION BANK</span><b>Clinical Cases</b><small>Clinical case questions, organized by medical system and topic.</small><span class="ped-collection-count">'+clinicalCaseQuestions().length.toLocaleString()+' questions</span></span><span class="ped-collection-arrow">›</span></button>';
   html=html.replace('</div><div class="ped-collection-footnote">',card+'</div><div class="ped-collection-footnote">');
-  html=html.replace('The five collections remain separate.','The six collections remain separate.');
+  html=html.replace('The five collections remain separate.','The seven collections remain separate.');
  }
  return html;
 };
