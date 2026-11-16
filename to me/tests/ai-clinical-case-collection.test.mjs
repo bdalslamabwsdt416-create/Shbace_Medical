@@ -83,7 +83,7 @@ test('Quiz and Smart Review include both AI banks and legacy AI routes are block
   assert.ok(adapter.includes("if(id==='quiz'||id==='review')ensureStudyToolBanks()"));
   assert.ok(adapter.includes('LEGACY_AI_PAGES'));
   assert.ok(adapter.includes("else if(currentBank&&['specialties','topics','questions'].indexOf(page)<0)"));
-  assert.ok(adapter.includes("document.addEventListener('shb-scripts-ready'"));
+  assert.ok(!adapter.includes("document.addEventListener('shb-scripts-ready'"), 'the startup render is owned by launchExperience after the boot-ready gate');
   assert.ok(adapter.includes('clinicalSystems'));
   assert.ok(adapter.includes('ai08Systems'));
   assert.ok(adapter.includes('shbace_clinical_case_answers_v1'));
@@ -221,9 +221,5 @@ test('The adapter registers real AI bank records in the shared engine and migrat
   assert.equal(bridge.activeBank,'all');
   assert.equal(bridge.inTopic().length,3479);
   context.appPage='subjects';
-  assert.equal(typeof docListeners['shb-scripts-ready'],'function');
-  const rendersBeforeStartupReady=renderCount;
-  docListeners['shb-scripts-ready']();
-  await new Promise(resolve=>setTimeout(resolve,10));
-  assert.ok(renderCount>rendersBeforeStartupReady);
+  assert.equal(typeof docListeners['shb-scripts-ready'],'undefined', 'the AI-bank adapter must not register a duplicate startup Home redraw');
 });
