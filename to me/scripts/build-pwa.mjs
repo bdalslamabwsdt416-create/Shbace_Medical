@@ -91,9 +91,8 @@ const requiredFiles = [
   "js/38-all-once-pediatrics.js",
   "js/39-clinical-case-pediatrics.js",
   "js/40-egyptian-book-pediatrics.js",
-  "js/33-clinical-case-bank.js",
-  "js/33-ai-generated-bank.js",
-  "js/41-collections-integration.js"
+  "js/41-collections-integration.js",
+  "js/43-ai-bank-engine-adapter.js"
 ];
 const requiredDirs = ["css", "js", "data"];
 const imageDirs = ["img", "img1", "img2"];
