@@ -10,6 +10,7 @@ const adapter = read('../js/43-ai-bank-engine-adapter.js');
 const mainBank = read('../js/09-app-features-v6.js');
 const polish = read('../js/42-pediatrics-collection-polish.js');
 const index = read('../index.html');
+const appMain = read('../js/04-app-main.js');
 const build = read('../scripts/build-pwa.mjs');
 const previousData = JSON.parse(read('../data/qbData.json')).questions;
 const bank07Data = JSON.parse(read('../data/clinicalCaseBank.json'));
@@ -78,12 +79,20 @@ test('Shared case vignette is shown in the first question card and marked contin
   assert.ok(mainBank.includes('CONTINUED — Same clinical case'));
 });
 
+test('First app render and splash dismissal wait for all deferred scripts', () => {
+  assert.ok(appMain.includes('const bootReady=window.__shbBooted===true'));
+  assert.ok(appMain.includes('window.__shbBooted!==true'));
+  assert.ok(appMain.includes('if(!bootReady){'));
+  assert.ok(appMain.includes("document.addEventListener('shb-scripts-ready'"));
+  assert.doesNotMatch(adapter, /document\.addEventListener\(['"]shb-scripts-ready/);
+});
+
 test('Quiz and Smart Review include both AI banks and legacy AI routes are blocked', () => {
   assert.ok(adapter.includes('function ensureStudyToolBanks()'));
   assert.ok(adapter.includes("if(id==='quiz'||id==='review')ensureStudyToolBanks()"));
   assert.ok(adapter.includes('LEGACY_AI_PAGES'));
   assert.ok(adapter.includes("else if(currentBank&&['specialties','topics','questions'].indexOf(page)<0)"));
-  assert.ok(adapter.includes("document.addEventListener('shb-scripts-ready'"));
+  assert.doesNotMatch(adapter, /document\.addEventListener\(['"]shb-scripts-ready/);
   assert.ok(adapter.includes('clinicalSystems'));
   assert.ok(adapter.includes('ai08Systems'));
   assert.ok(adapter.includes('shbace_clinical_case_answers_v1'));
@@ -221,9 +230,10 @@ test('The adapter registers real AI bank records in the shared engine and migrat
   assert.equal(bridge.activeBank,'all');
   assert.equal(bridge.inTopic().length,3479);
   context.appPage='subjects';
-  assert.equal(typeof docListeners['shb-scripts-ready'],'function');
+  /* The main entry owns the first render after the boot loader is ready.
+     The bank adapter must not schedule a second render for the same startup. */
+  assert.equal(typeof docListeners['shb-scripts-ready'],'undefined');
   const rendersBeforeStartupReady=renderCount;
-  docListeners['shb-scripts-ready']();
   await new Promise(resolve=>setTimeout(resolve,10));
-  assert.ok(renderCount>rendersBeforeStartupReady);
+  assert.equal(renderCount,rendersBeforeStartupReady);
 });
