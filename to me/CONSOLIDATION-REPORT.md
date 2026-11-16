@@ -40,18 +40,18 @@ The following are required before this change can be treated as fully release-ve
 
 | Check | Status |
 |---|---|
-| `npm ci` | Not run: `to me/package-lock.json` is absent. GitHub Actions successfully installed dependencies with `npm install`. |
-| `npm run test:unit` | Passed in GitHub Actions: 13/13 tests, 0 failures (commit `288a52b`). |
+| `npm ci` | Passed locally in a clean sandbox using the committed lockfile (lockfile v3; 33 package entries). GitHub Actions has been changed to use `npm ci`; latest CI run is pending. |
+| `npm run test:unit` | Passed: 13/13 tests, 0 failures. Re-run is triggered on the lockfile/workflow head. |
 | `npm run check:bank` | Passed: no root duplicates, bank identity/data audit clean, 0 warnings and 0 errors. |
 | `npm run build:pwa` | Passed: 79 deferred scripts verified, 342 offline files (28.64 MiB), 0 external runtime references. |
-| Playwright first-install / update / reload-flow | Not executed; a connected browser runner was not available in this task session. |
-| Screenshot comparison at 390×844 and 1280×800 | Not executed; no trusted before/after browser captures are available. |
-| Console and page-error checks | Not executed. |
+| Playwright first install | Passed in Chromium standalone-mode simulation: 342/342 files (28.6 MB) downloaded; all five package stages including integrity verification completed. Service Worker registered and controlled the app. |
+| App navigation, banks, offline restart, update/reload | Passed in Chromium at 390×844 and 1280×800. No horizontal overflow, page/console errors, failed requests, or HTTP errors. Both AI Clinical Cases and AI Generated banks rendered questions/options and accepted answers; per-case vignette/questions and Back navigation worked. Offline reload worked. A controlled two-file update (14.8 KB) passed byte/SHA-256 verification, cached the changed file, and requested exactly one reload after approval. |
+| Screenshot baseline comparison and physical-device installation | Still pending. Screenshots were captured during browser checks, but a trusted before/after visual baseline comparison and installation on a real Android/desktop device have not been performed. |
 
-The automated unit, bank-validation, and PWA-build checks are green. Keep the PR in draft / do not merge until the first-install, update/reload, visual screenshot, and browser-console checks are completed on a connected browser runner. The CSS bundles are produced by direct source-order concatenation, so their visual equivalence still needs screenshot comparison at both viewports.
+The automated unit, bank-validation, PWA-build, and simulated Chromium functional checks are green. Keep the PR in draft / do not merge until the latest `npm ci` CI run completes and the visual screenshot baseline comparison plus physical-device checks are completed. The CSS bundles retain their source order; layout overflow was checked at both viewports, but pixel-level before/after equivalence has not been certified.
 
 ## Explicitly not changed
 
-- No files outside `to me/`.
+- One CI workflow adjustment outside `to me/`: `.github/workflows/pwa-check.yml` now uses `npm ci` with the committed lockfile.
 - No question content, answer keys, bank datasets, or student progress stores.
 - No direct push to or merge into `main`.
