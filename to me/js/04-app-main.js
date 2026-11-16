@@ -329,6 +329,8 @@ function splashDissolve(overlay,ms,done){
  setTimeout(fin,ms+500);              /* safety: a WebView that pauses animation frames still removes the overlay */
 }
 function completeSplashOnce(overlay,instant){
+ /* The core script starts this timer before later deferred feature and bank scripts finish. Never reveal a partial app. */
+ if(window.__shbBooted!==true)return;
  if(splashFinalized)return;
  splashFinalized=true;
  clearTimeout(splashCompletionTimer);splashCompletionTimer=null;
@@ -343,7 +345,7 @@ function completeSplashOnce(overlay,instant){
  splashDissolve(overlay,SPLASH_FADE_MS,fin);
 }
 function syncSplashOnForeground(){
- const overlay=document.getElementById('startupSplash');if(!overlay||splashFinalized)return;
+ const overlay=document.getElementById('startupSplash');if(!overlay||splashFinalized||window.__shbBooted!==true)return;
  const r=splashDeadline-Date.now();
  if(r<=-SPLASH_FADE_MS)completeSplashOnce(overlay,true);      /* the whole hold + dissolve already passed while the app was in the background */
  else if(r<=0)completeSplashOnce(overlay);
@@ -366,13 +368,23 @@ function launchExperience(){
  try{[IMG.iconBig,IMG.icon].forEach(src=>{if(!src)return;const im=new Image();im.src=src;im.decode&&im.decode().catch(()=>{})})}catch(e){}
  try{const raw=localStorage.getItem('shbace_home_tip_index_v3');activeDailyTip=(Number(raw||'-1')+1)%5;localStorage.setItem('shbace_home_tip_index_v3',String(activeDailyTip));}catch(e){}
  const overlay=document.getElementById('startupSplash');
- if(!overlay){routeAfterSplash();return;}
+ if(!overlay){
+  if(window.__shbBooted===true){routeAfterSplash();return;}
+  document.addEventListener('shb-scripts-ready',function(){if(window.__shbBooted===true)routeAfterSplash()},{once:true});
+  return;
+ }
  /* The startup splash is replayed for every app document load. Automatic update checks have their own seven-day clock. */
  splashDeadline=(function(){const e=window.__spEcg;return Date.now()-((e&&e.t0!==null)?Math.max(0,performance.now()-e.t0):0)})()+SPLASH_DURATION_MS;      /* end of the 7 s hold (same clock as the ECG head); the transition starts here */
  splashFinalized=false;splashRouteDone=false;spBeats=0;
  startSplashHaptics();
  const tick=()=>{
   if(splashFinalized)return;
+  /* Keep the splash opaque until index.html has executed every deferred script in its declared order. */
+  if(window.__shbBooted!==true){
+   clearTimeout(splashCompletionTimer);
+   splashCompletionTimer=window.setTimeout(tick,100);
+   return;
+  }
   const remaining=splashDeadline-Date.now();
   if(!splashRouteDone&&(remaining<=SPLASH_PRE_MS||splashPreReady())){splashRouteDone=true;splashPre=true;routeAfterSplash();}   /* draw Onboarding / Home under the opaque splash: as soon as every script has loaded (early, so the heavy build never lands in the last ECG sweep); 0.9 s before the end at the latest */
   if(remaining<=0){whenSplashEcgDone(()=>completeSplashOnce(overlay));return;}
