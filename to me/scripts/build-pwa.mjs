@@ -208,8 +208,8 @@ const packageMeta = JSON.parse(readFileSync(join(root, "package.json"), "utf8"))
 const swSource = readFileSync(join(root, "sw.js"), "utf8");
 const offlineSetupSource = readFileSync(join(root, "js/29-offline-setup.js"), "utf8");
 if (packageMeta.version !== pwaVersion.version) fail("package.json and pwa-version.json must declare the same release");
-const swCacheName = swSource.match(/const CACHE_NAME\\s*=\\s*['"]([^'"]+)['"]/);
-const installerCacheName = offlineSetupSource.match(/var CACHE_NAME\\s*=\\s*['"]([^'"]+)['"]/);
+const swCacheName = swSource.match(/const CACHE_NAME\s*=\s*['"]([^'"]+)['"]/);
+const installerCacheName = offlineSetupSource.match(/var CACHE_NAME\s*=\s*['"]([^'"]+)['"]/);
 if (!swCacheName || !installerCacheName || swCacheName[1] !== installerCacheName[1]) {
   fail("Service Worker and offline installer cache namespaces must match");
 }
