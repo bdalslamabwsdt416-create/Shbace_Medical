@@ -2894,7 +2894,7 @@ applyAppFontScaleStage();
    topicIcon, topicCards ... were invisible to them: 35 threw ReferenceError and "Start Studying" /
    "Continue Studying" did nothing. Nothing here changes data, logic or markup. */
 window.__SHB_BRIDGE={
- qs:qs,SYS:SYS,QB:QB,sysIcon:sysIcon,isPinned:isPinned,answeredCount:answeredCount,TOPIC_ICON_ASSET:TOPIC_ICON_ASSET,
+ qs:qs,SYS:SYS,QB:QB,bankOf:bankOf,sysIcon:sysIcon,isPinned:isPinned,answeredCount:answeredCount,TOPIC_ICON_ASSET:TOPIC_ICON_ASSET,
  get REC(){return REC},
  get SPEC_NAME(){return SPEC_NAME},
  get inTopic(){return inTopic},set inTopic(f){inTopic=f},
