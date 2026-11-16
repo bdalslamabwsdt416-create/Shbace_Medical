@@ -1,10 +1,11 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.10-to-me.42",
-  "displayVersion": "1.3.10.42 · Chrome (Phone + Computer)",
+  "version": "1.3.10-to-me.43",
+  "displayVersion": "1.3.10.43 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-16",
   "releaseNotes": [
+    "Prevents the startup splash from revealing Home before every deferred app script has completed; startup stays behind the splash until the complete renderer is ready, and the duplicate late Home redraw is removed.",
     "Removes the retired design-prototype interface: sidebar, handoff panels, guide/document views, mock in-app screens and intermediate legacy Subjects renderer. The live Home and question-bank engine are now the only in-app render path. Splash, first-run onboarding, student data, offline package and update storage remain preserved.",
     "AI Clinical Cases and AI Generated now feed the same Dr. Al-Joaki question engine, question cards, answer state, Save and Personal note controls; their source data and separate progress remain independent.",
     "The two AI banks now participate in Quiz and Smart Review bank selection. Quiz topic choices are scoped to the chosen bank and system, and saved AI quiz attempts are retained across app restarts.",
@@ -89,8 +90,7 @@
     "A question opened from Search, Saved, Wrong answers or Smart Review now opens inside its own bank, so a Previous question no longer opens as an empty list."
   ],
   "summary": [
-    "The Chrome PWA opens only the production Shbace Medical interface; the retired design prototype and old Subjects renderers are removed.",
-    "The current Home, Pediatrics collections, question engine, student progress and local data stores remain active and independent.",
-    "Splash, first-run onboarding, stable offline package and update mechanisms are preserved."
+    "Home and onboarding are routed only after the full ordered startup script sequence is ready; slow network startup can no longer expose intermediate placeholder or partially enhanced screens.",
+    "The single startup path now owns the first Home render. Existing question banks, student progress and offline storage are preserved."
   ]
 }
