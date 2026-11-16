@@ -160,6 +160,7 @@ window.__bank={on:BANK_ON,total:QB.length,demo:DEMO_QB};
 const FILTERS=[['all','All Questions'],['unanswered','Unanswered'],['correct','Correct'],['incorrect','Incorrect'],['bookmarked','Bookmarked']];
 
 /* ---------- state ---------- */
+let ACTIVE_QBANK='all';
 const qs={spec:'endocrinology',topic:0,filter:'all',tag:'all',view:'all',lim:30,idx:0,full:false,noteOpen:{},streak:0,dd:null};
 window.__qs=qs;
 window.__shbQBVersionState={
@@ -223,7 +224,7 @@ const sysIcon=(img,cls='')=>img?`<img class="sysimg ${cls}" src="${IMG[img]}" al
 
 /* ---------- helpers ---------- */
 const subjectQs=()=>QB;
-let inTopic=()=>(gradeHasPediatrics()?QB:[]).filter(q=>(qs.spec==='all'||q.spec===qs.spec)&&(!qs.topic||q.topic===qs.topic));
+let inTopic=()=>(gradeHasPediatrics()?QB:[]).filter(q=>(ACTIVE_QBANK==='all'||bankOf(q)===ACTIVE_QBANK)&&(qs.spec==='all'||q.spec===qs.spec)&&(!qs.topic||q.topic===qs.topic));
 function statusOf(q){const a=S.ans[q.id];return !a?'unanswered':(a.ok?'correct':'incorrect')}
 function filtered(){return inTopic().filter(q=>{
   if(qs.filter==='bookmarked'&&!S.saved[q.id])return false;
@@ -282,8 +283,8 @@ function fmtExplanationHTML(text){
   return rest?'<p class="nl-sec"><b class="nl-lbl">'+esc(m[1])+'</b>'+esc(rest)+'</p>':''}).join('');
 }
 function nelsonDetails(q){
- if(!q||(!q.nl&&!q.ao&&!q.cc)||!q.more)return '';
- const source=q.eb?(q.ebSourceFile||'Egyptian Book source'):q.cc?(q.ccSource||'Accepted Clinical Case source'):q.ao?(q.aoSource||'Source details unavailable'):'Nelson Textbook of Pediatrics.';
+ if(!q||(!q.nl&&!q.ao&&!q.cc&&!q.aiBank)||!q.more)return '';
+ const source=q.aiBank?String(q.src||'AI question bank source'):q.eb?(q.ebSourceFile||'Egyptian Book source'):q.cc?(q.ccSource||'Accepted Clinical Case source'):q.ao?(q.aoSource||'Source details unavailable'):'Nelson Textbook of Pediatrics.';
  let moreBody=cleanExplanationText(q.more).replace(/^Explanation\s*:\s*/i,'');const lead=cleanExplanationText(q.ex).replace(/^Explanation\s*:\s*/i,'');
  if(lead&&moreBody.startsWith(lead))moreBody=moreBody.slice(lead.length).trim();
  const alt=q.ao&&!q.eb&&q.aoAltSource?'<p class="nl-source">Also found in: '+esc(q.aoAltSource)+'</p>':'';
@@ -316,7 +317,8 @@ function cardHTML(q,n,single){
 </div>`;
  const note=qs.noteOpen[q.id]?`<div class="qnote"><textarea placeholder="Write your note…" oninput="qNoteSave('${q.id}',this.value)">${esc(S.notes[q.id]||'')}</textarea></div>`:'';
  const sname=a?(a.ok?'Correct':'Incorrect'):'Unanswered';
- return `<article class="qcard${(q.nl||q.ao)?' nl-clean':''}" id="qc-${q.id}" data-id="${q.id}">${qExtra(q)}<h3 class="qstem">Q${n}. ${esc(QSTEM(q))}</h3><div class="qopts">${opts}</div>${react}${acts}${note}</article>`}
+ const aiCaseBlock=q.aiCaseVignette?`<div class="qcase ai-case-context"><span class="qflag">CLINICAL CASE ${esc(q.aiCaseNumber||'')}</span><b>${esc(q.aiCaseTitle||'Case history')}</b><p>${esc(q.aiCaseVignette).replace(/\r?\n/g,'<br>')}</p></div>`:q.aiCaseContinued?`<div class="qrep"><span class="qflag">CASE ${esc(q.aiCaseNumber||'')} · CONTINUED — Same clinical case</span></div>`:'';
+ return `<article class="qcard${(q.nl||q.ao)?' nl-clean':''}" id="qc-${q.id}" data-id="${q.id}">${aiCaseBlock}${qExtra(q)}<h3 class="qstem">Q${n}. ${esc(QSTEM(q))}</h3><div class="qopts">${opts}</div>${react}${acts}${note}</article>`}
 
 function bankBody(){
  const list=filtered();
@@ -352,13 +354,14 @@ document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement
 
 /* ---------- export PDF ---------- */
 const exp={open:false,scope:'filtered',layout:'study'};
-const SCOPES=()=>[['filtered',`Current filtered questions (${filtered().length})`],['topic',`Current topic (${inTopic().length})`],['subject',`Entire subject (${QB.length})`]];
+const activeSubjectQuestions=()=>ACTIVE_QBANK==='all'?QB:QB.filter(q=>bankOf(q)===ACTIVE_QBANK);
+const SCOPES=()=>[['filtered',`Current filtered questions (${filtered().length})`],['topic',`Current topic (${inTopic().length})`],['subject',`Entire subject (${activeSubjectQuestions().length})`]];
 const LAYOUTS=[['study','Study Mode · answer and explanation under each question'],['exam','Exam Mode · answer key and explanations at the end']];
 function exportHTML(){return `<div class="xbk" onclick="xClose()"></div><div class="xsheet" role="dialog" aria-label="Export Questions to PDF"><div class="xhead"><h3>Export Questions to PDF</h3><button type="button" class="xclose" onclick="xClose()" aria-label="Close">✕</button></div><label>Export scope</label>${ddHTML('xscope',SCOPES(),exp.scope)}<label>PDF layout</label>${ddHTML('xlayout',LAYOUTS,exp.layout)}<button type="button" class="btn primary block" onclick="xCreate()">Create PDF</button><p class="xnote">A print-ready white document will open. Choose “Save as PDF” in the browser dialog.</p></div>`}
 function paintExport(){const h=$('#xwrap');if(h)h.innerHTML=exportHTML()}
 window.xOpen=function(){exp.open=true;let h=$('#xwrap');if(!h){h=document.createElement('div');h.id='xwrap';h.className='xwrap';($('.phone')||document.body).appendChild(h)}paintExport()};
 window.xClose=function(){exp.open=false;qs.dd=null;const h=$('#xwrap');h&&h.remove()};
-function pdfList(){return exp.scope==='subject'?QB:exp.scope==='topic'?inTopic():filtered()}
+function pdfList(){return exp.scope==='subject'?activeSubjectQuestions():exp.scope==='topic'?inTopic():filtered()}
 function buildPDF(list,layout){const L=(q,i)=>QLT(q,i);const title='Shbace Medical — Question Bank';const sub=`Pediatrics · ${qs.spec==='all'?'All specialties':SPEC_NAME[qs.spec]} · ${exp.scope==='subject'?'Entire subject':topicTitle()}`;
  const q1=(q,i)=>`<section class="q"><div class="meta">${q.id} · ${esc(TOPIC_NAME[q.topic])} · ${esc(q.tag)}</div><p class="stem"><b>Q${i+1}.</b> ${esc(QSTEM(q))}</p><ol type="A" style="list-style:none;padding-left:0">${q.o.map((t,j)=>`<li class="${layout==='study'&&j===q.k?'key':''}"><b>${L(q,j)}.</b> ${esc(t)}${layout==='study'&&j===q.k?' ✓':''}</li>`).join('')}</ol>${layout==='study'?`<div class="ans"><b>Correct answer: ${L(q,q.k)}. ${esc(q.o[q.k])}</b><p>${esc(cleanExplanationText(q.ex))}</p></div>`:''}</section>`;
  let body=list.map(q1).join('');
@@ -2895,8 +2898,34 @@ applyAppFontScaleStage();
    "Continue Studying" did nothing. Nothing here changes data, logic or markup. */
 window.__SHB_BRIDGE={
  qs:qs,SYS:SYS,QB:QB,bankOf:bankOf,sysIcon:sysIcon,isPinned:isPinned,answeredCount:answeredCount,TOPIC_ICON_ASSET:TOPIC_ICON_ASSET,
- get REC(){return REC},
- get SPEC_NAME(){return SPEC_NAME},
+ get REC(){return REC},get SPEC_NAME(){return SPEC_NAME},get TOPIC_NAME(){return TOPIC_NAME},get REAL(){return REAL},get QBY(){return QBY},get qmap(){return qmap},get SRT(){return SRT},get SRT_Q(){return SRT_Q},get SRT_BY(){return SRT_BY},get BANK_OPTS(){return BANK_OPTS},get BANK_KEYS(){return BANK_KEYS},get S(){return S},save:save,
+ setActiveBank:function(key){ACTIVE_QBANK=bankValid(key);return ACTIVE_QBANK},
+ registerExternalBank:function(key,label,groups){
+  if(!key||!Array.isArray(groups))throw new Error('Invalid external question bank registration.');
+  if(!BANK_KEYS.has(key)){BANK_KEYS.add(key);BANK_OPTS.push([key,label||key]);}
+  var known=new Set(QB.map(function(q){return q&&q.id}).filter(Boolean));
+  var base=key==='clinical-ai'?8200000:8400000,added=0;
+  groups.forEach(function(g,index){
+   var spec=String(g.spec||'rheum'),topicId=base+index,topicName=String(g.topicName||'Other / Mixed Questions'),questions=Array.isArray(g.questions)?g.questions:[];
+   if(!REAL.spec[spec])REAL.spec[spec]={q:0,topics:[],label:String(g.systemLabel||SPEC_NAME[spec]||spec)};
+   if(!Array.isArray(REAL.spec[spec].topics))REAL.spec[spec].topics=[];
+   if(!SPEC_NAME[spec])SPEC_NAME[spec]=String(g.systemLabel||spec);
+   g.topicId=topicId;TOPIC_NAME[topicId]=topicName;
+   if(!REAL.spec[spec].topics.some(function(t){return Number(t[0])===topicId}))REAL.spec[spec].topics.push([topicId,topicName,questions.length,String(g.bankLabel||label||key)]);
+   var topicQuestions=[];
+   questions.forEach(function(q){
+    if(!q||!q.id||known.has(q.id))return;
+    q.bank=key;q.spec=spec;q.topic=topicId;q.o=Array.isArray(q.o)?q.o:[];q.k=Number.isInteger(q.k)?q.k:0;
+    QB.push(q);known.add(q.id);QBY.set(q.id,q);qmap.set(q.id,q);topicQuestions.push(q);added++;
+   });
+   REAL.spec[spec].q=(Number(REAL.spec[spec].q)||0)+topicQuestions.length;
+   SRT_Q.set(topicId,topicQuestions);
+   var topicRecord={id:topicId,name:topicName,sy:String(g.bankLabel||label||key),spec:spec,specLabel:SPEC_NAME[spec]||spec,key:spec+'|'+String(g.bankLabel||label||key)+'|'+topicName};
+   SRT.push(topicRecord);SRT_BY.set(topicId,topicRecord);
+  });
+  REAL.total=QB.length;window.__bank.total=QB.length;gIdx=null;srCache=null;_qsg=null;_qsgN=-1;
+  return {added:added,topics:groups.length,total:QB.length};
+ },
  get inTopic(){return inTopic},set inTopic(f){inTopic=f},
  get topicIcon(){return topicIcon},set topicIcon(f){topicIcon=f},
  get topicCards(){return topicCards},set topicCards(f){topicCards=f}
