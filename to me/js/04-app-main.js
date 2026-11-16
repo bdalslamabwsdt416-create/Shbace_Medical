@@ -343,7 +343,7 @@ function completeSplashOnce(overlay,instant){
  splashDissolve(overlay,SPLASH_FADE_MS,fin);
 }
 function syncSplashOnForeground(){
- const overlay=document.getElementById('startupSplash');if(!overlay||splashFinalized)return;
+ const overlay=document.getElementById('startupSplash');if(!overlay||splashFinalized||window.__shbBooted!==true)return;
  const r=splashDeadline-Date.now();
  if(r<=-SPLASH_FADE_MS)completeSplashOnce(overlay,true);      /* the whole hold + dissolve already passed while the app was in the background */
  else if(r<=0)completeSplashOnce(overlay);
@@ -366,7 +366,11 @@ function launchExperience(){
  try{[IMG.iconBig,IMG.icon].forEach(src=>{if(!src)return;const im=new Image();im.src=src;im.decode&&im.decode().catch(()=>{})})}catch(e){}
  try{const raw=localStorage.getItem('shbace_home_tip_index_v3');activeDailyTip=(Number(raw||'-1')+1)%5;localStorage.setItem('shbace_home_tip_index_v3',String(activeDailyTip));}catch(e){}
  const overlay=document.getElementById('startupSplash');
- if(!overlay){routeAfterSplash();return;}
+ if(!overlay){
+  if(window.__shbBooted===true){routeAfterSplash();return;}
+  document.addEventListener('shb-scripts-ready',function(){routeAfterSplash();},{once:true});
+  return;
+ }
  /* The startup splash is replayed for every app document load. Automatic update checks have their own seven-day clock. */
  splashDeadline=(function(){const e=window.__spEcg;return Date.now()-((e&&e.t0!==null)?Math.max(0,performance.now()-e.t0):0)})()+SPLASH_DURATION_MS;      /* end of the 7 s hold (same clock as the ECG head); the transition starts here */
  splashFinalized=false;splashRouteDone=false;spBeats=0;
@@ -374,10 +378,25 @@ function launchExperience(){
  const tick=()=>{
   if(splashFinalized)return;
   const remaining=splashDeadline-Date.now();
-  if(!splashRouteDone&&(remaining<=SPLASH_PRE_MS||splashPreReady())){splashRouteDone=true;splashPre=true;routeAfterSplash();}   /* draw Onboarding / Home under the opaque splash: as soon as every script has loaded (early, so the heavy build never lands in the last ECG sweep); 0.9 s before the end at the latest */
-  if(remaining<=0){whenSplashEcgDone(()=>completeSplashOnce(overlay));return;}
+  const bootReady=window.__shbBooted===true;
+  /* Never render a partial app: the boot loader sets __shbBooted only after every deferred
+     data, bank and feature script has executed in order and the held load callbacks have run. */
+  if(bootReady&&!splashRouteDone&&(remaining<=SPLASH_PRE_MS||splashPreReady())){
+   splashRouteDone=true;splashPre=true;routeAfterSplash();
+  }
+  if(remaining<=0){
+   if(!bootReady){
+    clearTimeout(splashCompletionTimer);
+    splashCompletionTimer=window.setTimeout(tick,50);
+    return;
+   }
+   if(!splashRouteDone){splashRouteDone=true;splashPre=true;routeAfterSplash();}
+   whenSplashEcgDone(()=>completeSplashOnce(overlay));return;
+  }
   clearTimeout(splashCompletionTimer);
-  splashCompletionTimer=window.setTimeout(tick,Math.max(8,splashRouteDone?remaining:Math.min(150,remaining-SPLASH_PRE_MS)));
+  const untilPre=remaining-SPLASH_PRE_MS;
+  const delay=splashRouteDone?remaining:(untilPre>0?Math.min(150,Math.max(16,untilPre)):50);
+  splashCompletionTimer=window.setTimeout(tick,delay);
  };
  tick();
 }
