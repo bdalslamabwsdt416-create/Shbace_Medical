@@ -229,7 +229,7 @@ window.navBack=function(){
 function ensureStudyToolBanks(){
  if(studyToolAttempted)return studyToolPromise||Promise.resolve();
  studyToolAttempted=true;
- studyToolPromise=Promise.all(Object.keys(BANKS).map(function(key){return ensureBank(key);})).then(function(){studyToolPromise=null;if(appPage==='quiz'||appPage==='quizrun'||appPage==='quizresult'||appPage==='quizhistory'||appPage==='review')renderAppDemo();}).catch(function(err){studyToolPromise=null;console.warn('AI banks could not be prepared for Quiz / Smart Review',err);});
+ studyToolPromise=Promise.all(Object.keys(BANKS).map(function(key){return ensureBank(key).catch(function(){return null;});})).then(function(){studyToolPromise=null;if(appPage==='quiz'||appPage==='quizrun'||appPage==='quizresult'||appPage==='quizhistory'||appPage==='review')renderAppDemo();});
  return studyToolPromise;
 }
 var coreNavTap=window.__shbNavTap;
@@ -247,7 +247,7 @@ window.shbAiOpenBank=function(key){
 window.shbAiRetryBank=function(){if(!currentBank)return;delete errors[currentBank];delete pending[currentBank];ensureBank(currentBank).then(function(){renderAppDemo();}).catch(function(){renderAppDemo();});};
 window.shbAiOpenSystem=function(id){
  var data=active(),sys=data&&data.systems.find(function(s){return s.id===id;});if(!sys)return;
- currentSystem=id;B.qs.spec=sys.spec;B.qs.topic=0;B.qs.filter='all';B.qs.tag='all';B.qs.view='all';B.qs.idx=0;
+ currentSystem=id;B.setActiveBank(currentBank,sys.groups.map(function(g){return g.topicId;}));B.qs.spec=sys.spec;B.qs.topic=0;B.qs.filter='all';B.qs.tag='all';B.qs.view='all';B.qs.idx=0;
  appPage='topics';renderAppDemo();
 };
 window.openClinicalCaseBank07=function(){window.shbAiOpenBank('clinical-ai');};

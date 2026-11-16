@@ -160,7 +160,7 @@ window.__bank={on:BANK_ON,total:QB.length,demo:DEMO_QB};
 const FILTERS=[['all','All Questions'],['unanswered','Unanswered'],['correct','Correct'],['incorrect','Incorrect'],['bookmarked','Bookmarked']];
 
 /* ---------- state ---------- */
-let ACTIVE_QBANK='all';
+let ACTIVE_QBANK='all',ACTIVE_QBANK_TOPICS=null;
 const qs={spec:'endocrinology',topic:0,filter:'all',tag:'all',view:'all',lim:30,idx:0,full:false,noteOpen:{},streak:0,dd:null};
 window.__qs=qs;
 window.__shbQBVersionState={
@@ -224,7 +224,7 @@ const sysIcon=(img,cls='')=>img?`<img class="sysimg ${cls}" src="${IMG[img]}" al
 
 /* ---------- helpers ---------- */
 const subjectQs=()=>QB;
-let inTopic=()=>(gradeHasPediatrics()?QB:[]).filter(q=>(ACTIVE_QBANK==='all'||bankOf(q)===ACTIVE_QBANK)&&(qs.spec==='all'||q.spec===qs.spec)&&(!qs.topic||q.topic===qs.topic));
+let inTopic=()=>(gradeHasPediatrics()?QB:[]).filter(q=>(ACTIVE_QBANK==='all'||bankOf(q)===ACTIVE_QBANK)&&(ACTIVE_QBANK_TOPICS===null||ACTIVE_QBANK_TOPICS.indexOf(q.topic)>=0)&&(qs.spec==='all'||q.spec===qs.spec)&&(!qs.topic||q.topic===qs.topic));
 function statusOf(q){const a=S.ans[q.id];return !a?'unanswered':(a.ok?'correct':'incorrect')}
 function filtered(){return inTopic().filter(q=>{
   if(qs.filter==='bookmarked'&&!S.saved[q.id])return false;
@@ -354,7 +354,7 @@ document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement
 
 /* ---------- export PDF ---------- */
 const exp={open:false,scope:'filtered',layout:'study'};
-const activeSubjectQuestions=()=>ACTIVE_QBANK==='all'?QB:QB.filter(q=>bankOf(q)===ACTIVE_QBANK);
+const activeSubjectQuestions=()=>QB.filter(q=>(ACTIVE_QBANK==='all'||bankOf(q)===ACTIVE_QBANK)&&(ACTIVE_QBANK_TOPICS===null||ACTIVE_QBANK_TOPICS.indexOf(q.topic)>=0));
 const SCOPES=()=>[['filtered',`Current filtered questions (${filtered().length})`],['topic',`Current topic (${inTopic().length})`],['subject',`Entire subject (${activeSubjectQuestions().length})`]];
 const LAYOUTS=[['study','Study Mode · answer and explanation under each question'],['exam','Exam Mode · answer key and explanations at the end']];
 function exportHTML(){return `<div class="xbk" onclick="xClose()"></div><div class="xsheet" role="dialog" aria-label="Export Questions to PDF"><div class="xhead"><h3>Export Questions to PDF</h3><button type="button" class="xclose" onclick="xClose()" aria-label="Close">✕</button></div><label>Export scope</label>${ddHTML('xscope',SCOPES(),exp.scope)}<label>PDF layout</label>${ddHTML('xlayout',LAYOUTS,exp.layout)}<button type="button" class="btn primary block" onclick="xCreate()">Create PDF</button><p class="xnote">A print-ready white document will open. Choose “Save as PDF” in the browser dialog.</p></div>`}
@@ -2900,7 +2900,7 @@ applyAppFontScaleStage();
 window.__SHB_BRIDGE={
  qs:qs,SYS:SYS,QB:QB,bankOf:bankOf,sysIcon:sysIcon,isPinned:isPinned,answeredCount:answeredCount,TOPIC_ICON_ASSET:TOPIC_ICON_ASSET,
  get REC(){return REC},get SPEC_NAME(){return SPEC_NAME},get TOPIC_NAME(){return TOPIC_NAME},get REAL(){return REAL},get QBY(){return QBY},get qmap(){return qmap},get SRT(){return SRT},get SRT_Q(){return SRT_Q},get SRT_BY(){return SRT_BY},get BANK_OPTS(){return BANK_OPTS},get BANK_KEYS(){return BANK_KEYS},get S(){return S},save:save,
- setActiveBank:function(key){ACTIVE_QBANK=bankValid(key);return ACTIVE_QBANK},
+ setActiveBank:function(key,topicIds){ACTIVE_QBANK=bankValid(key);ACTIVE_QBANK_TOPICS=Array.isArray(topicIds)?topicIds.slice():null;return ACTIVE_QBANK},
  registerExternalBank:function(key,label,groups){
   if(!key||!Array.isArray(groups))throw new Error('Invalid external question bank registration.');
   if(!BANK_KEYS.has(key)){BANK_KEYS.add(key);BANK_OPTS.push([key,label||key]);}
