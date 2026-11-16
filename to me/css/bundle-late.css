@@ -2622,3 +2622,15 @@ body.eb-bank-mode .qcard.nl-clean .qacts .qa{direction:ltr}
 .phone.light .cc-case-group>.cc-vignette{
   background:linear-gradient(145deg,rgba(223,246,241,.98),rgba(238,248,253,.98));
 }
+
+/* Bank 07 now uses the shared QB .qopts wrapper. Preserve its compact case-bank option layout. */
+.cc-question .qopts{display:flex;flex-direction:column;gap:7px}
+.cc-question .qopts .qopt{display:flex!important;align-items:flex-start!important;gap:9px!important;width:100%;min-height:0!important;text-align:left!important;white-space:normal!important;padding:10px 11px!important;border-radius:11px!important;line-height:1.45!important;font-size:11px!important}
+.cc-question .qopts .qopt i{width:21px;height:21px;flex:0 0 21px;display:grid;place-items:center;border-radius:7px;background:rgba(124,157,180,.13);font-style:normal;font-size:10px;font-weight:900;color:#a9c6dc}
+.cc-question .qopts .qopt>span:not(.ck){flex:1;min-width:0;line-height:1.5}
+.cc-question .qopts .qopt .ck{flex:0 0 auto;color:#85e2c8;font-size:14px;font-weight:900}
+.cc-question .qopts .qopt .ck.x{color:#f19a9a}
+.cc-question .qopts .qopt.correct{border-color:rgba(68,207,158,.68)!important;background:rgba(27,137,100,.19)!important}
+.cc-question .qopts .qopt.incorrect{border-color:rgba(239,116,116,.6)!important;background:rgba(142,48,55,.17)!important}
+.cc-question .qopts .qopt.dim{opacity:.62}
+.cc-question .qopts .qopt:disabled{cursor:default;opacity:1}
