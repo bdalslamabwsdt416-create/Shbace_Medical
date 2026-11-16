@@ -76,9 +76,8 @@ function normalizeQuestion(q,key,systemSpec,caseInfo){
   src:sourceText(q&&q.source),aiBank:key,
   py:false,nl:false,ao:false,cc:false,eb:false,rq:[],rc:[]
  };
- if(caseInfo&&caseInfo.vignette){
-  if(caseInfo.first){out.aiCaseVignette=caseInfo.vignette;out.aiCaseTitle=caseInfo.title;out.aiCaseNumber=caseInfo.number;}
-  else{out.aiCaseContinued=true;out.aiCaseTitle=caseInfo.title;out.aiCaseNumber=caseInfo.number;}
+ if(caseInfo&&caseInfo.vignette&&caseInfo.first){
+  out.aiCaseVignette=caseInfo.vignette;
  }
  if(!out.id||!out.q||out.o.length<2)throw new Error('Invalid question record in '+key+': '+safeText(q&&q.id));
  return out;
@@ -93,8 +92,8 @@ function clinicalGroups(data){
     (item.questions||[]).forEach(function(q,i){
      var shared=!!(item.hasSharedCaseText&&item.vignette);
      questions.push(normalizeQuestion(q,'clinical-ai',spec,{
-      vignette:shared?item.vignette:'',title:item.title||'Clinical case',
-      number:item.number==null?'':item.number,first:i===0
+      vignette:shared?item.vignette:'',
+      first:i===0
      }));
     });
    });
