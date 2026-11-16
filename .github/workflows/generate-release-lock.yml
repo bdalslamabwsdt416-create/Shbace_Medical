@@ -2,7 +2,7 @@ name: Generate npm lockfile for release branch
 on:
   push:
     branches: ["shbace-release-1.3.10.35"]
-    paths: ["to me/package.json"]
+    paths: [".github/workflows/generate-release-lock.yml", "to me/package.json"]
 permissions:
   contents: write
 jobs:
