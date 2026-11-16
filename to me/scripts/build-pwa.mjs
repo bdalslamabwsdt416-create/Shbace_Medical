@@ -203,15 +203,12 @@ if (pwaVersion.platform !== "Unified Chrome PWA" ||
   fail("pwa-version.json must declare a valid Unified Chrome PWA release version");
 }
 const packageMeta = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
-/* Keep the Service Worker and offline installer in sync. A patch release may intentionally retain the
-   existing cache namespace to preserve the verified package cache and avoid a forced full-cache rotation. */
+const expectedCacheName = "shbace-chrome-offline-v" + pwaVersion.version.replace("-to-me.", ".");
 const swSource = readFileSync(join(root, "sw.js"), "utf8");
 const offlineSetupSource = readFileSync(join(root, "js/29-offline-setup.js"), "utf8");
 if (packageMeta.version !== pwaVersion.version) fail("package.json and pwa-version.json must declare the same release");
-const swCacheName = swSource.match(/const CACHE_NAME\s*=\s*['"]([^'"]+)['"]/);
-const installerCacheName = offlineSetupSource.match(/var CACHE_NAME\s*=\s*['"]([^'"]+)['"]/);
-if (!swCacheName || !installerCacheName || swCacheName[1] !== installerCacheName[1]) {
-  fail("Service Worker and offline installer cache namespaces must match");
+if (!swSource.includes(expectedCacheName) || !offlineSetupSource.includes(expectedCacheName)) {
+  fail("Service Worker and offline installer cache namespaces must match " + expectedCacheName);
 }
 
 rmSync(output, { recursive: true, force: true });
