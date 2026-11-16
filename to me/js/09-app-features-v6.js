@@ -562,11 +562,7 @@ window.openTopic=function(spec,id){qs.spec=spec;qs.topic=id;qs.filter='all';qs.t
 /* Pediatrics hero image. Override with window.SHBACE_PEDIA_HERO = 'path/or/url.webp' before this script to swap the asset. */
 const PEDIA_HERO_SRC=window.SHBACE_PEDIA_HERO||'/assets/img/9fbea08e77d0.webp';
 window.startPractice=function(ev){ev&&ev.stopPropagation();const un=QB.some(q=>!S.ans[q.id]);qs.spec='all';qs.topic=0;qs.tag='all';qs.filter=un?'unanswered':'all';qs.idx=0;appPage='questions';renderAppDemo()};
-subjectsView=function(){const n=answeredCount(QB),all=pct(n,QB.length);
- return `${appHeader('Subjects')}<div class="rs"><h1>Subjects</h1><p class="sub">Choose a subject to practise.</p>
- <div class="card hero-ped" role="button" tabindex="0" aria-label="Pediatrics, ${QB.length} questions, ${all}% completed" onclick="appPage='specialties';renderAppDemo()" onkeydown="if(event.key==='Enter')appPage='specialties',renderAppDemo()"><img class="hp-img" src="${PEDIA_HERO_SRC}" alt="A male pediatrician in a white coat with a stethoscope smiling at a happy child holding a teddy bear" width="1100" height="516"><div class="hp-ov"><div class="eyebrow">SUBJECT</div><h3>Pediatrics</h3><div class="hp-q">${QB.length} questions</div></div>
-  <div class="hp-foot"><div><div class="hp-pr"><span>${n} answered</span><b>${all}%</b></div><div class="bar"><span style="width:${all}%"></span></div></div><button type="button" class="btn primary" onclick="startPractice(event)">Start practice</button></div></div>
- <div class="card sc soon"><div class="sic">🩺</div><div><h3>More subjects</h3><div class="meta">Content is in development</div></div></div></div>`};
+/* Retired intermediate Subjects screen removed. Home v7 below is the sole live Home renderer. */
 specialtiesView=function(){const av=gradeHasPediatrics()?SYS.filter(s=>s[3]):[],soon=gradeHasPediatrics()?SYS.filter(s=>!s[3]):[];
  return `${appHeader('Pediatrics')}<div class="rs"><h1>Pediatrics</h1><p class="sub">${av.length} specialties · ${gradeHasPediatrics()?REAL.total:0} questions</p>
  ${av.map(([id,l,img])=>{const s=REAL.spec[id]||{q:0,topics:[]};const p=specProg(id);return `<div class="card sc spc" onclick="openSpec('${id}')">${sysIcon(img,'lg')}<div class="spc-tx"><h3>${l}</h3><div class="meta">${s.q} questions · ${s.topics.length} topics</div><div class="bar"><span style="width:${p}%"></span></div></div><span class="chev">›</span></div>`}).join('')}
@@ -2629,8 +2625,7 @@ function gradeView(){const g=selectedGrade||5,list=GRADE_SUBJECTS[g]||[],st=grSt
  ${cards}
  <div class="soon-h">Change grade</div><div class="tm-chips" role="group" aria-label="Grade">${chips}</div>${note}</div>`}
 PAGES.grade=gradeView;
-{const _sv=subjectsView;subjectsView=function(){const g=selectedGrade;if(!g||g===5)return _sv.apply(this,arguments);
- const list=GRADE_SUBJECTS[g]||[];return `${appHeader('Subjects')}<div class="rs"><h1>Subjects</h1><p class="sub">Grade ${g} · ${list.length} subjects</p>${list.map(nm=>`<div class="card sc soon"><div class="sic">${GR_ICO[nm]||'📘'}</div><div><h3>${nm}</h3><div class="meta">Coming soon</div></div></div>`).join('')}<button type="button" class="btn primary block" style="margin-top:12px" onclick="appPage='grade';renderAppDemo()">Change grade</button></div>`}}
+/* Grade visibility is handled directly by Home v7; the old Subjects wrapper is retired. */
 
 DR2.forEach(g=>g[1].forEach(it=>{if(it[0]==='Notifications')it[1]='notifs'}));
 {const pg=DR2.find(g=>g[0]==='Progress');if(pg&&!pg[1].some(it=>it[0]==='Study timer'))pg[1].push(['Study timer','timer','<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9.5 2.5h5"/>'])}
@@ -2723,7 +2718,6 @@ function activity(){
 }
 function greet(){const h=new Date().getHours();return h<12?'Good Morning':h<18?'Good Afternoon':'Good Evening'}
 /* ---- Home view ---- */
-const legacy=window.subjectsView||subjectsView;
 window.measureDailyFactOverflow=measureDailyFactOverflow;
 function measureDailyFactOverflow(){
  try{
@@ -2781,7 +2775,6 @@ const home=function(){
   <div class="h7-rh">${IC.clock}<h3>Recent Activity</h3><button type="button" class="h7-chipbtn" style="align-self:center;margin:0" onclick="h7RecentSheet()">View All${IC.chev}</button></div>
   ${act.length?act.map(a=>`<button type="button" class="h7-row" onclick="h7OpenRecent('${a.k}','${$e(a.spec)}',${a.topic})">${a.ic}<span class="h7-rt">${$e(a.txt)}</span><span class="h7-rw">${ago(a.t)}</span><span class="h7-rc">${IC.chev}</span></button>`).join(''):'<p class="h7-none">Topics you study will appear here. Pinned topics remain in Pinned Items.</p>'}
  </section>`:''}</div>`};
-window.__legacySubjectsView=legacy;
 subjectsView=home;
 /* ---- read-only details sheet ---- */
 function closeSheet(){const s=document.querySelector('.h7-sheet');s&&s.remove()}
