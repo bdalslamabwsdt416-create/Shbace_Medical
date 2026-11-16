@@ -1,7 +1,6 @@
 /* SHBACE Medical · final PWA collection polish for main/to me
-   Orders banks 1–4, uses the supplied bank emblems, and exposes the established
-   Dr. Al-Joaki system/topic artwork (large icons) so Banks 07 and 08 render the
-   very same cards as the Dr. Al-Joaki bank. */
+   Orders banks 1–4, uses the supplied bank emblems, and reuses the established
+   Dr. Al-Joaki system/topic artwork wherever a matching topic exists. */
 (function () {
   'use strict';
   const B = window.__SHB_BRIDGE;
@@ -9,7 +8,7 @@
 
   const BANK_ICONS = [
     ['.ped-collection-previous:not(.ped-collection-bank07)', 'bank-university-tripoli.webp', 'Faculty of Medicine, University of Tripoli'],
-    ['.ped-collection-bank07', 'bank-ai-clinical-cases.webp', 'AI Clinical Case'],
+    ['.ped-collection-bank07', 'bank-clinical-case.webp', 'Clinical Cases'],
     ['.ped-collection-bank08', 'bank-ai-generated.webp', 'AI Generated'],
     ['.ped-collection-nelson', 'bank-nelson-textbook.webp', 'Nelson Textbook'],
     ['.ped-collection-allonce:not(.ped-collection-clinicalcase):not(.ped-collection-bank08)', 'bank-kasr-alainy.webp', 'Kasr Al-Ainy'],
@@ -24,7 +23,8 @@
     style.id = 'shb-pwa-bank-badge-css';
     style.textContent =
       '.ped-collection-avatar{overflow:hidden}'+
-      '.ped-collection-avatar>img{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:cover;border-radius:inherit}';
+      '.ped-collection-avatar>img{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:cover;border-radius:inherit}'+
+      '.cc-icon-art>img,.ai08-icon-art>img{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:cover;border-radius:11px}';
     document.head.appendChild(style);
   }
 
@@ -195,67 +195,88 @@
     return best && best.score >= 0.42 ? map[best.item] : '';
   }
 
-  /* Artwork for systems that have no row of their own in the Dr. Al-Joaki list. */
-  function specialSystemSrc(name) {
+  function applySystemImage(box, name) {
+    if (!box) return;
     const map = B.TOPIC_ICON_ASSET || {};
     const value = norm(name);
-    if (/dermatol|allerg|hepatology|child protection/.test(value)) return map['genetics|Skin Disorders'] || map['rheum|Immunodeficiency & Allergy'] || '';
-    if (/inborn errors|metabolic/.test(value)) return map['rheum|Inborn Errors of Metabolism'] || '';
-    if (/poison|environmental/.test(value)) return map['rheum|Poisoning'] || '';
-    if (/general pediatrics|clinical skills/.test(value)) return map['growth|Other / Mixed Questions'] || '';
-    if (/supplementary|curriculum gaps/.test(value)) return map['rheum|Other / Mixed Questions'] || map['growth|Other / Mixed Questions'] || '';
-    return '';
-  }
-
-  /* Same markup the Dr. Al-Joaki system cards use (B.sysIcon 'lg'), so the core CSS sizes it identically. */
-  function systemIconHtml(name) {
+    let special = '';
+    if (/dermatol|allerg|hepatology|child protection/.test(value)) {
+      special = map['genetics|Skin Disorders'] || map['rheum|Immunodeficiency & Allergy'] || '';
+    } else if (/inborn errors|metabolic/.test(value)) {
+      special = map['rheum|Inborn Errors of Metabolism'] || '';
+    } else if (/poison|environmental/.test(value)) {
+      special = map['rheum|Poisoning'] || '';
+    } else if (/general pediatrics|clinical skills/.test(value)) {
+      special = map['growth|Other / Mixed Questions'] || '';
+    } else if (/supplementary|curriculum gaps/.test(value)) {
+      special = map['rheum|Other / Mixed Questions'] || map['growth|Other / Mixed Questions'] || '';
+    }
     try {
-      if (typeof B.sysIcon !== 'function') return '';
-      const rows = Array.isArray(B.SYS) ? B.SYS : [];
-      const row = getSystemRow(name) || rows.find(r => r && r[0] === 'growth') || rows[0];
-      if (!row || !row[2]) return '';
+      if (special) {
+        const img = document.createElement('img');
+        img.src = special;
+        img.alt = name;
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        box.replaceChildren(img);
+        return;
+      }
+      const row = getSystemRow(name);
+      if (!row || typeof B.sysIcon !== 'function') return;
       const holder = document.createElement('div');
       holder.innerHTML = B.sysIcon(row[2], 'lg');
       const img = holder.querySelector('img');
       if (img) {
-        const special = specialSystemSrc(name);
-        if (special) img.src = special;
         img.alt = name;
         img.loading = 'lazy';
         img.decoding = 'async';
+        box.replaceChildren(img);
       }
-      return holder.innerHTML;
-    } catch (_) { return ''; }
+    } catch (_) {}
   }
 
-  /* Same markup the Dr. Al-Joaki topic cards use (.tno.ti with a 176px image). */
-  function topicIconHtml(systemName, topicName) {
-    try {
-      let src = topicImage(systemName, topicName);
-      if (!src) {
-        const holder = document.createElement('div');
-        holder.innerHTML = systemIconHtml(systemName);
-        const systemImg = holder.querySelector('img');
-        src = systemImg ? systemImg.getAttribute('src') : '';
-      }
-      if (!src) return '';
-      const wrap = document.createElement('div');
-      wrap.className = 'tno ti';
-      const img = document.createElement('img');
-      img.src = src;
-      img.alt = String(topicName || '');
-      img.width = 176;
-      img.height = 176;
-      img.loading = 'lazy';
-      img.decoding = 'async';
-      wrap.appendChild(img);
-      return wrap.outerHTML;
-    } catch (_) { return ''; }
+  function applyTopicImage(box, systemName, topicName) {
+    if (!box) return;
+    const src = topicImage(systemName, topicName);
+    if (!src) return;
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = topicName;
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    box.replaceChildren(img);
   }
 
-  window.__SHB_BANK_ICONS__ = { system: systemIconHtml, topic: topicIconHtml };
+  function refreshBankIcons() {
+    let page = '';
+    try { page = String(appPage || ''); } catch (_) {}
+    const root = document.querySelector('#phoneContent .screen') || document;
+    if (page === 'clinicalSystems' || page === 'ai08Systems') {
+      root.querySelectorAll('.cc-list-card,.ai08-list-card').forEach(card => {
+        const label = card.querySelector('.cc-list-copy strong,.ai08-list-copy strong');
+        const box = card.querySelector('.cc-sys-icon,.ai08-sys-icon');
+        if (label && box) applySystemImage(box, label.textContent.trim());
+      });
+    } else if (page === 'clinicalTopics' || page === 'ai08Topics') {
+      const heading = root.querySelector('.cc-page>h1,.ai08-page>h1');
+      const systemName = heading ? heading.textContent.trim() : '';
+      root.querySelectorAll('.cc-list-card,.ai08-list-card').forEach(card => {
+        const label = card.querySelector('.cc-list-copy strong,.ai08-list-copy strong');
+        const box = card.querySelector('.cc-topic-number,.ai08-topic-number');
+        if (label && box) applyTopicImage(box, systemName, label.textContent.trim());
+      });
+    }
+  }
 
   addBadgeCss();
+  const previousRender = window.renderAppDemo;
+  if (typeof previousRender === 'function') {
+    window.renderAppDemo = function () {
+      const result = previousRender.apply(this, arguments);
+      try { refreshBankIcons(); } catch (error) { console.error('PWA bank icon refresh failed', error); }
+      return result;
+    };
+  }
   window.__SHB_PWA_COLLECTION_POLISH__ = {
     firstFour: FIRST_FOUR.slice(),
     badgeAssets: BANK_ICONS.map(item => item[1]),

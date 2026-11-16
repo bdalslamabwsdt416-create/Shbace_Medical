@@ -38,7 +38,10 @@
 .cc-rich strong{color:#e7f3f8}
 .cc-vignette-note{border-color:rgba(127,157,185,.2);background:rgba(20,41,59,.7)}
 .cc-vignette-note p{font-size:11px;line-height:1.6;color:#a7b9c8;margin:10px 0 0}
-.cc-question-list{display:flex;flex-direction:column;gap:13px}
+.cc-question-list{display:flex;flex-direction:column;gap:0}
+.rs.qb .nl-more-body section+section{border-top:1px solid rgba(121,157,180,.14);margin-top:12px;padding-top:11px}
+.rs.qb .nl-more-body h4{font-size:12px;color:#8fe0cb;margin:0 0 7px}
+.phone.light .rs.qb .nl-more-body h4{color:#2874aa}
 .cc-question{padding:14px!important;scroll-margin-top:18px}
 .cc-question-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:11px}
 .cc-question .qid{font-size:9px;letter-spacing:.1em;color:#88a4ba;font-weight:850}

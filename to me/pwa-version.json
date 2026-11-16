@@ -1,12 +1,16 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.10-to-me.32",
-  "displayVersion": "1.3.10.32 · Chrome (Phone + Computer)",
+  "version": "1.3.10-to-me.33",
+  "displayVersion": "1.3.10.33 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-16",
   "releaseNotes": [
-    "Replaces the empty Previous Questions (0 questions) entry with one AI Clinical Case collection: 1,598 validated questions across 10 medical systems, 284 topics and 330 case groups.",
-    "Suppresses the empty legacy AI Clinical Cases tile so the chooser shows one populated AI Clinical Case entry, opening Medical System -> Topic -> Clinical Case -> Questions with its separate answer-progress store.",
+    "Restores the independent Previous Questions collection with all 399 original exam questions; the numeric source marker is respected and stale cached bank labels cannot hide them.",
+    "Keeps all three collections separate: Previous Questions (399), Clinical Cases (1,598) and AI Clinical Cases (90). The 90-question bank remains its own collection and answer store.",
+    "Unifies the question-card presentation for Previous Questions, Clinical Cases and AI Clinical Cases. Bank 07 now uses the shared question-card, answer-option, feedback and Read More visual system.",
+    "Clinical Case bank 07 now opens all questions for a selected topic directly, showing each shared case history once above its associated questions; the extra case-list screen is removed.",
+    "Restores the 399-question Previous Questions archive in its original separate collection.",
+    "Keeps the 1,598-question Clinical Cases bank and the independent 90-question AI Clinical Cases bank as two distinct collections.",
     "Preserves the archived Previous Questions source data and all existing student progress. No question records, answer keys, bookmarks, notes or saved progress were cleared.",
     "Fixes the Exam Goal Planner ? Study Hub storage-key mismatch so saved exam dates and daily targets appear consistently. Repairs corrupted punctuation in offline-install and update messages.",
     "Pre-caches all 16 AI Generated MCQ data shards and its bank renderer with the new release, so the complete 1,881-question bank is available from one consistent offline cache.",
@@ -65,8 +69,8 @@
     "A question opened from Search, Saved, Wrong answers or Smart Review now opens inside its own bank, so a Previous question no longer opens as an empty list."
   ],
   "summary": [
-    "Pediatrics now opens AI Clinical Case (1,598 questions) in place of the empty Previous Questions card.",
-    "One collection entry opens the validated clinical-case bank: Medical System -> Topic -> Clinical Case -> Questions.",
-    "Existing questions, answer keys and student progress remain preserved; no local student data was cleared."
+    "Restores Previous Questions — 399 questions.",
+    "Keeps Clinical Cases — 1,598 questions and AI Clinical Cases — 90 questions as separate banks.",
+    "All three use the shared question-card design; Bank 07 opens a topic directly to its case histories and questions."
   ]
 }
