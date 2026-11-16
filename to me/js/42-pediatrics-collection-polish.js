@@ -44,7 +44,7 @@
         const img = document.createElement('img');
         img.src = '/assets/img/' + file;
         img.alt = label + ' question bank';
-        img.loading = 'lazy';
+        img.loading = 'eager';
         img.decoding = 'async';
         avatar.replaceChildren(img);
         avatar.setAttribute('role', 'img');
