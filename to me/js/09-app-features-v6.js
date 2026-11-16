@@ -224,7 +224,8 @@ const sysIcon=(img,cls='')=>img?`<img class="sysimg ${cls}" src="${IMG[img]}" al
 
 /* ---------- helpers ---------- */
 const subjectQs=()=>QB;
-let inTopic=()=>(gradeHasPediatrics()?QB:[]).filter(q=>(ACTIVE_QBANK==='all'||bankOf(q)===ACTIVE_QBANK)&&(ACTIVE_QBANK_TOPICS===null||ACTIVE_QBANK_TOPICS.indexOf(q.topic)>=0)&&(qs.spec==='all'||q.spec===qs.spec)&&(!qs.topic||q.topic===qs.topic));
+const coreInTopic=()=>(gradeHasPediatrics()?QB:[]).filter(q=>(ACTIVE_QBANK==='all'||bankOf(q)===ACTIVE_QBANK)&&(ACTIVE_QBANK_TOPICS===null||ACTIVE_QBANK_TOPICS.indexOf(q.topic)>=0)&&(qs.spec==='all'||q.spec===qs.spec)&&(!qs.topic||q.topic===qs.topic));
+let inTopic=coreInTopic;
 function statusOf(q){const a=S.ans[q.id];return !a?'unanswered':(a.ok?'correct':'incorrect')}
 function filtered(){return inTopic().filter(q=>{
   if(qs.filter==='bookmarked'&&!S.saved[q.id])return false;
@@ -2901,7 +2902,7 @@ applyAppFontScaleStage();
    "Continue Studying" did nothing. Nothing here changes data, logic or markup. */
 window.__SHB_BRIDGE={
  qs:qs,SYS:SYS,QB:QB,bankOf:bankOf,sysIcon:sysIcon,isPinned:isPinned,answeredCount:answeredCount,TOPIC_ICON_ASSET:TOPIC_ICON_ASSET,
- get REC(){return REC},get SPEC_NAME(){return SPEC_NAME},get TOPIC_NAME(){return TOPIC_NAME},get REAL(){return REAL},get QBY(){return QBY},get qmap(){return qmap},get SRT(){return SRT},get SRT_Q(){return SRT_Q},get SRT_BY(){return SRT_BY},get BANK_OPTS(){return BANK_OPTS},get BANK_KEYS(){return BANK_KEYS},get S(){return S},save:save,
+ get REC(){return REC},get SPEC_NAME(){return SPEC_NAME},get TOPIC_NAME(){return TOPIC_NAME},get REAL(){return REAL},get QBY(){return QBY},get qmap(){return qmap},get SRT(){return SRT},get SRT_Q(){return SRT_Q},get SRT_BY(){return SRT_BY},get BANK_OPTS(){return BANK_OPTS},get BANK_KEYS(){return BANK_KEYS},get S(){return S},get coreInTopic(){return coreInTopic},save:save,
  setActiveBank:function(key,topicIds){ACTIVE_QBANK=bankValid(key);ACTIVE_QBANK_TOPICS=Array.isArray(topicIds)?topicIds.slice():null;return ACTIVE_QBANK},
  registerExternalBank:function(key,label,groups){
   if(!key||!Array.isArray(groups))throw new Error('Invalid external question bank registration.');

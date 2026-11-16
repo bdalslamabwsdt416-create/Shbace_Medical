@@ -53,6 +53,9 @@ test('AI Clinical Cases and AI Generated are registered as data providers for th
   assert.ok(adapter.includes("'clinical-ai':{label:'AI Clinical Cases',total:1598"));
   assert.ok(adapter.includes("'generated-ai':{label:'AI Generated',total:1881"));
   assert.ok(adapter.includes("B.registerExternalBank(key,BANKS[key].label,groups)"));
+  assert.ok(collections.includes("chosen==='clinical-ai'||chosen==='generated-ai'"));
+  assert.ok(core.includes('get coreInTopic(){return coreInTopic}'));
+  assert.ok(adapter.includes('B.coreInTopic().filter(function(q){return B.bankOf(q)===currentBank;})'));
   assert.ok(adapter.includes("data/ai-generated/16-rheumatology-metabolic-poisoning-immunology.json"));
   assert.ok(adapter.includes("shbace-ai-generated-mcq-source-v1"));
   assert.ok(adapter.includes("total!==1881||all.length!==1881"));
