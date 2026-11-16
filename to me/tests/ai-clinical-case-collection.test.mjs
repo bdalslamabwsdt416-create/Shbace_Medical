@@ -69,13 +69,32 @@ test('AI Clinical Cases and AI Generated are registered as data providers for th
   assert.ok(build.includes('"js/43-ai-bank-engine-adapter.js"'));
 });
 
-test('Shared case vignette is shown in the first question card and marked continued later', () => {
+test('AI Clinical Cases embeds vignette text without student-facing case headings or continuation labels', () => {
   assert.ok(adapter.includes('item.hasSharedCaseText&&item.vignette'));
-  assert.ok(adapter.includes("number:item.number==null?'':item.number,first:i===0"));
   assert.ok(adapter.includes('out.aiCaseVignette=caseInfo.vignette'));
-  assert.ok(adapter.includes('out.aiCaseContinued=true'));
-  assert.ok(mainBank.includes('const aiCaseBlock=q.aiCaseVignette'));
-  assert.ok(mainBank.includes('CONTINUED — Same clinical case'));
+  assert.doesNotMatch(adapter, /aiCaseContinued|aiCaseTitle|aiCaseNumber/);
+  assert.ok(mainBank.includes('const aiCaseBlock=q.aiCaseVignette?'));
+  assert.ok(!mainBank.includes('CONTINUED — Same clinical case'));
+  assert.ok(!mainBank.includes('q.aiCaseNumber'));
+  assert.ok(!mainBank.includes('q.aiCaseTitle'));
+  assert.ok(mainBank.includes('${aiCaseBlock}${qExtra(q)}<h3 class="qstem">'));
+  const intro = bank07Data.systems.find(system => system.id === 'cardiovascular-system')
+    .topics.find(topic => topic.id === 'cardiovascular-system-topic-intro');
+  const newCase = intro.cases.find(item => item.questions.some(question => question.id === 'CC-CARDIOVASCULAR-SYSTEM-001'));
+  const standalone = intro.cases.find(item => item.questions.some(question => question.id === 'CC-CARDIOVASCULAR-SYSTEM-002'));
+  assert.equal(newCase.questions.length, 1);
+  assert.equal(newCase.hasSharedCaseText, true);
+  assert.match(newCase.vignette, /poor weight gain/i);
+  assert.match(newCase.vignette, /pansystolic murmur/i);
+  assert.doesNotMatch(newCase.vignette, /ventricular septal defect|\\bVSD\\b|echocardiogram/i);
+  assert.equal(standalone.hasSharedCaseText, false);
+  assert.deepEqual(standalone.questions.map(question => question.id), [
+    'CC-CARDIOVASCULAR-SYSTEM-002','CC-CARDIOVASCULAR-SYSTEM-003','CC-CARDIOVASCULAR-SYSTEM-004',
+    'CC-CARDIOVASCULAR-SYSTEM-005','CC-CARDIOVASCULAR-SYSTEM-006','CC-CARDIOVASCULAR-SYSTEM-007',
+    'CC-CARDIOVASCULAR-SYSTEM-008'
+  ]);
+  const caseCss = read('../css/bundle-core.css');
+  assert.ok(caseCss.includes('font-size:18px;line-height:1.55'));
 });
 
 test('Quiz and Smart Review include both AI banks and legacy AI routes are blocked', () => {
@@ -208,7 +227,14 @@ test('The adapter registers real AI bank records in the shared engine and migrat
   assert.ok(bridge.QB.every(q=>q.kind===''));
   assert.ok(bridge.QB.every(q=>q.aiBank==='clinical-ai'||q.aiBank==='generated-ai'));
   assert.ok(bridge.QB.some(q=>q.aiCaseVignette));
-  assert.ok(bridge.QB.some(q=>q.aiCaseContinued));
+  const vsdQuestion=bridge.QB.find(q=>q.id==='ai07-CC-CARDIOVASCULAR-SYSTEM-001');
+  const nextStandaloneQuestion=bridge.QB.find(q=>q.id==='ai07-CC-CARDIOVASCULAR-SYSTEM-002');
+  assert.ok(vsdQuestion && vsdQuestion.aiCaseVignette);
+  assert.equal(vsdQuestion.aiCaseTitle,undefined);
+  assert.equal(vsdQuestion.aiCaseNumber,undefined);
+  assert.equal(nextStandaloneQuestion.aiCaseVignette,undefined);
+  assert.equal(nextStandaloneQuestion.aiCaseContinued,undefined);
+  assert.ok(bridge.QB.every(q=>!q.aiCaseContinued));
 
   // A question opened from Search / Saved / Quiz / Smart Review must enter its
   // actual AI bank topic, even though the older collection wrappers only knew AJ.

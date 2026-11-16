@@ -598,8 +598,8 @@ mark{background:rgba(255,200,87,.28);color:inherit;border-radius:3px;padding:0 1
 /* ---- full question bank: source / case / repeat info ---- */
 .qstem,.qfb p,.qcase{white-space:pre-wrap}
 .qsrc{margin:6px 0 0;font-size:12.5px;color:#8fa6ba}
-.qcase{margin:10px 0 0;padding:11px 13px;border-radius:14px;border:1px solid rgba(120,170,230,.28);background:rgba(94,182,255,.07);font-size:13.5px;line-height:1.55;color:#cfe0f0}
-.qcase b{display:block;margin-bottom:3px;color:#e9f3ff}
+.qcase{margin:10px 0 0;padding:11px 13px;border-radius:14px;border:1px solid rgba(120,170,230,.28);background:rgba(94,182,255,.07);font-size:18px;line-height:1.55;color:#cfe0f0}
+.qcase p{margin:0}
 .qrep{margin:8px 0 0;font-size:12.5px;line-height:1.7;color:#a9bccd}
 .qflag{display:inline-block;margin:8px 6px 0 0;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:700;background:rgba(94,182,255,.14);color:#9fd0ff}
 .qflag.w{background:rgba(255,196,87,.14);color:#ffd27a}.qflag.r{background:rgba(255,122,144,.15);color:#ff9fb0}
