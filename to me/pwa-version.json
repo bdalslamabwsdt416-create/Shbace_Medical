@@ -1,10 +1,11 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.10-to-me.43",
-  "displayVersion": "1.3.10.43 · Chrome (Phone + Computer)",
+  "version": "1.3.10-to-me.44",
+  "displayVersion": "1.3.10.44 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-16",
   "releaseNotes": [
+    "Prevents outgoing-page ghost overlays between Home and bank screens, and eagerly loads the seven main bank emblems. Preserves transitions on other app pages. Initial rendering remains gated until the complete deferred-script boot finishes. Student data and question records are unchanged.",
     "Prevents the first app screen from rendering until the ordered deferred-script boot has completed; keeps the splash visible if startup is still loading. Removes a redundant second Home render after the script-ready event. No student data stores or question-bank records are changed.",
     "Removes the retired design-prototype interface: sidebar, handoff panels, guide/document views, mock in-app screens and intermediate legacy Subjects renderer. The live Home and question-bank engine are now the only in-app render path. Splash, first-run onboarding, student data, offline package and update storage remain preserved.",
     "AI Clinical Cases and AI Generated now feed the same Dr. Al-Joaki question engine, question cards, answer state, Save and Personal note controls; their source data and separate progress remain independent.",
