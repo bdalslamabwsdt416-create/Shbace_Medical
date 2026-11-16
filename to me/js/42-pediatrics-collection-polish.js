@@ -8,11 +8,11 @@
 
   const BANK_ICONS = [
     ['.ped-collection-previous:not(.ped-collection-bank07)', 'bank-university-tripoli.webp', 'Faculty of Medicine, University of Tripoli'],
-    ['.ped-collection-bank07', 'bank-clinical-case.webp', 'Clinical Cases'],
+    ['.ped-collection-bank07', 'bank-ai-clinical-cases.webp', 'AI Clinical Cases'],
     ['.ped-collection-bank08', 'bank-ai-generated.webp', 'AI Generated'],
     ['.ped-collection-nelson', 'bank-nelson-textbook.webp', 'Nelson Textbook'],
     ['.ped-collection-allonce:not(.ped-collection-clinicalcase):not(.ped-collection-bank08)', 'bank-kasr-alainy.webp', 'Kasr Al-Ainy'],
-    ['.ped-collection-clinicalcase:not(.ped-collection-bank07)', 'bank-ai-clinical-cases.webp', 'AI Clinical Cases'],
+    ['.ped-collection-clinicalcase:not(.ped-collection-bank07)', 'bank-clinical-case.webp', 'Clinical Cases'],
     ['.ped-collection-egyptian', 'bank-egyptian-book.webp', 'Egyptian Book']
   ];
   const FIRST_FOUR = ['ped-collection-aj', 'ped-collection-previous', 'ped-collection-bank07', 'ped-collection-bank08'];

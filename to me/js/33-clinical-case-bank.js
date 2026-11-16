@@ -1,4 +1,4 @@
-/* Shbace Medical · Clinical Cases
+/* Shbace Medical · AI Clinical Cases
    Separate case-based collection. Original Pediatrics QB state and records are never mutated. */
 (function () {
   'use strict';
@@ -89,7 +89,7 @@
   function shbSystemIcon(name) { return shbSvgIcon(name,'shb-system-icon'); }
   function shbTopicIcon(name,systemName) { return shbSvgIcon(name+' '+systemName,'shb-topic-icon'); }
   function shbBankEmblem07() {
-    return '<svg class="shb-bank-emblem shb-bank-emblem-07" viewBox="0 0 80 80" role="img" aria-label="Clinical Case"><defs><linearGradient id="shb07g" x1="8" y1="8" x2="70" y2="72"><stop stop-color="#C8FFF0"/><stop offset=".55" stop-color="#55D9BC"/><stop offset="1" stop-color="#278FA5"/></linearGradient></defs><path d="M24 10h23l12 12v40a6 6 0 0 1-6 6H24a6 6 0 0 1-6-6V16a6 6 0 0 1 6-6Z" fill="#102F42" stroke="url(#shb07g)" stroke-width="2.4"/><path d="M47 11v11h11" fill="none" stroke="#C8FFF0" stroke-width="2.2" stroke-linejoin="round"/><path d="M24 39h9l5-11 7 22 5-11h7" fill="none" stroke="#D9FFF5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 54h26M27 60h17" stroke="#6FDAC6" stroke-width="2" stroke-linecap="round"/></svg>';
+    return '<svg class="shb-bank-emblem shb-bank-emblem-07" viewBox="0 0 80 80" role="img" aria-label="AI Clinical Cases"><defs><linearGradient id="shb07g" x1="8" y1="8" x2="70" y2="72"><stop stop-color="#C8FFF0"/><stop offset=".55" stop-color="#55D9BC"/><stop offset="1" stop-color="#278FA5"/></linearGradient></defs><path d="M24 10h23l12 12v40a6 6 0 0 1-6 6H24a6 6 0 0 1-6-6V16a6 6 0 0 1 6-6Z" fill="#102F42" stroke="url(#shb07g)" stroke-width="2.4"/><path d="M47 11v11h11" fill="none" stroke="#C8FFF0" stroke-width="2.2" stroke-linejoin="round"/><path d="M24 39h9l5-11 7 22 5-11h7" fill="none" stroke="#D9FFF5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 54h26M27 60h17" stroke="#6FDAC6" stroke-width="2" stroke-linecap="round"/></svg>';
   }
   function shbBankEmblem08() {
     return '<svg class="shb-bank-emblem shb-bank-emblem-08" viewBox="0 0 80 80" role="img" aria-label="AI Generated"><defs><linearGradient id="shb08g" x1="10" y1="8" x2="69" y2="71"><stop stop-color="#C9E9FF"/><stop offset=".55" stop-color="#6BCBFF"/><stop offset="1" stop-color="#9A8CFF"/></linearGradient></defs><ellipse cx="40" cy="40" rx="28" ry="12" transform="rotate(-34 40 40)" fill="none" stroke="url(#shb08g)" stroke-width="2.2"/><ellipse cx="40" cy="40" rx="28" ry="12" transform="rotate(38 40 40)" fill="none" stroke="url(#shb08g)" stroke-width="2.2" opacity=".7"/><path d="m40 23 15 17-15 17-15-17 15-17Z" fill="#153D5C" stroke="url(#shb08g)" stroke-width="2.5"/><path d="m40 31 7 9-7 9-7-9 7-9Z" fill="#A8E8FF" fill-opacity=".2" stroke="#D4F4FF" stroke-width="1.8"/><path d="m17 19 2.5 5.5L25 27l-5.5 2.5L17 35l-2.5-5.5L9 27l5.5-2.5L17 19Zm47 24 2 4 4 2-4 2-2 4-2-4-4-2 4-2 2-4Z" fill="#B9E7FF"/></svg>';
@@ -107,12 +107,12 @@
     return `<button type="button" class="backb cc-back" onclick="bank07ClinicalCaseBack()"><span aria-hidden="true">‹</span> ${$esc(label || 'Back')}</button>`;
   }
   function loadingPage() {
-    return pageShell('CLINICAL CASES','Clinical Cases','Based on Dr. Abdulrahman Al-Juaiki’s course sheets and teaching materials.',
+    return pageShell('AI CLINICAL CASES','AI Clinical Cases','Clinical case-based questions, organized by medical system and topic.',
       `<div class="card setcard cc-loading"><div class="cc-loader"></div><h3>Loading clinical cases…</h3><p class="meta">The bank is being prepared on this device.</p></div>`);
   }
   function errorPage() {
-    return pageShell('CLINICAL CASES','Clinical Cases','The source data could not be loaded.',
-      `<div class="card setcard"><h3>Clinical Case bank unavailable</h3><p class="meta">${$esc(dataError || 'The data file could not be opened.')}</p><button type="button" class="btn primary block" onclick="bank07RetryClinicalCaseData()">Try again</button></div>`);
+    return pageShell('AI CLINICAL CASES','AI Clinical Cases','The source data could not be loaded.',
+      `<div class="card setcard"><h3>AI Clinical Cases bank unavailable</h3><p class="meta">${$esc(dataError || 'The data file could not be opened.')}</p><button type="button" class="btn primary block" onclick="bank07RetryClinicalCaseData()">Try again</button></div>`);
   }
   function systemsPage() {
     if (!data) return dataError ? errorPage() : loadingPage();
@@ -124,8 +124,8 @@
         <span class="bar"><span style="width:${p}%"></span></span></span><span class="chev">›</span></button>`;
     }).join('');
     const total=allQuestions(),done=answerCount(total);
-    return pageShell('CLINICAL CASES','Clinical Cases',
-      'Choose a medical system to browse its topics and clinical cases.',
+    return pageShell('AI CLINICAL CASES','AI Clinical Cases',
+      'Choose a medical system to browse AI-assisted clinical cases and their topics.',
       `${progress(done,total.length)}
        <div class="cc-description card"><b>How this bank is organized</b><p>Choose a medical system, open a topic, then study each clinical case and its linked questions. The shared case history is shown once before its questions.</p></div>
        <div class="cc-section-heading">Medical Systems <span>${data.systems.length}</span></div>
@@ -201,7 +201,7 @@
         : (item.sourceHeadingPresent&&topic.cases.length>1?'<div class="cc-section-heading">'+$esc(item.title)+'</div>':'');
       return heading+'<div class="cc-question-list">'+item.questions.map(q=>questionCard(q,questionNumber++)).join('')+'</div>';
     }).join('');
-    return pageShell('CLINICAL CASES · '+system.name.toUpperCase(),topic.name,
+    return pageShell('AI CLINICAL CASES · '+system.name.toUpperCase(),topic.name,
       qs.length+' questions · '+done+' answered',
       backButton(system.name)+progress(done,qs.length)+blocks,
       'qb ped-bank-topics');
@@ -296,8 +296,8 @@
     let html=oldSpecialtiesView.apply(this,arguments);
     if(!String(html).includes('ped-collections-grid') || String(html).includes('ped-collection-bank07')) return html;
     const card=`<button type="button" class="ped-collection-card ped-collection-clinicalcase ped-collection-bank07" onclick="openClinicalCaseBank07()">
-      <div class="ped-collection-avatar ped-avatar-allonce ped-avatar-icon ped-avatar-clinical" role="img" aria-label="Clinical Case question bank">${shbBankEmblem07()}</div>
-      <span class="ped-collection-copy"><span class="eyebrow">CLINICAL CASE QUESTION BANK</span><b>Clinical Case</b>
+      <div class="ped-collection-avatar ped-avatar-allonce ped-avatar-icon ped-avatar-clinical" role="img" aria-label="AI Clinical Cases question bank">${shbBankEmblem07()}</div>
+      <span class="ped-collection-copy"><span class="eyebrow">AI CLINICAL CASES QUESTION BANK</span><b>AI Clinical Cases</b>
       <small>Clinical case-based questions, organized by medical system, topic and case.</small>
       <span class="ped-collection-count">${BANK_TOTAL.toLocaleString()} questions · 10 medical systems</span></span><span class="ped-collection-arrow">›</span></button>`;
     html=html.replace('</div><div class="ped-collection-footnote">',card+'</div><div class="ped-collection-footnote">');
@@ -322,8 +322,8 @@
     if(String(page).startsWith('clinical')) {
       try {
         const screen=document.querySelector('#phoneContent .screen');
-        if(screen)screen.innerHTML=appHeader('Clinical Cases')+'<div class="app-scroll">'+currentView()+'</div>'+appNav();
-      } catch(error) { console.error('Clinical Cases render failed',error); }
+        if(screen)screen.innerHTML=appHeader('AI Clinical Cases')+'<div class="app-scroll">'+currentView()+'</div>'+appNav();
+      } catch(error) { console.error('AI Clinical Cases render failed',error); }
     }
     return result;
   };
