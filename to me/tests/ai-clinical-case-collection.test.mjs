@@ -146,20 +146,27 @@ test('The adapter registers real AI bank records in the shared engine and migrat
     assert.ok(json,path);
     return {ok:true,json:async()=>json};
   };
+  const docListeners = {};
+  let renderCount = 0;
   const window = {
     __SHB_BRIDGE:bridge,
     addEventListener(){},
-    renderAppDemo(){},
-    specialtiesView(){return ''},
-    topicsView(){return ''},
+    renderAppDemo(){renderCount++;},
+    specialtiesView(){return '';},
+    topicsView(){return '';},
     navBack(){},
     __shbNavTap(){}
   };
   const context = {
-    window,document:{baseURI:'https://shbace.test/'},fetch,
+    window,
+    document:{
+      baseURI:'https://shbace.test/',
+      addEventListener(name,fn){docListeners[name]=fn;}
+    },
+    fetch,
     localStorage:{getItem:k=>local.has(k)?local.get(k):null,setItem:(k,v)=>local.set(k,v)},
     appPage:'subjects',mode:'app',
-    appHeader:()=>'',renderAppDemo(){},
+    appHeader:()=>'',renderAppDemo(){renderCount++;},
     console,URL,Promise,Map,Set,Date,Array,Object,String,Number,Math,RegExp,Error,
     setTimeout,clearTimeout
   };
@@ -187,4 +194,16 @@ test('The adapter registers real AI bank records in the shared engine and migrat
   assert.ok(bridge.QB.every(q=>q.aiBank==='clinical-ai'||q.aiBank==='generated-ai'));
   assert.ok(bridge.QB.some(q=>q.aiCaseVignette));
   assert.ok(bridge.QB.some(q=>q.aiCaseContinued));
+
+  // Direct drawer routes must clear the active bank scope; the startup-ready event
+  // is dispatched by the real loader on document, not window.
+  context.appPage='saved';
+  window.renderAppDemo();
+  assert.equal(bridge.activeBank,'all');
+  context.appPage='subjects';
+  assert.equal(typeof docListeners['shb-scripts-ready'],'function');
+  const rendersBeforeStartupReady=renderCount;
+  docListeners['shb-scripts-ready']();
+  await new Promise(resolve=>setTimeout(resolve,10));
+  assert.ok(renderCount>rendersBeforeStartupReady);
 });
