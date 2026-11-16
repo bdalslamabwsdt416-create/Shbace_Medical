@@ -25,9 +25,11 @@
  var TABS=['subjects','search','quiz','review','stats'],last=null,stack=[],scrolls={},ghostTimer=0,base=window.renderAppDemo;
  if(typeof base!=='function')return;
  function shell(){var pc=document.getElementById('phoneContent');return pc?pc.querySelector(':scope>.screen.app-shell'):null}
+ function isBankRoute(page){return ['subjects','pedcollections','specialties','topics','questions'].indexOf(page)>=0}
  function dropGhosts(){clearTimeout(ghostTimer);document.querySelectorAll('.pg-ghost').forEach(function(g){g.remove()})}
  window.renderAppDemo=function(){
   var page=(typeof mode!=='undefined'&&mode==='app')?appPage:null,dir=0,ghost=null,gBox=null,gTop=0;
+  var motionAllowed=!isBankRoute(page)&&!isBankRoute(last);
   try{
    dropGhosts();
    var osh=page&&last?shell():null,osc=osh&&osh.querySelector(':scope>.app-scroll');
@@ -38,7 +40,7 @@
     else if(stack.length&&stack[stack.length-1]===page){stack.pop();dir=-1}
     else if(ti>-1){stack=[];dir=-1}
     else{stack.push(last);if(stack.length>14)stack.shift();dir=1}
-    if(dir&&osc&&!reduce()){
+    if(dir&&osc&&!reduce()&&motionAllowed){
      var a=osh.getBoundingClientRect(),b=osc.getBoundingClientRect();
      ghost=document.createElement('div');ghost.className='app-scroll pg-ghost';ghost.setAttribute('aria-hidden','true');
      try{ghost.inert=true}catch(_){}
@@ -50,7 +52,7 @@
   try{
    last=page;
    var nsh=shell(),nsc=nsh&&nsh.querySelector(':scope>.app-scroll:not(.pg-ghost)');
-   if(dir&&nsc&&!reduce()){
+   if(dir&&nsc&&!reduce()&&motionAllowed){
     if(dir<0&&scrolls[page])nsc.scrollTop=scrolls[page];
     nsc.classList.add(dir>0?'pg-in-r':'pg-in-l');
     nsc.addEventListener('animationend',function(){nsc.classList.remove('pg-in-r','pg-in-l')},{once:true});
