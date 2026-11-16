@@ -530,26 +530,15 @@
 })();
 </script>
 
-<!-- Production app shell. Only the real app viewport is visible; compatibility hooks stay inert for existing app scripts. -->
+<!-- Production app viewport. The retired prototype panels and handoff UI are removed. -->
 <div class="shell shb-production-shell">
-  <aside class="rail shb-compat" aria-hidden="true" inert>
-    <button data-mode="preview" type="button"></button><button data-mode="app" type="button"></button>
-    <button data-mode="decisions" type="button"></button><button data-mode="preserve" type="button"></button>
-    <button data-mode="build" type="button"></button><button id="resetDemo" type="button"></button>
-  </aside>
   <main class="workspace">
     <div class="content-grid">
       <section class="preview-panel">
-        <div class="preview-head shb-compat" aria-hidden="true"><b id="previewLabel">Shbace Medical</b><span id="previewCount"></span></div>
         <div class="preview-view" id="previewView">
           <div class="phone-wrap"><div class="phone"><i class="shb-obbg" aria-hidden="true"></i><div class="phone-content" id="phoneContent"></div></div></div>
         </div>
-        <div class="doc-view shb-compat" id="docView" aria-hidden="true" inert></div>
       </section>
-      <aside class="guide-panel shb-compat" aria-hidden="true" inert>
-        <div class="guide-tabs"><button data-guide="screen" type="button"></button><button data-guide="logic" type="button"></button><button data-guide="handoff" type="button"></button></div>
-        <div class="guide-content" id="guideContent"></div>
-      </aside>
     </div>
   </main>
 </div>
@@ -806,7 +795,6 @@ window.__SHBACE_FACULTY_LOGO_DATA__="__SHBACE_FACULTY_LOGO_DATA__";
 <style id="shb-production-shell-v1">
 html,body{width:100%;min-height:100%;margin:0!important;overflow-x:hidden!important}
 body.app-mode .shell.shb-production-shell{display:block!important;position:relative!important;width:100%!important;max-width:none!important;min-height:100dvh!important;margin:0!important;padding:0!important;grid-template-columns:minmax(0,1fr)!important;gap:0!important;visibility:visible!important}
-body.app-mode .shb-production-shell .rail,body.app-mode .shb-production-shell .topbar,body.app-mode .shb-production-shell .preview-head,body.app-mode .shb-production-shell .doc-view,body.app-mode .shb-production-shell .guide-panel,body.app-mode .shb-production-shell .footer-note{display:none!important}
 body.app-mode .shb-production-shell .workspace{display:block!important;width:100%!important;max-width:none!important;min-width:0!important;min-height:100dvh!important;margin:0!important;padding:0!important}
 body.app-mode .shb-production-shell .content-grid{display:block!important;width:100%!important;max-width:none!important;grid-template-columns:minmax(0,1fr)!important;gap:0!important;margin:0!important;padding:0!important}
 body.app-mode .shb-production-shell .preview-panel{display:block!important;width:100%!important;max-width:none!important;min-height:100dvh!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:transparent!important;overflow:visible!important;backdrop-filter:none!important}
