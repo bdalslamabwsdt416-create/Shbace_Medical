@@ -2155,8 +2155,9 @@ const __ah=appHeader;appHeader=function(l){const h=__ah(l),u=unreadN();return u?
 let QZ=(()=>{const v=LS.get(QKEY,null);const A=isObj(v)&&Array.isArray(v.attempts)?v.attempts.filter(a=>isObj(a)&&typeof a.id==='string'&&Array.isArray(a.items)&&Number.isFinite(a.end)):[];return {attempts:A.slice(0,200),active:isObj(v)&&isObj(v.active)&&Array.isArray(v.active.ids)&&v.active.ids.length?v.active:null}})();
 const qzSave=()=>LS.set(QKEY,QZ);
 const QBY=new Map(QB.map(q=>[q.id,q]));
-QZ.attempts.forEach(a=>{a.items=a.items.filter(i=>isObj(i)&&QBY.has(i.id))});
-if(QZ.active)QZ.active.ids=QZ.active.ids.filter(id=>QBY.has(id));if(QZ.active&&!QZ.active.ids.length)QZ.active=null;
+const qzDeferredBankId=id=>/^(ai07|ai08)-/.test(String(id||''));
+QZ.attempts.forEach(a=>{a.items=a.items.filter(i=>isObj(i)&&(QBY.has(i.id)||qzDeferredBankId(i.id)))});
+if(QZ.active)QZ.active.ids=QZ.active.ids.filter(id=>QBY.has(id)||qzDeferredBankId(id));if(QZ.active&&!QZ.active.ids.length)QZ.active=null;
 let QC=Object.assign({scope:'all',bank:'all',banks:[],specs:[],topics:[],filt:'any',mode:'practice',fb:'instant',order:'random',count:20,mins:0},(()=>{const v=LS.get(QCKEY,{});return isObj(v)?v:{}})());
 (()=>{const E={scope:['all','sel','custom'],filt:['any','new','wrong','saved'],mode:['practice','timed'],fb:['instant','end'],order:['random','bank']};Object.keys(E).forEach(k=>{if(!E[k].includes(QC[k]))QC[k]=E[k][0]});
  QC.banks=Array.isArray(QC.banks)?[...new Set(QC.banks.filter(b=>bankValid(b)===b&&b!=='all'))]:((QC.bank&&bankValid(QC.bank)===QC.bank&&QC.bank!=='all')?[QC.bank]:[]);QC.bank=QC.banks.length===1?QC.banks[0]:'all';

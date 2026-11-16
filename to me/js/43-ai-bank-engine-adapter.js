@@ -9,7 +9,8 @@ var BANKS={
  'clinical-ai':{label:'AI Clinical Cases',total:1598,store:'shbace_clinical_case_answers_v1',source:'data/clinicalCaseBank.json'},
  'generated-ai':{label:'AI Generated',total:1881,store:'shbace_ai_generated_answers_v1'}
 };
-var registry={},errors={},pending={},currentBank='',currentSystem='';
+var registry={},errors={},pending={},currentBank='',currentSystem='',studyToolPromise=null,studyToolAttempted=false;
+Object.keys(BANKS).forEach(function(key){if(!B.BANK_KEYS.has(key)){B.BANK_KEYS.add(key);B.BANK_OPTS.push([key,BANKS[key].label]);}});
 var systemAliases=[
  [/central nervous|neurolog|\bcns\b/,'cns'],
  [/cardiovascular|cardiac|\bheart\b/,'cardio'],
@@ -225,10 +226,18 @@ window.navBack=function(){
  if(currentBank&&appPage==='specialties'){currentBank='';currentSystem='';B.setActiveBank('all');window.__SHB_PED_COLLECTION__='';appPage='subjects';renderAppDemo();return;}
  return typeof coreBack==='function'?coreBack.apply(this,arguments):undefined;
 };
+function ensureStudyToolBanks(){
+ if(studyToolAttempted)return studyToolPromise||Promise.resolve();
+ studyToolAttempted=true;
+ studyToolPromise=Promise.all(Object.keys(BANKS).map(function(key){return ensureBank(key);})).then(function(){studyToolPromise=null;if(appPage==='quiz'||appPage==='quizrun'||appPage==='quizresult'||appPage==='quizhistory'||appPage==='review')renderAppDemo();}).catch(function(err){studyToolPromise=null;console.warn('AI banks could not be prepared for Quiz / Smart Review',err);});
+ return studyToolPromise;
+}
 var coreNavTap=window.__shbNavTap;
 window.__shbNavTap=function(id){
  if(id==='subjects'||id==='search'||id==='quiz'||id==='review'||id==='stats'){currentBank='';currentSystem='';B.setActiveBank('all');window.__SHB_PED_COLLECTION__='';}
- return typeof coreNavTap==='function'?coreNavTap.apply(this,arguments):(appPage=id,renderAppDemo());
+ var result=typeof coreNavTap==='function'?coreNavTap.apply(this,arguments):(appPage=id,renderAppDemo());
+ if(id==='quiz'||id==='review')ensureStudyToolBanks();
+ return result;
 };
 window.shbAiOpenBank=function(key){
  if(!BANKS[key])return;
@@ -261,5 +270,7 @@ function addBankCards(html){
 }
 var finalSpecialties=window.specialtiesView;
 window.specialtiesView=function(){if(currentBank)return systemPage();return addBankCards(finalSpecialties.apply(this,arguments));};
+var coreRender=window.renderAppDemo;
+window.renderAppDemo=function(){var result=coreRender.apply(this,arguments);if(appPage==='quiz'||appPage==='quizrun'||appPage==='quizresult'||appPage==='quizhistory'||appPage==='review')ensureStudyToolBanks();return result;};
 if(String(appPage).indexOf('ai08')===0||String(appPage).indexOf('clinical')===0){appPage='specialties';currentBank='';B.setActiveBank('all');}
 })();
