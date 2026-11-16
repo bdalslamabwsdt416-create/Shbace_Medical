@@ -68,7 +68,7 @@ test('AI Clinical Cases and AI Generated are registered as data providers for th
 
 test('Shared case vignette is shown in the first question card and marked continued later', () => {
   assert.ok(adapter.includes('item.hasSharedCaseText&&item.vignette'));
-  assert.ok(adapter.includes('number:item.number==null?'':item.number,first:i===0'));
+  assert.ok(adapter.includes("number:item.number==null?'':item.number,first:i===0"));
   assert.ok(adapter.includes('out.aiCaseVignette=caseInfo.vignette'));
   assert.ok(adapter.includes('out.aiCaseContinued=true'));
   assert.ok(mainBank.includes('const aiCaseBlock=q.aiCaseVignette'));
