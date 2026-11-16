@@ -1,6 +1,6 @@
 'use strict';
 
-/* Rotate the cache namespace with every PWA release. Keep this identical to js/29-offline-setup.js so the new worker installs a fresh shell. */
+/* Persistent offline-package cache. Keep this name identical to js/29-offline-setup.js across releases; rotating it would discard the 28 MB verified package and force a full restore. */
 const CACHE_NAME = 'shbace-chrome-offline-v1.3.10.37';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
 const APP_SHELL = [

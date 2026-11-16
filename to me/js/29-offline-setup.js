@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 
-/* Rotate this cache namespace with every PWA release. It must match sw.js so installed copies can replace stale files. */
+/* Persistent offline-package cache. NEVER rotate this name for an app release: the manifest/hash planner updates only changed files inside it. */
 var CACHE_NAME='shbace-chrome-offline-v1.3.10.37';
 var STAGING_NAME='shbace-staging-offline';
 var INSTALLED_KEY='installed';
@@ -145,9 +145,7 @@ function mount(){
  };
  ui.button.addEventListener('click',function(){
   if(ui.button.dataset.done==='1'){if(plan&&plan.mode==='update'){
-   /* Restart after an update: forget "splash already shown this session" so the reload goes through the normal splash.
-      Otherwise 04-app-main.js removes the splash at once and the old prototype Home is visible until the app scripts finish loading. */
-   try{sessionStorage.removeItem('shbace_splash_completed_session_v1')}catch(e){}
+   /* Restart into the updated app without replaying the weekly splash. */
    location.reload();return}removeSetupOverlay();return}
   if(ui.button.dataset.retryCheck==='1'){location.reload();return}
   runPlan();

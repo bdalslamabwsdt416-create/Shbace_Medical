@@ -241,6 +241,8 @@ const SP_HAPTIC=[24,80,16];
 const SPLASH_DURATION_MS=7000;      /* Splash stays fully visible for exactly 7 s; the dissolve starts AFTER this and is not part of it */
 const SPLASH_FADE_MS=(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)?350:1900;           /* dissolve duration (1.8–2 s). The real screen is already drawn under the splash */
 const SPLASH_SESSION_KEY='shbace_splash_completed_session_v1';
+const SPLASH_LAST_SHOWN_KEY='shbace_splash_last_shown_v1';
+const SPLASH_EVERY_MS=7*24*60*60*1000;
 let spBeats=0,spHapticTimer=null,spHapticDubTimer=null,spHapticLoopTimer=null;
 let splashDeadline=0,splashCompletionTimer=null,splashFinalized=false,splashRouteDone=false,splashPre=false;
 function nativeHapticsBridge(){
@@ -377,10 +379,13 @@ function launchExperience(){
  try{const raw=localStorage.getItem('shbace_home_tip_index_v3');activeDailyTip=(Number(raw||'-1')+1)%5;localStorage.setItem('shbace_home_tip_index_v3',String(activeDailyTip));}catch(e){}
  const overlay=document.getElementById('startupSplash');
  if(!overlay){routeAfterSplash();return;}
+ /* Show the cinematic splash once per seven days, not on every app launch or updater restart. */
+ try{const last=Number(localStorage.getItem(SPLASH_LAST_SHOWN_KEY))||0;if(last>0&&Date.now()-last<SPLASH_EVERY_MS){overlay.remove();if(!splashRouteDone){splashRouteDone=true;routeAfterSplash();}return;}}catch(e){}
  /* A completed splash is not replayed when this WebView/session resumes or reloads. */
  try{if(sessionStorage.getItem(SPLASH_SESSION_KEY)==='1'){
   overlay.remove();if(!splashRouteDone){splashRouteDone=true;routeAfterSplash();}return;
  }}catch(e){}
+ try{localStorage.setItem(SPLASH_LAST_SHOWN_KEY,String(Date.now()))}catch(e){}
  splashDeadline=(function(){const e=window.__spEcg;return Date.now()-((e&&e.t0!==null)?Math.max(0,performance.now()-e.t0):0)})()+SPLASH_DURATION_MS;      /* end of the 7 s hold (same clock as the ECG head); the transition starts here */
  splashFinalized=false;splashRouteDone=false;spBeats=0;
  startSplashHaptics();

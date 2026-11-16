@@ -146,8 +146,7 @@ function safeToReload(){return document.hidden||!questionBankOpen()}
 function applyPendingReload(){
  if(!reloadPending||reloadStarted||!safeToReload())return;
  reloadStarted=true;
- /* Forget "splash already shown" so the reload runs the normal splash instead of flashing the old prototype Home. */
- try{sessionStorage.removeItem('shbace_splash_completed_session_v1')}catch(_){}
+ /* Apply the new app shell without resetting the seven-day splash schedule. */
  setTimeout(function(){location.reload()},180);
 }
 function checkVersion(){
