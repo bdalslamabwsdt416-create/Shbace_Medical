@@ -2166,7 +2166,7 @@ let QC=Object.assign({scope:'all',bank:'all',banks:[],specs:[],topics:[],filt:'a
 const qcSave=()=>LS.set(QCKEY,QC);
 let qzViewId=null,qzPal=false,qzRevF='all',qzAnim=false,qzBack=null;
 /* ---- Quiz scope helpers: several banks, systems and topics can be combined ---- */
-const SYS_CANON=[['cardio','Cardiovascular System',/cardio/i],['respiratory','Respiratory System',/respir/i],['endocrine','Endocrinology',/endocr/i],['git','Gastrointestinal Tract',/gastro|(^|-)git$/i],['hepatology','Hepatology',/hepat/i],['heme','Haematology',/ha?emat/i],['neonatology','Neonatology',/neonat/i],['nephrology','Nephrology',/nephro/i],['neuro','Neurology / CNS',/neuro|^cns$/i],['genetics','Genetics',/genet/i],['growth','Growth & Development',/growth/i],['nutrition','Nutrition',/nutrit/i],['infectious','Infectious Diseases',/infect/i],['rheum','Rheumatology',/rheum/i],['immunology','Immunology & Allergy',/immun|allerg/i],['emergency','Emergency & Toxicology',/emerg|toxic/i]];
+const SYS_CANON=[['cardio','Cardiovascular System',/cardio/i],['respiratory','Respiratory System',/respir/i],['endocrine','Endocrinology',/endocr/i],['git','Gastrointestinal Tract',/gastro|(^|-)git$/i],['hepatology','Hepatology',/hepat/i],['heme','Haematology',/ha?emat/i],['neonatology','Neonatology',/neonat/i],['nephrology','Nephrology',/nephro/i],['neuro','Neurology / CNS',/neuro|^cns$/i],['genetics','Genetics',/genet/i],['dermatology','Dermatology & Child Protection',/dermat|skin/i],['growth','Growth & Development',/growth/i],['nutrition','Nutrition',/nutrit/i],['infectious','Infectious Diseases',/infect/i],['rheum','Rheumatology',/rheum/i],['immunology','Immunology & Allergy',/immun|allerg/i],['emergency','Emergency & Toxicology',/emerg|toxic/i],['general','General Pediatrics',/general/i],['integrated','Integrated Exam Practice',/integrated|exam practice/i]];
 const sysGroupKey=sp=>{const m=SYS_CANON.find(c=>c[2].test(String(sp)));return m?m[0]:String(sp)};
 const cfgBanks=cfg=>Array.isArray(cfg.banks)?cfg.banks:((cfg.bank&&cfg.bank!=='all')?[cfg.bank]:[]);
 const bankIn=(q,banks)=>!banks.length||banks.includes(bankOf(q));
@@ -2923,7 +2923,7 @@ window.__SHB_BRIDGE={
    });
    REAL.spec[spec].q=(Number(REAL.spec[spec].q)||0)+topicQuestions.length;
    SRT_Q.set(topicId,topicQuestions);
-   var topicRecord={id:topicId,name:topicName,sy:String(g.bankLabel||label||key),spec:spec,specLabel:SPEC_NAME[spec]||spec,key:spec+'|'+String(g.bankLabel||label||key)+'|'+topicName};
+   var topicRecord={id:topicId,name:topicName,sy:String(g.systemName||g.bankLabel||label||key),spec:spec,specLabel:SPEC_NAME[spec]||spec,key:spec+'|'+String(g.systemName||g.bankLabel||label||key)+'|'+topicName};
    SRT.push(topicRecord);SRT_BY.set(topicId,topicRecord);
   });
   REAL.total=QB.length;window.__bank.total=QB.length;gIdx=null;srCache=null;_qsg=null;_qsgN=-1;

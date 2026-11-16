@@ -9,12 +9,12 @@ var BANKS={
  'clinical-ai':{label:'AI Clinical Cases',total:1598,store:'shbace_clinical_case_answers_v1',source:'data/clinicalCaseBank.json'},
  'generated-ai':{label:'AI Generated',total:1881,store:'shbace_ai_generated_answers_v1'}
 };
-var registry={},errors={},pending={},currentBank='',currentSystem='',studyToolPromise=null,studyToolAttempted=false;
+var registry={},errors={},pending={},currentBank='',currentSystem='',studyToolPromise=null,studyToolReady=false,studyToolLastAttempt=0;
 Object.keys(BANKS).forEach(function(key){if(!B.BANK_KEYS.has(key)){B.BANK_KEYS.add(key);B.BANK_OPTS.push([key,BANKS[key].label]);}});
 var systemAliases=[
  [/central nervous|neurolog|\bcns\b/,'cns'],
  [/cardiovascular|cardiac|\bheart\b/,'cardio'],
- [/endocrin/,'endocrinology'],
+ [/endocrin|inborn errors|metabolic/,'endocrinology'],
  [/gastro|digestive|intestinal|\bgit\b/,'git'],
  [/ha?ematolog|blood/,'haematology'],
  [/infectious|vaccin|immunis|immuniz/,'infectious'],
@@ -22,9 +22,14 @@ var systemAliases=[
  [/nephrolog|renal|urinar|urolog/,'nephrology'],
  [/respirator|pulmonary|lung/,'respiratory'],
  [/growth|nutrition|development/,'growth'],
- [/genetic|dermatolog|skin/,'genetics'],
- [/rheumat|immunolog|allerg|poison|metabolic/,'rheum'],
- [/hepat|liver/,'git']
+ [/genetic|dysmorph/,'genetics'],
+ [/general pediatrics|clinical skills/,'general'],
+ [/dermatolog|child protection|skin/,'dermatology'],
+ [/immunolog|allerg/,'immunology'],
+ [/emergency|critical care|toxic|poison/,'emergency'],
+ [/final integrated|supplementary.*exam|exam practice|integrated review/,'integrated'],
+ [/rheumat|musculoskeletal/,'rheum'],
+ [/hepat|liver/,'hepatology']
 ];
 function specFor(name){
  var s=String(name||'').toLowerCase();
@@ -33,7 +38,8 @@ function specFor(name){
 }
 function systemLabel(spec){
  var row=(B.SYS||[]).find(function(x){return x&&x[0]===spec;});
- return row?row[1]:(B.SPEC_NAME[spec]||spec);
+ var aliases={general:'General Pediatrics & Clinical Skills',dermatology:'Dermatology / Allergy / Hepatology',immunology:'Immunology & Allergy',emergency:'Emergency & Critical Care',integrated:'Integrated Exam Practice',hepatology:'Hepatology'};
+ return row?row[1]:(aliases[spec]||B.SPEC_NAME[spec]||spec);
 }
 function safeText(value){return String(value==null?'':value);}
 function sourceText(src){
@@ -58,10 +64,10 @@ function normalizeQuestion(q,key,systemSpec,caseInfo){
   id:(key==='clinical-ai'?'ai07-':'ai08-')+safeText(q&&q.id),
   spec:systemSpec,topic:0,
   tag:key==='clinical-ai'?'Clinical Case':'AI Generated',
-  kind:key==='clinical-ai'?'Clinical Case':'Knowledge',
+  kind:'',
   q:safeText(q&&q.stem),o:opts.map(function(o){return safeText(o&&o.text)}),
   k:idx>=0?idx:0,kx:idx<0,ex:safeText(q&&q.initialExplanation),more:more,
-  src:sourceText(q&&q.source),ai:1,aiBank:key,
+  src:sourceText(q&&q.source),aiBank:key,
   py:false,nl:false,ao:false,cc:false,eb:false,rq:[],rc:[]
  };
  if(caseInfo&&caseInfo.vignette){
@@ -227,9 +233,14 @@ window.navBack=function(){
  return typeof coreBack==='function'?coreBack.apply(this,arguments):undefined;
 };
 function ensureStudyToolBanks(){
- if(studyToolAttempted)return studyToolPromise||Promise.resolve();
- studyToolAttempted=true;
- studyToolPromise=Promise.all(Object.keys(BANKS).map(function(key){return ensureBank(key).catch(function(){return null;});})).then(function(){studyToolPromise=null;if(appPage==='quiz'||appPage==='quizrun'||appPage==='quizresult'||appPage==='quizhistory'||appPage==='review')renderAppDemo();});
+ if(studyToolReady)return Promise.resolve();
+ if(studyToolPromise)return studyToolPromise;
+ if(Date.now()-studyToolLastAttempt<15000)return Promise.resolve();
+ studyToolLastAttempt=Date.now();
+ studyToolPromise=Promise.all(Object.keys(BANKS).map(function(key){return ensureBank(key).catch(function(){return null;});})).then(function(results){
+  studyToolReady=results.every(Boolean);studyToolPromise=null;
+  if(appPage==='quiz'||appPage==='quizrun'||appPage==='quizresult'||appPage==='quizhistory'||appPage==='review')renderAppDemo();
+ });
  return studyToolPromise;
 }
 var coreNavTap=window.__shbNavTap;
