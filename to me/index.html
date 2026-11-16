@@ -374,7 +374,8 @@
      components are ready, never earlier (no old-design flash). */
 (function(){
  var el=document.getElementById('startupSplash');
- var hold=false,held={dcl:[],load:[]},domReady=false,painted=false,started=false,T=null;
+ var hold=false,held={dcl:[],load:[]},domReady=false,painted=false,started=false,T=null,bootDeadlineTimer=null,bootFailed=false,activeNode=null;
+ var BOOT_MAX_MS=60000; /* global fail-closed cap across question-data fetch and deferred scripts */
  /* question bank (1.4 MB JSON): fetched in parallel with the splash; placed into <script id="qbData" type="application/json"> before the first app script runs, so the code that reads its textContent is unchanged */
  var selectedQB='original';try{selectedQB=localStorage.getItem('shbace_question_bank_version')==='reviewed'?'reviewed':'original'}catch(e){}
  var dataText=null,dataErr=null;
@@ -449,18 +450,26 @@
   list.forEach(function(fn){try{if(typeof fn==='function')fn.call(target,ev);else if(fn&&fn.handleEvent)fn.handleEvent(ev)}catch(e){console.error(e)}});
  }
  function finish(){
+  if(bootFailed)return;
   unhook();
   setTimeout(function(){
+   if(bootFailed)return;
    callAll(held.dcl,'DOMContentLoaded',document);
    setTimeout(function(){
+    if(bootFailed)return;
     callAll(held.load,'load',window);
     window.__shbBooted=true;
+    if(bootDeadlineTimer){clearTimeout(bootDeadlineTimer);bootDeadlineTimer=null;}
     try{performance.mark('shb-scripts-done')}catch(e){}
     try{document.dispatchEvent(new Event('shb-scripts-ready'))}catch(e){}
    },0);
   },0);
  }
  function fatalBoot(src){
+  if(bootFailed)return;
+  bootFailed=true;
+  if(bootDeadlineTimer){clearTimeout(bootDeadlineTimer);bootDeadlineTimer=null;}
+  if(activeNode){try{activeNode.onload=null;activeNode.onerror=null;if(activeNode.parentNode)activeNode.parentNode.removeChild(activeNode)}catch(e){}activeNode=null;}
   console.error('shb-boot: startup stopped because a required script could not be loaded: '+src);
   window.__shbBooted=false;
   if(document.getElementById('shb-boot-failure'))return;
@@ -475,25 +484,30 @@
   var list=[].slice.call(document.querySelectorAll('script[type="text/shb-deferred"]')),i=0;
   hook();
   function next(){
+   if(bootFailed)return;
    if(i>=list.length){finish();return}
    var o=list[i++],big=o.getAttribute('data-big')==='1',src=o.getAttribute('data-src');
    function exec(attempt){
+    if(bootFailed)return;
     var n=document.createElement('script'),settled=false,timer=null;
     for(var k=0;k<o.attributes.length;k++){var a=o.attributes[k];if(a.name!=='type'&&a.name!=='data-src'&&a.name!=='data-big')n.setAttribute(a.name,a.value)}
     n.async=false;
     function failed(){
-     if(settled)return;settled=true;if(timer)clearTimeout(timer);
+     if(settled||bootFailed)return;settled=true;if(timer)clearTimeout(timer);
      n.onload=null;n.onerror=null;if(n.parentNode)n.parentNode.removeChild(n);
+     if(activeNode===n)activeNode=null;
      if(attempt<1){console.warn('shb-boot: retrying '+src+' after a load failure');exec(attempt+1);}
      else fatalBoot(src);
     }
     n.onload=function(){
-     if(settled)return;settled=true;if(timer)clearTimeout(timer);
+     if(settled||bootFailed)return;settled=true;if(timer)clearTimeout(timer);
+     if(activeNode===n)activeNode=null;
      if(o.parentNode)o.parentNode.removeChild(o);
      setTimeout(next,0);
     };
     n.onerror=failed;
     timer=setTimeout(failed,25000);
+    activeNode=n;
     if(attempt){
      var retryURL=new URL(src,document.baseURI);
      retryURL.searchParams.set('__shbace_reload',String(Date.now()));
@@ -507,6 +521,7 @@
   next();
  }
  function go(){if(started||!domReady||!painted)return;started=true;clearTimeout(T);
+  bootDeadlineTimer=setTimeout(function(){fatalBoot('overall startup timeout ('+Math.round(BOOT_MAX_MS/1000)+' seconds)')},BOOT_MAX_MS);
   dataFetch.then(function(){
    var q=document.getElementById('qbData');
    if(q&&dataText!=null)q.textContent=dataText;
