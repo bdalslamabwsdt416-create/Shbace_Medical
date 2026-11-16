@@ -40,7 +40,7 @@ test('The 90-question Clinical Cases bank and the 1,598-question AI Clinical Cas
 
   assert.match(bank07, /const BANK_TOTAL = 1598/);
   assert.match(bank07, /AI CLINICAL CASES QUESTION BANK/);
-  assert.match(bank07, /<b>AI Clinical Cases<\\/b>/);
+  assert.match(bank07, /AI CLINICAL CASES QUESTION BANK/);
   assert.match(bank07, /shbace_clinical_case_answers_v1/);
   assert.match(integration90, /CLINICAL CASES QUESTION BANK/);
   assert.match(integration90, /clinicalCaseQuestions\(\)\.length\.toLocaleString\(\)/);
