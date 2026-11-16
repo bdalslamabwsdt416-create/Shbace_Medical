@@ -203,12 +203,13 @@ if (pwaVersion.platform !== "Unified Chrome PWA" ||
   fail("pwa-version.json must declare a valid Unified Chrome PWA release version");
 }
 const packageMeta = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
-const expectedCacheName = "shbace-chrome-offline-v" + pwaVersion.version.replace("-to-me.", ".");
+/* Stable package cache: the PWA release version must NOT be part of this name. */
+const expectedCacheName = "shbace-chrome-offline-v1.3.10.37";
 const swSource = readFileSync(join(root, "sw.js"), "utf8");
 const offlineSetupSource = readFileSync(join(root, "js/29-offline-setup.js"), "utf8");
 if (packageMeta.version !== pwaVersion.version) fail("package.json and pwa-version.json must declare the same release");
 if (!swSource.includes(expectedCacheName) || !offlineSetupSource.includes(expectedCacheName)) {
-  fail("Service Worker and offline installer cache namespaces must match " + expectedCacheName);
+  fail("Service Worker and offline installer must retain the stable package cache namespace " + expectedCacheName + " across releases; rotating it forces a full offline download.");
 }
 
 rmSync(output, { recursive: true, force: true });
