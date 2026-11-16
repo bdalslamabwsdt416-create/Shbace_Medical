@@ -1,5 +1,6 @@
 /* Shbace Medical · AI Clinical Cases
-   Separate case-based collection. Original Pediatrics QB state and records are never mutated. */
+   Separate case-based collection. Original Pediatrics QB state and records are never mutated.
+   Systems and topics use the same cards, large icons and layout as the Dr. Al-Joaki bank. */
 (function () {
   'use strict';
 
@@ -55,48 +56,26 @@
     html = html.replace(/^- /gm, '• ');
     return html.replace(/\n/g, '<br>');
   }
-  function pageShell(kicker, title, subtitle, inner) {
-    return `<div class="rs cc-page">
-      <div class="cc-topline"><span class="cc-kicker">${$esc(kicker)}</span></div>
+
+  /* Shared names and icons (js/42-pediatrics-collection-polish.js): one spelling per system/topic, one picture per different system/topic. */
+  function icons() { return window.__SHB_BANK_ICONS__ || null; }
+  function systemLabel(system) { const I = icons(); return I ? I.canonicalSystem(system.name) : String(system.name || ''); }
+  function topicLabel(name) { const I = icons(); return I ? I.topicName(name) : String(name || ''); }
+  const FALLBACK_TILE = '<div class="tno ti"><span>✚</span></div>';
+  function systemTiles(list) { const I = icons(); return I ? I.systems(list.map(s => s.name)) : list.map(() => FALLBACK_TILE); }
+  function topicTiles(systemName, names) { const I = icons(); return I ? I.topics(systemName, names) : names.map(() => FALLBACK_TILE); }
+
+  /* One shell for every page: Back on top, then kicker, title and sub-line (same as the Dr. Al-Joaki screens). */
+  function pageShell(kicker, title, subtitle, inner, cls, backHtml) {
+    return `<div class="rs ${cls || 'ped-bank-topics'}">${backHtml || ''}
+      <div class="ped-collection-kicker">${$esc(kicker)}</div>
       <h1>${$esc(title)}</h1>${subtitle ? `<p class="sub">${$esc(subtitle)}</p>` : ''}
       ${inner}
     </div>`;
   }
 
-
-  function shbIconShape(name) {
-    const n=String(name||'').toLowerCase();
-    const shapes=[
-      [/central nervous|neurolog|cns|seizure|epilep|mening|brain/,'<path d="M24 8c-3-4-10-2-10 4-5 1-6 8-2 11-3 5 1 11 6 11 2 5 8 5 10 1 3 4 9 3 10-2 5-1 7-7 3-11 3-5 0-10-5-10-1-6-8-7-12-4Z"/><path d="M24 9v29M14 17c4 0 6 3 6 6m-8 2c4-1 7 1 8 5m14-14c-4 0-6 3-6 6m9 3c-4-1-7 1-8 5m-5-17c-3 2-3 5 0 7"/>'],
-      [/cardio|cardiovascular|heart|cardiac|septal|tetralogy|endocard/,'<path d="M24 39S7 29 7 17c0-8 10-12 17-3 7-9 17-5 17 3 0 12-17 22-17 22Z"/><path d="M10 23h8l4-8 5 16 4-8h7"/>'],
-      [/respirat|lung|asthma|pneumonia|bronchi|croup/,'<path d="M23 10v13m2-13v13M23 19c-5 0-8 4-10 10l-3 8c-1 3 2 5 5 4l9-4V19Zm2 0c5 0 8 4 10 10l3 8c1 3-2 5-5 4l-9-4V19Z"/><path d="M23 23 17 29m8-6 6 6"/>'],
-      [/gastro|digestive|hepat|liver|stomach|intestinal|diarr|coeliac|celiac|git/,'<path d="M17 8c-2 7 1 9 5 11 3 2 2 6-1 7-4 1-5 5-2 9 3 4 11 4 15 0 3-3 2-7-2-9-4-2-3-6 0-9 3-3 2-7-1-9"/><path d="M17 14c-4 0-7 3-7 7m24 5c4 1 6 4 5 8M17 34c-3 1-5 3-5 6"/>'],
-      [/nephro|renal|kidney|urinary|urolog/,'<path d="M18 9c-7 0-11 8-9 17 1 7 6 11 11 8 4-2 3-7 2-11-1-5 1-14-4-14Zm12 0c7 0 11 8 9 17-1 7-6 11-11 8-4-2-3-7-2-11 1-5-1-14 4-14Z"/><path d="M19 31c1 5 3 7 5 9m5-9c-1 5-3 7-5 9"/>'],
-      [/endocrin|hormone|thyroid|diabet|adrenal/,'<path d="M24 8c-4 5-9 9-9 16a9 9 0 0 0 18 0c0-7-5-11-9-16Z"/><path d="M18 25c3-3 9-3 12 0m-6-5v11"/>'],
-      [/neonat|newborn|infant|prematur|birth/,'<circle cx="24" cy="19" r="10"/><path d="M19 19h.1m10 0h.1m-8 5c2 2 4 2 6 0M12 39c2-7 7-10 12-10s10 3 12 10M17 11c2-5 12-6 16 0"/>'],
-      [/infect|vaccin|immun|virus|bacter|fever|sepsis/,'<path d="M24 6 39 12v11c0 9-6 15-15 19C15 38 9 32 9 23V12l15-6Z"/><circle cx="24" cy="23" r="7"/><path d="m24 12 0 4m0 14v4m-11-11h4m14 0h4m-19-8 3 3m10 10 3 3m0-16-3 3m-10 10-3 3"/>'],
-      [/haemat|hemat|blood|anaemia|anemia|iron|sickle/,'<path d="M24 6c-5 8-13 15-13 23a13 13 0 0 0 26 0C37 21 29 14 24 6Z"/><path d="M17 29c1 5 4 7 8 7m-1-19 0 5"/>'],
-      [/growth|development|nutrition|milestone|feeding|obesity/,'<path d="M10 39V9m0 30h29M17 33V25h6v8m5 0V17h6v16m5 0V11h4v22"/><path d="m15 18 7-5 6 2 9-8"/>'],
-      [/genetic|dna|chromosom|inherit|dermat/,'<path d="M14 8c0 12 20 20 20 32M34 8C34 20 14 28 14 40"/><path d="M17 13h14M17 22h14M17 31h14M17 36h14"/>'],
-      [/rheumat|metabolic|poison|joint|arthritis|musculoskeletal/,'<path d="m12 12 10 10m4 4 10 10M10 10l5-3 8 8-3 5-8-8Zm28 28-5 3-8-8 3-5 8 8Z"/><circle cx="24" cy="24" r="5"/><path d="M24 14v5m0 10v5m-10-10h5m10 0h5"/>']
-    ];
-    const hit=shapes.find(x=>x[0].test(n));
-    return hit?hit[1]:'<path d="M24 6 39 15v18l-15 9L9 33V15l15-9Z"/><path d="M16 24h16m-8-8v16"/>';
-  }
-  function shbSvgIcon(name,extra) {
-    return '<svg class="shb-bank-line-icon '+(extra||'')+'" viewBox="0 0 48 48" role="img" aria-hidden="true">'+shbIconShape(name)+'</svg>';
-  }
-  function shbSystemIcon(name) { return shbSvgIcon(name,'shb-system-icon'); }
-  function shbTopicIcon(name,systemName) { return shbSvgIcon(name+' '+systemName,'shb-topic-icon'); }
   function shbBankEmblem07() {
     return '<svg class="shb-bank-emblem shb-bank-emblem-07" viewBox="0 0 80 80" role="img" aria-label="AI Clinical Cases"><defs><linearGradient id="shb07g" x1="8" y1="8" x2="70" y2="72"><stop stop-color="#C8FFF0"/><stop offset=".55" stop-color="#55D9BC"/><stop offset="1" stop-color="#278FA5"/></linearGradient></defs><path d="M24 10h23l12 12v40a6 6 0 0 1-6 6H24a6 6 0 0 1-6-6V16a6 6 0 0 1 6-6Z" fill="#102F42" stroke="url(#shb07g)" stroke-width="2.4"/><path d="M47 11v11h11" fill="none" stroke="#C8FFF0" stroke-width="2.2" stroke-linejoin="round"/><path d="M24 39h9l5-11 7 22 5-11h7" fill="none" stroke="#D9FFF5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 54h26M27 60h17" stroke="#6FDAC6" stroke-width="2" stroke-linecap="round"/></svg>';
-  }
-  function shbBankEmblem08() {
-    return '<svg class="shb-bank-emblem shb-bank-emblem-08" viewBox="0 0 80 80" role="img" aria-label="AI Generated"><defs><linearGradient id="shb08g" x1="10" y1="8" x2="69" y2="71"><stop stop-color="#C9E9FF"/><stop offset=".55" stop-color="#6BCBFF"/><stop offset="1" stop-color="#9A8CFF"/></linearGradient></defs><ellipse cx="40" cy="40" rx="28" ry="12" transform="rotate(-34 40 40)" fill="none" stroke="url(#shb08g)" stroke-width="2.2"/><ellipse cx="40" cy="40" rx="28" ry="12" transform="rotate(38 40 40)" fill="none" stroke="url(#shb08g)" stroke-width="2.2" opacity=".7"/><path d="m40 23 15 17-15 17-15-17 15-17Z" fill="#153D5C" stroke="url(#shb08g)" stroke-width="2.5"/><path d="m40 31 7 9-7 9-7-9 7-9Z" fill="#A8E8FF" fill-opacity=".2" stroke="#D4F4FF" stroke-width="1.8"/><path d="m17 19 2.5 5.5L25 27l-5.5 2.5L17 35l-2.5-5.5L9 27l5.5-2.5L17 19Zm47 24 2 4 4 2-4 2-2 4-2-4-4-2 4-2 2-4Z" fill="#B9E7FF"/></svg>';
-  }
-
-  function shbCaseIcon() {
-    return '<svg class="shb-bank-line-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M14 7h14l8 8v26H14a3 3 0 0 1-3-3V10a3 3 0 0 1 3-3Z"/><path d="M28 7v9h8M17 25h16M17 31h12M17 19h5"/><path d="m23 13 3 3-3 3"/></svg>';
   }
 
   function progress(done, total) {
@@ -108,61 +87,56 @@
   }
   function loadingPage() {
     return pageShell('AI CLINICAL CASES','AI Clinical Cases','Clinical case-based questions, organized by medical system and topic.',
-      `<div class="card setcard cc-loading"><div class="cc-loader"></div><h3>Loading clinical cases…</h3><p class="meta">The bank is being prepared on this device.</p></div>`);
+      `<div class="card setcard cc-loading"><div class="cc-loader"></div><h3>Loading clinical cases…</h3><p class="meta">The bank is being prepared on this device.</p></div>`,
+      'ped-systems-page', backButton('Back'));
   }
   function errorPage() {
     return pageShell('AI CLINICAL CASES','AI Clinical Cases','The source data could not be loaded.',
-      `<div class="card setcard"><h3>AI Clinical Cases bank unavailable</h3><p class="meta">${$esc(dataError || 'The data file could not be opened.')}</p><button type="button" class="btn primary block" onclick="bank07RetryClinicalCaseData()">Try again</button></div>`);
+      `<div class="card setcard"><h3>AI Clinical Cases bank unavailable</h3><p class="meta">${$esc(dataError || 'The data file could not be opened.')}</p><button type="button" class="btn primary block" onclick="bank07RetryClinicalCaseData()">Try again</button></div>`,
+      'ped-systems-page', backButton('Back'));
   }
   function systemsPage() {
     if (!data) return dataError ? errorPage() : loadingPage();
-    const cards=data.systems.map(system=>{
+    const tiles = systemTiles(data.systems);
+    const cards = data.systems.map((system, i) => {
       const qs=systemQuestions(system),done=answerCount(qs),p=percent(done,qs.length);
-      return `<button type="button" class="card sc cc-list-card" onclick="bank07OpenClinicalCaseSystem('${system.id}')">
-        <span class="cc-sys-icon cc-icon-art" aria-hidden="true">${shbSystemIcon(system.name)}</span>
-        <span class="cc-list-copy"><strong>${$esc(system.name)}</strong><small>${system.topics.length} topics · ${qs.length} questions</small>
-        <span class="bar"><span style="width:${p}%"></span></span></span><span class="chev">›</span></button>`;
+      return `<div class="card sc spc ped-system-card" onclick="bank07OpenClinicalCaseSystem('${system.id}')">${tiles[i]}<div class="spc-tx"><h3>${$esc(systemLabel(system))}</h3><div class="meta"><b>${qs.length}</b> questions · <b>${system.topics.length}</b> topics</div><div class="bar"><span style="width:${p}%"></span></div></div><span class="chev">›</span></div>`;
     }).join('');
-    const total=allQuestions(),done=answerCount(total);
-    return pageShell('AI CLINICAL CASES','AI Clinical Cases',
-      'Choose a medical system to browse AI-assisted clinical cases and their topics.',
-      `${progress(done,total.length)}
-       <div class="cc-description card"><b>How this bank is organized</b><p>Choose a medical system, open a topic, then study each clinical case and its linked questions. The shared case history is shown once before its questions.</p></div>
-       <div class="cc-section-heading">Medical Systems <span>${data.systems.length}</span></div>
-       <div class="cc-list">${cards}</div>`);
+    const total = allQuestions().length;
+    return pageShell('AI CLINICAL CASES · PEDIATRICS','Choose a medical system',
+      `${data.systems.length} systems · ${total.toLocaleString()} questions`,
+      `<div class="ped-systems-grid">${cards}</div>`,
+      'ped-systems-page', backButton('Back'));
   }
   function topicsPage() {
     const system=findSystem();
     if (!system) return systemsPage();
-    const cards=system.topics.map(topic=>{
+    const label = systemLabel(system);
+    const tiles = topicTiles(label, system.topics.map(t => t.name));
+    const cards=system.topics.map((topic, i)=>{
       const qs=topicQuestions(topic),done=answerCount(qs),p=percent(done,qs.length);
-      return `<button type="button" class="card sc cc-list-card" onclick="bank07OpenClinicalCaseTopic('${topic.id}')">
-        <span class="cc-topic-number cc-icon-art" aria-hidden="true">${shbTopicIcon(topic.name,system.name)}</span>
-        <span class="cc-list-copy"><strong>${$esc(topic.name)}</strong><small>${topic.cases.length} clinical cases · ${qs.length} questions</small>
-        <span class="bar"><span style="width:${p}%"></span></span></span><span class="chev">›</span></button>`;
+      return `<div class="card sc tpc" onclick="bank07OpenClinicalCaseTopic('${topic.id}')">${tiles[i]}<div class="tpc-tx"><h3>${$esc(topicLabel(topic.name))}</h3><div class="meta">${topic.cases.length} clinical cases · ${qs.length} questions${done ? ' · ' + done + ' answered' : ''}</div><div class="bar"><span style="width:${p}%"></span></div></div><span class="chev">›</span></div>`;
     }).join('');
-    const qs=systemQuestions(system),done=answerCount(qs);
-    return pageShell('MEDICAL SYSTEM',system.name,
-      `${system.topics.length} topics · ${qs.length} clinical case questions`,
-      `${backButton('Medical Systems')}${progress(done,qs.length)}
-       <div class="cc-section-heading">Topics <span>${system.topics.length}</span></div><div class="cc-list">${cards}</div>`);
+    const qs=systemQuestions(system);
+    return pageShell('AI CLINICAL CASES',label,
+      `${system.topics.length} topics · ${qs.length} questions`,
+      `<div class="ped-topics-grid">${cards}</div>`,
+      'ped-bank-topics', backButton('Medical Systems'));
   }
   function casesPage() {
     const system=findSystem(),topic=findTopic();
     if (!system || !topic) return topicsPage();
-    const cards=topic.cases.map(item=>{
+    const tiles = topicTiles(systemLabel(system), topic.cases.map(item => item.sourceHeadingPresent ? item.title : 'Questions'));
+    const cards=topic.cases.map((item, i)=>{
       const qs=item.questions,done=answerCount(qs),p=percent(done,qs.length);
       const label=item.sourceHeadingPresent ? item.title : 'Questions';
-      return `<button type="button" class="card sc cc-case-card" onclick="bank07OpenClinicalCase('${item.id}')">
-        <span class="cc-case-icon cc-icon-art" aria-hidden="true">${shbCaseIcon()}</span>
-        <span class="cc-list-copy"><strong>${$esc(label)}</strong><small>${qs.length} questions${item.hasSharedCaseText ? ' · Shared clinical history' : ' · Topic questions'}</small>
-        <span class="bar"><span style="width:${p}%"></span></span></span><span class="chev">›</span></button>`;
+      return `<div class="card sc tpc" onclick="bank07OpenClinicalCase('${item.id}')">${tiles[i]}<div class="tpc-tx"><h3>${$esc(label)}</h3><div class="meta">${qs.length} questions${item.hasSharedCaseText ? ' · Shared clinical history' : ' · Topic questions'}</div><div class="bar"><span style="width:${p}%"></span></div></div><span class="chev">›</span></div>`;
     }).join('');
-    const qs=topicQuestions(topic),done=answerCount(qs);
-    return pageShell('TOPIC',topic.name,
+    const qs=topicQuestions(topic);
+    return pageShell('AI CLINICAL CASES · '+systemLabel(system).toUpperCase(),topicLabel(topic.name),
       `${topic.cases.length} clinical cases · ${qs.length} questions`,
-      `${backButton(system.name)}${progress(done,qs.length)}
-       <div class="cc-section-heading">Clinical Cases <span>${topic.cases.length}</span></div><div class="cc-list">${cards}</div>`);
+      `<div class="ped-topics-grid">${cards}</div>`,
+      'ped-bank-topics', backButton(systemLabel(system)));
   }
   function questionCard(q,index) {
     const saved=answers[q.id] || null;
@@ -201,10 +175,10 @@
         : (item.sourceHeadingPresent&&topic.cases.length>1?'<div class="cc-section-heading">'+$esc(item.title)+'</div>':'');
       return heading+'<div class="cc-question-list">'+item.questions.map(q=>questionCard(q,questionNumber++)).join('')+'</div>';
     }).join('');
-    return pageShell('AI CLINICAL CASES · '+system.name.toUpperCase(),topic.name,
+    return pageShell('AI CLINICAL CASES · '+systemLabel(system).toUpperCase(),topicLabel(topic.name),
       qs.length+' questions · '+done+' answered',
-      backButton(system.name)+progress(done,qs.length)+blocks,
-      'qb ped-bank-topics');
+      progress(done,qs.length)+blocks,
+      'qb ped-bank-topics', backButton(systemLabel(system)));
   }
   function currentView() {
     if (appPage==='clinicalSystems') return systemsPage();
