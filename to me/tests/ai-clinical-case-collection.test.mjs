@@ -85,6 +85,8 @@ test('Deferred startup has a global 60-second fail-closed cap', () => {
   assert.ok(index.includes('overall startup timeout'));
   assert.ok(index.includes('if(bootFailed)return'));
   assert.ok(index.includes('if(activeNode){try{activeNode.onload=null'));
+  assert.ok(index.includes('unhook();'));
+  assert.ok(index.includes("dataFetch.then(function(){\n   if(bootFailed)return;"));
 });
 
 test('First app render and splash dismissal wait for all deferred scripts', () => {
