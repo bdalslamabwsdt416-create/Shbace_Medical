@@ -40,15 +40,15 @@ The following are required before this change can be treated as fully release-ve
 
 | Check | Status |
 |---|---|
-| `npm ci` | Blocked: `to me/package-lock.json` is absent in the current base branch. A lockfile was not fabricated. |
-| `npm run test:unit` | Not executed in this environment. |
-| `npm run check:bank` | Not executed in this environment. |
-| `npm run build:pwa` | Not executed in this environment. |
+| `npm ci` | Not run: `to me/package-lock.json` is absent. GitHub Actions successfully installed dependencies with `npm install`. |
+| `npm run test:unit` | Passed in GitHub Actions: 13/13 tests, 0 failures (commit `288a52b`). |
+| `npm run check:bank` | Passed: no root duplicates, bank identity/data audit clean, 0 warnings and 0 errors. |
+| `npm run build:pwa` | Passed: 79 deferred scripts verified, 342 offline files (28.64 MiB), 0 external runtime references. |
 | Playwright first-install / update / reload-flow | Not executed; a connected browser runner was not available in this task session. |
 | Screenshot comparison at 390×844 and 1280×800 | Not executed; no trusted before/after browser captures are available. |
 | Console and page-error checks | Not executed. |
 
-The PR must remain unmerged until these checks run in a working checkout. The CSS bundles are produced by direct source-order concatenation, so their visual equivalence still needs the requested screenshot checks at both viewports.
+The automated unit, bank-validation, and PWA-build checks are green. Keep the PR in draft / do not merge until the first-install, update/reload, visual screenshot, and browser-console checks are completed on a connected browser runner. The CSS bundles are produced by direct source-order concatenation, so their visual equivalence still needs screenshot comparison at both viewports.
 
 ## Explicitly not changed
 
