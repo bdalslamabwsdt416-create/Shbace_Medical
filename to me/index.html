@@ -469,6 +469,7 @@
   if(bootFailed)return;
   bootFailed=true;
   if(bootDeadlineTimer){clearTimeout(bootDeadlineTimer);bootDeadlineTimer=null;}
+  unhook();
   if(activeNode){try{activeNode.onload=null;activeNode.onerror=null;if(activeNode.parentNode)activeNode.parentNode.removeChild(activeNode)}catch(e){}activeNode=null;}
   console.error('shb-boot: startup stopped because a required script could not be loaded: '+src);
   window.__shbBooted=false;
@@ -481,6 +482,7 @@
   document.body.appendChild(panel);
  }
  function run(){
+  if(bootFailed)return;
   var list=[].slice.call(document.querySelectorAll('script[type="text/shb-deferred"]')),i=0;
   hook();
   function next(){
@@ -523,6 +525,7 @@
  function go(){if(started||!domReady||!painted)return;started=true;clearTimeout(T);
   bootDeadlineTimer=setTimeout(function(){fatalBoot('overall startup timeout ('+Math.round(BOOT_MAX_MS/1000)+' seconds)')},BOOT_MAX_MS);
   dataFetch.then(function(){
+   if(bootFailed)return;
    var q=document.getElementById('qbData');
    if(q&&dataText!=null)q.textContent=dataText;
    else console.error('shb-boot: question bank missing',dataErr);
