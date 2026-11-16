@@ -135,20 +135,23 @@ window.addEventListener('pagehide',releaseWakeLock);
 var observerQueued=false;
 function onDomChange(){
  if(observerQueued)return;observerQueued=true;
- requestAnimationFrame(function(){observerQueued=false;mountSettings();syncWakeLock()});
+ requestAnimationFrame(function(){observerQueued=false;mountSettings();syncWakeLock();applyPendingReload()});
 }
 try{new MutationObserver(onDomChange).observe(document.body,{childList:true,subtree:true})}catch(_){}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',onDomChange,{once:true});
 else onDomChange();
 
 /* Quiet update checks. New files apply only after the Question Bank screen is left. */
-function safeToReload(){return document.hidden||!questionBankOpen()}
+function safeToReload(){return document.hidden||(!window.__SHBACE_OFFLINE_UPDATE_ACTIVE__&&!questionBankOpen())}
 function applyPendingReload(){
- if(!reloadPending||reloadStarted||!safeToReload())return;
+ if(!reloadPending||reloadStarted||!safeToReload())return false;
  reloadStarted=true;
- /* Apply the new app shell without resetting the seven-day splash schedule. */
  setTimeout(function(){location.reload()},180);
+ return true;
 }
+/* The offline updater calls this after a user-approved, verified package commit.
+   When a question-bank session is active, its next screen change triggers the reload. */
+window.shbaceRequestAppReload=function(){reloadPending=true;return applyPendingReload();};
 function checkVersion(){
  if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;
  fetch('./pwa-version.json?shbcheck='+Date.now(),{cache:'no-store'})
@@ -157,10 +160,9 @@ function checkVersion(){
    if(!v||!v.version)return;
    /* Only a successful check resets the 48-hour timer. */
    lsSet(VCHECK_OK_KEY,Date.now());
-   var previous=null;try{previous=localStorage.getItem(VERSION_KEY)}catch(_){}
    try{localStorage.setItem(VERSION_KEY,String(v.version))}catch(_){}
-   if(previous&&previous!==String(v.version))reloadPending=true;
-   applyPendingReload();
+   /* Version metadata alone never forces a reload. The offline manifest prompts first;
+      the updater requests one reload only after its verified commit. */
   }).catch(function(){});
 }
 /* Single entry point for every trigger below. It does nothing unless a check is due. */
@@ -172,11 +174,7 @@ function scheduledCheck(){
  checkVersion();
 }
 if('serviceWorker' in navigator){
- var hadController=!!navigator.serviceWorker.controller;
- navigator.serviceWorker.addEventListener('controllerchange',function(){
-  if(!hadController){hadController=true;return}
-  reloadPending=true;applyPendingReload();
- });
+ /* controllerchange alone does not reload; the offline package transaction owns restart. */
  navigator.serviceWorker.ready.then(function(){scheduledCheck()}).catch(function(){});
  window.addEventListener('online',scheduledCheck);
  document.addEventListener('visibilitychange',function(){if(!document.hidden){scheduledCheck();applyPendingReload()}});

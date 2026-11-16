@@ -11,7 +11,7 @@ const APP_SHELL = [
   './assets/img/shbace-pwa-192.png',
   './assets/img/shbace-pwa-512.png',
   './offline-assets-manifest.json',
-  './css/core.css',
+  './css/bundle-core.css',
   './js/29-offline-setup.js'
 ];
 

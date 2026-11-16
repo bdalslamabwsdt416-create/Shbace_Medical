@@ -145,8 +145,12 @@ function mount(){
  };
  ui.button.addEventListener('click',function(){
   if(ui.button.dataset.done==='1'){if(plan&&plan.mode==='update'){
-   /* Restart into the updated app without replaying the weekly splash. */
-   location.reload();return}removeSetupOverlay();return}
+   /* The package is verified and committed. Use the shared safe-restart gate. */
+    window.__SHBACE_OFFLINE_UPDATE_ACTIVE__=false;
+    if(typeof window.shbaceRequestAppReload==='function'){
+     if(!window.shbaceRequestAppReload())removeSetupOverlay();
+    }else location.reload();
+    return}removeSetupOverlay();return}
   if(ui.button.dataset.retryCheck==='1'){location.reload();return}
   runPlan();
  });
@@ -504,6 +508,7 @@ function runPlan(){
  if(started||!manifest||!ui||!plan)return;
  started=true;errors=[];resetCounters();setErrorList([]);ui.button.dataset.retryCheck='0';
  var staged=plan.mode==='update',target=null;
+ window.__SHBACE_OFFLINE_UPDATE_ACTIVE__=staged;
  ui.button.disabled=true;ui.button.textContent=staged?'Updating…':'Downloading…';ui.button.dataset.done='0';
  setStatus(staged?'Downloading only the changed files…':'Preparing local storage and the offline download…');
  setWarning('The download is resumable. Files already saved and verified are skipped.');
@@ -550,7 +555,7 @@ function runPlan(){
   if(errors.length)throw new Error('The final integrity check found missing or unreadable files.');
   return commitPlan(target);
  }).then(function(){return cleanupPreviousCaches()}).then(function(){
-  /* A fully verified package counts as an up-to-date check: the 48-hour timer restarts now. */
+  /* A fully verified package counts as an up-to-date check: the seven-day timer restarts now. */
   lsSet(CHECK_OK_KEY,Date.now());setPending(0);markInstalledNow();
   ui.percent.textContent='100%';ui.count.textContent=plan.files.length+' / '+plan.files.length+' files';
   ui.track.setAttribute('aria-valuenow','100');ui.bar.style.width='100%';
@@ -559,16 +564,22 @@ function runPlan(){
   var vs=ui.stages.querySelector('[data-stage="verify"]');
   if(vs){vs.querySelector('b').textContent='Complete';vs.classList.add('is-done');vs.classList.remove('is-active')}
   if(staged){
-   setStatus('Update installed. Restart to use the new version.');
-   setWarning('Only '+plan.files.length+' changed file'+(plan.files.length===1?' was':'s were')+' downloaded ('+fmtBytes(plan.bytes)+'). Your answers and study progress were not touched.');
-   ui.button.textContent='Restart now';
+   setStatus('Update installed. Applying the verified version…');
+   setWarning('Only '+plan.files.length+' changed file'+(plan.files.length===1?' was':'s were')+' downloaded ('+fmtBytes(plan.bytes)+'). Your answers and study progress were not touched. The app restarts once the current screen is safe.');
+   ui.button.textContent='Restarting…';
   }else{
    setStatus('Setup complete. Shbace Medical is ready to open from this device without an internet connection.');
    setWarning('All required files were saved and verified. From now on, updates download only the files that change. Keep a JSON backup of your study progress.');
    ui.button.textContent='Open Shbace Medical';
   }
-  ui.button.disabled=false;ui.button.dataset.done='1';ui.button.dataset.retryCheck='0';
+  ui.button.disabled=!!staged;ui.button.dataset.done='1';ui.button.dataset.retryCheck='0';
   ui.foot.textContent='Offline package verified · '+fmtBytes(manifest.totalBytes)+' stored.';
+  if(staged){
+   window.__SHBACE_OFFLINE_UPDATE_ACTIVE__=false;
+   if(typeof window.shbaceRequestAppReload==='function'){
+    if(!window.shbaceRequestAppReload())removeSetupOverlay();
+   }else setTimeout(function(){location.reload()},180);
+  }
  }).catch(function(error){
   setStatus(error.message||'The download could not be completed.');
   setWarning('No file is marked complete unless the HTTP response, byte size, SHA-256 hash and local cache write all succeeded. Retry to continue from verified files.');
@@ -678,7 +689,7 @@ function localRepairNeeded(){
   });
  }).catch(function(){return false});
 }
-/* Manual "Check for updates" (Settings). Ignores the 48-hour timer and reports what happened. */
+/* Manual "Check for updates" (Settings). Ignores the scheduled seven-day timer and reports what happened. */
 function manualCheck(){
  if(!standalone()||!('caches' in window)||!window.crypto||!crypto.subtle||!window.indexedDB)return Promise.resolve({state:'unsupported'});
  if(started)return Promise.resolve({state:'busy'});

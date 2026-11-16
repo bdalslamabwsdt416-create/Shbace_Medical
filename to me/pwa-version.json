@@ -1,10 +1,15 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.10-to-me.38",
-  "displayVersion": "1.3.10.38 · Chrome (Phone + Computer)",
+  "version": "1.3.10-to-me.39",
+  "displayVersion": "1.3.10.39 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-16",
   "releaseNotes": [
+    "Shows the cinematic splash on every app open. The seven-day interval applies only to automatic update checks, not the splash.",
+    "Consolidates the CSS cascade into bundle-core.css and bundle-late.css in their original order; source sheets are preserved under _layers/css/original/.",
+    "Routes AI Clinical Cases through system → topic → case → questions; each case now owns a visually grouped vignette and its linked questions.",
+    "Aligns AI Generated page and question-card classes with the shared Pediatrics bank styling.",
+    "Defers Service Worker-triggered reloads until the accepted offline package has passed size and SHA-256 checks and has been committed; first installation does not reload.",
     "Fixes repeated 28 MB offline restores by keeping the verified package cache stable across app releases; hash comparison now downloads only changed or genuinely missing files.",
     "Shows the cinematic splash once every seven days, not on every app open or after an update restart.",
     "Removes the unconditional Service Worker update check on every launch; installed Chrome apps check on the seven-day schedule and manual Check for updates remains available.",

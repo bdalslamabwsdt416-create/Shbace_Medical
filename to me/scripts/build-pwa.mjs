@@ -20,13 +20,8 @@ const requiredFiles = [
   "index.html",
   "manifest.webmanifest",
   "sw.js",
-  "css/core.css",
-  "css/late.css",
-  "css/unified-enhancements.css",
-  "css/shbace-layout-refinements.css",
-  "css/egyptian-book.css",
-  "css/clinical-case-bank.css",
-  "css/ai-generated-bank.css",
+  "css/bundle-core.css",
+  "css/bundle-late.css",
   "data/qbData.json",
   "data/nelson/nelson-textbook-bank-01.js",
   "data/nelson/nelson-textbook-bank-02.js",
@@ -315,10 +310,15 @@ html = html.replace(facultySlot, "window.__SHBACE_FACULTY_LOGO_DATA__=" + JSON.s
 writeFileSync(htmlPath, html);
 if (!html.includes("js/35-pediatrics-collections.js") ||
     !html.includes("js/36-exam-planner-settings-smartreview.js") ||
-    !html.includes("css/shbace-layout-refinements.css") ||
+    !html.includes("css/bundle-late.css") ||
     !html.includes("js/37-study-hub-linkage.js") ||
-    !html.includes("js/38-all-once-pediatrics.js") || !html.includes("js/39-clinical-case-pediatrics.js") || !html.includes("js/40-egyptian-book-pediatrics.js") || !html.includes("css/egyptian-book.css")) {
+    !html.includes("js/38-all-once-pediatrics.js") || !html.includes("js/39-clinical-case-pediatrics.js") || !html.includes("js/40-egyptian-book-pediatrics.js")) {
   fail("Pediatrics, Exam Planner/Smart Review or layout refinement assets are not referenced by index.html");
+}
+const consolidatedLateCss = readFileSync(join(root, "css/bundle-late.css"), "utf8");
+if (!consolidatedLateCss.includes(".cc-page") || !consolidatedLateCss.includes(".ai08-page") ||
+    !consolidatedLateCss.includes(".cc-case-group")) {
+  fail("The consolidated late stylesheet is missing the Clinical Cases / AI Generated shared bank presentation.");
 }
 if (!html.includes("navigator.serviceWorker.register('./sw.js'") || !html.includes("js/29-offline-setup.js") || !html.includes("js/29-reviewed-bank-controls.js") || !html.includes("qbData_reviewed_patch.json")) {
   fail("index.html does not register ./sw.js");
