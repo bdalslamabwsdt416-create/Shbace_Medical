@@ -123,7 +123,10 @@ test('The adapter registers real AI bank records in the shared engine and migrat
     BANK_OPTS:[['all','All banks']],BANK_KEYS:new Set(),SRT:[],SRT_BY:new Map(),SRT_Q:new Map(),
     S:{ans:{},saved:{},notes:{},rep:{}},qs:{spec:'all',topic:0,filter:'all',tag:'all',view:'all',idx:0},
     save(){this.savedCount=(this.savedCount||0)+1;},
+    bankOf(q){return q&&q.bank||'aj';},
     setActiveBank(key,topics){this.activeBank=key;this.activeTopics=topics||null;},
+    coreInTopic(){return this.QB.filter(q=>(!this.activeBank||this.activeBank==='all'||this.bankOf(q)===this.activeBank)&&(!this.activeTopics||this.activeTopics.includes(q.topic))&&(this.qs.spec==='all'||q.spec===this.qs.spec)&&(!this.qs.topic||q.topic===this.qs.topic));},
+    inTopic(){return [];},
     answeredCount(){return 0;},
     registerExternalBank(key,label,groups){
       if(!this.BANK_KEYS.has(key)){this.BANK_KEYS.add(key);this.BANK_OPTS.push([key,label]);}
@@ -158,6 +161,12 @@ test('The adapter registers real AI bank records in the shared engine and migrat
     specialtiesView(){return '';},
     topicsView(){return '';},
     navBack(){},
+    openQ(id){
+      const q=bridge.QB.find(item=>item&&item.id===id);
+      if(!q)return;
+      bridge.qs.spec=q.spec;bridge.qs.topic=q.topic;context.appPage='questions';this.renderAppDemo();
+      return q;
+    },
     __shbNavTap(){}
   };
   const context = {
@@ -184,6 +193,9 @@ test('The adapter registers real AI bank records in the shared engine and migrat
   assert.equal(bridge.BANK_OPTS.some(x=>x[0]==='clinical-ai'),true);
   assert.equal(bridge.BANK_OPTS.some(x=>x[0]==='generated-ai'),true);
   assert.equal(bridge.SRT_Q.size,clinicalResult.groups.length+generatedResult.groups.length);
+  assert.equal(bridge.inTopic().length,1881);
+  await window.shbAiOpenBank('clinical-ai');
+  assert.equal(bridge.inTopic().length,1598);
   const clinicalSaved=bridge.S.ans['ai07-'+clinicalAnswer.id];
   const generatedSaved=bridge.S.ans['ai08-'+generatedAnswer.id];
   assert.deepEqual(JSON.parse(JSON.stringify(clinicalSaved)),{sel:clinicalKey,ok:true,t:111});
@@ -198,11 +210,16 @@ test('The adapter registers real AI bank records in the shared engine and migrat
   assert.ok(bridge.QB.some(q=>q.aiCaseVignette));
   assert.ok(bridge.QB.some(q=>q.aiCaseContinued));
 
-  // Direct drawer routes must clear the active bank scope; the startup-ready event
-  // is dispatched by the real loader on document, not window.
-  context.appPage='saved';
+  // A question opened from Search / Saved / Quiz / Smart Review must enter its
+  // actual AI bank topic, even though the older collection wrappers only knew AJ.
+  await window.openQ('ai07-'+clinicalAnswer.id);
+  assert.ok(bridge.inTopic().length>0);
+  assert.ok(bridge.inTopic().every(q=>q.bank==='clinical-ai'));
+  // Direct drawer routes must clear the active bank scope and expose all saved banks.
+  context.appPage='saved';bridge.qs.spec='all';bridge.qs.topic=0;
   window.renderAppDemo();
   assert.equal(bridge.activeBank,'all');
+  assert.equal(bridge.inTopic().length,3479);
   context.appPage='subjects';
   assert.equal(typeof docListeners['shb-scripts-ready'],'function');
   const rendersBeforeStartupReady=renderCount;
