@@ -471,8 +471,26 @@
   panel.innerHTML='<h2 style="margin:0">Shbace Medical could not finish loading</h2><p style="max-width:520px;line-height:1.6">A required app component did not load. Your saved answers and progress have not been changed. Check your connection, then try again.</p><button type="button" style="border:0;border-radius:12px;padding:13px 24px;background:#1d9bf0;color:white;font-weight:700" onclick="location.reload()">Retry loading</button>';
   document.body.appendChild(panel);
  }
+ /* Fetch every deferred module in parallel, but keep execution ordered below.
+    This avoids one network round-trip per file on slow mobile links without letting a bank execute before its dependencies. */
+ function prefetchDeferredScripts(list){
+  var host=document.head||document.documentElement,seen=Object.create(null);
+  [].slice.call(document.querySelectorAll('link[rel="preload"][as="script"]')).forEach(function(link){try{seen[link.href]=true}catch(e){}});
+  list.forEach(function(o){
+   var src=o.getAttribute('data-src');if(!src)return;
+   var href=new URL(src,document.baseURI).href;
+   if(seen[href])return;
+   var link=document.createElement('link');
+   link.rel='preload';link.as='script';
+   link.setAttribute('fetchpriority','low');
+   link.setAttribute('data-shbace-parallel-preload','1');
+   link.href=href;
+   host.appendChild(link);seen[href]=true;
+  });
+ }
  function run(){
   var list=[].slice.call(document.querySelectorAll('script[type="text/shb-deferred"]')),i=0;
+  prefetchDeferredScripts(list);
   hook();
   function next(){
    if(i>=list.length){finish();return}
