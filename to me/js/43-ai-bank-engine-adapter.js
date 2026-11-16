@@ -312,6 +312,5 @@ window.renderAppDemo=function(){
  if(appPage==='quiz'||appPage==='quizrun'||appPage==='quizresult'||appPage==='quizhistory'||appPage==='review')ensureStudyToolBanks();
  return result;
 };
-document.addEventListener('shb-scripts-ready',function(){setTimeout(function(){if(mode==='app'&&appPage==='subjects'&&typeof window.renderAppDemo==='function')window.renderAppDemo();},0)});
 if(String(appPage).indexOf('ai08')===0||String(appPage).indexOf('clinical')===0){appPage='specialties';currentBank='';B.setActiveBank('all');}
 })();
