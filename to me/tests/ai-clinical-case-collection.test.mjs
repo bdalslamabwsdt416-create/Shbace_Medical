@@ -86,7 +86,7 @@ test('AI Clinical Cases embeds vignette text without student-facing case heading
   assert.equal(newCase.hasSharedCaseText, true);
   assert.match(newCase.vignette, /poor weight gain/i);
   assert.match(newCase.vignette, /pansystolic murmur/i);
-  assert.doesNotMatch(newCase.vignette, /ventricular septal defect|\\bVSD\\b|echocardiogram/i);
+  assert.doesNotMatch(newCase.vignette, /ventricular septal defect|\bVSD\b|echocardiogram/i);
   assert.equal(standalone.hasSharedCaseText, false);
   assert.deepEqual(standalone.questions.map(question => question.id), [
     'CC-CARDIOVASCULAR-SYSTEM-002','CC-CARDIOVASCULAR-SYSTEM-003','CC-CARDIOVASCULAR-SYSTEM-004',
