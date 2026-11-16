@@ -92,3 +92,97 @@ test('The collection icons distinguish the two case banks', () => {
   assert.match(polish, /\.ped-collection-bank07', 'bank-ai-clinical-cases\.webp', 'AI Clinical Cases'/);
   assert.match(polish, /\.ped-collection-clinicalcase:not\(\.ped-collection-bank07\)', 'bank-clinical-case\.webp', 'Clinical Cases'/);
 });
+
+
+test('The adapter registers real AI bank records in the shared engine and migrates previous answers without deleting source stores', async () => {
+  const clinical = bank07Data;
+  const shardPaths = [
+    '01-cns.json','02-comprehensive-pediatrics.json','03-cvs.json','04-developmental-assessment-and-milestones.json',
+    '05-endocrine.json','06-git.json','07-growth-and-nutrition.json','08-hematology.json','09-infectious.json',
+    '10-neonatology.json','11-nephrology.json','12-pediatric-dermatology-allergy-hepatology-tumors-child-abuse.json',
+    '13-pediatric-genetics.json','14-pediatric-vaccination.json','15-respiratory.json',
+    '16-rheumatology-metabolic-poisoning-immunology.json'
+  ];
+  const shardData = shardPaths.map(name => JSON.parse(read('../data/ai-generated/' + name)));
+  const clinicalAnswer = clinical.systems.flatMap(s => s.topics.flatMap(t => t.cases.flatMap(c => c.questions)))[0];
+  const generatedAnswer = shardData.flatMap(s => s.systems.flatMap(sys => sys.topics.flatMap(t => t.questions)))[0];
+  const clinicalKey = clinicalAnswer.options.findIndex(o => o.label === clinicalAnswer.correctAnswer);
+  const generatedKey = generatedAnswer.options.findIndex(o => o.label === generatedAnswer.correctAnswer);
+  const local = new Map([
+    ['shbace_clinical_case_answers_v1', JSON.stringify({[clinicalAnswer.id]:{selected:clinicalAnswer.correctAnswer,correct:true,answeredAt:111,readMore:true}})],
+    ['shbace_ai_generated_answers_v1', JSON.stringify({[generatedAnswer.id]:{selected:generatedAnswer.correctAnswer,correct:true,answeredAt:222,readMore:true}})]
+  ]);
+  const bridge = {
+    QB:[],QBY:new Map(),qmap:new Map(),TOPIC_NAME:{},REAL:{spec:{}},SPEC_NAME:{},
+    SYS:[['cns','Central Nervous System'],['cardio','Cardiovascular System'],['endocrinology','Endocrinology'],['nephrology','Nephrology'],['respiratory','Respiratory'],['git','Gastrointestinal Tract']],
+    BANK_OPTS:[['all','All banks']],BANK_KEYS:new Set(),SRT:[],SRT_BY:new Map(),SRT_Q:new Map(),
+    S:{ans:{},saved:{},notes:{},rep:{}},qs:{spec:'all',topic:0,filter:'all',tag:'all',view:'all',idx:0},
+    save(){this.savedCount=(this.savedCount||0)+1;},
+    setActiveBank(key,topics){this.activeBank=key;this.activeTopics=topics||null;},
+    answeredCount(){return 0;},
+    registerExternalBank(key,label,groups){
+      if(!this.BANK_KEYS.has(key)){this.BANK_KEYS.add(key);this.BANK_OPTS.push([key,label]);}
+      let added=0;
+      groups.forEach((g,i)=>{
+        const topicId=(key==='clinical-ai'?8200000:8400000)+i;
+        this.TOPIC_NAME[topicId]=g.topicName;
+        if(!this.REAL.spec[g.spec])this.REAL.spec[g.spec]={q:0,topics:[],label:g.systemLabel||g.spec};
+        this.REAL.spec[g.spec].topics.push([topicId,g.topicName,g.questions.length,g.systemName]);
+        const list=[];
+        g.questions.forEach(q=>{q.bank=key;q.topic=topicId;this.QB.push(q);this.QBY.set(q.id,q);this.qmap.set(q.id,q);list.push(q);added++;});
+        this.SRT_Q.set(topicId,list);
+        const tr={id:topicId,name:g.topicName,sy:g.systemName,spec:g.spec,specLabel:g.systemLabel,key:g.spec+'|'+g.systemName+'|'+g.topicName};
+        this.SRT.push(tr);this.SRT_BY.set(topicId,tr);
+      });
+      return {added,total:this.QB.length,topics:groups.length};
+    }
+  };
+  const generatedMap = Object.fromEntries(shardPaths.map((name,i)=>['data/ai-generated/'+name,shardData[i]]));
+  const fetch = async url => {
+    const path = new URL(url).pathname.replace(/^\\//,'');
+    const json = path==='data/clinicalCaseBank.json'?clinical:generatedMap[path];
+    assert.ok(json,path);
+    return {ok:true,json:async()=>json};
+  };
+  const window = {
+    __SHB_BRIDGE:bridge,
+    addEventListener(){},
+    renderAppDemo(){},
+    specialtiesView(){return ''},
+    topicsView(){return ''},
+    navBack(){},
+    __shbNavTap(){}
+  };
+  const context = {
+    window,document:{baseURI:'https://shbace.test/'},fetch,
+    localStorage:{getItem:k=>local.has(k)?local.get(k):null,setItem:(k,v)=>local.set(k,v)},
+    appPage:'subjects',mode:'app',
+    appHeader:()=>'',renderAppDemo(){},
+    console,URL,Promise,Map,Set,Date,Array,Object,String,Number,Math,RegExp,Error,
+    setTimeout,clearTimeout
+  };
+  runInNewContext(adapter,context);
+  const clinicalResult=await window.shbAiOpenBank('clinical-ai');
+  const generatedResult=await window.shbAiOpenBank('generated-ai');
+  assert.equal(clinicalResult.questions,1598);
+  assert.equal(generatedResult.questions,1881);
+  assert.equal(bridge.QB.length,3479);
+  assert.equal(bridge.BANK_KEYS.has('clinical-ai'),true);
+  assert.equal(bridge.BANK_KEYS.has('generated-ai'),true);
+  assert.equal(bridge.BANK_OPTS.some(x=>x[0]==='clinical-ai'),true);
+  assert.equal(bridge.BANK_OPTS.some(x=>x[0]==='generated-ai'),true);
+  assert.equal(bridge.SRT_Q.size,clinicalResult.groups.length+generatedResult.groups.length);
+  const clinicalSaved=bridge.S.ans['ai07-'+clinicalAnswer.id];
+  const generatedSaved=bridge.S.ans['ai08-'+generatedAnswer.id];
+  assert.deepEqual(JSON.parse(JSON.stringify(clinicalSaved)),{sel:clinicalKey,ok:true,t:111});
+  assert.deepEqual(JSON.parse(JSON.stringify(generatedSaved)),{sel:generatedKey,ok:true,t:222});
+  assert.ok(local.has('shbace_clinical_case_answers_v1'));
+  assert.ok(local.has('shbace_ai_generated_answers_v1'));
+  assert.ok(local.has('shbace_clinical-ai_engine_migration_v1'));
+  assert.ok(local.has('shbace_generated-ai_engine_migration_v1'));
+  assert.ok(bridge.QB.every(q=>q.ai!==1));
+  assert.ok(bridge.QB.every(q=>q.kind===''));
+  assert.ok(bridge.QB.every(q=>q.aiBank==='clinical-ai'||q.aiBank==='generated-ai'));
+  assert.ok(bridge.QB.some(q=>q.aiCaseVignette));
+  assert.ok(bridge.QB.some(q=>q.aiCaseContinued));
+});

@@ -251,9 +251,9 @@ window.__shbNavTap=function(id){
  return result;
 };
 window.shbAiOpenBank=function(key){
- if(!BANKS[key])return;
+ if(!BANKS[key])return Promise.resolve(null);
  currentBank=key;currentSystem='';B.setActiveBank(key);window.__SHB_PED_COLLECTION__=key;appPage='specialties';renderAppDemo();
- ensureBank(key).then(function(){renderAppDemo();}).catch(function(err){console.error('AI bank load failed',err);renderAppDemo();});
+ return ensureBank(key).then(function(){renderAppDemo();return registry[key];}).catch(function(err){console.error('AI bank load failed',err);renderAppDemo();throw err;});
 };
 window.shbAiRetryBank=function(){if(!currentBank)return;delete errors[currentBank];delete pending[currentBank];ensureBank(currentBank).then(function(){renderAppDemo();}).catch(function(){renderAppDemo();});};
 window.shbAiOpenSystem=function(id){
