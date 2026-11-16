@@ -266,11 +266,20 @@ function addBankCards(html){
   var card='<button type="button" class="'+item[1]+'" onclick="shbAiOpenBank(\''+item[0]+'\')"><div class="ped-collection-avatar ped-avatar-allonce ped-avatar-icon"><img src="/assets/img/'+item[5]+'" alt="" loading="lazy"></div><span class="ped-collection-copy"><span class="eyebrow">'+item[2]+'</span><b>'+item[3]+'</b><small>'+item[4]+'</small><span class="ped-collection-count">'+BANKS[item[0]].total.toLocaleString()+' questions</span></span><span class="ped-collection-arrow">›</span></button>';
   grid.insertAdjacentHTML('beforeend',card);
  });
+ var firstFour=['ped-collection-aj','ped-collection-previous','ped-collection-bank07','ped-collection-bank08'];
+ firstFour.slice().reverse().forEach(function(cls){var card=grid.querySelector('.'+cls);if(card)grid.insertBefore(card,grid.firstChild);});
  return root.innerHTML;
 }
 var finalSpecialties=window.specialtiesView;
 window.specialtiesView=function(){if(currentBank)return systemPage();return addBankCards(finalSpecialties.apply(this,arguments));};
 var coreRender=window.renderAppDemo;
-window.renderAppDemo=function(){var result=coreRender.apply(this,arguments);if(appPage==='quiz'||appPage==='quizrun'||appPage==='quizresult'||appPage==='quizhistory'||appPage==='review')ensureStudyToolBanks();return result;};
+var LEGACY_AI_PAGES=['clinicalSystems','clinicalTopics','clinicalCases','clinicalQuestions','ai08Systems','ai08Topics','ai08Questions'];
+window.renderAppDemo=function(){
+ if(LEGACY_AI_PAGES.indexOf(String(appPage))>=0){currentBank='';currentSystem='';B.setActiveBank('all');window.__SHB_PED_COLLECTION__='';appPage='subjects';}
+ var result=coreRender.apply(this,arguments);
+ if(appPage==='quiz'||appPage==='quizrun'||appPage==='quizresult'||appPage==='quizhistory'||appPage==='review')ensureStudyToolBanks();
+ return result;
+};
+window.addEventListener('shb-scripts-ready',function(){setTimeout(function(){if(mode==='app'&&appPage==='subjects'&&typeof window.renderAppDemo==='function')window.renderAppDemo();},0)});
 if(String(appPage).indexOf('ai08')===0||String(appPage).indexOf('clinical')===0){appPage='specialties';currentBank='';B.setActiveBank('all');}
 })();
