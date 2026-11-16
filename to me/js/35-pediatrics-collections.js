@@ -18,6 +18,7 @@ const knownQuestionIds=new Set(QB.map(q=>q&&q.id).filter(Boolean));
 incomingNelson.forEach(q=>{if(q&&B.bankOf(q)==="nelson"){q.bank='nelson';if(q.id&&!knownQuestionIds.has(q.id)){QB.push(q);knownQuestionIds.add(q.id)}}});
 if(window.__bank){window.__bank.total=QB.length;window.__bank.nelson=incomingNelson.length}
 let activeCollection='';let activePreviousSystem='';const previousSystemByTopic=new Map();
+window.__shbSetPedCollection=function(which){activeCollection=String(which||'');activePreviousSystem='';window.__SHB_PED_COLLECTION__=activeCollection;return activeCollection};
 const norm=v=>String(v==null?'':v).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
 const bankOf=B.bankOf;const isPreviousQuestion=q=>!!q&&bankOf(q)==="previous";const isNelsonQuestion=q=>!!q&&bankOf(q)==="nelson";const isAllOnceQuestion=q=>!!q&&bankOf(q)==="kasr";const isDoctorQuestion=q=>!!q&&bankOf(q)==="aj";
 const allQuestions=()=>Array.isArray(QB)?QB:[];const doctorQuestions=()=>allQuestions().filter(isDoctorQuestion);const previousQuestions=()=>allQuestions().filter(isPreviousQuestion);const nelsonQuestions=()=>allQuestions().filter(isNelsonQuestion);
@@ -117,15 +118,15 @@ function nelsonSystemsView(){
 }
 const _oldSpecialtiesView=specialtiesView;
 specialtiesView=function(){if(activeCollection==='previous')return previousSystemsView();if(activeCollection==='nelson')return nelsonSystemsView();if(activeCollection==='aj')return doctorSystemsView();return collectionView()};const _oldOpenSpec=window.openSpec;
-if(typeof _oldOpenSpec==='function')window.openSpec=function(id){activeCollection='aj';activePreviousSystem='';window.__SHB_PED_COLLECTION__='aj';return _oldOpenSpec(id)};
+if(typeof _oldOpenSpec==='function')window.openSpec=function(id){const chosen=String(window.__SHB_PED_COLLECTION__||'');if(chosen==='clinical-ai'||chosen==='generated-ai'){activeCollection=chosen;activePreviousSystem='';}else{activeCollection='aj';activePreviousSystem='';window.__SHB_PED_COLLECTION__='aj'}return _oldOpenSpec(id)};
 const _oldOpenTopic=window.openTopic;
-if(typeof _oldOpenTopic==='function')window.openTopic=function(spec,id){if(spec==='exams'){activeCollection='previous';window.__SHB_PED_COLLECTION__='previous'}else if(activeCollection!=='previous')activeCollection='aj';return _oldOpenTopic(spec,id)};
+if(typeof _oldOpenTopic==='function')window.openTopic=function(spec,id){const chosen=String(window.__SHB_PED_COLLECTION__||'');if(chosen==='clinical-ai'||chosen==='generated-ai'){activeCollection=chosen;}else if(spec==='exams'){activeCollection='previous';window.__SHB_PED_COLLECTION__='previous'}else if(activeCollection!=='previous')activeCollection='aj';return _oldOpenTopic(spec,id)};
 /* A question opened from Search, Saved, Wrong answers or Smart Review must open inside its own bank,
    otherwise the collection filter below hides it (a Previous question would open as an empty list). */
 const _oldOpenQ=window.openQ;
-if(typeof _oldOpenQ==='function')window.openQ=function(id){try{const q=allQuestions().find(x=>x&&x.id===id);if(q){if(isPreviousQuestion(q)){activeCollection='previous';activePreviousSystem=previousSystemByTopic.get(q.topic)||''}else if(isNelsonQuestion(q)){activeCollection='nelson';activePreviousSystem=''}else{activeCollection='aj';activePreviousSystem=''}window.__SHB_PED_COLLECTION__=activeCollection}}catch(e){}return _oldOpenQ.apply(this,arguments)};
+if(typeof _oldOpenQ==='function')window.openQ=function(id){try{const q=allQuestions().find(x=>x&&x.id===id);if(q){const bank=B.bankOf(q);if(bank==='clinical-ai'||bank==='generated-ai'){activeCollection=bank;activePreviousSystem=''}else if(isPreviousQuestion(q)){activeCollection='previous';activePreviousSystem=previousSystemByTopic.get(q.topic)||''}else if(isNelsonQuestion(q)){activeCollection='nelson';activePreviousSystem=''}else{activeCollection='aj';activePreviousSystem=''}window.__SHB_PED_COLLECTION__=activeCollection}}catch(e){}return _oldOpenQ.apply(this,arguments)};
 const _oldInTopic=B.inTopic;
-B.inTopic=function(){if(activeCollection!=='nelson'&&!gradeHasPediatrics())return [];let list=allQuestions().filter(q=>activeCollection==='previous'?isPreviousQuestion(q):activeCollection==='nelson'?isNelsonQuestion(q):isDoctorQuestion(q));if(qs.spec&&qs.spec!=='all')list=list.filter(q=>q.spec===qs.spec);if(qs.topic)list=list.filter(q=>q.topic===qs.topic);if(activeCollection==='previous'&&activePreviousSystem)list=list.filter(q=>previousSystemByTopic.get(q.topic)===activePreviousSystem);return list};
+B.inTopic=function(){const chosen=String(window.__SHB_PED_COLLECTION__||activeCollection||'');if(chosen==='clinical-ai'||chosen==='generated-ai')return _oldInTopic().filter(q=>B.bankOf(q)===chosen);if(activeCollection!=='nelson'&&!gradeHasPediatrics())return [];let list=allQuestions().filter(q=>activeCollection==='previous'?isPreviousQuestion(q):activeCollection==='nelson'?isNelsonQuestion(q):isDoctorQuestion(q));if(qs.spec&&qs.spec!=='all')list=list.filter(q=>q.spec===qs.spec);if(qs.topic)list=list.filter(q=>q.topic===qs.topic);if(activeCollection==='previous'&&activePreviousSystem)list=list.filter(q=>previousSystemByTopic.get(q.topic)===activePreviousSystem);return list};
 /* Conservative semantic matching: only equivalent/closely related topics reuse another bank's topic artwork. */
 const PREVIOUS_TOPIC_ICON_MATCH={
  'respiratory distress syndrome & neonatal lung disease':'Prematurity & Respiratory Distress',

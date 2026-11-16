@@ -1,10 +1,14 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.10-to-me.40",
-  "displayVersion": "1.3.10.40 · Chrome (Phone + Computer)",
+  "version": "1.3.10-to-me.41",
+  "displayVersion": "1.3.10.41 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-16",
   "releaseNotes": [
+    "AI Clinical Cases and AI Generated now feed the same Dr. Al-Joaki question engine, question cards, answer state, Save and Personal note controls; their source data and separate progress remain independent.",
+    "The two AI banks now participate in Quiz and Smart Review bank selection. Quiz topic choices are scoped to the chosen bank and system, and saved AI quiz attempts are retained across app restarts.",
+    "Retires the separate AI question renderers and blocks their legacy page routes. The current Home is redrawn after all startup scripts finish to prevent a stale first screen.",
+    "AI Clinical Cases displays a shared case vignette in the first question card and marks subsequent linked questions as continued.",
     "Fixes AI Clinical Cases topic-to-case-to-questions navigation and retains the shared compact question-card styling.",
     "Updates bank validation to recognize Egyptian Book styling inside the consolidated late CSS bundle.",
     "Shows the cinematic splash on every app open. The seven-day interval applies only to automatic update checks, not the splash.",
@@ -84,8 +88,8 @@
     "A question opened from Search, Saved, Wrong answers or Smart Review now opens inside its own bank, so a Previous question no longer opens as an empty list."
   ],
   "summary": [
-    "Restores Previous Questions — 399 questions.",
-    "Keeps Clinical Cases — 90 questions and AI Clinical Cases — 1,598 questions as separate banks.",
-    "All three use the shared question-card design; AI Clinical Cases (Bank 07) opens a topic directly to its case histories and questions."
+    "AI Clinical Cases and AI Generated use one shared question engine across the question bank, Quiz and Smart Review.",
+    "Standalone AI question renderers are retired from the Chrome PWA build; the modern Home and navigation paths are retained.",
+    "Existing question data, answer stores and the stable offline-cache namespace are preserved."
   ]
 }
