@@ -196,15 +196,26 @@ if (!questionVoice.includes('toolbar.dataset.sig=signature') ||
   throw new Error('Question toolbar must be idempotent and MutationObserver decoration must be frame-coalesced.');
 }
 const featureRuntime = fs.readFileSync(safePath('js/09-app-features-v6.js'), 'utf8');
+const startupRuntime = offlineSetup.slice(offlineSetup.indexOf('function start()'), offlineSetup.indexOf('function boot()'));
+const repairRuntime = offlineSetup.slice(offlineSetup.indexOf('function localRepairNeeded(installed)'), offlineSetup.indexOf('function cleanupPreviousCaches()'));
 if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !offlineSetup.includes("var DB_NAME='shbace-medical-offline-state-v1'") ||
     !offlineSetup.includes("var MIGRATION_KEY='shbace_ios_migrated_1_4_14'") ||
-    !offlineSetup.includes("lsSet(MIGRATION_KEY,'1')") ||
-    offlineSetup.includes('migrationInProgress') ||
+    !offlineSetup.includes('function finalizeVerifiedPlanCommit()') ||
+    !offlineSetup.includes("if(migrationInProgress){lsSet(MIGRATION_KEY,'1')") ||
+    !offlineSetup.includes('function localRepairNeeded(installed)') ||
+    !offlineSetup.includes('function syncPendingNotice()') ||
+    !offlineSetup.includes('function manualRepair()') ||
+    !offlineSetup.includes('window.shbaceRepairOffline=manualRepair') ||
+    !offlineSetup.includes('window.shbaceOfflineRepairHomeNotice=function()') ||
+    startupRuntime.includes("lsSet(MIGRATION_KEY,'1')") ||
+    !startupRuntime.includes('localRepairNeeded(record)') ||
+    !startupRuntime.includes('if(!hasRecord){') ||
+    !startupRuntime.includes('return runFullCheck(splashFinished)') ||
+    repairRuntime.includes('fetch(') || repairRuntime.includes('runPlan(') || repairRuntime.includes('mount(') ||
+    offlineSetup.includes('CHECK_TRY_KEY') ||
+    offlineSetup.includes('CHECK_RETRY') ||
     offlineSetup.includes('function checkDue(') ||
-    offlineSetup.includes('function localRepairNeeded(') ||
-    !offlineSetup.includes('if(!hasRecord)return runFullCheck(splashFinished)') ||
-    !offlineSetup.includes("name.indexOf('shbace-medical-ios-shell-')===0") ||
     !offlineSetup.includes('window.shbaceCheckForUpdate=manualCheck') ||
     !offlineSetup.includes('MANIFEST_FETCH_TIMEOUT=30000') ||
     !offlineSetup.includes('MANIFEST_FETCH_ATTEMPTS=2') ||
@@ -222,8 +233,12 @@ if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !serviceWorker.includes('networkFirstOnPackageMismatch(request)') ||
     !serviceWorker.includes("url.searchParams.has('__shbace_integrity')") ||
     !featureRuntime.includes('onclick="shbaceSettingsCheckForUpdates(this)"') ||
-    !featureRuntime.includes('window.shbaceCheckForUpdate()')) {
-  throw new Error('The manual-only iOS updater, first-install setup, cache cleanup, or version-aware service worker invariant failed.');
+    !featureRuntime.includes('window.shbaceCheckForUpdate()') ||
+    !featureRuntime.includes('function shbaceSettingsRepairMarkup()') ||
+    !featureRuntime.includes('Some offline files are missing - Repair') ||
+    !featureRuntime.includes('onclick="shbaceSettingsRepairOffline(this)"') ||
+    !featureRuntime.includes('window.shbaceOfflineRepairHomeNotice')) {
+  throw new Error('The manual-only iOS updater, first-install setup, cache repair, migration commit, or version-aware service worker invariant failed.');
 }
 const voiceObserverRuntime = fs.readFileSync(safePath('js/33-unified-voice.js'), 'utf8');
 const settingsObserverRuntime = fs.readFileSync(safePath('js/36-exam-planner-settings-smartreview.js'), 'utf8');
@@ -314,7 +329,10 @@ const pwaVersion = JSON.parse(fs.readFileSync(safePath('pwa-version.json'), 'utf
 const packageMetadata = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 if (packageMetadata.version !== '1.4.20' || pwaVersion.version !== '1.4.20' || pwaVersion.displayVersion !== '1.4.20' ||
     !Array.isArray(pwaVersion.releaseNotes) ||
-    !pwaVersion.releaseNotes.includes("Adds iOS Question Bank tools for Share, Copy and Read aloud, groups bank controls in Settings, and scopes progress resets to the active bank, system and topic.")) {
+    !pwaVersion.releaseNotes.includes("Adds iOS Question Bank tools for Share, Copy and Read aloud, groups bank controls in Settings, and scopes progress resets to the active bank, system and topic.") ||
+    !pwaVersion.releaseNotes.includes('Keeps existing iOS installs silent at launch; a legacy migration remains pending until a user-started update is verified, committed and cleaned up.') ||
+    !pwaVersion.releaseNotes.includes('Checks the installed offline file inventory locally at launch and offers an explicit online-only Repair action in Settings, with a dismissible Home fallback.') ||
+    !pwaVersion.releaseNotes.includes('Removes the unused startup retry marker while preserving automatic package discovery for first installs and the manual Settings update action.')) {
   throw new Error('The iOS 1.4.20 release metadata is missing or inconsistent.');
 }
 
