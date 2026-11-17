@@ -128,23 +128,30 @@ const featureRuntime = fs.readFileSync(safePath('js/09-app-features-v6.js'), 'ut
 const installerRequirements = [
   "var CACHE_NAME='shbace-medical-offline-v2'",
   "var DB_NAME='shbace-medical-offline-state-v1'",
+  'CHECK_EVERY=2*DAY',
   'CONCURRENCY=3',
-  'function ensureChip()',
-  'function paintChip()',
+  'window.__SHBACE_OFFLINE_SETUP_GATE__=setupGatePromise',
+  'function mountInitialSetup()',
+  'function paintSetup()',
+  'function finishInitialSetupPackage()',
   'async function commitStaged(st)',
   'window.shbaceCheckForUpdate=manualCheck'
 ];
 const installerMissing = installerRequirements.filter(function (token) {
   return !offlineSetup.includes(token);
 });
-const blockingInstallerRemnants = [
-  'function mount()',
-  'function removeSetupOverlay()',
-  'shbaceOfflineSetup',
-  'shb-offline-setup'
-].filter(function (token) {
-  return offlineSetup.includes(token);
+const bootMatch = html.match(/<script id="shb-boot-v1">([\s\S]*?)<\/script>/);
+const bootRuntime = bootMatch ? bootMatch[1] : '';
+const bootRequirements = [
+  'function startQuestionBankFetch()',
+  'window.__SHBACE_OFFLINE_SETUP_GATE__',
+  "o.id==='shbace-offline-setup'",
+  'prefetchDeferredScripts(list.slice(i))'
+];
+const bootMissing = bootRequirements.filter(function (token) {
+  return !bootRuntime.includes(token);
 });
+const staticScriptPreloads = html.match(/<link\b(?=[^>]*\brel=["']preload["'])(?=[^>]*\bas=["']script["'])[^>]*>/gi) || [];
 const workerRequirements = [
   "const CACHE_NAME = 'shbace-medical-offline-v2'",
   'const APP_SHELL = [',
@@ -155,14 +162,15 @@ const workerRequirements = [
 const workerMissing = workerRequirements.filter(function (token) {
   return !serviceWorker.includes(token);
 });
-if (installerMissing.length || blockingInstallerRemnants.length || workerMissing.length ||
+if (installerMissing.length || bootMissing.length || staticScriptPreloads.length || workerMissing.length ||
     !serviceWorker.includes("'./assets/img/fc0bef7cd7ca.png'") ||
     !featureRuntime.includes('onclick="shbaceSettingsCheckForUpdates(this)"') ||
     !featureRuntime.includes('window.shbaceCheckForUpdate()')) {
   throw new Error(
-    'The To Me-matched background offline installer or iOS settings integration is invalid. ' +
+    'The first-install Setup gate, 48-hour background updater or iOS settings integration is invalid. ' +
     'Installer missing: ' + installerMissing.join(', ') + '; ' +
-    'blocking UI remnants: ' + blockingInstallerRemnants.join(', ') + '; ' +
+    'boot gate missing: ' + bootMissing.join(', ') + '; ' +
+    'static app-script preloads: ' + staticScriptPreloads.length + '; ' +
     'worker missing: ' + workerMissing.join(', ')
   );
 }
@@ -192,7 +200,7 @@ manifest.generatedAt = new Date().toISOString();
 fs.writeFileSync(path.join(out, 'offline-assets-manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 
 console.log('Shbace Medical iOS PWA build successful');
-console.log('To Me-matched background installer, iOS local-first Service Worker and Settings control verified.');
+console.log('First-install Setup gate, deferred onboarding load, 48-hour updater, iOS local-first Service Worker and Settings control verified.');
 console.log('Base question bank: '+baseBank.questions.length);
 console.log('Deferred runtime assets verified: '+deferredRefs.length);
 console.log('Offline inventory: '+manifest.fileCount+' files ('+(manifest.totalBytes/1024/1024).toFixed(2)+' MiB).');
