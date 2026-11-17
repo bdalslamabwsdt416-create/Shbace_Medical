@@ -70,7 +70,7 @@ function patchPackedAsset(relative, originalBytes) {
   if (relative === 'js/30-ios-v5.js') {
     const flag = 'updateBanner:true,';
     if (!source.includes(flag)) throw new Error('Expected iOS update-banner flag was not found.');
-    source = source.replace(flag, 'updateBanner:false,' + String.fromCharCode(10) + ' autoUpdate:true,');
+    source = source.replace(flag, 'updateBanner:false,' + String.fromCharCode(10) + ' autoUpdate:false,');
     source = source.replace("lang:'ar',", "lang:'en',");
     for (const name of ['landscape','haptics','badge','keyboard','speak','progressCard','swipe','shareQuestion','inputHints']) {
       const pattern = new RegExp('('+name+':)true,');
@@ -188,7 +188,7 @@ const serviceWorker = fs.readFileSync(safePath('sw.js'), 'utf8');
 if (!iosOfflineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !iosOfflineSetup.includes("var DB_NAME='shbace-medical-offline-state-v1'") ||
     !serviceWorker.includes("const CACHE_NAME = 'shbace-medical-offline-v2'") ||
-    !serviceWorker.includes("const SHELL_CACHE_NAME = 'shbace-medical-ios-shell-v151'")) {
+    !serviceWorker.includes("const SHELL_CACHE_NAME = 'shbace-medical-ios-shell-v152'")) {
   throw new Error('The iOS offline cache or saved-state database identifiers changed unexpectedly.');
 }
 const onboardingMain = fs.readFileSync(safePath('js/04-app-main.js'), 'utf8');
@@ -196,7 +196,10 @@ if (!onboardingMain.includes('function gradeScreen()') || !onboardingMain.includ
 const iosStorageRuntime = fs.readFileSync(safePath('js/31-ios-v6.js'), 'utf8');
 if (!iosStorageRuntime.includes('persist:true') || !iosStorageRuntime.includes('navigator.storage.persist')) throw new Error('The iOS persistent-storage request is missing.');
 const iosContinuityRuntime = fs.readFileSync(safePath('js/30-ios-v5.js'), 'utf8');
-if (!iosContinuityRuntime.includes('autoUpdate:true') || !iosContinuityRuntime.includes('getRegistration')) throw new Error('The silent iOS updater is missing.');
+if (!iosContinuityRuntime.includes('autoUpdate:false')) throw new Error('The retired 30-minute iOS silent updater must remain disabled; the verified seven-day package updater owns update checks.');
+if (!iosOfflineSetup.includes('CHECK_EVERY=7*24*60*60*1000') || !iosOfflineSetup.includes('window.shbaceCheckForUpdate=manualCheck') || !iosOfflineSetup.includes("STAGING_NAME='shbace-medical-ios-staging-v1'")) throw new Error('The verified seven-day iOS offline package updater is incomplete.');
+if (!iosStudyTools.includes('shbUpdateSettings') || !iosStudyTools.includes('window.shbaceCheckForUpdate()')) throw new Error('The manual App updates control is missing from iOS Settings.');
+if (!serviceWorker.includes("url.searchParams.has('__shbace_integrity')")) throw new Error('The iOS Service Worker is intercepting package integrity downloads.');
 if (manifest.files.some(item => ['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/32-ios-v7.js'].includes(item.path))) throw new Error('A retired iOS visual layer is still included in the offline runtime inventory.');
 const scanFiles = manifest.files.filter(item => /\.(?:html|css|js|json|webmanifest)$/i.test(item.path));
 const missingImages = new Set();
