@@ -139,6 +139,26 @@ if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
 const onboardingMain = fs.readFileSync(safePath('js/04-app-main.js'), 'utf8');
 if (!onboardingMain.includes('function gradeScreen()') || !onboardingMain.includes('function finishScreen()')) throw new Error('The final two onboarding screens are missing from the app core.');
 
+const drawerRuntime = fs.readFileSync(safePath('js/07-returning-student-migration.js'), 'utf8');
+const drawerOrder = fs.readFileSync(safePath('js/20-drawer-order-v12.js'), 'utf8');
+const drawerMenuBase = fs.readFileSync(safePath('js/06-drawer-menu.js'), 'utf8');
+const drawerFeatures = fs.readFileSync(safePath('js/09-app-features-v6.js'), 'utf8');
+for (const marker of ['dr-top2','dr-x dr2-x','dr2-flag','class="dr-body"','class="dr-foot"']) {
+  if (!drawerRuntime.includes(marker)) throw new Error('The latest To Me side drawer is incomplete: ' + marker);
+}
+if (!drawerMenuBase.includes("['Notifications']") ||
+    !drawerOrder.includes("['Updates',[pick('Notifications')].filter(Boolean)]")) {
+  throw new Error('The current To Me Updates/Notifications drawer section is missing.');
+}
+for (const marker of ['PAGES.notifs=notifsView','PAGES.timer=timerView','PAGES.weak=weakView','window.__shbNavTap']) {
+  if (!drawerFeatures.includes(marker)) throw new Error('An iOS side-menu destination or navigation handler is missing: ' + marker);
+}
+if (!onboardingMain.includes('Which grade are you in?') ||
+    !onboardingMain.includes('THE MEDICAL JOURNEY') ||
+    !onboardingMain.includes('cp-finish-layout')) {
+  throw new Error('The original iOS final onboarding screens have changed unexpectedly.');
+}
+
 if (manifest.files.some(item => ['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/32-ios-v7.js'].includes(item.path))) throw new Error('A retired iOS visual layer is still included in the offline runtime inventory.');
 const scanFiles = manifest.files.filter(item => /\.(?:html|css|js|json|webmanifest)$/i.test(item.path));
 const missingImages = new Set();
