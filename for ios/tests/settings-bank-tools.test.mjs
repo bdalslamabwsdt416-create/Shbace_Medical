@@ -11,6 +11,7 @@ const settings = read('../js/36-exam-planner-settings-smartreview.js');
 const index = read('../index.html');
 const drawer = read('../js/06-drawer-menu.js');
 const returning = read('../js/07-returning-student-migration.js');
+const toMe = read('../../to%20me/js/30-android-enhancements.js');
 
 function extractFunction(source, name) {
   const start = source.indexOf('function ' + name + '(');
@@ -18,6 +19,14 @@ function extractFunction(source, name) {
   const end = source.indexOf('\n}', start);
   assert.notEqual(end, -1, name + ' has a closing brace');
   return source.slice(start, end + 2);
+}
+
+function extractToMeFunction(name) {
+  const start = toMe.indexOf('function ' + name + '(');
+  assert.notEqual(start, -1, 'To Me ' + name + ' exists');
+  const end = toMe.indexOf('\n  }', start);
+  assert.notEqual(end, -1, 'To Me ' + name + ' closes');
+  return toMe.slice(start, end + 4);
 }
 
 function bankHelpers() {
@@ -76,20 +85,45 @@ test('question cards in the iOS bank receive Share, Copy and Read aloud controls
   assert.ok(voice.includes('computerVoiceToggleQuestionReadAloud(qcard,qtext,questionTool)'));
   assert.ok(voice.includes('computerVoiceCopyQuestion(qtext)'));
   assert.ok(voice.includes('computerVoiceShareQuestion(qtext)'));
-  assert.ok(voice.includes('new MutationObserver(function(){mountVoiceSettings();scheduleQuestionDecoration()}'));
+  assert.ok(voice.includes('observe(questionHost,{childList:true})'));
+  assert.ok(!voice.includes('observe(document.body,{childList:true,subtree:true})'));
   assert.ok(features.includes('function u11DataKeys()') && features.includes("k.startsWith('shbace_')"),
     'the new question-tools preference is included in the existing app-prefixed backup');
 });
 
+test('App updates renders repair and migration badges as non-modal inline actions', () => {
+  const markup = vm.runInNewContext(
+    extractFunction(features, 'shbaceSettingsRepairMarkup') + '\nshbaceSettingsRepairMarkup()',
+    { window: { shbaceRepairPending: () => 2, shbaceUpdatePending: () => 1 }, Math, Number }
+  );
+  assert.ok(markup.includes('Some offline files are missing - Repair'));
+  assert.ok(markup.includes('onclick="shbaceSettingsRepairOffline(this)"'));
+  assert.ok(markup.includes('UPDATE PENDING'), 'repair and migration badges may appear together');
+  assert.ok(!markup.includes('role="alertdialog"'));
+  const pending = vm.runInNewContext(
+    extractFunction(features, 'shbaceSettingsRepairMarkup') + '\nshbaceSettingsRepairMarkup()',
+    { window: { shbaceRepairPending: () => 0, shbaceUpdatePending: () => 1 }, Math, Number }
+  );
+  assert.ok(pending.includes('UPDATE PENDING'));
+  assert.ok(pending.includes('Check for updates to install it'));
+  const clear = vm.runInNewContext(
+    extractFunction(features, 'shbaceSettingsRepairMarkup') + '\nshbaceSettingsRepairMarkup()',
+    { window: { shbaceRepairPending: () => 0, shbaceUpdatePending: () => 0 }, Math, Number }
+  );
+  assert.equal(clear, '');
+});
+
 test('Settings groups Question Bank Version and question actions, while retaining iOS App updates', () => {
   assert.ok(settings.includes("makeSettingZone(order,'appearance','Appearance & study experience'"));
-  assert.ok(settings.includes("makeSettingZone(order,'banks','Question banks & question voice'"));
+  assert.ok(settings.includes("makeSettingZone(order,'banks','Question bank'"));
   assert.ok(settings.includes("findSettingCard(root,'Question Bank Version')"));
-  assert.ok(settings.includes("root.querySelector('#shbQuestionToolsSettings')"));
+  assert.ok(voice.includes("if(!root.querySelector('#shbQuestionToolsSettings'))"));
   assert.ok(settings.includes("root.querySelector('#shbAppUpdates')"));
   assert.ok(settings.includes("target('updates').appendChild(updates)"));
   assert.ok(settings.includes("target('banks').appendChild(bankVersion)"));
-  assert.ok(settings.includes("target('appearance').appendChild(questionTools)"));
+  assert.ok(settings.includes("target('appearance').appendChild(voice)"));
+  assert.ok(!settings.includes("target('appearance').appendChild(questionTools)"));
+  assert.ok(!settings.includes("target('notifications').appendChild(studyReminders)"));
   assert.ok(!settings.includes('studyExperience'));
 });
 
@@ -198,6 +232,199 @@ test('question toolbar decoration is idempotent and only rebuilds when preferenc
   assert.equal(state.toolbar, null, 'no toolbar remains when every action is disabled');
   assert.equal(state.created, 2);
   assert.equal(state.removed, 2);
+});
+
+test('shared Study experience controls follow the To Me labels, descriptions and defaults', () => {
+  const defaultsDecl = toMe.match(/var DEFAULTS = \{[\s\S]*?\n  \};/);
+  assert.ok(defaultsDecl, 'To Me Study experience defaults are present');
+  const toMeMarkup = vm.runInNewContext(defaultsDecl[0] + '\nvar prefs=Object.assign({},DEFAULTS);\n' +
+    extractToMeFunction('toggleMarkup') + '\n' +
+    extractToMeFunction('featureSettingsHTML') +
+    '\nfeatureSettingsHTML()', {});
+  const prefs = vm.runInNewContext(
+    extractFunction(voice, 'computerVoiceReadQuestionTools') + '\ncomputerVoiceReadQuestionTools()',
+    { localStorage: { getItem() { return null; } }, Object, JSON }
+  );
+  const iosExperience = vm.runInNewContext(
+    "var IOS_EXPERIENCE_KEY='shbace_ios_study_experience_v1';" +
+    voice.slice(voice.indexOf('var iosStudyPrefs='), voice.indexOf('var iosStudyMedia=')) +
+    '\n({keepScreenAwake:iosStudyPrefs.keepScreenAwake,followSystemTheme:iosStudyPrefs.followSystemTheme})',
+    { localStorage: { getItem() { return null; } }, Object, JSON }
+  );
+  assert.equal(prefs.shareQuestion, true);
+  assert.equal(prefs.copyQuestion, true);
+  assert.equal(prefs.readAloud, true);
+  assert.equal(prefs.readingSpeed, 'normal');
+  assert.equal(iosExperience.keepScreenAwake, true);
+  assert.equal(iosExperience.followSystemTheme, true);
+  assert.equal(/haptics: true/.test(defaultsDecl[0]), true, 'To Me keeps haptics ON; the native-only control is intentionally absent on iOS');
+  for (const [label, description] of [
+    ['Share a question', 'Show the question-sharing action.'],
+    ['Copy question text', 'Show the copy action for notes or AI tools.'],
+    ['Read questions aloud', 'Show voice playback controls on questions.'],
+    ['Keep screen awake', 'Prevent the display from sleeping while the Question Bank is open.'],
+    ['Follow device theme', 'Automatically match the device light or dark appearance.'],
+    ['Reading speed', 'Applies to spoken question text.']
+  ]) {
+    assert.ok(toMeMarkup.includes(label), 'To Me source contains ' + label);
+    assert.ok(voice.includes(label), 'iOS source contains ' + label);
+    assert.ok(toMeMarkup.includes(description), 'To Me helper text matches for ' + label);
+    assert.ok(voice.includes(description), 'iOS helper text matches for ' + label);
+  }
+  assert.ok(voice.includes('Copy app information'));
+  assert.ok(voice.includes('Send the copied details when reporting an app issue. No account or personal data is included.'));
+  assert.ok(toMeMarkup.indexOf('Study experience') < toMeMarkup.indexOf('Study reminders'), 'To Me mounts Study experience before Study reminders');
+  assert.ok(voice.includes("reminders.id='shbStudyRemindersSettings'"), 'iOS retains the shared Study reminders card for Copy app information');
+  assert.ok(voice.includes('shbace_question_tools_v1'));
+  assert.ok(voice.includes('shbace_ios_study_experience_v1'));
+});
+
+test('question-screen observer is scoped to the viewport and repeated notifications coalesce', () => {
+  const frames = [], observed = { target: null, options: null, callback: null };
+  const host = {};
+  class FakeMutationObserver {
+    constructor(callback) { observed.callback = callback; }
+    observe(target, options) { observed.target = target; observed.options = options; }
+  }
+  const mountCalls = [];
+  const sandbox = {
+    document: { getElementById(id) { return id === 'phoneContent' ? host : null; }, readyState: 'complete' },
+    window: { MutationObserver: FakeMutationObserver, requestAnimationFrame(callback) { frames.push(callback); } },
+    MutationObserver: FakeMutationObserver,
+    computerVoiceMountSettings() { mountCalls.push('mount'); },
+    computerVoiceDecorateQuestions() { mountCalls.push('decorate'); },
+    setTimeout
+  };
+  const start = voice.indexOf('/* Observe only screen replacement at the app viewport.');
+  const end = voice.indexOf("if(document.readyState==='loading')", start);
+  assert.ok(start >= 0 && end > start);
+  vm.runInNewContext('var questionDecorationScheduled=false;' +
+    extractFunction(voice, 'scheduleQuestionDecoration') + '\n' +
+    voice.slice(start, end), sandbox);
+  assert.equal(observed.target, host);
+  assert.deepEqual(Object.keys(observed.options).sort(), ['childList']);
+  observed.callback([{ target: host }, { target: host }, { target: host }]);
+  assert.equal(frames.length, 1, 'a burst of render mutations schedules one decoration frame');
+  assert.equal(mountCalls.length, 3, 'the settings mount is cheap and runs only at screen replacement');
+  frames[0]();
+  assert.equal(mountCalls.filter(x => x === 'decorate').length, 1);
+  assert.equal(mountCalls.filter(x => x === 'mount').length, 3);
+  /* A toolbar insertion is nested below the host and cannot be observed by this direct-child observer. */
+  assert.equal(observed.options.subtree, undefined);
+});
+
+function settingsOrganizerHarness() {
+  let writes = 0;
+  const zones = Object.create(null);
+  function container(kind) {
+    const node = {
+      kind, children: [], parentElement: null, attrs: {}, zoneId: '',
+      setAttribute(key, value) { this.attrs[key] = value; if (key === 'data-shb-settings-zone') this.zoneId = value; },
+      appendChild(child) {
+        if (child.parentElement === this) return child;
+        if (child.parentElement) {
+          const index = child.parentElement.children.indexOf(child);
+          if (index >= 0) child.parentElement.children.splice(index, 1);
+        }
+        child.parentElement = this;
+        this.children.push(child);
+        writes++;
+        return child;
+      },
+      querySelector(selector) {
+        const match = selector.match(/data-shb-settings-items=["']([^"']+)/);
+        return match ? zones[match[1]] || null : null;
+      }
+    };
+    Object.defineProperty(node, 'innerHTML', {
+      set(value) {
+        const match = String(value).match(/data-shb-settings-items="([^"]+)"/);
+        if (match) {
+          const item = container('items');
+          item.zoneId = match[1];
+          zones[match[1]] = item;
+        }
+      }
+    });
+    return node;
+  }
+  function card(title, id, className) {
+    const node = container('card');
+    node.id = id || '';
+    node.className = className || 'card setcard';
+    node.querySelector = selector => selector === 'h3' ? { textContent: title } : null;
+    return node;
+  }
+  const root = container('root');
+  const h1 = { textContent: 'Settings' };
+  const cards = [
+    card('Appearance'), card('Onboarding'), card('Study progress'),
+    card('Student data backup'), card('Question Bank Version'),
+    card('Study experience', 'shbQuestionToolsSettings'),
+    card('Study reminders', 'shbStudyRemindersSettings'),
+    card('Question voice', 'shbUnifiedVoiceSettings'),
+    card('Study notifications', '', 'u10-settings-card'),
+    card('App updates', 'shbAppUpdates')
+  ];
+  const file = container('file');
+  cards.forEach(node => { node.parentElement = root; root.children.push(node); });
+  file.parentElement = root; root.children.push(file);
+  root.querySelector = selector => {
+    if (selector === 'h1') return h1;
+    if (selector === '.shb-settings-order') return root.children.find(node => node.className === 'shb-settings-order') || null;
+    if (selector === '#shbQuestionToolsSettings') return cards.find(node => node.id === 'shbQuestionToolsSettings');
+    if (selector === '#shbStudyRemindersSettings') return cards.find(node => node.id === 'shbStudyRemindersSettings');
+    if (selector === '#shbUnifiedVoiceSettings') return cards.find(node => node.id === 'shbUnifiedVoiceSettings');
+    if (selector === '.u10-settings-card') return cards.find(node => node.className === 'u10-settings-card');
+    if (selector === '#shbAppUpdates') return cards.find(node => node.id === 'shbAppUpdates');
+    if (selector === '#bkFile') return file;
+    return null;
+  };
+  root.querySelectorAll = selector => selector === '.card.setcard' ? cards : [];
+  const host = {};
+  const observed = { callback: null, target: null, options: null };
+  class FakeMutationObserver {
+    constructor(callback) { observed.callback = callback; }
+    observe(target, options) { observed.target = target; observed.options = options; }
+    takeRecords() { return []; }
+  }
+  const frames = [];
+  const sandbox = {
+    document: { querySelector(selector) { return selector === '#phoneContent .rs' ? root : null; },
+      getElementById(id) { return id === 'phoneContent' ? host : null; }, readyState: 'complete',
+      createElement() { return container('section'); } },
+    window: { MutationObserver: FakeMutationObserver },
+    MutationObserver: FakeMutationObserver,
+    requestAnimationFrame(callback) { frames.push(callback); },
+    setTimeout(callback) { frames.push(callback); },
+    console
+  };
+  const begin = settings.indexOf('var settingsBusy=false');
+  const finish = settings.indexOf('/* Smart Review:', begin);
+  const observerStart = settings.indexOf('/* The app replaces this viewport', finish > begin ? finish : begin);
+  const observerEnd = settings.lastIndexOf('queueSettingsOrganization();') + 'queueSettingsOrganization();'.length;
+  assert.ok(begin >= 0 && observerStart > begin && observerEnd > observerStart);
+  const code = settings.slice(begin, finish) + settings.slice(observerStart, observerEnd);
+  vm.runInNewContext(code, sandbox);
+  return { observed, frames, get writes() { return writes; }, cards, root, host };
+}
+
+test('Settings organizer and its observer stay idempotent under repeated callbacks', () => {
+  const h = settingsOrganizerHarness();
+  assert.equal(h.observed.target, h.host);
+  assert.deepEqual(Object.keys(h.observed.options).sort(), ['childList']);
+  h.observed.callback([{ target: h.observed.target }, { target: h.observed.target }, { target: h.observed.target }]);
+  assert.equal(h.frames.length, 1, 'repeated observer records are coalesced into one frame');
+  h.frames.shift()();
+  const firstWrites = h.writes;
+  for (let i = 0; i < 20; i++) h.observed.callback([{ target: h.observed.target }]);
+  assert.equal(h.frames.length, 1);
+  h.frames.shift()();
+  assert.equal(h.writes, firstWrites, 'a stable Settings tree is left untouched');
+  assert.equal(h.root.children.filter(node => node.className === 'shb-settings-order').length, 1);
+  assert.equal(h.cards.filter(node => node.id === 'shbQuestionToolsSettings').length, 1);
+  assert.deepEqual(h.root.children.slice(0, 2).map(node => node.id), ['shbQuestionToolsSettings','shbStudyRemindersSettings'],
+    'the To Me Study experience and Study reminders cards remain before the ordered Settings sections');
 });
 
 test('question decoration requests are coalesced into one animation frame', () => {

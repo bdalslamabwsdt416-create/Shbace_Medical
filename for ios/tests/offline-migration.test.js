@@ -144,46 +144,257 @@ function createServiceWorkerHarness(options) {
   };
 }
 
-function runOfflineStartup(installedRecord) {
-  const calls = [];
-  const writes = [];
+function runOfflineStartup(installedRecord, options = {}) {
+  const calls = [], writes = [], screens = [], pending = [], repairs = [];
+  const store = Object.create(null);
+  const migrationKey = 'shbace_ios_migrated_1_4_14';
+  if (options.migrated) store[migrationKey] = '1';
+  const scope = 'https://ios.example.test/';
+  const cached = new Set((options.cachedPaths || Object.keys(installedRecord && installedRecord.files || {}))
+    .map(relative => new URL(relative, scope).href));
+  const cache = { async keys() { return [...cached].map(url => ({ url })); } };
+  const localCaches = { async open(name) { calls.push('cache-open:' + name); return cache; } };
+  const localStorage = {
+    getItem(key) { return Object.prototype.hasOwnProperty.call(store, key) ? store[key] : null; },
+    setItem(key, value) { store[key] = String(value); writes.push([key, String(value)]); },
+    removeItem(key) { delete store[key]; writes.push([key, null]); }
+  };
   const sandbox = {
     standalone: () => true,
-    document: { body: {} },
-    window: { caches: {}, crypto: { subtle: {} }, indexedDB: {} },
+    document: { body: {}, readyState: 'complete' },
+    window: { caches: localCaches, crypto: { subtle: {} }, indexedDB: {} },
+    caches: localCaches,
     crypto: { subtle: {} },
-    waitForSplash: () => Promise.resolve(),
-    showInstallHint() {},
-    showSetupUnavailable() {},
+    localStorage,
+    navigator: {},
+    waitForSplash() { screens.push('wait-for-splash'); return Promise.resolve(); },
+    showInstallHint() { screens.push('install-hint'); },
+    showSetupUnavailable() { screens.push('setup-unavailable'); },
     dbGet: () => Promise.resolve(installedRecord),
+    urlFor: relative => new URL(relative.split('/').map(encodeURIComponent).join('/'), scope).href,
+    CACHE_NAME: 'shbace-medical-offline-v2',
     INSTALLED_KEY: 'installed',
-    MIGRATION_KEY: 'shbace_ios_migrated_1_4_14',
-    lsSet(key, value) { writes.push([key, String(value)]); },
+    MIGRATION_KEY: migrationKey,
+    PENDING_KEY: 'shbace_pkg_update_pending_v1',
+    REPAIR_PENDING_KEY: 'shbace_pkg_repair_pending_v1',
+    setPending(value) { pending.push(value); store['shbace_pkg_update_pending_v1'] = String(value); },
+    setRepairPending(value) {
+      repairs.push(value);
+      if (value > 0) store['shbace_pkg_repair_pending_v1'] = String(value);
+      else delete store['shbace_pkg_repair_pending_v1'];
+    },
     runFullCheck() { calls.push('first-install-check'); return Promise.resolve(); },
-    Promise
+    Promise, Object, Number
   };
-  vm.runInNewContext(extractFunction(offline, 'start') +
-    String.fromCharCode(10) + 'start();', sandbox);
-  return new Promise(resolve => setImmediate(() => resolve({ calls, writes })));
+  const code = extractFunction(offline, 'localRepairNeeded') + String.fromCharCode(10) +
+    extractFunction(offline, 'start') + String.fromCharCode(10) + 'start();';
+  vm.runInNewContext(code, sandbox);
+  return new Promise(resolve => setImmediate(() => resolve({
+    calls, writes, screens, pending, repairs, store, localStorage
+  })));
 }
 
-test('opening an already-installed app does not schedule updates or run local repair', async () => {
-  assert.ok(!offline.includes('function checkDue('));
-  assert.ok(!offline.includes('function localRepairNeeded('));
-  assert.ok(!offline.includes('migrationInProgress'));
-  assert.ok(offline.includes("lsSet(MIGRATION_KEY,'1')"));
-  assert.ok(offline.includes('if(!hasRecord)return runFullCheck(splashFinished)'));
-  assert.ok(offline.includes('window.shbaceCheckForUpdate=manualCheck'),
-    'the explicit Settings update action must remain available');
-  const result = await runOfflineStartup({ version: '1.4.18', files: { 'index.html': {} } });
-  assert.deepEqual(result.calls, [], 'an installed package does not start an update/restore flow on launch');
-  assert.deepEqual(result.writes, [['shbace_ios_migrated_1_4_14', '1']]);
+function runVerifiedPlanHarness(options = {}) {
+  const store = Object.create(null), writes = [], events = [];
+  const localStorage = {
+    getItem(key) { return Object.prototype.hasOwnProperty.call(store, key) ? store[key] : null; },
+    setItem(key, value) { store[key] = String(value); writes.push([key, String(value)]); },
+    removeItem(key) { delete store[key]; }
+  };
+  const scope = 'https://ios.example.test/';
+  const cache = {
+    async put(url, response) { events.push('cache.put:' + url); return true; },
+    async delete(url) { events.push('cache.delete:' + url); return true; }
+  };
+  const target = {
+    async match(url) {
+      events.push('staging.match:' + url);
+      if (options.failCommit) throw new Error('staged commit failed');
+      return { ok: true };
+    }
+  };
+  const caches = {
+    async open(name) { events.push('caches.open:' + name); return name === 'shbace-medical-offline-v2' ? cache : target; },
+    async delete(name) { events.push('caches.delete:' + name); return true; }
+  };
+  const stageVerify = {
+    querySelector() { return { textContent: '', }; },
+    classList: { add() {}, remove() {} }
+  };
+  const ui = {
+    button: { dataset: {}, disabled: false, textContent: '' },
+    stage: { textContent: '' }, percent: { textContent: '' }, count: { textContent: '' },
+    track: { setAttribute() {} }, bar: { style: {} }, bytes: { textContent: '' },
+    stages: { querySelector() { return stageVerify; } }, foot: { textContent: '' },
+    warning: { textContent: '' }, status: { textContent: '' },
+    errors: { hidden: true, textContent: '' }
+  };
+  const sandbox = {
+    started: false, migrationInProgress: true, migrationPendingAtLaunch: true,
+    manifest: { version: 'v1', totalBytes: 10, files: [{ path: 'index.html', bytes: 10, sha256: 'hash', group: 'app' }] },
+    plan: { mode: 'update', files: [{ path: 'index.html', bytes: 10, sha256: 'hash', group: 'app' }], removed: [], bytes: 10 },
+    ui, window: { shbaceRequestAppReload() { events.push('reload-requested'); return true; } },
+    localStorage, caches, navigator: { storage: null }, URL, Promise, Date, Object, Number, Math, Error,
+    CACHE_NAME: 'shbace-medical-offline-v2', STAGING_NAME: 'shbace-staging-offline',
+    MIGRATION_KEY: 'shbace_ios_migrated_1_4_14', CHECK_OK_KEY: 'shbace_pkg_check_ok_v1',
+    REPAIR_PENDING_KEY: 'shbace_pkg_repair_pending_v1', PENDING_KEY: 'shbace_pkg_update_pending_v1',
+    READY_URL: new URL('./__shbace_offline_ready__', scope).href,
+    urlFor(path) { return new URL(path, scope).href; },
+    ensureServiceWorker: () => Promise.resolve(),
+    dbPut: () => Promise.resolve(true),
+    fileValid: () => Promise.resolve(true),
+    verifyAll: () => Promise.resolve(),
+    cleanupPreviousCaches: () => {
+      events.push('cleanupPreviousCaches');
+      return options.failCleanup ? Promise.reject(new Error('cleanup failed')) : Promise.resolve();
+    },
+    saveInstalled: () => { events.push('saveInstalled'); return Promise.resolve(true); },
+    setStatus(message) { ui.status.textContent = message; },
+    setWarning(message) { ui.warning.textContent = message; },
+    setErrorList(items) { ui.errors.hidden = !items.length; },
+    resetCounters() {}, stageMarkup() { return {}; }, paintProgress() {}, addDone() {},
+    fmtBytes(value) { return String(value) + ' B'; },
+    lsSet(key, value) { localStorage.setItem(key, value); },
+    lsNum(key) { return Number(localStorage.getItem(key)) || 0; },
+    setPending(value) { events.push('pending:' + value); },
+    setRepairPending() { events.push('repair-pending-cleared'); },
+    markInstalledNow() { events.push('markInstalledNow'); },
+    console
+  };
+  const code = extractFunction(offline, 'commitPlan') + '\n' +
+    extractFunction(offline, 'finalizeVerifiedPlanCommit') + '\n' +
+    extractFunction(offline, 'runPlan') + '\n' +
+    '({runPlan, state:()=>({migrationInProgress,started,flag:localStorage.getItem(MIGRATION_KEY)}), events, store})';
+  const api = vm.runInNewContext(code, sandbox);
+  return { api, writes, events, store };
+}
+
+function manualMigrationHarness(options = {}) {
+  const store = Object.create(null), writes = [], events = [];
+  const localStorage = {
+    getItem(key) { return Object.prototype.hasOwnProperty.call(store, key) ? store[key] : null; },
+    setItem(key, value) { store[key] = String(value); writes.push([key, String(value)]); },
+    removeItem(key) { delete store[key]; }
+  };
+  const sandbox = {
+    migrationPendingAtLaunch: true,
+    migrationInProgress: false,
+    standalone: () => true,
+    window: { caches: {}, crypto: { subtle: {} }, indexedDB: {} },
+    crypto: { subtle: {} },
+    navigator: { onLine: options.online !== false },
+    localStorage,
+    started: false,
+    manifestFromNetwork: options.online !== false,
+    dbGet: () => Promise.resolve({ files: { 'index.html': {} }, version: '1.4.13' }),
+    decide: () => options.failCheck ? Promise.reject(new Error('network failure')) :
+      Promise.resolve({ kind: 'prompt', plan: { mode: 'update', files: [{ path: 'index.html' }], bytes: 10 } }),
+    fetchVersionInfo: () => Promise.resolve({ displayVersion: '1.4.20', releaseDate: '2026-11-17', notes: [] }),
+    showUpdateSheet(plan) { events.push(['update-sheet', plan.mode]); },
+    showPlanNeeded(plan) { events.push(['setup', plan.mode]); },
+    lsSet(key, value) { localStorage.setItem(key, value); },
+    lsSetJson(key, value) { localStorage.setItem(key, JSON.stringify(value)); },
+    lsDel(key) { localStorage.removeItem(key); },
+    lsNum(key) { return Number(localStorage.getItem(key)) || 0; },
+    setPending(value) { events.push(['pending', value]); },
+    rememberInstalled(info) { events.push(['installed', info && info.displayVersion]); },
+    CHECK_OK_KEY: 'shbace_pkg_check_ok_v1',
+    PENDING_KEY: 'shbace_pkg_update_pending_v1',
+    VER_AVAIL_KEY: 'shbace_pkg_version_available_v1',
+    MIGRATION_KEY: 'shbace_ios_migrated_1_4_14',
+    INSTALLED_KEY: 'installed',
+    REPAIR_PENDING_KEY: 'shbace_pkg_repair_pending_v1',
+    Promise, Date, Number, Object
+  };
+  const code = 'var migrationInProgress=false;' +
+    extractFunction(offline, 'manualCheck') + String.fromCharCode(10) +
+    extractFunction(offline, 'finalizeVerifiedPlanCommit') + String.fromCharCode(10) +
+    '({manualCheck,finalizeVerifiedPlanCommit,isMigrationInProgress:()=>migrationInProgress})';
+  const api = vm.runInNewContext(code, sandbox);
+  return { api, store, writes, events };
+}
+
+test('existing install with an unset migration flag stays silent and marks an update pending', async () => {
+  const record = { version: '1.4.13', files: { 'index.html': {}, 'js/04-app-main.js': {} } };
+  const result = await runOfflineStartup(record, { cachedPaths: ['index.html', 'js/04-app-main.js'] });
+  assert.deepEqual(result.calls, ['cache-open:shbace-medical-offline-v2'],
+    'only the local CacheStorage inspection may run');
+  assert.deepEqual(result.screens, [], 'no startup modal, splash wait, or update screen is opened');
+  assert.deepEqual(result.pending, [1], 'the legacy migration is represented as a persistent pending update');
+  assert.equal(result.localStorage.getItem('shbace_ios_migrated_1_4_14'), null,
+    'launch must not mark an install as migrated');
+  assert.equal(result.store.shbace_pkg_update_pending_v1, '1');
 });
 
-test('offline package discovery runs automatically only for a first install', async () => {
+test('existing install with missing cached files is detected locally and marked repair-pending', async () => {
+  const record = { version: '1.4.20', files: { 'index.html': {}, 'js/04-app-main.js': {}, 'js/33-unified-voice.js': {} } };
+  const result = await runOfflineStartup(record, {
+    migrated: true,
+    cachedPaths: ['index.html', 'js/04-app-main.js']
+  });
+  assert.deepEqual(result.calls, ['cache-open:shbace-medical-offline-v2']);
+  assert.deepEqual(result.screens, []);
+  assert.deepEqual(result.repairs, [1]);
+  assert.equal(result.store.shbace_pkg_repair_pending_v1, '1');
+  assert.deepEqual(result.pending, [], 'repair-only state does not masquerade as an update pending badge');
+});
+
+test('migration-pending and repair-pending states coexist independently on an older install', async () => {
+  const record = { version: '1.4.13', files: { 'index.html': {}, 'js/04-app-main.js': {}, 'js/33-unified-voice.js': {} } };
+  const result = await runOfflineStartup(record, { cachedPaths: ['index.html'] });
+  assert.deepEqual(result.pending, [1], 'legacy migration remains pending');
+  assert.deepEqual(result.repairs, [2], 'two evicted files are tracked independently');
+  assert.equal(result.store.shbace_pkg_update_pending_v1, '1');
+  assert.equal(result.store.shbace_pkg_repair_pending_v1, '2');
+  assert.equal(result.localStorage.getItem('shbace_ios_migrated_1_4_14'), null);
+});
+
+test('existing install with all expected cached files and migration complete does nothing', async () => {
+  const record = { version: '1.4.20', files: { 'index.html': {}, 'js/04-app-main.js': {} } };
+  const result = await runOfflineStartup(record, { migrated: true });
+  assert.deepEqual(result.calls, ['cache-open:shbace-medical-offline-v2']);
+  assert.deepEqual(result.writes, []);
+  assert.deepEqual(result.pending, []);
+  assert.deepEqual(result.repairs, []);
+  assert.deepEqual(result.screens, []);
+});
+
+test('manual update sets migration flag only after the real verified runPlan commit and cleanup succeed', async () => {
+  const result = runVerifiedPlanHarness();
+  result.api.runPlan();
+  await new Promise(resolve => setImmediate(resolve));
+  const state = result.api.state();
+  assert.equal(state.flag, '1');
+  assert.equal(state.migrationInProgress, false);
+  assert.ok(result.events.indexOf('saveInstalled') >= 0);
+  assert.ok(result.events.indexOf('cleanupPreviousCaches') > result.events.indexOf('saveInstalled'),
+    'cleanup is awaited after the installed-record commit');
+  assert.ok(result.events.indexOf('reload-requested') > result.events.indexOf('cleanupPreviousCaches'),
+    'safe reload is requested only after verified commit and cleanup');
+});
+
+test('failed commit or cache cleanup never sets the migration flag', async () => {
+  for (const failure of [{ failCommit: true }, { failCleanup: true }]) {
+    const result = runVerifiedPlanHarness(failure);
+    result.api.runPlan();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(result.api.state().flag, null);
+    assert.equal(result.api.state().migrationInProgress, false);
+  }
+});
+
+test('offline manual update attempt leaves migration flag unset', async () => {
+  const result = manualMigrationHarness({ online: false });
+  assert.deepEqual(await result.api.manualCheck(), { state: 'offline' });
+  assert.equal(result.store.shbace_ios_migrated_1_4_14, undefined);
+  assert.equal(result.api.isMigrationInProgress(), false);
+});
+
+test('first install still performs automatic package discovery', async () => {
   const result = await runOfflineStartup(null);
-  assert.deepEqual(result.calls, ['first-install-check']);
-  assert.deepEqual(result.writes, [['shbace_ios_migrated_1_4_14', '1']]);
+  assert.ok(result.calls.includes('first-install-check'));
+  assert.ok(result.screens.includes('wait-for-splash'));
+  assert.equal(result.localStorage.getItem('shbace_ios_migrated_1_4_14'), null);
 });
 
 test('only retired iOS shell caches are deleted; offline package and student database identities remain stable', () => {
@@ -308,11 +519,16 @@ test('retired iOS modules are absent and are not referenced by the live HTML', (
   }
 });
 
-test('release is 1.4.20 and records the iOS Settings navigation correction', () => {
+test('release is 1.4.20 and records the corrective startup, repair, observer and Settings parity fixes', () => {
   assert.equal(pkg.version, '1.4.20');
   assert.equal(pwa.version, '1.4.20');
   assert.equal(pwa.displayVersion, '1.4.20');
-  assert.ok(pwa.releaseNotes.includes("Aligns the iOS sidebar with To Me, exposes Exam Goal Planner, removes Smart Review badges, and shows installed/update version details in Settings."));
+  for (const note of [
+    'Prevents existing installs from opening startup update UI or making network requests; migration completes only after a manually initiated verified commit.',
+    'Detects missing offline files locally and offers user-initiated Repair from Settings, with a dismissible Home fallback notice.',
+    'Scopes question and Settings observers to the app viewport, coalesces callbacks and drains self-generated mutations to prevent DOM mutation loops.',
+    'Aligns shared iOS Study experience controls, labels, helper text and defaults with To Me while retaining iOS-only settings.'
+  ]) assert.ok(pwa.releaseNotes.includes(note), 'release notes include: ' + note);
   assert.equal(offlineManifest.fileCount, 338);
   assert.equal(offlineManifest.files.length, offlineManifest.fileCount);
   assert.ok(!offlineManifest.files.some(file => ['css/core.css', 'css/late.css'].includes(file.path)),
