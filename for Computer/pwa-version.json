@@ -1,10 +1,12 @@
 {
   "app": "Shbace Medical",
   "platform": "Computer PWA",
-  "version": "1.3.10-computer.1",
-  "displayVersion": "1.3.10.1 · Computer",
+  "version": "1.3.10-computer.2",
+  "displayVersion": "1.3.10.2 · Computer",
   "releaseDate": "2026-11-17",
   "releaseNotes": [
+    "Enforces a strict local-only runtime after the offline package is fully verified: cached navigation, JavaScript and CSS never fall back to the network after installation; missing files show a restore error instead.",
+    "Carries forward the complete to me offline architecture for Computer: SHA-256 and byte verification, IndexedDB installation records, resumable downloads, staging-cache updates, changed-file-only synchronization, and a stable persistent Computer cache.",
     "Replaces the legacy Computer codebase with the unified to me application source, including its latest question banks, clinical-case content, navigation, Smart Review, study tools and startup fixes.",
     "Retains the Computer-only desktop layout, install guidance, fullscreen support and Screen Wake Lock preference; native Android-only services remain excluded.",
     "Upgrades the offline package updater to staged per-file byte and SHA-256 verification. The existing Computer Cache name and IndexedDB database are retained so valid saved offline files can be adopted and only missing or changed files downloaded.",

@@ -206,6 +206,12 @@ if (packageMeta.version !== pwaVersion.version) fail("package.json and pwa-versi
 if (!swSource.includes(expectedCacheName) || !offlineSetupSource.includes(expectedCacheName)) {
   fail("Service Worker and offline installer must retain the stable package cache namespace " + expectedCacheName + " across releases; rotating it forces a full offline download.");
 }
+const localFirstSource = swSource.slice(swSource.indexOf("async function localFirst"), swSource.indexOf("self.addEventListener('fetch'"));
+if (!localFirstSource.includes("const ready = await cache.match(READY_URL)") ||
+    localFirstSource.indexOf("if (ready) return missingOfflineResponse(request.url)") < 0 ||
+    localFirstSource.indexOf("if (ready) return missingOfflineResponse(request.url)") > localFirstSource.indexOf("fetch(request)")) {
+  fail("Verified Computer installations must serve app-shell files locally and return 503 for missing files; runtime network fallback is forbidden after READY_URL.");
+}
 
 rmSync(output, { recursive: true, force: true });
 mkdirSync(output, { recursive: true });

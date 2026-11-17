@@ -32,9 +32,14 @@ Each question carries one flag that decides its bank (`bankOf` in the core, chec
 One normaliser, `nz` (lower-case, strip Arabic diacritics/tatweel, unify أ/إ/آ→ا, ى→ي, ة→ه), is meant to be used by the global Search, Saved, Wrong, Notes, Pinned & Recent and Smart Review. `tests/search-normalize.test.mjs` checks it against the real source.
 
 ## Offline / releases
-- `pwa-version.json` is the version source of truth; `package.json`, `sw.js` (`CACHE_NAME`) and `js/29-offline-setup.js` must carry the same number.
-- `npm run build:pwa` regenerates the offline manifest (file sizes + SHA-256); installed copies download only the files whose hash changed.
-- `vercel.json` serves `sw.js`, the manifest and the version files with `Cache-Control: no-cache` so updates are seen immediately.
+- `pwa-version.json` is the release source of truth; `package.json` must match it. The Service Worker and installer share the stable Computer cache namespace `shbace-computer-offline-v1.3.4`; do not rotate it for routine releases.
+- `npm run build:pwa` creates `www/offline-assets-manifest.json` from every shipped file, recording exact byte length and SHA-256. The installer compares that manifest with the IndexedDB installed-file record and downloads only changed or missing files.
+- Installation uses a dedicated staging cache for updates. Files are fetched with an integrity-bypass query, checked for byte length and SHA-256, verified again from local Cache Storage, then committed before the READY marker is written. A failed update must not replace the last verified package.
+- IndexedDB (`shbace-medical-computer-offline-state-v1`) stores installation metadata and per-file verification records; Cache Storage stores the actual app package. Existing browser storage and student progress are not cleared.
+- **Runtime boundary:** before the first verified installation, missing app-shell files may bootstrap from the network. After the READY marker exists, navigation, JavaScript and CSS are local-only. If any required file is absent, the worker returns a clear 503 restore message instead of silently fetching unverified code. Images and other same-origin package assets follow the same ready-marker rule.
+- Network access remains available for explicit/scheduled release checks (`cache: 'no-store'`), SHA-256 integrity downloads during install/update, and the explicit reload/recovery path. These are maintenance operations, not normal app runtime.
+- The seven-day successful update-check interval and two-hour retry delay after a failed check are retained. Manual update/restore remains available.
+- `vercel.json` serves `sw.js`, the manifest and version files with `Cache-Control: no-cache` so release metadata and worker updates are discoverable.
 
 ## Checks
 `npm run test:unit` (node:test), `npm run check:bank` (ids, answer keys, syntax of every script), `npm run build:pwa`. The `PWA checks` workflow runs all three on every push to a non-main branch and on pull requests.
