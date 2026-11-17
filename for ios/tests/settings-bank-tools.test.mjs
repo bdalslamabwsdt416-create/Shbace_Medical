@@ -38,6 +38,10 @@ test('iOS Settings retains appearance, onboarding, notifications, backup and pro
   ]) assert.ok(features.includes(marker), 'missing settings feature: ' + marker);
   assert.ok(voice.includes("card.id='shbUnifiedVoiceSettings'"));
   assert.ok(voice.includes("tools.id='shbQuestionToolsSettings'"));
+  assert.ok(voice.includes("card.id='shbIosStudyExperienceSettings'"));
+  assert.ok(voice.includes("navigator.wakeLock.request('screen')"));
+  assert.ok(voice.includes('prefers-color-scheme: light'));
+  assert.ok(voice.includes("localStorage.setItem(IOS_EXPERIENCE_KEY"));
 });
 
 test('question cards in the iOS bank receive Share, Copy and Read aloud controls', () => {
@@ -60,6 +64,7 @@ test('Settings groups Question Bank Version and question actions, while retainin
   assert.ok(settings.includes("target('updates').appendChild(updates)"));
   assert.ok(settings.includes("target('banks').appendChild(bankVersion)"));
   assert.ok(settings.includes("target('banks').appendChild(questionTools)"));
+  assert.ok(settings.includes("target('appearance').appendChild(studyExperience)"));
 });
 
 test('opening Settings from a Question Bank captures active source bank, system and topic', () => {
