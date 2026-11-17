@@ -10,6 +10,18 @@ const sharp = require('sharp');
 
 const root = path.resolve(__dirname, '..');
 const out = path.join(root, 'dist');
+const drawerSource = fs.readFileSync(safePath('js/06-drawer-menu.js'), 'utf8');
+const returningSource = fs.readFileSync(safePath('js/07-returning-student-migration.js'), 'utf8');
+const featuresSource = fs.readFileSync(safePath('js/09-app-features-v6.js'), 'utf8');
+if (!drawerSource.includes("if(n==='Settings'){appPage='settings';renderAppDemo();return}") ||
+    !drawerSource.includes("['Settings','settings']") ||
+    !returningSource.includes("['Settings','settings','<circle") ||
+    !featuresSource.includes("window.__shbOpenSettings=function(){appPage='settings';renderAppDemo();return true}") ||
+    !featuresSource.includes("window.__shbRenderSettings=function(){return settingsView()}") ||
+    !featuresSource.includes("PAGES.settings=settingsView")) {
+  throw new Error('The iOS Settings route must open from both the header and drawer.');
+}
+
 const manifest = { schema: 1, files: [] };
 
 /* Always run the iOS offline migration regression tests, even when the hosting
@@ -270,10 +282,10 @@ if (!onboardingMain.includes('Which grade are you in?') ||
 }
 const pwaVersion = JSON.parse(fs.readFileSync(safePath('pwa-version.json'), 'utf8'));
 const packageMetadata = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-if (packageMetadata.version !== '1.4.19' || pwaVersion.version !== '1.4.19' || pwaVersion.displayVersion !== '1.4.19' ||
+if (packageMetadata.version !== '1.4.20' || pwaVersion.version !== '1.4.20' || pwaVersion.displayVersion !== '1.4.20' ||
     !Array.isArray(pwaVersion.releaseNotes) ||
     !pwaVersion.releaseNotes.includes("Adds iOS Question Bank tools for Share, Copy and Read aloud, groups bank controls in Settings, and scopes progress resets to the active bank, system and topic.")) {
-  throw new Error('The iOS 1.4.19 release metadata is missing or inconsistent.');
+  throw new Error('The iOS 1.4.20 release metadata is missing or inconsistent.');
 }
 
 if (manifest.files.some(item => ['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/32-ios-v7.js'].includes(item.path))) throw new Error('A retired iOS visual layer is still included in the offline runtime inventory.');
