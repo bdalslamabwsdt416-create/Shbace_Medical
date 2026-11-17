@@ -768,15 +768,21 @@ function start(){
  }
  dbGet('meta',INSTALLED_KEY).catch(function(){return null}).then(function(rec){
   var hasRecord=!!(rec&&rec.files);
-  /* First install, legacy install, or a check that is due: do the full network check. */
-  if(!hasRecord||checkDue())return runFullCheck(splashFinished);
-  /* Otherwise stay off the network. Only repair when files are really missing and the device is online. */
-  return localRepairNeeded().then(function(needs){
-   if(needs&&navigator.onLine!==false)return runFullCheck(splashFinished);
+  /* First install: do not wait for updater metadata hydration; continue the existing
+     post-Splash download path immediately. There is no previous local metadata yet. */
+  if(!hasRecord)return runFullCheck(splashFinished);
+  /* Returning installs recover LocalStorage-first updater metadata before checkDue(). */
+  return hydrateLocalMetadata().then(function(){
+   /* A check that is due: use the existing update path. */
+   if(checkDue())return runFullCheck(splashFinished);
+   /* Otherwise stay off the network. Only repair when files are really missing and the device is online. */
+   return localRepairNeeded().then(function(needs){
+    if(needs&&navigator.onLine!==false)return runFullCheck(splashFinished);
+   });
   });
  });
 }
-function boot(){hydrateLocalMetadata().then(start,start);}
+function boot(){start();}
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
 else boot();
