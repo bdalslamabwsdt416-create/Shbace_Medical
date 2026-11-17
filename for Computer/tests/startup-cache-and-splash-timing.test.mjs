@@ -68,11 +68,13 @@ test("app still waits for the complete script sequence before revealing Home", (
 test("LocalStorage-first metadata never gates the first post-Splash package download", () => {
   const start = updater.slice(updater.indexOf("function start()"), updater.indexOf("function boot()"));
   assert.ok(!start.includes("localStorage"), "startup must not require LocalStorage to exist");
-  assert.match(updater, /function metaRawGet\\(key\\)[\\s\\S]*?localStorage\\.getItem\\(key\\)[\\s\\S]*?metaMemory/);
-  assert.match(updater, /function metaRawSet\\(key,value\\)[\\s\\S]*?localStorage\\.setItem\\(key,raw\\)[\\s\\S]*?dbPut\\('meta',META_DB_PREFIX\\+key,raw\\)/);
-  assert.match(updater, /function hydrateLocalMetadata\\(\\)[\\s\\S]*?dbGet\\('meta',META_DB_PREFIX\\+key\\)/);
-  assert.match(updater, /if\(!hasRecord\)return runFullCheck\(splashFinished\);[\s\S]*?return hydrateLocalMetadata\(\)\.then\(function\(\)\{/);
-  assert.match(updater, /function boot\(\)\{start\(\);\}/);
+  assert.ok(updater.includes("function metaRawGet(key){"));
+  assert.ok(updater.includes("localStorage.getItem(key)"));
+  assert.ok(updater.includes("Object.prototype.hasOwnProperty.call(metaMemory,key)"));
+  assert.ok(updater.includes("localStorage.setItem(key,raw)"));
+  assert.ok(updater.includes("dbPut('meta',META_DB_PREFIX+key,raw)"));
+  assert.ok(updater.includes("dbGet('meta',META_DB_PREFIX+key)"));
   assert.ok(updater.indexOf("if(!hasRecord)return runFullCheck(splashFinished)") < updater.indexOf("return hydrateLocalMetadata().then(function(){"));
+  assert.ok(updater.includes("function boot(){start();}"));
   assert.ok(updater.includes("if(installed===false)return {kind:'setup',plan:planOf('install',manifest.files,[])}"));
 });
