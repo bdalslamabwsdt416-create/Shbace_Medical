@@ -224,6 +224,8 @@ if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !startupRuntime.includes('scheduleCheckDue()') ||
     scheduledRuntime.includes('MIGRATION_KEY') ||
     scheduledRuntime.includes('migrationInProgress') ||
+    !offlineSetup.includes('scheduledCheckInProgress=false') ||
+    !scheduledRuntime.includes('scheduledCheckInProgress') ||
     scheduledRuntime.includes('mount(') ||
     scheduledRuntime.includes('showUpdateSheet(') ||
     scheduledRuntime.includes('showPlanNeeded(') ||
