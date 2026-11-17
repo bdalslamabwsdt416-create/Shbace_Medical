@@ -12,7 +12,7 @@ var INSTALLED_KEY='installed';
 /* Silent scheduled checks run no more than once per 7 days after a successful network check. Failures retry on the next launch. */
 var CHECK_OK_KEY='shbace_pkg_check_ok_v1',CHECK_ATTEMPT_KEY='shbace_pkg_check_attempt_v1';
 var MIGRATION_KEY='shbace_ios_migrated_1_4_14';
-var CHECK_EVERY=7*24*60*60*1000,CHECK_RETRY=2*60*60*1000;
+var CHECK_EVERY=7*24*60*60*1000;
 var PENDING_KEY='shbace_pkg_update_pending_v1',REPAIR_PENDING_KEY='shbace_pkg_repair_pending_v1',NOTIF_ID='update-available';
 var manifestFromNetwork=false,plan=null,migrationInProgress=false,migrationPendingAtLaunch=false,scheduledCheckInProgress=false;
 var DB_NAME='shbace-medical-offline-state-v1';
@@ -762,7 +762,7 @@ function checkDue(){
  if(scheduledCheckInProgress)return Promise.resolve({state:'busy'});
  scheduledCheckInProgress=true;
  /* iOS suspends the app at any moment: stamp the attempt as 'retry in 2 hours' first, and only a finished check stamps 'now'. */
- lsSet(CHECK_ATTEMPT_KEY,Date.now()-(CHECK_EVERY-CHECK_RETRY));
+ lsSet(CHECK_ATTEMPT_KEY,Date.now());
  return Promise.resolve().then(function(){return loadManifest(true)}).then(function(data){
   if(!manifestFromNetwork)return {state:'offline'};
   manifest=data;
@@ -778,8 +778,7 @@ function checkDue(){
   });
  }).catch(function(){return {state:'offline'}}).then(function(result){
   scheduledCheckInProgress=false;
-  /* The attempt was stamped before the request. If it failed, allow the next try in 2 hours instead of waiting 7 days. */
-  if(result&&result.state==='offline')lsSet(CHECK_ATTEMPT_KEY,Date.now()-(CHECK_EVERY-CHECK_RETRY));
+  /* Keep a failed online attempt stamped for the full seven-day interval. Offline launches do not stamp attempts. */
   return result;
  });
 }
