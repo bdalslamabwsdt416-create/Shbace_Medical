@@ -16,13 +16,24 @@ test("Service Worker and offline updater retain one persistent package cache", (
   assert.equal(workerCache[1], "shbace-computer-offline-v1.3.4");
 });
 
-test("cached navigation, JavaScript and CSS are served locally before any network fallback", () => {
+test("verified installations serve navigation, JavaScript and CSS strictly from local cache", () => {
   const local = sw.slice(sw.indexOf("async function localFirst"), sw.indexOf("self.addEventListener('fetch'"));
+  assert.ok(local.includes("const ready = await cache.match(READY_URL)"));
   assert.ok(local.indexOf("cache.match(INDEX_URL)") < local.indexOf("fetch(request)"));
-  assert.ok(local.includes("cache.put(cacheKey, fresh.clone())"), "successful missing-file fallback is saved");
+  assert.ok(local.indexOf("if (ready) return missingOfflineResponse(request.url)") < local.indexOf("fetch(request)"));
   assert.match(sw, /request\.mode === 'navigate'[\s\S]*?event\.respondWith\(localFirst\(request\)\)/);
   assert.match(sw, /request\.destination === 'script'[\s\S]*?event\.respondWith\(localFirst\(request\)\)/);
   assert.match(sw, /request\.destination === 'style'[\s\S]*?event\.respondWith\(localFirst\(request\)\)/);
+  assert.ok(local.includes("return missingOfflineResponse(request.url)"));
+  assert.ok(!local.includes("cache.put(cacheKey, fresh.clone())") || local.indexOf("if (ready)") < local.indexOf("cache.put(cacheKey, fresh.clone())"));
+});
+
+test("the READY marker is the boundary between online bootstrap and local-only runtime", () => {
+  const local = sw.slice(sw.indexOf("async function localFirst"), sw.indexOf("self.addEventListener('fetch'"));
+  assert.ok(local.indexOf("const ready = await cache.match(READY_URL)") < local.indexOf("if (ready)"));
+  assert.ok(local.indexOf("if (ready) return missingOfflineResponse(request.url)") < local.indexOf("fetch(request)"));
+  assert.ok(updater.includes("cache.put(READY_URL"));
+  assert.ok(updater.includes("return saveInstalled(manifest.files)"));
 });
 
 test("only explicit updater no-store requests refresh the manifests and version files", () => {
