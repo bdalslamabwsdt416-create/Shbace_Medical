@@ -15,6 +15,7 @@ var CHECK_EVERY=7*24*60*60*1000,CHECK_RETRY=2*60*60*1000;
 var PENDING_KEY='shbace_pkg_update_pending_v1',NOTIF_ID='update-available';
 var manifestFromNetwork=false,plan=null;
 var DB_NAME='shbace-medical-offline-state-v1';
+var MANIFEST_FETCH_TIMEOUT=30000,MANIFEST_FETCH_ATTEMPTS=2,WORKER_READY_TIMEOUT=20000;
 var MANIFEST_URL=new URL('./offline-assets-manifest.json',location.href).href;
 var READY_URL=new URL('./__shbace_offline_ready__',location.href).href;
 var manifest=null,cache=null,ui=null,started=false;
@@ -255,25 +256,37 @@ function cleanupPreviousCaches(){
 }
 function loadManifest(){
  return caches.open(CACHE_NAME).then(function(c){
-  /* Network first: a stale cached copy of the file list makes size/SHA checks fail against newer files.
-     The cached copy is only a fallback for when the device is offline. */
+  /* Fresh list first; tolerate slower iOS network wake-up and retry once before using
+     the last saved list. A failed network check must never erase a valid local manifest. */
   manifestFromNetwork=false;
-  var ctl=null,timer=null;
-  try{ctl=new AbortController();timer=setTimeout(function(){try{ctl.abort()}catch(e){}},10000)}catch(e){}
-  return fetch(MANIFEST_URL,{credentials:'same-origin',cache:'no-store',signal:ctl?ctl.signal:undefined}).then(function(r){
-   if(timer)clearTimeout(timer);
-   if(!r.ok)throw new Error('Offline asset manifest returned HTTP '+r.status+'.');
-   var copy=r.clone();
-   return r.json().then(function(data){manifestFromNetwork=true;
-    return c.put(MANIFEST_URL,copy).catch(function(){}).then(function(){return data});
+  function requestNetwork(attempt){
+   var ctl=null,timer=null,timedOut=false;
+   try{
+    ctl=new AbortController();
+    timer=setTimeout(function(){timedOut=true;try{ctl.abort()}catch(e){}},MANIFEST_FETCH_TIMEOUT);
+   }catch(e){}
+   return fetch(MANIFEST_URL,{credentials:'same-origin',cache:'no-store',signal:ctl?ctl.signal:undefined}).then(function(r){
+    if(!r.ok)throw new Error('Offline asset manifest returned HTTP '+r.status+'.');
+    var copy=r.clone();
+    return r.json().then(function(data){
+     manifestFromNetwork=true;
+     return c.put(MANIFEST_URL,copy).catch(function(){}).then(function(){return data});
+    });
+   }).then(function(data){
+    if(timer)clearTimeout(timer);
+    return data;
+   }).catch(function(err){
+    if(timer)clearTimeout(timer);
+    var failure=(timedOut||(err&&err.name==='AbortError'))?
+     new Error('The offline file list took too long to load. Check the internet connection and retry setup.') : err;
+    if(attempt<MANIFEST_FETCH_ATTEMPTS)return wait(1000*attempt).then(function(){return requestNetwork(attempt+1)});
+    return c.match(MANIFEST_URL).then(function(hit){
+     if(hit)return hit.json();
+     throw failure;
+    });
    });
-  }).catch(function(err){
-   if(timer)clearTimeout(timer);
-   return c.match(MANIFEST_URL).then(function(hit){
-    if(hit)return hit.json();
-    throw err;
-   });
-  });
+  }
+  return requestNetwork(1);
  }).then(function(data){
   if(!data||data.schema!==1||!Array.isArray(data.files)||!data.files.length||!data.version)
    throw new Error('The offline asset manifest is missing or invalid. Reconnect and reload the installed app.');
@@ -333,30 +346,28 @@ function resetCounters(){
  verifiedCount=0;verifiedBytes=0;donePaths=Object.create(null);
  stageDone={app:0,images:0,data:0,other:0};
 }
-function waitForWorkerActivation(worker){
- return new Promise(function(resolve,reject){
-  function check(){
-   if(worker.state==='activated'){
-    worker.removeEventListener('statechange',check);resolve();
-   }else if(worker.state==='redundant'){
-    worker.removeEventListener('statechange',check);
-    reject(new Error('The updated offline worker could not activate. Close other Shbace tabs and retry.'));
-   }
-  }
-  worker.addEventListener('statechange',check);check();
- });
+function waitForServiceWorkerReady(){
+ return Promise.race([
+  navigator.serviceWorker.ready,
+  wait(WORKER_READY_TIMEOUT).then(function(){
+   throw new Error('The offline service worker is taking too long to start. Close other Shbace tabs, reopen the app, and retry the download.');
+  })
+ ]);
 }
 function ensureServiceWorker(){
  if(!('serviceWorker' in navigator))return Promise.reject(new Error('This browser does not support Service Workers.'));
+ /* Follow the stable To Me bootstrap: reuse an existing registration without
+    blocking the download on a forced update or a waiting worker. First installs
+    still wait for the browser to activate the newly registered worker. */
  return navigator.serviceWorker.getRegistration('./').then(function(reg){
-  if(!reg)return navigator.serviceWorker.register('./sw.js',{scope:'./'});
-  /* Force an update check so integrity downloads are not intercepted by an older
-     cache-first worker. The current worker uses a network-only integrity route. */
-  return reg.update().then(function(){
-   var candidate=reg.installing||reg.waiting;
-   return candidate?waitForWorkerActivation(candidate).then(function(){return reg}):reg;
-  });
- }).then(function(){return navigator.serviceWorker.ready});
+  if(reg)return reg;
+  return navigator.serviceWorker.register('./sw.js',{scope:'./'});
+ }).then(function(){
+  return waitForServiceWorkerReady();
+ }).then(function(reg){
+  if(!reg||!reg.active)throw new Error('The offline service worker is not active yet. Close other Shbace tabs, reopen the app, and retry.');
+  return reg;
+ });
 }
 function fetchAndStore(file,target){
  var dest=target||cache,url=urlFor(file.path),lastError=null;
@@ -511,13 +522,15 @@ function commitPlan(target){
 function runPlan(){
  if(started||!manifest||!ui||!plan)return;
  started=true;errors=[];resetCounters();setErrorList([]);ui.button.dataset.retryCheck='0';
+ stageCounts=stageMarkup();
+ paintProgress('Preparing secure connection',false);
  var staged=plan.mode==='update',target=null;
  window.__SHBACE_OFFLINE_UPDATE_ACTIVE__=staged;
  ui.button.disabled=true;ui.button.textContent=staged?'Updating…':'Downloading…';ui.button.dataset.done='0';
  setStatus(staged?'Downloading only the changed files…':'Preparing local storage and the offline download…');
  setWarning('The download is resumable. Files already saved and verified are skipped.');
  Promise.resolve().then(function(){return ensureServiceWorker()})
- .then(function(){return caches.open(CACHE_NAME)})
+ .then(function(){setStatus('Opening local offline storage…');ui.stage.textContent='Preparing local storage';return caches.open(CACHE_NAME)})
  .then(function(c){cache=c;return staged?caches.open(STAGING_NAME):c})
  .then(function(t){target=t;return dbPut('meta','progress',{version:manifest.version,startedAt:Date.now(),fileCount:plan.files.length,mode:plan.mode})})
  .then(function(){
@@ -533,7 +546,8 @@ function runPlan(){
   }
   return staged?null:cache.delete(READY_URL);
  }).then(function(){
-  stageCounts=stageMarkup();
+  setStatus('Downloading and verifying the offline package…');
+  ui.stage.textContent='Downloading';
   var cursor=0;
   var workers=[0,1].map(function(){
    return (async function(){
