@@ -16,12 +16,8 @@ const APP_SHELL = [
   './js/09-app-features-v6.js',
   './js/30-ios-v5.js',
   './js/31-ios-v6.js',
-  './js/32-ios-v7.js',
   './css/bundle-core.css',
   './css/bundle-late.css',
-  './css/ios-v5.css',
-  './css/ios-v6.css',
-  './css/ios-v7.css',
   './js/29-offline-setup.js'
 ];
 
