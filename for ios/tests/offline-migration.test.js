@@ -504,7 +504,9 @@ test('silent scheduled update reaches the real bell notification and Settings Ap
     lsDel(key) { localStorage.removeItem(key); },
     window: {
       shbAddNotif(id, title, body, target) { notifications.push({ id, title, body, target }); },
-      shbRemoveNotif(id) { notifications.push({ id, removed: true }); }
+      shbRemoveNotif(id) { notifications.push({ id, removed: true }); },
+      shbaceUpdatePending() { return Number(localStorage.getItem('shbace_pkg_update_pending_v1')) || 0; },
+      shbaceRepairPending() { return Number(localStorage.getItem('shbace_pkg_repair_pending_v1')) || 0; }
     }
   };
   const code = [
