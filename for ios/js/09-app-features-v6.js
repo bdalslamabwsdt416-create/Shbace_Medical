@@ -3307,7 +3307,7 @@ window.shbaceEnablePush=async function(){
 
 /* Unit 11: versioned, integrity-checked backup of all app-prefixed student stores,
    including the separate Quiz History store. Never includes the static QB data script. */
-const U11_EXCLUDED_KEYS=new Set(['shbace_splash_completed_session_v1','shbace_fcm_token_v1','shbace_push_auth_v1','shbace_question_bank_version']);
+const U11_EXCLUDED_KEYS=new Set(['shbace_splash_completed_session_v1','shbace_fcm_token_v1','shbace_push_auth_v1','shbace_question_bank_version','shbace_app_resume_session_v1']);
 function u11DataKeys(){const keys=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('shbace_')&&!U11_EXCLUDED_KEYS.has(k)&&!/token|secret|credential/i.test(k))keys.push(k)}return keys.sort()}
 function u11Capture(){const stores={};u11DataKeys().forEach(k=>{const v=localStorage.getItem(k);if(v!==null)stores[k]=v});return stores}
 function u11Checksum(stores){const payload=Object.keys(stores).sort().map(k=>k+'\u0000'+stores[k]).join('\u0001');let h=2166136261;for(let i=0;i<payload.length;i++){h^=payload.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(16).padStart(8,'0')}
@@ -3506,16 +3506,17 @@ PAGES.notifs=notifsView;PAGES.settings=settingsView;
 (function(){
  const RESUME_KEY='shbace_app_resume_session_v1';
  const RESUME_MAX_AGE=24*60*60*1000;
- let restoring=false,lastSnapshot='';
+ let restoring=false,lastSnapshot='',lastSavedAt=0;
  function saveSession(force){
   if(restoring||mode!=='app'||!window.__shbQBVersionState||typeof window.__shbQBVersionState.capture!=='function')return false;
   try{
    const state=window.__shbQBVersionState.capture();
    if(!state||state.mode!=='app'||typeof state.appPage!=='string')return false;
    const encoded=JSON.stringify(state);
-   if(!force&&encoded===lastSnapshot)return true;
-   localStorage.setItem(RESUME_KEY,JSON.stringify({schema:1,savedAt:Date.now(),state:state}));
-   lastSnapshot=encoded;
+   if(!force&&encoded===lastSnapshot&&Date.now()-lastSavedAt<10*60*1000)return true;
+   const savedAt=Date.now();
+   localStorage.setItem(RESUME_KEY,JSON.stringify({schema:1,savedAt:savedAt,state:state}));
+   lastSnapshot=encoded;lastSavedAt=savedAt;
    return true;
   }catch(e){console.warn('Shbace session snapshot could not be saved:',e);return false}
  }
@@ -3530,7 +3531,7 @@ PAGES.notifs=notifsView;PAGES.settings=settingsView;
    if(!window.__shbQBVersionState||typeof window.__shbQBVersionState.restore!=='function')return false;
    restoring=true;
    const ok=window.__shbQBVersionState.restore(record.state)===true;
-   if(ok)lastSnapshot=JSON.stringify(record.state);
+   if(ok){lastSnapshot=JSON.stringify(record.state);lastSavedAt=record.savedAt;}
    return ok;
   }catch(e){console.warn('Shbace session snapshot could not be restored:',e);return false}
   finally{restoring=false}
@@ -3553,7 +3554,7 @@ PAGES.notifs=notifsView;PAGES.settings=settingsView;
  setInterval(()=>{if(mode==='app'&&!document.hidden)saveSession(false)},2000);
  window.__shbRestoreAppSession=restoreSession;
  window.__shbSaveAppSession=saveOnLeave;
- window.__shbClearAppSession=function(){try{localStorage.removeItem(RESUME_KEY);lastSnapshot=''}catch(e){}};
+ window.__shbClearAppSession=function(){try{localStorage.removeItem(RESUME_KEY);lastSnapshot='';lastSavedAt=0}catch(e){}};
 })(); 
 })();
 })();
