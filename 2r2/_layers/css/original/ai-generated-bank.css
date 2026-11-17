@@ -1,0 +1,66 @@
+/* AI Generated — Bank 08. Uses the existing Shbace Medical component palette. */
+.ai08-page{padding:8px 0 24px}
+.ai08-topline{display:flex;align-items:center;gap:9px;margin:3px 0 9px}
+.ai08-bank-number{display:inline-flex;align-items:center;border:1px solid rgba(77,211,187,.34);border-radius:999px;padding:4px 9px;color:#75e0c6;background:rgba(26,153,131,.11);font-size:9px;font-weight:900;letter-spacing:.1em}
+.ai08-kicker{font-size:9px;font-weight:800;letter-spacing:.11em;color:#8ca6bc}
+.ai08-home-entry{width:100%;display:flex!important;flex-direction:row!important;align-items:center!important;gap:13px!important;min-height:0!important;text-align:left;cursor:pointer;padding:15px!important;border-color:rgba(85,205,183,.25)!important;background:linear-gradient(120deg,rgba(23,73,79,.42),rgba(15,32,49,.96))!important}
+.ai08-home-icon{width:46px;height:46px;flex:0 0 46px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(145deg,#164e54,#123046);border:1px solid rgba(115,224,198,.28);color:#9cf0dc;font-size:16px;font-weight:900;letter-spacing:-.04em}
+.ai08-home-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
+.ai08-home-copy strong{font-size:17px;color:#f0f6fb;line-height:1.2}
+.ai08-home-copy small{font-size:11px;line-height:1.45;color:#a6bacb}
+.ai08-home-count{font-size:10px;color:#82d7c5;font-weight:750}
+.ai08-home-entry .chev,.ai08-list-card .chev{font-size:24px;color:#8cb8c9;flex:0 0 auto}
+.ai08-progress{border:1px solid rgba(116,157,182,.16);background:rgba(21,42,59,.58);border-radius:14px;padding:11px 12px;margin:12px 0}
+.ai08-progress-meta{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#a9bacb;margin-bottom:8px}
+.ai08-progress-meta b{font-size:11px;color:#8fe5d0}
+.ai08-description{padding:13px 14px!important;min-height:0!important;margin:12px 0;background:rgba(19,40,58,.72)!important;border-color:rgba(117,155,184,.16)!important}
+.ai08-description b{display:block;color:#e7f2fa;font-size:12px;margin-bottom:5px}
+.ai08-description p{font-size:11px;line-height:1.6;color:#a9bdcc;margin:0}
+.ai08-section-heading{display:flex;justify-content:space-between;align-items:center;margin:19px 2px 9px;color:#e7f1f8;font-size:14px;font-weight:850}
+.ai08-section-heading span{font-size:10px;font-weight:750;color:#80cdbf;background:rgba(39,149,132,.14);padding:4px 8px;border-radius:999px}
+.ai08-list{display:flex;flex-direction:column;gap:9px}
+.ai08-list-card{width:100%;display:flex!important;flex-direction:row!important;align-items:center!important;gap:12px!important;min-height:0!important;text-align:left;cursor:pointer;padding:13px!important;border-radius:15px!important}
+.ai08-list-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:5px}
+.ai08-list-copy strong{font-size:13px;line-height:1.35;color:#edf5fa}
+.ai08-list-copy small{font-size:10px;line-height:1.4;color:#9db2c4}
+.ai08-list-card .bar{width:100%;height:4px;margin:2px 0 0;background:rgba(125,157,177,.16)}
+.ai08-list-card .bar span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#2ea990,#83e0c7)}
+.ai08-topic-number{font-size:13px;color:#a9c7e2}
+.ai08-back{margin:0 0 7px}
+.ai08-rich{font-size:11px;line-height:1.7;color:#bfd0de;overflow-wrap:anywhere}
+.ai08-rich strong{color:#e7f3f8}
+.ai08-question-list{display:flex;flex-direction:column;gap:13px}
+.ai08-question{padding:14px!important;scroll-margin-top:18px}
+.ai08-question-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:11px}
+.ai08-question .qid{font-size:9px;letter-spacing:.1em;color:#88a4ba;font-weight:850}
+.ai08-question .qstem{font-size:13px;line-height:1.6;color:#f1f6fa;font-weight:700;margin:0 0 12px}
+.ai08-options{display:flex;flex-direction:column;gap:7px}
+.ai08-options .qopt{display:flex!important;align-items:flex-start!important;gap:9px!important;width:100%;min-height:0!important;text-align:left!important;white-space:normal!important;padding:10px 11px!important;border-radius:11px!important;line-height:1.45!important;font-size:11px!important}
+.ai08-options .qopt i{width:21px;height:21px;flex:0 0 21px;display:grid;place-items:center;border-radius:7px;background:rgba(124,157,180,.13);font-style:normal;font-size:10px;font-weight:900;color:#a9c6dc}
+.ai08-options .qopt span{flex:1;min-width:0;line-height:1.5}
+.ai08-options .qopt .ck{flex:0 0 auto;color:#85e2c8;font-size:14px;font-weight:900}
+.ai08-options .qopt .ck.x{color:#f19a9a}
+.ai08-options .qopt.correct{border-color:rgba(68,207,158,.65)!important;background:rgba(27,137,100,.18)!important}
+.ai08-options .qopt.incorrect{border-color:rgba(222,110,110,.65)!important;background:rgba(153,48,64,.18)!important}
+.ai08-options .qopt.dim{opacity:.62}
+.ai08-options .qopt:disabled{cursor:default;opacity:1}
+.ai08-question .qfb{margin-top:12px;padding:12px;border-radius:12px;border:1px solid rgba(67,193,151,.34);background:rgba(27,119,91,.14)}
+.ai08-question .qfb.no{border-color:rgba(217,118,118,.32);background:rgba(133,54,65,.13)}
+.ai08-question .qfb>b{font-size:11px;color:#91e2c9}
+.ai08-question .qfb.no>b{color:#f0b0b0}
+.ai08-question .qfb p{font-size:11px;line-height:1.62;color:#b9cbd8;margin:8px 0 0}
+.ai08-question .qfb p strong{color:#e8f5f2}
+.ai08-readmore{margin-top:10px}
+.ai08-readmore>button{font-size:10px!important;padding:7px 12px!important}
+.ai08-expanded{margin-top:10px;padding:12px;border:1px solid rgba(112,157,185,.18);border-radius:12px;background:rgba(10,26,40,.54)}
+.ai08-expanded section+section{border-top:1px solid rgba(121,157,180,.14);margin-top:12px;padding-top:11px}
+.ai08-expanded h4{font-size:11px;color:#8fe0cb;margin:0 0 7px}
+.ai08-expanded .ai08-rich{font-size:10px;line-height:1.72;color:#b9cad7}
+.ai08-source>div{display:flex;flex-direction:column;gap:5px}
+.ai08-source b{font-size:10px;color:#e3edf4}
+.ai08-source span{font-size:10px;color:#8fdcc8}
+.ai08-source small{font-size:9px;line-height:1.45;color:#8299ac}
+.ai08-loading{text-align:center;padding:24px!important}
+.ai08-loader{width:24px;height:24px;border:2px solid rgba(122,167,188,.2);border-top-color:#70d8bd;border-radius:50%;margin:0 auto 12px;animation:ai08spin .8s linear infinite}
+@keyframes ai08spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.ai08-loader{animation:none}}

@@ -1,0 +1,57 @@
+
+/* Shbace Medical · shared visual language for Pediatrics Banks 07 and 08 */
+.cc-page,.ai08-page{padding:8px 0 30px!important}
+.cc-topline,.ai08-topline{gap:9px;margin:3px 0 10px}
+.cc-bank-number,.ai08-bank-number{border-radius:999px;padding:4px 9px;font-size:9px;font-weight:900;letter-spacing:.1em}
+.cc-page>h1,.ai08-page>h1{font-size:clamp(22px,6vw,27px);line-height:1.2;letter-spacing:-.035em;margin:8px 0 5px;color:var(--text,#edf5fb)}
+.cc-page>.sub,.ai08-page>.sub{font-size:11px;line-height:1.55;margin:0 0 12px;color:var(--muted,#9db2c4)}
+.cc-section-heading,.ai08-section-heading{margin:18px 2px 9px;font-size:14px;letter-spacing:-.01em}
+.cc-list,.ai08-list{display:flex;flex-direction:column;gap:9px}
+.cc-list-card,.ai08-list-card{min-height:72px!important;gap:12px!important;padding:12px 13px!important;border-radius:15px!important;border:1px solid rgba(122,163,190,.17)!important;background:linear-gradient(145deg,rgba(23,43,63,.92),rgba(12,27,44,.97))!important;box-shadow:0 7px 18px rgba(0,0,0,.10)!important;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.cc-list-card:active,.ai08-list-card:active{transform:scale(.99)}
+.cc-list-copy strong,.ai08-list-copy strong{font-size:13px;line-height:1.35;font-weight:800;color:#edf5fa}
+.cc-list-copy small,.ai08-list-copy small{font-size:10px;line-height:1.4;color:#9db2c4}
+.cc-sys-icon,.cc-topic-number,.cc-case-icon,.ai08-sys-icon,.ai08-topic-number{width:43px;height:43px;flex:0 0 43px;border-radius:13px;display:grid;place-items:center;overflow:hidden}
+.cc-sys-icon,.ai08-sys-icon{background:linear-gradient(145deg,#193b57,#10243b)!important;border:1px solid rgba(123,181,218,.28)!important;color:#b6e7ff!important;box-shadow:inset 0 1px rgba(255,255,255,.06),0 5px 13px rgba(0,0,0,.12)}
+.cc-topic-number,.ai08-topic-number{background:linear-gradient(145deg,#1b3d4d,#122c3b)!important;border:1px solid rgba(107,204,184,.25)!important;color:#a8f0db!important}
+.cc-case-icon{background:linear-gradient(145deg,#1a4c4d,#12303d)!important;border:1px solid rgba(107,221,191,.27)!important}
+.cc-icon-art img,.ai08-icon-art img{width:100%;height:100%;max-width:100%;max-height:100%;object-fit:cover;border-radius:11px}
+.shb-bank-line-icon{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.cc-progress,.ai08-progress{margin:12px 0;border-radius:14px;padding:11px 12px}
+.cc-description,.ai08-description{border-radius:14px!important;margin:12px 0!important;padding:13px 14px!important}
+.cc-question-list,.ai08-question-list{display:flex;flex-direction:column;gap:12px}
+.cc-question,.ai08-question{padding:14px!important;border-radius:16px!important;border:1px solid rgba(119,157,184,.18)!important;background:linear-gradient(155deg,rgba(19,39,57,.98),rgba(11,25,42,.99))!important;box-shadow:0 9px 24px rgba(0,0,0,.13)!important;scroll-margin-top:18px}
+.cc-question-head,.ai08-question-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:11px}
+.cc-question .qid,.ai08-question .qid{font-size:9px;letter-spacing:.1em;color:#8faac0;font-weight:900}
+.cc-question .qstem,.ai08-question .qstem{font-size:13px!important;line-height:1.62!important;color:#f1f6fa!important;font-weight:750!important;margin:0 0 13px!important;letter-spacing:-.005em}
+.cc-options,.ai08-options{display:flex;flex-direction:column;gap:7px}
+.cc-options .qopt,.ai08-options .qopt{width:100%;display:flex!important;align-items:flex-start!important;gap:9px!important;min-height:0!important;text-align:left!important;white-space:normal!important;padding:10px 11px!important;border-radius:11px!important;line-height:1.5!important;font-size:11px!important;border:1px solid rgba(122,161,186,.18)!important;background:rgba(20,42,61,.74)!important;color:#d6e3ec!important}
+.cc-options .qopt i,.ai08-options .qopt i{width:22px;height:22px;flex:0 0 22px;display:grid;place-items:center;border-radius:7px;background:rgba(124,157,180,.13);font-style:normal;font-size:10px;font-weight:900;color:#b5d1e4}
+.cc-options .qopt>span:not(.ck),.ai08-options .qopt>span:not(.ck){flex:1;min-width:0;line-height:1.5}
+.cc-options .qopt.correct,.ai08-options .qopt.correct{border-color:rgba(68,207,158,.68)!important;background:rgba(27,137,100,.19)!important}
+.cc-options .qopt.incorrect,.ai08-options .qopt.incorrect{border-color:rgba(239,116,116,.6)!important;background:rgba(142,48,55,.17)!important}
+.cc-options .qopt.dim,.ai08-options .qopt.dim{opacity:.62}
+.cc-options .qopt:disabled,.ai08-options .qopt:disabled{cursor:default;opacity:1}
+.cc-options .qopt .ck,.ai08-options .qopt .ck{flex:0 0 auto;color:#85e2c8;font-size:14px;font-weight:900}
+.cc-options .qopt .ck.x,.ai08-options .qopt .ck.x{color:#f19a9a}
+.cc-vignette{border-radius:15px;padding:14px 15px;margin:12px 0 14px}
+.cc-vignette h2{font-size:15px;line-height:1.4}
+.cc-rich,.ai08-rich{font-size:11px;line-height:1.72}
+.cc-readmore,.ai08-readmore{margin-top:11px}
+.cc-expanded,.ai08-expanded{margin-top:10px;padding:12px;border-radius:12px;border:1px solid rgba(115,164,190,.15);background:rgba(13,31,47,.68)}
+.cc-expanded section,.ai08-expanded section{margin:0 0 12px}
+.cc-expanded section:last-child,.ai08-expanded section:last-child{margin-bottom:0}
+.cc-expanded h4,.ai08-expanded h4{font-size:10px;letter-spacing:.06em;text-transform:uppercase;margin:0 0 6px;color:#8fe0cb}
+.cc-source,.ai08-source{border-top:1px solid rgba(120,160,185,.14);padding-top:10px}
+.cc-back,.ai08-back{margin:0 0 8px}
+@media(max-width:360px){.cc-list-card,.ai08-list-card{gap:9px!important;padding:11px!important}.cc-sys-icon,.cc-topic-number,.cc-case-icon,.ai08-sys-icon,.ai08-topic-number{width:39px;height:39px;flex-basis:39px}.cc-question,.ai08-question{padding:11px!important}}
+@media(prefers-reduced-motion:reduce){.cc-list-card,.ai08-list-card{transition:none}}
+
+/* Original, hand-authored SVG icon set for Banks 07 and 08 */
+.shb-bank-emblem{display:block;width:76%;height:76%;overflow:visible}
+.shb-bank-emblem-07{filter:drop-shadow(0 0 8px rgba(89,235,197,.34))}
+.shb-bank-emblem-08{filter:drop-shadow(0 0 9px rgba(106,178,255,.38))}
+.shb-bank-line-icon{display:block;width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;overflow:visible}
+.cc-icon-art,.ai08-icon-art{display:grid;place-items:center}
+.cc-icon-art .shb-bank-line-icon{color:#9CEBD8}
+.ai08-icon-art .shb-bank-line-icon{color:#A9D9FF}

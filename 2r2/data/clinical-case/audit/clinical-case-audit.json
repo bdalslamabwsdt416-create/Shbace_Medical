@@ -1,0 +1,235 @@
+{
+  "schema": "shbace-clinical-case-audit-v1",
+  "source_archive": "Clinical case.zip",
+  "accepted_markdown_files_found": 35,
+  "unique_accepted_markdown_files_used": 24,
+  "base_accepted_files": 11,
+  "a4_corrected_files_identical_to_base": 11,
+  "nmt10_nmt11_accepted_files": 13,
+  "accepted_sections_with_recoverable_question_stems": 108,
+  "accepted_sections_without_dedicated_question_block": 59,
+  "parsed_source_records_before_deduplication": 108,
+  "unique_student_facing_cards_after_exact_deduplication": 90,
+  "exact_duplicate_records_removed": 18,
+  "mcq_cards": 90,
+  "open_ended_cards_with_stem": 0,
+  "mcq_answer_keys_resolved": 90,
+  "mcq_answer_keys_unresolved": 0,
+  "open_ended_records_with_source_answer": 0,
+  "system_counts": {
+    "Rheumatology": 5,
+    "Cardiovascular System": 6,
+    "Endocrinology": 6,
+    "Gastroenterology": 3,
+    "Infectious Diseases": 7,
+    "Emergency & Fluid Balance": 2,
+    "Genetics": 2,
+    "Growth & Development": 11,
+    "Hematology": 8,
+    "Neonatology": 15,
+    "Neurology": 8,
+    "Nephrology": 7,
+    "Respiratory": 10
+  },
+  "topic_counts": {
+    "Approach to fever and arthritis": 2,
+    "Rheumatic fever & carditis": 2,
+    "Infective endocarditis": 2,
+    "Congenital hypothyroidism": 2,
+    "Diabetes & diabetic ketoacidosis": 4,
+    "Pyloric stenosis": 2,
+    "Candidiasis & mucocutaneous infection": 1,
+    "Dehydration, shock & fluid balance": 2,
+    "IgA vasculitis & renal involvement": 3,
+    "Down syndrome & chromosomal disorders": 2,
+    "Developmental milestones": 2,
+    "Gastro-oesophageal reflux": 1,
+    "Malnutrition & feeding": 4,
+    "Vitamin D toxicity & renal manifestations": 1,
+    "Sickle cell disease & complications": 2,
+    "Iron deficiency & childhood anemia": 5,
+    "G6PD deficiency & haemolysis": 1,
+    "Measles & viral exanthems": 1,
+    "Roseola & febrile seizures": 2,
+    "Rubella & viral exanthems": 1,
+    "Neonatal jaundice & cholestasis": 6,
+    "Heart failure in infancy": 2,
+    "Neonatal sepsis & meningitis": 2,
+    "Neonatal birth injury": 1,
+    "Neonatal hypothermia & thermal care": 2,
+    "Neonatal hypocalcemia in an infant of a diabetic mother": 1,
+    "Neonatal skin findings": 1,
+    "Prematurity & neonatal respiratory disease": 1,
+    "Cerebral palsy & developmental delay": 1,
+    "Guillain–Barré syndrome": 4,
+    "Urinary tract infection": 4,
+    "Hypertensive encephalopathy": 3,
+    "Chronic kidney disease & renal function": 3,
+    "Viral upper respiratory infection": 2,
+    "Retropharyngeal abscess & upper-airway obstruction": 1,
+    "Pneumothorax & air leak": 2,
+    "Tuberculosis & chronic cough": 1,
+    "Bronchiolitis & viral wheeze": 4,
+    "Pneumonia complicated by sepsis": 1,
+    "Respiratory syncytial virus & bronchiolitis": 1,
+    "Intussusception & acute abdominal pain": 1,
+    "Infant feeding & overfeeding": 1,
+    "Infant feeding & nutritional assessment": 2,
+    "Congenital diaphragmatic hernia": 1
+  },
+  "pending_record_headings": [
+    "Cardiovascular_System_Accepted.md: C1",
+    "Cardiovascular_System_Accepted.md: C2",
+    "Cardiovascular_System_Accepted.md: C3–C4",
+    "Cardiovascular_System_Accepted.md: C5",
+    "Cardiovascular_System_Accepted.md: C6",
+    "Cardiovascular_System_Accepted.md: C7",
+    "Cardiovascular_System_Accepted.md: C12",
+    "Cardiovascular_System_Accepted.md: C13",
+    "Endocrinology_Metabolism_Accepted.md: E1",
+    "Endocrinology_Metabolism_Accepted.md: E2",
+    "Endocrinology_Metabolism_Accepted.md: E3",
+    "Gastroenterology_Fluid_Balance_Accepted.md: G1",
+    "Gastroenterology_Fluid_Balance_Accepted.md: G2",
+    "Gastroenterology_Fluid_Balance_Accepted.md: G3",
+    "Gastroenterology_Fluid_Balance_Accepted.md: G5",
+    "Gastroenterology_Fluid_Balance_Accepted.md: G6",
+    "Gastroenterology_Fluid_Balance_Accepted.md: G7–G8",
+    "Gastroenterology_Fluid_Balance_Accepted.md: G9",
+    "Gastroenterology_Fluid_Balance_Accepted.md: G10",
+    "Genetics_Dysmorphology_Accepted.md: G1",
+    "Genetics_Dysmorphology_Accepted.md: G2",
+    "Genetics_Dysmorphology_Accepted.md: G3",
+    "Genetics_Dysmorphology_Accepted.md: G4",
+    "Growth_Nutrition_Development_Accepted.md: N1",
+    "Growth_Nutrition_Development_Accepted.md: N2",
+    "Growth_Nutrition_Development_Accepted.md: N3",
+    "Growth_Nutrition_Development_Accepted.md: N4",
+    "Growth_Nutrition_Development_Accepted.md: N5",
+    "Growth_Nutrition_Development_Accepted.md: N6",
+    "Growth_Nutrition_Development_Accepted.md: N8",
+    "Growth_Nutrition_Development_Accepted.md: N9",
+    "Hematology_Oncology_Accepted.md: H1",
+    "Hematology_Oncology_Accepted.md: H2",
+    "Hematology_Oncology_Accepted.md: H3",
+    "Hematology_Oncology_Accepted.md: H4",
+    "Hematology_Oncology_Accepted.md: H7",
+    "Hematology_Oncology_Accepted.md: H8–H9",
+    "Hematology_Oncology_Accepted.md: H10–H11",
+    "Hematology_Oncology_Accepted.md: H12–H14",
+    "Hematology_Oncology_Accepted.md: H21",
+    "Infectious_Diseases_Accepted.md: I1",
+    "Infectious_Diseases_Accepted.md: I2",
+    "Infectious_Diseases_Accepted.md: I3",
+    "Infectious_Diseases_Accepted.md: I4",
+    "Infectious_Diseases_Accepted.md: I5",
+    "Infectious_Diseases_Accepted.md: I6",
+    "Infectious_Diseases_Accepted.md: I7",
+    "Infectious_Diseases_Accepted.md: I8–I9",
+    "Infectious_Diseases_Accepted.md: I10",
+    "Infectious_Diseases_Accepted.md: I11",
+    "Neurology_Accepted.md: N1",
+    "Neurology_Accepted.md: N2",
+    "Renal_Urinary_System_Accepted.md: R1",
+    "Renal_Urinary_System_Accepted.md: R2",
+    "Renal_Urinary_System_Accepted.md: R3",
+    "Renal_Urinary_System_Accepted.md: R4",
+    "Renal_Urinary_System_Accepted.md: R5",
+    "Renal_Urinary_System_Accepted.md: R6",
+    "Renal_Urinary_System_Accepted.md: R7"
+  ],
+  "publication_status": "MATCHED-ONLY BANK READY FOR APP QA — 90 matched MCQs with complete options and verified answer keys. The 59 Accepted sections without a recoverable dedicated question block remain excluded and preserved separately. No production deployment or Android changes made.",
+  "safety_notes": [
+    "Only Accepted.md records were parsed as question sources.",
+    "All 11 A4_Corrected copies were confirmed text-identical to their corresponding base Accepted files and were not double-counted.",
+    "Progress and Rejected sources were excluded.",
+    "Only exact stem-and-option duplicates were merged; all recorded source appearances were retained.",
+    "59 Accepted sections without a recoverable dedicated question stem are excluded from the student-facing matched bank and preserved separately; they are not labelled as incorrect or rejected.",
+    "All 90 student-facing records are explicitly marked matched; all have complete option arrays and a valid answer key traceable to the Accepted source record.",
+    "Nine incomplete option arrays were reconstructed from their verbatim Accepted source question blocks and their source-provided answers; no answer was inferred from proximity or guessed.",
+    "No production deployment or Android changes were made."
+  ],
+  "source_occurrences_preserved": 108,
+  "cards_with_multiple_source_appearances": 16,
+  "manual_content_classification_overrides": {
+    "CC-0011": {
+      "system": "Infectious Diseases",
+      "topic": "Candidiasis & mucocutaneous infection"
+    },
+    "CC-0020": {
+      "system": "Growth & Development",
+      "topic": "Vitamin D toxicity & renal manifestations"
+    },
+    "CC-0028": {
+      "system": "Infectious Diseases",
+      "topic": "Rubella & viral exanthems"
+    },
+    "CC-0031": {
+      "system": "Cardiovascular System",
+      "topic": "Heart failure in infancy"
+    },
+    "CC-0035": {
+      "system": "Neonatology",
+      "topic": "Neonatal hypocalcemia in an infant of a diabetic mother"
+    },
+    "CC-0038": {
+      "system": "Neurology",
+      "topic": "Cerebral palsy & developmental delay"
+    },
+    "CC-0046": {
+      "system": "Infectious Diseases",
+      "topic": "Viral upper respiratory infection"
+    },
+    "CC-0052": {
+      "system": "Respiratory",
+      "topic": "Pneumonia complicated by sepsis"
+    },
+    "CC-0053": {
+      "system": "Respiratory",
+      "topic": "Respiratory syncytial virus & bronchiolitis"
+    },
+    "CC-0054": {
+      "system": "Cardiovascular System",
+      "topic": "Heart failure in infancy"
+    },
+    "CC-0061": {
+      "system": "Growth & Development",
+      "topic": "Developmental milestones"
+    },
+    "CC-0062": {
+      "system": "Growth & Development",
+      "topic": "Infant feeding & overfeeding"
+    },
+    "CC-0064": {
+      "system": "Growth & Development",
+      "topic": "Infant feeding & nutritional assessment"
+    },
+    "CC-0065": {
+      "system": "Growth & Development",
+      "topic": "Infant feeding & nutritional assessment"
+    },
+    "CC-0066": {
+      "system": "Rheumatology",
+      "topic": "Approach to fever and arthritis"
+    },
+    "CC-0071": {
+      "system": "Infectious Diseases",
+      "topic": "Viral upper respiratory infection"
+    },
+    "CC-0077": {
+      "system": "Neonatology",
+      "topic": "Neonatal hypothermia & thermal care"
+    },
+    "CC-0079": {
+      "system": "Neonatology",
+      "topic": "Congenital diaphragmatic hernia"
+    },
+    "CC-0089": {
+      "system": "Respiratory",
+      "topic": "Pneumothorax & air leak"
+    }
+  },
+  "matched_student_facing_cards": 90,
+  "option_arrays_reconstructed_from_accepted_source": 9,
+  "accepted_sections_without_recoverable_stem_excluded": 59
+}
