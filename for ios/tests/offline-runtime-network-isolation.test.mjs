@@ -21,7 +21,7 @@ test('question bank startup is local after install and network-enabled only for 
   assert.match(loader, /PACKAGE_CACHE_NAME='shbace-medical-offline-v2'/);
   assert.match(loader, /cacheHit\(packageCache/);
   assert.match(loader, /is missing from the installed offline storage/);
-  assert.match(loader, /fetchText\(baseURL,cache,packageCache\)/, 'reviewed bank base must use package cache too');
+  assert.match(loader, /fetchText\(baseURL,cache,packageCache,verified\)/, 'reviewed bank base must use package cache too');
 });
 
 test('service worker is local-only except explicitly tagged updater traffic', () => {
@@ -34,7 +34,7 @@ test('service worker is local-only except explicitly tagged updater traffic', ()
   assert.match(worker, /url\.origin !== self\.location\.origin/);
   assert.doesNotMatch(worker, /refreshCachedPwaVersion|networkFirstOnPackageMismatch/);
   assert.match(worker, /if \(request.method !== 'GET'\)/);
-  assert.equal((worker.match(/\bfetch\s*\(/g) || []).length, 3, 'tagged updater and bootstrap are the only network paths');
+  assert.equal((worker.match(/\bfetch\s*\(/g) || []).length, 4, 'tagged updater and bootstrap fallback are the only network paths');
 });
 
 test('startup update metadata is local; manual and seven-day checks opt into network', () => {

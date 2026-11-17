@@ -119,7 +119,7 @@ function createServiceWorkerHarness(options) {
   }
 
   vm.runInNewContext(options.source, {
-    self, caches, fetch: fakeFetch, URL, Response, Promise
+    self, caches, fetch: fakeFetch, URL, Response, Promise, setTimeout, clearTimeout
   });
 
   return {
