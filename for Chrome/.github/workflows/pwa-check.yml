@@ -1,0 +1,25 @@
+name: PWA checks
+on:
+  pull_request:
+    paths: ["to me/**", "for Computer/**", "for Chrome/**"]
+  push:
+    branches-ignore: [main]
+    paths: ["to me/**", "for Computer/**", "for Chrome/**"]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: ["to me", "for Computer", "for Chrome"]
+    defaults:
+      run:
+        working-directory: ${{ matrix.app }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run test:unit
+      - run: npm run check:bank
+      - run: npm run build:pwa

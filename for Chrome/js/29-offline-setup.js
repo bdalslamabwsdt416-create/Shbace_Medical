@@ -1,23 +1,24 @@
 (function(){
 'use strict';
 
-/* Offline package installer + update flow for the Chrome Android PWA.
-   - Everything that can be prepared is prepared silently while the splash screen is visible.
-   - The setup / update window is built hidden during the splash and revealed the moment the splash is gone.
-   - An update downloads only the changed files into a staging cache, verifies them (size + SHA-256) and only
-     then swaps them into the installed package, so the installed app is never left half old / half new.
-   - The window can always be dismissed with "Later"; it never traps the student outside the app. */
+/* Native Capacitor builds ship a complete local asset bundle inside the signed APK.
+   Do not run the browser/PWA Cache Storage installer or updater inside the APK. */
+if(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) return;
 
-var CACHE_NAME='shbace-chrome-offline-v1.3.4';          /* must match sw.js (checked by scripts/build-pwa.mjs) */
-var STAGE_CACHE=CACHE_NAME+'-staging';
+/* Persistent offline-package cache. NEVER rotate this name for an app release: the manifest/hash planner updates only changed files inside it. */
+var CACHE_NAME='shbace-chrome-offline-v1.3.4';
+var STAGING_NAME='shbace-staging-offline';
+var INSTALLED_KEY='installed';
+/* Update checks are throttled: one successful network check every 7 days; after a failed attempt (offline) retry no sooner than 2 hours. */
+var CHECK_OK_KEY='shbace_pkg_check_ok_v1',CHECK_TRY_KEY='shbace_pkg_check_try_v1';
+var CHECK_EVERY=7*24*60*60*1000,CHECK_RETRY=2*60*60*1000;
+var PENDING_KEY='shbace_pkg_update_pending_v1',NOTIF_ID='update-available';
+var manifestFromNetwork=false,plan=null;
 var DB_NAME='shbace-medical-offline-state-v1';
 var MANIFEST_URL=new URL('./offline-assets-manifest.json',location.href).href;
-var INSTALLED_URL=new URL('./__shbace_offline_installed__',location.href).href;   /* manifest of the verified, installed package */
 var READY_URL=new URL('./__shbace_offline_ready__',location.href).href;
-var LATER_KEY='shbace_offline_later_v1';
-var REMOTE_TIMEOUT_MS=4000;
-var AUDIT_CONCURRENCY=3;
-var DOWNLOAD_WORKERS=2;
+var manifest=null,cache=null,ui=null,started=false;
+var verifiedCount=0,verifiedBytes=0,donePaths=Object.create(null),errors=[];
 var STAGES=[
  {id:'app',label:'Application files'},
  {id:'images',label:'Images and visual assets'},
@@ -26,10 +27,53 @@ var STAGES=[
  {id:'verify',label:'Integrity verification'}
 ];
 
-var ui=null,started=false,state=null,cache=null,plan=null;
-var verifiedCount=0,verifiedBytes=0,donePaths=Object.create(null),errors=[];
-var stageCounts={app:0,images:0,data:0,other:0},stageDone={app:0,images:0,data:0,other:0};
-
+function lsNum(key){try{return Number(localStorage.getItem(key))||0}catch(e){return 0}}
+function lsSet(key,value){try{localStorage.setItem(key,String(value))}catch(e){}}
+function setPending(n){
+ if(n>0)lsSet(PENDING_KEY,n);else{try{localStorage.removeItem(PENDING_KEY)}catch(e){}}
+ try{
+  if(n>0){if(typeof window.shbAddNotif==='function')window.shbAddNotif(NOTIF_ID,'A new update is available',n+' file'+(n===1?'':'s')+' changed. Open Settings → App updates → Check for updates to install it. Your progress is kept.','settings')}
+  else if(typeof window.shbRemoveNotif==='function')window.shbRemoveNotif(NOTIF_ID);
+ }catch(e){}
+}
+var VER_KEY='shbace_pkg_version_installed_v1',VER_AVAIL_KEY='shbace_pkg_version_available_v1',EXAM_KEY='shbace_exam_goal_planner_v1',SNOOZE_DAYS=2,EXAM_QUIET_DAYS=7;
+function lsGetJson(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}}
+function lsSetJson(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function lsDel(k){try{localStorage.removeItem(k)}catch(e){}}
+/* Version + short release summary from pwa-version.json (network first, 6 s limit). Uses "summary" when present, otherwise the 3 newest releaseNotes. */
+function fetchVersionInfo(){
+ return new Promise(function(resolve){
+  var done=false;function fin(v){if(!done){done=true;resolve(v)}}
+  setTimeout(function(){fin(null)},6000);
+  try{
+   fetch(new URL('./pwa-version.json',location.href).href,{cache:'no-store',credentials:'same-origin'}).then(function(r){if(!r.ok)throw new Error('http');return r.json()}).then(function(j){
+    var notes=Array.isArray(j.summary)?j.summary:(typeof j.summary==='string'&&j.summary?[j.summary]:(Array.isArray(j.releaseNotes)?j.releaseNotes.slice(0,3):[]));
+    fin({version:String(j.version||''),displayVersion:String(j.displayVersion||j.version||''),releaseDate:String(j.releaseDate||''),
+     notes:notes.slice(0,3).map(function(x){x=String(x);return x.length>150?x.slice(0,147)+'…':x})});
+   }).catch(function(){fin(null)});
+  }catch(e){fin(null)}
+ });
+}
+function rememberInstalled(info){if(info)lsSetJson(VER_KEY,{displayVersion:info.displayVersion,releaseDate:info.releaseDate})}
+function markInstalledNow(){
+ var av=lsGetJson(VER_AVAIL_KEY);
+ if(av){rememberInstalled(av);lsDel(VER_AVAIL_KEY)}else fetchVersionInfo().then(rememberInstalled);
+}
+/* True when any saved exam is today or within the next EXAM_QUIET_DAYS days: the automatic window stays quiet (the bell still shows the update). */
+function examSoon(){
+ var items=lsGetJson(EXAM_KEY);if(!Array.isArray(items))return false;
+ var n=new Date(),t=Date.UTC(n.getFullYear(),n.getMonth(),n.getDate());
+ return items.some(function(x){
+  var p=String(x&&x.date||'').split('-').map(Number);if(p.length!==3||p.some(isNaN))return false;
+  var d=Math.round((Date.UTC(p[0],p[1]-1,p[2])-t)/86400000);return d>=0&&d<=EXAM_QUIET_DAYS;
+ });
+}
+function checkDue(){
+ var now=Date.now(),ok=lsNum(CHECK_OK_KEY),tried=lsNum(CHECK_TRY_KEY);
+ if(ok&&ok<=now&&now-ok<CHECK_EVERY)return false;
+ if(tried&&tried<=now&&now-tried<CHECK_RETRY)return false;
+ return true;
+}
 function standalone(){
  try{return !!(navigator.standalone===true || (window.matchMedia&&(
   window.matchMedia('(display-mode: standalone)').matches ||
@@ -63,22 +107,6 @@ function urlFor(path){
  return new URL(path.split('/').map(encodeURIComponent).join('/'),new URL('./',location.href)).href;
 }
 function wait(ms){return new Promise(function(resolve){setTimeout(resolve,ms)})}
-function jsonResponse(value){
- return new Response(JSON.stringify(value),{status:200,headers:{'content-type':'application/json'}});
-}
-function mapLimit(items,limit,fn){
- var index=0,results=new Array(items.length);
- function worker(){
-  if(index>=items.length)return Promise.resolve();
-  var i=index++;
-  return Promise.resolve(fn(items[i],i)).then(function(r){results[i]=r}).then(worker);
- }
- var workers=[];
- for(var k=0;k<Math.min(limit,items.length);k++)workers.push(worker());
- return Promise.all(workers).then(function(){return results});
-}
-
-/* ───────────────────────── overlay (built hidden during the splash) ───────────────────────── */
 function mount(){
  if(ui&&ui.root&&ui.root.isConnected)return ui;
  var root=document.createElement('div');
@@ -87,36 +115,26 @@ function mount(){
  root.setAttribute('role','dialog');
  root.setAttribute('aria-modal','true');
  root.setAttribute('aria-labelledby','shbOfflineTitle');
- root.setAttribute('aria-hidden','true');
- root.style.visibility='hidden';
  root.innerHTML=
   '<div class="shb-offline-card">'+
-   '<div class="shb-offline-brand"><span class="shb-offline-mark">S</span><span>SHBACE <b>MEDICAL</b></span><span class="shb-offline-pill" id="shbOfflinePill">ONE-TIME SETUP</span></div>'+
-   '<div class="shb-offline-kicker" id="shbOfflineKicker">LOCAL INSTALLATION</div>'+
+   '<div class="shb-offline-brand"><span class="shb-offline-mark">S</span><span>SHBACE <b>MEDICAL</b></span><span class="shb-offline-pill">ONE-TIME SETUP</span></div>'+
+   '<div class="shb-offline-kicker">LOCAL INSTALLATION</div>'+
    '<h1 id="shbOfflineTitle">Prepare Shbace for offline study</h1>'+
-   '<p class="shb-offline-intro" id="shbOfflineIntro"></p>'+
+   '<p class="shb-offline-intro">Download the complete app package once. We will save every required file on this device, verify it, and then use the local copy for your study sessions.</p>'+
    '<div class="shb-offline-status" id="shbOfflineStatus" aria-live="polite">Preparing the installation checklist…</div>'+
-   '<div id="shbOfflineProgress">'+
-    '<div class="shb-offline-progress-head"><b id="shbOfflinePercent">0%</b><span id="shbOfflineCount">0 / 0 files</span></div>'+
-    '<div class="shb-offline-track" role="progressbar" aria-label="Offline installation progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="shbOfflineTrack"><i id="shbOfflineBar"></i></div>'+
-    '<div class="shb-offline-bytes"><span id="shbOfflineBytes">0 B / 0 B</span><span id="shbOfflineStage">Waiting</span></div>'+
-    '<div class="shb-offline-stages" id="shbOfflineStages"></div>'+
-   '</div>'+
-   '<div class="shb-offline-warning" id="shbOfflineWarning"></div>'+
+   '<div class="shb-offline-progress-head"><b id="shbOfflinePercent">0%</b><span id="shbOfflineCount">0 / 0 files</span></div>'+
+   '<div class="shb-offline-track" role="progressbar" aria-label="Offline installation progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="shbOfflineTrack"><i id="shbOfflineBar"></i></div>'+
+   '<div class="shb-offline-bytes"><span id="shbOfflineBytes">0 B / 0 B</span><span id="shbOfflineStage">Waiting</span></div>'+
+   '<div class="shb-offline-stages" id="shbOfflineStages"></div>'+
+   '<div class="shb-offline-warning" id="shbOfflineWarning">Keep this app open and connected to the internet until verification finishes.</div>'+
    '<div class="shb-offline-errors" id="shbOfflineErrors" hidden></div>'+
    '<button type="button" class="shb-offline-action" id="shbOfflineAction" disabled>Preparing…</button>'+
-   '<button type="button" class="shb-offline-later" id="shbOfflineLater">Later</button>'+
-   '<p class="shb-offline-footnote" id="shbOfflineFootnote">Your answers and study progress remain in the app’s existing local storage. The browser can still clear site data under storage pressure, so keep regular backups of your progress.</p>'+
+   '<p class="shb-offline-footnote" id="shbOfflineFootnote">Your answers and study progress remain in the app’s existing local storage. iOS storage can still be cleared by the operating system; keep regular backups of your progress.</p>'+
   '</div>';
  document.body.appendChild(root);
  ui={
   root:root,
-  pill:root.querySelector('#shbOfflinePill'),
-  kicker:root.querySelector('#shbOfflineKicker'),
-  title:root.querySelector('#shbOfflineTitle'),
-  intro:root.querySelector('#shbOfflineIntro'),
   status:root.querySelector('#shbOfflineStatus'),
-  progress:root.querySelector('#shbOfflineProgress'),
   percent:root.querySelector('#shbOfflinePercent'),
   count:root.querySelector('#shbOfflineCount'),
   track:root.querySelector('#shbOfflineTrack'),
@@ -127,37 +145,25 @@ function mount(){
   warning:root.querySelector('#shbOfflineWarning'),
   errors:root.querySelector('#shbOfflineErrors'),
   button:root.querySelector('#shbOfflineAction'),
-  later:root.querySelector('#shbOfflineLater'),
   foot:root.querySelector('#shbOfflineFootnote')
  };
  ui.button.addEventListener('click',function(){
-  if(ui.button.dataset.restart==='1'){location.reload();return}
-  if(ui.button.dataset.done==='1'){removeSetupOverlay();return}
-  if(ui.button.dataset.retryCheck==='1'){
-   try{sessionStorage.removeItem(LATER_KEY)}catch(e){}
-   location.reload();return;
-  }
-  startDownload();
+  if(ui.button.dataset.done==='1'){if(plan&&plan.mode==='update'){
+   /* The package is verified and committed. Use the shared safe-restart gate. */
+    window.__SHBACE_OFFLINE_UPDATE_ACTIVE__=false;
+    if(typeof window.shbaceRequestAppReload==='function'){
+     if(!window.shbaceRequestAppReload())removeSetupOverlay();
+    }else location.reload();
+    return}removeSetupOverlay();return}
+  if(ui.button.dataset.retryCheck==='1'){location.reload();return}
+  runPlan();
  });
- ui.later.addEventListener('click',function(){
-  if(started)return;
-  try{sessionStorage.setItem(LATER_KEY,'1')}catch(e){}
-  removeSetupOverlay();
- });
+ if(document.querySelector('.phone.light'))root.classList.add('is-light');
  return ui;
 }
 function removeSetupOverlay(){
  var element=ui&&ui.root;
  if(element&&element.parentNode)element.parentNode.removeChild(element);
-}
-function revealOverlay(){
- if(!ui||!ui.root||!ui.root.isConnected)return;
- var root=ui.root;
- root.classList.toggle('is-light',!!document.querySelector('.phone.light'));
- root.style.visibility='';
- root.removeAttribute('aria-hidden');
- root.classList.add('is-revealed');
- try{ui.button.focus({preventScroll:true})}catch(e){}
 }
 function showInstallHint(){
  if(!iosDevice())return;
@@ -171,8 +177,6 @@ function showInstallHint(){
  });
  document.body.appendChild(hint);
 }
-
-/* ───────────────────────── storage helpers ───────────────────────── */
 function openDb(){
  return new Promise(function(resolve,reject){
   if(!window.indexedDB){reject(new Error('IndexedDB is not available in this browser.'));return}
@@ -216,131 +220,68 @@ function hashBytes(bytes){
  });
 }
 function isQuotaError(e){return !!(e&&(e.name==='QuotaExceededError'||/quota/i.test(e.message||'')))}
-function fileValid(c,file,checkHash){
- return c.match(urlFor(file.path)).then(function(response){
+function fileValid(file,checkHash,target){
+ return (target||cache).match(urlFor(file.path)).then(function(response){
   if(!response||!response.ok)return false;
   return response.arrayBuffer().then(function(bytes){
    if(bytes.byteLength!==file.bytes)return false;
    if(!checkHash)return true;
    return hashBytes(bytes).then(function(sum){return sum===file.sha256});
   }).catch(function(){return false});
- }).catch(function(){return false});
-}
-function normalizeManifest(data){
- if(!data||data.schema!==1||!Array.isArray(data.files)||!data.files.length||!data.version)return null;
- var total=data.files.reduce(function(sum,f){return sum+(Number(f.bytes)||0)},0);
- data.totalBytes=Number(data.totalBytes)||total;
- data.fileCount=data.files.length;
- return data;
-}
-function readCachedJson(c,url){
- return c.match(url).then(function(hit){return hit&&hit.ok?hit.json():null}).catch(function(){return null});
-}
-
-/* ───────────────────────── silent check (runs under the splash) ───────────────────────── */
-/* Reads the server's current package list. Network only (the service worker never answers this URL from a
-   cache), with a short timeout so a weak connection can never hold the check hostage. Null = unknown / offline. */
-function fetchRemoteManifest(){
- if(navigator.onLine===false)return Promise.resolve(null);
- var ctl=('AbortController' in window)?new AbortController():null,timer=null;
- var url=MANIFEST_URL+'?__shbace_integrity=manifest-'+Date.now();
- var request=fetch(url,{credentials:'same-origin',cache:'no-store',signal:ctl?ctl.signal:undefined}).then(function(r){
-  if(!r.ok)throw new Error('HTTP '+r.status);
-  return r.json();
  });
- var timeout=new Promise(function(resolve,reject){
-  timer=setTimeout(function(){if(ctl)try{ctl.abort()}catch(e){}reject(new Error('timeout'))},REMOTE_TIMEOUT_MS);
- });
- return Promise.race([request,timeout]).then(function(data){clearTimeout(timer);return normalizeManifest(data)},function(){clearTimeout(timer);return null});
 }
-/* The manifest of the package that is verified and installed on this device. Older releases kept it under the
-   network manifest URL, so that copy is accepted only when it matches the recorded installed version. */
-function readInstalled(c){
- return dbGet('meta','ready').catch(function(){return null}).then(function(record){
-  return readCachedJson(c,INSTALLED_URL).then(function(m){
-   m=normalizeManifest(m);
-   if(m)return {record:record||null,manifest:m};
-   if(!record||!record.verified)return {record:record||null,manifest:null};
-   return readCachedJson(c,MANIFEST_URL).then(function(legacy){
-    legacy=normalizeManifest(legacy);
-    return {record:record,manifest:legacy&&legacy.version===record.version?legacy:null};
+function cleanupPreviousCaches(){
+ /* Keep only the current manifest assets, its manifest and its ready marker in
+    the active package cache. This also removes stale files left by older releases. */
+ var keep=Object.create(null);
+ manifest.files.forEach(function(file){keep[urlFor(file.path)]=true});
+ keep[MANIFEST_URL]=true;
+ keep[READY_URL]=true;
+ keep[new URL('./',location.href).href]=true;
+ return cache.keys().then(function(requests){
+  return Promise.all(requests.filter(function(request){return !keep[request.url]}).map(function(request){
+   return cache.delete(request).then(function(ok){return {name:request.url,ok:ok}}).catch(function(){return {name:request.url,ok:false}});
+  }));
+ }).then(function(internalResults){
+  return caches.keys().then(function(names){
+   var stale=names.filter(function(name){
+    return (name.indexOf('shbace-chrome-offline-')===0&&name!==CACHE_NAME)||name.indexOf('shbace-to-me-chrome-offline-')===0;
+   });
+   return Promise.all(stale.map(function(name){
+    return caches.delete(name).then(function(ok){return {name:name,ok:ok}}).catch(function(){return {name:name,ok:false}});
+   })).then(function(namedResults){return internalResults.concat(namedResults)});
+  });
+ });
+}
+function loadManifest(){
+ return caches.open(CACHE_NAME).then(function(c){
+  /* Network first: a stale cached copy of the file list makes size/SHA checks fail against newer files.
+     The cached copy is only a fallback for when the device is offline. */
+  manifestFromNetwork=false;
+  var ctl=null,timer=null;
+  try{ctl=new AbortController();timer=setTimeout(function(){try{ctl.abort()}catch(e){}},10000)}catch(e){}
+  return fetch(MANIFEST_URL,{credentials:'same-origin',cache:'no-store',signal:ctl?ctl.signal:undefined}).then(function(r){
+   if(timer)clearTimeout(timer);
+   if(!r.ok)throw new Error('Offline asset manifest returned HTTP '+r.status+'.');
+   var copy=r.clone();
+   return r.json().then(function(data){manifestFromNetwork=true;
+    return c.put(MANIFEST_URL,copy).catch(function(){}).then(function(){return data});
+   });
+  }).catch(function(err){
+   if(timer)clearTimeout(timer);
+   return c.match(MANIFEST_URL).then(function(hit){
+    if(hit)return hit.json();
+    throw err;
    });
   });
+ }).then(function(data){
+  if(!data||data.schema!==1||!Array.isArray(data.files)||!data.files.length||!data.version)
+   throw new Error('The offline asset manifest is missing or invalid. Reconnect and reload the installed app.');
+  var total=data.files.reduce(function(sum,f){return sum+(Number(f.bytes)||0)},0);
+  data.totalBytes=Number(data.totalBytes)||total;
+  data.fileCount=data.files.length;
+  return data;
  });
-}
-function auditFiles(c,m){
- return mapLimit(m.files,AUDIT_CONCURRENCY,function(f){
-  return fileValid(c,f,true).then(function(ok){return ok?null:f.path});
- }).then(function(list){return list.filter(Boolean)});
-}
-function diffManifests(installed,remote){
- var before=Object.create(null),after=Object.create(null);
- installed.files.forEach(function(f){before[f.path]=f.sha256});
- remote.files.forEach(function(f){after[f.path]=1});
- return {
-  changed:remote.files.filter(function(f){return before[f.path]!==f.sha256}),
-  removed:installed.files.filter(function(f){return !after[f.path]}).map(function(f){return f.path})
- };
-}
-function writeInstalledState(c,manifestData){
- var record={version:manifestData.version,verified:true,fileCount:manifestData.files.length,totalBytes:manifestData.totalBytes,completedAt:Date.now()};
- return c.put(INSTALLED_URL,jsonResponse(manifestData))
-  .then(function(){return dbPut('meta','ready',record)})
-  .then(function(){return c.put(READY_URL,jsonResponse(record))});
-}
-function ensureReadyMarkers(c,installedManifest){
- return Promise.all([c.match(READY_URL),c.match(INSTALLED_URL)]).then(function(hits){
-  if(hits[0]&&hits[1])return null;
-  return writeInstalledState(c,installedManifest);
- }).catch(function(){});
-}
-function inspect(){
- return caches.open(CACHE_NAME).then(function(c){
-  cache=c;
-  var installedP=readInstalled(c).then(function(inst){
-   var auditP=inst.manifest?auditFiles(c,inst.manifest):Promise.resolve([]);
-   return auditP.then(function(bad){return {inst:inst,bad:bad}});
-  });
-  return Promise.all([installedP,fetchRemoteManifest()]).then(function(res){
-   var inst=res[0].inst,bad=res[0].bad,remote=res[1],installed=inst.manifest;
-   if(installed&&!bad.length){
-    if(!remote||remote.version===installed.version){
-     if(remote)caches.delete(STAGE_CACHE).catch(function(){});
-     return ensureReadyMarkers(c,installed).then(function(){return {kind:'ready'}});
-    }
-    var d=diffManifests(installed,remote);
-    if(!d.changed.length){
-     /* only removals / metadata: nothing to download, adopt the new list silently */
-     return Promise.all(d.removed.map(function(p){return c.delete(urlFor(p)).catch(function(){})}))
-      .then(function(){return writeInstalledState(c,remote)})
-      .then(function(){return {kind:'ready'}});
-    }
-    return {kind:'update',target:remote,installed:installed,changed:d.changed,removed:d.removed};
-   }
-   if(!remote)return {kind:'offline',hadPackage:!!(inst.record||installed),bad:bad};
-   var removed=installed?diffManifests(installed,remote).removed:[];
-   return {kind:(inst.record||installed)?'repair':'first',target:remote,installed:installed,bad:bad,removed:removed};
-  });
- });
-}
-
-/* ───────────────────────── window content ───────────────────────── */
-function buildPlan(s){
- var files=s.kind==='update'?s.changed:s.target.files;
- return {
-  files:files,
-  staging:s.kind==='update',
-  totalBytes:files.reduce(function(sum,f){return sum+(Number(f.bytes)||0)},0)
- };
-}
-function stageMarkup(p){
- var counts={app:0,images:0,data:0,other:0};
- p.files.forEach(function(f){var g=fileGroup(f);counts[g]=(counts[g]||0)+1});
- ui.stages.innerHTML=STAGES.filter(function(s){return s.id!=='verify'&&(counts[s.id]||0)>0}).map(function(s){
-  return '<div class="shb-offline-stage" data-stage="'+s.id+'"><span class="shb-offline-stage-dot"></span><span>'+s.label+'</span><b>0 / '+(counts[s.id]||0)+'</b></div>';
- }).join('')+
- '<div class="shb-offline-stage" data-stage="verify"><span class="shb-offline-stage-dot"></span><span>Integrity verification</span><b>Pending</b></div>';
- return counts;
 }
 function setStatus(text){if(ui)ui.status.textContent=text}
 function setWarning(text){if(ui)ui.warning.textContent=text}
@@ -350,6 +291,16 @@ function setErrorList(items){
  ui.errors.hidden=false;
  ui.errors.innerHTML='<b>Files that still need attention</b><ul>'+items.slice(0,5).map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul>';
 }
+function stageMarkup(){
+ var counts={app:0,images:0,data:0,other:0};
+ plan.files.forEach(function(f){var g=fileGroup(f);counts[g]=(counts[g]||0)+1});
+ ui.stages.innerHTML=STAGES.filter(function(s){return s.id!=='verify'&&(counts[s.id]||0)>0}).map(function(s){
+  return '<div class="shb-offline-stage" data-stage="'+s.id+'"><span class="shb-offline-stage-dot"></span><span>'+s.label+'</span><b>0 / '+(counts[s.id]||0)+'</b></div>';
+ }).join('')+
+ '<div class="shb-offline-stage" data-stage="verify"><span class="shb-offline-stage-dot"></span><span>Integrity verification</span><b>Pending</b></div>';
+ return counts;
+}
+var stageCounts=null,stageDone={app:0,images:0,data:0,other:0};
 function paintProgress(current,verifying){
  if(!ui||!plan)return;
  var total=plan.files.length,done=verifiedCount;
@@ -359,7 +310,7 @@ function paintProgress(current,verifying){
  ui.count.textContent=done+' / '+total+' files';
  ui.track.setAttribute('aria-valuenow',String(pct));
  ui.bar.style.width=pct+'%';
- ui.bytes.textContent=fmtBytes(verifiedBytes)+' / '+fmtBytes(plan.totalBytes);
+ ui.bytes.textContent=fmtBytes(verifiedBytes)+' / '+fmtBytes(plan.bytes);
  ui.stage.textContent=verifying?'Verifying stored files':(current||'Downloading');
  var nodes=ui.stages.querySelectorAll('[data-stage]');
  Array.prototype.forEach.call(nodes,function(node){
@@ -382,110 +333,35 @@ function resetCounters(){
  verifiedCount=0;verifiedBytes=0;donePaths=Object.create(null);
  stageDone={app:0,images:0,data:0,other:0};
 }
-function setLater(label,visible){
- ui.later.textContent=label;
- ui.later.hidden=!visible;
-}
-/* Builds the whole window for the current state. Called while the splash is still running, so that revealing
-   it later costs nothing. */
-function prepareOverlay(s){
- mount();
- resetCounters();
- ui.button.dataset.done='0';ui.button.dataset.restart='0';ui.button.dataset.retryCheck='0';
- ui.progress.hidden=true;setErrorList([]);
- var kind=s.kind;
- if(kind==='first'||kind==='repair'||kind==='update'){
-  plan=buildPlan(s);
-  stageCounts=stageMarkup(plan);
-  ui.progress.hidden=false;
-  ui.count.textContent='0 / '+plan.files.length+' files';
-  ui.bytes.textContent='0 B / '+fmtBytes(plan.totalBytes);
-  ui.percent.textContent='0%';
-  ui.bar.style.width='0%';
-  ui.stage.textContent='Waiting';
-  ui.button.disabled=false;
-  setLater('Later',true);
- }
- if(kind==='first'){
-  ui.pill.textContent='ONE-TIME SETUP';ui.kicker.textContent='LOCAL INSTALLATION';
-  ui.title.textContent='Prepare Shbace for offline study';
-  ui.intro.textContent='Download the complete app package once. We will save every required file on this device, verify it, and then use the local copy for your study sessions.';
-  setStatus('Download the complete local package before using offline mode.');
-  setWarning('One-time package · '+s.target.files.length+' files · '+fmtBytes(s.target.totalBytes)+'. Connect to the internet, tap the button, and keep the app open until verification completes.');
-  ui.button.textContent='Start one-time download';
- }else if(kind==='update'){
-  ui.pill.textContent='UPDATE';ui.kicker.textContent='UPDATE AVAILABLE';
-  ui.title.textContent='A new version is ready';
-  ui.intro.textContent='Only the files that changed are downloaded, and every one is verified before anything is replaced. Your answers, bookmarks and study progress are kept.';
-  setStatus(s.changed.length+(s.changed.length===1?' changed file':' changed files')+' · '+fmtBytes(plan.totalBytes)+'.');
-  setWarning('You can update later. The version already saved on this device keeps working offline until then.');
-  ui.button.textContent='Update now';
- }else if(kind==='repair'){
-  ui.pill.textContent='REPAIR';ui.kicker.textContent='OFFLINE PACKAGE';
-  ui.title.textContent='Restore the offline package';
-  ui.intro.textContent='Some saved files are missing or failed verification. Restore them to keep studying without an internet connection.';
-  setStatus((s.bad&&s.bad.length?s.bad.length+' saved file(s) need to be restored. ':'')+'Verified files are reused and only the missing ones are downloaded.');
-  setWarning('Package · '+s.target.files.length+' files · '+fmtBytes(s.target.totalBytes)+'. Connect to the internet and keep the app open until verification completes.');
-  ui.button.textContent='Restore now';
- }else if(kind==='offline'){
-  ui.pill.textContent=s.hadPackage?'REPAIR':'ONE-TIME SETUP';ui.kicker.textContent=s.hadPackage?'OFFLINE PACKAGE':'LOCAL INSTALLATION';
-  ui.title.textContent=s.hadPackage?'Some offline files need restoring':'Offline setup needs internet';
-  ui.intro.textContent=s.hadPackage
-   ?'Some saved files are missing or failed verification, and the server could not be reached to restore them.'
-   :'The server could not be reached to read the offline package list, so the one-time download cannot start yet.';
-  setStatus('Connect to the internet, then choose Retry. You can keep using the app meanwhile.');
-  setWarning('Nothing was deleted. Your answers and study progress are untouched.');
-  ui.button.textContent='Retry setup';ui.button.disabled=false;ui.button.dataset.retryCheck='1';
-  setLater('Continue',true);
- }else if(kind==='unavailable'){
-  ui.pill.textContent='NOT SUPPORTED';ui.kicker.textContent='LOCAL INSTALLATION';
-  ui.title.textContent='Offline mode is unavailable';
-  ui.intro.textContent='';
-  setStatus('This browser does not provide the storage features required for a verified offline installation.');
-  setWarning('Use the latest Chrome and install Shbace Medical as an app. The app will keep working online.');
-  ui.button.hidden=true;
-  setLater('Continue',true);
- }else{
-  ui.pill.textContent='SETUP';ui.kicker.textContent='LOCAL INSTALLATION';
-  ui.title.textContent='Offline setup could not finish checking';
-  ui.intro.textContent='';
-  setStatus(s.message||'Could not read the offline installation state.');
-  setWarning('Your previously saved files have not been deleted. Choose Retry setup, or continue and try again next time.');
-  ui.button.textContent='Retry setup';ui.button.disabled=false;ui.button.dataset.retryCheck='1';
-  setLater('Continue',true);
- }
-}
-
-/* ───────────────────────── download / update ───────────────────────── */
 function waitForWorkerActivation(worker){
- return new Promise(function(resolve){
-  var timer=null;
+ return new Promise(function(resolve,reject){
   function check(){
-   if(worker.state==='activated'||worker.state==='redundant'){
-    worker.removeEventListener('statechange',check);clearTimeout(timer);resolve();
+   if(worker.state==='activated'){
+    worker.removeEventListener('statechange',check);resolve();
+   }else if(worker.state==='redundant'){
+    worker.removeEventListener('statechange',check);
+    reject(new Error('The updated offline worker could not activate. Close other Shbace tabs and retry.'));
    }
   }
-  worker.addEventListener('statechange',check);
-  timer=setTimeout(function(){worker.removeEventListener('statechange',check);resolve()},20000);
-  check();
+  worker.addEventListener('statechange',check);check();
  });
 }
 function ensureServiceWorker(){
  if(!('serviceWorker' in navigator))return Promise.reject(new Error('This browser does not support Service Workers.'));
  return navigator.serviceWorker.getRegistration('./').then(function(reg){
   if(!reg)return navigator.serviceWorker.register('./sw.js',{scope:'./'});
-  /* Pick up a newer worker first: it contains the network-only route used by the verified downloads. */
-  return reg.update().catch(function(){}).then(function(){
+  /* Force an update check so integrity downloads are not intercepted by an older
+     cache-first worker. The current worker uses a network-only integrity route. */
+  return reg.update().then(function(){
    var candidate=reg.installing||reg.waiting;
    return candidate?waitForWorkerActivation(candidate).then(function(){return reg}):reg;
   });
  }).then(function(){return navigator.serviceWorker.ready});
 }
-function fetchAndStore(sink,file){
- var target=urlFor(file.path),lastError=null;
- /* Bypasses every cache (service-worker and HTTP): the bytes must come from the server and pass SHA-256
-    before they are stored under the normal URL. */
- var freshTarget=target+(target.indexOf('?')>=0?'&':'?')+'__shbace_integrity='+encodeURIComponent(state.target.version.slice(0,16)+'-'+file.sha256.slice(0,16));
+function fetchAndStore(file,target){
+ var dest=target||cache,url=urlFor(file.path),lastError=null;
+ /* Integrity downloads bypass any stale Service Worker/CDN copy; the verified bytes are stored under the canonical URL. */
+ var freshTarget=url+(url.indexOf('?')>=0?'&':'?')+'__shbace_integrity='+encodeURIComponent(manifest.version+'-'+file.sha256.slice(0,16));
  function attempt(n){
   return fetch(freshTarget,{credentials:'same-origin',cache:'reload'}).then(function(response){
    if(!response||!response.ok)throw new Error('HTTP '+(response?response.status:'no response'));
@@ -496,7 +372,7 @@ function fetchAndStore(sink,file){
      var headers=new Headers(response.headers);
      headers.delete('content-length');
      headers.delete('content-encoding');
-     return sink.put(target,new Response(bytes,{status:200,statusText:'OK',headers:headers}));
+     return dest.put(url,new Response(bytes,{status:200,statusText:'OK',headers:headers}));
     });
    });
   }).catch(function(error){
@@ -508,188 +384,352 @@ function fetchAndStore(sink,file){
  }
  return attempt(1);
 }
-function verifyList(c,files){
+function verifyAll(target){
  setStatus('Checking that every downloaded file can be read from local storage…');
  paintProgress('verify',true);
- var checked=0;
- return mapLimit(files,AUDIT_CONCURRENCY,function(file){
-  return fileValid(c,file,true).then(function(ok){
+ var index=0;
+ function next(){
+  if(index>=plan.files.length)return Promise.resolve();
+  var file=plan.files[index++];
+  return fileValid(file,true,target).then(function(ok){
    if(!ok)errors.push(file.path+': missing or failed integrity check');
-   checked++;
-   if(checked%8===0||checked===files.length)ui.stage.textContent='Verifying '+checked+' / '+files.length;
+   if(index%8===0||index===plan.files.length)ui.stage.textContent='Verifying '+index+' / '+plan.files.length;
+   return next();
+  });
+ }
+ return next();
+}
+
+var MODE_TEXT={
+ install:{kicker:'LOCAL INSTALLATION',title:'Prepare Shbace for offline study',pill:'ONE-TIME SETUP',
+  intro:'Download the complete app package once. It is saved on this device and verified; later updates only download the files that changed.',button:'Start one-time download'},
+ restore:{kicker:'LOCAL REPAIR',title:'Restore offline files',pill:'RESTORE',
+  intro:'Some saved files are missing from this device. Only the missing files are downloaded again.',button:'Restore missing files'},
+ update:{kicker:'APP UPDATE',title:'Updating Shbace Medical',pill:'UPDATE',
+  intro:'Only the files that changed are downloaded. Your answers, notes and study progress are not touched.',button:'Update now'}
+};
+function setMode(mode){
+ var t=MODE_TEXT[mode]||MODE_TEXT.install;
+ try{
+  ui.root.querySelector('.shb-offline-kicker').textContent=t.kicker;
+  ui.root.querySelector('#shbOfflineTitle').textContent=t.title;
+  ui.root.querySelector('.shb-offline-pill').textContent=t.pill;
+  ui.root.querySelector('.shb-offline-intro').textContent=t.intro;
+ }catch(e){}
+}
+function planOf(mode,files,removed){
+ return {mode:mode,files:files,removed:removed||[],bytes:files.reduce(function(sum,f){return sum+(Number(f.bytes)||0)},0)};
+}
+function fileMap(files){
+ var map={};files.forEach(function(f){map[f.path]={sha256:f.sha256,bytes:f.bytes}});return map;
+}
+function saveInstalled(files){
+ var record={version:manifest.version,files:fileMap(files),verified:true,fileCount:files.length,totalBytes:files.reduce(function(s,f){return s+(Number(f.bytes)||0)},0),completedAt:Date.now()};
+ return dbPut('meta',INSTALLED_KEY,record).then(function(){
+  return dbPut('meta','ready',{version:manifest.version,verified:true,fileCount:record.fileCount,totalBytes:record.totalBytes,completedAt:record.completedAt});
+ }).then(function(){
+  return cache.put(READY_URL,new Response(JSON.stringify({version:manifest.version,verified:true,completedAt:record.completedAt}),{status:200,headers:{'content-type':'application/json'}}));
+ });
+}
+function cacheUrlSet(){
+ return cache.keys().then(function(requests){var have=Object.create(null);requests.forEach(function(r){have[r.url]=true});return have});
+}
+/* Compare the saved record with the current manifest: nothing is hashed or downloaded here. */
+function computePlan(installed){
+ return cacheUrlSet().then(function(have){
+  var files=[],changed=0,current=Object.create(null);
+  manifest.files.forEach(function(f){
+   current[f.path]=true;
+   var old=installed.files&&installed.files[f.path];
+   var same=!!(old&&old.sha256===f.sha256);
+   if(!same||!have[urlFor(f.path)]){files.push(f);if(!same)changed++}
+  });
+  var removed=Object.keys(installed.files||{}).filter(function(p){return !current[p]});
+  return {files:files,changed:changed,removed:removed};
+ });
+}
+/* Older builds stored only a "ready" marker. Verify the saved files once, then keep a per-file record from then on. */
+function adoptLegacy(){
+ var good=[],bad=[],idx=0;
+ function inspect(){
+  if(idx>=manifest.files.length)return Promise.resolve();
+  var f=manifest.files[idx++];
+  return fileValid(f,true).then(function(ok){(ok?good:bad).push(f);return inspect()});
+ }
+ return inspect().then(function(){
+  var record={version:manifest.version,files:fileMap(good),verified:true,fileCount:good.length,completedAt:Date.now()};
+  return dbPut('meta',INSTALLED_KEY,record).then(function(){return {good:good,bad:bad}});
+ });
+}
+function decide(){
+ return loadManifest().then(function(data){
+  manifest=data;
+  return caches.open(CACHE_NAME);
+ }).then(function(c){
+  cache=c;
+  return Promise.all([dbGet('meta',INSTALLED_KEY),dbGet('meta','ready')]);
+ }).then(function(rec){
+  var installed=rec[0],legacy=rec[1];
+  if(installed&&installed.files)return installed;
+  if(legacy&&legacy.verified)return adoptLegacy().then(function(r){
+   if(!r.bad.length)return saveInstalled(manifest.files).then(function(){return null});
+   return dbGet('meta',INSTALLED_KEY);
+  });
+  return false;
+ }).then(function(installed){
+  if(installed===null)return {kind:'none'};
+  if(installed===false)return {kind:'setup',plan:planOf('install',manifest.files,[])};
+  return computePlan(installed).then(function(d){
+   if(!d.files.length&&!d.removed.length){
+    if(installed.version!==manifest.version)return saveInstalled(manifest.files).then(function(){return {kind:'none'}});
+    return {kind:'none'};
+   }
+   if(!d.files.length){
+    return Promise.all(d.removed.map(function(p){return cache.delete(urlFor(p))})).then(function(){return saveInstalled(manifest.files)}).then(function(){return {kind:'none'}});
+   }
+   if(!manifestFromNetwork)return {kind:'none'};
+   if(!d.changed)return {kind:'setup',plan:planOf('restore',d.files,d.removed)};
+   return {kind:'prompt',plan:planOf('update',d.files,d.removed)};
   });
  });
 }
-/* Update only: copy the verified staged files into the installed package in one quick local step. */
-function commitStaged(sink){
- setStatus('Applying the verified update…');
- ui.stage.textContent='Applying update';
- var files=plan.files,i=0;
- function next(){
-  if(i>=files.length)return Promise.resolve();
-  var f=files[i++],u=urlFor(f.path);
-  return sink.match(u).then(function(resp){
-   if(!resp)throw new Error(f.path+': staged copy is missing');
-   return cache.put(u,resp);
-  }).then(next);
+function commitPlan(target){
+ var chain=Promise.resolve();
+ if(target!==cache){
+  plan.files.forEach(function(f){
+   chain=chain.then(function(){return target.match(urlFor(f.path))}).then(function(r){
+    if(!r)throw new Error(f.path+': staged copy is missing');
+    return cache.put(urlFor(f.path),r);
+   });
+  });
  }
- return next().then(function(){
-  return Promise.all((state.removed||[]).map(function(p){return cache.delete(urlFor(p)).catch(function(){})}));
+ plan.removed.forEach(function(p){chain=chain.then(function(){return cache.delete(urlFor(p))})});
+ return chain.then(function(){return saveInstalled(manifest.files)}).then(function(){
+  return target!==cache?caches.delete(STAGING_NAME):null;
  });
 }
-function finalizeInstall(){
- var target=state.target;
- var drop=Promise.resolve();
- if(!plan.staging&&state.removed&&state.removed.length){
-  drop=Promise.all(state.removed.map(function(p){return cache.delete(urlFor(p)).catch(function(){})}));
- }
- return drop.then(function(){return writeInstalledState(cache,target)})
-  .then(function(){return caches.delete(STAGE_CACHE).catch(function(){})});
-}
-function showComplete(){
- var restart=state.kind!=='first';
- ui.percent.textContent='100%';ui.count.textContent=plan.files.length+' / '+plan.files.length+' files';
- ui.track.setAttribute('aria-valuenow','100');ui.bar.style.width='100%';
- ui.bytes.textContent=fmtBytes(plan.totalBytes)+' / '+fmtBytes(plan.totalBytes);
- ui.stage.textContent='Verified and ready';
- var verifyRow=ui.stages.querySelector('[data-stage="verify"]');
- if(verifyRow){verifyRow.querySelector('b').textContent='Complete';verifyRow.classList.add('is-done');verifyRow.classList.remove('is-active')}
- if(restart){
-  setStatus('Update installed and verified. Restart the app to start using the new version.');
-  setWarning('All '+plan.files.length+' updated file(s) passed size and SHA-256 verification before they replaced the old ones. Your answers and study progress were not reset.');
-  ui.button.textContent='Restart now';ui.button.dataset.restart='1';
-  setLater('Later',true);
- }else{
-  setStatus('Setup complete. Shbace Medical is ready to open from this device without an internet connection.');
-  setWarning('All '+state.target.files.length+' required files were saved and verified locally. Your existing answers and study progress were not reset.');
-  ui.button.textContent='Open Shbace Medical';ui.button.dataset.done='1';
-  setLater('',false);
- }
- ui.button.disabled=false;ui.button.dataset.retryCheck='0';
- ui.foot.textContent='Offline package verified · '+fmtBytes(state.target.totalBytes)+' stored. Keep a JSON backup of your study progress.';
-}
-function showFailure(error){
- setStatus(error.message||'The offline download could not be completed.');
- setWarning('No file is marked complete unless the HTTP response, byte size, SHA-256 hash, and local cache write have all succeeded. Retry to continue from verified files.');
- setErrorList(errors.length?errors:[error.message||String(error)]);
- ui.button.disabled=false;ui.button.textContent='Retry download';ui.button.dataset.done='0';ui.button.dataset.restart='0';
- setLater('Later',true);
-}
-function startDownload(){
- if(started||!state||!state.target||!ui||!plan)return;
- started=true;errors=[];resetCounters();setErrorList([]);
- ui.button.dataset.retryCheck='0';ui.button.dataset.done='0';ui.button.dataset.restart='0';
- ui.button.disabled=true;ui.button.textContent='Downloading…';setLater('',false);
- setStatus('Preparing local storage and the download…');
- setWarning(plan.staging
-  ?'Changed files are downloaded and verified first, then swapped in. The current version stays intact until then.'
-  :'The download is resumable. Files already saved and verified will be skipped.');
- var staging=plan.staging,sink=null;
+function runPlan(){
+ if(started||!manifest||!ui||!plan)return;
+ started=true;errors=[];resetCounters();setErrorList([]);ui.button.dataset.retryCheck='0';
+ var staged=plan.mode==='update',target=null;
+ window.__SHBACE_OFFLINE_UPDATE_ACTIVE__=staged;
+ ui.button.disabled=true;ui.button.textContent=staged?'Updating…':'Downloading…';ui.button.dataset.done='0';
+ setStatus(staged?'Downloading only the changed files…':'Preparing local storage and the offline download…');
+ setWarning('The download is resumable. Files already saved and verified are skipped.');
  Promise.resolve().then(function(){return ensureServiceWorker()})
  .then(function(){return caches.open(CACHE_NAME)})
- .then(function(c){
-  cache=c;
-  return staging?caches.open(STAGE_CACHE):caches.delete(STAGE_CACHE).catch(function(){}).then(function(){return c});
- }).then(function(s){
-  sink=s;
-  return dbPut('meta','progress',{version:state.target.version,startedAt:Date.now(),fileCount:plan.files.length});
- }).then(function(){
+ .then(function(c){cache=c;return staged?caches.open(STAGING_NAME):c})
+ .then(function(t){target=t;return dbPut('meta','progress',{version:manifest.version,startedAt:Date.now(),fileCount:plan.files.length,mode:plan.mode})})
+ .then(function(){
   var persistPromise=Promise.resolve(null);
   try{if(navigator.storage&&navigator.storage.persist)persistPromise=navigator.storage.persist()}catch(e){}
   return persistPromise;
- }).then(function(persisted){
-  if(persisted===false)setWarning('The browser did not grant persistent storage. The app will work offline after verification, but the browser may still remove site data under storage pressure. Keep backups of your study progress.');
+ }).then(function(){
   return navigator.storage&&navigator.storage.estimate?navigator.storage.estimate().catch(function(){return null}):null;
  }).then(function(estimate){
   if(estimate&&Number.isFinite(estimate.quota)&&Number.isFinite(estimate.usage)){
-   var free=Math.max(0,estimate.quota-estimate.usage),need=plan.totalBytes*(staging?2:1);
-   if(free<need)setWarning('Available storage estimate ('+fmtBytes(free)+') is below what is needed ('+fmtBytes(need)+'). Free some space before continuing. Completed files will remain saved if the download stops.');
+   var free=Math.max(0,estimate.quota-estimate.usage);
+   if(free<plan.bytes)setWarning('Available storage estimate ('+fmtBytes(free)+') is below the download size ('+fmtBytes(plan.bytes)+'). Free some space before continuing.');
   }
-  /* A first install / repair writes straight into the package, so the "ready" marker is dropped until it is complete again. */
-  return staging?null:cache.delete(READY_URL);
+  return staged?null:cache.delete(READY_URL);
  }).then(function(){
+  stageCounts=stageMarkup();
   var cursor=0;
-  var workers=[];
-  for(var w=0;w<DOWNLOAD_WORKERS;w++){
-   workers.push((async function(){
+  var workers=[0,1].map(function(){
+   return (async function(){
     while(true){
      var i=cursor++;if(i>=plan.files.length)return;
      var file=plan.files[i];
      try{
-      var valid=await fileValid(sink,file,true);
+      var valid=await fileValid(file,true,target);
       if(!valid){
-       if(!staging)await sink.delete(urlFor(file.path));
-       await fetchAndStore(sink,file);
+       await target.delete(urlFor(file.path));
+       await fetchAndStore(file,target);
       }
       addDone(file);
      }catch(error){errors.push(file.path+': '+(error.message||String(error)))}
     }
-   })());
-  }
+   })();
+  });
   return Promise.all(workers);
  }).then(function(){
-  if(errors.length)throw new Error('Some files could not be downloaded. The saved files are kept; reconnect and retry the missing items.');
-  return verifyList(sink,plan.files);
+  if(errors.length)throw new Error('Some files could not be downloaded. The saved files are kept; reconnect and retry.');
+  return verifyAll(target);
  }).then(function(){
   if(errors.length)throw new Error('The final integrity check found missing or unreadable files.');
-  if(!staging)return null;
-  return commitStaged(sink).then(function(){return verifyList(cache,plan.files)}).then(function(){
-   if(errors.length)throw new Error('The updated files could not be read back after applying the update. Retry to repair them.');
-  });
- }).then(function(){return finalizeInstall()})
- .then(showComplete)
- .catch(showFailure)
- .finally(function(){started=false});
+  return commitPlan(target);
+ }).then(function(){return cleanupPreviousCaches()}).then(function(){
+  /* A fully verified package counts as an up-to-date check: the seven-day timer restarts now. */
+  lsSet(CHECK_OK_KEY,Date.now());setPending(0);markInstalledNow();
+  ui.percent.textContent='100%';ui.count.textContent=plan.files.length+' / '+plan.files.length+' files';
+  ui.track.setAttribute('aria-valuenow','100');ui.bar.style.width='100%';
+  ui.bytes.textContent=fmtBytes(plan.bytes)+' / '+fmtBytes(plan.bytes);
+  ui.stage.textContent='Verified and ready';
+  var vs=ui.stages.querySelector('[data-stage="verify"]');
+  if(vs){vs.querySelector('b').textContent='Complete';vs.classList.add('is-done');vs.classList.remove('is-active')}
+  if(staged){
+   setStatus('Update installed. Applying the verified version…');
+   setWarning('Only '+plan.files.length+' changed file'+(plan.files.length===1?' was':'s were')+' downloaded ('+fmtBytes(plan.bytes)+'). Your answers and study progress were not touched. The app restarts once the current screen is safe.');
+   ui.button.textContent='Restarting…';
+  }else{
+   setStatus('Setup complete. Shbace Medical is ready to open from this device without an internet connection.');
+   setWarning('All required files were saved and verified. From now on, updates download only the files that change. Keep a JSON backup of your study progress.');
+   ui.button.textContent='Open Shbace Medical';
+  }
+  ui.button.disabled=!!staged;ui.button.dataset.done='1';ui.button.dataset.retryCheck='0';
+  ui.foot.textContent='Offline package verified · '+fmtBytes(manifest.totalBytes)+' stored.';
+  if(staged){
+   window.__SHBACE_OFFLINE_UPDATE_ACTIVE__=false;
+   if(typeof window.shbaceRequestAppReload==='function'){
+    if(!window.shbaceRequestAppReload())removeSetupOverlay();
+   }else setTimeout(function(){location.reload()},180);
+  }
+ }).catch(function(error){
+  setStatus(error.message||'The download could not be completed.');
+  setWarning('No file is marked complete unless the HTTP response, byte size, SHA-256 hash and local cache write all succeeded. Retry to continue from verified files.');
+  setErrorList(errors.length?errors:[error.message||String(error)]);
+  ui.button.disabled=false;ui.button.textContent='Retry download';ui.button.dataset.done='0';
+ }).finally(function(){started=false});
 }
-
-/* ───────────────────────── start-up ───────────────────────── */
+function showPlanNeeded(p){
+ plan=p;mount();setMode(p.mode);
+ stageCounts=stageMarkup();resetCounters();
+ var what=p.mode==='restore'?'Restore':'One-time package';
+ setStatus(p.mode==='restore'?'Some required files are missing from local storage.':'Download the complete local package before using offline mode.');
+ setWarning(what+' · '+p.files.length+' files · '+fmtBytes(p.bytes)+'. Connect to the internet, tap the button, and keep the app open until verification completes.');
+ ui.button.disabled=false;ui.button.textContent=(MODE_TEXT[p.mode]||MODE_TEXT.install).button;
+ ui.count.textContent='0 / '+p.files.length+' files';
+ ui.bytes.textContent='0 B / '+fmtBytes(p.bytes);
+ ui.percent.textContent='0%';paintProgress('prepare',false);
+}
+function showUpdateSheet(p,info){
+ if(document.getElementById('shbaceUpdateSheet'))return;
+ plan=p;
+ var st=document.createElement('style');
+ st.textContent='#shbaceUpdateSheet{position:fixed;left:12px;right:12px;bottom:calc(86px + env(safe-area-inset-bottom,0px));z-index:99990;max-width:520px;max-height:70vh;overflow:auto;margin:0 auto;padding:14px 16px;border-radius:18px;border:1px solid rgba(95,169,225,.4);background:linear-gradient(150deg,#0e2a4e,#071a33);color:#eaf4ff;box-shadow:0 10px 30px rgba(0,0,0,.45);font:14px system-ui,sans-serif}'+
+  '#shbaceUpdateSheet b{display:block;font-size:15px;margin-bottom:4px}#shbaceUpdateSheet span{display:block;color:#a9c4de;line-height:1.45;font-size:12.5px}'+
+  '#shbaceUpdateSheet div{display:flex;gap:8px;margin-top:12px}#shbaceUpdateSheet button{flex:1;min-height:42px;border-radius:12px;border:1px solid rgba(95,169,225,.4);background:rgba(8,25,48,.7);color:#eaf4ff;font:inherit;font-weight:700;cursor:pointer}'+
+  '#shbaceUpdateSheet button.go{background:#1f6fe0;border-color:#3b8bff}';
+ var el=document.createElement('div');el.id='shbaceUpdateSheet';el.setAttribute('role','dialog');
+ var notesHtml=(info&&info.notes&&info.notes.length)?'<ul style="margin:8px 0 0;padding-left:18px;color:#a9c4de;font-size:12px;line-height:1.45">'+info.notes.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul>':'';
+ el.innerHTML='<b>Update available'+(info&&info.displayVersion?' · '+esc(info.displayVersion):'')+'</b><span>'+p.files.length+' changed file'+(p.files.length===1?'':'s')+' · '+fmtBytes(p.bytes)+'. Only the changes are downloaded; your progress is kept.</span>'+notesHtml+'<div><button type="button" id="shbUpdLater">Later</button><button type="button" class="go" id="shbUpdNow">Update now</button></div>';
+ el.appendChild(st);document.body.appendChild(el);
+ el.querySelector('#shbUpdLater').addEventListener('click',function(){
+  /* "Later": ask again after SNOOZE_DAYS (the next check becomes due then). The bell notification stays. */
+  lsSet(CHECK_OK_KEY,Date.now()-(CHECK_EVERY-SNOOZE_DAYS*86400000));el.remove();
+ });
+ el.querySelector('#shbUpdNow').addEventListener('click',function(){
+  el.remove();showPlanNeeded(p);runPlan();
+ });
+}
 function waitForSplash(){
  return new Promise(function(resolve){
   var splash=document.getElementById('startupSplash');
   if(!splash||!splash.isConnected){resolve();return}
-  var finished=false,observer=null,timer=null,poll=null;
-  function finish(){
-   if(finished)return;
-   finished=true;
-   if(observer)observer.disconnect();
-   clearTimeout(timer);clearInterval(poll);
-   resolve();
+  var finished=false,observer=null;
+  function done(){
+   if(finished||splash.isConnected)return;
+   finished=true;if(observer)observer.disconnect();resolve();
   }
-  function check(){if(!splash.isConnected)finish()}
-  /* Only the splash's own parent is observed (not the whole page): the app builds thousands of nodes under the splash. */
-  try{observer=new MutationObserver(check);observer.observe(splash.parentNode||document.body,{childList:true})}catch(e){}
-  poll=setInterval(check,400);
-  timer=setTimeout(finish,14000);
+  try{observer=new MutationObserver(done);observer.observe(document.body,{childList:true,subtree:true})}catch(e){}
+  setTimeout(function(){if(!finished){finished=true;if(observer)observer.disconnect();resolve()}},14000);
  });
 }
-function present(s,splashFinished){
- state=s;
- prepareOverlay(s);
- return splashFinished.then(revealOverlay);
+function showSetupUnavailable(){
+ mount();
+ setStatus('This browser does not provide the storage features required for a verified offline installation.');
+ setWarning('Use the latest supported browser and install Shbace Medical as an app. The app will remain online until offline storage is supported.');
+ ui.button.disabled=true;
 }
+function showSetupError(error){
+ mount();
+ setStatus(error.message||'Could not read the offline installation manifest.');
+ setWarning('The setup check could not finish. Your previously saved files have not been deleted. Connect to the internet if needed, then choose Retry setup.');
+ ui.button.disabled=false;ui.button.textContent='Retry setup';ui.button.dataset.done='0';ui.button.dataset.retryCheck='1';
+}
+
+/* Network check (reads the file list from the server). Runs only when it is due, on first install, or when local files are missing. */
+function runFullCheck(splashFinished){
+ lsSet(CHECK_TRY_KEY,Date.now());
+ return decide().then(function(res){
+  if(!res||res.kind==='none'){
+   /* Only a check that really reached the server counts; offline attempts leave the timer alone. */
+   if(manifestFromNetwork){lsSet(CHECK_OK_KEY,Date.now());setPending(0);lsDel(VER_AVAIL_KEY);fetchVersionInfo().then(rememberInstalled)}
+   return;
+  }
+  if(res.kind==='prompt'){
+   /* Automatic 7-day check: bell notification + the update window (Later / Update now). The timer restarts now either way. */
+   lsSet(CHECK_OK_KEY,Date.now());setPending(res.plan.files.length);
+   return fetchVersionInfo().then(function(info){
+    if(info)lsSetJson(VER_AVAIL_KEY,info);
+    if(examSoon())return;   /* exam within a week: bell only, no window */
+    return splashFinished.then(function(){showUpdateSheet(res.plan,info)});
+   });
+  }
+  return splashFinished.then(function(){showPlanNeeded(res.plan)});
+ }).catch(function(error){
+  /* Offline (or manifest unreachable) after a completed install: stay silent and keep using the saved copy. */
+  return dbGet('meta',INSTALLED_KEY).catch(function(){return null}).then(function(rec){
+   if(rec&&rec.files)return;
+   return dbGet('meta','ready').catch(function(){return null}).then(function(ready){
+    if(ready&&ready.verified)return;
+    return splashFinished.then(function(){showSetupError(error)});
+   });
+  });
+ });
+}
+/* Local-only look (no network): are saved files missing from this device? Uses the manifest already stored on the device. */
+function localRepairNeeded(){
+ return caches.open(CACHE_NAME).then(function(c){
+  cache=c;
+  return c.match(MANIFEST_URL).then(function(hit){
+   if(!hit)return false;
+   return hit.json().then(function(data){
+    if(!data||data.schema!==1||!Array.isArray(data.files)||!data.files.length)return false;
+    return cacheUrlSet().then(function(have){
+     return data.files.some(function(f){return !have[urlFor(f.path)]});
+    });
+   });
+  });
+ }).catch(function(){return false});
+}
+/* Manual "Check for updates" (Settings). Ignores the scheduled seven-day timer and reports what happened. */
+function manualCheck(){
+ if(!standalone()||!('caches' in window)||!window.crypto||!crypto.subtle||!window.indexedDB)return Promise.resolve({state:'unsupported'});
+ if(started)return Promise.resolve({state:'busy'});
+ lsSet(CHECK_TRY_KEY,Date.now());
+ return decide().then(function(res){
+  if(!manifestFromNetwork)return {state:'offline'};
+  if(!res||res.kind==='none'){lsSet(CHECK_OK_KEY,Date.now());setPending(0);lsDel(VER_AVAIL_KEY);fetchVersionInfo().then(rememberInstalled);return {state:'latest'}}
+  if(res.kind==='prompt'){lsSet(CHECK_OK_KEY,Date.now());setPending(res.plan.files.length);
+   return fetchVersionInfo().then(function(info){if(info)lsSetJson(VER_AVAIL_KEY,info);showUpdateSheet(res.plan,info);return {state:'update'}})}
+  showPlanNeeded(res.plan);return {state:'setup'};
+ }).catch(function(){return {state:'offline'}});
+}
+window.shbaceCheckForUpdate=manualCheck;
+window.shbaceLastUpdateCheck=function(){return lsNum(CHECK_OK_KEY)};
+window.shbaceUpdatePending=function(){return lsNum(PENDING_KEY)};
+window.shbaceVersionInfo=function(){return {installed:lsGetJson(VER_KEY),available:lsGetJson(VER_AVAIL_KEY)}};
+
 function start(){
  if(!standalone()){
   waitForSplash().then(showInstallHint);
   return;
  }
  if(!document.body)return;
- /* "Later" was chosen earlier in this app session (e.g. before a reload): stay out of the way until the next launch. */
- try{if(sessionStorage.getItem(LATER_KEY)==='1')return}catch(e){}
  var splashFinished=waitForSplash();
  if(!('caches' in window)||!window.crypto||!crypto.subtle||!window.indexedDB){
-  present({kind:'unavailable'},splashFinished);
+  splashFinished.then(showSetupUnavailable);
   return;
  }
- /* Runs underneath the splash: network list check, local SHA-256 audit and the window itself are all prepared
-    during the seven seconds. Nothing is shown at all when the installed package is current and intact. */
- inspect().then(function(s){
-  if(s.kind==='ready')return;
-  /* Offline with a package already on the device: nothing can be restored right now, so stay silent;
-     the next launch with a connection offers the repair. */
-  if(s.kind==='offline'&&s.hadPackage)return;
-  return present(s,splashFinished);
- }).catch(function(error){
-  return present({kind:'error',message:error&&error.message},splashFinished);
+ dbGet('meta',INSTALLED_KEY).catch(function(){return null}).then(function(rec){
+  var hasRecord=!!(rec&&rec.files);
+  /* First install, legacy install, or a check that is due: do the full network check. */
+  if(!hasRecord||checkDue())return runFullCheck(splashFinished);
+  /* Otherwise stay off the network. Only repair when files are really missing and the device is online. */
+  return localRepairNeeded().then(function(needs){
+   if(needs&&navigator.onLine!==false)return runFullCheck(splashFinished);
+  });
  });
 }
 function boot(){start();}
