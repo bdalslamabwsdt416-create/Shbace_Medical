@@ -849,11 +849,12 @@ test('retired iOS modules are absent and are not referenced by the live HTML', (
   }
 });
 
-test('release remains 1.4.21 and records the safe startup and offline repair fixes', () => {
-  assert.equal(pkg.version, '1.4.21');
-  assert.equal(pwa.version, '1.4.21');
-  assert.equal(pwa.displayVersion, '1.4.21');
+test('release remains 1.4.22 and records the non-blocking question-bank startup fixes', () => {
+  assert.equal(pkg.version, '1.4.22');
+  assert.equal(pwa.version, '1.4.22');
+  assert.equal(pwa.displayVersion, '1.4.22');
   for (const note of [
+    'Starts the core web app before waiting for the question bank, keeps the Splash from being held by bank downloads, and supports browsers without Cache Storage.',
     'Releases the startup Splash once the core app runtime is ready, without waiting for nonessential enhancement modules to finish loading.',
     'Keeps existing iOS installs silent at launch; a legacy migration remains pending until a user-started update is verified, committed and cleaned up.',
     'Checks the installed offline file inventory locally at launch and offers an explicit online-only Repair action in Settings, with a dismissible Home fallback.',
@@ -880,6 +881,26 @@ test('iOS Splash releases at core runtime readiness while optional modules can c
     'the core app feature layer must publish readiness before optional enhancement modules');
   assert.ok(html.includes('data-src="js/09-app-features-v6.js"'),
     'the readiness marker must be owned by the required app feature layer');
+});
+
+
+test('web startup runs core scripts before waiting for the question bank', () => {
+  assert.ok(html.includes("if(src==='js/09-app-features-v6.js')"),
+    'the script queue pauses only at the first question-bank-dependent module');
+  assert.ok(html.includes('window.__shbCoreReady=true;'),
+    'the core readiness signal is published before the question bank request resolves');
+  assert.ok(html.includes('dataFetch.then(function(){'),
+    'the question bank is awaited at the module dependency boundary');
+  const start = html.indexOf('function go(){if(started||!domReady||!painted)');
+  const end = html.indexOf('function markPainted()', start);
+  assert.ok(start >= 0 && end > start, 'the boot trigger function is present');
+  const go = html.slice(start, end);
+  assert.ok(go.includes('run();'), 'core scripts start immediately after the splash is painted');
+  assert.ok(!go.includes('dataFetch.then'), 'the initial script queue does not wait for question-bank network I/O');
+  assert.ok(html.includes('Cache Storage is optional on the web'),
+    'normal web startup remains available when Cache Storage is unsupported');
+  assert.ok(html.includes('Retry question bank'),
+    'a failed question-bank request shows a visible recovery action rather than leaving Splash stuck');
 });
 
 
