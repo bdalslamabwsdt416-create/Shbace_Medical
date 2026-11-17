@@ -142,7 +142,7 @@ function organizeSettings(){
     var order=root.querySelector('.shb-settings-order');
     if(!order){
       order=document.createElement('div');order.className='shb-settings-order';root.appendChild(order);
-      makeSettingZone(order,'appearance','Appearance & reading','Theme, text size and doctor character.');
+      makeSettingZone(order,'appearance','Appearance & reading','Theme, text size, doctor character and iPhone display controls.');
       makeSettingZone(order,'banks','Question banks & question tools','Choose the question-bank version and the actions available on each question.');
       makeSettingZone(order,'notifications','Study notifications','Choose which study events can notify you.');
       makeSettingZone(order,'updates','App updates','Check the installed iOS release and update available offline files.');
@@ -155,8 +155,10 @@ function organizeSettings(){
     var progress=findSettingCard(root,'Study progress'),backup=findSettingCard(root,'Student data backup');
     var bankVersion=findSettingCard(root,'Question Bank Version');
     var questionTools=root.querySelector('#shbQuestionToolsSettings'),voice=root.querySelector('#shbUnifiedVoiceSettings');
+    var studyExperience=root.querySelector('#shbIosStudyExperienceSettings');
     var notification=root.querySelector('.u10-settings-card'),updates=root.querySelector('#shbAppUpdates'),file=root.querySelector('#bkFile');
     if(appearance&&appearance.parentElement!==target('appearance'))target('appearance').appendChild(appearance);
+    if(studyExperience&&studyExperience.parentElement!==target('appearance'))target('appearance').appendChild(studyExperience);
     if(bankVersion&&bankVersion.parentElement!==target('banks'))target('banks').appendChild(bankVersion);
     if(questionTools&&questionTools.parentElement!==target('banks'))target('banks').appendChild(questionTools);
     if(voice&&voice.parentElement!==target('banks'))target('banks').appendChild(voice);
