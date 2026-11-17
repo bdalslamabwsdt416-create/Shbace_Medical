@@ -32,7 +32,7 @@ function runtimeFiles() {
   for (const directory of ['assets', 'css', 'data', 'js', 'fonts', 'audio', 'media', 'videos', 'documents', 'img', 'img1', 'img2']) {
     walkRuntimeDirectory(directory, files);
   }
-  return [...new Set(files)].filter(relative => relative !== 'offline-assets-manifest.json' && !['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/30-ios-v5.js','js/31-ios-v6.js','js/32-ios-study-tools.js','js/33-ios-exam-planner.js'].includes(relative)).sort((a, b) => a.localeCompare(b));
+  return [...new Set(files)].filter(relative => relative !== 'offline-assets-manifest.json' && !['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/30-ios-v5.js','js/31-ios-v6.js'].includes(relative)).sort((a, b) => a.localeCompare(b));
 }
 
 fs.rmSync(out, { recursive: true, force: true });
@@ -110,7 +110,10 @@ for (const relative of deferredRefs) {
   if (!fs.existsSync(safePath(relative))) throw new Error('Deferred runtime asset is missing: ' + relative);
 }
 if (/js\/30-android-enhancements|js\/31-android-v13|js\/32-chrome-android/.test(html)) throw new Error('Android-only runtime module leaked into the iOS build.');
-if (['js/30-ios-v5.js','js/31-ios-v6.js','js/32-ios-study-tools.js','js/33-ios-exam-planner.js'].some(function (file) { return html.indexOf(file) !== -1; })) throw new Error('An iOS-only runtime layer is still referenced; To Me app core plus the preserved onboarding should be the only platform-specific exception.');
+if (['js/30-ios-v5.js','js/31-ios-v6.js'].some(function (file) { return html.indexOf(file) !== -1; })) throw new Error('A retired iOS-only runtime layer is still referenced; To Me app core plus the preserved onboarding should be the only platform-specific exception.');
+for (const retired of ['js/32-ios-study-tools.js','js/33-ios-exam-planner.js']) {
+  if (fs.existsSync(path.join(root, retired))) throw new Error('Retired iOS runtime file must be deleted: ' + retired);
+}
 for (const relative of ['css/bundle-core.css','css/bundle-late.css','js/44-islamic-reminders.js']) {
   if (!fs.existsSync(safePath(relative))) throw new Error('Required iOS runtime asset is missing: ' + relative);
 }
@@ -125,16 +128,25 @@ const offlineSetup = fs.readFileSync(safePath('js/29-offline-setup.js'), 'utf8')
 const serviceWorker = fs.readFileSync(safePath('sw.js'), 'utf8');
 const featureRuntime = fs.readFileSync(safePath('js/09-app-features-v6.js'), 'utf8');
 if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
+    !offlineSetup.includes("var DB_NAME='shbace-medical-offline-state-v1'") ||
+    !offlineSetup.includes("var MIGRATION_KEY='shbace_ios_migrated_1_4_14'") ||
+    !offlineSetup.includes('migrationInProgress&&manifestFromNetwork&&res.plan') ||
+    !offlineSetup.includes("lsSet(MIGRATION_KEY,'1')") ||
+    !offlineSetup.includes("name.indexOf('shbace-medical-ios-shell-')===0") ||
     !offlineSetup.includes('window.shbaceCheckForUpdate=manualCheck') ||
     !offlineSetup.includes('MANIFEST_FETCH_TIMEOUT=30000') ||
     !offlineSetup.includes('MANIFEST_FETCH_ATTEMPTS=2') ||
     !offlineSetup.includes('function waitForServiceWorkerReady') ||
     offlineSetup.includes("},10000)") ||
     !serviceWorker.includes("const CACHE_NAME = 'shbace-medical-offline-v2'") ||
+    !serviceWorker.includes("const DB_NAME = 'shbace-medical-offline-state-v1'") ||
+    !serviceWorker.includes("name.startsWith('shbace-medical-ios-shell-')") ||
+    !serviceWorker.includes('readInstalledReleaseVersion') ||
+    !serviceWorker.includes('networkFirstOnPackageMismatch(request)') ||
     !serviceWorker.includes("url.searchParams.has('__shbace_integrity')") ||
     !featureRuntime.includes('onclick="shbaceSettingsCheckForUpdates(this)"') ||
     !featureRuntime.includes('window.shbaceCheckForUpdate()')) {
-  throw new Error('The shared To Me updater, retry-safe iOS bootstrap, integrity route, or Settings control is missing.');
+  throw new Error('The shared To Me updater, one-time migration, cache cleanup, or version-aware service worker is missing.');
 }
 const onboardingMain = fs.readFileSync(safePath('js/04-app-main.js'), 'utf8');
 if (!onboardingMain.includes('function gradeScreen()') || !onboardingMain.includes('function finishScreen()')) throw new Error('The final two onboarding screens are missing from the app core.');
@@ -158,6 +170,12 @@ if (!onboardingMain.includes('Which grade are you in?') ||
     !onboardingMain.includes('cp-finish-layout')) {
   throw new Error('The original iOS final onboarding screens have changed unexpectedly.');
 }
+const pwaVersion = JSON.parse(fs.readFileSync(safePath('pwa-version.json'), 'utf8'));
+if (pwaVersion.version !== '1.4.15' || pwaVersion.displayVersion !== '1.4.15' ||
+    !Array.isArray(pwaVersion.releaseNotes) ||
+    !pwaVersion.releaseNotes.includes('Fixes mixed old/new files after updating from 1.4.10; cleans old caches')) {
+  throw new Error('The iOS 1.4.15 release metadata is missing or inconsistent.');
+}
 
 if (manifest.files.some(item => ['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/32-ios-v7.js'].includes(item.path))) throw new Error('A retired iOS visual layer is still included in the offline runtime inventory.');
 const scanFiles = manifest.files.filter(item => /\.(?:html|css|js|json|webmanifest)$/i.test(item.path));
@@ -173,10 +191,12 @@ if (missingImages.size) throw new Error('Missing referenced images: ' + [...miss
 
 manifest.fileCount = manifest.files.length;
 manifest.totalBytes = manifest.files.reduce(function (sum, item) { return sum + item.bytes; }, 0);
-// Keep the offline package version tied to the exact deployed file inventory and hashes.
+manifest.releaseVersion = pwaVersion.version;
+// Keep the offline package version tied to the release version and exact deployed file inventory/hashes.
 manifest.version = crypto.createHash('sha256')
-  .update(manifest.files.slice().sort(function (a, b) { return a.path.localeCompare(b.path); })
-    .map(function (item) { return item.path + ':' + item.sha256; }).join('\n'))
+  .update('release:' + manifest.releaseVersion + '\n' +
+    manifest.files.slice().sort(function (a, b) { return a.path.localeCompare(b.path); })
+      .map(function (item) { return item.path + ':' + item.sha256; }).join('\n'))
   .digest('hex');
 manifest.generatedAt = new Date().toISOString();
 fs.writeFileSync(path.join(out, 'offline-assets-manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
