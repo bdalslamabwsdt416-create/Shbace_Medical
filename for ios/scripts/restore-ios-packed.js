@@ -127,7 +127,7 @@ const featureRuntime = fs.readFileSync(safePath('js/09-app-features-v6.js'), 'ut
 const installerRequirements = [
   "var CACHE_NAME='shbace-medical-offline-v2'",
   "var DB_NAME='shbace-medical-offline-state-v1'",
-  'var CONCURRENCY=3',
+  'CONCURRENCY=3',
   'function ensureChip()',
   'function paintChip()',
   'async function commitStaged(st)',
@@ -146,7 +146,6 @@ const blockingInstallerRemnants = [
 });
 const workerRequirements = [
   "const CACHE_NAME = 'shbace-medical-offline-v2'",
-  "const DB_NAME = 'shbace-medical-offline-state-v1'",
   'const APP_SHELL = [',
   'async function localFirst(request)',
   'async function networkThenCache(request)',
