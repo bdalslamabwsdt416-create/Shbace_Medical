@@ -1,10 +1,13 @@
 {
   "app": "Shbace Medical",
   "platform": "PWA",
-  "version": "1.4.18",
-  "displayVersion": "1.4.18",
+  "version": "1.4.19",
+  "displayVersion": "1.4.19",
   "releaseDate": "2026-11-17",
   "releaseNotes": [
+    "Consolidates iPhone-supported study controls into the To Me-aligned Study experience card.",
+    "Stops the question toolbar MutationObserver re-render loop that could freeze question screens.",
+    "Disables scheduled startup update checks, automatic migration, and local repair prompts; existing installs update only from Settings.",
     "Adds iPhone-compatible Follow device appearance and Keep screen awake controls, while preserving Question Bank tools and iOS update controls.",
     "Adds iOS Question Bank tools for Share, Copy and Read aloud, groups bank controls in Settings, and scopes progress resets to the active bank, system and topic.",
     "Aligns the iOS sidebar with To Me, exposes Exam Goal Planner, removes Smart Review badges, and shows installed/update version details in Settings.",

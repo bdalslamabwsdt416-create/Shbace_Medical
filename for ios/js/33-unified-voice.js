@@ -353,8 +353,8 @@ function computerVoiceMountSettings(){
   }
   if(!root.querySelector('#shbQuestionToolsSettings')){
    var tools=document.createElement('section');tools.className='card setcard';tools.id='shbQuestionToolsSettings';
-   tools.innerHTML='<h3>Question bank tools</h3>'+
-    '<p class="meta">Choose which actions appear on each question card. These controls also work in topic and single-question views.</p>'+
+   tools.innerHTML='<h3>Study experience</h3>'+
+    '<p class="meta">Controls for study sessions and question tools on this iPhone.</p>'+
     computerVoiceQuestionToolSetting('shareQuestion','Share a question','Share the question text using the iOS share sheet when available.')+
     computerVoiceQuestionToolSetting('copyQuestion','Copy question text','Copy the question stem and answer options.')+
     computerVoiceQuestionToolSetting('readAloud','Read questions aloud','Show or hide the voice playback control on question cards.')+
@@ -382,19 +382,41 @@ function computerVoiceQuestionText(card){
   return [stemText,options.length?options.join('. '):''].filter(Boolean).join('. ');
  }catch(_){return ''}
 }
+var questionDecorationScheduled=false;
+function scheduleQuestionDecoration(){
+ if(questionDecorationScheduled)return;
+ questionDecorationScheduled=true;
+ var flush=function(){
+  questionDecorationScheduled=false;
+  computerVoiceDecorateQuestions();
+ };
+ if(typeof window.requestAnimationFrame==='function')window.requestAnimationFrame(flush);
+ else setTimeout(flush,16);
+}
 function computerVoiceDecorateQuestions(){
  try{
   var host=document.querySelector('#phoneContent');if(!host)return;
+  var signature=[
+   computerQuestionTools.shareQuestion?'1':'0',
+   computerQuestionTools.copyQuestion?'1':'0',
+   computerQuestionTools.readAloud?'1':'0'
+  ].join(':');
   host.querySelectorAll('.qcard').forEach(function(card){
    var old=card.querySelector('.shb-question-tools'),stem=card.querySelector('.qstem');
    if(!stem)return;
+   /* The observer also sees toolbar insertion. Preserve unchanged toolbars so
+      our own DOM writes cannot trigger an endless remove/recreate cycle. */
+   if(old&&old.dataset&&old.dataset.sig===signature)return;
    if(old)old.remove();
    var actions=[];
    if(computerQuestionTools.shareQuestion)actions.push('<button type="button" class="shb-question-tool" data-shb-question-tool="share" aria-label="Share question"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg><span>Share</span></button>');
    if(computerQuestionTools.copyQuestion)actions.push('<button type="button" class="shb-question-tool" data-shb-question-tool="copy" aria-label="Copy question"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg><span>Copy</span></button>');
    if(computerQuestionTools.readAloud)actions.push('<button type="button" class="shb-question-tool shb-computer-read-aloud" data-shb-question-tool="readAloud" aria-label="Read question aloud" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg><span>Read aloud</span></button>');
    if(!actions.length)return;
-   var toolbar=document.createElement('div');toolbar.className='shb-question-tools';toolbar.setAttribute('role','group');toolbar.setAttribute('aria-label','Question tools');toolbar.innerHTML=actions.join('');
+   var toolbar=document.createElement('div');toolbar.className='shb-question-tools';
+   toolbar.dataset.sig=signature;
+   toolbar.setAttribute('role','group');toolbar.setAttribute('aria-label','Question tools');
+   toolbar.innerHTML=actions.join('');
    stem.insertAdjacentElement('afterend',toolbar);
   });
  }catch(_){}
@@ -530,7 +552,7 @@ computerVoiceInit();
 
 function mountVoiceSettings(){try{computerVoiceMountSettings()}catch(_){}}
 try{
- var ob=new MutationObserver(function(){mountVoiceSettings();computerVoiceDecorateQuestions()});
+ var ob=new MutationObserver(function(){mountVoiceSettings();scheduleQuestionDecoration()});
  if(document.body)ob.observe(document.body,{childList:true,subtree:true});
 }catch(_){}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mountVoiceSettings,{once:true});else mountVoiceSettings();
@@ -627,22 +649,22 @@ function iosStudyToggleMarkup(key,title,description,disabled){
 function iosStudyMountSettings(){
  try{
   var root=settingsRoot();if(!root)return;
-  if(!root.querySelector('#shbIosStudyExperienceSettings')){
-   var card=document.createElement('section');
-   card.className='card setcard';card.id='shbIosStudyExperienceSettings';
-   card.innerHTML='<h3>Study experience</h3>'+
-    '<p class="meta">iPhone-compatible controls for device appearance and focused Question Bank sessions.</p>'+
-    iosStudyToggleMarkup('followSystemTheme','Follow device appearance','Match the app to your iPhone light or dark appearance. Choosing a theme manually turns this off.',false)+
-    iosStudyToggleMarkup('keepScreenAwake','Keep screen awake','Prevent the screen from dimming while the Question Bank is open. Requires Screen Wake Lock support.',!iosStudyWakeSupported())+
-    '<p class="meta shb-ios-study-status" id="shbIosStudyWakeStatus" role="status" aria-live="polite"></p>';
-   root.appendChild(card);
+  /* These controls share the To Me Study experience card; only the iPhone-safe
+     appearance and Screen Wake Lock options are added on this platform. */
+  var card=root.querySelector('#shbQuestionToolsSettings');
+  if(!card){computerVoiceMountSettings();card=root.querySelector('#shbQuestionToolsSettings')}
+  if(card&&!card.querySelector('[data-shb-ios-experience]')){
+   card.insertAdjacentHTML('beforeend',
+    iosStudyToggleMarkup('keepScreenAwake','Keep screen awake','Prevent the display from sleeping while the Question Bank is open.',!iosStudyWakeSupported())+
+    iosStudyToggleMarkup('followSystemTheme','Follow device theme','Automatically match the device light or dark appearance.',false)+
+    '<p class="meta shb-ios-study-status" id="shbIosStudyWakeStatus" role="status" aria-live="polite"></p>');
   }
   iosStudyUpdateUI();
  }catch(_){}
 }
 function iosStudyUpdateUI(){
  try{
-  var root=document.getElementById('shbIosStudyExperienceSettings');if(!root)return;
+  var root=document.getElementById('shbQuestionToolsSettings');if(!root)return;
   root.querySelectorAll('[data-shb-ios-experience]').forEach(function(button){
    var key=button.getAttribute('data-shb-ios-experience'),on=!!iosStudyPrefs[key];
    button.classList.toggle('on',on);button.setAttribute('aria-checked',String(on));
