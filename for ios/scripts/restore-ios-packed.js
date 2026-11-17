@@ -106,7 +106,7 @@ for (const relative of deferredRefs) {
   if (!fs.existsSync(safePath(relative))) throw new Error('Deferred runtime asset is missing: ' + relative);
 }
 if (/js\/30-android-enhancements|js\/31-android-v13|js\/32-chrome-android/.test(html)) throw new Error('Android-only runtime module leaked into the iOS build.');
-if (/js\\/30-ios-v5|js\\/31-ios-v6|js\\/32-ios-study-tools|js\\/33-ios-exam-planner/.test(html)) throw new Error('An iOS-only runtime layer is still referenced; To Me app core plus the preserved onboarding should be the only platform-specific exception.');
+if (['js/30-ios-v5.js','js/31-ios-v6.js','js/32-ios-study-tools.js','js/33-ios-exam-planner.js'].some(function (file) { return html.indexOf(file) !== -1; })) throw new Error('An iOS-only runtime layer is still referenced; To Me app core plus the preserved onboarding should be the only platform-specific exception.');
 for (const relative of ['css/bundle-core.css','css/bundle-late.css','js/44-islamic-reminders.js']) {
   if (!fs.existsSync(safePath(relative))) throw new Error('Required iOS runtime asset is missing: ' + relative);
 }
