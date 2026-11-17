@@ -186,20 +186,23 @@ function runOfflineStartup(installedRecord, options = {}) {
     PENDING_KEY: pendingKey,
     REPAIR_PENDING_KEY: repairKey,
     NOTIF_ID: 'update-available',
-    setPending(value) { pending.push(value); if(value>0)store[pendingKey]=String(value);else delete store[pendingKey]; },
-    setRepairPending(value) { repairs.push(value); if(value>0)store[repairKey]=String(value);else delete store[repairKey]; },
+    lsNum(key) { return Number(localStorage.getItem(key)) || 0; },
+    setPending(value) {
+      pending.push(value);
+      if(value>0)store[pendingKey]=String(value);else delete store[pendingKey];
+      notifications.push(value>0?{id:'update-available',title:'A new update is available'}:{id:'update-available',removed:true});
+    },
+    setRepairPending(value) {
+      repairs.push(value);
+      if(value>0)store[repairKey]=String(value);else delete store[repairKey];
+      notifications.push(value>0?{id:'update-available',title:'Some offline files are missing'}:{id:'update-available',removed:true});
+    },
     migrationPendingAtLaunch: false,
     cache: null,
     runFullCheck() { calls.push('first-install-check'); networkCalls.push('first-install-check'); return Promise.resolve(); },
     Promise, Object, Number, Math
   };
   const code = [
-    extractFunction(offline, 'lsNum'),
-    extractFunction(offline, 'lsSet'),
-    extractFunction(offline, 'lsDel'),
-    extractFunction(offline, 'syncPendingNotice'),
-    extractFunction(offline, 'setPending'),
-    extractFunction(offline, 'setRepairPending'),
     extractFunction(offline, 'localRepairNeeded'),
     extractFunction(offline, 'start'),
     'start();'
@@ -351,6 +354,40 @@ function manualRepairHarness(options = {}) {
   return { api: vm.runInNewContext(code, sandbox), events };
 }
 
+
+test('Settings exposes a non-modal Repair notice only while repair is pending', () => {
+  const source = drawerFeatures;
+  const fn = extractFunction(source, 'shbaceSettingsRepairMarkup');
+  const markup = vm.runInNewContext(fn + String.fromCharCode(10) + 'shbaceSettingsRepairMarkup()', {
+    window: {
+      shbaceRepairPending: () => 2,
+      shbaceUpdatePending: () => 1
+    }
+  });
+  assert.match(markup, /Some offline files are missing - Repair/);
+  assert.match(markup, /id="shbaceSettingsRepairButton"/);
+  assert.match(markup, /onclick="shbaceSettingsRepairOffline\(this\)"/);
+  assert.match(markup, /UPDATE PENDING/);
+  assert.doesNotMatch(markup, /role="dialog"|aria-modal/);
+});
+
+test('Home fallback is dismissible inline and offers explicit Repair without a modal', () => {
+  const marker = 'window.shbaceOfflineRepairHomeNotice=function(){';
+  const start = offline.indexOf(marker);
+  const end = offline.indexOf('window.shbaceDismissRepairNotice=function', start);
+  assert.ok(start >= 0 && end > start, 'the Home fallback export exists');
+  const declaration = offline.slice(start, end).replace(/;\s*$/, '');
+  const markup = vm.runInNewContext(declaration + String.fromCharCode(10) + 'window.shbaceOfflineRepairHomeNotice()', {
+    window: {},
+    lsNum: key => key === 'shbace_pkg_repair_pending_v1' ? 2 : 0,
+    sessionStorage: { getItem: () => null }
+  });
+  assert.match(markup, /Some offline files are missing\./);
+  assert.match(markup, /onclick="shbaceRepairOffline\(\)"/);
+  assert.match(markup, /shbaceDismissRepairNotice/);
+  assert.match(markup, /role="status"/);
+  assert.doesNotMatch(markup, /role="dialog"|aria-modal/);
+});
 
 test('existing install with an unset migration flag stays silent and marks an update pending', async () => {
   const record = { version: '1.4.13', files: { 'index.html': {}, 'js/04-app-main.js': {} } };
