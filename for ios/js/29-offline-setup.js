@@ -9,7 +9,7 @@ if(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' &
 var CACHE_NAME='shbace-medical-offline-v2';
 var STAGING_NAME='shbace-staging-offline';
 var INSTALLED_KEY='installed';
-/* Silent scheduled checks run no more than once per 7 days after a successful network check. Failures retry on the next launch. */
+/* Silent scheduled checks run at most once per 7 days. Offline launches do not count; failed online attempts are also held for 7 days. */
 var CHECK_OK_KEY='shbace_pkg_check_ok_v1',CHECK_ATTEMPT_KEY='shbace_pkg_check_attempt_v1';
 var MIGRATION_KEY='shbace_ios_migrated_1_4_14';
 var CHECK_EVERY=7*24*60*60*1000;
