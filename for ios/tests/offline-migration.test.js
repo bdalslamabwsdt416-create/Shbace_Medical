@@ -286,13 +286,100 @@ test('retired iOS modules are absent and are not referenced by the live HTML', (
   }
 });
 
-test('release is 1.4.16 and records the iOS To Me navigation and update-details changes', () => {
-  assert.equal(pkg.version, '1.4.16');
-  assert.equal(pwa.version, '1.4.16');
-  assert.equal(pwa.displayVersion, '1.4.16');
+test('release is 1.4.18 and records the iOS To Me navigation and update-details changes', () => {
+  assert.equal(pkg.version, '1.4.18');
+  assert.equal(pwa.version, '1.4.18');
+  assert.equal(pwa.displayVersion, '1.4.18');
   assert.ok(pwa.releaseNotes.includes("Aligns the iOS sidebar with To Me, exposes Exam Goal Planner, removes Smart Review badges, and shows installed/update version details in Settings."));
   assert.equal(offlineManifest.fileCount, 338);
   assert.equal(offlineManifest.files.length, offlineManifest.fileCount);
   assert.ok(!offlineManifest.files.some(file => ['css/core.css', 'css/late.css'].includes(file.path)),
     'unreferenced legacy CSS must not remain in the offline manifest');
+});
+
+
+function serviceWorkerBootstrapFunctions(source, serviceWorker) {
+  const start = source.indexOf('function waitForWorkerActivation(');
+  const end = source.indexOf('function fetchAndStore(file,target)', start);
+  assert.ok(start >= 0 && end > start, 'service-worker bootstrap functions are present');
+  return vm.runInNewContext(
+    source.slice(start, end) + '\n;({waitForWorkerActivation,ensureServiceWorker})',
+    { navigator: { serviceWorker }, Promise, Error }
+  );
+}
+
+test('iOS service-worker bootstrap follows To Me and removes the extra 20-second readiness race', () => {
+  assert.ok(!offline.includes('WORKER_READY_TIMEOUT'));
+  assert.ok(!offline.includes('waitForServiceWorkerReady'));
+  assert.ok(offline.includes("return reg.update().then(function(){"));
+  assert.ok(offline.includes('var candidate=reg.installing||reg.waiting'));
+  assert.ok(offline.includes('return candidate?waitForWorkerActivation(candidate)'));
+  assert.ok(offline.includes('return navigator.serviceWorker.ready'));
+  assert.ok(sw.includes("url.searchParams.has('__shbace_integrity')"),
+    'the iOS worker must let SHA-256 integrity downloads reach the network');
+});
+
+test('service-worker bootstrap reuses an active registration after the update check', async () => {
+  const calls = [];
+  const registration = {
+    active: { state: 'activated' },
+    installing: null,
+    waiting: null,
+    async update() { calls.push('update'); }
+  };
+  const serviceWorker = {
+    async getRegistration(scope) { calls.push('getRegistration:' + scope); return registration; },
+    async register() { calls.push('register'); throw new Error('must not register twice'); },
+    get ready() { calls.push('ready'); return Promise.resolve(registration); }
+  };
+  const api = serviceWorkerBootstrapFunctions(offline, serviceWorker);
+  const result = await api.ensureServiceWorker();
+  assert.equal(result, registration);
+  assert.deepEqual(calls, ['getRegistration:./', 'update', 'ready']);
+});
+
+test('service-worker bootstrap waits for an installing worker only until activation', async () => {
+  let stateChange = null;
+  const calls = [];
+  const installing = {
+    state: 'installing',
+    addEventListener(type, listener) { assert.equal(type, 'statechange'); stateChange = listener; },
+    removeEventListener(type, listener) { if (stateChange === listener) stateChange = null; }
+  };
+  const registration = {
+    active: { state: 'activated' },
+    installing,
+    waiting: null,
+    async update() { calls.push('update'); }
+  };
+  const serviceWorker = {
+    async getRegistration() { return registration; },
+    async register() { throw new Error('existing registration should be reused'); },
+    get ready() { calls.push('ready'); return Promise.resolve(registration); }
+  };
+  const api = serviceWorkerBootstrapFunctions(offline, serviceWorker);
+  const pending = api.ensureServiceWorker();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(typeof stateChange, 'function', 'installer must be observed before readiness resolves');
+  installing.state = 'activated';
+  stateChange();
+  assert.equal(await pending, registration);
+  assert.deepEqual(calls, ['update', 'ready']);
+  assert.equal(stateChange, null, 'state-change listener is removed after activation');
+});
+
+test('first install registers the worker and then waits for browser readiness', async () => {
+  const calls = [];
+  const registration = { active: { state: 'activated' }, installing: null, waiting: null };
+  const serviceWorker = {
+    async getRegistration(scope) { calls.push('getRegistration:' + scope); return null; },
+    async register(path, options) {
+      calls.push('register:' + path + ':' + options.scope);
+      return registration;
+    },
+    get ready() { calls.push('ready'); return Promise.resolve(registration); }
+  };
+  const api = serviceWorkerBootstrapFunctions(offline, serviceWorker);
+  assert.equal(await api.ensureServiceWorker(), registration);
+  assert.deepEqual(calls, ['getRegistration:./', 'register:./sw.js:./', 'ready']);
 });

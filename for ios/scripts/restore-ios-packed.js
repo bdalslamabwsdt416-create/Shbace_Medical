@@ -14,14 +14,14 @@ const manifest = { schema: 1, files: [] };
 
 /* Always run the iOS offline migration regression tests, even when the hosting
    provider invokes this build file directly instead of npm run build:pwa. */
-for (const relative of ['js/09-app-features-v6.js', 'js/20-drawer-order-v12.js', 'js/36-exam-planner-settings-smartreview.js']) {
+for (const relative of ['js/09-app-features-v6.js', 'js/20-drawer-order-v12.js', 'js/29-offline-setup.js', 'js/33-unified-voice.js', 'js/36-exam-planner-settings-smartreview.js']) {
   const syntax = spawnSync(process.execPath, ['--check', relative], { cwd: root, stdio: 'inherit' });
   if (syntax.error) throw syntax.error;
   if (syntax.status !== 0) throw new Error('JavaScript syntax check failed: ' + relative);
 }
 console.log('Changed iOS JavaScript syntax checks passed.');
 
-const migrationTests = spawnSync(process.execPath, ['--test', 'tests/offline-migration.test.js', 'tests/exam-planner-linkage.test.mjs'], {
+const migrationTests = spawnSync(process.execPath, ['--test', 'tests/offline-migration.test.js', 'tests/exam-planner-linkage.test.mjs', 'tests/settings-bank-tools.test.mjs'], {
   cwd: root,
   stdio: 'inherit'
 });
@@ -177,7 +177,12 @@ if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !offlineSetup.includes('window.shbaceCheckForUpdate=manualCheck') ||
     !offlineSetup.includes('MANIFEST_FETCH_TIMEOUT=30000') ||
     !offlineSetup.includes('MANIFEST_FETCH_ATTEMPTS=2') ||
-    !offlineSetup.includes('function waitForServiceWorkerReady') ||
+    !offlineSetup.includes('function waitForWorkerActivation(worker)') ||
+    !offlineSetup.includes('return reg.update().then(function(){') ||
+    !offlineSetup.includes('var candidate=reg.installing||reg.waiting') ||
+    !offlineSetup.includes('return candidate?waitForWorkerActivation(candidate)') ||
+    !offlineSetup.includes('return navigator.serviceWorker.ready') ||
+    offlineSetup.includes('WORKER_READY_TIMEOUT') ||
     offlineSetup.includes("},10000)") ||
     !serviceWorker.includes("const CACHE_NAME = 'shbace-medical-offline-v2'") ||
     !serviceWorker.includes("const DB_NAME = 'shbace-medical-offline-state-v1'") ||
@@ -248,10 +253,10 @@ if (!onboardingMain.includes('Which grade are you in?') ||
 }
 const pwaVersion = JSON.parse(fs.readFileSync(safePath('pwa-version.json'), 'utf8'));
 const packageMetadata = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-if (packageMetadata.version !== '1.4.16' || pwaVersion.version !== '1.4.16' || pwaVersion.displayVersion !== '1.4.16' ||
+if (packageMetadata.version !== '1.4.18' || pwaVersion.version !== '1.4.18' || pwaVersion.displayVersion !== '1.4.18' ||
     !Array.isArray(pwaVersion.releaseNotes) ||
-    !pwaVersion.releaseNotes.includes("Aligns the iOS sidebar with To Me, exposes Exam Goal Planner, removes Smart Review badges, and shows installed/update version details in Settings.")) {
-  throw new Error('The iOS 1.4.16 release metadata is missing or inconsistent.');
+    !pwaVersion.releaseNotes.includes("Adds iOS Question Bank tools for Share, Copy and Read aloud, groups bank controls in Settings, and scopes progress resets to the active bank, system and topic.")) {
+  throw new Error('The iOS 1.4.18 release metadata is missing or inconsistent.');
 }
 
 if (manifest.files.some(item => ['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/32-ios-v7.js'].includes(item.path))) throw new Error('A retired iOS visual layer is still included in the offline runtime inventory.');

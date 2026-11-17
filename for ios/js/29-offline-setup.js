@@ -16,7 +16,7 @@ var CHECK_EVERY=7*24*60*60*1000,CHECK_RETRY=2*60*60*1000;
 var PENDING_KEY='shbace_pkg_update_pending_v1',NOTIF_ID='update-available';
 var manifestFromNetwork=false,plan=null;
 var DB_NAME='shbace-medical-offline-state-v1';
-var MANIFEST_FETCH_TIMEOUT=30000,MANIFEST_FETCH_ATTEMPTS=2,WORKER_READY_TIMEOUT=20000;
+var MANIFEST_FETCH_TIMEOUT=30000,MANIFEST_FETCH_ATTEMPTS=2;
 var MANIFEST_URL=new URL('./offline-assets-manifest.json',location.href).href;
 var READY_URL=new URL('./__shbace_offline_ready__',location.href).href;
 var manifest=null,cache=null,ui=null,started=false;
@@ -347,28 +347,31 @@ function resetCounters(){
  verifiedCount=0;verifiedBytes=0;donePaths=Object.create(null);
  stageDone={app:0,images:0,data:0,other:0};
 }
-function waitForServiceWorkerReady(){
- return Promise.race([
-  navigator.serviceWorker.ready,
-  wait(WORKER_READY_TIMEOUT).then(function(){
-   throw new Error('The offline service worker is taking too long to start. Close other Shbace tabs, reopen the app, and retry the download.');
-  })
- ]);
+function waitForWorkerActivation(worker){
+ return new Promise(function(resolve,reject){
+  function check(){
+   if(worker.state==='activated'){
+    worker.removeEventListener('statechange',check);resolve();
+   }else if(worker.state==='redundant'){
+    worker.removeEventListener('statechange',check);
+    reject(new Error('The updated offline worker could not activate. Close other Shbace tabs and retry.'));
+   }
+  }
+  worker.addEventListener('statechange',check);check();
+ });
 }
 function ensureServiceWorker(){
  if(!('serviceWorker' in navigator))return Promise.reject(new Error('This browser does not support Service Workers.'));
- /* Follow the stable To Me bootstrap: reuse an existing registration without
-    blocking the download on a forced update or a waiting worker. First installs
-    still wait for the browser to activate the newly registered worker. */
  return navigator.serviceWorker.getRegistration('./').then(function(reg){
-  if(reg)return reg;
-  return navigator.serviceWorker.register('./sw.js',{scope:'./'});
- }).then(function(){
-  return waitForServiceWorkerReady();
- }).then(function(reg){
-  if(!reg||!reg.active)throw new Error('The offline service worker is not active yet. Close other Shbace tabs, reopen the app, and retry.');
-  return reg;
- });
+  if(!reg)return navigator.serviceWorker.register('./sw.js',{scope:'./'});
+  /* Match To Me: update the current registration, then wait only when a new worker
+     is actually installing or waiting. An already-active registration proceeds
+     directly to the already-resolved serviceWorker.ready promise. */
+  return reg.update().then(function(){
+   var candidate=reg.installing||reg.waiting;
+   return candidate?waitForWorkerActivation(candidate).then(function(){return reg}):reg;
+  });
+ }).then(function(){return navigator.serviceWorker.ready});
 }
 function fetchAndStore(file,target){
  var dest=target||cache,url=urlFor(file.path),lastError=null;
