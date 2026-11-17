@@ -463,7 +463,7 @@ test('silent seven-day check is skipped when the last successful check is less t
 });
 
 test('silent scheduled check stays silent and does not advance its timestamp offline or after failure', async () => {
-  for (const options of [{ online: false }, { fail: true }]) {
+  for (const options of [{ online: false }, { fail: true }, { network: false }]) {
     const result = await runScheduledCheckHarness(options);
     assert.deepEqual(result.state, { state: 'offline' });
     assert.equal(result.store.shbace_pkg_check_ok_v1, String(result.initialTimestamp));
