@@ -91,6 +91,27 @@ test('question cards in the iOS bank receive Share, Copy and Read aloud controls
     'the new question-tools preference is included in the existing app-prefixed backup');
 });
 
+test('App updates renders repair and migration badges as non-modal inline actions', () => {
+  const markup = vm.runInNewContext(
+    extractFunction(features, 'shbaceSettingsRepairMarkup') + '\nshbaceSettingsRepairMarkup()',
+    { window: { shbaceRepairPending: () => 2, shbaceUpdatePending: () => 1 }, Math, Number }
+  );
+  assert.ok(markup.includes('Some offline files are missing - Repair'));
+  assert.ok(markup.includes('onclick="shbaceSettingsRepairOffline(this)"'));
+  assert.ok(!markup.includes('role="alertdialog"'));
+  const pending = vm.runInNewContext(
+    extractFunction(features, 'shbaceSettingsRepairMarkup') + '\nshbaceSettingsRepairMarkup()',
+    { window: { shbaceRepairPending: () => 0, shbaceUpdatePending: () => 1 }, Math, Number }
+  );
+  assert.ok(pending.includes('UPDATE PENDING'));
+  assert.ok(pending.includes('Check for updates to install it'));
+  const clear = vm.runInNewContext(
+    extractFunction(features, 'shbaceSettingsRepairMarkup') + '\nshbaceSettingsRepairMarkup()',
+    { window: { shbaceRepairPending: () => 0, shbaceUpdatePending: () => 0 }, Math, Number }
+  );
+  assert.equal(clear, '');
+});
+
 test('Settings groups Question Bank Version and question actions, while retaining iOS App updates', () => {
   assert.ok(settings.includes("makeSettingZone(order,'appearance','Appearance & study experience'"));
   assert.ok(settings.includes("makeSettingZone(order,'banks','Question bank'"));

@@ -1940,7 +1940,7 @@ function shbaceSettingsRepairMarkup(){
  let repair=0,pending=0;
  try{repair=Number(window.shbaceRepairPending&&window.shbaceRepairPending())||0;pending=Number(window.shbaceUpdatePending&&window.shbaceUpdatePending())||0}catch(e){}
  if(repair>0)return '<div class="shb-offline-repair-card" role="status"><p class="meta">Some offline files are missing - Repair</p><button type="button" class="btn block" id="shbaceSettingsRepairButton" onclick="shbaceSettingsRepairOffline(this)">Repair</button></div>';
- if(pending>0)return '<p class="meta shb-update-pending" role="status">Update pending · Check for updates to install it</p>';
+ if(pending>0)return '<p class="meta shb-update-pending" role="status"><span style="display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;border:1px solid rgba(54,166,130,.35);background:rgba(54,166,130,.12);color:var(--mint,#32b890);font-size:10px;font-weight:800;letter-spacing:.04em">UPDATE PENDING</span> · Check for updates to install it</p>';
  return '';
 }
 window.shbaceSettingsRepairOffline=async function(button){

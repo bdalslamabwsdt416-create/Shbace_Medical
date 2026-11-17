@@ -259,7 +259,10 @@ if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !serviceWorker.includes('networkFirstOnPackageMismatch(request)') ||
     !serviceWorker.includes("url.searchParams.has('__shbace_integrity')") ||
     !featureRuntime.includes('onclick="shbaceSettingsCheckForUpdates(this)"') ||
-    !featureRuntime.includes('window.shbaceCheckForUpdate()')) {
+    !featureRuntime.includes('window.shbaceCheckForUpdate()') ||
+    !featureRuntime.includes('UPDATE PENDING') ||
+    !featureRuntime.includes('Some offline files are missing - Repair') ||
+    !featureRuntime.includes('onclick="shbaceSettingsRepairOffline(this)"')) {
   throw new Error('The manual-only iOS updater, first-install setup, cache cleanup, or version-aware service worker invariant failed.');
 }
 const onboardingMain = fs.readFileSync(safePath('js/04-app-main.js'), 'utf8');

@@ -1809,8 +1809,8 @@
     },
     {
       "path": "js/09-app-features-v6.js",
-      "bytes": 440597,
-      "sha256": "7178d55deea054da6a449de78fff37a91cb3616a750e6c09c770ed23318516f5",
+      "bytes": 440841,
+      "sha256": "e4d09b1eba9e5a6d80e5b5cd01be3d29d7496e51ca71000731d0dc2a4a405408",
       "group": "app"
     },
     {
@@ -2031,8 +2031,8 @@
     }
   ],
   "fileCount": 338,
-  "totalBytes": 30054273,
+  "totalBytes": 30054517,
   "releaseVersion": "1.4.20",
-  "version": "bc9f782084ceda1aa43374ff7fdfac8b3fbf7f5baca14963eb607cac7364c5fb",
-  "generatedAt": "2026-11-17T15:23:43.395Z"
+  "version": "805abbcb3f762d231ac18581b44c84aa752449e4e21e9bc7e4d5999f85aff807",
+  "generatedAt": "2026-11-17T15:25:40.286Z"
 }

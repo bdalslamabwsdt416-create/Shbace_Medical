@@ -302,6 +302,7 @@ function manualMigrationHarness(options = {}) {
     PENDING_KEY: 'shbace_pkg_update_pending_v1',
     VER_AVAIL_KEY: 'shbace_pkg_version_available_v1',
     MIGRATION_KEY: 'shbace_ios_migrated_1_4_14',
+    INSTALLED_KEY: 'installed',
     REPAIR_PENDING_KEY: 'shbace_pkg_repair_pending_v1',
     Promise, Date, Number, Object
   };
