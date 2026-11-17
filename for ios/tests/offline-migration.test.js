@@ -486,6 +486,44 @@ test('silent scheduled update only marks pending and never opens UI, downloads o
   assert.ok(Number(result.store.shbace_pkg_check_ok_v1) > result.initialTimestamp);
 });
 
+test('silent scheduled update reaches the real bell notification and Settings App updates badge', () => {
+  const store = Object.create(null);
+  const notifications = [];
+  const localStorage = {
+    getItem(key) { return Object.prototype.hasOwnProperty.call(store, key) ? store[key] : null; },
+    setItem(key, value) { store[key] = String(value); },
+    removeItem(key) { delete store[key]; }
+  };
+  const sandbox = {
+    PENDING_KEY: 'shbace_pkg_update_pending_v1',
+    REPAIR_PENDING_KEY: 'shbace_pkg_repair_pending_v1',
+    NOTIF_ID: 'update-available',
+    localStorage,
+    lsNum(key) { return Number(localStorage.getItem(key)) || 0; },
+    lsSet(key, value) { localStorage.setItem(key, value); },
+    lsDel(key) { localStorage.removeItem(key); },
+    window: {
+      shbAddNotif(id, title, body, target) { notifications.push({ id, title, body, target }); },
+      shbRemoveNotif(id) { notifications.push({ id, removed: true }); }
+    }
+  };
+  const code = [
+    extractFunction(offline, 'syncPendingNotice'),
+    extractFunction(offline, 'setPending'),
+    extractFunction(drawerFeatures, 'shbaceSettingsRepairMarkup'),
+    'setPending(1);',
+    '({ markup: shbaceSettingsRepairMarkup(), pending: lsNum(PENDING_KEY) })'
+  ].join(String.fromCharCode(10));
+  const result = vm.runInNewContext(code, sandbox);
+  assert.equal(result.pending, 1, 'the real pending store is updated');
+  assert.equal(notifications.length, 1, 'the real pending sync creates one notification');
+  assert.equal(notifications[0].id, 'update-available');
+  assert.equal(notifications[0].title, 'A new update is available');
+  assert.equal(notifications[0].target, 'settings', 'the bell notification routes to Settings');
+  assert.match(result.markup, /UPDATE PENDING/, 'Settings -> App updates renders its pending badge');
+  assert.doesNotMatch(result.markup, /role="dialog"|aria-modal/, 'the pending state does not open a modal');
+});
+
 test('existing install with an unset migration flag stays silent and marks an update pending', async () => {
   const record = { version: '1.4.13', files: { 'index.html': {}, 'js/04-app-main.js': {} } };
   const result = await runOfflineStartup(record, { cachedPaths: ['index.html', 'js/04-app-main.js'] });
