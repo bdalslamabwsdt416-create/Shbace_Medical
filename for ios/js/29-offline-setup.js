@@ -6,7 +6,7 @@
 if(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) return;
 
 /* Persistent offline-package cache. NEVER rotate this name for an app release: the manifest/hash planner updates only changed files inside it. */
-var CACHE_NAME='shbace-chrome-offline-v1.3.10.37';
+var CACHE_NAME='shbace-medical-offline-v2';
 var STAGING_NAME='shbace-staging-offline';
 var INSTALLED_KEY='installed';
 /* Update checks are throttled: one successful network check every 7 days; after a failed attempt (offline) retry no sooner than 2 hours. */
@@ -245,7 +245,7 @@ function cleanupPreviousCaches(){
  }).then(function(internalResults){
   return caches.keys().then(function(names){
    var stale=names.filter(function(name){
-    return (name.indexOf('shbace-chrome-offline-')===0&&name!==CACHE_NAME)||name.indexOf('shbace-to-me-chrome-offline-')===0||name==='shbace-medical-offline-v2'||name==='shbace-medical-ios-shell-v151';
+    return (name.indexOf('shbace-chrome-offline-')===0&&name!==CACHE_NAME)||name.indexOf('shbace-to-me-chrome-offline-')===0||name==='shbace-medical-ios-shell-v151';
    });
    return Promise.all(stale.map(function(name){
     return caches.delete(name).then(function(ok){return {name:name,ok:ok}}).catch(function(){return {name:name,ok:false}});
