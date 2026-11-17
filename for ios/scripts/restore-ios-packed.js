@@ -10,18 +10,6 @@ const sharp = require('sharp');
 
 const root = path.resolve(__dirname, '..');
 const out = path.join(root, 'dist');
-const drawerSource = fs.readFileSync(safePath('js/06-drawer-menu.js'), 'utf8');
-const returningSource = fs.readFileSync(safePath('js/07-returning-student-migration.js'), 'utf8');
-const featuresSource = fs.readFileSync(safePath('js/09-app-features-v6.js'), 'utf8');
-if (!drawerSource.includes("if(n==='Settings'){appPage='settings';renderAppDemo();return}") ||
-    !drawerSource.includes("['Settings','settings']") ||
-    !returningSource.includes("['Settings','settings','<circle") ||
-    !featuresSource.includes("window.__shbOpenSettings=function(){appPage='settings';renderAppDemo();return true}") ||
-    !featuresSource.includes("window.__shbRenderSettings=function(){return settingsView()}") ||
-    !featuresSource.includes("PAGES.settings=settingsView")) {
-  throw new Error('The iOS Settings route must open from both the header and drawer.');
-}
-
 const manifest = { schema: 1, files: [] };
 
 /* Always run the iOS offline migration regression tests, even when the hosting
@@ -123,6 +111,18 @@ async function buildPwa() {
        relative === 'sw.js') ? 'app' : 'other';
     manifest.files.push({ path: relative, bytes: bytes.length, sha256: digest, group });
   }
+
+const drawerSource = fs.readFileSync(safePath('js/06-drawer-menu.js'), 'utf8');
+const returningSource = fs.readFileSync(safePath('js/07-returning-student-migration.js'), 'utf8');
+const featuresSource = fs.readFileSync(safePath('js/09-app-features-v6.js'), 'utf8');
+if (!drawerSource.includes("if(n==='Settings'){appPage='settings';renderAppDemo();return}") ||
+    !drawerSource.includes("['Settings','settings']") ||
+    !returningSource.includes("['Settings','settings','<circle") ||
+    !featuresSource.includes("window.__shbOpenSettings=function(){appPage='settings';renderAppDemo();return true}") ||
+    !featuresSource.includes("window.__shbRenderSettings=function(){return settingsView()}") ||
+    !featuresSource.includes("PAGES.settings=settingsView")) {
+  throw new Error('The iOS Settings route must open from both the header and drawer.');
+}
 
 for (const name of ['index.html', 'manifest.webmanifest', 'pwa-version.json', 'sw.js']) {
   if (!fs.existsSync(path.join(out, name))) throw new Error('Missing PWA shell output: ' + name);
