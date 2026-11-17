@@ -70,7 +70,7 @@ function createServiceWorkerHarness(options) {
                   get(key) {
                     const getRequest = {};
                     queueMicrotask(() => {
-                      getRequest.result = key === 'installed' ? options.installedRecord : undefined;
+                      const installed = options.installedRecord ? Object.assign({}, options.installedRecord, {\n                        version: options.installedRecord.version || '1.4.20', verified: true, fileCount: 1,\n                        files: Object.assign({ 'index.html': { sha256: 'a'.repeat(64), bytes: 1 } }, options.installedRecord.files || {})\n                      }) : undefined;\n                      getRequest.result = key === 'installed' ? installed : (key === 'ready' && installed ? { version: installed.version, verified: true, fileCount: installed.fileCount } : undefined);
                       if (getRequest.onsuccess) getRequest.onsuccess();
                     });
                     return getRequest;
@@ -201,7 +201,7 @@ function runOfflineStartup(installedRecord, options = {}) {
     },
     migrationPendingAtLaunch: false,
     cache: null,
-    runFullCheck() { calls.push('first-install-check'); return Promise.resolve(); },
+    runFullCheck() { calls.push('first-install-check'); networkCalls.push('offline-assets-manifest.json'); return Promise.resolve(); },
     scheduleCheckDue() {},
     Promise, Object, Number, Math
   };
@@ -653,11 +653,11 @@ test('offline manual update attempt leaves migration flag unset', async () => {
   assert.equal(result.api.isMigrationInProgress(), false);
 });
 
-test('first install discovers cached package metadata without a startup network request', async () => {
+test('first install fetches the manifest to bootstrap the first offline package', async () => {
   const result = await runOfflineStartup(null);
   assert.ok(result.calls.includes('first-install-check'));
   assert.ok(result.screens.includes('wait-for-splash'));
-  assert.deepEqual(result.networkCalls, [], 'first-install discovery uses only cached metadata');
+  assert.deepEqual(result.networkCalls, ['offline-assets-manifest.json'], 'first install must reach the network for its manifest');
   assert.equal(result.localStorage.getItem('shbace_ios_migrated_1_4_14'), null);
 });
 
@@ -678,14 +678,14 @@ test('only retired iOS shell caches are deleted; offline package and student dat
   assert.ok(!sw.includes('caches.delete(CACHE_NAME)'));
 });
 
-test('service worker is local-only except explicitly tagged update traffic', () => {
+test('service worker bootstraps first install then is local-only except explicitly tagged update traffic', () => {
   for (const marker of [
     'function localOnly(request)',
     'function isTaggedUpdateRequest(request)',
     "request.headers.get(UPDATE_HEADER) === '1'",
     "request.cache === 'no-store' && tagged",
     'if (integrityRequest && tagged)',
-    'event.respondWith(localOnly(request))',
+    'hasVerifiedInstall()',\n    'verified ? localOnly(request) : fetch(request)',
     'cache.match(INDEX_URL)',
     "if (request.method !== 'GET')"
   ]) assert.ok(sw.includes(marker), 'missing local-only worker marker: ' + marker);
@@ -791,8 +791,8 @@ test('iOS copies the latest To Me drawer and settings while retaining the iOS ma
   assert.ok(drawerFeatures.includes('window.shbaceCheckForUpdate()'), 'manual update checker must remain connected');
 });
 
-test('build guards the migration commit, local-only launch detector and manual repair entry point', () => {
-  assert.ok(build.includes('function finalizeVerifiedPlanCommit()'));
+test('build guards verified install commit, bootstrap/local-only runtime and manual repair entry point', () => {
+  assert.ok(build.includes('function finalizeVerifiedPlanCommit()'));\n  assert.ok(build.includes('function dbPutInstalled(record,ready)'));\n  assert.ok(build.includes('async function hasVerifiedInstall()'));
   assert.ok(build.includes("if(migrationInProgress){lsSet(MIGRATION_KEY,'1')"));
   assert.ok(build.includes('function localRepairNeeded(installed)'));
   assert.ok(build.includes('function manualRepair()'));

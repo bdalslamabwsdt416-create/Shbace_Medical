@@ -1,0 +1,32 @@
+name: iOS Offline Runtime Checks
+
+on:
+  push:
+    branches:
+      - "ios/splash-offline-first-boot-1.4.20"
+    paths:
+      - "for ios/**"
+      - ".github/workflows/ios-offline-runtime-checks.yml"
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "for ios"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: "for ios/package-lock.json"
+      - name: Install dependencies
+        run: npm install
+      - name: Run offline and app regression tests
+        run: npm test
+      - name: Build iOS PWA bundle
+        run: npm run build:pwa
