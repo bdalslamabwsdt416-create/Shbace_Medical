@@ -13,6 +13,7 @@ const build = read('scripts/restore-ios-packed.js');
 const html = read('index.html');
 const pkg = JSON.parse(read('package.json'));
 const pwa = JSON.parse(read('pwa-version.json'));
+const offlineManifest = JSON.parse(read('offline-assets-manifest.json'));
 
 test('one-time migration forces a network check for an installed 1.4.10-era package', () => {
   for (const marker of [
@@ -95,4 +96,7 @@ test('release remains 1.4.15 and records the mixed-cache repair note', () => {
   assert.equal(pwa.version, '1.4.15');
   assert.equal(pwa.displayVersion, '1.4.15');
   assert.ok(pwa.releaseNotes.includes('Fixes mixed old/new files after updating from 1.4.10; cleans old caches'));
+  assert.equal(offlineManifest.releaseVersion, '1.4.15');
+  assert.equal(offlineManifest.fileCount, 340);
+  assert.equal(offlineManifest.files.length, offlineManifest.fileCount);
 });
