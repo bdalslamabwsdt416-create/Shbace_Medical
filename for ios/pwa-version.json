@@ -6,7 +6,7 @@
   "releaseDate": "2026-11-17",
   "releaseNotes": [
     "Fixes mixed old/new files after updating from 1.4.10; cleans old caches",
-    "Updates the iOS side drawer to the latest To Me layout and grouping, including the close control and a dedicated Updates section for notifications.",
+    "Synchronizes the iOS side drawer with the final To Me layout and grouping; Notifications remain accessible and manual App updates stay in Settings.",
     "Keeps all existing iOS sidebar page handlers, Smart Review navigation safeguards, and local student data.",
     "Keeps the original iOS final two onboarding screens unchanged.",
     "Fixes iOS first-time offline setup: retries the offline manifest request with a longer timeout and avoids blocking downloads on a forced Service Worker update.",

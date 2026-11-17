@@ -2020,7 +2020,7 @@
     {
       "path": "pwa-version.json",
       "bytes": 1246,
-      "sha256": "cb3ddae4b54d493b30d572e4e1bcea6c0d1671331fac6f661b14710c0236e26e",
+      "sha256": "86c5c5a1628f5803a29943355a938a5c70256f22e9e4f1ed36f238169e65050a",
       "group": "other"
     },
     {
@@ -2033,6 +2033,6 @@
   "fileCount": 338,
   "totalBytes": 30025533,
   "releaseVersion": "1.4.15",
-  "version": "03b3a82b7be97e1b54d79c472cea49691c7d0f5d6c4fd5b0e91eca51572ef3fa",
+  "version": "68c970ae99f3b49248d71567093d5cd3ec54ecf99719f34b1d0dd4a244d1707d",
   "generatedAt": "2026-11-17T11:42:45.728Z"
 }
