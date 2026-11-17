@@ -5,6 +5,9 @@
   "displayVersion": "1.4.20",
   "releaseDate": "2026-11-17",
   "releaseNotes": [
+    "Keeps existing iOS installs silent at launch; a legacy migration remains pending until a user-started update is verified, committed and cleaned up.",
+    "Checks the installed offline file inventory locally at launch and offers an explicit online-only Repair action in Settings, with a dismissible Home fallback.",
+    "Removes the unused startup retry marker while preserving automatic package discovery for first installs and the manual Settings update action.",
     "Scopes iOS question and Settings observers to #phoneContent, coalesces decoration and organization through requestAnimationFrame, and prevents repeated DOM writes on unchanged question toolbars or Settings cards.",
     "Fixes Settings navigation from the header and drawer by routing directly to the Settings screen.",
     "Consolidates iPhone-supported study controls into the To Me-aligned Study experience card.",

@@ -9,9 +9,9 @@ const features = read('../js/09-app-features-v6.js');
 const voice = read('../js/33-unified-voice.js');
 const settings = read('../js/36-exam-planner-settings-smartreview.js');
 const restoreBuild = read('../scripts/restore-ios-packed.js');
-const androidEnhancements = read('../../to me/js/30-android-enhancements.js');
-const toMeSettings = read('../../to me/js/36-exam-planner-settings-smartreview.js');
-const toMeVoice = read('../../to me/js/33-unified-voice.js');
+const androidEnhancements = read('./fixtures/to-me/30-android-enhancements.js');
+const toMeSettings = read('./fixtures/to-me/36-exam-planner-settings-smartreview.js');
+const toMeVoice = read('./fixtures/to-me/33-unified-voice.js');
 const index = read('../index.html');
 const drawer = read('../js/06-drawer-menu.js');
 const returning = read('../js/07-returning-student-migration.js');
@@ -104,7 +104,7 @@ test('Settings places Question voice with Appearance and keeps the single Study 
 test('PWA build invariants match the single root-level Study experience card and dynamic manifest inventory', () => {
   assert.ok(restoreBuild.includes("root.appendChild(questionTools)"));
   assert.ok(restoreBuild.includes("root.lastElementChild!==questionTools"));
-  assert.ok(restoreBuild.includes("target('appearance').appendChild(questionTools)") === false);
+  assert.ok(restoreBuild.includes("includes(\"target('appearance').appendChild(questionTools)\")"), 'build script must reject obsolete Appearance placement');
   assert.ok(restoreBuild.includes('manifest.fileCount = manifest.files.length'));
 });
 
@@ -320,7 +320,7 @@ test('shared Study experience controls, labels, order, defaults and legacy prefe
 
   const questionDefaultsMatch = voice.match(/var defaults=\{shareQuestion:true,copyQuestion:true,readAloud:true,readingSpeed:'normal'\}/);
   assert.ok(questionDefaultsMatch,'iOS question tool defaults are declared');
-  const questionDefaults = vm.runInNewContext('({' + questionDefaultsMatch[0].replace(/^var defaults=/,'') + '})');
+  const questionDefaults = vm.runInNewContext('(' + questionDefaultsMatch[0].replace(/^var defaults=/,'') + ')');
   assert.equal(questionDefaults.shareQuestion, toMeDefaults.shareQuestion);
   assert.equal(questionDefaults.copyQuestion, toMeDefaults.copyQuestion);
   assert.equal(questionDefaults.readAloud, toMeDefaults.readAloud);
@@ -391,6 +391,7 @@ function studyExperienceMountHarness() {
     {
       settingsRoot(){return activeRoot},
       document,
+      computerVoiceQuestionToolSetting(){return '<div></div>'},
       computerVoiceUpdateUi(){},
       computerVoiceUpdateQuestionToolsUI(){}
     }

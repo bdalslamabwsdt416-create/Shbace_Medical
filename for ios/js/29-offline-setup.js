@@ -9,12 +9,12 @@ if(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' &
 var CACHE_NAME='shbace-medical-offline-v2';
 var STAGING_NAME='shbace-staging-offline';
 var INSTALLED_KEY='installed';
-/* Update checks are throttled: one successful network check every 7 days; after a failed attempt (offline) retry no sooner than 2 hours. */
-var CHECK_OK_KEY='shbace_pkg_check_ok_v1',CHECK_TRY_KEY='shbace_pkg_check_try_v1';
+/* Silent scheduled checks run no more than once per 7 days after a successful network check. Failures retry on the next launch. */
+var CHECK_OK_KEY='shbace_pkg_check_ok_v1';
 var MIGRATION_KEY='shbace_ios_migrated_1_4_14';
 var CHECK_EVERY=7*24*60*60*1000;
-var PENDING_KEY='shbace_pkg_update_pending_v1',NOTIF_ID='update-available';
-var manifestFromNetwork=false,plan=null;
+var PENDING_KEY='shbace_pkg_update_pending_v1',REPAIR_PENDING_KEY='shbace_pkg_repair_pending_v1',NOTIF_ID='update-available';
+var manifestFromNetwork=false,plan=null,migrationInProgress=false,migrationPendingAtLaunch=false,scheduledCheckInProgress=false;
 var DB_NAME='shbace-medical-offline-state-v1';
 var MANIFEST_FETCH_TIMEOUT=30000,MANIFEST_FETCH_ATTEMPTS=2;
 var MANIFEST_URL=new URL('./offline-assets-manifest.json',location.href).href;
@@ -31,12 +31,28 @@ var STAGES=[
 
 function lsNum(key){try{return Number(localStorage.getItem(key))||0}catch(e){return 0}}
 function lsSet(key,value){try{localStorage.setItem(key,String(value))}catch(e){}}
-function setPending(n){
- if(n>0)lsSet(PENDING_KEY,n);else{try{localStorage.removeItem(PENDING_KEY)}catch(e){}}
+function syncPendingNotice(){
  try{
-  if(n>0){if(typeof window.shbAddNotif==='function')window.shbAddNotif(NOTIF_ID,'A new update is available',n+' file'+(n===1?'':'s')+' changed. Open Settings → App updates → Check for updates to install it. Your progress is kept.','settings')}
-  else if(typeof window.shbRemoveNotif==='function')window.shbRemoveNotif(NOTIF_ID);
+  var pending=lsNum(PENDING_KEY),repair=lsNum(REPAIR_PENDING_KEY);
+  if(repair>0){
+   if(typeof window.shbAddNotif==='function')window.shbAddNotif(NOTIF_ID,'Some offline files are missing','Some offline files are missing. Open Settings → App updates → Repair to restore them.','settings');
+  }else if(pending>0){
+   if(typeof window.shbAddNotif==='function')window.shbAddNotif(NOTIF_ID,'A new update is available','An update is pending. Open Settings → App updates → Check for updates to install it. Your progress is kept.','settings');
+  }else if(typeof window.shbRemoveNotif==='function')window.shbRemoveNotif(NOTIF_ID);
  }catch(e){}
+}
+function setPending(n){
+ if(n>0)lsSet(PENDING_KEY,n);else lsDel(PENDING_KEY);
+ syncPendingNotice();
+}
+function setRepairPending(n){
+ n=Math.max(0,Math.floor(Number(n)||0));
+ if(n>0)lsSet(REPAIR_PENDING_KEY,n);else lsDel(REPAIR_PENDING_KEY);
+ syncPendingNotice();
+}
+function finalizeVerifiedPlanCommit(){
+ if(migrationInProgress){lsSet(MIGRATION_KEY,'1');migrationInProgress=false;migrationPendingAtLaunch=false;}
+ if(lsNum(REPAIR_PENDING_KEY)>0)setRepairPending(0);
 }
 var VER_KEY='shbace_pkg_version_installed_v1',VER_AVAIL_KEY='shbace_pkg_version_available_v1',EXAM_KEY='shbace_exam_goal_planner_v1',SNOOZE_DAYS=2,EXAM_QUIET_DAYS=7;
 function lsGetJson(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}}
@@ -225,6 +241,19 @@ function fileValid(file,checkHash,target){
    return hashBytes(bytes).then(function(sum){return sum===file.sha256});
   }).catch(function(){return false});
  });
+}
+/* A launch-time cache check is local-only: compare the IndexedDB install manifest
+   against CacheStorage keys. It never fetches, mounts UI, or repairs automatically. */
+function localRepairNeeded(installed){
+ if(!installed||!installed.files||typeof installed.files!=='object')return Promise.resolve(0);
+ return caches.open(CACHE_NAME).then(function(activeCache){
+  cache=activeCache;
+  return activeCache.keys().then(function(requests){
+   var have=Object.create(null);
+   requests.forEach(function(request){have[request.url]=true});
+   return Object.keys(installed.files).filter(function(path){return !have[urlFor(path)]}).length;
+  });
+ }).catch(function(){return Object.keys(installed.files).length});
 }
 function cleanupPreviousCaches(){
  /* Keep only the current manifest assets, its manifest and its ready marker in
@@ -571,8 +600,10 @@ function runPlan(){
   if(errors.length)throw new Error('The final integrity check found missing or unreadable files.');
   return commitPlan(target);
  }).then(function(){return cleanupPreviousCaches()}).then(function(){
+  /* Migration is committed only after every file is verified, copied and stale-cache cleanup succeeds. */
+  finalizeVerifiedPlanCommit();
   /* A fully verified package counts as an up-to-date check: the seven-day timer restarts now. */
-  lsSet(CHECK_OK_KEY,Date.now());setPending(0);markInstalledNow();
+  lsSet(CHECK_OK_KEY,Date.now());setPending(migrationPendingAtLaunch?1:0);markInstalledNow();
   ui.percent.textContent='100%';ui.count.textContent=plan.files.length+' / '+plan.files.length+' files';
   ui.track.setAttribute('aria-valuenow','100');ui.bar.style.width='100%';
   ui.bytes.textContent=fmtBytes(plan.bytes)+' / '+fmtBytes(plan.bytes);
@@ -597,6 +628,8 @@ function runPlan(){
    }else setTimeout(function(){location.reload()},180);
   }
  }).catch(function(error){
+  /* Keep the manual migration intent in memory for the explicit Retry download action.
+     The persistent MIGRATION_KEY is still untouched until a later verified commit. */
   setStatus(error.message||'The download could not be completed.');
   setWarning('No file is marked complete unless the HTTP response, byte size, SHA-256 hash and local cache write all succeeded. Retry to continue from verified files.');
   setErrorList(errors.length?errors:[error.message||String(error)]);
@@ -628,6 +661,7 @@ function showUpdateSheet(p,info){
  el.appendChild(st);document.body.appendChild(el);
  el.querySelector('#shbUpdLater').addEventListener('click',function(){
   /* "Later": ask again after SNOOZE_DAYS (the next check becomes due then). The bell notification stays. */
+  migrationInProgress=false;
   lsSet(CHECK_OK_KEY,Date.now()-(CHECK_EVERY-SNOOZE_DAYS*86400000));el.remove();
  });
  el.querySelector('#shbUpdNow').addEventListener('click',function(){
@@ -643,7 +677,6 @@ function waitForSplash(){
    if(finished||splash.isConnected)return;
    finished=true;if(observer)observer.disconnect();resolve();
   }
-  /* The splash only disappears from its own parent; avoid watching the whole document. */
   try{observer=new MutationObserver(done);if(splash.parentNode)observer.observe(splash.parentNode,{childList:true})}catch(e){}
   setTimeout(function(){if(!finished){finished=true;if(observer)observer.disconnect();resolve()}},14000);
  });
@@ -663,7 +696,6 @@ function showSetupError(error){
 
 /* Initial package discovery only. Existing installations update only through the explicit Settings action. */
 function runFullCheck(splashFinished){
- lsSet(CHECK_TRY_KEY,Date.now());
  return decide().then(function(res){
   if(!res||res.kind==='none'){
    /* Only a check that really reached the server counts; offline attempts leave the timer and migration flag alone. */
@@ -693,20 +725,90 @@ function runFullCheck(splashFinished){
   });
  });
 }
+/* Silent scheduled update check. It inspects metadata and cache keys only: no UI, download, migration arming or plan execution. */
+function checkDue(){
+ var last=lsNum(CHECK_OK_KEY);
+ if(last>0&&Date.now()-last<CHECK_EVERY)return Promise.resolve({state:'not-due'});
+ if(typeof navigator!=='undefined'&&navigator.onLine===false)return Promise.resolve({state:'offline'});
+ if(scheduledCheckInProgress)return Promise.resolve({state:'busy'});
+ scheduledCheckInProgress=true;
+ return Promise.resolve().then(function(){return loadManifest()}).then(function(data){
+  if(!manifestFromNetwork)return {state:'offline'};
+  manifest=data;
+  return caches.open(CACHE_NAME).then(function(c){cache=c;return dbGet('meta',INSTALLED_KEY)});
+ }).then(function(installed){
+  if(installed&&installed.state)return installed;
+  if(!installed||!installed.files)return {state:'no-install'};
+  return computePlan(installed).then(function(diff){
+   var changed=Number(diff.changed)||0,removed=Array.isArray(diff.removed)?diff.removed.length:0;
+   if(changed>0||removed>0)setPending(Math.max(1,(diff.files||[]).length+removed));
+   lsSet(CHECK_OK_KEY,Date.now());
+   return {state:changed>0||removed>0?'update-pending':'current'};
+  });
+ }).catch(function(){return {state:'offline'}}).then(function(result){
+  scheduledCheckInProgress=false;
+  return result;
+ });
+}
+function scheduleCheckDue(){
+ setTimeout(function(){
+  try{
+   if(typeof window.requestIdleCallback==='function'){
+    window.requestIdleCallback(function(){checkDue()},{timeout:2500});
+    return;
+   }
+  }catch(e){}
+  checkDue();
+ },1200);
+}
 /* Manual "Check for updates" (Settings). Ignores the scheduled seven-day timer and reports what happened. */
 function manualCheck(){
  if(!standalone()||!('caches' in window)||!window.crypto||!crypto.subtle||!window.indexedDB)return Promise.resolve({state:'unsupported'});
  if(started)return Promise.resolve({state:'busy'});
- lsSet(CHECK_TRY_KEY,Date.now());
+ return dbGet('meta',INSTALLED_KEY).catch(function(){return null}).then(function(record){
+  migrationInProgress=!!(record&&record.files&&localStorage.getItem(MIGRATION_KEY)!=='1');
+  return decide();
+ }).then(function(res){
+  if(!manifestFromNetwork){migrationInProgress=false;return {state:'offline'}}
+  if(!res||res.kind==='none'){
+   migrationInProgress=false;lsSet(CHECK_OK_KEY,Date.now());
+   setPending(migrationPendingAtLaunch?1:0);lsDel(VER_AVAIL_KEY);fetchVersionInfo().then(rememberInstalled);
+   return {state:'latest'}
+  }
+  if(res.kind==='prompt'){
+   lsSet(CHECK_OK_KEY,Date.now());setPending(res.plan.files.length);
+   return fetchVersionInfo().then(function(info){if(info)lsSetJson(VER_AVAIL_KEY,info);showUpdateSheet(res.plan,info);return {state:'update'}})
+  }
+  showPlanNeeded(res.plan);return {state:'setup'};
+ }).catch(function(){migrationInProgress=false;return {state:'offline'}});
+}
+function manualRepair(){
+ if(!standalone()||!('caches' in window)||!window.crypto||!crypto.subtle||!window.indexedDB)return Promise.resolve({state:'unsupported'});
+ if(typeof navigator!=='undefined'&&navigator.onLine===false)return Promise.resolve({state:'offline'});
+ if(started)return Promise.resolve({state:'busy'});
+ migrationInProgress=false;
  return decide().then(function(res){
   if(!manifestFromNetwork)return {state:'offline'};
-  if(!res||res.kind==='none'){lsSet(CHECK_OK_KEY,Date.now());setPending(0);lsDel(VER_AVAIL_KEY);fetchVersionInfo().then(rememberInstalled);return {state:'latest'}}
-  if(res.kind==='prompt'){lsSet(CHECK_OK_KEY,Date.now());setPending(res.plan.files.length);
-   return fetchVersionInfo().then(function(info){if(info)lsSetJson(VER_AVAIL_KEY,info);showUpdateSheet(res.plan,info);return {state:'update'}})}
-  showPlanNeeded(res.plan);return {state:'setup'};
+  if(res&&res.kind==='setup'&&res.plan&&res.plan.mode==='restore'){
+   showPlanNeeded(res.plan);runPlan();return {state:'repair'};
+  }
+  if(res&&res.kind==='prompt'){showUpdateSheet(res.plan,null);return {state:'update'}}
+  if(!res||res.kind==='none'){setRepairPending(0);return {state:'latest'}}
+  return {state:'setup'};
  }).catch(function(){return {state:'offline'}});
 }
 window.shbaceCheckForUpdate=manualCheck;
+window.shbaceRepairOffline=manualRepair;
+window.shbaceLastUpdateCheck=function(){return lsNum(CHECK_OK_KEY)};
+window.shbaceUpdatePending=function(){return lsNum(PENDING_KEY)};
+window.shbaceRepairPending=function(){return lsNum(REPAIR_PENDING_KEY)};
+window.shbaceMigrationPending=function(){return migrationPendingAtLaunch};
+window.shbaceOfflineRepairHomeNotice=function(){
+ if(!lsNum(REPAIR_PENDING_KEY))return '';
+ try{if(sessionStorage.getItem('shbace_repair_notice_dismissed')==='1')return ''}catch(e){}
+ return '<div class="shb-offline-repair-inline" role="status" style="display:flex;align-items:center;gap:8px;margin:10px 0;padding:10px 12px;border:1px solid rgba(110,170,230,.35);border-radius:12px;font-size:12px"><span style="flex:1">Some offline files are missing.</span><button type="button" style="min-height:34px;padding:6px 12px;border-radius:9px" onclick="shbaceRepairOffline()">Repair</button><button type="button" aria-label="Dismiss repair notice" style="border:0;background:transparent;font-size:18px" onclick="shbaceDismissRepairNotice()">×</button></div>';
+};
+window.shbaceDismissRepairNotice=function(){try{sessionStorage.setItem('shbace_repair_notice_dismissed','1')}catch(e){}var n=document.querySelector('.shb-offline-repair-inline');if(n)n.remove()};
 window.shbaceLastUpdateCheck=function(){return lsNum(CHECK_OK_KEY)};
 window.shbaceUpdatePending=function(){return lsNum(PENDING_KEY)};
 window.shbaceVersionInfo=function(){return {installed:lsGetJson(VER_KEY),available:lsGetJson(VER_AVAIL_KEY)}};
@@ -717,17 +819,24 @@ function start(){
   return;
  }
  if(!document.body)return;
- /* Retire the old automatic migration path. Existing installs must never launch
-    an update check or local restore screen merely because the app was opened. */
- lsSet(MIGRATION_KEY,'1');
- var splashFinished=waitForSplash();
- if(!('caches' in window)||!window.crypto||!crypto.subtle||!window.indexedDB){
-  splashFinished.then(showSetupUnavailable);
-  return;
- }
- dbGet('meta',INSTALLED_KEY).catch(function(){return null}).then(function(rec){
-  var hasRecord=!!(rec&&rec.files);
-  if(!hasRecord)return runFullCheck(splashFinished);
+ dbGet('meta',INSTALLED_KEY).catch(function(){return null}).then(function(record){
+  var hasRecord=!!(record&&record.files);
+  if(!hasRecord){
+   var splashFinished=waitForSplash();
+   if(!('caches' in window)||!window.crypto||!crypto.subtle||!window.indexedDB){
+    splashFinished.then(showSetupUnavailable);return;
+   }
+   return runFullCheck(splashFinished);
+  }
+  /* Returning installs are deliberately silent: no overlay, prompt, update sheet or fetch. */
+  var migrated=false;try{migrated=localStorage.getItem(MIGRATION_KEY)==='1'}catch(e){}
+  migrationPendingAtLaunch=!migrated;
+  if(migrationPendingAtLaunch)setPending(Math.max(1,lsNum(PENDING_KEY)));
+  return localRepairNeeded(record).then(function(missing){
+   if(missing>0)setRepairPending(missing);
+   else if(lsNum(REPAIR_PENDING_KEY)>0)setRepairPending(0);
+   scheduleCheckDue();
+  });
  });
 }
 function boot(){start();}
