@@ -382,19 +382,41 @@ function computerVoiceQuestionText(card){
   return [stemText,options.length?options.join('. '):''].filter(Boolean).join('. ');
  }catch(_){return ''}
 }
+var questionDecorationScheduled=false;
+function scheduleQuestionDecoration(){
+ if(questionDecorationScheduled)return;
+ questionDecorationScheduled=true;
+ var flush=function(){
+  questionDecorationScheduled=false;
+  computerVoiceDecorateQuestions();
+ };
+ if(typeof window.requestAnimationFrame==='function')window.requestAnimationFrame(flush);
+ else setTimeout(flush,16);
+}
 function computerVoiceDecorateQuestions(){
  try{
   var host=document.querySelector('#phoneContent');if(!host)return;
+  var signature=[
+   computerQuestionTools.shareQuestion?'1':'0',
+   computerQuestionTools.copyQuestion?'1':'0',
+   computerQuestionTools.readAloud?'1':'0'
+  ].join(':');
   host.querySelectorAll('.qcard').forEach(function(card){
    var old=card.querySelector('.shb-question-tools'),stem=card.querySelector('.qstem');
    if(!stem)return;
+   /* The observer also sees toolbar insertion. Preserve unchanged toolbars so
+      our own DOM writes cannot trigger an endless remove/recreate cycle. */
+   if(old&&old.dataset&&old.dataset.sig===signature)return;
    if(old)old.remove();
    var actions=[];
    if(computerQuestionTools.shareQuestion)actions.push('<button type="button" class="shb-question-tool" data-shb-question-tool="share" aria-label="Share question"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg><span>Share</span></button>');
    if(computerQuestionTools.copyQuestion)actions.push('<button type="button" class="shb-question-tool" data-shb-question-tool="copy" aria-label="Copy question"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg><span>Copy</span></button>');
    if(computerQuestionTools.readAloud)actions.push('<button type="button" class="shb-question-tool shb-computer-read-aloud" data-shb-question-tool="readAloud" aria-label="Read question aloud" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg><span>Read aloud</span></button>');
    if(!actions.length)return;
-   var toolbar=document.createElement('div');toolbar.className='shb-question-tools';toolbar.setAttribute('role','group');toolbar.setAttribute('aria-label','Question tools');toolbar.innerHTML=actions.join('');
+   var toolbar=document.createElement('div');toolbar.className='shb-question-tools';
+   toolbar.dataset.sig=signature;
+   toolbar.setAttribute('role','group');toolbar.setAttribute('aria-label','Question tools');
+   toolbar.innerHTML=actions.join('');
    stem.insertAdjacentElement('afterend',toolbar);
   });
  }catch(_){}
@@ -530,7 +552,7 @@ computerVoiceInit();
 
 function mountVoiceSettings(){try{computerVoiceMountSettings()}catch(_){}}
 try{
- var ob=new MutationObserver(function(){mountVoiceSettings();computerVoiceDecorateQuestions()});
+ var ob=new MutationObserver(function(){mountVoiceSettings();scheduleQuestionDecoration()});
  if(document.body)ob.observe(document.body,{childList:true,subtree:true});
 }catch(_){}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mountVoiceSettings,{once:true});else mountVoiceSettings();
