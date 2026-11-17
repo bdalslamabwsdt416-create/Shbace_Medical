@@ -30,6 +30,8 @@ test('service worker is local-only except explicitly tagged updater traffic', ()
   assert.match(worker, /event\.respondWith\(localOnly\(request\)\)/);
   assert.match(worker, /url\.origin !== self\.location\.origin/);
   assert.doesNotMatch(worker, /refreshCachedPwaVersion|networkFirstOnPackageMismatch/);
+  assert.match(worker, /if \(request.method !== 'GET'\)/);
+  assert.equal((worker.match(/\\bfetch\\s*\\(/g) || []).length, 2, 'only the tagged update functions may fetch');
 });
 
 test('startup update metadata is local; manual and seven-day checks opt into network', () => {
@@ -42,6 +44,7 @@ test('startup update metadata is local; manual and seven-day checks opt into net
   assert.match(updater, /document\.addEventListener\('shb-splash-complete'/);
   assert.match(updater, /CHECK_EVERY=7\*24\*60\*60\*1000/);
   assert.match(updater, /CHECK_ATTEMPT_KEY='shbace_pkg_check_attempt_v1'/);
+  assert.match(updater, /CHECK_ATTEMPT_KEY,Date\.now\(\)-\(CHECK_EVERY-SNOOZE_DAYS\*86400000\)/, 'Later preserves the two-day snooze');
   assert.match(updater, /var last=lsNum\(CHECK_ATTEMPT_KEY\)\|\|lsNum\(CHECK_OK_KEY\)/);
 });
 
