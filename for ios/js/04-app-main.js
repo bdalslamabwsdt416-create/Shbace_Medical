@@ -366,11 +366,18 @@ const splashPreReady=()=>splashLoadAt>0&&performance.now()-splashLoadAt>700&&per
 function launchExperience(){
  /* Warm up artwork while the seven-second splash is visible. */
  try{[IMG.iconBig,IMG.icon].forEach(src=>{if(!src)return;const im=new Image();im.src=src;im.decode&&im.decode().catch(()=>{})})}catch(e){}
- try{const raw=localStorage.getItem('shbace_home_tip_index_v3');activeDailyTip=(Number(raw||'-1')+1)%5;localStorage.setItem('shbace_home_tip_index_v3',String(activeDailyTip));}catch(e){}
+ function advanceDailyTip(){try{const raw=localStorage.getItem('shbace_home_tip_index_v3');activeDailyTip=(Number(raw||'-1')+1)%5;localStorage.setItem('shbace_home_tip_index_v3',String(activeDailyTip));}catch(e){}}
  const overlay=document.getElementById('startupSplash');
  if(!overlay){
-  if(window.__shbBooted===true){routeAfterSplash();return;}
-  document.addEventListener('shb-scripts-ready',function(){if(window.__shbBooted===true)routeAfterSplash()},{once:true});
+  if(window.__shbBooted===true){
+   if(typeof window.__shbRestoreAppSession==='function'&&window.__shbRestoreAppSession())return;
+   advanceDailyTip();routeAfterSplash();return;
+  }
+  document.addEventListener('shb-scripts-ready',function(){
+   if(window.__shbBooted!==true)return;
+   if(typeof window.__shbRestoreAppSession==='function'&&window.__shbRestoreAppSession())return;
+   advanceDailyTip();routeAfterSplash();
+  },{once:true});
   return;
  }
  /* The startup splash is replayed for every app document load. Automatic update checks have their own seven-day clock. */
@@ -385,6 +392,16 @@ function launchExperience(){
    splashCompletionTimer=window.setTimeout(tick,100);
    return;
   }
+  /* iOS may discard a background PWA WebKit process. Restore its last app page immediately instead of replaying the startup Splash. */
+  if(typeof window.__shbRestoreAppSession==='function'&&window.__shbRestoreAppSession()){
+   splashFinalized=true;splashRouteDone=true;
+   clearTimeout(splashCompletionTimer);splashCompletionTimer=null;
+   cancelSplashHaptics();
+   if(overlay&&overlay.isConnected)overlay.remove();
+   splashPre=false;
+   return;
+  }
+  advanceDailyTip();
   const remaining=splashDeadline-Date.now();
   if(!splashRouteDone&&(remaining<=SPLASH_PRE_MS||splashPreReady())){splashRouteDone=true;splashPre=true;routeAfterSplash();}   /* draw Onboarding / Home under the opaque splash: as soon as every script has loaded (early, so the heavy build never lands in the last ECG sweep); 0.9 s before the end at the latest */
   if(remaining<=0){whenSplashEcgDone(()=>completeSplashOnce(overlay));return;}
