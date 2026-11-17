@@ -1,10 +1,12 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.10-to-me.46",
-  "displayVersion": "1.3.10.46 · Chrome (Phone + Computer)",
-  "releaseDate": "2026-11-17",
+  "version": "1.3.10-to-me.47",
+  "displayVersion": "1.3.10.47 · Chrome (Phone + Computer)",
+  "releaseDate": "2026-11-18",
   "releaseNotes": [
+    "First installation now opens the one-time Setup screen immediately after Splash. Setup downloads and verifies the complete offline package before question-bank loading, script preloads or onboarding can begin. Existing To Me storage and student progress remain unchanged.",
+    "Installed copies open from the verified local package without a blocking setup screen. The single update engine checks the manifest every 48 hours or on manual request, downloads only changed files in the background, and no longer runs periodic full-package hashing on every install.",
     "Adds 242 verified supplementary AI Clinical Cases questions across the ten medical systems, with four new topics. Preserves each source case, question, option, key, explanation and provenance; the duplicate Proteus question is not imported.",
     "Gives every topic a matching medical illustration in the Nephrotic Syndrome glossy blue icon style. Existing topic artwork is retained; missing topics receive a unique subject-aware illustration.",
     "AI Clinical Cases now displays case text directly inside the first linked question card, without case numbers, titles or CONTINUED labels. Adds a newly authored, diagnosis-neutral clinical vignette for CVS Q1 (VSD); the remaining introductory CVS questions stay independent. Existing question stems, options, answer keys and explanations are preserved.",
@@ -93,6 +95,8 @@
     "A question opened from Search, Saved, Wrong answers or Smart Review now opens inside its own bank, so a Previous question no longer opens as an empty list."
   ],
   "summary": [
+    "First-run Setup owns the complete offline package download and SHA-256 verification; the app boot loader waits before fetching question data or preloading app modules.",
+    "Returning installations open directly from the existing local package. One updater checks every 48 hours or manually, without duplicate Service Worker/version polling.",
     "AI Clinical Cases places case text and its question/options together in one question card, with matched typography and no student-facing case headings or CONTINUED labels.",
     "The CVS Q1 VSD item now has a new clinical vignette; the following introductory CVS questions remain standalone.",
     "Startup now serves the verified offline package locally first, avoiding network round-trips for cached HTML, JavaScript, CSS and assets; missing files are fetched once and saved locally.",
