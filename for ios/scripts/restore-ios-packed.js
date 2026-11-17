@@ -214,8 +214,9 @@ if (!questionVoice.includes("computerVoiceQuestionToolSetting('shareQuestion','S
     questionVoice.includes('Haptic feedback') || questionVoice.includes('examCountdown')) {
   throw new Error('iOS Study experience controls/defaults do not match the shared To Me settings.');
 }
-if (!settingsOrganizer.includes("target('appearance').appendChild(questionTools)") ||
-    !settingsOrganizer.includes("target('notifications').appendChild(studyReminders)") ||
+if (!settingsOrganizer.includes("target('appearance').appendChild(voice)") ||
+    settingsOrganizer.includes("target('appearance').appendChild(questionTools)") ||
+    settingsOrganizer.includes("target('notifications').appendChild(studyReminders)") ||
     !settingsOrganizer.includes("observe(settingsHost,{childList:true})") ||
     settingsOrganizer.includes('observe(document.documentElement') ||
     !settingsOrganizer.includes('settingsObserver.takeRecords()')) {

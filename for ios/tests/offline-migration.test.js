@@ -194,6 +194,81 @@ function runOfflineStartup(installedRecord, options = {}) {
   })));
 }
 
+function runVerifiedPlanHarness(options = {}) {
+  const store = Object.create(null), writes = [], events = [];
+  const localStorage = {
+    getItem(key) { return Object.prototype.hasOwnProperty.call(store, key) ? store[key] : null; },
+    setItem(key, value) { store[key] = String(value); writes.push([key, String(value)]); },
+    removeItem(key) { delete store[key]; }
+  };
+  const scope = 'https://ios.example.test/';
+  const cache = {
+    async put(url, response) { events.push('cache.put:' + url); return true; },
+    async delete(url) { events.push('cache.delete:' + url); return true; }
+  };
+  const target = {
+    async match(url) {
+      events.push('staging.match:' + url);
+      if (options.failCommit) throw new Error('staged commit failed');
+      return { ok: true };
+    }
+  };
+  const caches = {
+    async open(name) { events.push('caches.open:' + name); return name === 'shbace-medical-offline-v2' ? cache : target; },
+    async delete(name) { events.push('caches.delete:' + name); return true; }
+  };
+  const stageVerify = {
+    querySelector() { return { textContent: '', }; },
+    classList: { add() {}, remove() {} }
+  };
+  const ui = {
+    button: { dataset: {}, disabled: false, textContent: '' },
+    stage: { textContent: '' }, percent: { textContent: '' }, count: { textContent: '' },
+    track: { setAttribute() {} }, bar: { style: {} }, bytes: { textContent: '' },
+    stages: { querySelector() { return stageVerify; } }, foot: { textContent: '' },
+    warning: { textContent: '' }, status: { textContent: '' },
+    errors: { hidden: true, textContent: '' }
+  };
+  const sandbox = {
+    started: false, migrationInProgress: true, migrationPendingAtLaunch: true,
+    manifest: { version: 'v1', totalBytes: 10, files: [{ path: 'index.html', bytes: 10, sha256: 'hash', group: 'app' }] },
+    plan: { mode: 'update', files: [{ path: 'index.html', bytes: 10, sha256: 'hash', group: 'app' }], removed: [], bytes: 10 },
+    ui, window: { shbaceRequestAppReload() { events.push('reload-requested'); return true; } },
+    localStorage, caches, navigator: { storage: null }, URL, Promise, Date, Object, Number, Math, Error,
+    CACHE_NAME: 'shbace-medical-offline-v2', STAGING_NAME: 'shbace-staging-offline',
+    MIGRATION_KEY: 'shbace_ios_migrated_1_4_14', CHECK_OK_KEY: 'shbace_pkg_check_ok_v1',
+    REPAIR_PENDING_KEY: 'shbace_pkg_repair_pending_v1', PENDING_KEY: 'shbace_pkg_update_pending_v1',
+    READY_URL: new URL('./__shbace_offline_ready__', scope).href,
+    urlFor(path) { return new URL(path, scope).href; },
+    ensureServiceWorker: () => Promise.resolve(),
+    dbPut: () => Promise.resolve(true),
+    fileValid: () => Promise.resolve(true),
+    verifyAll: () => Promise.resolve(),
+    cleanupPreviousCaches: () => {
+      events.push('cleanupPreviousCaches');
+      return options.failCleanup ? Promise.reject(new Error('cleanup failed')) : Promise.resolve();
+    },
+    saveInstalled: () => { events.push('saveInstalled'); return Promise.resolve(true); },
+    setStatus(message) { ui.status.textContent = message; },
+    setWarning(message) { ui.warning.textContent = message; },
+    setErrorList(items) { ui.errors.hidden = !items.length; },
+    resetCounters() {}, stageMarkup() { return {}; }, paintProgress() {}, addDone() {},
+    fmtBytes(value) { return String(value) + ' B'; },
+    lsSet(key, value) { localStorage.setItem(key, value); },
+    lsNum(key) { return Number(localStorage.getItem(key)) || 0; },
+    setPending(value) { events.push('pending:' + value); },
+    setRepairPending() { events.push('repair-pending-cleared'); },
+    markInstalledNow() { events.push('markInstalledNow'); },
+    console
+  };
+  const code = extractFunction(offline, 'commitPlan') + '\n' +
+    extractFunction(offline, 'finalizeVerifiedPlanCommit') + '\n' +
+    extractFunction(offline, 'runPlan') + '\n' +
+    '({runPlan, state:()=>({migrationInProgress,started,flag:localStorage.getItem(MIGRATION_KEY)}), events, store})';
+  const api = vm.runInNewContext(code, sandbox);
+  return { api, writes, events, store };
+}
+
 function manualMigrationHarness(options = {}) {
   const store = Object.create(null), writes = [], events = [];
   const localStorage = {
@@ -273,28 +348,28 @@ test('existing install with all expected cached files and migration complete doe
   assert.deepEqual(result.screens, []);
 });
 
-test('manual update sets migration flag only after commit and cache cleanup both succeed', async () => {
-  const result = manualMigrationHarness();
-  assert.deepEqual(await result.api.manualCheck(), { state: 'update' });
-  assert.equal(result.store.shbace_ios_migrated_1_4_14, undefined,
-    'checking and presenting an update is not a migration commit');
-  const calls = [];
-  await Promise.resolve()
-    .then(() => { calls.push('commit'); })
-    .then(() => { calls.push('cleanup'); })
-    .then(() => result.api.finalizeVerifiedPlanCommit());
-  assert.deepEqual(calls, ['commit', 'cleanup']);
-  assert.equal(result.store.shbace_ios_migrated_1_4_14, '1');
+test('manual update sets migration flag only after the real verified runPlan commit and cleanup succeed', async () => {
+  const result = runVerifiedPlanHarness();
+  result.api.runPlan();
+  await new Promise(resolve => setImmediate(resolve));
+  const state = result.api.state();
+  assert.equal(state.flag, '1');
+  assert.equal(state.migrationInProgress, false);
+  assert.ok(result.events.indexOf('saveInstalled') >= 0);
+  assert.ok(result.events.indexOf('cleanupPreviousCaches') > result.events.indexOf('saveInstalled'),
+    'cleanup is awaited after the installed-record commit');
+  assert.ok(result.events.indexOf('reload-requested') > result.events.indexOf('cleanupPreviousCaches'),
+    'safe reload is requested only after verified commit and cleanup');
 });
 
-test('failed manual update commit never sets the migration flag', async () => {
-  const result = manualMigrationHarness();
-  assert.deepEqual(await result.api.manualCheck(), { state: 'update' });
-  await Promise.resolve()
-    .then(() => { throw new Error('commit failed'); })
-    .then(() => result.api.finalizeVerifiedPlanCommit())
-    .catch(() => {});
-  assert.equal(result.store.shbace_ios_migrated_1_4_14, undefined);
+test('failed commit or cache cleanup never sets the migration flag', async () => {
+  for (const failure of [{ failCommit: true }, { failCleanup: true }]) {
+    const result = runVerifiedPlanHarness(failure);
+    result.api.runPlan();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(result.api.state().flag, null);
+    assert.equal(result.api.state().migrationInProgress, false);
+  }
 });
 
 test('offline manual update attempt leaves migration flag unset', async () => {

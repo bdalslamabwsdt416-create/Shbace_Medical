@@ -1941,8 +1941,8 @@
     },
     {
       "path": "js/33-unified-voice.js",
-      "bytes": 40237,
-      "sha256": "32e7930bc41f6a4e24203ae708a22836b6c30fedb359276dec209f04639da7fb",
+      "bytes": 40337,
+      "sha256": "d81be3203dd3ee76d012ea5aca2a692f420331c39aee5cf7b109c5a9805d2cf1",
       "group": "app"
     },
     {
@@ -1959,8 +1959,8 @@
     },
     {
       "path": "js/36-exam-planner-settings-smartreview.js",
-      "bytes": 21029,
-      "sha256": "c1a32587ed95ab21979035df288216b1b5ded88aac10e226c21a0eb77e7898d2",
+      "bytes": 20620,
+      "sha256": "7f98f553084db14ae7475d6924f1bbb95cea1be67f164dc51ce314aae1cbf512",
       "group": "app"
     },
     {
@@ -2031,8 +2031,8 @@
     }
   ],
   "fileCount": 338,
-  "totalBytes": 30054582,
+  "totalBytes": 30054273,
   "releaseVersion": "1.4.20",
-  "version": "70471f7d2a373ee52ca2987ba37fd616ecf4e6eceef1100d7b650f0545286ceb",
-  "generatedAt": "2026-11-17T15:19:00.268Z"
+  "version": "bc9f782084ceda1aa43374ff7fdfac8b3fbf7f5baca14963eb607cac7364c5fb",
+  "generatedAt": "2026-11-17T15:23:43.395Z"
 }

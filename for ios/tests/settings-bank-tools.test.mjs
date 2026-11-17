@@ -21,6 +21,14 @@ function extractFunction(source, name) {
   return source.slice(start, end + 2);
 }
 
+function extractToMeFunction(name) {
+  const start = toMe.indexOf('function ' + name + '(');
+  assert.notEqual(start, -1, 'To Me ' + name + ' exists');
+  const end = toMe.indexOf('\n  }', start);
+  assert.notEqual(end, -1, 'To Me ' + name + ' closes');
+  return toMe.slice(start, end + 4);
+}
+
 function bankHelpers() {
   const start = features.indexOf('/* SHB-BANK-SCOPE:');
   const end = features.indexOf('/* ---------- state ---------- */', start);
@@ -85,13 +93,15 @@ test('question cards in the iOS bank receive Share, Copy and Read aloud controls
 
 test('Settings groups Question Bank Version and question actions, while retaining iOS App updates', () => {
   assert.ok(settings.includes("makeSettingZone(order,'appearance','Appearance & study experience'"));
-  assert.ok(settings.includes("makeSettingZone(order,'banks','Question banks & question voice'"));
+  assert.ok(settings.includes("makeSettingZone(order,'banks','Question bank'"));
   assert.ok(settings.includes("findSettingCard(root,'Question Bank Version')"));
-  assert.ok(settings.includes("root.querySelector('#shbQuestionToolsSettings')"));
+  assert.ok(voice.includes("if(!root.querySelector('#shbQuestionToolsSettings'))"));
   assert.ok(settings.includes("root.querySelector('#shbAppUpdates')"));
   assert.ok(settings.includes("target('updates').appendChild(updates)"));
   assert.ok(settings.includes("target('banks').appendChild(bankVersion)"));
-  assert.ok(settings.includes("target('appearance').appendChild(questionTools)"));
+  assert.ok(settings.includes("target('appearance').appendChild(voice)"));
+  assert.ok(!settings.includes("target('appearance').appendChild(questionTools)"));
+  assert.ok(!settings.includes("target('notifications').appendChild(studyReminders)"));
   assert.ok(!settings.includes('studyExperience'));
 });
 
@@ -206,8 +216,8 @@ test('shared Study experience controls follow the To Me labels, descriptions and
   const defaultsDecl = toMe.match(/var DEFAULTS = \{[\s\S]*?\n  \};/);
   assert.ok(defaultsDecl, 'To Me Study experience defaults are present');
   const toMeMarkup = vm.runInNewContext(defaultsDecl[0] + '\nvar prefs=Object.assign({},DEFAULTS);\n' +
-    extractFunction(toMe, 'toggleMarkup') + '\n' +
-    extractFunction(toMe, 'featureSettingsHTML') +
+    extractToMeFunction('toggleMarkup') + '\n' +
+    extractToMeFunction('featureSettingsHTML') +
     '\nfeatureSettingsHTML()', {});
   const prefs = vm.runInNewContext(
     extractFunction(voice, 'computerVoiceReadQuestionTools') + '\ncomputerVoiceReadQuestionTools()',
@@ -241,6 +251,8 @@ test('shared Study experience controls follow the To Me labels, descriptions and
   }
   assert.ok(voice.includes('Copy app information'));
   assert.ok(voice.includes('Send the copied details when reporting an app issue. No account or personal data is included.'));
+  assert.ok(toMeMarkup.indexOf('Study experience') < toMeMarkup.indexOf('Study reminders'), 'To Me mounts Study experience before Study reminders');
+  assert.ok(voice.includes("reminders.id='shbStudyRemindersSettings'"), 'iOS retains the shared Study reminders card for Copy app information');
   assert.ok(voice.includes('shbace_question_tools_v1'));
   assert.ok(voice.includes('shbace_ios_study_experience_v1'));
 });
@@ -257,7 +269,7 @@ test('question-screen observer is scoped to the viewport and repeated notificati
     document: { getElementById(id) { return id === 'phoneContent' ? host : null; }, readyState: 'complete' },
     window: { MutationObserver: FakeMutationObserver, requestAnimationFrame(callback) { frames.push(callback); } },
     MutationObserver: FakeMutationObserver,
-    mountVoiceSettings() { mountCalls.push('mount'); },
+    computerVoiceMountSettings() { mountCalls.push('mount'); },
     computerVoiceDecorateQuestions() { mountCalls.push('decorate'); },
     setTimeout
   };
@@ -387,8 +399,10 @@ test('Settings organizer and its observer stay idempotent under repeated callbac
   assert.equal(h.frames.length, 1);
   h.frames.shift()();
   assert.equal(h.writes, firstWrites, 'a stable Settings tree is left untouched');
-  assert.equal(h.root.children.filter(node => node.kind === 'order').length, 1);
+  assert.equal(h.root.children.filter(node => node.className === 'shb-settings-order').length, 1);
   assert.equal(h.cards.filter(node => node.id === 'shbQuestionToolsSettings').length, 1);
+  assert.deepEqual(h.root.children.slice(0, 2).map(node => node.id), ['shbQuestionToolsSettings','shbStudyRemindersSettings'],
+    'the To Me Study experience and Study reminders cards remain before the ordered Settings sections');
 });
 
 test('question decoration requests are coalesced into one animation frame', () => {
@@ -411,5 +425,5 @@ test('question decoration requests are coalesced into one animation frame', () =
   assert.equal(frames.length, 1, 'many observer callbacks in one frame schedule one decoration pass');
   frames[0]();
   assert.deepEqual(calls, ['decorate']);
-  assert.ok(voice.includes("observe(questionHost,{childList:true})"));
+  assert.ok(voice.includes('new MutationObserver(function(){mountVoiceSettings();scheduleQuestionDecoration()}'));
 });

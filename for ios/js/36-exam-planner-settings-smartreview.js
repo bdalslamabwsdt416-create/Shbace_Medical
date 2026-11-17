@@ -143,7 +143,7 @@ function organizeSettings(){
     if(!order){
       order=document.createElement('div');order.className='shb-settings-order';root.appendChild(order);
       makeSettingZone(order,'appearance','Appearance & study experience','Theme, text size, doctor character, device display and question-study controls.');
-      makeSettingZone(order,'banks','Question banks & question voice','Choose the question-bank version and the voice used to read questions.');
+      makeSettingZone(order,'banks','Question bank','Choose the question-bank version used for study.');
       makeSettingZone(order,'notifications','Study notifications','Choose which study events can notify you.');
       makeSettingZone(order,'updates','App updates','Check the installed iOS release and update available offline files.');
       makeSettingZone(order,'experience','Onboarding & experience','Control the welcome screens and app presentation.');
@@ -154,13 +154,11 @@ function organizeSettings(){
     var appearance=findSettingCard(root,'Appearance'),onboarding=findSettingCard(root,'Onboarding');
     var progress=findSettingCard(root,'Study progress'),backup=findSettingCard(root,'Student data backup');
     var bankVersion=findSettingCard(root,'Question Bank Version');
-    var questionTools=root.querySelector('#shbQuestionToolsSettings'),voice=root.querySelector('#shbUnifiedVoiceSettings');
-    var studyReminders=root.querySelector('#shbStudyRemindersSettings'),notification=root.querySelector('.u10-settings-card'),updates=root.querySelector('#shbAppUpdates'),file=root.querySelector('#bkFile');
+    var voice=root.querySelector('#shbUnifiedVoiceSettings');
+    var notification=root.querySelector('.u10-settings-card'),updates=root.querySelector('#shbAppUpdates'),file=root.querySelector('#bkFile');
     if(appearance&&appearance.parentElement!==target('appearance'))target('appearance').appendChild(appearance);
-    if(questionTools&&questionTools.parentElement!==target('appearance'))target('appearance').appendChild(questionTools);
     if(bankVersion&&bankVersion.parentElement!==target('banks'))target('banks').appendChild(bankVersion);
-    if(voice&&voice.parentElement!==target('banks'))target('banks').appendChild(voice);
-    if(studyReminders&&studyReminders.parentElement!==target('notifications'))target('notifications').appendChild(studyReminders);
+    if(voice&&voice.parentElement!==target('appearance'))target('appearance').appendChild(voice);
     if(notification&&notification.parentElement!==target('notifications'))target('notifications').appendChild(notification);
     if(updates&&updates.parentElement!==target('updates'))target('updates').appendChild(updates);
     if(onboarding&&onboarding.parentElement!==target('experience'))target('experience').appendChild(onboarding);

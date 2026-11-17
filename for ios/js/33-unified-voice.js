@@ -368,6 +368,7 @@ function computerVoiceMountSettings(){
   if(!root.querySelector('#shbStudyRemindersSettings')){
    var reminders=document.createElement('section');reminders.className='card setcard';reminders.id='shbStudyRemindersSettings';
    reminders.innerHTML='<h3>Study reminders</h3>'+
+    '<p class="meta">Scheduled native reminders are not available in the iOS Home Screen app.</p>'+
     '<div class="setrow"><span><b>Copy app information</b><small>Send the copied details when reporting an app issue. No account or personal data is included.</small></span><button type="button" class="btn" id="shbCopyAppInfo">Copy app information</button></div>';
    root.appendChild(reminders);
   }
