@@ -58,7 +58,7 @@ function runtimeFiles() {
     walkRuntimeDirectory(directory, files);
   }
   files.push(...Object.keys(packed));
-  return [...new Set(files)].filter(relative => relative !== 'offline-assets-manifest.json' && !/^css\\/ios-v[567]\\.css$/.test(relative)).sort((a, b) => a.localeCompare(b));
+  return [...new Set(files)].filter(relative => relative !== 'offline-assets-manifest.json' && !['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css'].includes(relative)).sort((a, b) => a.localeCompare(b));
 }
 
 fs.rmSync(out, { recursive: true, force: true });
@@ -70,7 +70,7 @@ function patchPackedAsset(relative, originalBytes) {
   if (relative === 'js/30-ios-v5.js') {
     const flag = 'updateBanner:true,';
     if (!source.includes(flag)) throw new Error('Expected iOS update-banner flag was not found.');
-    source = source.replace(flag, 'updateBanner:false,\\n autoUpdate:true,');
+    source = source.replace(flag, 'updateBanner:false,' + String.fromCharCode(10) + ' autoUpdate:true,');
     source = source.replace("lang:'ar',", "lang:'en',");
     for (const name of ['landscape','haptics','badge','keyboard','speak','progressCard','swipe','shareQuestion','inputHints']) {
       const pattern = new RegExp('('+name+':)true,');
@@ -106,7 +106,7 @@ if(V5.autoUpdate&&swReady()){
     const guideStart = source.indexOf('/* Extend the About > How to Use guide with every shipped iPhone/iPad addition (v5-v7). */');
     const finalClose = source.lastIndexOf('})();');
     if (guideStart < 0 || finalClose < guideStart) throw new Error('Could not locate legacy iOS guide section.');
-    source = source.slice(0, guideStart) + '\\n})();\\n';
+    source = source.slice(0, guideStart) + String.fromCharCode(10) + '})();' + String.fromCharCode(10);
   }
   if (relative === 'js/31-ios-v6.js') {
     source = source.replace("lang:'ar',", "lang:'en',");
@@ -184,6 +184,11 @@ if (!iosOfflineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
 }
 const onboardingMain = fs.readFileSync(safePath('js/04-app-main.js'), 'utf8');
 if (!onboardingMain.includes('function gradeScreen()') || !onboardingMain.includes('function finishScreen()')) throw new Error('The final two onboarding screens are missing from the app core.');
+const iosStorageRuntime = fs.readFileSync(safePath('js/31-ios-v6.js'), 'utf8');
+if (!iosStorageRuntime.includes('persist:true') || !iosStorageRuntime.includes('navigator.storage.persist')) throw new Error('The iOS persistent-storage request is missing.');
+const iosContinuityRuntime = fs.readFileSync(safePath('js/30-ios-v5.js'), 'utf8');
+if (!iosContinuityRuntime.includes('autoUpdate:true') || !iosContinuityRuntime.includes('getRegistration')) throw new Error('The silent iOS updater is missing.');
+if (manifest.files.some(item => ['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/32-ios-v7.js'].includes(item.path))) throw new Error('A retired iOS visual layer is still included in the offline runtime inventory.');
 const scanFiles = manifest.files.filter(item => /\.(?:html|css|js|json|webmanifest)$/i.test(item.path));
 const missingImages = new Set();
 for (const item of scanFiles) {
