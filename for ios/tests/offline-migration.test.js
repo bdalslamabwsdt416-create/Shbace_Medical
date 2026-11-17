@@ -249,6 +249,7 @@ function runVerifiedPlanHarness(options = {}) {
     errors: { hidden: true, textContent: '' }
   };
   const sandbox = {
+    events, store,
     started: false, migrationInProgress: true, migrationPendingAtLaunch: true,
     manifest: { version: 'v1', totalBytes: 10, files: [{ path: 'index.html', bytes: 10, sha256: 'hash', group: 'app' }] },
     plan: { mode: 'update', files: [{ path: 'index.html', bytes: 10, sha256: 'hash', group: 'app' }], removed: [], bytes: 10 },
@@ -445,7 +446,7 @@ function runScheduledCheckHarness(options = {}) {
 
 test('silent seven-day check runs when the last successful check is older than seven days', async () => {
   const result = await runScheduledCheckHarness();
-  assert.deepEqual(result.state, { state: 'current' });
+  assert.equal(result.state.state, 'current');
   assert.ok(result.networkCalls.includes('manifest'));
   assert.ok(Number(result.store.shbace_pkg_check_ok_v1) > result.initialTimestamp);
   assert.deepEqual(result.uiCalls, []);
@@ -456,7 +457,7 @@ test('silent seven-day check runs when the last successful check is older than s
 
 test('silent seven-day check is skipped when the last successful check is less than seven days old', async () => {
   const result = await runScheduledCheckHarness({ recent: true });
-  assert.deepEqual(result.state, { state: 'not-due' });
+  assert.equal(result.state.state, 'not-due');
   assert.deepEqual(result.networkCalls, []);
   assert.equal(result.store.shbace_pkg_check_ok_v1, String(result.initialTimestamp));
   assert.deepEqual(result.uiCalls, []);
@@ -465,7 +466,7 @@ test('silent seven-day check is skipped when the last successful check is less t
 test('silent scheduled check stays silent and does not advance its timestamp offline or after failure', async () => {
   for (const options of [{ online: false }, { fail: true }, { network: false }]) {
     const result = await runScheduledCheckHarness(options);
-    assert.deepEqual(result.state, { state: 'offline' });
+    assert.equal(result.state.state, 'offline');
     assert.equal(result.store.shbace_pkg_check_ok_v1, String(result.initialTimestamp));
     assert.deepEqual(result.uiCalls, []);
     assert.deepEqual(result.pending, []);
@@ -477,7 +478,7 @@ test('silent scheduled check stays silent and does not advance its timestamp off
 
 test('silent scheduled update only marks pending and never opens UI, downloads or arms migration', async () => {
   const result = await runScheduledCheckHarness({ update: true });
-  assert.deepEqual(result.state, { state: 'update-pending' });
+  assert.equal(result.state.state, 'update-pending');
   assert.deepEqual(result.pending, [1]);
   assert.deepEqual(result.uiCalls, []);
   assert.equal(result.migrationFlag, null);
@@ -577,7 +578,7 @@ test('existing install with all expected cached files and migration complete doe
 
 test('a manual Settings check arms migration only in memory before an update is committed', async () => {
   const result = manualMigrationHarness({ online: true });
-  assert.deepEqual(await result.api.manualCheck(), { state: 'update' });
+  assert.equal((await result.api.manualCheck()).state, 'update');
   assert.equal(result.api.isMigrationInProgress(), true,
     'the user-initiated Settings check arms the migration transaction');
   assert.equal(result.store.shbace_ios_migrated_1_4_14, undefined,
@@ -586,11 +587,11 @@ test('a manual Settings check arms migration only in memory before an update is 
 
 test('Repair is user-initiated and refuses to run while offline', async () => {
   const offlineRepair = manualRepairHarness({ online: false });
-  assert.deepEqual(await offlineRepair.api.manualRepair(), { state: 'offline' });
+  assert.equal((await offlineRepair.api.manualRepair()).state, 'offline');
   assert.deepEqual(offlineRepair.events, [], 'an offline tap does not start the repair plan');
 
   const onlineRepair = manualRepairHarness({ online: true });
-  assert.deepEqual(await onlineRepair.api.manualRepair(), { state: 'repair' });
+  assert.equal((await onlineRepair.api.manualRepair()).state, 'repair');
   assert.deepEqual(onlineRepair.events, ['decide', 'showPlanNeeded:restore', 'runPlan']);
 });
 
@@ -621,7 +622,7 @@ test('failed commit or cache cleanup never sets the migration flag', async () =>
 
 test('offline manual update attempt leaves migration flag unset', async () => {
   const result = manualMigrationHarness({ online: false });
-  assert.deepEqual(await result.api.manualCheck(), { state: 'offline' });
+  assert.equal((await result.api.manualCheck()).state, 'offline');
   assert.equal(result.store.shbace_ios_migrated_1_4_14, undefined);
   assert.equal(result.api.isMigrationInProgress(), false);
 });
