@@ -31,7 +31,7 @@ test('service worker is local-only except explicitly tagged updater traffic', ()
   assert.match(worker, /url\.origin !== self\.location\.origin/);
   assert.doesNotMatch(worker, /refreshCachedPwaVersion|networkFirstOnPackageMismatch/);
   assert.match(worker, /if \(request.method !== 'GET'\)/);
-  assert.equal((worker.match(/\\bfetch\\s*\\(/g) || []).length, 2, 'only the tagged update functions may fetch');
+  assert.equal((worker.match(/\bfetch\s*\(/g) || []).length, 2, 'only the tagged update functions may fetch');
 });
 
 test('startup update metadata is local; manual and seven-day checks opt into network', () => {
