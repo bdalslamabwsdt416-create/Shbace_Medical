@@ -351,7 +351,7 @@ function computerVoiceMountSettings(){
    var card=document.createElement('section');
    card.className='card setcard';card.id='shbUnifiedVoiceSettings';
    card.innerHTML='<h3>Question voice</h3>'+
-    '<p class="meta">Choose the English voice used when reading questions aloud. English (US) is the default; English (UK) is available when the device provides it.</p>'+
+    '<p class="meta">Questions are read in English only. SHBACE picks the clearest male English voice your device provides (natural or neural voices first), reads slightly slower, and spells out medical units. English (US) is the default.</p>'+
     '<div class="shb-computer-voice-options" role="group" aria-label="Question reading voice">'+
     '<button type="button" data-shb-unified-voice="en-US" aria-pressed="false">English (US)</button>'+
     '<button type="button" data-shb-unified-voice="en-GB" aria-pressed="false">English (UK)</button>'+
@@ -370,9 +370,7 @@ function computerVoiceMountSettings(){
     '<div class="seg shb-question-tool-speed" role="group" aria-label="Reading speed">'+
     '<button type="button" data-shb-question-speed="slow">Slow</button>'+
     '<button type="button" data-shb-question-speed="normal">Normal</button>'+
-    '<button type="button" data-shb-question-speed="fast">Fast</button></div></div>'+
-    '<button type="button" class="btn block shb-af-copyinfo" id="shbCopyAppInfo" onclick="window.__shbCopyAppInfoIOS()">Copy app information</button>'+
-    '<p class="meta">Send the copied details when reporting an app issue. No account or personal data is included.</p>';
+    '<button type="button" data-shb-question-speed="fast">Fast</button></div></div>'+;
    root.appendChild(tools);
   }
   computerVoiceUpdateUi();computerVoiceUpdateQuestionToolsUI();
@@ -740,7 +738,9 @@ function iosStudyMountSettings(){
   if(card&&!card.querySelector('[data-shb-ios-experience]')){
    card.insertAdjacentHTML('beforeend',
     iosStudyToggleMarkup('keepScreenAwake','Keep screen awake','Prevent the display from sleeping while the Question Bank is open.',!iosStudyWakeSupported())+
-    iosStudyToggleMarkup('followSystemTheme','Follow device theme','Automatically match the device light or dark appearance.',false)+
+    iosStudyToggleMarkup('followSystemTheme','Follow device theme','Automatically match device light or dark appearance.',false)+
+    '<button type="button" class="btn block shb-af-copyinfo" id="shbCopyAppInfo" onclick="window.__shbCopyAppInfoIOS()">Copy app information</button>'+
+    '<p class="meta">Send the copied details when reporting an app issue. No account or personal data is included.</p>'+
     '<p class="meta shb-ios-study-status" id="shbIosStudyWakeStatus" role="status" aria-live="polite"></p>');
   }
   iosStudyUpdateUI();
