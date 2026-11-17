@@ -57,7 +57,7 @@ async function localOnly(request) {
    database once per file. A "verified" answer is kept 60 s, a "not verified yet" answer only 3 s so the
    first install switches to local-only quickly. Concurrent requests share one lookup. */
 const verifiedMemo = { value: false, at: 0, pending: null };
-function hasVerifiedInstall() {
+async function hasVerifiedInstall() {
   const age = Date.now() - verifiedMemo.at;
   if (verifiedMemo.at && age >= 0 && age < (verifiedMemo.value ? 60000 : 3000)) return Promise.resolve(verifiedMemo.value);
   if (verifiedMemo.pending) return verifiedMemo.pending;
