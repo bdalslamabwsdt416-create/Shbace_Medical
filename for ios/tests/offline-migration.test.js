@@ -180,7 +180,7 @@ function runOfflineStartup(installedRecord, options = {}) {
     setPending(value) { pending.push(value); store['shbace_pkg_update_pending_v1'] = String(value); },
     setRepairPending(value) {
       repairs.push(value);
-      if (value > 0) { store['shbace_pkg_repair_pending_v1'] = String(value); pending.push(value); }
+      if (value > 0) store['shbace_pkg_repair_pending_v1'] = String(value);
       else delete store['shbace_pkg_repair_pending_v1'];
     },
     runFullCheck() { calls.push('first-install-check'); return Promise.resolve(); },
@@ -336,7 +336,17 @@ test('existing install with missing cached files is detected locally and marked 
   assert.deepEqual(result.screens, []);
   assert.deepEqual(result.repairs, [1]);
   assert.equal(result.store.shbace_pkg_repair_pending_v1, '1');
-  assert.equal(result.pending.at(-1), 1);
+  assert.deepEqual(result.pending, [], 'repair-only state does not masquerade as an update pending badge');
+});
+
+test('migration-pending and repair-pending states coexist independently on an older install', async () => {
+  const record = { version: '1.4.13', files: { 'index.html': {}, 'js/04-app-main.js': {}, 'js/33-unified-voice.js': {} } };
+  const result = await runOfflineStartup(record, { cachedPaths: ['index.html'] });
+  assert.deepEqual(result.pending, [1], 'legacy migration remains pending');
+  assert.deepEqual(result.repairs, [2], 'two evicted files are tracked independently');
+  assert.equal(result.store.shbace_pkg_update_pending_v1, '1');
+  assert.equal(result.store.shbace_pkg_repair_pending_v1, '2');
+  assert.equal(result.localStorage.getItem('shbace_ios_migrated_1_4_14'), null);
 });
 
 test('existing install with all expected cached files and migration complete does nothing', async () => {

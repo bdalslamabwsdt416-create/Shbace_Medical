@@ -98,6 +98,7 @@ test('App updates renders repair and migration badges as non-modal inline action
   );
   assert.ok(markup.includes('Some offline files are missing - Repair'));
   assert.ok(markup.includes('onclick="shbaceSettingsRepairOffline(this)"'));
+  assert.ok(markup.includes('UPDATE PENDING'), 'repair and migration badges may appear together');
   assert.ok(!markup.includes('role="alertdialog"'));
   const pending = vm.runInNewContext(
     extractFunction(features, 'shbaceSettingsRepairMarkup') + '\nshbaceSettingsRepairMarkup()',

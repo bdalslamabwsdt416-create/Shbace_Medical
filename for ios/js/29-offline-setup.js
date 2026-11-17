@@ -31,22 +31,24 @@ var STAGES=[
 
 function lsNum(key){try{return Number(localStorage.getItem(key))||0}catch(e){return 0}}
 function lsSet(key,value){try{localStorage.setItem(key,String(value))}catch(e){}}
-function setPending(n){
- if(n>0)lsSet(PENDING_KEY,n);else{try{localStorage.removeItem(PENDING_KEY)}catch(e){}}
+function syncPendingNotice(){
  try{
-  if(n>0){
-   var repair=lsNum(REPAIR_PENDING_KEY)>0;
-   var title=repair?'Some offline files are missing':'A new update is available';
-   var body=repair?'Some offline files are missing. Open Settings → App updates → Repair to restore them.':'An update is pending. Open Settings → App updates → Check for updates to install it. Your progress is kept.';
-   if(typeof window.shbAddNotif==='function')window.shbAddNotif(NOTIF_ID,title,body,'settings');
+  var pending=lsNum(PENDING_KEY),repair=lsNum(REPAIR_PENDING_KEY);
+  if(repair>0){
+   if(typeof window.shbAddNotif==='function')window.shbAddNotif(NOTIF_ID,'Some offline files are missing','Some offline files are missing. Open Settings → App updates → Repair to restore them.','settings');
+  }else if(pending>0){
+   if(typeof window.shbAddNotif==='function')window.shbAddNotif(NOTIF_ID,'A new update is available','An update is pending. Open Settings → App updates → Check for updates to install it. Your progress is kept.','settings');
   }else if(typeof window.shbRemoveNotif==='function')window.shbRemoveNotif(NOTIF_ID);
  }catch(e){}
 }
+function setPending(n){
+ if(n>0)lsSet(PENDING_KEY,n);else lsDel(PENDING_KEY);
+ syncPendingNotice();
+}
 function setRepairPending(n){
  n=Math.max(0,Math.floor(Number(n)||0));
- var old=lsNum(REPAIR_PENDING_KEY);
- if(n>0){lsSet(REPAIR_PENDING_KEY,n);setPending(Math.max(lsNum(PENDING_KEY),n));}
- else if(old>0){lsDel(REPAIR_PENDING_KEY);if(!migrationPendingAtLaunch)setPending(0);}
+ if(n>0)lsSet(REPAIR_PENDING_KEY,n);else lsDel(REPAIR_PENDING_KEY);
+ syncPendingNotice();
 }
 function finalizeVerifiedPlanCommit(){
  if(migrationInProgress){lsSet(MIGRATION_KEY,'1');migrationInProgress=false;migrationPendingAtLaunch=false;}

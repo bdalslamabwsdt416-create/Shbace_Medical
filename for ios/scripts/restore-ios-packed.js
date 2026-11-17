@@ -235,6 +235,7 @@ if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !offlineSetup.includes('function finalizeVerifiedPlanCommit()') ||
     !offlineSetup.includes("if(migrationInProgress){lsSet(MIGRATION_KEY,'1')") ||
     !offlineSetup.includes('function localRepairNeeded(installed)') ||
+    !offlineSetup.includes('function syncPendingNotice()') ||
     !offlineSetup.includes('function manualRepair()') ||
     !offlineSetup.includes('window.shbaceRepairOffline=manualRepair') ||
     !offlineSetup.includes('function start()') ||

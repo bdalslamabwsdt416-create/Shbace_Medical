@@ -1809,8 +1809,8 @@
     },
     {
       "path": "js/09-app-features-v6.js",
-      "bytes": 440841,
-      "sha256": "e4d09b1eba9e5a6d80e5b5cd01be3d29d7496e51ca71000731d0dc2a4a405408",
+      "bytes": 440940,
+      "sha256": "311329d35a7b6b57435e54ad0b6be3c08f53c910f0e8d54c105f4e249fb4a71d",
       "group": "app"
     },
     {
@@ -1929,8 +1929,8 @@
     },
     {
       "path": "js/29-offline-setup.js",
-      "bytes": 44092,
-      "sha256": "b134c32eb4886584d5c2f75d32ed8335eb329b3ae8e4c3dddd9c7a1f3de95be1",
+      "bytes": 44084,
+      "sha256": "7e44fc56cb4b021c729ece335ffca123b6c72fc4eb035682b3967c05b6ce7aa4",
       "group": "app"
     },
     {
@@ -2031,8 +2031,8 @@
     }
   ],
   "fileCount": 338,
-  "totalBytes": 30054517,
+  "totalBytes": 30054608,
   "releaseVersion": "1.4.20",
-  "version": "805abbcb3f762d231ac18581b44c84aa752449e4e21e9bc7e4d5999f85aff807",
-  "generatedAt": "2026-11-17T15:25:40.286Z"
+  "version": "69466ce9aed0f3ce5c38a7b1e916e14ff7ea5187acc154ac70255931fcedf35a",
+  "generatedAt": "2026-11-17T15:28:39.112Z"
 }
