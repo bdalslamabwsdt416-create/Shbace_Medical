@@ -1942,7 +1942,6 @@ window.shbaceSettingsCheckForUpdates=async function(button){
   btn.dataset.checking='0';btn.disabled=false;btn.textContent='Check for updates';
  }
 };
-
 const rsPool=()=>QB.filter(q=>bankOk(q,rBank)&&(rSys==='all'||q.spec===rSys)&&(!rTop||q.topic===rTop));
 const rsSort=(a,b)=>String(a[1]).localeCompare(String(b[1]));
 function rsSystems(){const m=new Map();QB.forEach(q=>{if(bankOk(q,rBank)&&!m.has(q.spec))m.set(q.spec,SPEC_NAME[q.spec]||q.spec)});return [...m].sort(rsSort)}

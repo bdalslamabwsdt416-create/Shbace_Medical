@@ -189,12 +189,23 @@ const drawerRuntime = fs.readFileSync(safePath('js/07-returning-student-migratio
 const drawerOrder = fs.readFileSync(safePath('js/20-drawer-order-v12.js'), 'utf8');
 const drawerMenuBase = fs.readFileSync(safePath('js/06-drawer-menu.js'), 'utf8');
 const drawerFeatures = fs.readFileSync(safePath('js/09-app-features-v6.js'), 'utf8');
-for (const marker of ['dr-top2','dr-x dr2-x','dr2-flag','class="dr-body"','class="dr-foot"']) {
+for (const marker of ['dr-top2','dr2-flag','class="dr-body"','class="dr-foot"']) {
   if (!drawerRuntime.includes(marker)) throw new Error('The latest To Me side drawer is incomplete: ' + marker);
 }
-if (!drawerMenuBase.includes("['Notifications']") ||
-    !drawerOrder.includes("['Updates',[pick('Notifications')].filter(Boolean)]")) {
-  throw new Error('The current To Me Updates/Notifications drawer section is missing.');
+if (!drawerMenuBase.includes("hdrTap('Notifications')") ||
+    drawerOrder.includes("['Updates'") ||
+    !drawerOrder.includes("['App & support',['Settings','Contact & Feedback','Changelog','About','Rate this app'].map(pick).filter(Boolean)]")) {
+  throw new Error('The iOS drawer must match the latest To Me App & support grouping, without a separate Updates section.');
+}
+if (!drawerFeatures.includes('id="shbAppUpdates"') ||
+    !drawerFeatures.includes('onclick="shbaceSettingsCheckForUpdates(this)"') ||
+    !drawerFeatures.includes('window.shbaceCheckForUpdate()')) {
+  throw new Error('The iOS manual App updates card and update-check action must remain available.');
+}
+if (!drawerFeatures.includes('id="shbAppUpdates"') ||
+    !drawerFeatures.includes('onclick="shbaceSettingsCheckForUpdates(this)"') ||
+    !drawerFeatures.includes('window.shbaceCheckForUpdate()')) {
+  throw new Error('The iOS manual App updates card and update-check action must remain available.');
 }
 for (const marker of ['PAGES.notifs=notifsView','PAGES.timer=timerView','PAGES.weak=weakView','window.__shbNavTap']) {
   if (!drawerFeatures.includes(marker)) throw new Error('An iOS side-menu destination or navigation handler is missing: ' + marker);
