@@ -705,11 +705,15 @@ test('build guards the migration commit, local-only launch detector and manual r
   assert.ok(offline.includes('function checkDue()'));
   assert.ok(offline.includes('function scheduleCheckDue()'));
   const scheduled = offline.slice(offline.indexOf('function checkDue()'), offline.indexOf('function scheduleCheckDue()'));
+  const scheduledTimer = offline.slice(offline.indexOf('function scheduleCheckDue()'), offline.indexOf('function manualCheck()'));
   assert.ok(!scheduled.includes('MIGRATION_KEY'));
   assert.ok(!scheduled.includes('migrationInProgress'));
   assert.ok(!scheduled.includes('mount(') && !scheduled.includes('showUpdateSheet(') && !scheduled.includes('showPlanNeeded('));
   assert.ok(!scheduled.includes('runPlan(') && !scheduled.includes('fetchAndStore('));
   assert.ok(scheduled.includes('setPending('));
+  assert.ok(scheduled.includes('CHECK_OK_KEY') && scheduled.includes('CHECK_EVERY') && scheduled.includes('Date.now()'));
+  assert.ok(!scheduled.includes('document.') && !scheduled.includes('ui.'));
+  assert.ok(scheduledTimer.includes('setTimeout(') && scheduledTimer.includes('1200') && scheduledTimer.includes('requestIdleCallback'));
   assert.ok(offline.includes('function localRepairNeeded(installed)'));
 });
 
