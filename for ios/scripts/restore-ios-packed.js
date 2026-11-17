@@ -365,13 +365,15 @@ if (!onboardingMain.includes('Which grade are you in?') ||
 }
 const pwaVersion = JSON.parse(fs.readFileSync(safePath('pwa-version.json'), 'utf8'));
 const packageMetadata = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-if (packageMetadata.version !== '1.4.20' || pwaVersion.version !== '1.4.20' || pwaVersion.displayVersion !== '1.4.20' ||
+if (packageMetadata.version !== '1.4.21' || pwaVersion.version !== '1.4.21' || pwaVersion.displayVersion !== '1.4.21' ||
     !Array.isArray(pwaVersion.releaseNotes) ||
     !pwaVersion.releaseNotes.includes("Adds iOS Question Bank tools for Share, Copy and Read aloud, groups bank controls in Settings, and scopes progress resets to the active bank, system and topic.") ||
     !pwaVersion.releaseNotes.includes('Keeps existing iOS installs silent at launch; a legacy migration remains pending until a user-started update is verified, committed and cleaned up.') ||
     !pwaVersion.releaseNotes.includes('Checks the installed offline file inventory locally at launch and offers an explicit online-only Repair action in Settings, with a dismissible Home fallback.') ||
-    !pwaVersion.releaseNotes.includes('Removes the unused startup retry marker while preserving automatic package discovery for first installs and the manual Settings update action.')) {
-  throw new Error('The iOS 1.4.20 release metadata is missing or inconsistent.');
+    !pwaVersion.releaseNotes.includes('Removes the unused startup retry marker while preserving automatic package discovery for first installs and the manual Settings update action.') ||
+    !pwaVersion.releaseNotes.includes('Releases the startup Splash once the core app runtime is ready, without waiting for nonessential enhancement modules to finish loading.') ||
+    !drawerFeatures.includes('window.__shbCoreReady = true;')) {
+  throw new Error('The iOS 1.4.21 release metadata or Splash readiness handoff is missing or inconsistent.');
 }
 
 if (manifest.files.some(item => ['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/32-ios-v7.js'].includes(item.path))) throw new Error('A retired iOS visual layer is still included in the offline runtime inventory.');

@@ -13,6 +13,7 @@ const voice = read('js/33-unified-voice.js');
 const sw = read('sw.js');
 const build = read('scripts/restore-ios-packed.js');
 const html = read('index.html');
+const appMain = read('js/04-app-main.js');
 const pkg = JSON.parse(read('package.json'));
 const pwa = JSON.parse(read('pwa-version.json'));
 const offlineManifest = JSON.parse(read('offline-assets-manifest.json'));
@@ -848,11 +849,12 @@ test('retired iOS modules are absent and are not referenced by the live HTML', (
   }
 });
 
-test('release remains 1.4.20 and records the safe startup migration and local repair fixes', () => {
-  assert.equal(pkg.version, '1.4.20');
-  assert.equal(pwa.version, '1.4.20');
-  assert.equal(pwa.displayVersion, '1.4.20');
+test('release remains 1.4.21 and records the safe startup and offline repair fixes', () => {
+  assert.equal(pkg.version, '1.4.21');
+  assert.equal(pwa.version, '1.4.21');
+  assert.equal(pwa.displayVersion, '1.4.21');
   for (const note of [
+    'Releases the startup Splash once the core app runtime is ready, without waiting for nonessential enhancement modules to finish loading.',
     'Keeps existing iOS installs silent at launch; a legacy migration remains pending until a user-started update is verified, committed and cleaned up.',
     'Checks the installed offline file inventory locally at launch and offers an explicit online-only Repair action in Settings, with a dismissible Home fallback.',
     'Removes the unused startup retry marker while preserving automatic package discovery for first installs and the manual Settings update action.'
@@ -864,6 +866,20 @@ test('release remains 1.4.20 and records the safe startup migration and local re
     'unreferenced legacy CSS must not remain in the offline manifest');
   assert.ok(build.includes('manifest.fileCount = manifest.files.length'),
     'the normal PWA build computes fileCount from the generated runtime inventory');
+});
+
+ 
+test('iOS Splash releases at core runtime readiness while optional modules can continue loading', () => {
+  assert.ok(appMain.includes('const splashRuntimeReady=()=>window.__shbBooted===true||window.__shbCoreReady===true;'),
+    'the Splash gate must accept the core runtime marker as well as full boot completion');
+  assert.ok(appMain.includes('!splashRuntimeReady()'),
+    'foreground and splash completion paths must use the shared readiness gate');
+  assert.ok(appMain.includes('splashRuntimeReady()&&(remaining<=SPLASH_PRE_MS||splashPreReady())'),
+    'routing must begin when the core runtime is ready, not only after every deferred script');
+  assert.ok(drawerFeatures.includes('window.__shbCoreReady = true;'),
+    'the core app feature layer must publish readiness before optional enhancement modules');
+  assert.ok(html.includes('data-src="js/09-app-features-v6.js"'),
+    'the readiness marker must be owned by the required app feature layer');
 });
 
 

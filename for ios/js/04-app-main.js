@@ -230,6 +230,8 @@ const SPLASH_DURATION_MS=7000;      /* Splash stays fully visible for exactly 7 
 const SPLASH_FADE_MS=(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)?350:1900;           /* dissolve duration (1.8–2 s). The real screen is already drawn under the splash */
 let spBeats=0,spHapticTimer=null,spHapticDubTimer=null,spHapticLoopTimer=null;
 let splashDeadline=0,splashCompletionTimer=null,splashFinalized=false,splashRouteDone=false,splashPre=false;
+/* Do not keep the Splash waiting for nonessential late feature modules. */
+const splashRuntimeReady=()=>window.__shbBooted===true||window.__shbCoreReady===true;
 function nativeHapticsBridge(){
  try{
   const cap=window.Capacitor||window.capacitor||null;
@@ -339,7 +341,7 @@ function completeSplashOnce(overlay,instant){
  splashDissolve(overlay,SPLASH_FADE_MS,fin);
 }
 function syncSplashOnForeground(){
- const overlay=document.getElementById('startupSplash');if(!overlay||splashFinalized||window.__shbBooted!==true)return;
+ const overlay=document.getElementById('startupSplash');if(!overlay||splashFinalized||!splashRuntimeReady())return;
  const r=splashDeadline-Date.now();
  if(r<=-SPLASH_FADE_MS)completeSplashOnce(overlay,true);      /* the whole hold + dissolve already passed while the app was in the background */
  else if(r<=0)completeSplashOnce(overlay);
@@ -369,8 +371,8 @@ function launchExperience(){
  const tick=()=>{
   if(splashFinalized)return;
   const remaining=splashDeadline-Date.now();
-  if(!splashRouteDone&&window.__shbBooted===true&&(remaining<=SPLASH_PRE_MS||splashPreReady())){splashRouteDone=true;splashPre=true;routeAfterSplash();}   /* wait for the deferred script queue: on a cold first install the hologram override arrives after the base app script */
-  if(remaining<=0){if(window.__shbBooted!==true){splashCompletionTimer=window.setTimeout(tick,80);return;}whenSplashEcgDone(()=>completeSplashOnce(overlay));return;}
+  if(!splashRouteDone&&splashRuntimeReady()&&(remaining<=SPLASH_PRE_MS||splashPreReady())){splashRouteDone=true;splashPre=true;routeAfterSplash();}   /* wait for the core app runtime; optional enhancement modules may continue loading behind the Splash */
+  if(remaining<=0){if(!splashRuntimeReady()){splashCompletionTimer=window.setTimeout(tick,80);return;}whenSplashEcgDone(()=>completeSplashOnce(overlay));return;}
   clearTimeout(splashCompletionTimer);
   splashCompletionTimer=window.setTimeout(tick,Math.max(8,splashRouteDone?remaining:Math.min(150,remaining-SPLASH_PRE_MS)));
  };

@@ -3588,3 +3588,7 @@ window.__shbOpenSettings=function(){appPage='settings';renderAppDemo();return tr
 
 })();
 })();
+
+/* Minimum interactive app runtime is now present. The remaining enhancement modules may finish after the Splash is released. */
+window.__shbCoreReady = true;
+try { document.dispatchEvent(new Event('shb-core-ready')); } catch (e) {}

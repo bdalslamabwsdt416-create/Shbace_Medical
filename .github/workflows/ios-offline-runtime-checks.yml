@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "ios/splash-offline-first-boot-1.4.20"
+      - "ios/splash-core-ready-1.4.21"
     paths:
       - "for ios/**"
       - ".github/workflows/ios-offline-runtime-checks.yml"
