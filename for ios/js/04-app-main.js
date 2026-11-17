@@ -366,7 +366,8 @@ const splashPreReady=()=>splashLoadAt>0&&performance.now()-splashLoadAt>700&&per
 function launchExperience(){
  /* Warm up artwork while the seven-second splash is visible. */
  try{[IMG.iconBig,IMG.icon].forEach(src=>{if(!src)return;const im=new Image();im.src=src;im.decode&&im.decode().catch(()=>{})})}catch(e){}
- function advanceDailyTip(){try{const raw=localStorage.getItem('shbace_home_tip_index_v3');activeDailyTip=(Number(raw||'-1')+1)%5;localStorage.setItem('shbace_home_tip_index_v3',String(activeDailyTip));}catch(e){}}
+ let dailyTipAdvanced=false;
+ function advanceDailyTip(){if(dailyTipAdvanced)return;dailyTipAdvanced=true;try{const raw=localStorage.getItem('shbace_home_tip_index_v3');activeDailyTip=(Number(raw||'-1')+1)%5;localStorage.setItem('shbace_home_tip_index_v3',String(activeDailyTip));}catch(e){}}
  const overlay=document.getElementById('startupSplash');
  if(!overlay){
   if(window.__shbBooted===true){
@@ -380,7 +381,7 @@ function launchExperience(){
   },{once:true});
   return;
  }
- /* The startup splash is replayed for every app document load. Automatic update checks have their own seven-day clock. */
+ /* Fresh starts show the startup Splash. A saved iOS app session is restored above it without replaying the Splash. */
  splashDeadline=(function(){const e=window.__spEcg;return Date.now()-((e&&e.t0!==null)?Math.max(0,performance.now()-e.t0):0)})()+SPLASH_DURATION_MS;      /* end of the 7 s hold (same clock as the ECG head); the transition starts here */
  splashFinalized=false;splashRouteDone=false;spBeats=0;
  startSplashHaptics();
