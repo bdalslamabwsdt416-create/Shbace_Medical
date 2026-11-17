@@ -18,7 +18,6 @@ const NET_TIMEOUT = 8000;      /* runtime fetch of a file that is not cached yet
 const VERSION_TIMEOUT = 10000; /* manifest / version checks */
 
 const APP_SHELL = [
-  './',
   './index.html',
   './manifest.webmanifest',
   './pwa-version.json',
