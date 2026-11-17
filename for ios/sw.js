@@ -3,7 +3,7 @@
 
 const CACHE_NAME = 'shbace-medical-offline-v2';
 // App-shell updates are isolated from the verified offline package. Never overwrite offline resources during SW install.
-const SHELL_CACHE_NAME = 'shbace-medical-ios-shell-v150';
+const SHELL_CACHE_NAME = 'shbace-medical-ios-shell-v151';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
 const APP_SHELL = [
   './',
@@ -16,6 +16,8 @@ const APP_SHELL = [
   './js/09-app-features-v6.js',
   './js/30-ios-v5.js',
   './js/31-ios-v6.js',
+  './js/32-ios-study-tools.js',
+  './js/33-ios-exam-planner.js',
   './css/bundle-core.css',
   './css/bundle-late.css',
   './js/29-offline-setup.js'
@@ -47,7 +49,7 @@ self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     await self.clients.claim();
     const cache = await caches.open(CACHE_NAME);
-    const migrationUrl = new URL('__shbace_silent_update_migration_150__', self.registration.scope).href;
+    const migrationUrl = new URL('__shbace_silent_update_migration_151__', self.registration.scope).href;
     if (!(await cache.match(migrationUrl))) {
       await cache.put(migrationUrl, new Response('done', {
         status: 200, headers: { 'Content-Type': 'text/plain', 'Cache-Control': 'no-store' }
