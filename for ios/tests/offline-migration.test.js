@@ -15,6 +15,9 @@ const html = read('index.html');
 const pkg = JSON.parse(read('package.json'));
 const pwa = JSON.parse(read('pwa-version.json'));
 const offlineManifest = JSON.parse(read('offline-assets-manifest.json'));
+const drawerOrder = read('js/20-drawer-order-v12.js');
+const drawerRuntime = read('js/07-returning-student-migration.js');
+const drawerFeatures = read('js/09-app-features-v6.js');
 
 /* Execute the real service-worker fetch listener with deterministic CacheStorage,
    IndexedDB and fetch fakes. These tests assert returned bytes and network behavior. */
@@ -247,6 +250,16 @@ test('behavior: mismatch applies network-first to every script, style and naviga
     assert.equal(harness.fetchCalls.length, 1, item.path + ' must fetch network');
     assert.equal(harness.fetchCalls[0].cache, 'reload', item.path + ' must bypass stale HTTP cache');
   }
+});
+
+test('iOS drawer matches To Me grouping while preserving close control and manual App updates', () => {
+  assert.ok(!drawerOrder.includes("['Updates'"), 'there must not be a separate Updates section');
+  assert.ok(drawerOrder.includes("['App & support',['Notifications','Settings','Contact & Feedback','Changelog','About','Rate this app'].map(pick).filter(Boolean)]"),
+    'Notifications must stay available under App & support');
+  assert.ok(drawerRuntime.includes('dr-x dr2-x'), 'the iPhone drawer close control must remain available');
+  assert.ok(drawerFeatures.includes('id="shbAppUpdates"'), 'the App updates settings card must remain visible');
+  assert.ok(drawerFeatures.includes('onclick="shbaceSettingsCheckForUpdates(this)"'), 'manual update action must remain wired');
+  assert.ok(drawerFeatures.includes('window.shbaceCheckForUpdate()'), 'manual update checker must remain connected');
 });
 
 test('manifest build embeds releaseVersion and protects the migration/cache invariants', () => {

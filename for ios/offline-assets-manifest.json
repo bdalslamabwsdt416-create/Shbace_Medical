@@ -1875,8 +1875,8 @@
     },
     {
       "path": "js/20-drawer-order-v12.js",
-      "bytes": 1335,
-      "sha256": "fa4a236403231e48bd879da4353ee0d393aba5c5f1e04da75777cf62f86b9721",
+      "bytes": 1296,
+      "sha256": "4fc4ffc32d4288a7795522966d15f8ebe071dca8ede79a8b70b67c04b248ed84",
       "group": "app"
     },
     {
@@ -2031,8 +2031,8 @@
     }
   ],
   "fileCount": 338,
-  "totalBytes": 30025700,
+  "totalBytes": 30025661,
   "releaseVersion": "1.4.15",
-  "version": "4b10072c38f2bc72451cc2c784e733d832995164c98ff0b68d0ee489d5400dd5",
+  "version": "19686fa33b2b9175f536e8c2e698f79417e470cbffae3a3570faee31b00a8f26",
   "generatedAt": "2026-11-17T11:42:45.728Z"
 }
