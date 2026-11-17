@@ -737,6 +737,7 @@ function checkDue(){
   manifest=data;
   return caches.open(CACHE_NAME).then(function(c){cache=c;return dbGet('meta',INSTALLED_KEY)});
  }).then(function(installed){
+  if(installed&&installed.state)return installed;
   if(!installed||!installed.files)return {state:'no-install'};
   return computePlan(installed).then(function(diff){
    var changed=Number(diff.changed)||0,removed=Array.isArray(diff.removed)?diff.removed.length:0;
