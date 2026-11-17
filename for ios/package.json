@@ -1,12 +1,12 @@
 {
   "name": "shbace-medical",
-  "version": "1.1.0",
+  "version": "1.4.11",
   "private": true,
-  "description": "Shbace Medical 1.1 — offline-first medical question bank",
+  "description": "Shbace Medical iOS PWA — unified shared app core with iOS-specific offline delivery",
   "scripts": {
     "android:debug": "cd android && ./gradlew :app:assembleDebug",
     "android:release": "cd android && ./gradlew :app:assembleRelease",
-    "build:pwa": "node scripts/build-pwa.mjs"
+    "build:pwa": "node scripts/restore-ios-packed.js"
   },
   "dependencies": {
     "@capacitor/android": "8.6.0",

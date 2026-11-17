@@ -1,12 +1,12 @@
 {
   "app": "Shbace Medical",
   "platform": "PWA",
-  "version": "1.4.10",
-  "displayVersion": "1.4.10",
-  "releaseDate": "2026-11-12",
+  "version": "1.4.11",
+  "displayVersion": "1.4.11",
+  "releaseDate": "2026-11-17",
   "releaseNotes": [
-    "Replace the full-width offline status bar with a small floating notification that does not cover or move the top bar.",
-    "Automatically dismiss both offline and back-online notifications after two seconds.",
-    "Keep all other app behavior and saved study data unchanged."
+    "Unify the iOS app interface, shared study systems, and question-bank collections with the current to me source.",
+    "Preserve the original iOS design of the final two onboarding screens and the iOS-specific offline installer, storage database, and Service Worker lifecycle.",
+    "Bring the current shared medical study tools, pediatric collections, AI bank adapter, and Islamic reminders to the iOS PWA."
   ]
 }
