@@ -1,7 +1,7 @@
 'use strict';
 
 /* Keep this cache name identical to js/29-offline-setup.js. Never rotate it for a routine app release: doing so would discard the verified 28 MB package. */
-const CACHE_NAME = 'shbace-chrome-offline-v1.3.10.37';
+const CACHE_NAME = 'shbace-medical-offline-v2';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
 const INDEX_URL = new URL('index.html', self.registration.scope).href;
 const APP_SHELL = [
