@@ -1907,7 +1907,7 @@ function settingsView(){
   <div class="setrow"><b>Last Onboarding Page</b><small>When ON, the final “Your journey starts here” page is shown at app start. Turn it OFF to skip it.</small><button type="button" class="drsw ${SET.obLast==='on'?'on':''}" role="switch" aria-checked="${SET.obLast==='on'}" aria-label="Last Onboarding Page" onclick="setSet('obLast','${SET.obLast==='on'?'off':'on'}')"><i></i><span>${SET.obLast==='on'?'ON':'OFF'}</span></button></div></div>
 
  <div class="card setcard" id="shbAppUpdates"><h3>App updates</h3>
-  <p class="meta">Updates are checked only when you tap Check for updates. ${shbaceSettingsUpdateMeta()}</p>
+  <p class="meta">Automatic update checks run every seven days. ${shbaceSettingsUpdateMeta()}</p>
   <button type="button" class="btn primary block" id="shbaceSettingsUpdateButton" onclick="shbaceSettingsCheckForUpdates(this)">Check for updates</button>
   <p class="meta" id="shbaceSettingsUpdateStatus" role="status" aria-live="polite">Manual checks look for changed files. Your answers, notes and study progress remain saved.</p>
   ${shbaceSettingsRepairMarkup()}</div>
