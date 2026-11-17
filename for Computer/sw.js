@@ -73,10 +73,12 @@ self.addEventListener('activate', event => {
   event.waitUntil(self.clients.claim());
 });
 
-/* Local-first: after the updater verifies and stores the package, startup uses those local bytes.
-   A genuinely missing file gets one network fallback and is saved locally after a successful response. */
+/* Before the first verified installation, bootstrap may use the network.
+   Once READY_URL exists, app-shell requests are strictly local: a missing file is
+   an installation/restore error, never an excuse to fetch unverified code at runtime. */
 async function localFirst(request) {
   const cache = await caches.open(CACHE_NAME);
+  const ready = await cache.match(READY_URL);
   let hit = null;
   if (request.mode === 'navigate') {
     /* The updater stores the canonical index.html path. Do not serve an older cached './' entry first. */
@@ -85,6 +87,7 @@ async function localFirst(request) {
     hit = await cache.match(request, { ignoreSearch: true });
   }
   if (hit) return hit;
+  if (ready) return missingOfflineResponse(request.url);
   try {
     const fresh = await fetch(request);
     if (fresh && fresh.ok) {
