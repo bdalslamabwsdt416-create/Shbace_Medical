@@ -168,6 +168,14 @@ for (const icon of pwaManifest.icons || []) {
 const offlineSetup = fs.readFileSync(safePath('js/29-offline-setup.js'), 'utf8');
 const serviceWorker = fs.readFileSync(safePath('sw.js'), 'utf8');
 const questionVoice = fs.readFileSync(safePath('js/33-unified-voice.js'), 'utf8');
+if (!questionVoice.includes("tools.innerHTML='<h3>Study experience</h3>'") ||
+    !questionVoice.includes("iosStudyToggleMarkup('keepScreenAwake','Keep screen awake'") ||
+    !questionVoice.includes("iosStudyToggleMarkup('followSystemTheme','Follow device theme'") ||
+    questionVoice.includes('shbIosStudyExperienceSettings') ||
+    !fs.readFileSync(safePath('js/36-exam-planner-settings-smartreview.js'), 'utf8').includes("target('appearance').appendChild(questionTools)")) {
+  throw new Error('iOS Study experience controls must stay consolidated in the To Me-aligned card.');
+}
+
 if (!questionVoice.includes('toolbar.dataset.sig=signature') ||
     !questionVoice.includes('scheduleQuestionDecoration()') ||
     questionVoice.includes('new MutationObserver(function(){mountVoiceSettings();computerVoiceDecorateQuestions()}')) {
