@@ -2,7 +2,7 @@
   "name": "shbace-medical",
   "version": "1.4.12",
   "private": true,
-  "description": "Shbace Medical iOS PWA — unified shared app core with iOS-specific offline delivery",
+  "description": "Shbace Medical iOS PWA — To Me app core with preserved iOS onboarding.",
   "scripts": {
     "android:debug": "cd android && ./gradlew :app:assembleDebug",
     "android:release": "cd android && ./gradlew :app:assembleRelease",
@@ -13,7 +13,8 @@
     "@capacitor/app": "8.1.2",
     "@capacitor/core": "8.6.0",
     "@capacitor/haptics": "8.0.2",
-    "@capacitor/local-notifications": "8.3.1"
+    "@capacitor/local-notifications": "8.3.1",
+    "sharp": "0.35.5"
   },
   "devDependencies": {
     "@capacitor/cli": "8.6.0"
