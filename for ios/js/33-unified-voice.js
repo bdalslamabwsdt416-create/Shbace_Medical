@@ -13,6 +13,7 @@ var computerVoiceMessage='',computerVoiceMessageOption='',computerVoicePendingCh
 var computerVoiceNoticesShown={},computerVoiceSpeechToken=0,computerVoiceReadingButton=null;
 var computerVoiceRetryDelays=[250,650,1300,2600];
 var QUESTION_TOOLS_KEY='shbace_question_tools_v1';
+var ANDROID_SHARED_PREF_KEY='shbace_android_features_v1';
 function computerVoiceReadQuestionTools(){
  var defaults={shareQuestion:true,copyQuestion:true,readAloud:true,readingSpeed:'normal'},saved=null,legacy=null;
  try{saved=JSON.parse(localStorage.getItem(QUESTION_TOOLS_KEY)||'null')}catch(_){}
@@ -27,6 +28,13 @@ function computerVoiceReadQuestionTools(){
 var computerQuestionTools=computerVoiceReadQuestionTools();
 function computerVoiceSaveQuestionTools(){
  try{localStorage.setItem(QUESTION_TOOLS_KEY,JSON.stringify(computerQuestionTools))}catch(_){}
+ /* Keep the historical To Me preference store backup-compatible; preserve Android-only fields. */
+ try{
+  var shared=JSON.parse(localStorage.getItem(ANDROID_SHARED_PREF_KEY)||'{}');
+  if(!shared||typeof shared!=='object'||Array.isArray(shared))shared={};
+  ['shareQuestion','copyQuestion','readAloud','readingSpeed'].forEach(function(key){shared[key]=computerQuestionTools[key]});
+  localStorage.setItem(ANDROID_SHARED_PREF_KEY,JSON.stringify(shared));
+ }catch(_){}
  computerVoiceUpdateQuestionToolsUI();
 }
 function computerVoiceQuestionToolsRate(){
@@ -343,7 +351,7 @@ function computerVoiceMountSettings(){
    var card=document.createElement('section');
    card.className='card setcard';card.id='shbUnifiedVoiceSettings';
    card.innerHTML='<h3>Question voice</h3>'+
-    '<p class="meta">Choose the English voice used when reading questions aloud. English (US) is the default; English (UK) is available when the device provides it.</p>'+
+    '<p class="meta">Questions are read in English only. SHBACE picks the clearest male English voice your device provides (natural or neural voices first), reads slightly slower, and spells out medical units. English (US) is the default.</p>'+
     '<div class="shb-computer-voice-options" role="group" aria-label="Question reading voice">'+
     '<button type="button" data-shb-unified-voice="en-US" aria-pressed="false">English (US)</button>'+
     '<button type="button" data-shb-unified-voice="en-GB" aria-pressed="false">English (UK)</button>'+
@@ -355,9 +363,9 @@ function computerVoiceMountSettings(){
    var tools=document.createElement('section');tools.className='card setcard';tools.id='shbQuestionToolsSettings';
    tools.innerHTML='<h3>Study experience</h3>'+
     '<p class="meta">Controls for study sessions and question tools on this iPhone.</p>'+
-    computerVoiceQuestionToolSetting('shareQuestion','Share a question','Share the question text using the iOS share sheet when available.')+
-    computerVoiceQuestionToolSetting('copyQuestion','Copy question text','Copy the question stem and answer options.')+
-    computerVoiceQuestionToolSetting('readAloud','Read questions aloud','Show or hide the voice playback control on question cards.')+
+    computerVoiceQuestionToolSetting('shareQuestion','Share a question','Show the question-sharing action.')+
+    computerVoiceQuestionToolSetting('copyQuestion','Copy question text','Show the copy action for notes or AI tools.')+
+    computerVoiceQuestionToolSetting('readAloud','Read questions aloud','Show voice playback controls on questions.')+
     '<div class="setrow shb-question-tool-setting"><span><b>Reading speed</b><small>Applies to spoken question text.</small></span>'+
     '<div class="seg shb-question-tool-speed" role="group" aria-label="Reading speed">'+
     '<button type="button" data-shb-question-speed="slow">Slow</button>'+
@@ -433,6 +441,24 @@ function computerVoiceFallbackCopy(text){
   var ok=!!(document.execCommand&&document.execCommand('copy'));
   area.remove();computerVoiceNotify(ok?'Question copied':'Could not copy question');
  }catch(_){try{if(area)area.remove()}catch(__){}computerVoiceNotify('Could not copy question')}
+}
+window.__shbCopyAppInfoIOS=function(){
+ try{
+  var info='Shbace Medical app diagnostics\\n'+String(navigator.userAgent||'Device information unavailable');
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+   navigator.clipboard.writeText(info).then(function(){computerVoiceNotify('App information copied')}).catch(function(){computerVoiceCopyDiagnosticFallback(info)});
+  }else computerVoiceCopyDiagnosticFallback(info);
+ }catch(_){try{computerVoiceCopyDiagnosticFallback(String(navigator.userAgent||''))}catch(__){}}
+};
+function computerVoiceCopyDiagnosticFallback(text){
+ var area=null;
+ try{
+  area=document.createElement('textarea');area.value=text;area.setAttribute('readonly','');
+  area.style.position='fixed';area.style.opacity='0';area.style.pointerEvents='none';
+  document.body.appendChild(area);area.select();
+  var ok=!!(document.execCommand&&document.execCommand('copy'));
+  area.remove();computerVoiceNotify(ok?'App information copied':'Could not copy app information');
+ }catch(_){try{if(area)area.remove()}catch(__){}computerVoiceNotify('Could not copy app information')}
 }
 function computerVoiceCopyQuestion(text){
  if(!text)return;
@@ -604,13 +630,27 @@ var IOS_EXPERIENCE_KEY='shbace_ios_study_experience_v1';
 var iosStudyPrefs=(function(){
  try{
   var saved=JSON.parse(localStorage.getItem(IOS_EXPERIENCE_KEY)||'null');
-  return Object.assign({followSystemTheme:false,keepScreenAwake:false},
-    saved&&typeof saved==='object'&&!Array.isArray(saved)?saved:{});
- }catch(_){return {followSystemTheme:false,keepScreenAwake:false}}
+  var shared=JSON.parse(localStorage.getItem(ANDROID_SHARED_PREF_KEY)||'null');
+  var defaults={
+   followSystemTheme:shared&&typeof shared.autoTheme==='boolean'?shared.autoTheme:true,
+   keepScreenAwake:shared&&typeof shared.keepScreenOn==='boolean'?shared.keepScreenOn:true
+  };
+  return Object.assign(defaults,saved&&typeof saved==='object'&&!Array.isArray(saved)?saved:{});
+ }catch(_){return {followSystemTheme:true,keepScreenAwake:true}}
 })();
 var iosStudyMedia=null,iosStudyWakeLock=null,iosStudyWakeBusy=false,iosStudyThemeDriven=false;
 var iosStudyWakeStatus='';
-function iosStudySave(){try{localStorage.setItem(IOS_EXPERIENCE_KEY,JSON.stringify(iosStudyPrefs))}catch(_){}}
+function iosStudySave(){
+ try{localStorage.setItem(IOS_EXPERIENCE_KEY,JSON.stringify(iosStudyPrefs))}catch(_){}
+ /* Mirror shared To Me options into the legacy shbace_* store without dropping any backup fields. */
+ try{
+  var shared=JSON.parse(localStorage.getItem(ANDROID_SHARED_PREF_KEY)||'{}');
+  if(!shared||typeof shared!=='object'||Array.isArray(shared))shared={};
+  shared.autoTheme=!!iosStudyPrefs.followSystemTheme;
+  shared.keepScreenOn=!!iosStudyPrefs.keepScreenAwake;
+  localStorage.setItem(ANDROID_SHARED_PREF_KEY,JSON.stringify(shared));
+ }catch(_){}
+}
 function iosStudyWakeSupported(){
  try{return !!(window.isSecureContext!==false&&navigator.wakeLock&&typeof navigator.wakeLock.request==='function')}catch(_){return false}
 }
@@ -698,7 +738,9 @@ function iosStudyMountSettings(){
   if(card&&!card.querySelector('[data-shb-ios-experience]')){
    card.insertAdjacentHTML('beforeend',
     iosStudyToggleMarkup('keepScreenAwake','Keep screen awake','Prevent the display from sleeping while the Question Bank is open.',!iosStudyWakeSupported())+
-    iosStudyToggleMarkup('followSystemTheme','Follow device theme','Automatically match the device light or dark appearance.',false)+
+    iosStudyToggleMarkup('followSystemTheme','Follow device theme','Automatically match device light or dark appearance.',false)+
+    '<button type="button" class="btn block shb-af-copyinfo" id="shbCopyAppInfo" onclick="window.__shbCopyAppInfoIOS()">Copy app information</button>'+
+    '<p class="meta">Send the copied details when reporting an app issue. No account or personal data is included.</p>'+
     '<p class="meta shb-ios-study-status" id="shbIosStudyWakeStatus" role="status" aria-live="polite"></p>');
   }
   iosStudyUpdateUI();

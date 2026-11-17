@@ -8,6 +8,10 @@ const read = (relative) => fs.readFileSync(fileURLToPath(new URL(relative, impor
 const features = read('../js/09-app-features-v6.js');
 const voice = read('../js/33-unified-voice.js');
 const settings = read('../js/36-exam-planner-settings-smartreview.js');
+const restoreBuild = read('../scripts/restore-ios-packed.js');
+const androidEnhancements = read('../../to me/js/30-android-enhancements.js');
+const toMeSettings = read('../../to me/js/36-exam-planner-settings-smartreview.js');
+const toMeVoice = read('../../to me/js/33-unified-voice.js');
 const index = read('../index.html');
 const drawer = read('../js/06-drawer-menu.js');
 const returning = read('../js/07-returning-student-migration.js');
@@ -83,16 +87,25 @@ test('question cards in the iOS bank receive Share, Copy and Read aloud controls
     'the new question-tools preference is included in the existing app-prefixed backup');
 });
 
-test('Settings groups Question Bank Version and question actions, while retaining iOS App updates', () => {
-  assert.ok(settings.includes("makeSettingZone(order,'appearance','Appearance & study experience'"));
-  assert.ok(settings.includes("makeSettingZone(order,'banks','Question banks & question voice'"));
+test('Settings places Question voice with Appearance and keeps the single Study experience card after the zones', () => {
+  assert.ok(settings.includes("makeSettingZone(order,'appearance','Appearance & reading','Theme, text size, doctor character and question-reading voice.')"));
+  assert.ok(settings.includes("makeSettingZone(order,'banks','Question bank settings','Choose the question-bank version used for study.')"));
   assert.ok(settings.includes("findSettingCard(root,'Question Bank Version')"));
   assert.ok(settings.includes("root.querySelector('#shbQuestionToolsSettings')"));
   assert.ok(settings.includes("root.querySelector('#shbAppUpdates')"));
   assert.ok(settings.includes("target('updates').appendChild(updates)"));
   assert.ok(settings.includes("target('banks').appendChild(bankVersion)"));
-  assert.ok(settings.includes("target('appearance').appendChild(questionTools)"));
+  assert.ok(settings.includes("target('appearance').appendChild(voice)"));
+  assert.ok(settings.includes("root.lastElementChild!==questionTools"));
+  assert.ok(!settings.includes("target('appearance').appendChild(questionTools)"));
   assert.ok(!settings.includes('studyExperience'));
+});
+
+test('PWA build invariants match the single root-level Study experience card and dynamic manifest inventory', () => {
+  assert.ok(restoreBuild.includes("root.appendChild(questionTools)"));
+  assert.ok(restoreBuild.includes("root.lastElementChild!==questionTools"));
+  assert.ok(restoreBuild.includes("target('appearance').appendChild(questionTools)") === false);
+  assert.ok(restoreBuild.includes('manifest.fileCount = manifest.files.length'));
 });
 
 test('opening Settings from a Question Bank captures active source bank, system and topic', () => {
@@ -262,10 +275,147 @@ test('behavior: repeated question observer callbacks cannot recreate their own t
   assert.equal(state.writes, writesAfterCreate, 'bounded writes; unchanged toolbar stays untouched');
 });
 
+
+test('shared Study experience controls, labels, order, defaults and legacy preference keys match To Me', () => {
+  const defaultsMatch = androidEnhancements.match(/var DEFAULTS = \{([\s\S]*?)\n  \};/);
+  assert.ok(defaultsMatch, 'To Me DEFAULTS object is the reference source');
+  const toMeDefaults = vm.runInNewContext('({' + defaultsMatch[1] + '})');
+  const featureBlock = androidEnhancements.slice(
+    androidEnhancements.indexOf('function featureSettingsHTML()'),
+    androidEnhancements.indexOf('function mountSettings()', androidEnhancements.indexOf('function featureSettingsHTML()'))
+  );
+  const toMeRows = [...featureBlock.matchAll(/toggleMarkup\('([^']+)', '([^']+)', '([^']+)'\)/g)]
+    .map(match => ({key:match[1], title:match[2], description:match[3]}));
+  const sharedRows = toMeRows.filter(row => ['shareQuestion','copyQuestion','readAloud','keepScreenOn','autoTheme'].includes(row.key));
+  assert.deepEqual(sharedRows.map(row => row.key), ['shareQuestion','copyQuestion','readAloud','keepScreenOn','autoTheme']);
+
+  const iosQuestionRows = [...voice.matchAll(/computerVoiceQuestionToolSetting\('([^']+)','([^']+)','([^']+)'\)/g)]
+    .map(match => ({key:match[1], title:match[2], description:match[3]}));
+  const iosStudyMap = {keepScreenOn:'keepScreenAwake', autoTheme:'followSystemTheme'};
+  const iosRows = sharedRows.map(row => {
+    const mapped = iosStudyMap[row.key] || row.key;
+    const found = iosQuestionRows.find(item => item.key === mapped) || (() => {
+      const re = new RegExp("iosStudyToggleMarkup\\('" + mapped + "','([^']+)','([^']+)'");
+      const match = voice.match(re);
+      return match ? {key:mapped,title:match[1],description:match[2]} : null;
+    })();
+    assert.ok(found, 'iOS shared setting exists: ' + row.key);
+    return {key:row.key,title:found.title,description:found.description};
+  });
+  assert.deepEqual(iosRows, sharedRows, 'shared labels and helper text must match the To Me source');
+
+  const toMeOrder = [...featureBlock.matchAll(/toggleMarkup\('([^']+)'/g)].map(match=>match[1]);
+  assert.deepEqual(toMeOrder.filter(key=>['shareQuestion','copyQuestion','readAloud','keepScreenOn','autoTheme'].includes(key)),
+    ['shareQuestion','copyQuestion','readAloud','keepScreenOn','autoTheme']);
+  const toolsStart=voice.indexOf('function computerVoiceMountSettings()');
+  const toolsEnd=voice.indexOf('function computerVoiceQuestionText',toolsStart);
+  const iosStudyStart=voice.indexOf('function iosStudyMountSettings()');
+  const iosStudyEnd=voice.indexOf('function iosStudyUpdateUI',iosStudyStart);
+  const studyMarkup=voice.slice(toolsStart,toolsEnd)+voice.slice(iosStudyStart,iosStudyEnd);
+  const iosPositions = ['shareQuestion','copyQuestion','readAloud','Reading speed','keepScreenAwake','followSystemTheme','Copy app information']
+    .map(term=>studyMarkup.indexOf(term));
+  assert.ok(iosPositions.every(position=>position>=0),'all To Me card controls are present on iOS');
+  assert.ok(iosPositions.every((position,index)=>index===0||position>iosPositions[index-1]),
+    'Study experience controls retain the To Me order');
+
+  const questionDefaultsMatch = voice.match(/var defaults=\{shareQuestion:true,copyQuestion:true,readAloud:true,readingSpeed:'normal'\}/);
+  assert.ok(questionDefaultsMatch,'iOS question tool defaults are declared');
+  const questionDefaults = vm.runInNewContext('({' + questionDefaultsMatch[0].replace(/^var defaults=/,'') + '})');
+  assert.equal(questionDefaults.shareQuestion, toMeDefaults.shareQuestion);
+  assert.equal(questionDefaults.copyQuestion, toMeDefaults.copyQuestion);
+  assert.equal(questionDefaults.readAloud, toMeDefaults.readAloud);
+  assert.equal(questionDefaults.readingSpeed, toMeDefaults.readingSpeed);
+  assert.ok(voice.includes('followSystemTheme:shared&&typeof shared.autoTheme===\'boolean\'?shared.autoTheme:true'));
+  assert.ok(voice.includes('keepScreenAwake:shared&&typeof shared.keepScreenOn===\'boolean\'?shared.keepScreenOn:true'));
+  function questionVoiceDescription(source) {
+    const cardStart=source.indexOf("card.innerHTML='<h3>Question voice</h3>'");
+    assert.notEqual(cardStart,-1,'Question voice card exists in source');
+    const paragraphStart=source.indexOf('<p class="meta">',cardStart);
+    assert.notEqual(paragraphStart,-1,'Question voice helper paragraph exists');
+    const textStart=paragraphStart+'<p class="meta">'.length;
+    const textEnd=source.indexOf('</p>',textStart);
+    assert.ok(textEnd>textStart,'Question voice helper paragraph closes');
+    return source.slice(textStart,textEnd);
+  }
+  assert.equal(questionVoiceDescription(voice),questionVoiceDescription(toMeVoice));
+  assert.ok(voice.includes('saved&&typeof saved===\'object\'&&!Array.isArray(saved)?saved:{}'),
+    'existing iOS preference backups override new-install defaults');
+
+  assert.ok(androidEnhancements.includes("var PREF_KEY = 'shbace_android_features_v1'"));
+  assert.ok(voice.includes("var ANDROID_SHARED_PREF_KEY='shbace_android_features_v1'"));
+  assert.ok(voice.includes("var QUESTION_TOOLS_KEY='shbace_question_tools_v1'"));
+  assert.ok(voice.includes("var IOS_EXPERIENCE_KEY='shbace_ios_study_experience_v1'"));
+  assert.ok(voice.includes("localStorage.setItem(ANDROID_SHARED_PREF_KEY,JSON.stringify(shared))"));
+  assert.ok(voice.includes("['shareQuestion','copyQuestion','readAloud','readingSpeed'].forEach(function(key){shared[key]=computerQuestionTools[key]})"));
+  assert.ok(voice.includes('shared.autoTheme=!!iosStudyPrefs.followSystemTheme'));
+  assert.ok(voice.includes('shared.keepScreenOn=!!iosStudyPrefs.keepScreenAwake'));
+});
+
+test('iOS retains only the non-native shared controls and marks Android-native controls as platform-only', () => {
+  const featureBlock = androidEnhancements.slice(
+    androidEnhancements.indexOf('function featureSettingsHTML()'),
+    androidEnhancements.indexOf('function mountSettings()', androidEnhancements.indexOf('function featureSettingsHTML()'))
+  );
+  assert.ok(featureBlock.includes("toggleMarkup('haptics', 'Haptic feedback'"));
+  assert.ok(featureBlock.includes("toggleMarkup('examCountdown', 'Exam countdown reminders'"));
+  assert.ok(voice.includes('Android-only haptics and scheduled native reminders are intentionally not exposed here.'));
+  assert.ok(!voice.includes('data-shb-ios-experience="haptics"'));
+  assert.ok(!voice.includes('data-shb-ios-experience="examCountdown"'));
+  for (const marker of ['App updates','Notification preferences','Student data backup','Onboarding']) {
+    assert.ok(features.includes(marker), 'iOS-only Settings item remains: ' + marker);
+  }
+});
+
+function studyExperienceMountHarness() {
+  const roots=[];
+  let activeRoot=null;
+  function makeRoot() {
+    const root={
+      children:[],
+      querySelector(selector) {
+        if(selector==='h1')return {textContent:'Settings'};
+        if(selector==='#shbUnifiedVoiceSettings')return this.children.find(node=>node.id==='shbUnifiedVoiceSettings')||null;
+        if(selector==='#shbQuestionToolsSettings')return this.children.find(node=>node.id==='shbQuestionToolsSettings')||null;
+        return null;
+      },
+      appendChild(child) {
+        if(child.parentElement){const old=child.parentElement.children.indexOf(child);if(old>=0)child.parentElement.children.splice(old,1)}
+        child.parentElement=this;this.children.push(child);return child;
+      }
+    };
+    roots.push(root);activeRoot=root;return root;
+  }
+  const document={createElement(){return {id:'',className:'',innerHTML:'',parentElement:null}}};
+  const api=vm.runInNewContext(
+    extractFunction(voice,'computerVoiceMountSettings')+String.fromCharCode(10)+'({computerVoiceMountSettings})',
+    {
+      settingsRoot(){return activeRoot},
+      document,
+      computerVoiceUpdateUi(){},
+      computerVoiceUpdateQuestionToolsUI(){}
+    }
+  );
+  return {roots,makeRoot,api};
+}
+
+test('behavior: one Study experience card is mounted after repeated Settings opens and re-mounts', () => {
+  const {roots,makeRoot,api}=studyExperienceMountHarness();
+  for(let open=0;open<12;open++){
+    const root=makeRoot();
+    for(let render=0;render<5;render++)api.computerVoiceMountSettings();
+    assert.equal(root.children.filter(node=>node.id==='shbQuestionToolsSettings').length,1,
+      'each Settings render has exactly one Study experience card');
+    assert.equal(root.children.filter(node=>node.id==='shbUnifiedVoiceSettings').length,1,
+      'each Settings render has exactly one Question voice card');
+  }
+  assert.equal(roots.length,12);
+});
+
 function settingsOrganizerHarness() {
   const state = { writes: 0, zones: [], cards: [], order: null };
   const node = name => ({
     name, parentElement: null, children: [],
+    get lastElementChild(){return this.children[this.children.length-1]||null},
     appendChild(child) {
       const oldParent=child.parentElement;
       if(oldParent){const at=oldParent.children.indexOf(child);if(at>=0)oldParent.children.splice(at,1)}
@@ -278,12 +428,15 @@ function settingsOrganizerHarness() {
   });
   ['Appearance','Onboarding','Study progress','Student data backup','Question Bank Version','Study experience','Question voice'].forEach(title=>{
     const c=node(title);c.className='card setcard';
+    if(title==='Study experience')c.id='shbQuestionToolsSettings';
+    if(title==='Question voice')c.id='shbUnifiedVoiceSettings';
     c.querySelector=selector=>selector==='h3'?{textContent:title}:null;
     state.cards.push(c);
   });
   const notification=node('notifications'),updates=node('updates'),file=node('bkFile');
   notification.className='u10-settings-card';
   const root=node('settingsRoot');
+  state.root=root;
   const appendRoot=root.appendChild.bind(root);
   root.appendChild=child=>{const result=appendRoot(child);if(child.className==='shb-settings-order')state.order=child;return result};
   root.querySelector=selector=>{
@@ -335,9 +488,16 @@ test('behavior: Settings organizer is idempotent and never re-appends unchanged 
   const firstWrites=state.writes;
   assert.ok(firstWrites>0,'first organization creates zones and positions cards');
   assert.deepEqual(state.zones,['appearance','banks','notifications','updates','experience','data','progress']);
+  const toMeZones=[...toMeSettings.matchAll(/makeSettingZone\(order,'([^']+)'/g)].map(match=>match[1]);
+  const iosCoreZones=state.zones.filter(zone=>toMeZones.includes(zone));
+  assert.deepEqual(iosCoreZones,toMeZones,'the shared Settings zones preserve To Me order');
+  assert.equal(state.cards[6].parentElement.name,'items:appearance','Question voice is grouped with Appearance');
+  assert.equal(state.cards[5].parentElement,state.root,'Study experience remains a sibling after the Settings zones');
+  assert.equal(state.root.lastElementChild,state.cards[5],'Study experience is mounted once after the zones');
+  assert.ok(state.cards.filter(card=>card!==state.cards[5]).every(card=>card.parentElement&&card.parentElement.name.startsWith('items:')));
   api.organizeSettings();api.organizeSettings();api.organizeSettings();
   assert.equal(state.writes,firstWrites,'repeated passes make zero DOM writes');
-  assert.ok(state.cards.every(card=>card.parentElement&&card.parentElement.name.startsWith('items:')));
+  assert.equal(state.root.children.filter(card=>card===state.cards[5]).length,1,'Study experience is never duplicated');
 });
 
 test('behavior: repeated Settings host observer callbacks are coalesced and stable',()=>{

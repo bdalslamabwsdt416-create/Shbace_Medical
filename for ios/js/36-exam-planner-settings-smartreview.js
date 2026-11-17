@@ -142,8 +142,8 @@ function organizeSettings(){
     var order=root.querySelector('.shb-settings-order');
     if(!order){
       order=document.createElement('div');order.className='shb-settings-order';root.appendChild(order);
-      makeSettingZone(order,'appearance','Appearance & study experience','Theme, text size, doctor character, device display and question-study controls.');
-      makeSettingZone(order,'banks','Question banks & question voice','Choose the question-bank version and the voice used to read questions.');
+      makeSettingZone(order,'appearance','Appearance & reading','Theme, text size, doctor character and question-reading voice.');
+      makeSettingZone(order,'banks','Question bank settings','Choose the question-bank version used for study.');
       makeSettingZone(order,'notifications','Study notifications','Choose which study events can notify you.');
       makeSettingZone(order,'updates','App updates','Check the installed iOS release and update available offline files.');
       makeSettingZone(order,'experience','Onboarding & experience','Control the welcome screens and app presentation.');
@@ -157,15 +157,16 @@ function organizeSettings(){
     var questionTools=root.querySelector('#shbQuestionToolsSettings'),voice=root.querySelector('#shbUnifiedVoiceSettings');
     var notification=root.querySelector('.u10-settings-card'),updates=root.querySelector('#shbAppUpdates'),file=root.querySelector('#bkFile');
     if(appearance&&appearance.parentElement!==target('appearance'))target('appearance').appendChild(appearance);
-    if(questionTools&&questionTools.parentElement!==target('appearance'))target('appearance').appendChild(questionTools);
     if(bankVersion&&bankVersion.parentElement!==target('banks'))target('banks').appendChild(bankVersion);
-    if(voice&&voice.parentElement!==target('banks'))target('banks').appendChild(voice);
+    if(voice&&voice.parentElement!==target('appearance'))target('appearance').appendChild(voice);
     if(notification&&notification.parentElement!==target('notifications'))target('notifications').appendChild(notification);
     if(updates&&updates.parentElement!==target('updates'))target('updates').appendChild(updates);
     if(onboarding&&onboarding.parentElement!==target('experience'))target('experience').appendChild(onboarding);
     if(file&&file.parentElement!==target('data'))target('data').appendChild(file);
     if(backup&&backup.parentElement!==target('data'))target('data').appendChild(backup);
     if(progress&&progress.parentElement!==target('progress'))target('progress').appendChild(progress);
+    /* To Me mounts Study experience once after the Settings zones; keep this one iOS card there. */
+    if(questionTools&&(questionTools.parentElement!==root||root.lastElementChild!==questionTools))root.appendChild(questionTools);
   }catch(e){console.warn('Settings organization skipped:',e)}
   finally{settingsBusy=false}
 }
