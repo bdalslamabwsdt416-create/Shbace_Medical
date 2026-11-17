@@ -73,6 +73,6 @@
  /* Splash -> Onboarding page 1  /  Splash -> Home: the destination is already drawn under the opaque splash; the splash pulls back into the same glow. */
  window.shbPortalSplash=function(overlay,finish){
   if(!overlay||!overlay.isConnected)return false;
-  return portal({out:overlay,holdDest:true,marksBusy:false,T:{out:1150,hold:160,in:1550},ease:'cubic-bezier(.45,.05,.25,1)',swap:()=>{try{finish()}catch(e){}}});   /* splash -> page: a longer, even flash (was 0.52 s + 0.76 s with a front-loaded curve, which read as a sudden cut) */
+  return portal({out:overlay,holdDest:true,marksBusy:false,T:{out:320,hold:50,in:480},ease:'cubic-bezier(.45,.05,.25,1)',swap:()=>{try{finish()}catch(e){}}});   /* splash -> page: a longer, even flash (was 0.52 s + 0.76 s with a front-loaded curve, which read as a sudden cut) */
  };
 })();
