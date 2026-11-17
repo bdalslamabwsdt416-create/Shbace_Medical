@@ -339,6 +339,7 @@ function manualRepairHarness(options = {}) {
   const sandbox = {
     standalone: () => true,
     window: { caches: {}, crypto: { subtle: {} }, indexedDB: {} },
+    crypto: { subtle: {} },
     navigator: { onLine: options.online !== false },
     started: false,
     migrationInProgress: false,
@@ -468,8 +469,8 @@ test('silent seven-day check is skipped when the last successful check is less t
 test('silent scheduled check stays silent and does not advance its timestamp offline or after failure', async () => {
   for (const options of [{ online: false }, { fail: true }, { network: false }]) {
     const result = await runScheduledCheckHarness(options);
-    assert.equal(result.state.state, 'offline');
-    assert.equal(result.store.shbace_pkg_check_ok_v1, String(result.initialTimestamp));
+    assert.equal(result.state.state, 'offline', 'offline/failure result for ' + JSON.stringify(options));
+    assert.equal(result.store.shbace_pkg_check_ok_v1, String(result.initialTimestamp), 'failed check must preserve timestamp for ' + JSON.stringify(options));
     assert.deepEqual(result.uiCalls, []);
     assert.deepEqual(result.pending, []);
     assert.equal(result.migrationFlag, null);
