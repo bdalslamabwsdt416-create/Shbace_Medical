@@ -748,7 +748,7 @@ function start(){
  }
  dbGet('meta',INSTALLED_KEY).catch(function(){return null}).then(function(rec){
   var hasRecord=!!(rec&&rec.files);
-  var migrationNeeded=hasRecord&&localStorage.getItem(MIGRATION_KEY)!=='1';
+  var migrationNeeded=hasRecord&&lsNum(MIGRATION_KEY)!==1;
   if(migrationNeeded){
    migrationInProgress=true;
    /* Force a fresh network check even when the seven-day timer was recently satisfied. */
