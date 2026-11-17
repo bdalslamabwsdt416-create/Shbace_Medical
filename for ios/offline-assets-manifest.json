@@ -1869,8 +1869,8 @@
     },
     {
       "path": "js/19-ob-shared-bg-v1-js.js",
-      "bytes": 2729,
-      "sha256": "a21ca99cd000da914d6283e1958ec10ed6de701398fb875748ff08c30e0e9793",
+      "bytes": 3116,
+      "sha256": "249ef1f81af66973d32dd898aa53cb46be83be24129150dc84a0cf3fae69da64",
       "group": "app"
     },
     {
@@ -1929,8 +1929,8 @@
     },
     {
       "path": "js/29-offline-setup.js",
-      "bytes": 41651,
-      "sha256": "7a272ac2dc0543c393fa741e02b297d34efbf7e0f2bd4db0c5367968aee5c0f5",
+      "bytes": 39899,
+      "sha256": "7580b4954ac1a66188d3e6b09a550102c75db5c24974922d7f770ecd7e896db6",
       "group": "app"
     },
     {
@@ -1941,8 +1941,8 @@
     },
     {
       "path": "js/33-unified-voice.js",
-      "bytes": 21033,
-      "sha256": "ebfb2bd74de4c0042e40250eb59c7182001eb580fc1828ecf91c6d261d03aaac",
+      "bytes": 41433,
+      "sha256": "83bfdc44ad0786bc693816f73756d8682ec4e866ebd7fc6c54d25709ad640093",
       "group": "app"
     },
     {
@@ -1959,8 +1959,8 @@
     },
     {
       "path": "js/36-exam-planner-settings-smartreview.js",
-      "bytes": 19784,
-      "sha256": "776feae378475194f2d9c2ea863179b9577cfcbc961ed2512559623990585909",
+      "bytes": 20564,
+      "sha256": "9a015a5255e3f9177d42cea2acbf418eed00b3c8d014ac4b9bb65862f519cc4f",
       "group": "app"
     },
     {
@@ -2019,8 +2019,8 @@
     },
     {
       "path": "pwa-version.json",
-      "bytes": 1246,
-      "sha256": "cb3ddae4b54d493b30d572e4e1bcea6c0d1671331fac6f661b14710c0236e26e",
+      "bytes": 2366,
+      "sha256": "5dbdf5cc905b4bcb9d31ad9326c244c981464ab1339aba4ba84623f89095aa65",
       "group": "other"
     },
     {
@@ -2031,8 +2031,8 @@
     }
   ],
   "fileCount": 338,
-  "totalBytes": 30025533,
-  "releaseVersion": "1.4.15",
-  "version": "03b3a82b7be97e1b54d79c472cea49691c7d0f5d6c4fd5b0e91eca51572ef3fa",
-  "generatedAt": "2026-11-17T11:42:45.728Z"
+  "totalBytes": 30046468,
+  "releaseVersion": "1.4.20",
+  "version": "e6fde236675f4cd1d804df4a68447b507f0886d170bcacea58980bf39c9d1732",
+  "generatedAt": "2026-11-17T15:45:35.526Z"
 }

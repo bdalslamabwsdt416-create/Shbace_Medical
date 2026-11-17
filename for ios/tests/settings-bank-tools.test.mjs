@@ -76,7 +76,9 @@ test('question cards in the iOS bank receive Share, Copy and Read aloud controls
   assert.ok(voice.includes('computerVoiceToggleQuestionReadAloud(qcard,qtext,questionTool)'));
   assert.ok(voice.includes('computerVoiceCopyQuestion(qtext)'));
   assert.ok(voice.includes('computerVoiceShareQuestion(qtext)'));
-  assert.ok(voice.includes('new MutationObserver(function(){mountVoiceSettings();scheduleQuestionDecoration()}'));
+  assert.ok(voice.includes('queueVoiceSettingsMountFromMutations') && voice.includes('queueQuestionDecorationFromMutations'));
+  assert.ok(voice.includes("observe(voiceHost,{childList:true,subtree:true})"));
+  assert.ok(!voice.includes('observe(document.body'));
   assert.ok(features.includes('function u11DataKeys()') && features.includes("k.startsWith('shbace_')"),
     'the new question-tools preference is included in the existing app-prefixed backup');
 });
@@ -137,14 +139,18 @@ test('iOS loads shared voice and bank controls without importing Android-only sc
 });
 
 function questionToolbarHarness() {
-  const state = { toolbar: null, created: 0, removed: 0 };
+  const state = { toolbar: null, created: 0, removed: 0, writes: 0 };
+  let card;
   const stem = {
+    closest(selector) { return selector === '.qcard' ? card : null; },
     insertAdjacentElement(position, element) {
       assert.equal(position, 'afterend');
+      state.writes++;
       state.toolbar = element;
     }
   };
-  const card = {
+  card = {
+    closest(selector) { return selector === '.qcard' ? card : null; },
     querySelector(selector) {
       if (selector === '.shb-question-tools') return state.toolbar;
       if (selector === '.qstem') return stem;
@@ -156,25 +162,37 @@ function questionToolbarHarness() {
     querySelector(selector) { return selector === '#phoneContent' ? host : null; },
     createElement() {
       state.created++;
+      state.writes++;
       return {
+        nodeType: 1,
         dataset: {},
+        matches(selector) { return selector === '.shb-question-tools'; },
         setAttribute() {},
         remove() {
           state.removed++;
+          state.writes++;
           if (state.toolbar === this) state.toolbar = null;
         }
       };
     }
   };
+  const frames = [];
   const prefs = { shareQuestion: true, copyQuestion: true, readAloud: true };
   const api = vm.runInNewContext(
-    extractFunction(voice, 'computerVoiceDecorateQuestions') +
-      String.fromCharCode(10) + '({computerVoiceDecorateQuestions})',
-    { document, computerQuestionTools: prefs }
+    'var questionDecorationScheduled=false,questionDecorationRunning=false;' + String.fromCharCode(10) +
+      extractFunction(voice, 'scheduleQuestionDecoration') + String.fromCharCode(10) +
+      extractFunction(voice, 'computerVoiceQuestionMutationRelevant') + String.fromCharCode(10) +
+      extractFunction(voice, 'queueQuestionDecorationFromMutations') + String.fromCharCode(10) +
+      extractFunction(voice, 'computerVoiceDecorateQuestions') + String.fromCharCode(10) +
+      '({scheduleQuestionDecoration,computerVoiceQuestionMutationRelevant,queueQuestionDecorationFromMutations,computerVoiceDecorateQuestions})',
+    {
+      document, computerQuestionTools: prefs,
+      window: { requestAnimationFrame(callback) { frames.push(callback); return frames.length; } },
+      setTimeout
+    }
   );
-  return { state, prefs, api };
+  return { state, prefs, api, frames, stem, card };
 }
-
 test('question toolbar decoration is idempotent and only rebuilds when preferences change', () => {
   const { state, prefs, api } = questionToolbarHarness();
   api.computerVoiceDecorateQuestions();
@@ -185,6 +203,9 @@ test('question toolbar decoration is idempotent and only rebuilds when preferenc
   assert.equal(state.toolbar, first, 'unchanged toolbar must be preserved');
   assert.equal(state.created, 1, 'a second pass must not create another toolbar');
   assert.equal(state.removed, 0, 'a second pass must not remove the existing toolbar');
+  const unchangedWrites = state.writes;
+  api.computerVoiceDecorateQuestions();
+  assert.equal(state.writes, unchangedWrites, 'unchanged DOM is not written a second time');
 
   prefs.readAloud = false;
   api.computerVoiceDecorateQuestions();
@@ -220,5 +241,122 @@ test('question decoration requests are coalesced into one animation frame', () =
   assert.equal(frames.length, 1, 'many observer callbacks in one frame schedule one decoration pass');
   frames[0]();
   assert.deepEqual(calls, ['decorate']);
-  assert.ok(voice.includes('new MutationObserver(function(){mountVoiceSettings();scheduleQuestionDecoration()}'));
+  assert.ok(voice.includes("observe(voiceHost,{childList:true,subtree:true})"));
+  assert.ok(!voice.includes("observe(document.body"));
+});
+
+test('behavior: repeated question observer callbacks cannot recreate their own toolbar', () => {
+  const { state, api, frames, stem } = questionToolbarHarness();
+  const actualQuestionChange = { target: stem, addedNodes: [{ nodeType: 3 }], removedNodes: [] };
+  for (let i = 0; i < 20; i++) api.queueQuestionDecorationFromMutations([actualQuestionChange]);
+  assert.equal(frames.length, 1, 'repeated records coalesce to one rAF');
+  frames.shift()();
+  assert.equal(state.created, 1);
+  assert.equal(state.removed, 0);
+  const writesAfterCreate = state.writes;
+  const selfMutation = { target: stem, addedNodes: [state.toolbar], removedNodes: [] };
+  for (let i = 0; i < 50; i++) api.queueQuestionDecorationFromMutations([selfMutation]);
+  assert.equal(frames.length, 0, 'observer ignores its own toolbar insertion records');
+  assert.equal(state.created, 1, 'no endless create cycle');
+  assert.equal(state.removed, 0, 'no endless remove cycle');
+  assert.equal(state.writes, writesAfterCreate, 'bounded writes; unchanged toolbar stays untouched');
+});
+
+function settingsOrganizerHarness() {
+  const state = { writes: 0, zones: [], cards: [], order: null };
+  const node = name => ({
+    name, parentElement: null, children: [],
+    appendChild(child) {
+      const oldParent=child.parentElement;
+      if(oldParent){const at=oldParent.children.indexOf(child);if(at>=0)oldParent.children.splice(at,1)}
+      if(oldParent!==this || !this.children.includes(child))state.writes++;
+      child.parentElement=this;
+      if(!this.children.includes(child))this.children.push(child);
+      return child;
+    },
+    querySelector(){return null}
+  });
+  ['Appearance','Onboarding','Study progress','Student data backup','Question Bank Version','Study experience','Question voice'].forEach(title=>{
+    const c=node(title);c.className='card setcard';
+    c.querySelector=selector=>selector==='h3'?{textContent:title}:null;
+    state.cards.push(c);
+  });
+  const notification=node('notifications'),updates=node('updates'),file=node('bkFile');
+  notification.className='u10-settings-card';
+  const root=node('settingsRoot');
+  const appendRoot=root.appendChild.bind(root);
+  root.appendChild=child=>{const result=appendRoot(child);if(child.className==='shb-settings-order')state.order=child;return result};
+  root.querySelector=selector=>{
+    if(selector==='h1')return {textContent:'Settings'};
+    if(selector==='.shb-settings-order')return state.order;
+    if(selector==='#shbQuestionToolsSettings')return state.cards[5];
+    if(selector==='#shbUnifiedVoiceSettings')return state.cards[6];
+    if(selector==='.u10-settings-card')return notification;
+    if(selector==='#shbAppUpdates')return updates;
+    if(selector==='#bkFile')return file;
+    return null;
+  };
+  root.querySelectorAll=selector=>selector==='.card.setcard'?state.cards:[];
+  const document={
+    querySelector(selector){return selector==='#phoneContent .rs'?root:null},
+    createElement(tag){
+      const el=node(tag);
+      el.setAttribute=()=>{};
+      el.querySelector=selector=>{
+        if(selector==='.shb-settings-items')return el.items||null;
+        const match=selector.match(/data-shb-settings-items="([^"]+)"/);
+        if(match){const zone=el.children.find(child=>child.items&&child.items.name==='items:'+match[1]);return zone?zone.items:null}
+        return null;
+      };
+      Object.defineProperty(el,'innerHTML',{set(html){
+        const match=html.match(/data-shb-settings-items="([^"]+)"/);
+        if(match){el.items=node('items:'+match[1]);state.zones.push(match[1])}
+      }});
+      return el;
+    }
+  };
+  const frames=[];
+  const api=vm.runInNewContext(
+    'var settingsBusy=false,settingsQueued=false;' + String.fromCharCode(10) +
+      extractFunction(settings,'getSettingsRoot') + String.fromCharCode(10) +
+      extractFunction(settings,'makeSettingZone') + String.fromCharCode(10) +
+      extractFunction(settings,'findSettingCard') + String.fromCharCode(10) +
+      extractFunction(settings,'organizeSettings') + String.fromCharCode(10) +
+      extractFunction(settings,'queueSettingsOrganization') + String.fromCharCode(10) +
+      '({organizeSettings,queueSettingsOrganization})',
+    {document,requestAnimationFrame(fn){frames.push(fn)},setTimeout}
+  );
+  return {state,api,frames};
+}
+
+test('behavior: Settings organizer is idempotent and never re-appends unchanged cards',()=>{
+  const {state,api}=settingsOrganizerHarness();
+  api.organizeSettings();
+  const firstWrites=state.writes;
+  assert.ok(firstWrites>0,'first organization creates zones and positions cards');
+  assert.deepEqual(state.zones,['appearance','banks','notifications','updates','experience','data','progress']);
+  api.organizeSettings();api.organizeSettings();api.organizeSettings();
+  assert.equal(state.writes,firstWrites,'repeated passes make zero DOM writes');
+  assert.ok(state.cards.every(card=>card.parentElement&&card.parentElement.name.startsWith('items:')));
+});
+
+test('behavior: repeated Settings host observer callbacks are coalesced and stable',()=>{
+  const {state,api,frames}=settingsOrganizerHarness();
+  const host={};
+  const relevant=[{target:host}],irrelevant=[{target:{}}];
+  const handler=vm.runInNewContext(
+    extractFunction(settings,'settingsHostMutationRelevant')+String.fromCharCode(10)+
+      extractFunction(settings,'handleSettingsHostMutations')+String.fromCharCode(10)+
+      '({settingsHostMutationRelevant,handleSettingsHostMutations})',
+    {queueSettingsOrganization:api.queueSettingsOrganization}
+  );
+  for(let i=0;i<20;i++)handler.handleSettingsHostMutations(relevant,host);
+  handler.handleSettingsHostMutations(irrelevant,host);
+  assert.equal(frames.length,1,'repeated route mutations schedule one rAF');
+  frames.shift()();
+  const writes=state.writes;
+  for(let i=0;i<20;i++)handler.handleSettingsHostMutations(relevant,host);
+  assert.equal(frames.length,1);
+  frames.shift()();
+  assert.equal(state.writes,writes,'unchanged Settings DOM is untouched');
 });

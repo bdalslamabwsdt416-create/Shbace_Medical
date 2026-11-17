@@ -5,8 +5,21 @@ const RM=()=>!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)'
 document.documentElement.style.setProperty('--xf-splash',SPLASH_FADE_MS+'ms');
 document.documentElement.style.setProperty('--xf-home',(RM()?350:3200)+'ms');
 /* flag the real last onboarding slide (index = screenTitles.length-1), never a hard-coded page */
-const sync=()=>{const v=pc.getAttribute('data-ob');if(v!==null&&Number(v)===screenTitles.length-1)pc.setAttribute('data-ob-final','');else pc.removeAttribute('data-ob-final')};
-new MutationObserver(sync).observe(pc,{attributes:true,attributeFilter:['data-ob']});sync();
+let syncQueued=false,syncRunning=false;
+const sync=()=>{
+ if(syncRunning)return;syncRunning=true;
+ try{
+  const v=pc.getAttribute('data-ob'),should=v!==null&&Number(v)===screenTitles.length-1,has=pc.hasAttribute('data-ob-final');
+  if(should&&!has)pc.setAttribute('data-ob-final','');
+  else if(!should&&has)pc.removeAttribute('data-ob-final');
+ }finally{syncRunning=false}
+};
+const queueSync=()=>{
+ if(syncQueued||syncRunning)return;syncQueued=true;
+ const raf=window.requestAnimationFrame||((fn)=>setTimeout(fn,16));
+ raf(()=>{syncQueued=false;sync()});
+};
+new MutationObserver(queueSync).observe(pc,{attributes:true,attributeFilter:['data-ob']});sync();
 /* Splash -> Onboarding: onboarding is drawn under the splash and fades in while the splash fades out */
 const rA=routeAfterSplash;
 routeAfterSplash=function(){return rA.apply(this,arguments)};   /* dissolve is done by the splash mask itself; the destination is fully opaque underneath (no black / blank frames) */
