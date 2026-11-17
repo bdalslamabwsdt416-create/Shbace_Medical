@@ -348,7 +348,7 @@ if (missingAssets.size) {
   fail(`Missing referenced image assets: ${[...missingAssets].join(", ")}`);
 }
 
-const scriptRefs = [...html.matchAll(/data-src=["']([^"']+\.js)["']/g)].map(m => m[1]);
+const scriptRefs = [...html.matchAll(/(?:data-src|src)=["']([^"']+\.js)["']/g)].map(m => m[1]);
 for (const script of scriptRefs) {
   if (!existsSync(join(output, script))) fail(`Deferred application script is missing: ${script}`);
   try {
