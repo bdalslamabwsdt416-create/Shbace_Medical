@@ -1702,3 +1702,491 @@ The sheet lists the six traditional EPI targets as diphtheria, pertussis, tetanu
 - The PDF schedule page was used for age-specific schedule questions. Vaccine-specific sections were used for detailed properties and precautions.
 - The source has internal inconsistencies in certain values/routes (notably BCG volume and some table vs paragraph route entries). Those disputed values are not treated as universal facts in this bank.
 - These questions are based on the course sheet only. The existing AI-generated MCQ bank was not used.
+
+---
+
+# 2. Routine Immunization Schedule in Libya
+
+## Clinical Case 13 — Why does one vaccine need one dose and another needs a series?
+
+A primary care center is running the routine infant and toddler immunization session. Parents and a trainee nurse ask a series of questions about how different vaccines are built and why their schedules differ.
+
+### Q55. [Medium] A mother brings her 2-month-old daughter for the first Hexa, PCV and rotavirus visit. She remembers that her 4-year-old son received BCG as a single injection at birth, and she asks why the baby will need three doses of Hexa and later boosters to be protected. Which explanation is most accurate?
+
+A. Hexa is a live attenuated vaccine, so every dose must be repeated to replace the organisms that the host rapidly clears from the body after injection  
+B. BCG is an inactivated vaccine, and inactivated vaccines give lifelong immunity after a single injection, so one dose is always enough  
+C. Intradermal vaccines always protect after a single dose, whereas intramuscular vaccines never do, whatever kind of antigen they contain  
+D. BCG is live and multiplies in the host, giving a larger antigenic dose than injected, whereas Hexa's non-replicating antigens need repeated doses as titers may fall  
+E. Combination vaccines such as Hexa need repeated doses because mixing several antigens in one syringe cancels out their immune effect  
+
+**Correct Answer:** D. BCG is live and multiplies in the host, giving a larger antigenic dose than injected, whereas Hexa's non-replicating antigens need repeated doses as titers may fall
+
+**Initial Explanation:**
+
+Live attenuated vaccine organisms multiply in the host, so the antigenic dose the immune system sees is larger than what was injected, and one dose is usually enough (oral vaccines are the exception). Killed/inactivated and other non-replicating antigens cannot multiply, so they usually need several doses, and antibody titers may diminish with time.
+
+**Detailed Explanation:**
+
+The clinical reasoning here is to ask "does the antigen replicate in the host?" before asking how many doses are needed. The mother compares a live vaccine (BCG) with a multi-antigen vaccine whose components cannot replicate.
+
+- **A. Incorrect.** Hexa is DPT + hepatitis B + Hib + IPV. None of these is a live replicating vaccine, so the idea that organisms must be "replaced" after being cleared reverses the real mechanism.
+- **B. Incorrect.** BCG is listed among the live attenuated vaccines. Killed/inactivated vaccines are the ones that generally need multiple doses and whose titers can wane.
+- **C. Incorrect.** The number of doses follows the nature of the antigen (replicating or not), not the route. Note also that the sheet excepts oral live vaccines from the "one dose" rule, so even live vaccines are not always single-dose.
+- **D. Correct.** This links BCG (live, replicates, larger antigenic dose, usually one dose) with Hexa's non-replicating antigens (multiple doses, titers may diminish, hence boosters later in the schedule).
+- **E. Incorrect.** The sheet gives the purpose of combination vaccines as simplifying administration, reducing cost and minimizing the number of contacts with the health system. It does not state that antigens cancel each other.
+
+**HIGH-YIELD POINTS:**
+
+- Live attenuated: replicate in the host, larger antigenic dose than injected, carry all major and minor antigenic components, severe reactions are possible, fragile (careful storage), usually one dose except oral vaccines.
+- Killed/inactivated: killed by heat or chemicals, cannot replicate, generally less effective than live vaccines, antibody titers may diminish with time, usually safe, usually need multiple doses.
+- This difference explains the primary series plus boosters used for DPT-containing vaccines in the schedule.
+
+**Source:** Pediatric Vaccination sheet - Page 2 (Active immunity: live attenuated vs killed/inactivated vaccines); Page 4 (Hexa composition and schedule).
+
+### Q56. [Hard] At the 9-month visit an infant receives the meningococcal vaccine (ACYW135). A trainee tells the parents that this vaccine, and the 13-valent pneumococcal vaccine the baby received earlier, are both "combination vaccines, just like Hexa". The supervising pediatrician corrects her. Which statement is the most accurate correction?
+
+A. They are polyvalent, not combination, vaccines: each covers several strains of one species and uses polysaccharide antigens linked to a carrier protein  
+B. They are combination vaccines, because each one protects against several different diseases with a single injection given to the infant at one visit  
+C. They are live attenuated polyvalent vaccines, which is why they need especially careful storage and handling in the cold chain system  
+D. They are recombinant vaccines produced by cloning selected antigen genes into yeast cells, in the same way as the hepatitis B vaccine  
+E. They are toxoid vaccines made from detoxified bacterial exotoxins that stimulate antitoxin antibodies, as diphtheria and tetanus vaccines do  
+
+**Correct Answer:** A. They are polyvalent, not combination, vaccines: each covers several strains of one species and uses polysaccharide antigens linked to a carrier protein
+
+**Initial Explanation:**
+
+A combination vaccine joins different antigens (different diseases) in one product, as Hexa does. Meningococcal ACYW135 and PCV13 are polyvalent, because each covers several groups or serotypes of one species, and they are conjugated polysaccharide (subunit) vaccines.
+
+**Detailed Explanation:**
+
+The trainee's error is confusing "many antigens in one syringe" with "many strains of the same organism". The Hexa example in the sheet (DPT + HepB + Hib + IPV) contains different diseases; the meningococcal vaccine contains groups A, C, Y and W135 of one species, and PCV13 contains 13 serotypes of Streptococcus pneumoniae.
+
+- **A. Correct.** It separates polyvalent from combination and adds the subunit/conjugation principle: bacterial polysaccharide antigens give antibody with less functional activity, and conjugation to a carrier protein improves immunogenicity.
+- **B. Incorrect.** This describes combination vaccines (Hexa, MMR, DPT, DT). Each of these two vaccines targets one organism, not several diseases.
+- **C. Incorrect.** Both are given intramuscularly and are not in the live attenuated list; polyvalent describes strain coverage, not viability.
+- **D. Incorrect.** The recombinant examples in the sheet are hepatitis B and HPV vaccines.
+- **E. Incorrect.** Toxoid vaccines (diphtheria, tetanus) are made from detoxified exotoxin, which is unrelated to capsular or cell-wall polysaccharides.
+
+**HIGH-YIELD POINTS:**
+
+- Combination vaccine = different antigens in one product (MMR, DPT, DT, Hexa). Reasons: simplify administration, reduce costs, minimize contacts with the health system.
+- Polyvalent vaccine = more than one strain of the same species (OPV, rotavirus, meningococcal A/C/Y/W135, PCV with 13 serotypes).
+- Plain polysaccharide antigens produce antibody with less functional activity; conjugation to a carrier protein improves immunogenicity.
+
+**Source:** Pediatric Vaccination sheet - Page 3 (Subunit vaccines; Combination vaccines; Polyvalent vaccine; Conjugated vaccine); Page 4 (Hexa composition; meningococcal vaccine in the schedule).
+
+---
+
+# 2. Routine Immunization Schedule in Libya
+
+## Clinical Case 14 — A school-entry immunization review
+
+A school health clinic reviews the immunization records of children entering primary school and children with pertussis-like illness. The team uses the routine schedule table and the DPT/pertussis section together.
+
+### Q57. [Hard] A 6-year-old boy attends for school-entry immunization. His card shows every dose given on time: BCG, OPV and hepatitis B at birth; Hexa at 2, 4 and 6 months; Penta together with MMR at 18 months. Today he is due for Tetra and the second varicella dose. His mother asks whether he will still need any diphtheria-tetanus-pertussis-containing injection later, and why Tetra does not include hepatitis B. Which statement is correct?
+
+A. Today's Tetra is his third booster, so no further pertussis-containing dose of any kind will be needed after today  
+B. Today's Tetra is his first booster, because the 18-month Penta counted as the third primary dose of his primary series  
+C. Today's Tetra is his second booster and contains DPT, Hib and hepatitis B components, exactly like the Hexa he received in infancy  
+D. Today's Tetra is his second booster and replaces Tdap, so no DPT-containing vaccine will be due at 15 years of age  
+E. Today's Tetra is his second booster and contains DPT and IPV only (hepatitis B series already complete); Tdap is still due at 15 years  
+
+**Correct Answer:** E. Today's Tetra is his second booster and contains DPT and IPV only (hepatitis B series already complete); Tdap is still due at 15 years
+
+**Initial Explanation:**
+
+The sheet describes DPT as "3 doses and 3 boosters". In the Libya schedule the three primary doses are the Hexa doses at 2, 4 and 6 months, and the three boosters are Penta (18 months), Tetra (6 years) and Tdap (15 years). Tetra is DPT + IPV only.
+
+**Detailed Explanation:**
+
+To answer, build the child's timeline: primary series = Hexa x3; booster 1 = Penta at 18 months; booster 2 = Tetra today; booster 3 = Tdap at 15 years. Then compare the composition of each product.
+
+- **A. Incorrect.** Tdap at 15 years is a separate booster listed in the schedule, so today's dose is the second booster, not the third.
+- **B. Incorrect.** The 18-month Penta is a booster after the three primary Hexa doses.
+- **C. Incorrect.** Hexa = DPT + HepB + Hib + IPV; Penta = DPT + Hib + IPV; Tetra = DPT + IPV only. Tetra has no Hib or hepatitis B component.
+- **D. Incorrect.** The 15-year visit lists Tdap, so a further DPT-type booster remains.
+- **E. Correct.** The hepatitis B series is already four doses (birth dose plus three Hexa doses), and Tetra contains only DPT and IPV.
+
+**HIGH-YIELD POINTS:**
+
+- DPT: 3 primary doses + 3 boosters, mapped to Hexa (2, 4, 6 months), Penta (18 months), Tetra (6 years) and Tdap (15 years).
+- Hexa = DPT + HepB + Hib + IPV; Penta = DPT + Hib + IPV; Tetra = DPT + IPV. Penta lacks HepB; Tetra lacks both HepB and Hib.
+- Hepatitis B: birth dose + Hexa doses at 2, 4, 6 months = 4 doses.
+
+**Source:** Pediatric Vaccination sheet - Page 4 (routine schedule table and combination compositions); Page 7 (DPT: 3 doses and 3 boosters; replaced by Hexa); Page 8 (hepatitis B: 4 doses in total).
+
+# 6. DPT and Pertussis Vaccine
+
+## Clinical Case 15 — A school-entry immunization review
+
+A school health clinic reviews the immunization records of children entering primary school and children with pertussis-like illness. The team uses the routine schedule table and the DPT/pertussis section together.
+
+### Q58. [Medium] An 8-year-old boy has had a 12-day paroxysmal cough with post-tussive vomiting and no fever. PCR is positive for Bordetella pertussis. His illness is mild, with no apnea or cyanosis, and he is improving. His card shows all pertussis-containing doses were given on schedule (Hexa x3, Penta at 18 months, Tetra at 6 years). His father says, "He had every injection, so the vaccine was useless." Which response is the most accurate?
+
+A. A fully vaccinated child cannot develop pertussis, so the positive PCR must be a false result and the diagnosis is wrong  
+B. Pertussis in a vaccinated person tends to be mild and short, and titers after killed vaccines may wane, so a Tdap booster is scheduled at 15 years  
+C. Vaccination typically makes pertussis more severe than in unvaccinated children, so the vaccine should be withheld from his younger siblings  
+D. A mild course proves that the boy received only a single dose of a pertussis-containing vaccine rather than the full series  
+E. Pertussis-containing vaccines never lose their effect over time, so a breakthrough case can only mean that the vials used were faulty  
+
+**Correct Answer:** B. Pertussis in a vaccinated person tends to be mild and short, and titers after killed vaccines may wane, so a Tdap booster is scheduled at 15 years
+
+**Initial Explanation:**
+
+The sheet states that pertussis in a vaccinated person is mild and of short duration, and that killed/inactivated vaccines may lose antibody titers with time. A mild breakthrough illness does not mean the vaccine was useless.
+
+**Detailed Explanation:**
+
+The key clinical idea is that a vaccine can modify disease without guaranteeing that infection never occurs. Here the child had the full series, his illness is mild and self-limited in course, and a booster is already planned in the schedule.
+
+- **A. Incorrect.** The sheet does not claim complete protection; it describes the disease in vaccinated people as mild and short.
+- **B. Correct.** It combines the mild/short course in the vaccinated with waning titers after killed vaccines, and it points to the Tdap booster at 15 years.
+- **C. Incorrect.** Nothing in the sheet suggests vaccination worsens pertussis; the contraindications are about specific severe reactions, not about disease severity.
+- **D. Incorrect.** A mild course is expected in vaccinated people and does not indicate under-vaccination.
+- **E. Incorrect.** Killed vaccines are described as having titers that may diminish; the sheet does not support the idea of lifelong protection.
+
+**HIGH-YIELD POINTS:**
+
+- Pertussis in a vaccinated person is mild and of short duration.
+- Killed/inactivated vaccines: antibody titers may diminish with time, so boosters are used.
+- Tdap (acellular) is the booster listed at 15 years in the schedule.
+
+**Source:** Pediatric Vaccination sheet - Page 2 (killed/inactivated vaccines: titers may diminish); Page 4 (Tdap at 15 years); Page 7 (Pertussis: whole-cell DTP, mild disease in the vaccinated; acellular Tdap).
+
+---
+
+# 3. Contraindications and Precautions
+
+## Clinical Case 16 — A morning clinic for children due for live vaccines
+
+A pediatric clinic reviews several children who are due for live attenuated vaccines. For each, the physician must decide whether the history is a true contraindication or only a false one.
+
+### Q59. [Hard] Five children are reviewed on the same morning for MMR. Which child can receive the vaccine today?
+
+A. A 5-year-old girl with acute lymphoblastic leukemia in remission, clinically well, whose last chemotherapy cycle ended 3 months ago  
+B. A 7-year-old boy with nephrotic syndrome, afebrile, who has been receiving large daily doses of prednisolone continuously for the last 3 months  
+C. A 14-month-old with mild-to-moderate undernutrition and mild coryza, finishing oral antibiotics for otitis media; he is afebrile, and his father has asthma  
+D. A 4-year-old boy who had a bone marrow transplant 4 months ago and is now clinically well with no current infection  
+E. An 18-month-old girl with very severe protein-energy malnutrition who is afebrile and has no other acute illness at present  
+
+**Correct Answer:** C. A 14-month-old with mild-to-moderate undernutrition and mild coryza, finishing oral antibiotics for otitis media; he is afebrile, and his father has asthma
+
+**Initial Explanation:**
+
+Live attenuated vaccines are contraindicated in immunodeficiency, malignancy, immunosuppression (bone marrow transplant, chemotherapy or radiotherapy within 6 months, large prolonged corticosteroid doses), pregnancy and very severe protein-energy malnutrition. A mild cold, an antibiotic course and a family history of asthma are not contraindications.
+
+**Detailed Explanation:**
+
+Each option hides one item from the live-vaccine contraindication list; only option C contains items that the sheet explicitly says are not contraindications.
+
+- **A. Incorrect.** Chemotherapy within the last 6 months is a listed contraindication, and leukemia is a listed malignant condition.
+- **B. Incorrect.** A large, prolonged corticosteroid dose is a listed immunosuppressant contraindication.
+- **C. Correct.** Mild respiratory symptoms, an antibiotic course and a family history of asthma are listed as non-contraindications. Protein-energy malnutrition counts only if it is very severe, and this child is mild-to-moderate.
+- **D. Incorrect.** Bone marrow transplantation within the last 6 months is a listed contraindication.
+- **E. Incorrect.** Severe protein-energy malnutrition is listed as a contraindication only when very severe, which describes this child.
+
+**HIGH-YIELD POINTS:**
+
+- Contraindications to live vaccines: humoral, cellular or combined immunodeficiency (primary or secondary, e.g., HIV); leukemia and Hodgkin disease; BM transplant, chemotherapy or radiotherapy within 6 months; large prolonged corticosteroid dose; pregnancy; protein-energy malnutrition only if very severe.
+- Not contraindications: mild cold, mild local reaction to a previous dose, family history of allergy/eczema/asthma, antibiotic course, prematurity/IUGR, breastfeeding.
+- Do not withhold vaccines for false contraindications, and do not give live vaccines inside the 6-month window after chemotherapy or transplant.
+
+**Source:** Pediatric Vaccination sheet - Page 5 (Contraindication to live attenuated vaccines; Conditions which are not contraindications).
+
+### Q60. [Hard] A 12-month-old infant with HIV infection is clinically stable and asymptomatic on antiretroviral therapy (ART). He missed BCG at birth because the diagnosis was made at 2 months. Today the mother asks whether he can receive MMR and the BCG he missed. Which plan is consistent with the sheet?
+
+A. Give MMR, because HIV on ART is the stated exception, but not BCG, which is contraindicated in HIV infection even when asymptomatic  
+B. Give both BCG and MMR today, since the infant is clinically well and has no symptoms or signs of HIV-related disease  
+C. Withhold both vaccines, because every live vaccine is contraindicated in every HIV-infected child without any exception  
+D. Give BCG but withhold MMR, because BCG is the only live vaccine that the sheet permits in HIV-infected children  
+E. Give BCG after a negative tuberculin test, because a negative Mantoux overrides the HIV contraindication, and withhold MMR  
+
+**Correct Answer:** A. Give MMR, because HIV on ART is the stated exception, but not BCG, which is contraindicated in HIV infection even when asymptomatic
+
+**Initial Explanation:**
+
+The sheet lists immunocompromise as a contraindication to MMR "except HIV on ART", whereas for BCG it lists HIV infection, symptomatic or asymptomatic, as a contraindication.
+
+**Detailed Explanation:**
+
+Two live vaccines are being compared for the same child, and the sheet treats HIV differently for each. The trap is to apply the "asymptomatic means safe" reasoning to both vaccines, or the "immunocompromised means no live vaccine" reasoning to both.
+
+- **A. Correct.** MMR has an explicit exception for HIV on ART; BCG has an explicit contraindication that includes asymptomatic infection.
+- **B. Incorrect.** BCG is contraindicated in HIV whether symptomatic or asymptomatic. Disseminated BCG disease is a recognized complication in immunodeficient infants.
+- **C. Incorrect.** MMR carries a specific exception for HIV on ART, so a blanket ban is not what the sheet states for MMR.
+- **D. Incorrect.** This reverses the sheet: BCG is the one with the HIV contraindication.
+- **E. Incorrect.** A negative tuberculin test is relevant to TB exposure (a positive test is itself a BCG contraindication), but it does not cancel the HIV contraindication.
+
+**HIGH-YIELD POINTS:**
+
+- MMR: immunocompromised are contraindicated except HIV on ART.
+- BCG: HIV infection (symptomatic or asymptomatic) is a contraindication; a positive Mantoux is also a contraindication.
+- Disseminated BCG infection is a recognized complication in infants with immunodeficiency.
+
+**Source:** Pediatric Vaccination sheet - Page 5 (BCG contraindications and complications); Page 8 (MMR contraindications).
+
+---
+
+# 3. Contraindications and Precautions
+
+## Clinical Case 17 — Allergy and antibody history before the 12-month visit
+
+At the 12-month visit (MMR, meningococcal, PCV) several toddlers have histories that need careful interpretation before MMR is given.
+
+### Q61. [Hard] A 12-month-old boy attends for MMR, meningococcal and PCV. His mother reports that 2 months ago, minutes after eating scrambled egg for the first time, he developed lip swelling, generalized urticaria and wheezing and needed emergency treatment. He is afebrile, immunologically normal, has no known neomycin allergy, and has had no recent immunoglobulin. What is the most appropriate plan for MMR?
+
+A. Cancel MMR permanently, because egg anaphylaxis is an absolute contraindication with no alternative approach  
+B. Give MMR immediately without further assessment, because egg allergy never affects MMR  
+C. Replace MMR with BCG, because BCG gives equivalent protection against measles  
+D. Perform a skin test first, and vaccinate after the skin test rather than giving the vaccine directly  
+E. Give MMR intradermally instead of subcutaneously, because the intradermal route prevents anaphylaxis  
+
+**Correct Answer:** D. Perform a skin test first, and vaccinate after the skin test rather than giving the vaccine directly
+
+**Initial Explanation:**
+
+The sheet lists anaphylactic reaction to egg ingestion as a consideration for MMR, with vaccination after a skin test. Other contraindications (pregnancy, neomycin anaphylaxis, recent immunoglobulin, immunocompromise) are not present in this child.
+
+**Detailed Explanation:**
+
+The history (lip swelling, urticaria and wheeze within minutes of egg) is a convincing anaphylactic reaction. The question tests the "next best step" rather than the diagnosis.
+
+- **A. Incorrect.** The sheet does not describe permanent exclusion; it describes vaccination after a skin test.
+- **B. Incorrect.** Giving the vaccine directly ignores the specific precaution in the sheet.
+- **C. Incorrect.** BCG is a TB vaccine and gives no protection against measles, mumps or rubella.
+- **D. Correct.** It follows the sheet's instruction: vaccinate after a skin test.
+- **E. Incorrect.** The MMR route in the sheet is subcutaneous. Intradermal administration is the BCG route, and no route is described as preventing anaphylaxis.
+
+**HIGH-YIELD POINTS:**
+
+- MMR contraindications/precautions: pregnancy (risk of fetal damage), anaphylaxis to egg ingestion (vaccinated after skin test), anaphylactic allergy to neomycin, immunoglobulin within 3 months, immunocompromise except HIV on ART.
+- MMR: 2 doses at 12 and 18 months, SC route.
+- General safety principle (not stated in the sheet): vaccinate where anaphylaxis can be managed.
+
+**Source:** Pediatric Vaccination sheet - Page 8 (MMR: schedule, route and contraindications).
+
+### Q62. [Hard] An 11-month-old girl developed generalized urticaria, lip swelling and stridor minutes after receiving neomycin-containing ear drops. Her mother asks which of the upcoming routine vaccines need to be reconsidered because of this history. Which answer is consistent with the sheet?
+
+A. Only BCG and OPV, because live vaccines are the only ones affected by an antibiotic allergy  
+B. MMR (12 and 18 months) and pertussis-containing vaccines such as Penta at 18 months  
+C. Only PCV and the meningococcal vaccine, because they are given at the next visit  
+D. Only the hepatitis A and varicella vaccines at 15 months, because only these are given after the 12-month visit  
+E. None, because anaphylaxis to an antibiotic is never a reason to change any vaccine in the routine schedule  
+
+**Correct Answer:** B. MMR (12 and 18 months) and pertussis-containing vaccines such as Penta at 18 months
+
+**Initial Explanation:**
+
+The sheet lists anaphylactic allergy to neomycin as a contraindication to MMR (the vaccine contains neomycin), and lists anaphylaxis to neomycin, streptomycin and polymyxin in the contraindications column for pertussis-containing vaccines.
+
+**Detailed Explanation:**
+
+The approach is to identify the antigen-independent contraindication (a specific drug allergy) and search the sheet for every vaccine that lists it.
+
+- **A. Incorrect.** BCG and OPV are not the vaccines for which neomycin anaphylaxis is listed.
+- **B. Correct.** MMR lists neomycin anaphylaxis explicitly; the DPT/pertussis table lists anaphylaxis to neomycin, streptomycin and polymyxin. The next pertussis-containing doses are Penta (18 months), Tetra (6 years) and Tdap (15 years).
+- **C. Incorrect.** Nothing in the sheet ties PCV or the meningococcal vaccine to neomycin allergy.
+- **D. Incorrect.** Hepatitis A and varicella vaccines are not the vaccines the sheet links to neomycin anaphylaxis, and this option leaves out MMR and the pertussis-containing vaccines that are.
+- **E. Incorrect.** Anaphylaxis to specific antibiotics is listed as a contraindication for particular vaccines.
+
+**HIGH-YIELD POINTS:**
+
+- Neomycin anaphylaxis: contraindication to MMR (the vaccine contains neomycin).
+- Pertussis/DPT contraindications also include anaphylaxis to neomycin, streptomycin and polymyxin, previous post-vaccination anaphylaxis, uncontrolled convulsions, progressive neurological illness and non-minor acute febrile illness.
+- Always ask about drug allergies, not only previous vaccine reactions.
+
+**Source:** Pediatric Vaccination sheet - Page 7 (Pertussis contraindication table); Page 8 (MMR contraindications).
+
+# 8. MMR Vaccine
+
+## Clinical Case 18 — Allergy and antibody history before the 12-month visit
+
+At the 12-month visit (MMR, meningococcal, PCV) several toddlers have histories that need careful interpretation before MMR is given.
+
+### Q63. [Hard] A 12-month-old boy, born to an HBsAg-positive mother, received hepatitis B vaccine and HBIG 100 IU IM at birth in separate thighs and later completed four doses of hepatitis B vaccine. Today he is due for MMR, meningococcal vaccine and PCV. His mother worries that "the antibodies he was given at birth" will block the measles vaccine. What is the most appropriate response?
+
+A. Delay MMR until 18 months, because HBIG given in the newborn period blocks live vaccines for the first two years of life  
+B. Repeat HBIG today so that MMR can be given under antibody cover, since the first HBIG dose was only given at birth  
+C. Give MMR at double dose to overcome the interference from HBIG, then repeat the dose at 18 months as scheduled  
+D. Replace MMR with inactivated vaccines for life, because he received an immunoglobulin product as a newborn infant  
+E. Proceed with MMR; immunoglobulin interferes only when given within the previous 3 months, and HBIG was given about 12 months ago  
+
+**Correct Answer:** E. Proceed with MMR; immunoglobulin interferes only when given within the previous 3 months, and HBIG was given about 12 months ago
+
+**Initial Explanation:**
+
+The sheet lists immunoglobulin within 3 months as a contraindication to MMR because of a blunted immune response. HBIG was given at birth, about 12 months before today's visit, so the 3-month window has long passed.
+
+**Detailed Explanation:**
+
+This question links two separate sections of the sheet (neonatal HBV prophylaxis and MMR contraindications) and tests whether the student applies the time window rather than the mere history of receiving immunoglobulin.
+
+- **A. Incorrect.** The sheet gives a 3-month window, not 2 years.
+- **B. Incorrect.** Repeating immunoglobulin would create the interference the 3-month rule warns about.
+- **C. Incorrect.** Doubling the dose is not a solution described in the sheet for any live vaccine problem.
+- **D. Incorrect.** There is no need to replace MMR; the contraindication has expired.
+- **E. Correct.** The interval since HBIG is far longer than 3 months.
+
+**HIGH-YIELD POINTS:**
+
+- MMR: contraindicated if immunoglobulin was given within the last 3 months (blunted immune response).
+- HBsAg-positive mother: HepB vaccine + HBIG 100 IU IM on the day of birth in separate thighs, then HepB vaccine at 2, 4, 6 months (4 doses).
+- The key is the interval since immunoglobulin, not whether immunoglobulin was ever given.
+
+**Source:** Pediatric Vaccination sheet - Page 8 (Hepatitis B: infant of HBsAg-positive mother; MMR contraindications).
+
+---
+
+# 4. BCG Vaccine
+
+## Clinical Case 19 — A family affected by tuberculosis
+
+A child vaccinated with BCG is seen in a family where an adult has been diagnosed with pulmonary TB, and a younger infant has no visible BCG scar.
+
+### Q64. [Medium] A 38-year-old man is diagnosed with pulmonary tuberculosis. His wife brings their 3-year-old son, who received BCG at birth and has a typical scar, and says: "My husband was vaccinated as a child and still developed lung TB, so BCG must be useless for our son too." Which statement should the pediatrician make?
+
+A. BCG gives complete protection against all forms of TB, so the husband's illness cannot be tuberculosis at all and must be something else  
+B. BCG protects only against pulmonary TB in adults and gives no protection to young children against TB meningitis at all  
+C. BCG is about 70-80% effective against severe forms such as TB meningitis in children, but less effective against respiratory disease  
+D. BCG is effective against respiratory disease only if it is repeated every 5 years, given in the same arm each time  
+E. A visible BCG scar proves lifelong protection against respiratory TB, so the child needs no further consideration at all  
+
+**Correct Answer:** C. BCG is about 70-80% effective against severe forms such as TB meningitis in children, but less effective against respiratory disease
+
+**Initial Explanation:**
+
+The sheet gives BCG efficacy as 70-80% against the most severe forms of TB (TB meningitis in children) and notes it is less effective against respiratory disease, which is more common in adults.
+
+**Detailed Explanation:**
+
+The father's pulmonary TB does not contradict the vaccine's purpose. BCG is aimed at preventing severe childhood forms, and its weaker effect on respiratory disease is exactly what the sheet describes.
+
+- **A. Incorrect.** The sheet states partial efficacy and a weaker effect on respiratory disease.
+- **B. Incorrect.** This reverses the sheet: the stronger effect is against severe childhood forms such as TB meningitis.
+- **C. Correct.** It matches the efficacy statement and explains the father's case.
+- **D. Incorrect.** No 5-year repetition schedule is described; BCG is given once soon after birth, with a second dose considered only in the specific no-scar situation.
+- **E. Incorrect.** The scar reflects the local reaction, not a guarantee of protection against respiratory TB. The sheet also notes that a scar does not appear in everyone.
+
+**HIGH-YIELD POINTS:**
+
+- BCG: 70-80% effective against the most severe forms of TB (TB meningitis in children).
+- Less effective in preventing respiratory disease, which is more common in adults.
+- One dose soon after birth, intradermal, left upper arm over the deltoid insertion.
+
+**Source:** Pediatric Vaccination sheet - Page 5 (BCG: dose, site and efficacy).
+
+### Q65. [Hard] A 4-month-old girl received BCG intradermally in the left upper arm at birth. There is no scar at the site. She has no immunodeficiency and is afebrile. A tuberculin skin test performed today is negative. Which plan is consistent with the sheet?
+
+A. Give a second BCG dose in the right arm, and advise that no other vaccine be given in that arm for 3 months  
+B. Do not repeat BCG, because absence of a scar is normal and the tuberculin result has no bearing on the decision  
+C. Give the second BCG dose subcutaneously in the left arm, because this route gives a stronger response  
+D. Give BCG boosters at monthly intervals until a scar appears, regardless of the tuberculin result  
+E. Repeat BCG in the right arm and give the next intramuscular vaccines in the same arm on the same day  
+
+**Correct Answer:** A. Give a second BCG dose in the right arm, and advise that no other vaccine be given in that arm for 3 months
+
+**Initial Explanation:**
+
+A scar appears in most but not all vaccinated infants, so absence of a scar does not prove non-response. The sheet advises a tuberculin skin test; if negative, a second BCG dose is given in the right arm, with advice not to have any vaccination in that arm for 3 months after BCG.
+
+**Detailed Explanation:**
+
+The sequence is: no scar (not itself diagnostic) -> tuberculin test -> negative -> second dose in the right arm -> arm precaution. The sheet gives the 3-month advice without stating the reason, so it should be remembered as written.
+
+- **A. Correct.** This follows the sequence in the sheet.
+- **B. Incorrect.** The tuberculin result is exactly what decides repeat vaccination, and a negative test leads to a second dose.
+- **C. Incorrect.** Subcutaneous BCG risks BCG-oma; the route is intradermal.
+- **D. Incorrect.** The sheet describes a single second dose, not repeated boosters.
+- **E. Incorrect.** The sheet advises no vaccination in the arm used for BCG for 3 months.
+
+**HIGH-YIELD POINTS:**
+
+- A BCG scar appears in most but not all vaccinated people; its absence does not by itself mean non-response.
+- Tuberculin skin test first; if negative, give a second BCG dose in the right arm (it is not necessary to inspect this scar).
+- Avoid any other vaccination in the arm used for BCG for 3 months.
+- Wrong route (subcutaneous) may cause BCG-oma.
+
+**Source:** Pediatric Vaccination sheet - Pages 5-6 (BCG: no-scar management; complications).
+
+---
+
+# 11. Varicella and Influenza Vaccines
+
+## Clinical Case 20 — A school-entry visit after a previous reaction
+
+A 6-year-old is due for the second varicella dose in the routine schedule (15 months and 6 years), and his mother reports a reaction to the first dose.
+
+### Q66. [Medium] A 6-year-old boy is due for the second varicella dose. His mother reports that 9 days after the first dose at 15 months he had a low-grade fever and a brief rash, with pain and redness at the injection site, all of which resolved without treatment. He had no breathing difficulty or swelling of the face. He has no immunodeficiency, no lymphopenia, and is not receiving immunosuppressive therapy. What is the appropriate decision?
+
+A. Cancel the second dose, because fever and rash after the first dose indicate that he developed anaphylaxis  
+B. Give the second dose, because fever, rash and local pain or redness are listed adverse reactions, not contraindications  
+C. Skip the second dose, because the rash proves that he developed wild chickenpox and is now permanently immune  
+D. Postpone the second dose until age 15 years, when it can be given together with the Tdap booster at that visit  
+E. Give the second dose only after first administering varicella immunoglobulin to prevent a more severe reaction  
+
+**Correct Answer:** B. Give the second dose, because fever, rash and local pain or redness are listed adverse reactions, not contraindications
+
+**Initial Explanation:**
+
+The sheet lists fever, rash and local pain or redness as adverse reactions to varicella vaccine, and lists anaphylaxis after a previous dose, lymphopenia, immunodeficiency and immunosuppressive therapy as contraindications. This boy's history fits the first list.
+
+**Detailed Explanation:**
+
+The task is to separate an expected adverse reaction from a contraindicating reaction. Anaphylaxis would involve airway or circulatory features; the mother describes none.
+
+- **A. Incorrect.** Anaphylaxis after a previous dose is a contraindication, but this history lacks respiratory difficulty or facial swelling.
+- **B. Correct.** The reactions described are listed adverse reactions, and none of the listed contraindications are present.
+- **C. Incorrect.** The sheet does not support the idea that a vaccine rash replaces the second scheduled dose.
+- **D. Incorrect.** The routine schedule lists the second dose at 6 years, and Tdap is a separate vaccine.
+- **E. Incorrect.** Immunoglobulin is not part of the varicella vaccination process in the sheet.
+
+**HIGH-YIELD POINTS:**
+
+- Varicella vaccine: 0.5 mL SC or IM; site anterolateral thigh or upper arm; doses at 15 months and 6 years.
+- Adverse reactions: fever, rash, local pain or redness.
+- Contraindications: anaphylaxis after a previous dose, lymphopenia, immunodeficiency, immunosuppressive therapy.
+- Storage: 2-8 degrees C, protect from light, use within 30 minutes of reconstitution.
+
+**Source:** Pediatric Vaccination sheet - Page 4 (schedule); Page 10 (Varicella vaccine: dose, route, site, adverse reactions, contraindications).
+
+---
+
+# 11. Varicella and Influenza Vaccines
+
+## Clinical Case 21 — An influenza vaccination session
+
+A clinic organizes an influenza vaccination session and reviews who falls within the groups listed in the sheet.
+
+### Q67. [Medium] During an influenza vaccination session, five people attend. Which one is NOT covered by the groups listed in the sheet?
+
+A. A healthy 8-year-old boy  
+B. A pregnant woman accompanying her child  
+C. A healthy 20-month-old girl  
+D. A healthy 15-year-old boy with no chronic illness  
+E. A 14-year-old girl with sickle cell disease  
+
+**Correct Answer:** D. A healthy 15-year-old boy with no chronic illness
+
+**Initial Explanation:**
+
+The sheet lists children aged 2 to 12 years, pregnant women, all those aged 6-23 months, those aged 13-64 years who are at increased risk of complications (chronic illness), and people aged 65 years and over. A healthy 15-year-old with no risk factor does not belong to any listed group.
+
+**Detailed Explanation:**
+
+Four of the five people fit a different group on the list; the one who fits none is the healthy adolescent.
+
+- **A. Included.** A child aged 2 to 12 years is listed.
+- **B. Included.** Pregnancy is listed.
+- **C. Included.** All those aged 6-23 months are listed.
+- **D. Correct (not covered).** The 13-64-year group is limited to those at increased risk of influenza-related complications, and this boy has no chronic illness.
+- **E. Included.** Haemoglobinopathies are listed among chronic conditions that increase the risk of complications in the 13-64-year group.
+
+**HIGH-YIELD POINTS:**
+
+- Influenza vaccine: 0.5 mL IM.
+- Groups: children 2-12 years; pregnancy; all aged 6-23 months; 13-64 years at increased risk; 65 years and over.
+- Risk conditions: chronic heart, liver, neurological, renal or respiratory disease (including cystic fibrosis, moderate or severe asthma, bronchopulmonary dysplasia), diabetes mellitus, haemoglobinopathies.
+
+**Source:** Pediatric Vaccination sheet - Pages 10-11 (Influenza vaccine).
+
+---

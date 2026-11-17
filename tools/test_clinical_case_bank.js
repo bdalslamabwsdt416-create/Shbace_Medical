@@ -29,7 +29,7 @@ async function tick(){await new Promise(r=>setTimeout(r,0));}
   assert(scroll.innerHTML.includes(firstNarrativeLine),'Shared case text missing');
   assert((scroll.innerHTML.match(/CLINICAL CASE/g)||[]).length===1,'Shared case heading should appear once');
   assert((scroll.innerHTML.match(/class="qcard cc-question"/g)||[]).length===item.questions.length,'Questions are not grouped under the shared case');
-  assert(ctx.window.__shbClinicalCaseBank.count()===1598,'Bank total does not match source');
+  assert(ctx.window.__shbClinicalCaseBank.count()===1840,'Bank total does not match source');
   assert(!scroll.innerHTML.includes('Detailed Explanation'),'Detailed explanation leaked before answer');
   let wrong='A'; if(wrong===q.correctAnswer)wrong='B';
   ctx.window.answerClinicalCaseQuestion(q.id,wrong);

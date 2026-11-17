@@ -5066,3 +5066,469 @@ The sheet lists dextrose 5% or 10% among the intravenous fluid preparations.
 ## Supplementary coverage and clinical-use note
 
 This continuation adds direct testing of the intravenous fluid formulations and classification shown on page 31. The listed fluids are reproduced for lecture revision; they should not be interpreted as a current prescribing protocol. Fluid choice, tonicity, rate and monitoring must follow current local pediatric guidance and the child's clinical and biochemical status. The previous 35 cases and Q1–Q153 remain unchanged.
+
+---
+
+# 0. Introductory / Unsectioned Questions
+
+### Q160. [Moderate] Which treatment is most consistent with the lecture's recommended management?
+
+A. Oral metoclopramide  
+B. A proton pump inhibitor  
+C. A course of systemic antibacterial therapy  
+D. A topical antifungal such as nystatin or miconazole  
+E. Nissen fundoplication  
+
+**Correct Answer:** D. A topical antifungal such as nystatin or miconazole
+
+**Initial Explanation:**
+
+The lecture recommends topical antifungal treatment for oral thrush, specifically nystatin or miconazole.
+
+**Detailed Explanation:**
+
+The adherent white oral plaques support oral candidiasis rather than a reflux-related or bacterial condition. Once the clinical diagnosis is established, the treatment stated in the lecture is a topical antifungal.
+
+- **A. Incorrect.** Metoclopramide is discussed in the GERD section, not as treatment for oral candidiasis; the lecture also cautions against its use as a pediatric antiemetic because of extrapyramidal adverse effects.
+- **B. Incorrect.** Proton pump inhibitors are listed in the GERD treatment section and do not treat Candida infection of the oral mucosa.
+- **C. Incorrect.** The lecture identifies Candida albicans as the cause and recommends an antifungal, not antibacterial treatment.
+- **D. Correct.** Nystatin or miconazole are the topical antifungal agents specifically named in the sheet.
+- **E. Incorrect.** Fundoplication is an operation described for selected severe or refractory GERD.
+
+**HIGH-YIELD POINTS:**
+
+- Oral thrush is an oropharyngeal Candida infection, commonly due to *Candida albicans*.
+- The plaques are typically difficult to remove with a tongue depressor.
+- The lecture names topical nystatin or miconazole as treatment.
+- Persistent, severe or recurrent thrush in an older child, especially with FTT, should raise concern for possible immunodeficiency.
+
+**Source:** GIT sheet — Page 4.
+
+---
+
+## New Case 02 — Reflux symptoms persisting despite feeding measures
+
+A 7-month-old infant has troublesome post-feed regurgitation, feeding refusal and poor weight gain. The clinical assessment supports pathological gastro-oesophageal reflux, and conservative feeding measures have not adequately controlled the symptoms. The team is considering pharmacological treatment.
+
+**Case focus:** GERD — pharmacological management and medication-related cautions.
+
+# 2. Gastroesophageal Reflux Disease
+
+### Q161. [Hard] According to the lecture, which pharmacological group is described as the most potent and first-line option?
+
+A. H2-receptor antagonists such as ranitidine  
+B. Proton pump inhibitors such as omeprazole  
+C. Prokinetic treatment with domperidone  
+D. Metoclopramide as a routine pediatric antiemetic  
+E. Antacid therapy alone  
+
+**Correct Answer:** B. Proton pump inhibitors such as omeprazole
+
+**Initial Explanation:**
+
+The lecture describes proton pump inhibitors, including omeprazole and esomeprazole, as the most potent pharmacological treatment and identifies them as first-line in its treatment outline.
+
+**Detailed Explanation:**
+
+This infant has troublesome symptoms and poor weight gain rather than uncomplicated physiological reflux. The question asks specifically about the pharmacological hierarchy stated in the supplied lecture. That sheet lists antacids and H2 antagonists, then describes proton pump inhibitors as the most potent and first-line treatment.
+
+- **A. Incorrect.** Ranitidine and cimetidine are listed as H2 antagonists, but the lecture identifies PPIs as the most potent and first-line option.
+- **B. Correct.** Omeprazole and esomeprazole are the PPIs named in the sheet.
+- **C. Incorrect.** The lecture notes significant adverse effects with domperidone and says its use should be discouraged.
+- **D. Incorrect.** The sheet states that metoclopramide is contraindicated as a pediatric antiemetic because central action may cause extrapyramidal effects.
+- **E. Incorrect.** Antacids are listed, but they are not the pharmacological group identified by the lecture as most potent and first-line.
+
+**HIGH-YIELD POINTS:**
+
+- PPIs named in the lecture: omeprazole and esomeprazole.
+- H2 antagonists named: ranitidine and cimetidine.
+- The lecture discourages domperidone because of significant adverse effects.
+- The lecture cautions against metoclopramide as a pediatric antiemetic because of extrapyramidal side effects.
+- This item reflects the treatment hierarchy written in the supplied GIT sheet.
+
+**Source:** GIT sheet — Page 9.
+
+---
+
+## New Case 03 — Recurrent aspiration in an infant who can swallow an NGT
+
+A 5-month-old infant has had repeated coughing during feeds and several episodes of aspiration pneumonia. The symptoms have been present for months, and the infant did not have the dramatic choking episode classically seen during the first feed after birth. A nasogastric tube can pass into the stomach, so the team considers a communication between the trachea and oesophagus without oesophageal atresia.
+
+**Case focus:** Isolated H-type tracheoesophageal fistula — delayed presentation and diagnostic approach.
+
+# 3. Oesophageal Atresia and Tracheoesophageal Fistula
+
+### Q162. [Hard] Which investigation is specifically described in the lecture for confirming this suspected lesion?
+
+A. Twenty-four-hour oesophageal pH monitoring only  
+B. Abdominal ultrasound measuring pyloric muscle thickness  
+C. Plain abdominal radiography looking for a double-bubble sign  
+D. Stool microscopy for ova and parasites  
+E. Contrast oesophagram or fibre-optic endoscopy using methylene blue  
+
+**Correct Answer:** E. Contrast oesophagram or fibre-optic endoscopy using methylene blue
+
+**Initial Explanation:**
+
+An isolated H-type fistula may be diagnosed later because there is no oesophageal atresia. The lecture recommends a contrast oesophagram or fibre-optic endoscopy with methylene blue for its evaluation.
+
+**Detailed Explanation:**
+
+The delayed feeding-related respiratory symptoms and recurrent aspiration are compatible with the H-type form described in the sheet. In contrast to oesophageal atresia, the oesophageal lumen remains continuous, so an NGT may reach the stomach. The lecture identifies two diagnostic approaches for the isolated fistula: an oesophagram with contrast (Gastrografin or barium) or fibre-optic endoscopy with methylene blue.
+
+- **A. Incorrect.** pH monitoring is used for objective assessment of acid reflux, not to demonstrate an H-type fistula.
+- **B. Incorrect.** Pyloric ultrasound is used in suspected hypertrophic pyloric stenosis.
+- **C. Incorrect.** A double-bubble sign is associated with duodenal atresia.
+- **D. Incorrect.** Stool microscopy is not the investigation described for a tracheoesophageal communication.
+- **E. Correct.** Both contrast oesophagram and fibre-optic endoscopy with methylene blue are listed in the lecture for isolated H-type TEF.
+
+**HIGH-YIELD POINTS:**
+
+- H-type TEF occurs without oesophageal atresia and may therefore present later.
+- Feeding difficulty and recurrent aspiration pneumonia are important clinical clues.
+- The lecture lists contrast oesophagram or fibre-optic endoscopy with methylene blue for diagnosis.
+- A coiled NGT in the upper oesophageal pouch is a clue to oesophageal atresia, not the isolated H-type pattern.
+
+**Source:** GIT sheet — Pages 10–11.
+
+---
+
+## New Case 04 — An exposure identified during assessment of infantile vomiting
+
+A 3-week-old infant is being assessed for progressively worsening projectile, non-bilious vomiting after feeds. The infant remains hungry immediately after vomiting, and examination raises suspicion of hypertrophic pyloric stenosis. During the history, the clinician reviews early-life medication exposure.
+
+**Case focus:** Hypertrophic pyloric stenosis — epidemiological and medication-related risk factors.
+
+# 4. Gastric Outlet and Duodenal Obstruction
+
+### Q163. [Moderate] Which historical detail is specifically identified in the lecture as a risk factor for this condition?
+
+A. Macrolide exposure during the first 6 weeks of life  
+B. A history of recurrent oral candidiasis  
+C. Introduction of gluten-containing foods  
+D. Rotavirus vaccination  
+E. A previous episode of lactose intolerance  
+
+**Correct Answer:** A. Macrolide exposure during the first 6 weeks of life
+
+**Initial Explanation:**
+
+The lecture lists macrolide intake during the first 6 weeks of life among the risk factors associated with hypertrophic pyloric stenosis.
+
+**Detailed Explanation:**
+
+The vomiting pattern and age are already suggestive of pyloric stenosis. The additional medication history is relevant because the sheet specifically records early macrolide exposure as an associated risk factor.
+
+- **A. Correct.** Macrolide intake in the first 6 weeks is explicitly listed in the lecture.
+- **B. Incorrect.** Persistent or recurrent thrush in an older child may suggest immunodeficiency; it is not listed as a pyloric stenosis risk factor.
+- **C. Incorrect.** Gluten exposure is discussed in the coeliac disease section, not as a risk factor for pyloric stenosis.
+- **D. Incorrect.** Rotavirus vaccination is discussed as prevention of rotavirus gastroenteritis, not as a pyloric stenosis risk factor.
+- **E. Incorrect.** Lactose intolerance is discussed as a cause of diarrhoea and is not listed as a pyloric stenosis risk factor.
+
+**HIGH-YIELD POINTS:**
+
+- Hypertrophic pyloric stenosis commonly presents at 2–8 weeks, with a peak around 2–3 weeks in the lecture.
+- The lecture lists male sex, first-born status, positive family history (especially maternal side) and macrolide exposure in the first 6 weeks as associated factors.
+- The typical vomiting is projectile and non-bilious; the infant may remain hungry after vomiting.
+
+**Source:** GIT sheet — Page 12.
+
+---
+
+## New Case 05 — Bilious vomiting with a three-bubble radiographic pattern
+
+A newborn develops bilious vomiting during the first days of life. An abdominal radiograph demonstrates a pattern of three prominent gas-filled bubbles. The clinical team is considering the site of a congenital small-bowel obstruction.
+
+**Case focus:** Jejunal atresia — radiographic distinction from other congenital obstruction patterns.
+
+### Q164. [Moderate] Which diagnosis is matched to the three-bubble pattern in the lecture?
+
+A. Hypertrophic pyloric stenosis  
+B. Duodenal atresia  
+C. Jejunal atresia  
+D. Functional gastro-oesophageal reflux  
+E. Hirschsprung disease  
+
+**Correct Answer:** C. Jejunal atresia
+
+**Initial Explanation:**
+
+The lecture's radiographic summary associates the triple-bubble sign with jejunal atresia.
+
+**Detailed Explanation:**
+
+The source sheet presents a comparison of the bubble patterns in congenital gastrointestinal obstruction. It links a single-bubble pattern with pyloric stenosis/annular pancreas, a double-bubble pattern with duodenal atresia, and a triple-bubble pattern with jejunal atresia. The three-bubble finding therefore points to jejunal rather than duodenal obstruction.
+
+- **A. Incorrect.** The lecture associates pyloric stenosis with the single-bubble pattern.
+- **B. Incorrect.** Duodenal atresia is associated with the double-bubble sign.
+- **C. Correct.** The sheet explicitly matches the triple-bubble sign with jejunal atresia.
+- **D. Incorrect.** GER is not a congenital small-bowel atresia and does not produce this radiographic pattern.
+- **E. Incorrect.** Hirschsprung disease is associated with distal aganglionosis and a transition zone on contrast enema, not the triple-bubble pattern described here.
+
+**HIGH-YIELD POINTS:**
+
+- Single bubble: pyloric stenosis / annular pancreas in the lecture's diagram.
+- Double bubble: duodenal atresia.
+- Triple bubble: jejunal atresia.
+- The sheet also notes that jejunal or ileal atresia/stenosis may involve multiple atretic segments.
+
+**Source:** GIT sheet — Page 16.
+
+---
+
+## New Case 06 — A cluster of diarrhoea cases in a nursery
+
+Several neonates in a nursery develop acute diarrhoea over a short period. The illness began about 1–2 days after exposure in the childcare setting. The stools are not described as bloody, and the pattern raises concern for a diarrhoeagenic *E. coli* type associated with nursery outbreaks.
+
+**Case focus:** *E. coli* pathotypes — clinical and epidemiological distinction.
+
+# 5. Acute Diarrhoea and Acute Gastroenteritis
+
+### Q165. [Hard] Which *E. coli* pathotype best fits this outbreak pattern?
+
+A. Enteropathogenic *E. coli* (EPEC)  
+B. Enterohemorrhagic *E. coli* (EHEC)  
+C. Enteroinvasive *E. coli* (EIEC)  
+D. Enterotoxigenic *E. coli* (ETEC)  
+E. Enteroaggregative *E. coli* (EAEC)  
+
+**Correct Answer:** A. Enteropathogenic *E. coli* (EPEC)
+
+**Initial Explanation:**
+
+The lecture associates EPEC with outbreaks in nurseries involving neonates and in day-care centres, with an incubation period of approximately 1–2 days.
+
+**Detailed Explanation:**
+
+The childcare cluster and short incubation period are the discriminating clues. The question is not asking for the most common cause of diarrhoea overall; it asks which of the listed *E. coli* pathotypes matches the setting and timing described in the lecture.
+
+- **A. Correct.** EPEC is linked in the sheet to epidemics in nurseries for neonates and day-care centres; its listed incubation period is 1–2 days.
+- **B. Incorrect.** EHEC, particularly O157:H7, is associated with haemorrhagic colitis and haemolytic uraemic syndrome.
+- **C. Incorrect.** EIEC is associated with sudden-onset diarrhoea containing blood, pus and mucus, often with fever and abdominal pain.
+- **D. Incorrect.** ETEC is associated with travellers' diarrhoea and an incubation period of 1–3 days.
+- **E. Incorrect.** EAEC is associated with watery diarrhoea, but the nursery/day-care outbreak association in the lecture is assigned to EPEC.
+
+**HIGH-YIELD POINTS:**
+
+- EPEC: nursery/day-care outbreaks; incubation 1–2 days.
+- ETEC: travellers' diarrhoea; incubation 1–3 days.
+- EIEC: blood, pus and mucus with fever and abdominal pain; incubation 18–24 hours.
+- EHEC O157:H7: haemorrhagic colitis and HUS.
+- EAEC: watery diarrhoea.
+
+**Source:** GIT sheet — Page 20.
+
+---
+
+## New Case 07 — Positive coeliac screening in a child without gastrointestinal symptoms
+
+A 9-year-old child with a condition associated with coeliac disease undergoes screening despite having no chronic diarrhoea, abdominal distension or weight loss. Coeliac serology is positive, and intestinal biopsy demonstrates a gluten-related mucosal lesion. The child is otherwise clinically asymptomatic.
+
+**Case focus:** Coeliac disease — classification of clinically silent disease.
+
+# 8. Coeliac Disease
+
+### Q166. [Hard] Which category best describes this presentation?
+
+A. Typical symptomatic coeliac disease  
+B. Latent coeliac disease  
+C. Potential coeliac disease  
+D. Silent coeliac disease  
+E. Non-coeliac lactose intolerance  
+
+**Correct Answer:** D. Silent coeliac disease
+
+**Initial Explanation:**
+
+Silent coeliac disease is defined in the lecture by the absence of clinical symptoms despite positive antibodies and a positive biopsy. It may be identified by screening children in risk groups.
+
+**Detailed Explanation:**
+
+The key is the relationship between symptoms, serology and histology. This child has no clinical picture, but both antibody testing and biopsy are positive. That combination matches the lecture's definition of silent coeliac disease.
+
+- **A. Incorrect.** Typical symptomatic coeliac disease includes clinical features as well as positive antibodies and biopsy.
+- **B. Incorrect.** Latent coeliac disease is described as having normal histology at the present time, despite gluten-dependent enteropathy being demonstrated at another time.
+- **C. Incorrect.** Potential coeliac disease has positive antibodies with a negative biopsy, with or without symptoms.
+- **D. Correct.** No clinical picture + positive antibodies + positive biopsy is the definition of silent coeliac disease in the sheet.
+- **E. Incorrect.** Lactose intolerance does not explain the positive coeliac serology and biopsy pattern described.
+
+**HIGH-YIELD POINTS:**
+
+- Symptomatic coeliac disease: clinical picture + positive antibodies + positive biopsy.
+- Silent coeliac disease: no clinical picture + positive antibodies + positive biopsy.
+- Latent coeliac disease: currently normal histology, but gluten-dependent enteropathy has been shown at another time.
+- Potential coeliac disease: positive antibodies with negative biopsy, with or without symptoms.
+- Screening of children in risk groups may identify silent disease.
+
+**Source:** GIT sheet — Page 35.
+
+---
+
+## New Case 08 — Ulcerative colitis recurring during steroid taper
+
+A 13-year-old with ulcerative colitis improves after corticosteroid treatment but repeatedly relapses when the dose is reduced. The treating team considers a steroid-sparing immunomodulator, rather than repeatedly relying on corticosteroid courses alone.
+
+**Case focus:** Inflammatory bowel disease — medication used in steroid-dependent or steroid-resistant disease.
+
+# 13. Inflammatory Bowel Disease
+
+### Q167. [Hard] Which medication is specifically listed in the lecture as an immunomodulator for steroid-dependent or steroid-resistant disease?
+
+A. Mesalamine alone  
+B. Prednisolone as repeated induction therapy  
+C. Omeprazole  
+D. Lactulose  
+E. Azathioprine (or 6-mercaptopurine)  
+
+**Correct Answer:** E. Azathioprine (or 6-mercaptopurine)
+
+**Initial Explanation:**
+
+The lecture lists azathioprine or 6-mercaptopurine as immunomodulators used in steroid-resistant or steroid-dependent inflammatory bowel disease.
+
+**Detailed Explanation:**
+
+The clinical issue is dependence on corticosteroids: symptoms recur as the steroid dose is reduced. The sheet identifies immunomodulators as part of the medical treatment plan for these cases and names azathioprine and 6-mercaptopurine.
+
+- **A. Incorrect.** 5-ASA agents such as mesalamine are included in the treatment section, but the lecture separately names azathioprine/6-mercaptopurine as the immunomodulators for steroid-resistant or dependent cases.
+- **B. Incorrect.** Steroids are used to induce remission, with tapering described in the lecture; repeating them does not answer the question about the listed immunomodulator.
+- **C. Incorrect.** Omeprazole is a proton pump inhibitor discussed in the GERD section.
+- **D. Incorrect.** Lactulose is not the immunomodulator described for IBD.
+- **E. Correct.** Azathioprine or 6-mercaptopurine is the pair specifically identified in the source sheet.
+
+**HIGH-YIELD POINTS:**
+
+- 5-ASA agents named in the lecture include sulfasalazine and mesalamine.
+- The sheet describes oral steroids at 1–2 mg/kg/day for 3–4 weeks followed by tapering; IV steroids may be used in severe cases.
+- Azathioprine or 6-mercaptopurine is listed for steroid-resistant or steroid-dependent disease.
+- Infliximab is also listed in the IBD treatment section.
+
+**Source:** GIT sheet — Page 45.
+
+---
+
+## New Case 09 — Confirmed Hirschsprung disease before definitive surgery
+
+A newborn with abdominal distension and delayed passage of meconium has an empty rectum on examination. Rectal biopsy confirms absence of ganglion cells with increased acetylcholinesterase staining. The surgical team explains that the lecture describes a staged operative approach.
+
+**Case focus:** Hirschsprung disease — the two-step surgical treatment described in the sheet.
+
+# 14. Constipation and Hirschsprung Disease
+
+### Q168. [Moderate] Which sequence matches the operative plan in the lecture?
+
+A. Ramstedt pyloromyotomy followed by fundoplication  
+B. Resection of the affected segment with colostomy, followed later by anastomosis  
+C. Appendectomy followed by bowel rest  
+D. Duodenal resection followed by pyloroplasty  
+E. Nissen fundoplication followed by rectal dilation  
+
+**Correct Answer:** B. Resection of the affected segment with colostomy, followed later by anastomosis
+
+**Initial Explanation:**
+
+The lecture describes Hirschsprung disease as requiring two-step surgery: resection with colostomy, followed by anastomosis.
+
+**Detailed Explanation:**
+
+The diagnostic evidence establishes aganglionosis, so the question is about the surgical sequence described in the supplied sheet. Its treatment summary explicitly lists two stages: first resection with colostomy, then anastomosis.
+
+- **A. Incorrect.** Ramstedt pyloromyotomy is the operation for hypertrophic pyloric stenosis; fundoplication is described for selected GERD cases.
+- **B. Correct.** This is the two-step surgical sequence written in the Hirschsprung section.
+- **C. Incorrect.** Appendectomy is used for appendicitis, not congenital aganglionosis.
+- **D. Incorrect.** Duodenal surgery is relevant to duodenal atresia, not Hirschsprung disease.
+- **E. Incorrect.** Fundoplication treats selected reflux disease and rectal dilation is not the staged operation described.
+
+**HIGH-YIELD POINTS:**
+
+- Definitive diagnosis: rectal biopsy showing absence of ganglion cells and increased acetylcholinesterase staining in nerve trunks.
+- Contrast enema may show a narrowed distal aganglionic segment, dilated proximal colon and a transition zone.
+- The supplied sheet describes two-step surgery: resection + colostomy, then anastomosis.
+
+**Source:** GIT sheet — Page 48.
+
+---
+
+## New Case 10 — Sudden acute abdominal pain in a child with ulcer disease
+
+A 12-year-old with a history of recurrent nocturnal epigastric pain has been diagnosed with peptic ulcer disease. The child now develops a sudden episode of acute abdominal pain. The clinician is concerned about an acute complication of the ulcer rather than uncomplicated dyspepsia.
+
+**Case focus:** Peptic ulcer disease — recognition of perforation as an acute complication.
+
+# 25. Gastritis, Peptic Ulcer Disease and Helicobacter pylori
+
+### Q169. [Hard] Which complication should be suspected from this change in presentation?
+
+A. Physiological gastro-oesophageal reflux  
+B. Functional constipation  
+C. Peptic ulcer perforation  
+D. Toddler diarrhoea  
+E. Oral candidiasis  
+
+**Correct Answer:** C. Peptic ulcer perforation
+
+**Initial Explanation:**
+
+The lecture lists acute abdominal pain as a presentation of peptic ulcer perforation. A sudden change from recurrent ulcer symptoms to acute abdominal pain should therefore raise concern for perforation.
+
+**Detailed Explanation:**
+
+The source describes peptic ulcer disease as potentially causing epigastric pain, nausea, vomiting, bleeding and iron-deficiency anaemia. It separately identifies acute abdominal pain as a presentation of perforation. The clinical change in this vignette is therefore the key warning feature.
+
+- **A. Incorrect.** Physiological GER is common in infancy and does not explain an acute complication in a child with known ulcer disease.
+- **B. Incorrect.** Functional constipation does not account for acute abdominal pain in the context of known peptic ulcer disease.
+- **C. Correct.** Perforation is the ulcer complication linked to acute abdominal pain in the lecture.
+- **D. Incorrect.** Toddler diarrhoea is a chronic loose-stool pattern in a thriving young child.
+- **E. Incorrect.** Oral candidiasis causes adherent oral plaques and does not explain acute abdominal pain.
+
+**HIGH-YIELD POINTS:**
+
+- The lecture lists nocturnal dull epigastric pain, nausea/vomiting, bleeding and iron-deficiency anaemia among peptic ulcer presentations.
+- Acute abdominal pain is specifically associated with perforation in the source sheet.
+- Bleeding and perforation are important acute complications to keep in mind.
+
+**Source:** GIT sheet — Page 63.
+
+---
+
+## New Case 11 — Blood-stained vomit in an otherwise healthy newborn
+
+A newborn has a small episode of blood-stained vomit shortly after delivery. The infant is otherwise clinically well, and the history places the episode in the immediate neonatal period. The team reviews the two maternal/neonatal sources of blood listed in the lecture before attributing the finding to gastrointestinal disease.
+
+**Case focus:** Neonatal vomiting — distinguishing swallowed maternal blood from neonatal haemorrhagic disease.
+
+# 26. Vomiting in Children — Age-Based Differential and Red Flags
+
+### Q170. [Moderate] Which explanation is specifically listed in the lecture as a cause of blood in the vomit of a healthy neonate?
+
+A. Swallowed maternal blood from the birth canal  
+B. Hypertrophic pyloric stenosis  
+C. Duodenal atresia  
+D. Rotavirus gastroenteritis  
+E. Hirschsprung-associated enterocolitis  
+
+**Correct Answer:** A. Swallowed maternal blood from the birth canal
+
+**Initial Explanation:**
+
+The lecture lists swallowed maternal blood from the birth canal as one cause of blood in the vomit of an otherwise healthy neonate.
+
+**Detailed Explanation:**
+
+The sheet separates neonatal vomiting into healthy and sick neonates. Under healthy neonates, it lists blood due to either neonatal haemorrhagic disease (vitamin K deficiency) or swallowed maternal blood from the birth canal. The immediate post-delivery context in this case supports the maternal source described in the question.
+
+- **A. Correct.** Swallowed maternal blood from the birth canal is explicitly listed under causes in healthy neonates.
+- **B. Incorrect.** Pyloric stenosis causes projectile, non-bilious vomiting and is described as presenting in the following weeks of life.
+- **C. Incorrect.** Duodenal atresia is a congenital obstruction associated with bilious vomiting, not the maternal blood explanation.
+- **D. Incorrect.** Rotavirus is a cause of acute gastroenteritis and is not the neonatal blood source listed in the lecture.
+- **E. Incorrect.** Hirschsprung-associated enterocolitis is not the explanation given for blood-stained vomit immediately after delivery.
+
+**HIGH-YIELD POINTS:**
+
+- In a healthy neonate, the lecture lists swallowed maternal blood from the birth canal as a cause of blood in vomit.
+- The other neonatal blood-related cause listed is neonatal haemorrhagic disease due to vitamin K deficiency.
+- Blood-stained vomiting should be interpreted in the context of the infant's clinical condition and timing.
+
+**Source:** GIT sheet — Page 63.
+
+---

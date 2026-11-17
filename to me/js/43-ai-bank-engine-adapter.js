@@ -6,7 +6,7 @@
 var B=window.__SHB_BRIDGE;
 if(!B){console.error('AI bank adapter: shared question engine is unavailable.');return;}
 var BANKS={
- 'clinical-ai':{label:'AI Clinical Cases',total:1598,store:'shbace_clinical_case_answers_v1',source:'data/clinicalCaseBank.json'},
+ 'clinical-ai':{label:'AI Clinical Cases',total:1840,store:'shbace_clinical_case_answers_v1',source:'data/clinicalCaseBank.json'},
  'generated-ai':{label:'AI Generated',total:1881,store:'shbace_ai_generated_answers_v1'}
 };
 var registry={},errors={},pending={},currentBank='',currentSystem='',studyToolPromise=null,studyToolReady=false,studyToolLastAttempt=0;
@@ -191,7 +191,7 @@ function loadGenerated(){
 }
 var loaders={
  'clinical-ai':function(){return fetchJson(BANKS['clinical-ai'].source).then(function(data){
-  if(!data||data.schema!=='shbace-clinical-case-bank-v1'||!Array.isArray(data.systems)||data.systems.length!==10||Number(data.totalQuestions||1598)!==1598)throw new Error('AI Clinical Cases data validation failed.');
+  if(!data||data.schema!=='shbace-clinical-case-bank-v1'||!Array.isArray(data.systems)||data.systems.length!==10||Number(data.totalQuestions||1840)!==1840)throw new Error('AI Clinical Cases data validation failed.');
   return data;
  });},
  'generated-ai':loadGenerated

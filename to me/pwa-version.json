@@ -1,10 +1,12 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.10-to-me.45",
-  "displayVersion": "1.3.10.45 · Chrome (Phone + Computer)",
+  "version": "1.3.10-to-me.46",
+  "displayVersion": "1.3.10.46 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-17",
   "releaseNotes": [
+    "Adds 242 verified supplementary AI Clinical Cases questions across the ten medical systems, with four new topics. Preserves each source case, question, option, key, explanation and provenance; the duplicate Proteus question is not imported.",
+    "Gives every topic a matching medical illustration in the Nephrotic Syndrome glossy blue icon style. Existing topic artwork is retained; missing topics receive a unique subject-aware illustration.",
     "AI Clinical Cases now displays case text directly inside the first linked question card, without case numbers, titles or CONTINUED labels. Adds a newly authored, diagnosis-neutral clinical vignette for CVS Q1 (VSD); the remaining introductory CVS questions stay independent. Existing question stems, options, answer keys and explanations are preserved.",
     "Serves the verified offline package locally first for the page, scripts, styles and assets; successful network fallbacks are cached. Only the scheduled/manual updater checks and integrity downloads bypass the local copy. Shortens the Splash-to-app portal handoff from about 2.86 s to about 0.85 s.",
     "Prevents the startup splash from revealing Home before every deferred app script has completed; startup stays behind the splash until the complete renderer is ready, and the duplicate late Home redraw is removed.",

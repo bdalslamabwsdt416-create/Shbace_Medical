@@ -28,19 +28,30 @@ test('Previous Questions is restored with all 399 source-marked questions', () =
   assert.doesNotMatch(collections, /ped-collection-previous ped-collection-clinicalcase ped-collection-bank07/);
 });
 
-test('The 90-question Clinical Cases bank and 1,598-question AI Clinical Cases bank stay independent', () => {
-  assert.equal(bank07Data.totalQuestions, 1598);
+test('The 90-question Clinical Cases bank and 1,840-question AI Clinical Cases bank stay independent', () => {
+  assert.equal(bank07Data.totalQuestions, 1840);
   assert.equal(bank07Data.systems.length, 10);
   const bank07Questions = bank07Data.systems.flatMap(system => system.topics.flatMap(topic => topic.cases.flatMap(item => item.questions)));
-  assert.equal(bank07Questions.length, 1598);
-  assert.equal(new Set(bank07Questions.map(question => question.id)).size, 1598);
+  assert.equal(bank07Questions.length, 1840);
+  assert.equal(new Set(bank07Questions.map(question => question.id)).size, 1840);
+  const counts = Object.fromEntries(bank07Data.systems.map(system => [system.name, system.questionCount]));
+  assert.deepEqual(counts, {
+    'Central Nervous System':187,'Cardiovascular System':190,'Endocrine System':218,
+    'Gastrointestinal System':170,'Hematology':185,'Infectious Diseases':127,
+    'Neonatology':262,'Nephrology':240,'Pediatric Vaccination':67,'Respiratory System':194
+  });
+  const newTopicNames = bank07Data.systems.flatMap(system => system.topics.map(topic => topic.name));
+  assert.ok(newTopicNames.includes('Ventricular Septal Defect (VSD)'));
+  assert.ok(newTopicNames.includes('Haemoglobin Development and Fetal Haematopoiesis'));
+  assert.ok(newTopicNames.includes('Bone and Joint Infections (Septic Arthritis and Osteomyelitis)'));
+  assert.ok(newTopicNames.includes('Neonatal Gastrointestinal and Surgical Conditions'));
 
   assert.equal(clinicalCases90.length, 90);
   assert.ok(clinicalCases90.every(question => question.cc === true));
   assert.equal(new Set(clinicalCases90.map(question => question.id)).size, 90);
   assert.equal(clinicalCases90.filter(question => bank07Questions.some(item => item.id === question.id)).length, 0);
 
-  assert.ok(adapter.includes("'clinical-ai':{label:'AI Clinical Cases',total:1598"));
+  assert.ok(adapter.includes("'clinical-ai':{label:'AI Clinical Cases',total:1840"));
   assert.ok(adapter.includes("store:'shbace_clinical_case_answers_v1'"));
   assert.ok(adapter.includes("source:'data/clinicalCaseBank.json'"));
   assert.match(integration90, /CLINICAL CASES QUESTION BANK/);
@@ -50,7 +61,7 @@ test('The 90-question Clinical Cases bank and 1,598-question AI Clinical Cases b
 });
 
 test('AI Clinical Cases and AI Generated are registered as data providers for the shared question engine', () => {
-  assert.ok(adapter.includes("'clinical-ai':{label:'AI Clinical Cases',total:1598"));
+  assert.ok(adapter.includes("'clinical-ai':{label:'AI Clinical Cases',total:1840"));
   assert.ok(adapter.includes("'generated-ai':{label:'AI Generated',total:1881"));
   assert.ok(adapter.includes("B.registerExternalBank(key,BANKS[key].label,groups)"));
   assert.ok(collections.includes("chosen==='clinical-ai'||chosen==='generated-ai'"));
@@ -61,6 +72,10 @@ test('AI Clinical Cases and AI Generated are registered as data providers for th
   assert.ok(adapter.includes("total!==1881||all.length!==1881"));
   assert.ok(mainBank.includes("registerExternalBank:function(key,label,groups)"));
   assert.match(mainBank, /function cardHTML\(q,n,single\)/);
+  assert.match(mainBank, /function topicIconMarkup\(sp,n,id\)/);
+  assert.match(mainBank, /shb-gen-icon/);
+  assert.ok(mainBank.includes('topicIconHtml:topicIconMarkup'));
+  assert.ok(polish.includes('B.topicIconHtml(systemName, label'));
   assert.ok(index.includes('data-src="js/43-ai-bank-engine-adapter.js"'));
   assert.ok(!index.includes('data-src="js/33-clinical-case-bank.js"'));
   assert.ok(!index.includes('data-src="js/33-ai-generated-bank.js"'));
@@ -204,9 +219,9 @@ test('The adapter registers real AI bank records in the shared engine and migrat
   runInNewContext(adapter,context);
   const clinicalResult=await window.shbAiOpenBank('clinical-ai');
   const generatedResult=await window.shbAiOpenBank('generated-ai');
-  assert.equal(clinicalResult.questions,1598);
+  assert.equal(clinicalResult.questions,1840);
   assert.equal(generatedResult.questions,1881);
-  assert.equal(bridge.QB.length,3479);
+  assert.equal(bridge.QB.length,3721);
   assert.equal(bridge.BANK_KEYS.has('clinical-ai'),true);
   assert.equal(bridge.BANK_KEYS.has('generated-ai'),true);
   assert.equal(bridge.BANK_OPTS.some(x=>x[0]==='clinical-ai'),true);
@@ -214,7 +229,7 @@ test('The adapter registers real AI bank records in the shared engine and migrat
   assert.equal(bridge.SRT_Q.size,clinicalResult.groups.length+generatedResult.groups.length);
   assert.equal(bridge.inTopic().length,1881);
   await window.shbAiOpenBank('clinical-ai');
-  assert.equal(bridge.inTopic().length,1598);
+  assert.equal(bridge.inTopic().length,1840);
   const clinicalSaved=bridge.S.ans['ai07-'+clinicalAnswer.id];
   const generatedSaved=bridge.S.ans['ai08-'+generatedAnswer.id];
   assert.deepEqual(JSON.parse(JSON.stringify(clinicalSaved)),{sel:clinicalKey,ok:true,t:111});
@@ -245,7 +260,7 @@ test('The adapter registers real AI bank records in the shared engine and migrat
   context.appPage='saved';bridge.qs.spec='all';bridge.qs.topic=0;
   window.renderAppDemo();
   assert.equal(bridge.activeBank,'all');
-  assert.equal(bridge.inTopic().length,3479);
+  assert.equal(bridge.inTopic().length,3721);
   context.appPage='subjects';
   assert.equal(typeof docListeners['shb-scripts-ready'],'undefined', 'the AI-bank adapter must not register a duplicate startup Home redraw');
 });

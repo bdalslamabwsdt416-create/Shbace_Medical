@@ -1,3 +1,7 @@
+## Clinical Case 1 — A symptomatic infant with a congenital shunt
+
+A 6-week-old infant is brought with poor feeding, sweating during feeds and poor weight gain. Examination shows tachypnoea, tachycardia, a pansystolic murmur at the lower left sternal border and mild hepatomegaly. The infant has signs of pulmonary overcirculation and early heart failure.
+
 ### Q1. [Easy] What is the most likely diagnosis?
 
 A. Ventricular septal defect  
@@ -27,6 +31,8 @@ The echocardiogram confirms a defect in the interventricular septum. The clinica
 - Feeding difficulty, sweating, tachypnoea, hepatomegaly and poor growth suggest heart failure in an infant.
 
 **Source:** CVS sheet — Pages 8–10.
+
+# 0. Introductory / Unsectioned Questions
 
 ### Q2. [Easy] Which haemodynamic change is primarily responsible for the infant's pulmonary congestion?
 
@@ -4535,3 +4541,1639 @@ Pulmonary atresia is explicitly included in the list of additional lesions on pa
 ## Supplementary coverage note
 
 This addition directly tests pulmonary atresia from the additional lesion list on page 48. The previous 21 cases and Q1–Q142 remain unchanged.
+
+---
+
+# 19. Fetal Circulation and Innocent Murmurs
+
+## Clinical Case 23 — Murmurs, syndromic screening and the fetal circulation
+
+### Q144. [Medium] A 4-year-old girl with a known ventricular septal defect is examined by a trainee. A pansystolic murmur is easily audible at the lower left sternal edge with a palpable thrill. The murmur is still heard when the stethoscope rests lightly on the chest wall, but disappears as soon as the stethoscope is lifted off the chest. Which Levine grade best describes this murmur?
+
+A. Grade II  
+B. Grade III  
+C. Grade V  
+D. Grade VI  
+E. Grade IV  
+
+**Correct Answer:** C. Grade V
+
+**Initial Explanation:**
+
+A thrill places the murmur at grade IV or above. A murmur that is still heard with the stethoscope only lightly on the chest (but not when lifted off) is grade V. Grade VI is audible even with the stethoscope 1–2 cm off the chest.
+
+**Detailed Explanation:**
+
+- **A. Grade II — Incorrect.** Audible but soft, equal in intensity to the heart sounds, and never associated with a thrill.
+- **B. Grade III — Incorrect.** Easily audible and louder than S1 and S2, but there is no thrill.
+- **C. Grade V — Correct.** Easily audible, with a thrill, and still heard with the stethoscope only lightly on the chest.
+- **D. Grade VI — Incorrect.** Requires the murmur to remain audible when the stethoscope is held off the chest (1–2 cm).
+- **E. Grade IV — Incorrect.** Easily audible with a thrill, but the "light contact" criterion places it higher, at grade V.
+- **Clinical reasoning:** The thrill and the loudness make this murmur pathological. An innocent murmur is soft (grade 1–2/6), short and has no thrill, so this child cannot be reassured and needs echocardiographic assessment.
+
+**HIGH-YIELD POINTS:**
+
+- Grade I: barely audible; II: soft; III: loud, no thrill; IV: thrill; V: thrill + audible with light contact; VI: thrill + audible off the chest.
+- Any thrill excludes an innocent murmur.
+- Innocent murmurs are grade 1–2/6, systolic, short, with normal pulses, normal sounds and no symptoms.
+
+**Source:** Murmur — Levine grading (sheet p. 6) and innocent-murmur criteria (sheet p. 5).
+
+---
+
+### Q145. [Hard] A healthy, thriving 5-year-old is found at a school check to have a soft continuous murmur just below the right clavicle. The murmur is clearly heard when she sits upright but becomes inaudible when she lies flat. Pulses and pulse pressure are normal, there is no thrill, and the chest X-ray and ECG are normal. Which is the most likely diagnosis?
+
+A. Venous hum (innocent murmur)  
+B. Small patent ductus arteriosus  
+C. Small ventricular septal defect  
+D. Secundum atrial septal defect  
+E. Mild pulmonary stenosis  
+
+**Correct Answer:** A. Venous hum (innocent murmur)
+
+**Initial Explanation:**
+
+A venous hum is an innocent murmur of children aged about 3–8 years, heard in the infraclavicular region and arising from the jugular veins. It varies with position, and all special tests are normal.
+
+**Detailed Explanation:**
+
+- **A. Venous hum — Correct.** Infraclavicular site, age 3–8 years, jugular venous origin, variation with position, normal pulses and normal ECG/CXR.
+- **B. Small PDA — Incorrect.** The PDA murmur is also continuous, but it is a machinery murmur in the *left* infraclavicular area that does not disappear with posture. Echo is diagnostic, and even a small PDA carries a risk of infective endocarditis and is closed by catheter.
+- **C. Small VSD — Incorrect.** Produces a pansystolic murmur at the lower left sternal edge, not a continuous murmur.
+- **D. Secundum ASD — Incorrect.** Causes an ejection systolic flow murmur with fixed wide splitting of S2.
+- **E. Mild pulmonary stenosis — Incorrect.** An ejection systolic murmur at the upper left sternal edge, not continuous.
+- **Clinical reasoning:** A normal child, normal pulse pressure (no wide pulse pressure as in a large PDA), positional variation and normal investigations point to an innocent origin. The management is reassurance.
+
+**HIGH-YIELD POINTS:**
+
+- Still's murmur is the commonest innocent murmur (3–8 years, left lower sternal edge).
+- Venous hum: infraclavicular, jugular veins, varies with position.
+- Peripheral pulmonary flow murmur: newborns, pulmonary area.
+- Structural continuous murmurs (PDA) do not behave like positional innocent murmurs.
+
+**Source:** Murmur — types of innocent murmur (sheet p. 5); PDA clinical picture (sheet p. 14–15).
+
+---
+
+### Q148. [Medium] A student asks why, in fetal life, the coronary and carotid arteries receive blood with a higher oxygen content than the descending aorta. Which description best explains this?
+
+A. Umbilical venous blood passes through the liver and then through the expanded lungs, reaching the left heart fully saturated  
+B. Blood from the superior vena cava is directed across the foramen ovale into the left atrium and then supplies the coronary and carotid arteries  
+C. The descending aorta is supplied mainly by the left ventricle, so the lower body receives the best-oxygenated blood in fetal life  
+D. Oxygenated blood bypasses the liver through the ductus venosus, mixes in the IVC and right atrium, and crosses the foramen ovale to the left side to supply the heart and brain, while SVC blood passes through the right ventricle and ductus arteriosus to the descending aorta  
+E. The pulmonary veins return large volumes of well-oxygenated blood to the left atrium because the fetal lungs are fully expanded and perfused  
+
+**Correct Answer:** D
+
+**Initial Explanation:**
+
+Placental blood is routed by the ductus venosus to the IVC and right atrium, then mostly through the foramen ovale to the left atrium and left ventricle. The coronary and carotid arteries therefore receive relatively well-oxygenated blood, whereas SVC blood goes RV → pulmonary trunk → ductus arteriosus → descending aorta.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** The ductus venosus *bypasses* the liver, and the fetal lungs do little work (PVR is high), so blood does not pass through them.
+- **B. Incorrect.** SVC (deoxygenated) blood flows to the RA → RV → pulmonary trunk, not preferentially across the foramen ovale.
+- **C. Incorrect.** The descending aorta receives the ductal blood from the pulmonary trunk, which is poorly oxygenated.
+- **D. Correct.** Describes the streaming of oxygenated blood to the upper body and poorly oxygenated blood to the lower body.
+- **E. Incorrect.** Fetal lungs are not expanded; pulmonary venous return is small until the first breath.
+- **Clinical reasoning:** This pattern explains why ductal closure and the changes at birth matter: the shunts are essential before birth but must close afterwards.
+
+**HIGH-YIELD POINTS:**
+
+- Shunts: ductus venosus (bypasses liver), foramen ovale (RA → LA), ductus arteriosus (pulmonary trunk → aorta).
+- Antenatally right-sided pressure exceeds left-sided pressure.
+- Blood returns to the placenta via two umbilical arteries.
+- Prostaglandin keeps the duct patent; anti-prostaglandins promote closure.
+
+**Source:** Fetal circulation (sheet p. 3–4).
+
+---
+
+# 13. Cardiomyopathies
+
+## Clinical Case 24 — Murmurs, syndromic screening and the fetal circulation
+
+### Q146. [Hard] A term infant of a mother with poorly controlled diabetes is tachypnoeic on day 2 with a systolic murmur. Echocardiography shows marked thickening of the ventricular septum and walls with reduced ventricular compliance, and the outflow tract narrows during systole. Which statement correctly describes the condition and an important treatment caution?
+
+A. Dilated cardiomyopathy with thin walls; digitalis is the preferred inotrope  
+B. Restrictive cardiomyopathy; beta-blockers are contraindicated  
+C. Large VSD with pulmonary plethora; indomethacin is indicated  
+D. Tetralogy of Fallot; prostaglandin E should be started  
+E. Hypertrophic cardiomyopathy; digitalis is contraindicated if there is outflow obstruction  
+
+**Correct Answer:** E. Hypertrophic cardiomyopathy; digitalis is contraindicated if there is outflow obstruction
+
+**Initial Explanation:**
+
+Maternal diabetes (infant of a diabetic mother) is a recognised cause of hypertrophic cardiomyopathy, characterised by a thick wall with reduced compliance. Positive inotropes such as digitalis increase contractility and are contraindicated when there is obstruction.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Dilated cardiomyopathy has a dilated, thin-walled ventricle with reduced contractility — the opposite of the echo described.
+- **B. Incorrect.** Restrictive cardiomyopathy is very rare, with stiff small/normal ventricles; the question describes marked wall thickening, and beta-blockers are among the drugs used in hypertrophic disease.
+- **C. Incorrect.** A VSD would not explain a thickened septum with systolic outflow narrowing, and indomethacin is used for PDA in preterm infants.
+- **D. Incorrect.** Maternal diabetes is also linked with VSD and TOF, but TOF is a cyanotic lesion with pulmonary stenosis, not diffuse hypertrophy with reduced compliance; PGE is used for duct-dependent lesions.
+- **E. Correct.** HCM = thick wall + reduced compliance (diastolic dysfunction). Management: avoid severe exertion, beta-blockers; digitalis is contraindicated in obstructive lesions such as HOCM.
+- **Clinical reasoning:** The key clue is the maternal diabetes — it links the infant to the cardiomyopathy and the drug caution.
+
+**HIGH-YIELD POINTS:**
+
+- Maternal diabetes → HCM, VSD, TOF.
+- Obstructive CHD (e.g., aortic stenosis) and metabolic disease are also causes of HCM.
+- HCM complications: chest pain, arrhythmia, syncope, sudden death.
+- Digitalis is contraindicated in obstructive lesions (e.g., HOCM).
+
+**Source:** CHD aetiology — maternal disease (sheet p. 6); Cardiomyopathy table and treatment (sheet p. 34–35).
+
+---
+
+# 11. Complex Congenital Heart Disease
+
+## Clinical Case 25 — Murmurs, syndromic screening and the fetal circulation
+
+### Q147. [Medium] A cardiology team plans echocardiographic screening for newborns with different syndromic diagnoses. Which syndrome–lesion pairing is correct?
+
+A. Turner syndrome — atrioventricular septal defect  
+B. DiGeorge syndrome — aortic arch anomalies, tetralogy of Fallot and common arterial trunk  
+C. Williams syndrome — valvular pulmonary stenosis as the typical lesion  
+D. Down syndrome — supravalvular aortic stenosis  
+E. Noonan syndrome — coarctation of the aorta and bicuspid aortic valve  
+
+**Correct Answer:** B. DiGeorge syndrome — aortic arch anomalies, tetralogy of Fallot and common arterial trunk
+
+**Initial Explanation:**
+
+DiGeorge syndrome is associated with conotruncal and aortic arch anomalies: aortic arch anomalies, TOF and common arterial trunk (about 80%).
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Turner syndrome → bicuspid aortic valve and coarctation (~15%). AVSD is the Down syndrome lesion.
+- **B. Correct.** DiGeorge → aortic arch anomalies, TOF, common arterial trunk.
+- **C. Incorrect.** Williams → supravalvular aortic stenosis. Pulmonary stenosis is linked with Alagille and Noonan syndromes.
+- **D. Incorrect.** Down syndrome → AVSD (~30%), not supravalvular AS.
+- **E. Incorrect.** Noonan → hypertrophic cardiomyopathy, ASD and pulmonary valve stenosis; coarctation/bicuspid valve belong to Turner syndrome.
+
+**HIGH-YIELD POINTS:**
+
+- Down → AVSD; Edwards/Patau → VSD, ASD (complex); Turner → bicuspid AV, CoA.
+- Noonan → HCM, ASD, PS; Alagille → PS; Williams → supravalvular AS.
+- DiGeorge → arch anomalies, TOF, truncus; fetal alcohol → ASD, VSD, TOF.
+- Marfan → aortic dissection, mitral valve prolapse; Kartagener → dextrocardia.
+
+**Source:** Common syndromes and associated CHD (sheet p. 7).
+
+---
+
+# 23. Ventricular Septal Defect (VSD)
+
+## Clinical Case 26 — Large shunts and their late consequences
+
+### Q149. [Medium] A 3-month-old with a large VSD has tachypnoea, sweating on feeds and poor weight gain. Examination shows a soft pansystolic murmur, an ejection systolic murmur at the upper left sternal edge and a mid-diastolic rumble at the apex, with an enlarged tender liver. Which mechanism best explains the apical mid-diastolic murmur?
+
+A. Increased flow across the mitral valve due to the large left-to-right shunt  
+B. Established rheumatic mitral stenosis  
+C. Aortic regurgitation caused by the defect  
+D. Tricuspid stenosis from right ventricular hypertrophy  
+E. Carey–Coombs murmur of acute rheumatic carditis  
+
+**Correct Answer:** A. Increased flow across the mitral valve due to the large left-to-right shunt
+
+**Initial Explanation:**
+
+In a large VSD the increased pulmonary blood flow returns to the left atrium and crosses the mitral valve in larger volume, producing a relative (functional) mitral diastolic murmur. The increased flow across the pulmonary valve produces the ejection systolic murmur.
+
+**Detailed Explanation:**
+
+- **A. Correct.** Apical mid-diastolic murmur from increased flow across the mitral valve; the ESM reflects increased flow across the pulmonary valve (functional pulmonary stenosis).
+- **B. Incorrect.** Rheumatic MS needs years of fibrosis and is not expected in a 3-month-old.
+- **C. Incorrect.** Aortic regurgitation causes a diastolic murmur at the left sternal edge, not an apical rumble.
+- **D. Incorrect.** Nothing in the history suggests a tricuspid valve lesion.
+- **E. Incorrect.** Carey–Coombs murmur occurs in acute rheumatic carditis (5–15-year-olds), not in this infant.
+- **Clinical reasoning:** In a large VSD the pansystolic murmur may be soft because the defect is large; the extra murmurs signal a large shunt, and the signs of heart failure (tachypnoea, tender hepatomegaly, FTT) confirm it.
+
+**HIGH-YIELD POINTS:**
+
+- Large VSD: soft pansystolic murmur ± functional ESM at the pulmonary area ± apical mid-diastolic murmur.
+- Signs of HF: tachypnoea, tachycardia, tender hepatomegaly, under-weight.
+- Small VSD: loud pansystolic murmur at the lower left sternal edge with normal growth.
+
+**Source:** VSD — examination and investigation (sheet p. 8–9).
+
+---
+
+### Q150. [Hard] A 9-month-old with an unrepaired large VSD had sweating and tachypnoea at 4 months. Her mother is now pleased because she feeds well and has stopped sweating. On examination the pansystolic murmur is softer than before, the second heart sound is loud and palpable, and there is a right ventricular heave. Which interpretation is most appropriate?
+
+A. The defect is closing spontaneously and follow-up can be stopped  
+B. Heart failure has resolved because the shunt has reduced  
+C. Left ventricular failure is worsening and diuretics should be increased  
+D. Pulmonary hypertension is probably developing, and urgent echocardiography and early surgical correction are needed  
+E. Established Eisenmenger syndrome; transplantation is the only option  
+
+**Correct Answer:** D. Pulmonary hypertension is probably developing, and urgent echocardiography and early surgical correction are needed
+
+**Initial Explanation:**
+
+A loud S2 in a child with a large VSD is a bad sign: it indicates pulmonary hypertension. As pulmonary vascular resistance rises, the left-to-right shunt (and the symptoms of congestion) decreases, which can falsely reassure the family. Early correction prevents irreversible disease.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Spontaneous closure is expected in *small* VSDs (especially muscular), and the signs here (loud S2, RV heave) do not support closure.
+- **B. Incorrect.** Symptoms improved because the shunt is falling as PVR rises, not because the defect is better.
+- **C. Incorrect.** The new findings are right-sided (loud S2, RV heave), not left ventricular failure.
+- **D. Correct.** Loud S2 = pulmonary hypertension → early echo, then surgical or catheter closure (3–6 months in large VSD) to prevent pulmonary hypertension and Eisenmenger syndrome.
+- **E. Incorrect.** Eisenmenger syndrome (shunt reversal) usually appears in the 2nd–3rd decade, and she is not cyanosed.
+- **Clinical reasoning:** Improved symptoms plus softer murmur plus loud S2 = rising PVR, not recovery.
+
+**HIGH-YIELD POINTS:**
+
+- Loud S2 in VSD = pulmonary hypertension (bad sign).
+- Large VSD: early surgical or cath correction at 3–6 months.
+- Eisenmenger syndrome = irreversible shunt reversal from raised PVR; prevent by early correction.
+
+**Source:** VSD — examination, treatment (sheet p. 9); Eisenmenger syndrome (sheet p. 11).
+
+---
+
+# 3. Patent Ductus Arteriosus (PDA)
+
+## Clinical Case 27 — Large shunts and their late consequences
+
+### Q151. [Medium] A preterm infant of 28 weeks has a haemodynamically significant PDA and is treated in the first week with indomethacin and restriction of intravenous fluids. On day 7 she develops abdominal distension, bilious aspirates and blood in the stools. Which adverse effect of the therapy is most consistent?
+
+A. Prostaglandin-induced apnoea  
+B. Necrotising enterocolitis  
+C. Digoxin toxicity  
+D. Diuretic-induced hypokalaemia  
+E. Rupture of the ductus arteriosus  
+
+**Correct Answer:** B. Necrotising enterocolitis
+
+**Initial Explanation:**
+
+Anti-prostaglandin therapy (indomethacin or ibuprofen) closes the ductus but can cause necrotising enterocolitis, bleeding and renal failure. The picture of abdominal distension, bilious aspirates and bloody stools suggests NEC.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Apnoea, jitteriness, flushing and hypotension are adverse effects of prostaglandin E infusion — the *opposite* drug, used to keep the duct open.
+- **B. Correct.** NEC, bleeding and renal failure are the listed adverse effects of indomethacin/ibuprofen.
+- **C. Incorrect.** The infant is not on digoxin.
+- **D. Incorrect.** Hypokalaemia would not cause bloody stools and abdominal distension, and diuretics are not part of this regimen.
+- **E. Incorrect.** Not a recognised complication of this therapy.
+- **Clinical reasoning:** Distinguish the adverse effects of drugs that close the duct (NSAIDs) from drugs that open it (PGE).
+
+**HIGH-YIELD POINTS:**
+
+- Preterm PDA: anti-PG (indomethacin/ibuprofen) + IV fluid restriction in the first week.
+- Adverse effects: NEC, bleeding, renal failure.
+- PGE adverse effects: apnoea, jitteriness/seizures, flushing, vasodilation, hypotension.
+- PDA is not regarded as CHD in preterm infants; it is called persistent if the duct fails to close by 1 month after the expected date of delivery.
+
+**Source:** PDA — definition and treatment (sheet p. 14–15); Management of the cyanotic newborn (sheet p. 23).
+
+---
+
+# 18. Syncope and Pulmonary Hypertension
+
+## Clinical Case 28 — Large shunts and their late consequences
+
+### Q152. [Hard] A 23-year-old woman with an unrepaired large VSD from childhood has progressive dyspnoea, cyanosis, haemoptysis and finger clubbing. She has a palpable, loud second heart sound and a right ventricular heave. Which set of investigation results is most consistent with her diagnosis?
+
+A. Low haemoglobin; plethoric lung fields; LVH; left-to-right flow on Doppler  
+B. Normal haemoglobin; boot-shaped heart; RVH; pulmonary stenosis on echo  
+C. Polycythaemia; cardiomegaly with plethoric lungs; biventricular hypertrophy; left-to-right shunt  
+D. Polycythaemia; egg-on-side heart; normal ECG; parallel circulations  
+E. Polycythaemia; cardiomegaly with oligaemic lung fields; RVH with a tall peaked P wave; right-to-left shunt with high pulmonary pressure on Doppler  
+
+**Correct Answer:** E
+
+**Initial Explanation:**
+
+This is Eisenmenger syndrome: irreversible shunt reversal from raised pulmonary vascular resistance. Chronic hypoxia causes polycythaemia; the CXR shows cardiomegaly with oligaemic lung fields; the ECG shows RVH and P pulmonale; Doppler shows the shunt direction and pulmonary pressure.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Describes the pattern of an uncomplicated moderate L→R shunt, not a cyanosed adult; anaemia is not expected.
+- **B. Incorrect.** Describes tetralogy of Fallot.
+- **C. Incorrect.** This is the pattern of a large *uncomplicated* VSD in infancy (cardiomegaly, plethora, biventricular hypertrophy).
+- **D. Incorrect.** Describes TGA.
+- **E. Correct.** Polycythaemia (hypoxia), oligaemic fields, RVH + P pulmonale, shunt reversal on Doppler. Cardiac catheterisation measures pressures and the response to vasodilator therapy.
+- **Clinical reasoning:** Onset in the 2nd–3rd decade, with cyanosis, haemoptysis, clubbing and a loud S2, strongly suggests Eisenmenger. Treatment: pulmonary vasodilators (sildenafil, inhaled NO) and heart–lung transplantation in advanced cases; prevention by early surgery.
+
+**HIGH-YIELD POINTS:**
+
+- Eisenmenger can complicate large VSD, ASD or PDA.
+- Features: cyanosis, dyspnoea, chest pain, haemoptysis, clubbing, arrhythmias.
+- Investigations: CBC (polycythaemia), CXR (cardiomegaly + oligaemic lungs), ECG (RVH + P pulmonale), Doppler, catheterisation.
+- Prevention: early surgical treatment of large defects in infancy.
+
+**Source:** Eisenmenger syndrome (sheet p. 11).
+
+---
+
+### Q153. [Medium] A 7-month-old girl born at 27 weeks was ventilated for several weeks and remains oxygen-dependent. Echocardiography shows no structural lesion but an elevated mean pulmonary artery pressure above 25 mmHg at rest. Which category of pulmonary hypertension does this best represent?
+
+A. Pulmonary arterial hypertension due to a post-tricuspid shunt  
+B. Pulmonary venous hypertension due to left-sided heart disease  
+C. Pulmonary hypertension associated with chronic lung disease (bronchopulmonary dysplasia)  
+D. Persistent pulmonary hypertension of the newborn  
+E. Idiopathic pulmonary arterial hypertension  
+
+**Correct Answer:** C. Pulmonary hypertension associated with chronic lung disease (bronchopulmonary dysplasia)
+
+**Initial Explanation:**
+
+The sheet lists chronic lung disease or bronchopulmonary dysplasia in preterm infants under pulmonary hypertension with respiratory disease. Here a premature infant with long ventilation and oxygen dependence has no structural defect.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Post-tricuspid shunts (VSD, AVSD, PDA) require a structural lesion, which the echo excludes.
+- **B. Incorrect.** Left-sided heart disease, pulmonary vein stenosis or compression would show left-sided or venous abnormalities on echo.
+- **C. Correct.** Preterm infant with bronchopulmonary dysplasia and PH.
+- **D. Incorrect.** PPHN is a neonatal condition in the early newborn period, not a 7-month-old with chronic lung disease.
+- **E. Incorrect.** Idiopathic PAH is sporadic or familial and diagnosed only after excluding known causes — here a clear cause exists.
+- **Clinical reasoning:** Find the cause: lung disease in a former preterm infant is the identifiable trigger. Treatment includes vasodilators (inhaled nitric oxide, sildenafil, prostacyclin analogues) and treating the underlying disease; heart–lung transplantation in advanced cases.
+
+**HIGH-YIELD POINTS:**
+
+- PH definition in the sheet: mean PAP > 25 mmHg at rest (normal 8–20).
+- Groups: pulmonary arterial (idiopathic, post-tricuspid shunts, PPHN), pulmonary venous (left heart disease, pulmonary vein stenosis/compression), with respiratory disease (BPD, interstitial lung disease, OSA).
+- Treatment options: inhaled NO, magnesium sulphate, sildenafil, prostacyclin, iloprost, anticoagulants; transplantation in advanced cases.
+
+**Source:** Pulmonary hypertension — definition, causes, treatment (sheet p. 47).
+
+---
+
+# 21. Duct-Dependent Left-Heart Obstruction in the Sick Neonate
+
+## Clinical Case 29 — Pulses, pressures and outflow obstruction
+
+### Q154. [Hard] A 3-day-old term neonate who was feeding poorly collapses. He is pale, tachypnoeic and has an enlarged liver with severe metabolic acidosis. Oxygen saturation is 98% in the right hand but 83% in the foot. Femoral pulses are weak and arm blood pressure is higher than leg blood pressure. There is no significant murmur. Which diagnosis and immediate action are most appropriate?
+
+A. Transposition of the great arteries — start indomethacin to close the duct  
+B. Severe coarctation of the aorta with duct-dependent lower-body flow — ABC resuscitation and prostaglandin infusion  
+C. Tetralogy of Fallot — knee–chest position and propranolol  
+D. Large PDA — indomethacin and fluid restriction  
+E. Large VSD — diuretic and captopril  
+
+**Correct Answer:** B
+
+**Initial Explanation:**
+
+In severe coarctation with a PDA, lower-limb perfusion depends on the duct, so the lower body is bluer than the upper body (differential cyanosis). When the duct closes the neonate collapses with heart failure, weak or absent femoral pulses and severe acidosis. Treatment: ABC, early prostaglandin, urgent referral for surgery.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** TGA causes severe cyanosis everywhere with a loud single S2; indomethacin would close the duct needed for mixing.
+- **B. Correct.** Upper-limb BP > lower-limb BP, weak femoral pulses, shock, acidosis, duct dependence.
+- **C. Incorrect.** Tet spells occur later (3–6 months); knee–chest position and propranolol treat a spell.
+- **D. Incorrect.** A large PDA has bounding pulses and a wide pulse pressure, not weak femoral pulses; the duct must be kept open here.
+- **E. Incorrect.** A large VSD does not produce an upper–lower limb pressure gradient or shock on day 3.
+- **Clinical reasoning:** Oxygen saturation difference + pulse and BP discrepancy = coarctation with duct-dependent lower body.
+
+**HIGH-YIELD POINTS:**
+
+- Critical CoA: circulatory collapse when the duct closes, absent femoral pulses, severe metabolic acidosis, HF.
+- Differential cyanosis: pink upper body, bluish lower body (severe CoA + PDA).
+- Treatment: ABC, early prostaglandin, cardiac centre referral.
+- Normally leg BP > arm BP; in CoA the arm BP is higher — measure BP in all four limbs.
+
+**Source:** Coarctation of the aorta — haemodynamics, clinical picture, treatment (sheet p. 18, 20).
+
+---
+
+# 5. Coarctation of the Aorta (CoA)
+
+## Clinical Case 30 — Pulses, pressures and outflow obstruction
+
+### Q155. [Medium] A 14-year-old boy has recurrent headaches and epistaxis. Blood pressure is 150/95 mmHg in the right arm. Femoral pulses are delayed compared with the radial pulses. There is an ejection systolic murmur at the upper sternal edge and a continuous murmur between the scapulae. Which finding best explains the interscapular continuous murmur?
+
+A. An associated patent ductus arteriosus  
+B. Flow through a perimembranous VSD  
+C. Aortic regurgitation from a bicuspid valve  
+D. Venous hum from the jugular veins  
+E. Blood flowing through enlarged collateral vessels around the narrowed aorta  
+
+**Correct Answer:** E. Blood flowing through enlarged collateral vessels around the narrowed aorta
+
+**Initial Explanation:**
+
+Older children with milder coarctation are asymptomatic or have hypertension symptoms (headache, epistaxis, dizziness). Collateral vessels between the proximal and distal aorta cause radio-femoral delay and a continuous murmur heard at the back between the scapulae.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** A PDA gives a continuous murmur in the left infraclavicular area, not the back.
+- **B. Incorrect.** VSD gives a pansystolic murmur at the lower left sternal edge.
+- **C. Incorrect.** Aortic regurgitation causes a diastolic murmur; a bicuspid valve may coexist with CoA but does not explain a continuous murmur between the scapulae.
+- **D. Incorrect.** Venous hum is infraclavicular, innocent, and does not occur with hypertension and delayed femoral pulses.
+- **E. Correct.** Collaterals explain both the radio-femoral delay and the interscapular continuous murmur.
+- **Clinical reasoning:** Hypertension plus delayed femoral pulses should prompt BP measurement in all four limbs, a CXR (rib notching, usually after about 6 years; figure-of-3 sign), echo Doppler, and CT/MR angiography as needed.
+
+**HIGH-YIELD POINTS:**
+
+- Adult-type CoA: hypertension symptoms, radio-femoral delay, ESM at the upper sternal edge, collateral murmur at the back.
+- CXR: rib notching (>6 years), figure-of-3 sign; ECG: LVH.
+- Mild: medical control of hypertension; moderate: balloon dilatation ± stent; severe: surgical repair.
+- Complications: hypertension complications, IE, LV failure, cerebral aneurysm rupture, sudden death.
+
+**Source:** Coarctation of the aorta — adult type (sheet p. 18–20).
+
+---
+
+# 22. Additional Cyanotic and Pulmonary Outflow Lesions
+
+## Clinical Case 31 — Pulses, pressures and outflow obstruction
+
+### Q156. [Hard] Two neonates are admitted in the first week of life. Neonate 1 is cyanosed with hepatomegaly, a loud ejection systolic murmur at the upper left sternal edge radiating to the back, and RVH on ECG. Neonate 2 is in shock with heart failure, weak pulses, left ventricular hypertrophy on ECG and an ejection systolic murmur in the aortic area radiating to the neck. Which pairing of diagnoses is most appropriate?
+
+A. Neonate 1: critical pulmonary stenosis; Neonate 2: critical aortic stenosis  
+B. Neonate 1: critical aortic stenosis; Neonate 2: critical pulmonary stenosis  
+C. Neonate 1: transposition of the great arteries; Neonate 2: atrial septal defect  
+D. Neonate 1: ventricular septal defect; Neonate 2: patent ductus arteriosus  
+E. Neonate 1: tricuspid atresia; Neonate 2: hypoplastic left heart syndrome  
+
+**Correct Answer:** A
+
+**Initial Explanation:**
+
+Severe or critical PS presents early with cyanosis and right-sided heart failure (RV outflow obstruction, RVH). Critical AS in the newborn presents with heart failure and shock (LV outflow obstruction, LVH).
+
+**Detailed Explanation:**
+
+- **A. Correct.** PS: RVH, ESM at the upper left sternal edge radiating to the back, cyanosis + HF; AS: LVH, ESM radiating to the neck, HF and shock.
+- **B. Incorrect.** The sides are reversed.
+- **C. Incorrect.** TGA has a loud single S2 and usually no murmur; ASD is rarely symptomatic in the neonate.
+- **D. Incorrect.** Neither lesion produces cyanosis or shock with these ECG findings.
+- **E. Incorrect.** Tricuspid atresia shows left-axis deviation, not RVH; HLHS lacks a prominent ESM radiating to the neck (usually no murmur).
+- **Clinical reasoning:** The ventricle that is hypertrophied identifies the side of the obstruction.
+
+**HIGH-YIELD POINTS:**
+
+- PS → RVH, right-sided HF; AS → LVH, left-sided failure.
+- PS murmur radiates to the back, AS murmur radiates to the carotids/neck.
+- Newborn critical AS: HF and shock; severe/critical PS: cyanosis + HF early in life.
+- Treatment of symptomatic children: balloon dilatation/valvotomy; aortic valve replacement may be needed in newborns.
+
+**Source:** Aortic stenosis and pulmonary stenosis comparison table (sheet p. 20–21).
+
+---
+
+# 9. Tetralogy of Fallot (TOF)
+
+## Clinical Case 32 — The cyanotic infant
+
+### Q157. [Hard] An 11-month-old with unrepaired tetralogy of Fallot and a haemoglobin of 21 g/dL has had 3 days of vomiting with poor oral intake. He suddenly develops right-sided weakness. He is afebrile, with no meningism, and has had no cyanotic spells. CT shows a cerebral infarct. What is the most likely mechanism?
+
+A. Brain abscess from paradoxical embolism  
+B. Infarction secondary to a hypercyanotic spell with convulsions  
+C. Cerebral thrombosis due to polycythaemia  
+D. Embolism from an infective-endocarditis vegetation  
+E. Bacterial meningitis with vascular involvement  
+
+**Correct Answer:** C. Cerebral thrombosis due to polycythaemia
+
+**Initial Explanation:**
+
+Chronic hypoxia increases erythropoietin and RBC mass (polycythaemia), which predisposes to thrombosis, especially with dehydration. In this afebrile child with no spell, cerebral thrombosis is the best explanation.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Brain abscess follows paradoxical embolism (no pulmonary filtration) and presents with fever, headache and focal signs.
+- **B. Incorrect.** Infarction after hypercyanotic spells follows convulsions and hypoxia; none occurred.
+- **C. Correct.** Polycythaemia (Hb 21) + dehydration → brain thrombosis.
+- **D. Incorrect.** IE would give persistent fever and other peripheral signs.
+- **E. Incorrect.** Meningitis causes fever and meningism.
+- **Clinical reasoning:** Distinguish the three neurological complications of TOF by the setting: fever + focal signs → abscess; after spell/convulsions → infarction; high Hb/dehydration → thrombosis.
+
+**HIGH-YIELD POINTS:**
+
+- TOF complications: IE, cyanotic spells, HF (rare), FTT, polycythaemia, thromboembolism, brain abscess, brain infarction, brain thrombosis.
+- Polycythaemia results from hypoxia → increased erythropoietin.
+- Brain abscess risk comes from the loss of pulmonary filtration with right-to-left shunting.
+
+**Source:** Complications of TOF (sheet p. 27).
+
+---
+
+# 10. Transposition of the Great Arteries (TGA)
+
+## Clinical Case 33 — The cyanotic infant
+
+### Q158. [Medium] A term neonate, pink after an uneventful delivery, becomes progressively cyanosed by 36 hours of age. SpO2 is 70% and does not improve with oxygen. There is a loud single second sound, no murmur, and the chest X-ray shows an egg-on-side heart with plethoric lungs. Which event best explains the timing of the deterioration?
+
+A. A rise in pulmonary vascular resistance  
+B. Closure of the ductus venosus  
+C. A fall in pulmonary vascular resistance causing a massive left-to-right shunt  
+D. Closure of the ductus arteriosus, reducing mixing between the two parallel circulations  
+E. Onset of infundibular spasm  
+
+**Correct Answer:** D
+
+**Initial Explanation:**
+
+In TGA the pulmonary and systemic circulations run in parallel. Survival depends on mixing through a PFO/ASD, VSD or PDA. Functional closure of the duct in the first days of life reduces mixing and unmasks severe cyanosis.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** A rise in PVR is not the mechanism of TGA cyanosis.
+- **B. Incorrect.** The ductus venosus is part of the venous circuit and its closure does not cause cyanosis.
+- **C. Incorrect.** A falling PVR does not cause the deterioration in TGA.
+- **D. Correct.** Duct closure → loss of mixing → severe cyanosis (usually day 2).
+- **E. Incorrect.** Infundibular spasm belongs to TOF tet spells, which present later.
+- **Clinical reasoning:** Treat with prostaglandin to reopen the duct and a Rashkind balloon atrial septostomy to improve mixing, followed by early arterial switch surgery.
+
+**HIGH-YIELD POINTS:**
+
+- TGA = aorta from RV, pulmonary artery from LV; mixing is essential.
+- TGA is the commonest cyanotic CHD in neonates (TOF in older children).
+- Cyanosis, loud single S2, usually no murmur, egg-on-side heart, plethoric lungs.
+- PGE + Rashkind septostomy, then arterial switch operation.
+
+**Source:** Transposition of the great arteries (sheet p. 27–28); CHD notes (sheet p. 8).
+
+---
+
+# 11. Complex Congenital Heart Disease
+
+## Clinical Case 34 — The cyanotic infant
+
+### Q159. [Hard] A 2-week-old infant has mild-to-moderate central cyanosis, tachypnoea and hepatomegaly. The chest X-ray shows cardiomegaly with increased pulmonary vascular markings. Which diagnosis is most consistent with these findings?
+
+A. Tetralogy of Fallot  
+B. Tricuspid atresia  
+C. Pulmonary atresia  
+D. Ebstein anomaly  
+E. Total anomalous pulmonary venous return  
+
+**Correct Answer:** E. Total anomalous pulmonary venous return
+
+**Initial Explanation:**
+
+Cyanosis with plethoric lung fields suggests a lesion with increased pulmonary blood flow, such as TAPVR (or TGA). TOF, tricuspid atresia, pulmonary atresia and Ebstein anomaly are all causes of oligaemic lungs.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** TOF — oligaemic lungs, boot-shaped heart.
+- **B. Incorrect.** Tricuspid atresia — oligaemic lungs, left-axis deviation.
+- **C. Incorrect.** Pulmonary atresia — oligaemic lungs, duct-dependent, no murmur.
+- **D. Incorrect.** Ebstein anomaly — oligaemic lungs, box-shaped heart.
+- **E. Correct.** TAPVR: all pulmonary veins drain to the systemic venous side; cyanosis variable with HF signs and plethora; supracardiac type shows the snowman sign.
+- **Clinical reasoning:** Classify cyanotic lesions by lung vascularity first.
+
+**HIGH-YIELD POINTS:**
+
+- Oligaemic lungs: pulmonary atresia, tricuspid atresia, PS/pulmonary hypertension, TOF, Eisenmenger, Ebstein.
+- Plethoric lungs: VSD, PDA, ASD, AVSD, TAPVR, TGA.
+- TAPVR types: supracardiac 50% (into SVC), cardiac 25%, infracardiac 20%, mixed 5%; ASD is associated.
+
+**Source:** Summary — DD of oligaemic vs plethoric lungs (sheet p. 48); TAPVR (sheet p. 29–30).
+
+---
+
+# 4. Atrioventricular Septal Defect (AVSD)
+
+## Clinical Case 35 — Complex lesions and staged management
+
+### Q160. [Medium] A 6-week-old infant has mild cyanosis, tachypnoea, sweating with feeds and hepatomegaly. The chest X-ray shows plethoric lungs. Echocardiography shows a single arterial trunk arising from the heart and giving rise to both the aorta and the pulmonary arteries. Which management approach is most appropriate?
+
+A. Prostaglandin E and a Blalock–Taussig shunt  
+B. Treatment of heart failure and urgent surgical correction in infancy  
+C. Rashkind balloon atrial septostomy as definitive therapy  
+D. Supportive care alone as definitive management  
+E. Cardiac transplantation as first-line treatment  
+
+**Correct Answer:** B. Treatment of heart failure and urgent surgical correction in infancy
+
+**Initial Explanation:**
+
+This is common arterial trunk (truncus arteriosus). It presents with variable-onset cyanosis and features of increased pulmonary blood flow (heart failure, plethora). Urgent surgical correction in infancy is the treatment.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** A BT shunt increases pulmonary flow in lesions with *reduced* pulmonary flow; here flow is increased.
+- **B. Correct.** HF care + urgent surgical correction.
+- **C. Incorrect.** Rashkind septostomy improves mixing in TGA, not truncus.
+- **D. Incorrect.** Supportive therapy is the mainstay for single ventricle, not for truncus.
+- **E. Incorrect.** Transplantation is considered in HLHS, not routinely here.
+- **Clinical reasoning:** Truncus is a "plethoric cyanotic" lesion; treat failure then operate early.
+
+**HIGH-YIELD POINTS:**
+
+- Truncus arteriosus: single trunk → aorta and pulmonary artery; cyanosis variable; features of increased pulmonary blood flow.
+- DiGeorge syndrome is associated with common arterial trunk.
+- Complex CHD: presentation depends on whether cyanosis or HF predominates.
+
+**Source:** Complex CHD table (sheet p. 29); syndromes (sheet p. 7).
+
+---
+
+# 11. Complex Congenital Heart Disease
+
+## Clinical Case 36 — Complex lesions and staged management
+
+### Q161. [Hard] A neonate has early cyanosis with left-axis deviation on ECG. Echocardiography shows absence of the tricuspid valve, blood passing from the right atrium through an ASD to the left atrium and left ventricle, and a small non-functional right ventricle. Which management plan best fits?
+
+A. Prostaglandin E to maintain pulmonary flow, with balloon atrial septostomy if needed, followed by staged palliation (BT shunt or pulmonary artery banding, then Glenn and Fontan)  
+B. Arterial switch operation in the first week  
+C. Indomethacin and fluid restriction  
+D. Total correction with VSD closure at 6–12 months only  
+E. Digoxin and diuretics with routine follow-up  
+
+**Correct Answer:** A
+
+**Initial Explanation:**
+
+This is tricuspid atresia, the commonest of the complex lesions. Only the left ventricle functions. Management is medical (PGE, supportive, Rashkind) then surgical palliation: BT shunt, pulmonary artery banding, Glenn or Fontan.
+
+**Detailed Explanation:**
+
+- **A. Correct.** Matches the sheet's treatment plan.
+- **B. Incorrect.** Arterial switch is the definitive operation for TGA.
+- **C. Incorrect.** Indomethacin closes the duct and would worsen pulmonary flow.
+- **D. Incorrect.** Total correction at 6–12 months is the strategy for TOF.
+- **E. Incorrect.** Early-onset cyanosis requires urgent specialist management.
+- **Clinical reasoning:** Single-ventricle physiology needs staged palliation instead of biventricular repair.
+
+**HIGH-YIELD POINTS:**
+
+- Tricuspid atresia: RA → LA → LV; early cyanosis; left-axis deviation on ECG.
+- Medical: PGE + supportive + Rashkind; surgical: BT shunt, PA banding, Glenn, Fontan.
+- Oligaemic lung fields are expected (pulmonary blood flow reduced).
+
+**Source:** Complex CHD — tricuspid atresia (sheet p. 29).
+
+---
+
+# 22. Additional Cyanotic and Pulmonary Outflow Lesions
+
+## Clinical Case 37 — Complex lesions and staged management
+
+### Q162. [Medium] A 2-day-old neonate has central cyanosis (SpO2 78%) without respiratory distress or murmur. The hyperoxia test fails to improve oxygenation, and the chest X-ray shows oligaemic lungs. Echocardiography shows no communication between the right ventricle and the pulmonary artery and a VSD, with pulmonary blood flow supplied through the ductus arteriosus. What is the most appropriate treatment statement?
+
+A. Indomethacin to close the duct  
+B. Captopril and furosemide for heart failure  
+C. Prostaglandin E to keep the duct open because the lungs depend on it; later BT shunt or total correction  
+D. Balloon atrial septostomy as the only definitive treatment  
+E. Reassurance, as the lesion will improve when pulmonary vascular resistance falls  
+
+**Correct Answer:** C
+
+**Initial Explanation:**
+
+Pulmonary atresia (with or without VSD) is duct-dependent. Early cyanosis, no murmur ± HF, oligaemic lungs. PGE and supportive care are given first; surgery is palliative (BT shunt) or total correction.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Closing the duct would remove the only source of pulmonary blood flow.
+- **B. Incorrect.** There is no heart failure; this is a cyanotic neonate.
+- **C. Correct.** PGE + supportive care, then BT shunt or total correction.
+- **D. Incorrect.** Septostomy is used in TGA/tricuspid atresia and is not definitive here.
+- **E. Incorrect.** Falling PVR does not create pulmonary outflow where none exists.
+- **Clinical reasoning:** Failed hyperoxia test + oligaemic lungs + absent murmur → duct-dependent cyanotic lesion.
+
+**HIGH-YIELD POINTS:**
+
+- Pulmonary atresia: early cyanosis, no murmur, duct-dependent, blood passes RV → LV → aorta.
+- Duct-dependent lesions: TA/PA, Ebstein, TGA, HLHS, critical CoA/AS, interrupted aortic arch.
+- PGE adverse effects: apnoea, jitteriness, seizures, flushing, hypotension.
+
+**Source:** Complex CHD — pulmonary atresia (sheet p. 29); cyanotic newborn management (sheet p. 22–23); duct-dependent CHD (sheet p. 49).
+
+---
+
+### Q163. [Hard] A neonate born to a mother treated with lithium throughout pregnancy has cyanosis, a tricuspid regurgitation murmur and massive cardiomegaly with a box-shaped heart on chest X-ray. Right-to-left shunting occurs across a PFO. Later he has episodes of sudden rapid regular tachycardia. Which anatomical abnormality best explains the findings?
+
+A. An overriding aorta above a large VSD with pulmonary stenosis  
+B. Failure of all pulmonary veins to connect to the left atrium  
+C. Ventricular inversion with parallel circulations  
+D. Downward displacement of the tricuspid valve with a huge right atrium and small functional right ventricle  
+E. Absent tricuspid valve with only the left ventricle effective  
+
+**Correct Answer:** D
+
+**Initial Explanation:**
+
+Maternal lithium is associated with Ebstein anomaly: the tricuspid valve is displaced downwards, producing a huge RA and a small RV, TR, right-to-left shunt at atrial level (PFO) and arrhythmias such as SVT. The CXR shows a box-shaped heart.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Describes TOF (boot-shaped heart, oligaemic lungs).
+- **B. Incorrect.** TAPVR gives plethoric lungs and a snowman sign (supracardiac).
+- **C. Incorrect.** Ventricular inversion is a feature of L-TGA.
+- **D. Correct.** Ebstein anomaly.
+- **E. Incorrect.** Describes tricuspid atresia, with left-axis deviation.
+- **Clinical reasoning:** Drug exposure + CXR shape + arrhythmia identify the lesion.
+
+**HIGH-YIELD POINTS:**
+
+- Lithium → Ebstein anomaly.
+- Ebstein: variable-onset cyanosis, TR murmur, SVT, box-shaped heart, medical treatment with PGE, supportive and antiarrhythmic drugs; surgery rarely needed.
+- Ebstein is also listed as a cause of SVT and as a duct-dependent lesion in the sheet's summary.
+
+**Source:** CHD causes — maternal drugs (sheet p. 6); Complex CHD — Ebstein (sheet p. 29–30); SVT aetiology (sheet p. 45).
+
+---
+
+# 21. Duct-Dependent Left-Heart Obstruction in the Sick Neonate
+
+## Clinical Case 38 — Complex lesions and staged management
+
+### Q164. [Medium] A 3-day-old neonate collapses with acidosis, absent peripheral pulses and no murmur. Echocardiography shows hypoplastic left atrium, left ventricle and ascending aorta with mitral and aortic stenosis. Which approach best matches the sheet?
+
+A. ABC and prostaglandin infusion, followed by definitive surgery (Norwood operation) or cardiac transplantation  
+B. Balloon atrial septostomy followed by arterial switch operation  
+C. Indomethacin to close the duct  
+D. Digoxin and discharge with outpatient follow-up  
+E. Blalock–Taussig shunt alone, as in tetralogy of Fallot  
+
+**Correct Answer:** A
+
+**Initial Explanation:**
+
+HLHS is duct-dependent with severely reduced systemic output: collapse, acidosis, absent pulses, usually no murmur. Management: ABC + prostaglandin, then surgical palliation (Norwood) or cardiac transplantation.
+
+**Detailed Explanation:**
+
+- **A. Correct.**
+- **B. Incorrect.** Arterial switch is for TGA.
+- **C. Incorrect.** Closing the duct is fatal in HLHS.
+- **D. Incorrect.** The infant is critically ill.
+- **E. Incorrect.** A BT shunt adds pulmonary flow and does not restore systemic output.
+
+**HIGH-YIELD POINTS:**
+
+- HLHS: hypoplastic LA, LV, ascending aorta; mitral and aortic stenosis; duct-dependent.
+- Presents with differential cyanosis, decreased COP, absent pulsations, acidosis, death in the first month if untreated.
+- PGE + supportive; Norwood or transplantation.
+
+**Source:** Complex CHD — HLHS (sheet p. 30); summary (sheet p. 48).
+
+---
+
+# 12. Heart Failure in Children
+
+## Clinical Case 39 — Beyond the basic diagnosis of heart failure
+
+### Q165. [Medium] A 3-year-old with severe chronic iron-deficiency anaemia presents with tachycardia, tachypnoea, tender hepatomegaly and cardiomegaly. The pulses are bounding. Echocardiography shows a structurally normal, hyperdynamic heart. Which mechanism of heart failure applies?
+
+A. Obstruction to the systemic circulation  
+B. Large left-to-right shunt with high pulmonary blood flow  
+C. Chronic immune-mediated myocardial damage  
+D. Valve damage from rheumatic heart disease  
+E. High-output failure caused by a hyperdynamic circulation  
+
+**Correct Answer:** E. High-output failure caused by a hyperdynamic circulation
+
+**Initial Explanation:**
+
+Besides pump failure, the sheet lists high cardiac-output failure (hyperdynamic circulation) from anaemia, an arteriovenous fistula or thyrotoxicosis. A structurally normal heart with bounding pulses and severe anaemia fits.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Obstructed systemic circulation (e.g., critical AS, CoA) is a neonatal cause and the heart is structurally abnormal.
+- **B. Incorrect.** There is no shunt on echo.
+- **C. Incorrect.** Chronic immune-mediated damage describes late myocarditis → dilated cardiomyopathy, with a dilated poorly contracting ventricle.
+- **D. Incorrect.** RHD would show valve lesions and a history of rheumatic fever.
+- **E. Correct.** Anaemia → high output state → failure with the same signs of HF (3T + 1C).
+- **Clinical reasoning:** Treat the cause (anaemia) as well as the failure.
+
+**HIGH-YIELD POINTS:**
+
+- HF signs in infancy: tachycardia, tachypnoea, tender enlarged liver, cardiomegaly (3T 1C).
+- Causes by group: obstruction (neonates), large L→R shunt (infants), acquired disease (older children).
+- High-output HF: anaemia, AV fistula, thyrotoxicosis.
+
+**Source:** Heart failure — causes (sheet p. 31–32).
+
+---
+
+### Q166. [Hard] An infant with a large VSD awaiting surgery is receiving furosemide. She becomes weak and lethargic. Serum potassium is 2.9 mmol/L, sodium is low and the bicarbonate is high. Which management statement is most appropriate?
+
+A. Add hydrochlorothiazide because it conserves potassium  
+B. Increase the furosemide dose because the alkalosis will correct itself  
+C. Add spironolactone, an aldosterone antagonist acting on the collecting duct, and monitor for hyperkalaemia  
+D. Add digoxin to correct the hypokalaemia  
+E. Stop all diuretics permanently  
+
+**Correct Answer:** C
+
+**Initial Explanation:**
+
+Loop diuretics (furosemide) cause hypokalaemia, hyponatraemia, hypovolaemia and metabolic alkalosis. Spironolactone is a potassium-sparing diuretic acting on the collecting duct whose main adverse effect is hyperkalaemia (and gynaecomastia).
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Thiazides (distal convoluted tubule) also cause hypokalaemia and metabolic alkalosis.
+- **B. Incorrect.** More furosemide would worsen the hypokalaemia and alkalosis.
+- **C. Correct.** Potassium-sparing action; watch for hyperkalaemia.
+- **D. Incorrect.** Digoxin does not correct potassium, and hypokalaemia increases the risk of digitalis toxicity.
+- **E. Incorrect.** The infant still has a large shunt and needs decongestive therapy until surgery.
+
+**HIGH-YIELD POINTS:**
+
+- Furosemide: hypoK, hypoNa, hypovolaemia, metabolic alkalosis.
+- Hydrochlorothiazide: hypoK, metabolic alkalosis.
+- Spironolactone: hyperkalaemia, gynaecomastia.
+- Hypokalaemia predisposes to digitalis toxicity.
+
+**Source:** Heart failure — preload-reducing drugs (sheet p. 33–34).
+
+---
+
+# 13. Cardiomyopathies
+
+## Clinical Case 40 — Beyond the basic diagnosis of heart failure
+
+### Q167. [Medium] A 9-year-old with dilated cardiomyopathy has been on oral hydralazine for several months. She develops a facial rash, joint pains and a positive antinuclear antibody test. There has been no sore throat, the echocardiogram is unchanged and blood cultures are negative. What is the most likely explanation?
+
+A. Recurrent rheumatic fever  
+B. Drug-induced systemic lupus erythematosus  
+C. Infective endocarditis  
+D. Digitalis toxicity  
+E. Captopril-induced neutropenia  
+
+**Correct Answer:** B. Drug-induced systemic lupus erythematosus
+
+**Initial Explanation:**
+
+Hydralazine is a direct vasodilator used as an afterload-reducing drug. Its listed adverse effects include tachycardia, nausea and vomiting, and drug-induced SLE.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** No preceding streptococcal infection and no major criteria.
+- **B. Correct.** Rash + arthralgia + positive ANA on hydralazine.
+- **C. Incorrect.** Negative cultures and unchanged echo.
+- **D. Incorrect.** Digitalis toxicity causes GI, CNS and arrhythmic features.
+- **E. Incorrect.** Neutropenia would not cause a lupus-like syndrome, and she is not on captopril.
+
+**HIGH-YIELD POINTS:**
+
+- Hydralazine: tachycardia, nausea/vomiting, drug-induced SLE.
+- Captopril/enalapril: cough, rash, neutropenia, decreased GFR.
+- Preload reducers: diuretics; afterload reducers: vasodilators or ACE inhibitors; contractility: digitalis.
+
+**Source:** Heart failure — afterload-reducing drugs (sheet p. 33).
+
+---
+
+# 17. Cardiac Arrhythmias — SVT and Conduction Disorders
+
+## Clinical Case 41 — Beyond the basic diagnosis of heart failure
+
+### Q168. [Hard] A 3-week-old preterm infant with renal impairment is treated with digoxin and furosemide for heart failure. She develops vomiting, poor feeding and a new irregular rhythm. Serum potassium is 2.7 mmol/L and the digoxin level is high. What is the most appropriate management?
+
+A. Increase the digoxin dose to control the rhythm  
+B. Give calcium to stabilise the rhythm  
+C. Give amiodarone alone and continue digoxin  
+D. Stop digoxin, correct the hypokalaemia, treat the arrhythmia (phenytoin or lidocaine) and consider digoxin-specific antibody fragments if severe  
+E. Continue digoxin but stop furosemide  
+
+**Correct Answer:** D
+
+**Initial Explanation:**
+
+Digitalis toxicity is more likely with hypokalaemia, hypercalcaemia, impaired renal function, preterm age and rheumatic or viral myocarditis. Treatment: stop digitalis, correct electrolytes, treat arrhythmias (phenytoin, lidocaine), and use digoxin antibody fragments (Digibind) when indicated.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** More digoxin worsens toxicity.
+- **B. Incorrect.** Hypercalcaemia increases the risk of toxicity; calcium is harmful.
+- **C. Incorrect.** Continuing the offending drug is wrong, and amiodarone is not the sheet's treatment of choice here.
+- **D. Correct.** Stop, correct K, treat arrhythmia, antibody fragments.
+- **E. Incorrect.** Digoxin must be stopped, and the hypokalaemia needs correction.
+- **Clinical reasoning:** Recognise the risk factors (hypoK, renal impairment, preterm) before prescribing.
+
+**HIGH-YIELD POINTS:**
+
+- Toxicity: GI (anorexia, nausea, vomiting, diarrhoea), CVS (arrhythmias), CNS (headache, visual disturbance with coloured vision), allergy, gynaecomastia.
+- Risk factors: hypoK, hyperCa, renal impairment, rheumatic/viral myocarditis, preterm infant.
+- Digitalis is contraindicated in obstructive lesions such as HOCM.
+
+**Source:** Heart failure — digitalis (sheet p. 34).
+
+---
+
+# 13. Cardiomyopathies
+
+## Clinical Case 42 — Myocardial disease with a specific trigger
+
+### Q169. [Medium] A 12-year-old boy with Duchenne muscular dystrophy develops fatigue and breathlessness. He is tachycardic with cardiomegaly. Echocardiography shows a dilated thin-walled left ventricle with a reduced ejection fraction. Which diagnosis and management best fit the sheet?
+
+A. Dilated cardiomyopathy; treat heart failure, treat arrhythmias and consider cardiac transplantation if refractory  
+B. Hypertrophic cardiomyopathy; digoxin and vigorous exercise  
+C. Restrictive cardiomyopathy; avoid all heart failure therapy  
+D. Acute rheumatic carditis; start salicylates  
+E. Infective endocarditis; start IV antibiotics for 6 weeks  
+
+**Correct Answer:** A
+
+**Initial Explanation:**
+
+DMD is a listed cause of dilated cardiomyopathy (the commonest type). Echo shows a dilated ventricle with a thin wall and reduced ejection fraction. Treatment: heart-failure therapy, antiarrhythmics and transplantation in refractory cases.
+
+**Detailed Explanation:**
+
+- **A. Correct.**
+- **B. Incorrect.** HCM has a thick wall; severe exercise should be avoided.
+- **C. Incorrect.** Restrictive cardiomyopathy is very rare and has reduced compliance with small/normal ventricular size.
+- **D. Incorrect.** No sore throat or Jones criteria.
+- **E. Incorrect.** No fever or peripheral signs.
+
+**HIGH-YIELD POINTS:**
+
+- DCM causes: idiopathic, post-viral, familial, metabolic, systemic, nutritional, DMD.
+- Echo: dilated LV, decreased ejection fraction; treat HF, arrhythmias; transplantation.
+
+**Source:** Cardiomyopathy table (sheet p. 35).
+
+---
+
+# 14. Myocarditis
+
+## Clinical Case 43 — Myocardial disease with a specific trigger
+
+### Q170. [Medium] A 5-year-old child was stung by a scorpion 12 hours ago. He now has tachycardia (170/min), cold extremities, a gallop rhythm, tender hepatomegaly and pulmonary oedema. The chest X-ray shows cardiomegaly, the ECG shows arrhythmia, and CK and LDH are raised. Which diagnosis is most likely?
+
+A. Acute rheumatic carditis  
+B. Infective endocarditis  
+C. Hypertrophic cardiomyopathy  
+D. Kawasaki disease with coronary aneurysm  
+E. Toxin-induced myocarditis  
+
+**Correct Answer:** E. Toxin-induced myocarditis
+
+**Initial Explanation:**
+
+Scorpion venom is a listed toxin cause of myocarditis. Myocardial inflammation and necrosis lead to impaired contractility, heart failure, arrhythmia and cardiogenic shock; CK and LDH are elevated.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** No sore throat, Jones criteria or latent period.
+- **B. Incorrect.** No fever, structural heart disease or peripheral stigmata.
+- **C. Incorrect.** Acute pump failure after envenomation is not HCM.
+- **D. Incorrect.** Kawasaki disease is a collagen vascular cause of myocarditis but needs its own clinical picture.
+- **E. Correct.**
+- **Clinical reasoning:** Exposure history identifies the cause; treatment is supportive/ICU care, HF therapy and treatment of arrhythmia.
+
+**HIGH-YIELD POINTS:**
+
+- Myocarditis causes: viral (Coxsackie A/B, adenovirus, EBV, measles, varicella, HIV), bacterial (diphtheria, TB), fungal, parasitic, toxins (scorpion venom), collagen vascular (SLE, KD, JIA), drugs, nutritional and endocrine causes.
+- Investigations: CXR, echo, CBC/ESR, CK/LDH, ECG, viral studies.
+- Treatment: supportive + ICU, HF and arrhythmia management, transplantation in refractory cases.
+
+**Source:** Myocarditis (sheet p. 36–37).
+
+---
+
+# 15. Acute Rheumatic Fever (ARF)
+
+## Clinical Case 44 — Detailed manifestations and management
+
+### Q171. [Hard] An 11-year-old girl has 3 months of clumsiness, dropping objects and emotional lability. She has involuntary jerky movements of the face and limbs that worsen with stress and disappear in sleep, with mild hypotonia. There is no fever, joint pain, rash or murmur. ESR, CRP and ASO are normal and the echocardiogram is normal. Which statement is most accurate?
+
+A. ARF cannot be diagnosed because two major criteria are required  
+B. Sydenham chorea can be the only manifestation of ARF, so normal inflammatory markers and ASO do not exclude it  
+C. Normal ESR, CRP and ASO exclude ARF  
+D. The chorea indicates permanent basal-ganglia damage  
+E. Chorea always appears within 2 weeks of the sore throat  
+
+**Correct Answer:** B
+
+**Initial Explanation:**
+
+Chorea is a late manifestation (months after the infection), may be the only presentation, involves the basal ganglia and resolves spontaneously without residuals. It is one of the exceptions to the usual Jones-criteria requirements.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Chorea is an exception to the two-major rule.
+- **B. Correct.**
+- **C. Incorrect.** By the time chorea appears the acute-phase markers may have normalised.
+- **D. Incorrect.** Chorea resolves spontaneously without residuals.
+- **E. Incorrect.** The latent period is 2–3 weeks generally, but several months for chorea.
+
+**HIGH-YIELD POINTS:**
+
+- Chorea: late onset (months), basal ganglia, hypotonia, emotional lability, increased by stress and decreased in sleep.
+- Treatment: psychological, educational and social support, or phenobarbitone/haloperidol.
+- Exceptions to the criteria: chorea, late-onset carditis, recurrence in documented RHD.
+
+**Source:** Rheumatic fever — Sydenham chorea, Jones interpretation (sheet p. 39–41).
+
+---
+
+### Q172. [Hard] A 12-year-old develops migratory painful swelling of the knees and ankles 2 weeks after a sore throat. She also reports wrist aches. Temperature is 38.9°C, ESR is 90 mm/h with raised CRP and white cell count, the ECG shows a prolonged PR interval, and the ASO titre is raised. There is no murmur and the echocardiogram is normal. Which statement about the Jones criteria is correct?
+
+A. Criteria are not met because two major criteria are always required  
+B. Criteria are met because fever, arthralgia, ESR and CRP each count separately as minor criteria  
+C. Criteria are met: one major (polyarthritis) plus two or more minor criteria (fever, prolonged PR, raised markers counted as one) with evidence of streptococcal infection; arthralgia is not counted  
+D. Criteria are not met because ASO alone cannot prove recent infection  
+E. Criteria are met only if carditis is also present  
+
+**Correct Answer:** C
+
+**Initial Explanation:**
+
+Diagnosis requires two major criteria, or one major plus two minor, plus evidence of recent streptococcal infection. Leukocytosis, ESR and CRP together count as one minor criterion, and arthralgia is not counted when arthritis is present.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** One major + two minor is an accepted pathway.
+- **B. Incorrect.** Inflammatory markers count once, and arthralgia is excluded because she has arthritis.
+- **C. Correct.** Major: polyarthritis. Minor: fever ≥ 38.5°C, prolonged PR, raised ESR/CRP/WBC (one). Evidence: raised ASO.
+- **D. Incorrect.** A raised ASO titre is accepted evidence of recent streptococcal infection (others: throat culture, anti-DNase B, anti-streptokinase).
+- **E. Incorrect.** Carditis is not required.
+
+**HIGH-YIELD POINTS:**
+
+- Major: polyarthritis, carditis, chorea, erythema marginatum, subcutaneous nodules.
+- Minor: fever ≥ 38.5, arthralgia, prolonged PR, raised WBC/CRP/ESR.
+- Two majors is a stronger diagnosis than one major + two minor.
+
+**Source:** Rheumatic fever — Jones criteria and interpretation (sheet p. 38–39).
+
+---
+
+### Q173. [Medium] A 10-year-old with ARF develops non-itchy pink ring-shaped macules with pale centres over the trunk and proximal thighs. The lesions appear and fade within hours and look more obvious after a hot bath. Which manifestation is this?
+
+A. Subcutaneous nodules  
+B. Janeway lesions  
+C. Osler nodes  
+D. Erythema marginatum  
+E. Allergic urticaria  
+
+**Correct Answer:** D. Erythema marginatum
+
+**Initial Explanation:**
+
+Erythema marginatum consists of large erythematous macules with a pale centre and a maple-leaf-like outline, non-pruritic, on the trunk and proximal limbs, recurrent and evanescent, and accentuated by heat.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Subcutaneous nodules are hard, painless nodules over extensor surfaces.
+- **B. Incorrect.** Janeway lesions are painless lesions of infective endocarditis.
+- **C. Incorrect.** Osler nodes are painful nodules of infective endocarditis.
+- **D. Correct.**
+- **E. Incorrect.** Urticaria is itchy.
+
+**HIGH-YIELD POINTS:**
+
+- Erythema marginatum: <5%, early, trunk/proximal limbs, evanescent, increased with heat.
+- Subcutaneous nodules: <1%.
+
+**Source:** Rheumatic fever — erythema marginatum (sheet p. 40).
+
+---
+
+### Q174. [Medium] A 13-year-old with acute rheumatic fever has cardiomegaly, tachycardia and signs of heart failure. She also has firm, painless, round nodules over the extensor surfaces of both elbows and knees. Which statement is correct?
+
+A. The nodules are hard and non-tender and are usually associated with severe carditis  
+B. The nodules are tender and indicate infective endocarditis  
+C. The nodules are the commonest major criterion  
+D. The nodules respond dramatically to salicylates  
+E. The nodules are usually found over the flexor surface of the wrist  
+
+**Correct Answer:** A
+
+**Initial Explanation:**
+
+Subcutaneous nodules are hard, non-tender, round, located over bony prominences on extensor surfaces, and usually associated with severe carditis. They are uncommon (<1% in the sheet).
+
+**Detailed Explanation:**
+
+- **A. Correct.**
+- **B. Incorrect.** Painful nodules in IE are Osler nodes, found on the fingers or toes.
+- **C. Incorrect.** Polyarthritis is the commonest manifestation.
+- **D. Incorrect.** The dramatic salicylate response is seen with polyarthritis.
+- **E. Incorrect.** They occur over extensor surfaces.
+
+**HIGH-YIELD POINTS:**
+
+- Nodules: elbows, knees, extensor, hard, non-tender, round.
+- Nodules and severe carditis often coexist.
+
+**Source:** Rheumatic fever — subcutaneous nodules (sheet p. 40).
+
+---
+
+### Q175. [Hard] A 14-year-old girl had migratory polyarthritis at age 8 which resolved completely without deformity. She now has exertional dyspnoea and a mid-diastolic apical murmur of mitral stenosis. A student asks why the same disease left the joints normal but scarred the valve. Which explanation is correct?
+
+A. Joint lesions were destructive and healed with deformity, but valves healed normally  
+B. Arthritis is caused by direct bacterial invasion that antibiotics eradicated, while carditis is autoimmune  
+C. Chronic streptococcal infection remained in the valve  
+D. The arthritis was a separate disease unrelated to the carditis  
+E. Joint, pericardial and basal-ganglia lesions are exudative and heal without fibrosis, whereas endomyocardial lesions are proliferative (Aschoff nodules) and heal with fibrosis  
+
+**Correct Answer:** E
+
+**Initial Explanation:**
+
+Rheumatic fever "licks the joints and bites the heart." Exudative lesions (joints, pericardium, basal ganglia) heal without fibrosis; proliferative lesions (Aschoff nodules in endo-myocardium and skin) heal with fibrosis, which causes chronic valve disease such as mitral stenosis.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Rheumatic arthritis is non-destructive.
+- **B. Incorrect.** ARF is an autoimmune reaction (molecular mimicry), not direct invasion.
+- **C. Incorrect.** The valve damage is immune-mediated.
+- **D. Incorrect.** Both are manifestations of ARF.
+- **E. Correct.**
+
+**HIGH-YIELD POINTS:**
+
+- ARF follows group A β-haemolytic streptococcal pharyngitis after 2–3 weeks.
+- Mechanism: molecular mimicry/cross-reactivity.
+- Chronic stage: fibrosis → mitral stenosis.
+
+**Source:** Rheumatic fever — pathogenesis and pathology (sheet p. 38, 40).
+
+---
+
+### Q176. [Medium] A 9-year-old with ARF has chest pain worse on inspiration, a pericardial friction rub, muffled heart sounds, tachycardia out of proportion to fever, tender hepatomegaly and a new apical pansystolic murmur radiating to the axilla. Which statement is correct?
+
+A. Isolated pericarditis; the murmur is unrelated  
+B. Isolated myocarditis; the apical murmur is functional  
+C. Pancarditis; the murmur reflects endocarditis, with mitral involvement more common than aortic in the acute stage  
+D. Infective endocarditis; start IV antibiotics for 6 weeks  
+E. Pericarditis and myocarditis only, because endocarditis never occurs in children  
+
+**Correct Answer:** C
+
+**Initial Explanation:**
+
+Pancarditis is common in children: pericarditis (pain, rub), myocarditis (muffled sounds, tachycardia, HF) and endocarditis (left-sided, mitral more than aortic, with a harsh pansystolic apical murmur from regurgitation).
+
+**Detailed Explanation:**
+
+- **A, B. Incorrect.** Incomplete; findings span all three layers.
+- **C. Correct.**
+- **D. Incorrect.** IE requires fever, positive cultures and a pre-existing valve lesion; the criteria here fit ARF.
+- **E. Incorrect.** Endocarditis is a key component of rheumatic carditis.
+
+**HIGH-YIELD POINTS:**
+
+- Carditis (50–60%) is the most serious manifestation.
+- Acute mitral regurgitation: harsh pansystolic murmur propagating to the axilla.
+- Pericardial effusion and HF can complicate carditis.
+
+**Source:** Rheumatic fever — carditis (sheet p. 39–40).
+
+---
+
+### Q177. [Hard] Ten days after the onset of ARF, a child has a new apical pansystolic murmur and a mid-diastolic apical murmur. Echocardiography shows mitral regurgitation. There is no previous history of rheumatic fever. Which statement about the mid-diastolic murmur is correct?
+
+A. It indicates established fibrotic mitral stenosis requiring balloon dilatation  
+B. It is a Carey–Coombs murmur from oedema of the mitral cusps in the acute stage; fibrotic mitral stenosis develops later  
+C. It indicates a secundum ASD  
+D. It indicates aortic regurgitation  
+E. It is innocent  
+
+**Correct Answer:** B
+
+**Initial Explanation:**
+
+In acute carditis the mid-diastolic murmur (Carey–Coombs) is caused by oedema of the cusps. Chronic mitral stenosis results from fibrosis and takes years.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Fibrosis needs time; 10 days is too early.
+- **B. Correct.**
+- **C. Incorrect.** ASD gives fixed splitting of S2 and a pulmonary-area flow murmur.
+- **D. Incorrect.** AR is a left-sternal-edge diastolic murmur.
+- **E. Incorrect.** Diastolic murmurs are never innocent.
+
+**HIGH-YIELD POINTS:**
+
+- Acute stage: MR (damage of cusps) and Carey–Coombs murmur (oedema).
+- Chronic stage: mitral stenosis from fibrosis.
+- Innocent murmurs are systolic only.
+
+**Source:** Rheumatic fever — carditis (sheet p. 40); innocent murmur criteria (sheet p. 5).
+
+---
+
+### Q178. [Medium] A 10-year-old with ARF has migratory arthritis and mild carditis, with no cardiomegaly or heart failure. Which is the most appropriate specific management?
+
+A. Salicylates, with penicillin to eradicate group A streptococci, and rest only if severe  
+B. Prednisolone for all patients  
+C. Haloperidol  
+D. Digoxin and diuretics routinely  
+E. IV ceftriaxone for 6 weeks  
+
+**Correct Answer:** A
+
+**Initial Explanation:**
+
+Arthritis or mild carditis is treated with salicylates; penicillin eradicates GAS; rest is for severe carditis or arthritis.
+
+**Detailed Explanation:**
+
+- **A. Correct.**
+- **B. Incorrect.** Steroids are for severe carditis with cardiomegaly.
+- **C. Incorrect.** Haloperidol is an option for chorea.
+- **D. Incorrect.** Only if heart failure is present.
+- **E. Incorrect.** That is the IE regimen.
+
+**HIGH-YIELD POINTS:**
+
+- Salicylates → dramatic response in arthritis.
+- Steroids → severe carditis with cardiomegaly.
+- Serial CRP monitors disease activity.
+
+**Source:** Rheumatic fever — treatment (sheet p. 41).
+
+---
+
+### Q179. [Hard] A 12-year-old with ARF has pancarditis, marked cardiomegaly, tachypnoea and hepatomegaly. Which plan best matches the sheet?
+
+A. Salicylates alone  
+B. NSAID and bed rest only  
+C. IV antibiotics for 6 weeks  
+D. Prednisolone, treatment of heart failure with fluid restriction, penicillin to eradicate streptococci and rest  
+E. Immediate valve surgery  
+
+**Correct Answer:** D
+
+**Initial Explanation:**
+
+Severe carditis with cardiomegaly is treated with steroids (prednisolone). Heart failure is treated and fluids restricted; penicillin eradicates GAS; rest is advised in severe carditis.
+
+**Detailed Explanation:**
+
+- **A, B. Incorrect.** Insufficient for severe carditis with HF.
+- **C. Incorrect.** That is IE treatment.
+- **D. Correct.**
+- **E. Incorrect.** Surgery is not the acute treatment.
+
+**HIGH-YIELD POINTS:**
+
+- Early complications: HF, arrhythmias; late: RHD, recurrence, IE.
+- Monitor disease activity with serial CRP.
+
+**Source:** Rheumatic fever — treatment and complications (sheet p. 41).
+
+---
+
+### Q180. [Medium] A 15-year-old had ARF with severe carditis and residual mitral valve disease. Which secondary-prevention regimen is most appropriate?
+
+A. Oral penicillin V for 10 days once a year  
+B. IM benzathine penicillin every 3–4 weeks for 1 year  
+C. Antibiotics only for dental procedures  
+D. Oral penicillin V only after each sore throat  
+E. IM benzathine penicillin every 3–4 weeks, continued lifelong because of severe carditis  
+
+**Correct Answer:** E
+
+**Initial Explanation:**
+
+Recurrence is prevented by IM benzathine penicillin every 3–4 weeks. The sheet gives the duration as either 10 years after the last episode or until age 21 years (OCR text — confirm against the original page), and lifelong prophylaxis in severe carditis.
+
+**Detailed Explanation:**
+
+- **A, B. Incorrect.** Too short.
+- **C. Incorrect.** IE prophylaxis is separate.
+- **D. Incorrect.** Oral courses are for treatment of a streptococcal infection, not secondary prophylaxis.
+- **E. Correct.**
+
+**HIGH-YIELD POINTS:**
+
+- IM benzathine penicillin is the most effective secondary prophylaxis.
+- Severe carditis: lifelong prophylaxis.
+
+**Source:** Rheumatic fever — prevention (sheet p. 41).
+
+---
+
+### Q181. [Medium] An 8-year-old presents with group A streptococcal pharyngitis. His older sibling had rheumatic fever. Which measure best prevents rheumatic fever in this episode?
+
+A. Salicylates  
+B. Early diagnosis and a full 10-day course of oral penicillin V  
+C. A 3-day course of antibiotics  
+D. Corticosteroids  
+E. Antipyretics  
+
+**Correct Answer:** B
+
+**Initial Explanation:**
+
+Primary prevention depends on early diagnosis and proper treatment of streptococcal infection with a 10-day course of oral penicillin V.
+
+**Detailed Explanation:**
+
+- **A, D, E. Incorrect.** They treat symptoms or inflammation and do not eradicate GAS.
+- **B. Correct.**
+- **C. Incorrect.** A short course does not eradicate the organism.
+
+**HIGH-YIELD POINTS:**
+
+- ARF is more common in 5–15-year-olds, developing countries and low-socioeconomic, crowded conditions.
+- Primary prevention: treat streptococcal infection; secondary: benzathine penicillin.
+
+**Source:** Rheumatic fever — prevention (sheet p. 38, 41).
+
+---
+
+# 16. Infective Endocarditis (IE)
+
+## Clinical Case 45 — Fever in a child with structural heart disease
+
+### Q182. [Medium] A 10-year-old with an unrepaired VSD has had fever and fatigue for 3 weeks. On examination there are tender nodules on the finger pulps, painless flat red macules on the palms, splinter haemorrhages and splenomegaly. Urine microscopy shows haematuria and the character of the murmur has changed. Which statement is correct?
+
+A. Painful nodules are Janeway lesions and painless palm lesions are Osler nodes  
+B. The haematuria indicates an unrelated urinary infection  
+C. Painful nodules are Osler nodes and painless macules are Janeway lesions; haematuria suggests immune-complex glomerulonephritis, which supports infective endocarditis  
+D. Splenomegaly excludes infective endocarditis  
+E. A normal echocardiogram would exclude infective endocarditis  
+
+**Correct Answer:** C
+
+**Initial Explanation:**
+
+Osler nodes are painful and Janeway lesions are painless. Splinter haemorrhages, splenomegaly and glomerulonephritis (microscopic haematuria) are recognised features, and a new or changed murmur is the key cardiac sign.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** The two are reversed.
+- **B. Incorrect.** In the setting of IE, haematuria reflects glomerulonephritis; low C3/C4 may be found.
+- **C. Correct.**
+- **D. Incorrect.** Splenomegaly is found in about 70%.
+- **E. Incorrect.** Absence of vegetations does not exclude IE.
+
+**HIGH-YIELD POINTS:**
+
+- Signs: high fever, chills, anorexia, weight loss, pallor, clubbing (late), splinter haemorrhages, Osler nodes, Janeway lesions, Roth spots, subconjunctival haemorrhage, splenomegaly, GN, hemiplegia.
+- Cardiac: new murmur, change in an existing murmur, heart failure.
+- Blood cultures (at least 3 before antibiotics), echo, CRP/ESR, urine, C3/C4.
+
+**Source:** Infective endocarditis — clinical picture and diagnosis (sheet p. 43).
+
+---
+
+### Q183. [Hard] A 12-year-old with an unrepaired VSD has a temperature of 39°C. One of three blood-culture bottles grows viridans streptococci. Echocardiography shows a vegetation, and Osler nodes are present. How is this case classified using the Duke criteria in the sheet?
+
+A. Definite IE: one major criterion (vegetation on echo) plus at least three minor criteria (fever, predisposing heart lesion, single positive culture, immune-complex phenomenon)  
+B. Possible IE only  
+C. IE is rejected because only one blood culture is positive  
+D. Definite IE only if two major criteria are present  
+E. Cannot be classified without a CRP result  
+
+**Correct Answer:** A
+
+**Initial Explanation:**
+
+Definite IE requires two major criteria, or one major plus three minor, or five minor criteria. A single positive culture is a minor criterion; positive echo is a major criterion.
+
+**Detailed Explanation:**
+
+- **A. Correct.** Major: echo vegetation. Minor: fever, predisposing factor (VSD), single positive culture, immune-complex phenomenon (Osler nodes).
+- **B. Incorrect.** The case meets the definite threshold.
+- **C. Incorrect.** One positive culture counts as a minor criterion; it does not reject the diagnosis.
+- **D. Incorrect.** One major + three minor is also definite.
+- **E. Incorrect.** CRP is not part of the Duke criteria.
+
+**HIGH-YIELD POINTS:**
+
+- Major: ≥ 2 positive blood cultures; positive echo (vegetation, new valve damage).
+- Minor: fever, embolic phenomenon, immune-complex disease, predisposing factors, single positive culture.
+- Definite: 2 major, or 1 major + 3 minor, or 5 minor.
+
+**Source:** Infective endocarditis — Duke criteria (sheet p. 44).
+
+---
+
+### Q184. [Medium] A 9-year-old with congenital heart disease develops fever and a new murmur 3 weeks after a urological instrumentation. Blood cultures grow a Gram-positive coccus. Which organism group is most likely in this setting?
+
+A. Viridans streptococci  
+B. *Pseudomonas aeruginosa*  
+C. Fungi  
+D. Enterococci  
+E. HACEK organisms  
+
+**Correct Answer:** D. Enterococci
+
+**Initial Explanation:**
+
+Enterococci are linked to bacteraemia from the gastrointestinal or genitourinary tract. Viridans streptococci are the commonest overall (dental source).
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Most common overall, associated with dental procedures.
+- **B. Incorrect.** Associated with IV drug use.
+- **C. Incorrect.** Associated with immune deficiency.
+- **D. Correct.**
+- **E. Incorrect.** HACEK are fastidious Gram-negative organisms.
+
+**HIGH-YIELD POINTS:**
+
+- α-haemolytic (viridans) streptococci ~50%; Staph aureus/epidermidis ~40%.
+- Enterococci: GIT/GU sources; Pseudomonas: IV drug use; fungi: immune deficiency.
+- Treatment: IV antibiotics for 6 weeks (high-dose penicillin + gentamicin, or penicillin + ceftriaxone).
+
+**Source:** Infective endocarditis — pathogenesis and organisms (sheet p. 42, 44).
+
+---
+
+### Q185. [Hard] Three children are awaiting elective dental extraction: child 1 has unrepaired tetralogy of Fallot, child 2 has an unrepaired VSD and child 3 has a small secundum ASD. According to the sheet's risk categories, which statement is correct?
+
+A. All three need prophylaxis because all have congenital heart disease  
+B. Child 1 (high risk) and child 2 (moderate risk) need a single dose of amoxicillin 30–60 minutes before the procedure; child 3 (negligible risk) does not  
+C. Only child 1 needs prophylaxis; the VSD is negligible risk  
+D. Only child 3 needs prophylaxis  
+E. None need antibiotics because good oral hygiene replaces prophylaxis  
+
+**Correct Answer:** B
+
+**Initial Explanation:**
+
+Prophylaxis is advised for high- and moderate-risk categories before procedures such as dental extraction. Complex cyanotic CHD (TOF, TGA) is high risk; VSD, PDA, primum ASD and CoA are moderate risk; secundum ASD is negligible risk. Good dental hygiene remains the most important factor.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Secundum ASD is in the negligible-risk category.
+- **B. Correct.**
+- **C. Incorrect.** VSD is moderate risk.
+- **D. Incorrect.** Reversal of the risk ranking.
+- **E. Incorrect.** Oral hygiene is the most important measure but does not replace prophylaxis in these categories.
+- **Clinical note:** The sheet reflects UK practice; apply current local guidelines.
+
+**HIGH-YIELD POINTS:**
+
+- Amoxicillin single dose 30–60 minutes before the procedure (ampicillin IV, ceftriaxone, clindamycin or vancomycin are alternatives).
+- Procedures: tooth extraction, adenotonsillectomy.
+- All congenital heart disease except secundum ASD predisposes to IE.
+
+**Source:** Infective endocarditis — prophylaxis and risk categories (sheet p. 42, 44).
+
+---
+
+### Q186. [Hard] On day 10 of IV penicillin and gentamicin for viridans streptococcal endocarditis in a child with a VSD, fever persists. Echocardiography shows a large mobile vegetation with a perivalvular abscess, and the child has developed new heart failure. What is the most appropriate next step?
+
+A. Stop antibiotics and repeat the cultures  
+B. Switch to oral amoxicillin to complete treatment at home  
+C. Add corticosteroids  
+D. Extend the same antibiotics to 12 weeks without further intervention  
+E. Continue IV antibiotics and refer for cardiac surgery  
+
+**Correct Answer:** E
+
+**Initial Explanation:**
+
+Surgery is indicated for an abscess, a large vegetation or infected prosthetic material, alongside the prolonged IV antibiotic course.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Stopping antibiotics is unsafe.
+- **B. Incorrect.** IE requires about 6 weeks of IV therapy.
+- **C. Incorrect.** Steroids are not part of IE treatment.
+- **D. Incorrect.** Antibiotics alone will not eradicate an abscess or a large vegetation.
+- **E. Correct.**
+
+**HIGH-YIELD POINTS:**
+
+- Empirical IV antibiotics for 6 weeks.
+- Surgery: abscess, large vegetation, infected prosthetic material.
+- CRP/ESR are useful for monitoring response.
+
+**Source:** Infective endocarditis — treatment (sheet p. 43–44).
+
+---
+
+# 17. Cardiac Arrhythmias — SVT and Conduction Disorders
+
+## Clinical Case 46 — Syncope, palpitations and irregular pulses
+
+### Q187. [Medium] A 9-year-old boy with congenital deafness has recurrent exercise-related syncope. The ECG shows a prolonged QT interval. His parents are consanguineous and an older brother died suddenly at the age of 7. Which diagnosis is most likely?
+
+A. Romano–Ward syndrome  
+B. Wolff–Parkinson–White syndrome  
+C. Lange–Nielsen (Jervell and Lange-Nielsen) syndrome  
+D. Congenital complete heart block  
+E. Supraventricular tachycardia  
+
+**Correct Answer:** C
+
+**Initial Explanation:**
+
+Lange–Nielsen syndrome is the autosomal recessive form of congenital long-QT syndrome associated with deafness. Romano–Ward syndrome is autosomal dominant without deafness.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Autosomal dominant, normal hearing.
+- **B. Incorrect.** WPW shows a short PR interval and delta wave.
+- **C. Correct.**
+- **D. Incorrect.** CHB relates to maternal anti-Ro/La antibodies and bradycardia.
+- **E. Incorrect.** SVT: narrow QRS tachycardia, normal ECG between attacks.
+
+**HIGH-YIELD POINTS:**
+
+- LQTS: syncope (often exercise), seizures (misdiagnosed as epilepsy), sudden death.
+- ECG: QT > 0.47 s. Treatment: propranolol, ICD.
+
+**Source:** Long QT syndrome (sheet p. 46).
+
+---
+
+### Q188. [Hard] A 7-year-old is treated with erythromycin for pneumonia and also has vomiting and diarrhoea. She has two episodes of loss of consciousness with jerking movements that were labelled as seizures. The ECG shows a QT interval of 0.50 s and the serum potassium is low. There is no family history. What is the best management?
+
+A. Treat as acquired long-QT syndrome: stop erythromycin, correct potassium (and calcium and magnesium) and monitor the ECG  
+B. Start an anticonvulsant  
+C. Implant an ICD immediately  
+D. Give adenosine  
+E. Perform ablation of an accessory pathway  
+
+**Correct Answer:** A
+
+**Initial Explanation:**
+
+Acquired long-QT syndrome is caused by drugs (erythromycin, ketoconazole) and electrolyte disturbances (hypokalaemia, hypocalcaemia, hypomagnesaemia). Seizure-like episodes may be misdiagnosed as epilepsy.
+
+**Detailed Explanation:**
+
+- **A. Correct.**
+- **B. Incorrect.** The events are arrhythmic syncope, not epilepsy.
+- **C. Incorrect.** An ICD is for selected congenital cases.
+- **D. Incorrect.** Adenosine treats SVT.
+- **E. Incorrect.** No pre-excitation.
+
+**HIGH-YIELD POINTS:**
+
+- Acquired causes: drugs (erythromycin, ketoconazole), hypoK, hypoCa, hypoMg.
+- ECG QT > 0.47 s; congenital forms are treated with propranolol ± ICD.
+
+**Source:** Long QT syndrome (sheet p. 46).
+
+---
+
+### Q189. [Medium] A 3-month-old had 12 hours of pallor, irritability and vomiting and was found to have a heart rate of 280/min with a narrow QRS and no visible P waves. He converted after vagal stimulation and adenosine, and the ECG in sinus rhythm is normal. The parents ask about the future. Which advice is most accurate?
+
+A. Lifelong antiarrhythmic drugs and ablation will be required  
+B. No follow-up is needed because SVT never recurs  
+C. Echocardiography is unnecessary  
+D. Echocardiography to exclude structural disease, maintenance therapy (e.g., propranolol, sotalol, flecainide) and treatment is usually stopped by about 1 year of age  
+E. A permanent pacemaker will be required  
+
+**Correct Answer:** D
+
+**Initial Explanation:**
+
+Echocardiography excludes structural heart disease and assesses function; maintenance therapy prevents recurrence; treatment usually stops around 1 year of age because attacks do not usually continue after infancy. A short PR with delta wave in sinus rhythm would indicate WPW (ablation).
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Treatment usually stops by 1 year.
+- **B. Incorrect.** Recurrence is possible, hence maintenance therapy and follow-up.
+- **C. Incorrect.** Echo is required.
+- **D. Correct.**
+- **E. Incorrect.** Pacemakers are for complete heart block.
+
+**HIGH-YIELD POINTS:**
+
+- SVT: most common symptomatic childhood arrhythmia, rate 250–300/min, re-entry via AV node + accessory pathway.
+- Infants present with pallor, irritability, vomiting, ± heart failure if prolonged.
+- Stable: vagal manoeuvres then adenosine; unstable: DC cardioversion.
+- ECG is normal between attacks unless WPW.
+
+**Source:** Arrhythmias — SVT (sheet p. 45–46).
+
+---
+
+### Q190. [Medium] A GP notes an irregular pulse in a healthy 8-year-old. The rate increases with inspiration and slows with expiration, by up to 30/min. The ECG shows a P wave before each QRS complex and is otherwise normal. Which statement is correct?
+
+A. Supraventricular tachycardia  
+B. Complete heart block  
+C. Wolff–Parkinson–White syndrome  
+D. Long QT syndrome  
+E. Normal sinus arrhythmia requiring no treatment  
+
+**Correct Answer:** E
+
+**Initial Explanation:**
+
+Sinus arrhythmia is normal in children and is seen as a change in heart rate with respiration (increase on inspiration, decrease on expiration) of up to 30 beats/min.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** SVT is 250–300/min with no visible P waves.
+- **B. Incorrect.** Complete heart block presents with bradycardia.
+- **C. Incorrect.** WPW has a short PR and delta wave.
+- **D. Incorrect.** LQTS shows a prolonged QT.
+- **E. Correct.**
+
+**HIGH-YIELD POINTS:**
+
+- Sinus arrhythmia: normal; heart rate varies with respiration.
+- SVT: very rapid, narrow QRS, no P wave.
+- WPW: short PR, delta wave; ablation.
+
+**Source:** Cardiac arrhythmias (sheet p. 45–46).
+
+---
+
+# Answer-Key Distribution (new questions only)
+
+| Letter | Count | Questions |
+|---|---|---|
+| A | 10 | 145, 149, 156, 161, 164, 169, 174, 178, 183, 188 |
+| B | 9 | 147, 151, 154, 160, 167, 171, 177, 181, 185 |
+| C | 9 | 144, 153, 157, 162, 166, 172, 176, 182, 187 |
+| D | 9 | 148, 150, 158, 163, 168, 173, 179, 184, 189 |
+| E | 10 | 146, 152, 155, 159, 165, 170, 175, 180, 186, 190 |
+
+*No correct letter repeats consecutively, and the sequence follows no fixed cycle.*

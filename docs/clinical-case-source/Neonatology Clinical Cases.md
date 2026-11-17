@@ -7272,3 +7272,1182 @@ The lecture describes the parachute reflex as an extension of the arms/hands whe
 - **Bilirubin thresholds:** treatment decisions require bilirubin plotted against age in hours, gestational age and neurotoxicity risk factors; no single fixed bilirubin number applies to every newborn.
 - Page references refer to the page numbering of the supplied lecture/PDF. Some scans contain OCR errors; confirm any ambiguous numerical detail against the original page and current protocol.
 
+---
+
+# 0. Introductory / Unsectioned Questions
+
+## Clinical Case 57 — A regional unit reviews its monthly mortality data and a mother worries about her baby's weight
+
+### Q229. [Hard] A regional hospital reviews one month of data: (1) a fetus delivered at 26 weeks' gestation with no signs of life; (2) a live-born term infant who died on day 5; (3) a live-born preterm infant who died on day 20; (4) a fetal loss at 20 weeks' gestation with no signs of life. Which statement correctly assigns these events to the mortality rates?
+
+A. Events 1, 2 and 3 are all included in the perinatal mortality rate  
+B. Event 4 is a stillbirth because the fetus showed no signs of life  
+C. Event 1 is a neonatal death because the baby never breathed  
+D. Perinatal mortality includes events 1 and 2; neonatal mortality includes events 2 and 3  
+E. Perinatal mortality includes events 2 and 3; neonatal mortality includes events 1 and 2  
+
+**Correct Answer:** D. Perinatal mortality includes events 1 and 2; neonatal mortality includes events 2 and 3
+
+**Initial Explanation:**
+
+The perinatal mortality rate counts stillbirths plus deaths in the first week of life. The neonatal mortality rate counts deaths of live-born infants within the first 4 weeks. Stillbirth is defined in the lecture as an infant born with no signs of life at 24 weeks or more.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Event 3 died on day 20, after the first week, so it is not a perinatal death.
+- **B. Incorrect.** A stillbirth requires gestation of 24 weeks or more; a loss at 20 weeks does not qualify.
+- **C. Incorrect.** A neonatal death requires a live-born infant. Event 1 is a stillbirth.
+- **D. Correct.** Event 1 is a stillbirth, so it counts only in perinatal mortality. Event 2 died within the first week of a live birth, so it counts in both rates. Event 3 is a late neonatal death, so it counts only in neonatal mortality. Event 4 counts in neither.
+- **E. Incorrect.** This reverses the logic: the stillbirth cannot be a neonatal death, and a day-20 death is not perinatal.
+
+**HIGH-YIELD POINTS:**
+
+- Stillbirth: no signs of life at ≥24 weeks.
+- Perinatal mortality = stillbirths + deaths in the first 7 days, per 1,000 live births and stillbirths.
+- Neonatal mortality = deaths of live-born infants within 28 days, per 1,000 live births.
+- Early neonatal period: birth to day 7. Late neonatal period: day 7 to day 28.
+
+**Source:** Neonatology sheet - Page 4 (Introduction: mortality definitions, stillbirth).
+
+# 2. Routine Newborn Examination and Normal Findings
+
+## Clinical Case 58 — A regional unit reviews its monthly mortality data and a mother worries about her baby's weight
+
+### Q230. [Medium] A term boy weighs 3.4 kg at birth and 3.1 kg on day 4. He breastfeeds well, passes urine and stool normally and looks well. His mother is worried. Which statement is correct?
+
+A. A 9% loss exceeds the physiological limit, so supplementation and admission are needed  
+B. The loss is physiological; he should regain birth weight by about 10 days and then gain roughly 25-30 g/day  
+C. Birth weight should already have been regained by day 3, so this is abnormal  
+D. After regaining birth weight, the expected gain is about 10 g/day  
+E. Any weight loss in a term baby means dehydration and needs IV fluids  
+
+**Correct Answer:** B. The loss is physiological; he should regain birth weight by about 10 days and then gain roughly 25-30 g/day
+
+**Initial Explanation:**
+
+The loss is 300 g out of 3,400 g, about 8.8%. The lecture describes physiological weight loss of up to about 10% of birth weight in the first 3-5 days, with recovery by about 10 days of age, then a gain of 25-30 g/day.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** 8.8% is within the physiological limit, and a well-feeding baby needs no admission.
+- **B. Correct.** The loss is within the expected range, and the recovery time and later gain match the lecture.
+- **C. Incorrect.** Recovery is expected by about day 10, not day 3.
+- **D. Incorrect.** 25-30 g/day is the expected gain; 10 g/day would be poor.
+- **E. Incorrect.** A well baby with normal urine output and feeding is not dehydrated.
+
+**HIGH-YIELD POINTS:**
+
+- Physiological weight loss: up to ~10% in the first 3-5 days; birth weight regained by ~10 days.
+- Normal weight gain afterwards: 25-30 g/day.
+- Weight loss with poor feeding, reduced urine output or jaundice needs assessment.
+- Normal term birth length is about 50 cm.
+
+**Source:** Neonatology sheet - Page 7 (normal term newborn: weight and growth).
+
+---
+
+# 2. Routine Newborn Examination and Normal Findings
+
+## Clinical Case 59 — Eye, mouth and neck findings during the first examination
+
+### Q231. [Medium] Baby 1 was born after a precipitate delivery and has a flat bright-red patch on the white of one eye, with no discharge. Baby 2 is 36 hours old and has red eyes with a purulent discharge. Which management is correct?
+
+A. Both are normal transient findings and need reassurance only  
+B. Baby 1 needs urgent ophthalmology review for cataract; Baby 2 needs reassurance  
+C. Baby 1 needs antibiotics; Baby 2 will resolve spontaneously within weeks  
+D. Both need urgent treatment because both represent gonococcal infection  
+E. Baby 1 needs reassurance because it is harmless and resolves in weeks; Baby 2 needs immediate treatment because gonococcal infection is possible  
+
+**Correct Answer:** E. Baby 1 needs reassurance because it is harmless and resolves in weeks; Baby 2 needs immediate treatment because gonococcal infection is possible
+
+**Initial Explanation:**
+
+Subconjunctival haemorrhage can follow precipitate delivery and is harmless, resolving within weeks. Red eyes with discharge in the first 48 hours (ophthalmia neonatorum) may be gonococcal and need immediate treatment.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** The first finding is benign, but the second is not normal and must not be reassured.
+- **B. Incorrect.** A red scleral patch is not a red reflex problem. The absent red reflex is the cataract screening sign.
+- **C. Incorrect.** This reverses the two babies' needs.
+- **D. Incorrect.** A haemorrhage without discharge is not infection.
+- **E. Correct.** Differentiating the benign bleed from a purulent conjunctivitis within 48 hours is the point of the case.
+
+**HIGH-YIELD POINTS:**
+
+- Subconjunctival haemorrhage: due to precipitate delivery, harmless, resolves within weeks.
+- Ophthalmia neonatorum (red eyes + discharge) in the first 48 hours: may be gonococcal; immediate treatment.
+- Absent red reflex: ophthalmology consultation (congenital cataract).
+- Newborns have a pupillary light reflex but no tears at birth.
+
+**Source:** Neonatology sheet - Pages 4-5 (Examination: Eyes).
+
+### Q232. [Medium] A term newborn has small white cysts on the palate and gum margins and a bluish translucent swelling in the floor of the mouth. The baby feeds well. Which statement is correct?
+
+A. These are benign self-resolving lesions, but the palate should still be palpated to screen for cleft palate  
+B. The white cysts are early teeth and must be removed to prevent aspiration  
+C. The floor-of-mouth swelling needs urgent ENT surgery because it causes airway obstruction  
+D. White oral lesions are candidiasis and need antifungal treatment  
+E. Bohn's nodules indicate congenital hypothyroidism  
+
+**Correct Answer:** A. These are benign self-resolving lesions, but the palate should still be palpated to screen for cleft palate
+
+**Initial Explanation:**
+
+Epstein's pearls (palate/gum cysts), Bohn's nodules (mucous gland cysts) and ranula (mucous retention cyst in the floor of the mouth) are self-resolving. Every newborn still needs palpation of the palate to screen for cleft palate.
+
+**Detailed Explanation:**
+
+- **A. Correct.** Describes the lesions correctly and keeps the cleft palate screening step.
+- **B. Incorrect.** Natal teeth are teeth, usually lower incisors; loose ones are removed. Epstein's pearls are cysts.
+- **C. Incorrect.** A ranula is a self-resolving mucous retention cyst, not an emergency in a well-feeding baby.
+- **D. Incorrect.** Candidiasis is not part of the described findings; cysts are not plaques.
+- **E. Incorrect.** Bohn's nodules are mucous gland cysts with no thyroid link.
+
+**HIGH-YIELD POINTS:**
+
+- Epstein's pearls: palate/gum cysts. Bohn's nodules: mucous gland cysts. Ranula: floor-of-mouth mucous retention cyst. All self-resolve.
+- Tongue-tie is also described in the examination.
+- Screen all newborns for cleft palate by palpation.
+- Natal teeth (front lower incisors): remove if loose, to avoid aspiration.
+
+**Source:** Neonatology sheet - Page 5 (Examination: Mouth); Page 9 (natal teeth).
+
+### Q233. [Medium] A newborn girl has a short neck with skin webbing. Another baby has a swelling in the anterior midline of the neck, and a third has a lateral neck swelling. Which classification matches the lecture?
+
+A. Webbing occurs in Down and Edwards syndromes; the midline swelling is a sternomastoid tumour  
+B. Webbing occurs in Turner and Noonan syndromes; the midline swelling is a cystic hygroma and the lateral swelling is a thyroglossal cyst  
+C. Webbing occurs in Turner and Noonan syndromes; the midline swelling is a thyroid/thyroglossal cyst; lateral swellings include sternomastoid tumour, cystic hygroma and lymph nodes  
+D. Webbing indicates CHARGE association; all neck swellings are lymph nodes  
+E. A short neck is abnormal in newborns and always needs imaging  
+
+**Correct Answer:** C. Webbing occurs in Turner and Noonan syndromes; the midline swelling is a thyroid/thyroglossal cyst; lateral swellings include sternomastoid tumour, cystic hygroma and lymph nodes
+
+**Initial Explanation:**
+
+The lecture links neck webbing to Turner and Noonan syndromes. Central neck swellings are thyroid or thyroglossal in origin, while peripheral (lateral) swellings include sternomastoid tumour, cystic hygroma and lymph nodes.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** The lecture names Turner and Noonan, and a midline swelling is not a sternomastoid tumour.
+- **B. Incorrect.** The locations of thyroglossal cyst and cystic hygroma are reversed.
+- **C. Correct.** Matches webbing and the central versus peripheral division.
+- **D. Incorrect.** CHARGE is linked to choanal atresia, not neck webbing.
+- **E. Incorrect.** A short neck is the normal newborn neck.
+
+**HIGH-YIELD POINTS:**
+
+- Normal newborn neck is short.
+- Webbed neck: Turner and Noonan syndromes.
+- Central neck swelling: thyroid/thyroglossal cyst.
+- Peripheral swelling: sternomastoid tumour, cystic hygroma, lymph node.
+
+**Source:** Neonatology sheet - Page 5 (Examination: Neck).
+
+# 38. Neonatal Gastrointestinal and Surgical Conditions
+
+## Clinical Case 60 — Elimination, skin and midline findings in the nursery
+
+### Q234. [Medium] A term boy has not passed meconium by day 3. The abdomen is distended and the anus is visibly patent. His older sister has cystic fibrosis. Which is the most likely cause?
+
+A. Anal atresia  
+B. Meconium ileus  
+C. Hirschsprung disease  
+D. Renal agenesis  
+E. Normal variation in a term newborn  
+
+**Correct Answer:** B. Meconium ileus
+
+**Initial Explanation:**
+
+About 95% of healthy term babies pass meconium in the first 24-48 hours. Delayed passage has a differential of anal atresia, Hirschsprung disease, meconium ileus (cystic fibrosis) and organic obstruction. A patent anus excludes anal atresia, and the family history of cystic fibrosis points to meconium ileus.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** A visibly patent anus argues against anal atresia.
+- **B. Correct.** Meconium ileus is the cystic fibrosis-related cause on the lecture's list.
+- **C. Incorrect.** Hirschsprung disease is on the list, but nothing here points to it, whereas the cystic fibrosis history strongly favours meconium ileus.
+- **D. Incorrect.** Renal agenesis belongs to the differential of delayed passage of urine, not meconium.
+- **E. Incorrect.** Passage beyond 48 hours with distension is not a normal variant.
+
+**HIGH-YIELD POINTS:**
+
+- ~95% of term babies pass meconium within 24-48 hours.
+- DD of delayed meconium: anal atresia, Hirschsprung disease, meconium ileus (cystic fibrosis), organic obstruction.
+- Always inspect the anus for imperforate anus.
+- Cystic fibrosis is also in the blood-spot screening programme.
+
+**Source:** Neonatology sheet - Page 7 (DD of delayed passage of meconium).
+
+# 2. Routine Newborn Examination and Normal Findings
+
+## Clinical Case 61 — Elimination, skin and midline findings in the nursery
+
+### Q235. [Hard] A term boy has not passed urine for 30 hours. A distended, palpable bladder is felt above the pubis. Which diagnosis and next step are most appropriate?
+
+A. Renal agenesis; reassure and repeat examination in 24 hours  
+B. Shocked neonate; give fluid boluses only  
+C. Normal variation; 95% pass urine within 24 hours so wait another day  
+D. Congenital hypothyroidism; send thyroid function tests  
+E. Renal outlet obstruction such as posterior urethral valves; prompt ultrasound of the renal tract  
+
+**Correct Answer:** E. Renal outlet obstruction such as posterior urethral valves; prompt ultrasound of the renal tract
+
+**Initial Explanation:**
+
+A palpable, large bladder with absent urine suggests urinary outflow obstruction, particularly posterior urethral valves in boys. The lecture advises prompt evaluation with ultrasound.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** In renal agenesis there is no urine to fill the bladder, so a large palpable bladder is not expected.
+- **B. Incorrect.** Shock is on the differential of absent urine, but a distended bladder points to obstruction, and shock would show circulatory signs.
+- **C. Incorrect.** Passage within 24 hours is expected; failure with a palpable bladder needs action, not waiting.
+- **D. Incorrect.** Hypothyroidism is not the explanation for a distended bladder.
+- **E. Correct.** Matches the palpable bladder, the male sex and the lecture's recommended step.
+
+**HIGH-YIELD POINTS:**
+
+- ~95% of healthy term babies pass urine in the first 24 hours.
+- DD of delayed urine: renal agenesis, renal outlet obstruction, shocked neonate.
+- Palpable large bladder in a boy: think posterior urethral valves; urgent ultrasound.
+- Posterior urethral valves are often diagnosed antenatally.
+
+**Source:** Neonatology sheet - Page 7 (DD of delayed passage of urine); Page 9 (palpable large bladder).
+
+### Q236. [Medium] A well term baby, examined in a cool room, has a lacy reddish-purple pattern over the trunk and limbs that fades once the baby is wrapped. There are also flat pink patches on the upper eyelids and nape that fade when the baby cries. Which statement is correct?
+
+A. Mottled skin in a cooled baby always indicates sepsis and needs cultures and antibiotics  
+B. The eyelid and nape patches are port-wine stains that grow with the child and need laser  
+C. The reticular pattern indicates Sturge-Weber syndrome  
+D. The reticular pattern (cutis marmorata) is a cold response that improves over the first month and is abnormal only if it persists; the pink patches (salmon patches) are benign and fade over the first year  
+E. Both findings are variants of erythema toxicum and need an eosinophil smear  
+
+**Correct Answer:** D. The reticular pattern (cutis marmorata) is a cold response that improves over the first month and is abnormal only if it persists; the pink patches (salmon patches) are benign and fade over the first year
+
+**Initial Explanation:**
+
+Cutis marmorata is a reticular vascular pattern when the baby is cooled; it improves over the first month and is abnormal only if it persists. Salmon patches (nevus simplex) on the eyelids, glabella and nape fade over the first year.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Mottling is non-specific. In a well baby it responds to warming, and sepsis is only one cause in the differential.
+- **B. Incorrect.** Port-wine stains are fixed vascular malformations that grow with the child; salmon patches fade.
+- **C. Incorrect.** Sturge-Weber is linked to a port-wine stain, not to cutis marmorata.
+- **D. Correct.** Describes both lesions and their natural course.
+- **E. Incorrect.** Erythema toxicum is a pustular rash on an erythematous base.
+
+**HIGH-YIELD POINTS:**
+
+- Cutis marmorata: reticular pattern on cooling; improves in the first month; abnormal if persistent.
+- Salmon patch (angel's kiss on the forehead/eyelids, stork bite on the nape): blanches, fades in the first year.
+- Harlequin colour change and acrocyanosis in the first 24 hours are normal findings.
+- Mottled skin in a sick baby has many causes (sepsis, cold stress, shock, Down syndrome, hypothyroidism).
+
+**Source:** Neonatology sheet - Page 8 (cutis marmorata, salmon patch); Page 9 (Harlequin colour change).
+
+### Q237. [Medium] During the routine examination of a term newborn you find: milia on the nose, a loose tooth in the lower gum present since birth, a skin tag anterior to the ear, and a tuft of hair over the lumbosacral spine. What is the correct plan?
+
+A. Evaluate the hair tuft for an underlying spinal abnormality, remove the loose tooth to avoid aspiration, and refer the skin tag to a plastic surgeon  
+B. Reassure about all four findings; the tooth will fall out on its own  
+C. Remove the milia surgically and ignore the hair tuft  
+D. The hair tuft needs no investigation, but the tooth must be preserved  
+E. Request MRI of the brain because of the skin tag  
+
+**Correct Answer:** A. Evaluate the hair tuft for an underlying spinal abnormality, remove the loose tooth to avoid aspiration, and refer the skin tag to a plastic surgeon
+
+**Initial Explanation:**
+
+A midline tuft of hair, swelling or naevus over the spine or skull may indicate an underlying vertebral, spinal cord or brain abnormality and needs evaluation. Loose natal teeth are removed to avoid aspiration, and ear skin tags are removed by a plastic surgeon.
+
+**Detailed Explanation:**
+
+- **A. Correct.** Matches the lecture for all three significant findings; milia need nothing.
+- **B. Incorrect.** A loose natal tooth is an aspiration risk, and the hair tuft needs evaluation.
+- **C. Incorrect.** Milia self-resolve, and a hair tuft is the one that needs attention.
+- **D. Incorrect.** Loose teeth should be removed.
+- **E. Incorrect.** A preauricular tag is a cosmetic finding for plastic surgery, not an indication for brain MRI.
+
+**HIGH-YIELD POINTS:**
+
+- Midline abnormality over spine/skull (hair tuft, swelling, naevus): further evaluation.
+- Natal teeth: remove if loose (aspiration risk).
+- Extra digits, skin tags anterior to the ear, accessory auricles: plastic surgeon.
+- Heart murmurs in the first days are often transient, but some reflect congenital heart disease.
+
+**Source:** Neonatology sheet - Page 9 (significant abnormalities on routine examination).
+
+---
+
+# 2. Routine Newborn Examination and Normal Findings
+
+## Clinical Case 62 — Routine care after a good Apgar score, temperature control and resuscitation drugs
+
+### Q238. [Medium] A term baby is born vaginally, cries immediately, is pink, has a heart rate of 140/min and flexes actively. The Apgar scores are 9 at 1 minute and 10 at 5 minutes. Which plan is appropriate?
+
+A. Begin the Newborn Life Support sequence because it applies to every delivery  
+B. Admit to the NICU for observation because the 1-minute score is below 10  
+C. Keep the baby warm, start breastfeeding, and give routine newborn care: IM vitamin K, prophylactic eye ointment, cord care, and arrange hearing and blood-spot screening  
+D. Delay vitamin K until there is bleeding  
+E. Give oral glucose and withhold feeding for 6 hours  
+
+**Correct Answer:** C. Keep the baby warm, start breastfeeding, and give routine newborn care: IM vitamin K, prophylactic eye ointment, cord care, and arrange hearing and blood-spot screening
+
+**Initial Explanation:**
+
+An Apgar of 8-10 indicates good general condition. The lecture's plan is to keep the baby warm and start breastfeeding, with routine newborn care: vitamin K IM, prophylactic eye erythromycin, umbilical cord care, hearing test and newborn screening.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** The resuscitation sequence is used when Apgar is below 7 or breathing/heart rate are inadequate.
+- **B. Incorrect.** A score of 9 is within the good range; admission is not needed.
+- **C. Correct.** Matches the lecture's action plan for a score of 8-10.
+- **D. Incorrect.** Vitamin K is given prophylactically at birth to prevent haemorrhagic disease of the newborn.
+- **E. Incorrect.** Early breastfeeding is encouraged.
+
+**HIGH-YIELD POINTS:**
+
+- Apgar 8-10: good condition; keep warm and start breastfeeding.
+- Routine newborn care: vitamin K IM, eye prophylaxis (erythromycin), cord care, hearing test, newborn screening.
+- Apgar <7: follow the Newborn Life Support sequence.
+- 1-minute score guides resuscitation need; 5-minute score shows response.
+
+**Source:** Neonatology sheet - Page 11 (Apgar action plan and newborn care).
+
+# 4. Prematurity - Classification, Clinical Features and Initial Care
+
+## Clinical Case 63 — Routine care after a good Apgar score, temperature control and resuscitation drugs
+
+### Q239. [Hard] A 28-week infant is admitted to the NICU with a temperature of 35.2 °C. A colleague says that mild cooling is harmless once the baby is warmed. Which statement is most accurate?
+
+A. Slight hypothermia (35-36 °C) is protective because it lowers oxygen consumption  
+B. Admission temperature has no relationship to outcome once the baby is rewarmed  
+C. Overheating to about 38 °C is preferred in extremely preterm infants  
+D. Hypothermia is a concern only in term infants after cold stress  
+E. The target is 36.5-37.5 °C; hypothermia raises morbidity and mortality, and each degree below this on admission in very preterm infants increases mortality by about 28%  
+
+**Correct Answer:** E. The target is 36.5-37.5 °C; hypothermia raises morbidity and mortality, and each degree below this on admission in very preterm infants increases mortality by about 28%
+
+**Initial Explanation:**
+
+The lecture states that normal body temperature (36.5-37.5 °C) must be maintained during resuscitation and in the NICU, and that each degree below this on admission in very preterm infants increases mortality by 28%.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Hypothermia increases energy consumption, hypoxia and hypoglycaemia.
+- **B. Incorrect.** Admission temperature is associated with mortality.
+- **C. Incorrect.** Overheating is also harmful; the target is normothermia.
+- **D. Incorrect.** Preterm infants are the most vulnerable because of thin skin, little fat and a large surface area.
+- **E. Correct.** States the target and the mortality relationship.
+
+**HIGH-YIELD POINTS:**
+
+- Maintain 36.5-37.5 °C during resuscitation and NICU care.
+- Each 1 °C below this on admission (very preterm): mortality +28%.
+- Heat loss: convection, radiation, evaporation, conduction.
+- Hypothermia (<35 °C in the lecture) causes hypoxia, hypoglycaemia and poor weight gain.
+
+**Source:** Neonatology sheet - Page 14 (temperature during resuscitation); Pages 19-20 (hypothermia).
+
+# 3. Neonatal Resuscitation
+
+## Clinical Case 64 — Routine care after a good Apgar score, temperature control and resuscitation drugs
+
+### Q240. [Medium] After a placental abruption, a pale newborn has a heart rate of 40/min despite effective ventilation and synchronized chest compressions. The blood gas shows severe lactic acidosis and the glucose is very low. Which pairing of problem and listed resuscitation drug is correct?
+
+A. Hypoglycaemia: sodium bicarbonate; lactic acidosis: dextrose  
+B. Heart rate <60 despite ventilation and compressions: epinephrine; severe lactic acidosis: sodium bicarbonate; hypoglycaemia: 10% dextrose; blood loss: volume expander  
+C. Heart rate <60 before ventilation is established: epinephrine as the first intervention  
+D. Blood loss: sodium bicarbonate; lactic acidosis: volume expander  
+E. Hypoglycaemia: epinephrine; heart rate <60: dextrose  
+
+**Correct Answer:** B. Heart rate <60 despite ventilation and compressions: epinephrine; severe lactic acidosis: sodium bicarbonate; hypoglycaemia: 10% dextrose; blood loss: volume expander
+
+**Initial Explanation:**
+
+The lecture's drug table lists epinephrine for a heart rate below 60/min despite adequate ventilation and external compressions, sodium bicarbonate for severe lactic acidosis, 10% dextrose for hypoglycaemia, and isotonic crystalloid or blood for blood loss.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** The two drugs are swapped.
+- **B. Correct.** Each problem is matched to its listed drug.
+- **C. Incorrect.** Ventilation comes first; epinephrine is for a heart rate that remains low despite effective ventilation and compressions.
+- **D. Incorrect.** Blood loss is treated with volume, and bicarbonate is for severe acidosis.
+- **E. Incorrect.** Epinephrine does not correct hypoglycaemia.
+
+**HIGH-YIELD POINTS:**
+
+- Drugs come after effective ventilation and compressions.
+- Epinephrine: HR <60 despite ventilation + compressions. Bicarbonate: severe lactic acidosis. Dextrose: hypoglycaemia. Volume: blood loss.
+- Doses in the scanned table must be checked against current local neonatal guidelines.
+
+**Source:** Neonatology sheet - Page 13 (Drugs used in neonatal resuscitation).
+
+---
+
+# 12. Retinopathy of Prematurity
+
+## Clinical Case 65 — Preterm infants beyond respiratory disease: oxygen, fluids, organ immaturity and outcomes
+
+### Q241. [Hard] A 27-week infant was resuscitated with 100% oxygen and later kept at oxygen saturations of 97-100% for weeks. At screening, the retina shows abnormal vessel proliferation. Which oxygen strategy would be consistent with the lecture for the next preterm infant?
+
+A. Start with 100% oxygen and aim for 97-100% to prevent NEC  
+B. Start with 21-30% oxygen and avoid only saturations below 80%  
+C. Avoid supplemental oxygen entirely because it causes ROP  
+D. Start with 21-30% oxygen; avoid saturations below 91% (more NEC and death) and above 95% (more retinopathy of prematurity)  
+E. Start with 21-30% oxygen and avoid saturations above 98% only, since hypoxaemia is harmless  
+
+**Correct Answer:** D. Start with 21-30% oxygen; avoid saturations below 91% (more NEC and death) and above 95% (more retinopathy of prematurity)
+
+**Initial Explanation:**
+
+The lecture recommends starting resuscitation of preterm infants with 21-30% oxygen, correcting hypoxaemia, and avoiding both low saturations (<91%, higher NEC and mortality) and high saturations (>95%, higher ROP).
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** High oxygen and high saturations increase the risk of ROP.
+- **B. Incorrect.** Saturations below 91% are already linked with NEC and death.
+- **C. Incorrect.** Oxygen is needed to correct hypoxaemia; the aim is to use the least possible for the shortest time.
+- **D. Correct.** Matches the starting concentration and both saturation limits.
+- **E. Incorrect.** Hypoxaemia is harmful; both extremes must be avoided.
+
+**HIGH-YIELD POINTS:**
+
+- Preterm resuscitation: start with 21-30% oxygen.
+- SpO₂ <91%: more NEC and death. SpO₂ >95%: more ROP.
+- ROP prevention: least oxygen for the least duration.
+- Screen ROP in infants ≤1,500 g or <32 weeks.
+
+**Source:** Neonatology sheet - Page 17 (oxygen therapy in preterm infants; ROP).
+
+# 4. Prematurity - Classification, Clinical Features and Initial Care
+
+## Clinical Case 66 — Preterm infants beyond respiratory disease: oxygen, fluids, organ immaturity and outcomes
+
+### Q242. [Medium] A 29-week infant, 1 day old, needs intravenous fluids. Which statement agrees with the lecture?
+
+A. Use 10% dextrose on day 1 and add electrolytes from day 2; preterm infants need more fluid than term infants (day 1 about 90 versus 60-75 mL/kg/day)  
+B. Use normal saline on day 1 and start dextrose on day 3  
+C. Preterm and term infants have the same fluid requirement  
+D. Preterm infants need less fluid because of their size and should be restricted to about 40 mL/kg/day  
+E. Use 5% dextrose without electrolytes for the whole first week  
+
+**Correct Answer:** A. Use 10% dextrose on day 1 and add electrolytes from day 2; preterm infants need more fluid than term infants (day 1 about 90 versus 60-75 mL/kg/day)
+
+**Initial Explanation:**
+
+The lecture states that preterm infants need more fluid than term babies. The fluid on day 1 is 10% dextrose, and on day 2 it is 10% dextrose with electrolytes.
+
+**Detailed Explanation:**
+
+- **A. Correct.** Matches the fluid type on days 1 and 2 and the preterm-versus-term difference.
+- **B. Incorrect.** Dextrose is the day-1 fluid, and preterm infants are prone to hypoglycaemia.
+- **C. Incorrect.** Preterm infants have higher requirements.
+- **D. Incorrect.** Restriction to 40 mL/kg/day is not in the lecture.
+- **E. Incorrect.** The lecture specifies 10% dextrose, with electrolytes added from day 2.
+
+**HIGH-YIELD POINTS:**
+
+- Preterm infants need more fluid per kg than term infants.
+- Day 1 fluid: 10% dextrose. Day 2: 10% dextrose + electrolytes.
+- Very immature or sick infants (typically <1 kg) often need total parenteral nutrition.
+- The fluid table was scanned with OCR; check the exact volumes against the original page.
+
+**Source:** Neonatology sheet - Page 21 (IVF in preterm versus term infants).
+
+# 14. Other Complications of Prematurity and Feeding Support
+
+## Clinical Case 67 — Preterm infants beyond respiratory disease: oxygen, fluids, organ immaturity and outcomes
+
+### Q243. [Medium] A 28-week infant has hypoglycaemia, mainly indirect jaundice and a low albumin on day 2. At 3 weeks the infant is dehydrated with electrolyte imbalance and hypotension. At 7 weeks the bones are poorly mineralized with low calcium, phosphate and vitamin D. Which pairing of organ and problem is correct?
+
+A. Liver: poor bone mineralization; kidney: hypoglycaemia; bone: jaundice  
+B. Kidney: hypoglycaemia and jaundice; liver: electrolyte imbalance; bone: hypotension  
+C. Liver: acute renal failure; kidney: hypoalbuminaemia; bone: dehydration  
+D. All three problems are caused by immature lungs  
+E. Liver: hypoglycaemia, indirect jaundice, hypoalbuminaemia; kidney: electrolyte imbalance, dehydration, hypotension, acute renal failure; bone: osteopenia of prematurity  
+
+**Correct Answer:** E. Liver: hypoglycaemia, indirect jaundice, hypoalbuminaemia; kidney: electrolyte imbalance, dehydration, hypotension, acute renal failure; bone: osteopenia of prematurity
+
+**Initial Explanation:**
+
+An immature liver with low stores and immature enzymes leads to hypoglycaemia, indirect jaundice and hypoalbuminaemia. Immature kidneys cause electrolyte imbalance, hypotension, dehydration and acute renal failure. Low calcium, phosphate and vitamin D cause osteopenia of prematurity.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Organs and problems are mismatched.
+- **B. Incorrect.** Hypoglycaemia and jaundice come from the liver, not the kidney.
+- **C. Incorrect.** Renal failure is a kidney problem, and albumin is made by the liver.
+- **D. Incorrect.** Lung immaturity causes RDS, not these metabolic problems.
+- **E. Correct.** Each problem is attributed to the right organ.
+
+**HIGH-YIELD POINTS:**
+
+- Liver immaturity: hypoglycaemia, indirect jaundice, hypoalbuminaemia.
+- Renal immaturity: electrolyte imbalance, hypotension, dehydration, ARF.
+- Bone: osteopenia of prematurity (low calcium, phosphate, vitamin D).
+- Hypoalbuminaemia raises the kernicterus risk.
+
+**Source:** Neonatology sheet - Pages 20-21 (Metabolic complications of prematurity: liver, kidneys, bone).
+
+### Q244. [Hard] The parents of a 27-week, 900 g infant who is about to be discharged ask about long-term outcomes. Which statement agrees with the lecture?
+
+A. Cerebral palsy affects more than half of very-low-birth-weight infants, and learning difficulties are rare  
+B. Hearing loss occurs in 20-30% and nearly all need amplification  
+C. Learning difficulties are the commonest impairment; cerebral palsy occurs in about 5-10%; refractive errors and squints are common; bronchiolitis can cause respiratory failure, especially with BPD  
+D. Visual problems occur only in infants who had ROP, and refractive errors are uncommon  
+E. Late problems occur only after IVH, and respiratory infection risk equals that of term infants  
+
+**Correct Answer:** C. Learning difficulties are the commonest impairment; cerebral palsy occurs in about 5-10%; refractive errors and squints are common; bronchiolitis can cause respiratory failure, especially with BPD
+
+**Initial Explanation:**
+
+The lecture lists late outcomes: about 5-10% of very-low-birth-weight infants develop cerebral palsy, but the commonest impairment is learning difficulty. Hearing impairment affects 1-2% and needs amplification; about 1% are blind in both eyes, and refractive errors and squints are common. There is also a higher risk of respiratory failure from bronchiolitis and lower respiratory tract infection, especially with BPD.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Cerebral palsy is 5-10%, and learning difficulty is the commonest problem.
+- **B. Incorrect.** Hearing impairment is 1-2%.
+- **C. Correct.** Matches the sheet's outcome figures and the respiratory risk.
+- **D. Incorrect.** Refractive errors and squints are common.
+- **E. Incorrect.** Late problems are not limited to IVH, and respiratory risk is increased.
+
+**HIGH-YIELD POINTS:**
+
+- VLBW late outcomes: cerebral palsy 5-10%; commonest impairment is learning difficulty.
+- Hearing impairment 1-2% need amplification; blindness in both eyes about 1%.
+- Refractive errors and squints are common.
+- Increased risk of respiratory failure from bronchiolitis/LRTI, especially with BPD.
+
+**Source:** Neonatology sheet - Page 21 (late-onset complications after discharge).
+
+---
+
+# 13. Necrotizing Enterocolitis
+
+## Clinical Case 68 — A preterm infant with several risk factors develops a surgical abdomen
+
+### Q245. [Hard] A 29-week, 1,100 g infant at day 12 has an umbilical venous catheter, was treated with ibuprofen for a PDA, is polycythaemic and had rapid feed advancement. He develops bilious vomiting, bloody stool, abdominal wall erythema and shock. The abdominal X-ray shows pneumatosis intestinalis, gas in the portal venous system and gas under the diaphragm. What is the best next step?
+
+A. Continue feeds with a hyperosmolar formula to maintain gut function  
+B. Stop feeds, decompress with an NG tube, give IV fluids and broad-spectrum antibiotics, support circulation and respiration, and obtain urgent surgical consultation for perforation  
+C. Repeat the abdominal X-ray in 48 hours before changing management  
+D. Give extra ibuprofen to treat the PDA and relieve gut hypoperfusion  
+E. Insert a chest drain for the free air  
+
+**Correct Answer:** B. Stop feeds, decompress with an NG tube, give IV fluids and broad-spectrum antibiotics, support circulation and respiration, and obtain urgent surgical consultation for perforation
+
+**Initial Explanation:**
+
+This is NEC with perforation (free gas under the diaphragm). The lecture's treatment is NICU care, nil by mouth, IV fluids, NG tube on free drainage, IV antibiotics (third-generation cephalosporin plus metronidazole), systemic respiratory and circulatory support, and surgical consultation for GI perforation or failure of medical treatment.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Aggressive and hyperosmolar feeds are risk factors for NEC.
+- **B. Correct.** Combines medical management with surgical consultation for perforation.
+- **C. Incorrect.** Free air means perforation, so waiting delays treatment.
+- **D. Incorrect.** Ibuprofen is itself listed as a risk factor for NEC.
+- **E. Incorrect.** The free air is intraperitoneal; a chest drain is for pleural air.
+
+**HIGH-YIELD POINTS:**
+
+- NEC risk factors: prematurity, asphyxia, polycythaemia, PDA, aggressive/bottle/hyperosmolar feeds, UVC, drugs such as ibuprofen.
+- X-ray: pneumatosis intestinalis, portal venous gas, dilated loops, free air (football sign) with perforation.
+- Surgery: perforation or failure of medical therapy.
+- Prevention: avoid aggressive feeding, breastfeeding, antenatal steroids, early treatment of sepsis.
+
+**Source:** Neonatology sheet - Pages 18-19 (Necrotizing enterocolitis: risk factors, X-ray, treatment).
+
+---
+
+# 4. Prematurity - Classification, Clinical Features and Initial Care
+
+## Clinical Case 69 — A threatened preterm delivery at 32 weeks
+
+### Q246. [Medium] A woman at 32 weeks with threatened preterm labour has amniocentesis. The lecithin/sphingomyelin ratio is 1.2. Which interpretation and plan are correct?
+
+A. The ratio is above 2.5 (mature lung); no steroids are needed  
+B. The ratio is in the transitional range (1.5-2); no action is needed  
+C. The ratio is immature, so give the mother surfactant by injection  
+D. The ratio is below 1.5 (immature lung); give antenatal betamethasone or dexamethasone, ideally 48 hours before delivery, and plan delivery where neonatal intensive care is available  
+E. A ratio below 1.5 indicates a mature lung, so neonatal surfactant will be unnecessary  
+
+**Correct Answer:** D. The ratio is below 1.5 (immature lung); give antenatal betamethasone or dexamethasone, ideally 48 hours before delivery, and plan delivery where neonatal intensive care is available
+
+**Initial Explanation:**
+
+A lecithin/sphingomyelin ratio above 2.5 indicates a mature lung, 1.5-2 transitional, and below 1.5 immature. For an immature lung, antenatal steroids (24-34 weeks, two doses 12 hours apart, about 48 hours before delivery) reduce RDS and mortality.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** 1.2 is not above 2.5.
+- **B. Incorrect.** 1.2 is below the transitional range.
+- **C. Incorrect.** Surfactant is given to the baby through the endotracheal tube, not to the mother.
+- **D. Correct.** Interprets the ratio correctly and applies the lecture's prevention.
+- **E. Incorrect.** A low ratio means immature lungs, so surfactant is more likely to be needed.
+
+**HIGH-YIELD POINTS:**
+
+- L/S ratio: >2.5 mature; 1.5-2 transitional; <1.5 immature.
+- Antenatal steroids at 24-34 weeks: two doses 12 hours apart, about 48 hours before delivery.
+- Steroids reduce RDS incidence and mortality (about 40% in the lecture).
+- Surfactant (lecithin) mature around 35-36 weeks.
+
+**Source:** Neonatology sheet - Page 32 (antenatal fetal lung maturity test; prevention of RDS).
+
+---
+
+# 18. Intrauterine Growth Restriction
+
+## Clinical Case 70 — Four SGA term infants and discharge planning
+
+### Q247. [Medium] Four term infants with intrauterine growth restriction are ready for review. Which one can be discharged?
+
+A. 2,300 g, sucks well, gaining weight, keeps temperature at room temperature, and the mother can care for the baby  
+B. 2,300 g, feeds poorly and becomes cold in the cot  
+C. 1,700 g, feeds well and has a stable temperature  
+D. 2,200 g, gaining weight, but the mother is unable to care for the infant  
+E. 2,000 g, with ongoing weight loss  
+
+**Correct Answer:** A. 2,300 g, sucks well, gaining weight, keeps temperature at room temperature, and the mother can care for the baby
+
+**Initial Explanation:**
+
+The lecture advises NICU admission for birth weight below 1,800 g, and discharge when the baby sucks well, gains weight, maintains temperature at room temperature and the mother can care for the infant.
+
+**Detailed Explanation:**
+
+- **A. Correct.** Meets all four discharge criteria.
+- **B. Incorrect.** Poor feeding and hypothermia fail the criteria.
+- **C. Incorrect.** Below 1,800 g, so NICU admission applies.
+- **D. Incorrect.** Maternal ability to care is one of the criteria.
+- **E. Incorrect.** Weight loss means the weight-gain criterion is not met.
+
+**HIGH-YIELD POINTS:**
+
+- Admit to NICU if birth weight <1,800 g.
+- Discharge criteria: sucking well, weight gain, temperature maintained at room temperature, mother capable.
+- IUGR complications: asphyxia/MAS, hypoglycaemia, hypothermia, polycythaemia, PPHN, thrombocytopenia.
+
+**Source:** Neonatology sheet - Pages 23-24 (IUGR complications and management).
+
+# 17. Multiple Pregnancy and Twin Complications
+
+## Clinical Case 71 — Counselling about a monochorionic twin pregnancy
+
+### Q248. [Hard] Ultrasound shows a twin pregnancy with a single placenta. The couple asks about risks. Which statement agrees with the lecture?
+
+A. Twin-to-twin transfusion occurs in 10-15% of dichorionic pregnancies, and anomaly rates are equal in both types  
+B. Dichorionic twins have an 8% risk of congenital abnormality and monochorionic twins 4%  
+C. Monochorionic twins have the higher risk of congenital abnormality (about 8% versus 4% in dichorionic) and twin-to-twin transfusion in about 10-15%  
+D. Twins are at no increased risk of preterm labour; only conjoined twins carry risk  
+E. Twin pregnancy does not increase the risk of growth restriction  
+
+**Correct Answer:** C. Monochorionic twins have the higher risk of congenital abnormality (about 8% versus 4% in dichorionic) and twin-to-twin transfusion in about 10-15%
+
+**Initial Explanation:**
+
+The lecture gives a 4% risk of congenital abnormality in dichorionic and 8% in monochorionic twins, and twin-to-twin transfusion in about 10-15% of monochorionic pregnancies. Preterm labour and IUGR are also increased.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Twin-to-twin transfusion is a monochorionic complication.
+- **B. Incorrect.** The percentages are reversed.
+- **C. Correct.** Matches both figures.
+- **D. Incorrect.** Preterm labour is a major complication of multiple births.
+- **E. Incorrect.** IUGR is also increased.
+
+**HIGH-YIELD POINTS:**
+
+- Newborn complications: preterm labour, IUGR, congenital abnormalities, TTTS, birth trauma, conjoined twins.
+- Congenital anomalies: 4% (dichorionic) versus 8% (monochorionic).
+- TTTS in 10-15% of monochorionic pregnancies.
+
+**Source:** Neonatology sheet - Page 23 (multiple births).
+
+---
+
+# 19. Neonatal Sepsis - Early-Onset and Late-Onset Infection
+
+## Clinical Case 72 — A preterm infant with a central line becomes ill after the first week
+
+### Q249. [Medium] A 16-day-old preterm infant with an umbilical venous catheter has apnoea, poor feeding, seizures and a tense, bulging anterior fontanelle. The white count is high with a low platelet count, and CRP is raised. Which statement is correct?
+
+A. This is early-onset sepsis, which usually presents with meningitis and needs a 5-day course  
+B. This is late-onset sepsis; antibiotics should wait until the culture results return  
+C. This is late-onset sepsis presenting as pyelonephritis because of oliguria  
+D. This is hepatitis with direct jaundice and hepatosplenomegaly  
+E. This is late-onset sepsis with meningitis; obtain blood and CSF cultures, start IV antibiotics immediately, and treat for longer (14-21 days) if meningitis is confirmed  
+
+**Correct Answer:** E. This is late-onset sepsis with meningitis; obtain blood and CSF cultures, start IV antibiotics immediately, and treat for longer (14-21 days) if meningitis is confirmed
+
+**Initial Explanation:**
+
+Late-onset sepsis occurs after the first 72 hours/first week, often in hospitalized infants with invasive devices, and commonly presents with meningitis. Sepsis work-up includes blood and CSF culture, and empirical IV antibiotics are started immediately. The lecture gives 10-14 days, extended to 14-21 days for meningitis.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** EOS usually presents with respiratory distress, and the timing here is late.
+- **B. Incorrect.** Antibiotics are started empirically without waiting.
+- **C. Incorrect.** Oliguria suggests pyelonephritis; seizures and bulging fontanelle suggest meningitis.
+- **D. Incorrect.** Hepatitis presents with direct jaundice and hepatosplenomegaly.
+- **E. Correct.** Matches the timing, device risk, focal sign and plan.
+
+**HIGH-YIELD POINTS:**
+
+- LOS: after the first week/72 hours; NICU or community acquired; main presentation is meningitis.
+- Focal infections: pneumonia, meningitis, pyelonephritis (oliguria), hepatitis (direct jaundice, HSM), arthritis/osteomyelitis.
+- Empirical LOS regimen in the lecture: flucloxacillin + gentamicin; escalate if not improving.
+- Duration 10-14 days; 14-21 days for meningitis.
+
+**Source:** Neonatology sheet - Pages 25-26 (late-onset sepsis: presentation, focal infections, treatment).
+
+### Q250. [Hard] A septic neonate has mottled skin, petechiae, bleeding from puncture sites and generalized oedema with sclerema. Which statement is correct?
+
+A. Mottled skin proves sepsis and carries a bad prognosis  
+B. Sclerema is a late sign of severe sepsis with a bad prognosis, whereas mottling alone is non-specific (cold stress, shock, Down syndrome, congenital hypothyroidism)  
+C. Petechiae and bleeding from puncture sites are benign findings  
+D. Sclerema is the typical sign of congenital hypothyroidism  
+E. Poor Moro and suckling reflexes indicate recovery  
+
+**Correct Answer:** B. Sclerema is a late sign of severe sepsis with a bad prognosis, whereas mottling alone is non-specific (cold stress, shock, Down syndrome, congenital hypothyroidism)
+
+**Initial Explanation:**
+
+The lecture lists petechiae, bruising, puncture-site bleeding, oedema and sclerema among skin findings in sepsis, with sclerema marking a bad prognosis. Mottled skin has several other causes.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Mottling can be due to cold stress, shock, Down syndrome or hypothyroidism.
+- **B. Correct.** Separates the prognostic sign from the non-specific one.
+- **C. Incorrect.** Bleeding signs in a septic baby suggest serious illness.
+- **D. Incorrect.** Sclerema is linked with severe sepsis.
+- **E. Incorrect.** Poor Moro and suckling are early non-specific signs of sepsis.
+
+**HIGH-YIELD POINTS:**
+
+- Skin signs in sepsis: petechiae, bruising, bleeding, oedema, sclerema (bad prognosis).
+- DD of mottled skin: sepsis, cold stress, shock, Down syndrome, congenital hypothyroidism.
+- Early signs are non-specific: poor feeding, lethargy, temperature instability, poor Moro and suckling.
+
+**Source:** Neonatology sheet - Pages 25-26 (clinical picture and DD of mottled skin).
+
+---
+
+# 25. Neonatal Cyanosis
+
+## Clinical Case 73 — A comfortable-looking blue newborn
+
+### Q251. [Hard] A term newborn has central cyanosis with SpO₂ 82% but little respiratory distress, and the chest radiograph shows clear lungs. After 10 minutes in 100% oxygen, the saturation and right radial PaO₂ stay low. What is the best next step?
+
+A. Repeat the hyperoxia test after 30 minutes  
+B. Give surfactant through an endotracheal tube  
+C. Insert a chest drain  
+D. Start a prostaglandin E infusion while stabilizing ABC, and arrange urgent cardiac consultation and echocardiography  
+E. Treat as sepsis and wait for cultures  
+
+**Correct Answer:** D. Start a prostaglandin E infusion while stabilizing ABC, and arrange urgent cardiac consultation and echocardiography
+
+**Initial Explanation:**
+
+Failure of oxygenation to improve in 100% oxygen points to cyanotic congenital heart disease. The lecture's immediate management is to stabilize airway, breathing and circulation, start a prostaglandin E infusion (5 ng/kg/min), and obtain urgent cardiac consultation and echocardiography.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Repeating the test delays treatment.
+- **B. Incorrect.** Surfactant treats RDS; the lungs are clear.
+- **C. Incorrect.** There is no air leak to drain.
+- **D. Correct.** Matches the lecture's management of suspected cyanotic heart disease.
+- **E. Incorrect.** Sepsis may coexist, but it does not explain the hyperoxia result.
+
+**HIGH-YIELD POINTS:**
+
+- Hyperoxia test: PaO₂ or saturation stays low in 100% oxygen: cyanotic CHD; it improves: respiratory disease or PPHN.
+- Immediate steps: ABC, prostaglandin E infusion, urgent cardiology and echocardiography.
+- Cyanotic CHD: TOF, TGA, truncus arteriosus, pulmonary atresia, TAPVR.
+- Do not delay treatment for the test; the PaO₂ threshold in the scan should be checked against current protocols.
+
+**Source:** Neonatology sheet - Page 36 (management of the cyanosed newborn).
+
+---
+
+# 26. Infant of a Diabetic Mother
+
+## Clinical Case 74 — Unexpected presentations in infants of diabetic mothers
+
+### Q252. [Hard] A mother with long-standing diabetes complicated by retinopathy and nephropathy delivers at 37 weeks a baby weighing 2.0 kg (below the 10th centile). Which statement is most accurate?
+
+A. Impossible: every infant of a diabetic mother is macrosomic, so the dates must be wrong  
+B. Being SGA removes the risk of hypoglycaemia  
+C. Long-standing diabetic microvascular disease is associated with a three-fold increase in growth restriction, so an infant of a diabetic mother can be small; glucose and calcium monitoring are still needed  
+D. Growth restriction in diabetes occurs only with gestational diabetes  
+E. Small size is caused by hypoglycaemia in utero  
+
+**Correct Answer:** C. Long-standing diabetic microvascular disease is associated with a three-fold increase in growth restriction, so an infant of a diabetic mother can be small; glucose and calcium monitoring are still needed
+
+**Initial Explanation:**
+
+The lecture notes a three-fold increase in growth restriction in mothers with long-standing diabetic microvascular disease. Macrosomia is the classic finding in IDM, but not the only one.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** IDM are often macrosomic, not always.
+- **B. Incorrect.** The metabolic risks of IDM are related to glycaemic control.
+- **C. Correct.** Matches the lecture's note and still applies IDM monitoring.
+- **D. Incorrect.** The lecture ties growth restriction to long-standing microvascular disease.
+- **E. Incorrect.** Fetal hyperglycaemia and hyperinsulinaemia are the typical mechanism, not hypoglycaemia in utero.
+
+**HIGH-YIELD POINTS:**
+
+- Classic IDM: macrosomia, plethoric face; risk relates to maternal glycaemic control.
+- Long-standing microvascular disease: three-fold increase in IUGR.
+- IDM risks: hypoglycaemia, hypocalcaemia, hypomagnesaemia, polycythaemia, jaundice, birth asphyxia, cardiomyopathy, anomalies.
+
+**Source:** Neonatology sheet - Page 39 (NB: IUGR in mothers with microvascular disease).
+
+# 28. Neonatal Jaundice - Bilirubin Physiology and Classification
+
+## Clinical Case 75 — Unexpected presentations in infants of diabetic mothers
+
+### Q253. [Medium] An infant of a diabetic mother is plethoric with a haematocrit of 68% on day 3. He has indirect hyperbilirubinaemia. Which explanation best fits the jaundice?
+
+A. Polycythaemia and a shortened red-cell lifespan (and prematurity) increase the bilirubin load  
+B. Excess maternal insulin crossing the placenta inhibits glucuronyl transferase  
+C. Rh sensitization caused by maternal diabetes  
+D. Breast milk inhibits conjugation in all infants of diabetic mothers  
+E. Hypocalcaemia reduces bilirubin conjugation  
+
+**Correct Answer:** A. Polycythaemia and a shortened red-cell lifespan (and prematurity) increase the bilirubin load
+
+**Initial Explanation:**
+
+The lecture explains IDM hyperbilirubinaemia by polycythaemia, reduced red-cell lifespan and prematurity. Polycythaemia results from erythropoietin stimulation by fetal hypoxia.
+
+**Detailed Explanation:**
+
+- **A. Correct.** Matches the lecture's causes.
+- **B. Incorrect.** Insulin does not inhibit glucuronyl transferase.
+- **C. Incorrect.** Rh sensitization is unrelated to maternal diabetes.
+- **D. Incorrect.** Breast milk jaundice is not a feature specific to IDM.
+- **E. Incorrect.** Hypocalcaemia causes jitteriness and seizures, not unconjugated jaundice.
+
+**HIGH-YIELD POINTS:**
+
+- IDM jaundice: polycythaemia, reduced RBC lifespan, prematurity.
+- Polycythaemia: Hct >65%, from erythropoietin and fetal hypoxia; can cause hyperviscosity and renal vein thrombosis; partial exchange transfusion.
+- Observe IDM for jaundice.
+
+**Source:** Neonatology sheet - Page 38 (IDM: hyperbilirubinaemia, polycythaemia).
+
+---
+
+# 27. Neonatal Birth Injuries
+
+## Clinical Case 76 — An infant with Erb palsy who is not recovering
+
+### Q254. [Hard] A 10-week-old infant had shoulder dystocia at birth and a waiter's-tip posture with an absent Moro reflex. Physiotherapy has been given, but the arm is still weak. Which management is correct?
+
+A. Stop physiotherapy because lack of recovery means a permanent lesion  
+B. Reassure and wait; recovery usually occurs by 2 years, so referral is not needed  
+C. Admit for urgent exchange transfusion  
+D. Immobilize the arm in a cast for 6 months  
+E. Continue physiotherapy and refer to an orthopaedic or plastic surgeon because recovery has not occurred by 2-3 months  
+
+**Correct Answer:** E. Continue physiotherapy and refer to an orthopaedic or plastic surgeon because recovery has not occurred by 2-3 months
+
+**Initial Explanation:**
+
+Full recovery of brachial plexus injury occurs in more than 90% of cases within 3 months, but infants not recovered by 2-3 months should be referred to an orthopaedic or plastic surgeon. Most recover by 2 years.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Physiotherapy is the treatment.
+- **B. Incorrect.** Referral is advised if no recovery by 2-3 months.
+- **C. Incorrect.** Exchange transfusion is for severe jaundice.
+- **D. Incorrect.** Treatment is physiotherapy, not prolonged casting.
+- **E. Correct.** Matches the sheet's prognosis and referral advice.
+
+**HIGH-YIELD POINTS:**
+
+- Erb palsy (C5-C6): waiter's tip; absent Moro, grasp preserved; may coexist with phrenic nerve palsy (C4-C5).
+- Klumpke palsy (C7-C8, T1): claw hand; absent grasp, Moro preserved; Horner syndrome (T1).
+- Treatment: physiotherapy; >90% recover in 3 months.
+- Refer if not resolved by 2-3 months.
+
+**Source:** Neonatology sheet - Page 41 (brachial plexus injury: associations, treatment, prognosis).
+
+---
+
+# 31. Kernicterus - Bilirubin Encephalopathy
+
+## Clinical Case 77 — A series of jaundiced newborns needing assessment and treatment decisions
+
+### Q255. [Hard] A 33-week infant on day 3 has sepsis, acidosis and hypoxia. The albumin is low and the infant is receiving a drug that competes with bilirubin for albumin binding. Why is this infant at risk of kernicterus at a total bilirubin that would be safe in a healthy term baby?
+
+A. Conjugated bilirubin crosses the blood-brain barrier in sick infants  
+B. Prematurity, acidosis, sepsis and hypoxia increase blood-brain barrier permeability, while hypoalbuminaemia and albumin-competing drugs increase free unconjugated bilirubin  
+C. Kernicterus depends only on the total bilirubin level  
+D. Preterm infants are at lower risk because their blood-brain barrier is immature  
+E. Hypothermia and hypoglycaemia lower the risk  
+
+**Correct Answer:** B. Prematurity, acidosis, sepsis and hypoxia increase blood-brain barrier permeability, while hypoalbuminaemia and albumin-competing drugs increase free unconjugated bilirubin
+
+**Initial Explanation:**
+
+Kernicterus risk depends on bilirubin level, factors that increase blood-brain barrier permeability (preterm, acidosis, sepsis, hypoxia), factors that increase free unconjugated bilirubin (hypoalbuminaemia, drugs such as aspirin or sulphonamide) and duration of exposure.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Conjugated bilirubin is water soluble and does not cause kernicterus.
+- **B. Correct.** Combines both mechanisms present in this infant.
+- **C. Incorrect.** Free bilirubin, barrier permeability and duration all matter.
+- **D. Incorrect.** Immaturity increases barrier permeability and raises the risk.
+- **E. Incorrect.** Hypothermia and hypoglycaemia are listed among the risk factors.
+
+**HIGH-YIELD POINTS:**
+
+- Kernicterus: unconjugated bilirubin deposits in basal ganglia and brainstem nuclei.
+- Risk: level of bilirubin, free bilirubin, barrier permeability, duration.
+- Chronic form: choreoathetoid cerebral palsy, deafness, learning difficulty.
+- Treat and prevent risk factors.
+
+**Source:** Neonatology sheet - Page 51 (Kernicterus: risk factors).
+
+# 28. Neonatal Jaundice - Bilirubin Physiology and Classification
+
+## Clinical Case 78 — A series of jaundiced newborns needing assessment and treatment decisions
+
+### Q256. [Hard] A term infant is jaundiced at 20 hours of age with pallor, low haemoglobin and a high reticulocyte count. Mother and baby have compatible blood groups, and the direct Coombs test is negative. Which investigations are most appropriate next?
+
+A. Liver biopsy and HIDA scan  
+B. Liver scan and abdominal ultrasound for biliary atresia  
+C. TORCH screen and metabolic screen for conjugated jaundice  
+D. Peripheral blood film, red-cell enzyme assay (e.g., G6PD) and osmotic fragility test, with a septic screen  
+E. Repeat anti-D testing in the mother  
+
+**Correct Answer:** D. Peripheral blood film, red-cell enzyme assay (e.g., G6PD) and osmotic fragility test, with a septic screen
+
+**Initial Explanation:**
+
+Jaundice in the first 24 hours is always pathological. With haemolysis and a negative Coombs test, the lecture's unconjugated algorithm points to blood film, enzyme assay and osmotic fragility test, alongside a septic screen.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** These investigate conjugated jaundice and biliary atresia.
+- **B. Incorrect.** Imaging of the biliary tree is for conjugated jaundice.
+- **C. Incorrect.** These belong to the conjugated pathway.
+- **D. Correct.** Matches the Coombs-negative haemolysis pathway.
+- **E. Incorrect.** The mother's anti-D status does not apply to compatible blood groups.
+
+**HIGH-YIELD POINTS:**
+
+- Day-1 jaundice: always pathological.
+- Haemolysis causes: Rh and ABO incompatibility, G6PD deficiency, hereditary spherocytosis, pyruvate kinase deficiency.
+- Coombs positive: check blood groups; Coombs negative: film, enzyme assay, osmotic fragility, septic screen.
+- Also consider thyroid function tests.
+
+**Source:** Neonatology sheet - Page 48 (investigation of hyperbilirubinaemia in the newborn).
+
+### Q258. [Hard] A 12-day-old exclusively breastfed infant is thriving and well hydrated, with unconjugated jaundice. Haemolysis, infection, hypothyroidism and cholestasis are excluded. Which mechanism best explains the jaundice and distinguishes it from breastfeeding jaundice?
+
+A. Dehydration from poor milk intake increasing enterohepatic circulation  
+B. Absent glucuronyl transferase enzyme  
+C. Substances in breast milk (pregnanediol, free fatty acids) and increased glucuronidase activity reduce conjugation and increase enterohepatic reabsorption despite adequate intake and hydration  
+D. ABO haemolysis  
+E. Biliary obstruction  
+
+**Correct Answer:** C. Substances in breast milk (pregnanediol, free fatty acids) and increased glucuronidase activity reduce conjugation and increase enterohepatic reabsorption despite adequate intake and hydration
+
+**Initial Explanation:**
+
+Breast milk jaundice is multifactorial: milk pregnanediol decreases conjugation, high free fatty acids decrease uptake and conjugation, and increased glucuronidase activity increases enterohepatic circulation. Breastfeeding jaundice is due to low milk intake, dehydration and increased enterohepatic circulation.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** This describes breastfeeding jaundice, in a dehydrated baby.
+- **B. Incorrect.** Absent enzyme describes Crigler-Najjar type I.
+- **C. Correct.** Matches the lecture's mechanism for breast milk jaundice.
+- **D. Incorrect.** Haemolysis has been excluded.
+- **E. Incorrect.** Cholestasis has been excluded and the bilirubin is unconjugated.
+
+**HIGH-YIELD POINTS:**
+
+- Breast milk jaundice: week 2, well-hydrated, may reach 30 mg/dL, no kernicterus risk, may last up to 12 weeks; continue breastfeeding.
+- Breastfeeding jaundice: first week, low intake, dehydration; improve feeding and hydration.
+- Both are diagnoses of exclusion.
+- The table was scanned with OCR; check details against the original page.
+
+**Source:** Neonatology sheet - Page 48 (breast milk versus breastfeeding jaundice).
+
+---
+
+# 30. Treatment of Unconjugated Hyperbilirubinaemia
+
+## Clinical Case 79 — A series of jaundiced newborns needing assessment and treatment decisions
+
+### Q257. [Hard] An infant with severe Rh disease is being prepared for exchange transfusion. Which description of the technique is correct?
+
+A. Exchange twice the baby's blood volume with fresh O-negative blood, removing and replacing small aliquots (10-20 mL) through the umbilical venous catheter, with 10% dextrose and calcium gluconate at about every 100 mL  
+B. Exchange one blood volume with stored AB blood in 100 mL aliquots  
+C. Remove blood first without replacement, then give blood afterwards  
+D. Use any blood group, change 50 mL at a time, and give calcium only if seizures occur  
+E. Perform the exchange through a peripheral cannula using plasma only  
+
+**Correct Answer:** A. Exchange twice the baby's blood volume with fresh O-negative blood, removing and replacing small aliquots (10-20 mL) through the umbilical venous catheter, with 10% dextrose and calcium gluconate at about every 100 mL
+
+**Initial Explanation:**
+
+The lecture describes a double-volume exchange (2 × 85-90 mL/kg) with fresh O-negative blood, small aliquots (10-20 mL) replaced through the UVC, and 10% dextrose and calcium gluconate given at 100 mL intervals.
+
+**Detailed Explanation:**
+
+- **A. Correct.** Matches the volume, blood type, aliquot size, access and supportive measures.
+- **B. Incorrect.** The exchange is double volume, with small aliquots.
+- **C. Incorrect.** Blood is removed and replaced in equal small amounts.
+- **D. Incorrect.** Calcium and dextrose are given at set intervals, not only for seizures.
+- **E. Incorrect.** Whole blood is used, through the UVC.
+
+**HIGH-YIELD POINTS:**
+
+- Exchange transfusion removes bilirubin and antibodies and corrects anaemia.
+- Indications: bilirubin above the exchange line (Rh/ABO incompatibility).
+- Complications: hypocalcaemia, acidosis, hyperkalaemia, heart failure, infections, UVC sepsis/thrombosis/NEC.
+
+**Source:** Neonatology sheet - Page 50 (exchange transfusion: procedure and complications).
+
+# 32. Hypoxic-Ischaemic Encephalopathy (HIE)
+
+## Clinical Case 80 — Term infants after perinatal asphyxia
+
+### Q259. [Hard] A term infant with moderate HIE has oliguria, rising creatinine and hyponatraemia on day 1. Seizures are controlled. Which fluid strategy agrees with the lecture?
+
+A. Aggressive fluid loading to force a urine output  
+B. Give diuretics and stop all glucose  
+C. Free water in large volumes to correct the sodium  
+D. Stop dextrose completely  
+E. Restrict fluids because of transient renal impairment and SIADH, with careful monitoring of glucose, calcium and electrolytes  
+
+**Correct Answer:** E. Restrict fluids because of transient renal impairment and SIADH, with careful monitoring of glucose, calcium and electrolytes
+
+**Initial Explanation:**
+
+The lecture recommends fluid restriction in HIE because of transient renal impairment and the syndrome of inappropriate ADH secretion, with monitoring and treatment of hypoglycaemia and electrolyte imbalance, especially hypocalcaemia.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Fluid loading worsens fluid overload in SIADH.
+- **B. Incorrect.** Glucose must be monitored and maintained.
+- **C. Incorrect.** Free water would worsen dilutional hyponatraemia.
+- **D. Incorrect.** Hypoglycaemia must be prevented.
+- **E. Correct.** Matches the lecture's management.
+
+**HIGH-YIELD POINTS:**
+
+- HIE management: respiratory support, anticonvulsants, fluid restriction, treat hypotension (volume and inotropes), correct acidosis, monitor glucose and electrolytes, nutrition and family support.
+- Therapeutic hypothermia (33-34 °C for 72 hours, start within 6 hours, ≥36 weeks).
+- Avoid overheating.
+
+**Source:** Neonatology sheet - Page 57 (HIE: management).
+
+### Q260. [Hard] Two term infants have had HIE. Infant A was hyperalert with hyperactive reflexes and no seizures for less than 24 hours. Infant B was lethargic and hypotonic with seizures, and abnormal signs persisted beyond 2 weeks of age. Which prognosis is correct?
+
+A. Infant A: poor outcome; Infant B: full recovery expected  
+B. Infant A: complete recovery usually expected; Infant B: full recovery unlikely because abnormalities persist beyond 2 weeks  
+C. Both have an equally good prognosis  
+D. Infant A: severe disability; Infant B: no deficits  
+E. Prognosis cannot be related to the clinical stage  
+
+**Correct Answer:** B. Infant A: complete recovery usually expected; Infant B: full recovery unlikely because abnormalities persist beyond 2 weeks
+
+**Initial Explanation:**
+
+Stage 1 (mild) HIE lasts less than 24 hours and usually recovers completely. In stage 2, infants who recover clinically by 2 weeks have a good prognosis, but persistent abnormalities beyond that time make full recovery unlikely.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Reverses the prognoses.
+- **B. Correct.** Matches stage 1 and the 2-week rule for stage 2.
+- **C. Incorrect.** Severity and duration affect prognosis.
+- **D. Incorrect.** Mild HIE rarely causes disability.
+- **E. Incorrect.** The staging system is used for prognosis.
+
+**HIGH-YIELD POINTS:**
+
+- Stage 1 (<24 hours): good, complete recovery.
+- Stage 2 (2-14 days): good if clinically normal by 2 weeks.
+- Stage 3 (severe): mortality 30-40%; most survivors without cooling have disability, including cerebral palsy.
+
+**Source:** Neonatology sheet - Page 57 (clinical staging and prognosis of HIE).
+
+---
+
+# 33. Neonatal Seizures
+
+## Clinical Case 81 — Several newborns with abnormal movements
+
+### Q261. [Medium] Three newborns have these movements: (1) rhythmic jerking of the right arm and face that continues when the limb is gently held; (2) stiffening posture of the trunk and limbs; (3) brief shock-like jerks of the fingers and toes. Which pairing is correct, and what is the first check?
+
+A. (1) tonic; (2) myoclonic; (3) clonic  
+B. (1) myoclonic; (2) clonic; (3) tonic  
+C. (1) jitteriness; (2) tonic; (3) clonic  
+D. (1) focal clonic; (2) tonic; (3) myoclonic; check blood glucose and calcium first  
+E. All three are subtle seizures  
+
+**Correct Answer:** D. (1) focal clonic; (2) tonic; (3) myoclonic; check blood glucose and calcium first
+
+**Initial Explanation:**
+
+Clonic seizures are rhythmic twitching of a muscle group (focal, multifocal or generalized), tonic seizures are rigid posturing, and myoclonic jerks are brief focal or generalized jerks, mainly of distal muscles. Movements that do not stop on holding are not jitteriness.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** The types are mismatched.
+- **B. Incorrect.** The types are mismatched.
+- **C. Incorrect.** Movement continuing when held is not jitteriness.
+- **D. Correct.** Matches each type and the first reversible causes.
+- **E. Incorrect.** Subtle seizures are eye, orofacial, limb-cycling or autonomic phenomena.
+
+**HIGH-YIELD POINTS:**
+
+- Subtle seizures are commonest; clonic, tonic and myoclonic are other types.
+- Jitteriness stops on holding the limb and is stimulus-provoked.
+- Stabilize ABC, treat hypoglycaemia (dextrose) and hypocalcaemia (calcium gluconate).
+- First-line drug: phenobarbital.
+
+**Source:** Neonatology sheet - Pages 58-59 (clinical features of seizures; management).
+
+### Q262. [Hard] A well term baby has brief focal clonic seizures on day 4. Glucose, calcium, magnesium and sodium are normal; CSF and imaging are normal. Several maternal relatives had seizures as newborns that resolved in infancy, and there is no maternal drug use. Which diagnosis is most likely?
+
+A. Benign familial neonatal seizures  
+B. Hypoxic-ischaemic encephalopathy  
+C. Neonatal abstinence syndrome  
+D. Pyridoxine deficiency  
+E. Kernicterus  
+
+**Correct Answer:** A. Benign familial neonatal seizures
+
+**Initial Explanation:**
+
+Benign familial neonatal seizures are a listed cause of neonatal seizures. Normal metabolic and structural work-up with a family pattern and a well infant fits this diagnosis.
+
+**Detailed Explanation:**
+
+- **A. Correct.** A family pattern and a normal work-up in a well infant are typical.
+- **B. Incorrect.** HIE, the commonest cause, requires a perinatal hypoxic event and encephalopathy.
+- **C. Incorrect.** Abstinence syndrome requires maternal substance use.
+- **D. Incorrect.** Pyridoxine deficiency is considered when seizures are refractory; the lecture gives pyridoxine as a late step.
+- **E. Incorrect.** Kernicterus needs severe jaundice.
+
+**HIGH-YIELD POINTS:**
+
+- Commonest cause: HIE. Other causes: infection, haemorrhage/stroke, hypoglycaemia, hypocalcaemia, hypomagnesaemia, sodium disorders, inborn errors, kernicterus, malformations, maternal substance abuse, benign familial seizures, pyridoxine deficiency.
+- Drug ladder in the lecture: phenobarbital, phenytoin, benzodiazepines, pyridoxine, general anaesthesia.
+- Prognosis depends on the cause.
+
+**Source:** Neonatology sheet - Page 58 (causes of neonatal seizures); Page 59 (management).
+
+---
+
+# Answer Key Distribution (Q229-Q262)
+
+A: 7 | B: 7 | C: 6 | D: 7 | E: 7
+
+Correct answers by question: 229 D, 230 B, 231 E, 232 A, 233 C, 234 B, 235 E, 236 D, 237 A, 238 C, 239 E, 240 B, 241 D, 242 A, 243 E, 244 C, 245 B, 246 D, 247 A, 248 C, 249 E, 250 B, 251 D, 252 C, 253 A, 254 E, 255 B, 256 D, 257 A, 258 C, 259 E, 260 B, 261 D, 262 A.

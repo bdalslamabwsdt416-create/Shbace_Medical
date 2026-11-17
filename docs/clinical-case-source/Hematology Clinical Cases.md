@@ -4968,3 +4968,971 @@ The lecture identifies lymph-node biopsy as a key diagnostic investigation and C
 - Treatment may include multi-agent chemotherapy with or without radiotherapy according to subtype and stage.
 
 **Source:** Haematology sheet/PDF - Pages 46-47.
+
+---
+
+# 2. Nutritional iron deficiency in infancy
+
+## Clinical Case 41 — Comparing iron bioavailability in milk
+
+An 8-month-old infant is receiving different milk feeds. The parents ask why the type of milk matters when considering the amount of iron the infant actually absorbs. The clinician reviews the numerical comparison in the course sheet.
+
+### Q161. According to the numerical table on page 6, which statement about iron absorption is correct?
+
+A. Breast milk and cow's milk both have approximately 50% iron absorption.  
+B. Formula has approximately 50% absorption, while breast milk has approximately 10%.  
+C. Breast milk has approximately 50% absorption, while formula and cow's milk each have approximately 10%.  
+D. Cow's-milk iron is absorbed at approximately 50%, while formula and breast milk are absorbed at approximately 10%.  
+E. All three milk sources have the same iron-absorption proportion.
+
+**Correct Answer:** C. Breast milk has approximately 50% absorption, while formula and cow's milk each have approximately 10%.
+
+**Initial Explanation:**
+
+The page 6 table lists breast milk at about 1.5 mg/L with 50% absorption, infant formula at 5–9 mg/L with 10% absorption, and cow's milk at 0.5 mg/L with 10% absorption.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** The numerical table gives breast milk 50% absorption but formula and cow's milk 10%.
+- **B. Incorrect.** The table gives formula 10%, not 50%.
+- **C. Correct.** This is the absorption pattern in the numerical table on page 6.
+- **D. Incorrect.** Cow's-milk iron is listed with 10% absorption, not 50%.
+- **E. Incorrect.** The table gives a higher absorbed proportion for breast milk than for formula or cow's milk.
+
+**HIGH-YIELD POINTS:**
+
+- Iron absorption occurs mainly in the proximal small intestine, especially the duodenum.
+- The page 6 table lists breast milk: 1.5 mg/L, 50% absorption; formula: 5–9 mg/L, 10%; cow's milk: 0.5 mg/L, 10%.
+- **Source inconsistency:** page 7 prose says cow's milk has a higher iron content than breast milk, whereas the page 6 numerical table lists a lower concentration for cow's milk. This question tests the absorption percentages in the table and does not rely on the conflicting statement about iron concentration.
+
+**Source:** Haematology sheet – Iron intake and absorption, Pages 6–7.
+
+---
+
+# 5. Distinguishing causes of microcytic anaemia
+
+## Clinical Case 42 — Microcytosis in chronic kidney disease
+
+A 9-year-old child with chronic kidney disease is found to have pallor and reduced exercise tolerance. The full blood count shows microcytic anaemia. Iron studies show low serum iron, normal-to-high ferritin and low total iron-binding capacity (TIBC).
+
+### Q162. Which interpretation best fits the iron-study pattern described in the lecture?
+
+A. Uncomplicated iron deficiency anaemia  
+B. Beta-thalassaemia trait  
+C. Sideroblastic anaemia  
+D. Chronic lead poisoning  
+E. Anaemia of chronic disease
+
+**Correct Answer:** E. Anaemia of chronic disease
+
+**Initial Explanation:**
+
+The lecture's comparison table describes anaemia of chronic disease as low serum iron with normal or increased ferritin and low TIBC. Chronic kidney disease is also listed among causes of anaemia.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Iron deficiency is associated with low serum iron, low ferritin and high TIBC.
+- **B. Incorrect.** The lecture's thalassaemia pattern has normal or increased serum iron and ferritin.
+- **C. Incorrect.** Sideroblastic anaemia is associated with normal-to-high serum iron and ferritin and normal TIBC in the table.
+- **D. Incorrect.** Lead poisoning is listed as a microcytic differential and is associated with basophilic stippling and a high blood lead level; it does not match the iron-study pattern given.
+- **E. Correct.** Low serum iron, preserved or increased ferritin and low TIBC match anaemia of chronic disease.
+
+**HIGH-YIELD POINTS:**
+
+- IDA: low serum iron, low ferritin, high TIBC.
+- Anaemia of chronic disease: low serum iron, normal/high ferritin, low TIBC.
+- Thalassaemia and sideroblastic anaemia have different patterns in the lecture's comparison table.
+
+**Source:** Haematology sheet – Causes of anaemia and microcytic differential, Pages 5 and 10.
+
+---
+
+# 3. Confirming and treating iron deficiency anaemia
+
+## Clinical Case 43 — Completing treatment for iron deficiency
+
+A 2-year-old child with nutritional iron deficiency starts oral iron and dietary modification. The child's appetite and activity improve, and the haemoglobin begins to rise. The parents ask whether they can stop treatment as soon as the child looks well.
+
+### Q163. Which treatment duration is recommended in the course sheet to replenish iron stores?
+
+A. Continue oral iron for approximately 3–6 months.  
+B. Stop as soon as appetite improves.  
+C. Give one dose only after reticulocytosis appears.  
+D. Continue only until the first rise in haemoglobin.  
+E. Replace oral iron routinely with a single packed red-cell transfusion.
+
+**Correct Answer:** A. Continue oral iron for approximately 3–6 months.
+
+**Initial Explanation:**
+
+The lecture gives a treatment duration of 3–6 months and states that iron should continue for at least 3 months to replenish iron stores.
+
+**Detailed Explanation:**
+
+- **A. Correct.** The stated duration is 3–6 months, with at least 3 months recommended to replenish stores.
+- **B. Incorrect.** Clinical improvement does not prove that iron stores have been replenished.
+- **C. Incorrect.** Reticulocytosis is an early marrow response, not a signal that treatment is complete.
+- **D. Incorrect.** Haemoglobin begins to improve before iron stores are fully replenished.
+- **E. Incorrect.** Packed red-cell transfusion is reserved for very severe anaemia with instability, not routine completion of iron therapy.
+
+**HIGH-YIELD POINTS:**
+
+- Oral iron dose in the sheet: 3–6 mg/kg/day.
+- Expected early response includes reticulocytosis at about 48–72 hours.
+- Continue treatment long enough to replenish stores; the lecture states 3–6 months and at least 3 months.
+
+**Source:** Haematology sheet – Iron deficiency treatment and response, Page 9.
+
+---
+
+# 10. Hereditary spherocytosis
+
+## Clinical Case 44 — Aplastic crisis in hereditary spherocytosis
+
+A 7-year-old child has hereditary spherocytosis with a history of intermittent jaundice and splenomegaly. The child develops fever and marked pallor over a short period. The haemoglobin has fallen substantially, and the reticulocyte count is unexpectedly low rather than increased.
+
+### Q164. Which event best explains this sudden deterioration?
+
+A. Increased splenic destruction with an appropriate reticulocyte response  
+B. Transient aplastic crisis associated with parvovirus B19  
+C. A new episode of iron deficiency caused by excess cow's-milk intake  
+D. A vaso-occlusive crisis caused by HbS polymerisation  
+E. Isolated immune platelet destruction
+
+**Correct Answer:** B. Transient aplastic crisis associated with parvovirus B19
+
+**Initial Explanation:**
+
+The lecture identifies parvovirus B19 as a cause of an uncommon, transient aplastic crisis in hereditary spherocytosis. A sudden haemoglobin fall with a low reticulocyte count indicates reduced red-cell production rather than the usual compensatory response to haemolysis.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Increased red-cell destruction would usually provoke a marrow response and reticulocytosis.
+- **B. Correct.** Parvovirus B19 may temporarily suppress red-cell production in a child with chronic haemolysis.
+- **C. Incorrect.** Iron deficiency is not the best explanation for this sudden fall in haemoglobin with reticulocytopenia.
+- **D. Incorrect.** The case does not describe sickle cell disease or a vaso-occlusive presentation.
+- **E. Incorrect.** Isolated platelet destruction does not explain the acute anaemia and low reticulocyte count.
+
+**HIGH-YIELD POINTS:**
+
+- Hereditary spherocytosis causes chronic haemolysis.
+- Parvovirus B19 may precipitate a transient aplastic crisis.
+- A sudden fall in haemoglobin with a low reticulocyte count is different from the usual haemolytic pattern.
+- The lecture notes that one or two transfusions may be required during the 3–4-week period when red cells are not being produced.
+
+**Source:** Haematology sheet – Hereditary spherocytosis, Page 16.
+
+---
+
+# 14. Complications and long-term care in beta-thalassaemia
+
+## Clinical Case 45 — When to start iron chelation in transfusion-dependent thalassaemia
+
+A 3-year-old child with transfusion-dependent beta-thalassaemia major has received repeated red-cell transfusions. The serum ferritin is reported above the threshold stated in the course sheet. The team discusses treatment to reduce iron deposition in organs.
+
+### Q165. Which approach matches the iron-chelation plan described in the lecture?
+
+A. Start oral iron because repeated transfusions deplete iron stores.  
+B. Delay all chelation until adulthood.  
+C. Use platelet transfusions to remove excess iron.  
+D. Consider chelation when ferritin exceeds the stated threshold; the sheet lists subcutaneous deferoxamine and oral deferasirox.  
+E. Use desmopressin to increase urinary iron excretion.
+
+**Correct Answer:** D. Consider chelation when ferritin exceeds the stated threshold; the sheet lists subcutaneous deferoxamine and oral deferasirox.
+
+**Initial Explanation:**
+
+The lecture indicates iron chelation when serum ferritin is above 1000 and says it is started from approximately 2–3 years of age. It lists deferoxamine by subcutaneous injection and deferasirox orally.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Repeated transfusions cause iron overload; additional iron would not address it.
+- **B. Incorrect.** The lecture describes starting chelation from about 2–3 years when the stated ferritin criterion is met.
+- **C. Incorrect.** Platelet transfusion is not an iron-chelation treatment.
+- **D. Correct.** This matches the threshold, age and two agents/routes listed in the lecture.
+- **E. Incorrect.** Desmopressin is described in the bleeding-disorder section, not as treatment for iron overload.
+
+**HIGH-YIELD POINTS:**
+
+- Transfusional iron overload can affect the heart, liver, pancreas, pituitary gland and skin.
+- The sheet lists ferritin above 1000 as the indication and says chelation starts from about 2–3 years of age.
+- Deferoxamine: subcutaneous injection; deferasirox: oral.
+- **OCR caution:** the ferritin unit in the extracted sheet appears as “ng/dl”. Verify the unit against the original lecture PDF before using it clinically; the question tests the threshold as transcribed, not an independently corrected unit.
+
+**Source:** Haematology sheet – Beta-thalassaemia major treatment, Page 20.
+
+---
+
+# 20. Cold-antibody autoimmune haemolysis
+
+## Clinical Case 46 — Cold-reactive haemolysis with an IgG antibody
+
+A 9-year-old child develops pallor and dark urine after prolonged exposure to cold weather. Investigations support acute intravascular haemolysis. Immunological assessment identifies a cold-reactive IgG antibody rather than the IgM antibody described in the common cold-agglutinin pattern.
+
+### Q166. Which condition is most consistent with this combination?
+
+A. Warm-antibody autoimmune haemolytic anaemia  
+B. Isoimmune haemolytic disease of the newborn  
+C. Hereditary spherocytosis  
+D. Paroxysmal cold haemoglobinuria  
+E. G6PD deficiency
+
+**Correct Answer:** D. Paroxysmal cold haemoglobinuria
+
+**Initial Explanation:**
+
+The lecture lists paroxysmal cold haemoglobinuria separately and associates it with cold IgG, not IgM. This distinguishes it from the common cold-agglutinin pattern described in the same section.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Warm AIHA is associated with IgG active at approximately 35–40°C and usually causes extravascular haemolysis in the spleen.
+- **B. Incorrect.** Isoimmune haemolysis is due to passively acquired antibodies, as in haemolytic disease of the newborn.
+- **C. Incorrect.** Hereditary spherocytosis is an intrinsic red-cell membrane disorder, not a cold-antibody condition.
+- **D. Correct.** The cold-reactive IgG finding matches the paroxysmal cold haemoglobinuria entry in the lecture.
+- **E. Incorrect.** G6PD deficiency is associated with oxidant-triggered haemolysis and Heinz bodies, bite cells and blister cells.
+
+**HIGH-YIELD POINTS:**
+
+- Warm AIHA: IgG, active around 35–40°C, usually extravascular haemolysis.
+- Cold-agglutinin pattern in the sheet: IgM, complement-associated activity and agglutination.
+- Paroxysmal cold haemoglobinuria: cold IgG, not IgM.
+
+**Source:** Haematology sheet – Extracorpuscular haemolytic anaemia, Page 25.
+
+---
+
+# 25. Haemophilia A and B
+
+## Clinical Case 47 — Preventing recurrent joint bleeding in severe haemophilia A
+
+A 3-year-old boy has severe haemophilia A and has already experienced repeated joint bleeds. The team wants to reduce further spontaneous joint bleeding and prevent progressive joint damage.
+
+### Q167. Which long-term strategy most closely follows the prophylaxis plan in the course sheet?
+
+A. Regular intravenous factor VIII prophylaxis two to three times weekly, aiming to maintain factor VIII activity above 2%  
+B. Desmopressin as the sole long-term treatment for every severe case  
+C. Routine platelet transfusions after every minor injury  
+D. Avoid all activity and give factor replacement only after permanent joint deformity develops  
+E. Lifelong oral iron to prevent factor VIII deficiency
+
+**Correct Answer:** A. Regular intravenous factor VIII prophylaxis two to three times weekly, aiming to maintain factor VIII activity above 2%
+
+**Initial Explanation:**
+
+The lecture recommends prophylactic factor VIII in severe haemophilia to prevent spontaneous joint bleeding. It gives an intravenous schedule of two to three times weekly to maintain factor VIII above 2%; primary prophylaxis usually begins at 2–3 years.
+
+**Detailed Explanation:**
+
+- **A. Correct.** This matches the schedule, target and preventive purpose stated in the course sheet.
+- **B. Incorrect.** Desmopressin is described for selected mild haemophilia A, not as sole prophylaxis for every severe case.
+- **C. Incorrect.** Haemophilia is a coagulation-factor deficiency; platelet transfusions are not routine prophylaxis.
+- **D. Incorrect.** The lecture describes active prophylaxis to prevent spontaneous joint bleeding, not waiting for established deformity.
+- **E. Incorrect.** Iron does not replace factor VIII or prevent haemarthrosis.
+
+**HIGH-YIELD POINTS:**
+
+- Haemophilia A is due to factor VIII deficiency.
+- Severe disease is associated with spontaneous joint and muscle bleeding.
+- The sheet gives factor VIII prophylaxis two to three times weekly, maintaining a level above 2%.
+- Primary prophylaxis usually begins at 2–3 years of age.
+
+**Source:** Haematology sheet – Haemophilia prophylaxis and long-term complications, Pages 35–36.
+
+---
+
+# 41. Haemoglobin Development and Fetal Haematopoiesis
+
+## Clinical Case 48 — The normal haemoglobin pattern at birth
+
+A term newborn has a haemoglobin electrophoresis performed as part of an assessment. The clinician explains that the proportions of haemoglobin types in a newborn differ from those in an older child or adult.
+
+### Q168. Which pattern is listed as normal at birth in the course sheet?
+
+A. HbA 97%, HbA2 2%, HbF 1%  
+B. HbF approximately 74%, HbA approximately 25% and HbA2 approximately 1%  
+C. HbS approximately 90% with no HbA  
+D. HbA2 approximately 50% and HbF approximately 50%  
+E. HbA is absent and HbA2 is the predominant normal haemoglobin
+
+**Correct Answer:** B. HbF approximately 74%, HbA approximately 25% and HbA2 approximately 1%
+
+**Initial Explanation:**
+
+The page 3 chart lists the newborn pattern as HbA about 25%, HbA2 about 1% and HbF about 74%.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** This resembles the adult pattern shown in the lecture rather than the newborn pattern.
+- **B. Correct.** HbF is the predominant haemoglobin at birth in the course-sheet chart.
+- **C. Incorrect.** HbS predominance is not the normal newborn pattern.
+- **D. Incorrect.** These proportions are not listed as normal.
+- **E. Incorrect.** The lecture lists HbA at about 25% at birth.
+
+**HIGH-YIELD POINTS:**
+
+- HbF consists of two alpha and two gamma chains.
+- HbA consists of two alpha and two beta chains.
+- HbA2 consists of two alpha and two delta chains.
+- Newborn chart: HbF about 74%, HbA about 25%, HbA2 about 1%.
+
+**Source:** Haematology sheet – Haemoglobin types and proportions, Page 3.
+
+---
+
+# 41. Haemoglobin Development and Fetal Haematopoiesis
+
+## Clinical Case 49 — The changing sites of fetal haematopoiesis
+
+A student reviews the developmental sequence of blood-cell production before and after birth. The course sheet describes an early embryonic site, followed by fetal organs, and then the postnatal site.
+
+### Q169. Which sequence best matches the timeline in the lecture?
+
+A. Bone marrow from conception, followed by the yolk sac after birth  
+B. Spleen only throughout fetal life, followed by the liver after birth  
+C. Yolk sac in the first 8 weeks, liver and spleen from about 8 weeks to 6 months, then bone marrow as the main postnatal site  
+D. Thymus in the first 8 weeks, then kidney and spleen throughout childhood  
+E. Liver only during the first 8 weeks, followed by the yolk sac until adulthood
+
+**Correct Answer:** C. Yolk sac in the first 8 weeks, liver and spleen from about 8 weeks to 6 months, then bone marrow as the main postnatal site
+
+**Initial Explanation:**
+
+The lecture gives the yolk sac as the site during the first 8 weeks, the spleen and liver from about 8 weeks to 6 months, and bone marrow as the main site throughout postnatal life.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Bone marrow is the main postnatal site, not the initial site from conception.
+- **B. Incorrect.** The lecture places liver and spleen in the fetal period and bone marrow after birth.
+- **C. Correct.** This is the developmental sequence and timing shown in the lecture.
+- **D. Incorrect.** The thymus and kidney are not given as the main sequence in the sheet.
+- **E. Incorrect.** The sequence reverses the stated early and later fetal sites.
+
+**HIGH-YIELD POINTS:**
+
+- Yolk sac: first 8 weeks.
+- Liver and spleen: approximately 8 weeks to 6 months.
+- Bone marrow: main site throughout postnatal life.
+
+**Source:** Haematology sheet – Haematopoiesis, Page 3.
+
+---
+
+# 3. Confirming and treating iron deficiency anaemia
+
+## Clinical Case 50 — Expected haemoglobin response to oral iron
+
+A child with iron deficiency anaemia starts oral iron with good adherence. At follow-up, the family asks what haemoglobin response is expected over the following weeks if treatment is effective.
+
+### Q170. What approximate rate of haemoglobin rise is stated in the course sheet with good compliance?
+
+A. About 5 g/dL per day  
+B. No haemoglobin increase until iron stores are fully replenished  
+C. About 0.1 g/dL per month  
+D. Immediate normalization within 24 hours  
+E. About 1 g/dL per week
+
+**Correct Answer:** E. About 1 g/dL per week
+
+**Initial Explanation:**
+
+The iron-response table states that, with good compliance, haemoglobin rises by about 1 g/dL per week.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** The lecture does not describe a rise of several grams per day.
+- **B. Incorrect.** Haemoglobin begins to increase before iron stores are fully replenished.
+- **C. Incorrect.** This is far slower than the response stated in the sheet.
+- **D. Incorrect.** Haemoglobin does not normalize immediately after the first dose.
+- **E. Correct.** The sheet gives approximately 1 g/dL per week with good compliance.
+
+**HIGH-YIELD POINTS:**
+
+- Reticulocytosis: approximately 48–72 hours.
+- Haemoglobin rises over the following days to weeks.
+- With good compliance, the lecture gives an approximate Hb rise of 1 g/dL per week.
+- Iron-store replenishment takes longer than the initial clinical response.
+
+**Source:** Haematology sheet – Response to iron therapy, Page 9.
+
+---
+
+# 5. Distinguishing causes of microcytic anaemia
+
+## Clinical Case 51 — A microcytic pattern with increased iron stores
+
+A child is investigated for microcytic hypochromic anaemia. Serum iron and ferritin are normal-to-high, TIBC is normal, and marrow iron stores are present. The clinician compares the results with the course-sheet table of microcytic anaemia.
+
+### Q171. Which diagnosis best matches this laboratory pattern in the lecture?
+
+A. Iron deficiency anaemia  
+B. Anaemia of chronic disease  
+C. Beta-thalassaemia trait  
+D. Chronic lead poisoning  
+E. Sideroblastic anaemia
+
+**Correct Answer:** E. Sideroblastic anaemia
+
+**Initial Explanation:**
+
+The lecture's table describes sideroblastic anaemia as having high or normal serum iron, high or normal ferritin, normal TIBC and present marrow iron stores.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** IDA has low serum iron, low ferritin, high TIBC and absent marrow iron stores.
+- **B. Incorrect.** Anaemia of chronic disease has low serum iron and low TIBC, with normal or high ferritin.
+- **C. Incorrect.** The table gives thalassaemia a normal-to-high iron/ferritin pattern but a normal or low TIBC and increased iron in nucleated red cells; the complete pattern in this case is assigned to sideroblastic anaemia.
+- **D. Incorrect.** Lead poisoning is listed separately and is associated with basophilic stippling and increased blood lead.
+- **E. Correct.** This matches the sideroblastic column of the lecture's comparison table.
+
+**HIGH-YIELD POINTS:**
+
+- Do not assume every microcytic anaemia is iron deficiency.
+- Sideroblastic pattern in the lecture: serum iron high/normal, ferritin high/normal, TIBC normal and marrow iron present.
+- The table also includes IDA, anaemia of chronic disease and beta-thalassaemia.
+
+**Source:** Haematology sheet – Differential diagnosis of microcytic hypochromic anaemia, Page 10.
+
+---
+
+# 1. Approach to a child with anaemia
+
+## Clinical Case 52 — Macrocytosis with another possible underlying cause
+
+A child has macrocytosis on the full blood count. The clinician considers the causes of macrocytic anaemia listed in the course sheet rather than assuming that every case is due to vitamin deficiency.
+
+### Q172. Which of the following is specifically listed as another differential diagnosis of macrocytic anaemia?
+
+A. Chronic liver disease  
+B. Iron deficiency due to poor dietary intake  
+C. Sickle cell trait  
+D. Von Willebrand disease  
+E. Acute blood loss without reticulocytosis
+
+**Correct Answer:** A. Chronic liver disease
+
+**Initial Explanation:**
+
+The lecture lists chronic liver diseases among the differential diagnoses of macrocytic anaemia, in addition to megaloblastic anaemia and aplastic anaemia.
+
+**Detailed Explanation:**
+
+- **A. Correct.** Chronic liver disease is explicitly listed on page 12.
+- **B. Incorrect.** Iron deficiency is typically microcytic and hypochromic.
+- **C. Incorrect.** Sickle cell trait is usually asymptomatic in the sheet and is not listed as a macrocytic cause.
+- **D. Incorrect.** Von Willebrand disease is an inherited bleeding disorder.
+- **E. Incorrect.** Acute blood loss is not listed in this macrocytic differential.
+
+**HIGH-YIELD POINTS:**
+
+- The lecture's macrocytic differential includes B12/folate deficiency, aplastic anaemia, chronic liver disease, bone-marrow infiltration such as MDS, hypothyroidism, Down syndrome and Lesch-Nyhan syndrome.
+- Macrocytosis should not automatically be equated with B12 deficiency.
+
+**Source:** Haematology sheet – Differential diagnosis of macrocytic anaemia, Page 12.
+
+---
+
+# 18. Sickle cell disease: prevention and sickle trait
+
+## Clinical Case 53 — Nocturnal hypoxaemia in sickle cell disease
+
+A child with sickle cell disease has adenotonsillar hypertrophy and symptoms during sleep. The family asks whether this could affect the child's sickle-cell complications.
+
+### Q173. Which sequence of consequences is described in the course sheet?
+
+A. Adenotonsillar hypertrophy causes iron deficiency, which directly produces haemarthrosis.  
+B. Adenotonsillar hypertrophy may cause sleep apnoea and nocturnal hypoxaemia, increasing the risk of vaso-occlusive crises and/or stroke.  
+C. Adenotonsillar hypertrophy prevents sickling by increasing HbF.  
+D. Adenotonsillar hypertrophy causes isolated thrombocytopenia and prolonged PT.  
+E. Adenotonsillar hypertrophy prevents renal complications in sickle cell disease.
+
+**Correct Answer:** B. Adenotonsillar hypertrophy may cause sleep apnoea and nocturnal hypoxaemia, increasing the risk of vaso-occlusive crises and/or stroke.
+
+**Initial Explanation:**
+
+The sickle-cell complications section links adenotonsillar hypertrophy to sleep apnoea, nocturnal hypoxaemia and an increased risk of vaso-occlusive crises and/or stroke.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** This sequence is not described in the sickle-cell section.
+- **B. Correct.** This is the chain of complications stated in the lecture.
+- **C. Incorrect.** Hydroxyurea is the treatment listed as increasing HbF; adenotonsillar hypertrophy does not do this.
+- **D. Incorrect.** This is not the complication pathway described.
+- **E. Incorrect.** The lecture identifies this as a risk pathway, not a protective effect.
+
+**HIGH-YIELD POINTS:**
+
+- Sickle cell disease can cause sleep-related complications.
+- The lecture links adenotonsillar hypertrophy → sleep apnoea → nocturnal hypoxaemia → vaso-occlusive crises and/or stroke.
+
+**Source:** Haematology sheet – Complications of sickle cell disease, Page 24.
+
+---
+
+# 18. Sickle cell disease: prevention and sickle trait
+
+## Clinical Case 54 — Renal complications in sickle cell disease
+
+A child with established sickle cell disease develops recurrent enuresis and is found to have evidence of chronic renal dysfunction. There is no new painful crisis at the time of review.
+
+### Q174. Which chronic complication is specifically listed in the course sheet?
+
+A. Isolated factor VIII deficiency  
+B. Autoimmune destruction of platelets  
+C. Renal dysfunction, including chronic kidney disease and enuresis  
+D. Pure red-cell aplasia  
+E. Vitamin K deficiency
+
+**Correct Answer:** C. Renal dysfunction, including chronic kidney disease and enuresis
+
+**Initial Explanation:**
+
+The complications list for sickle cell disease explicitly includes renal dysfunction, chronic kidney disease and enuresis.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Factor VIII deficiency causes haemophilia A.
+- **B. Incorrect.** Immune platelet destruction is the mechanism of ITP.
+- **C. Correct.** Renal dysfunction, CKD and enuresis are listed complications of sickle cell disease.
+- **D. Incorrect.** Pure red-cell aplasia is described in the Diamond-Blackfan section.
+- **E. Incorrect.** Vitamin K deficiency is listed among acquired coagulation disorders.
+
+**HIGH-YIELD POINTS:**
+
+- Sickle cell disease can affect the kidneys as well as the bones, spleen, lungs, CNS, eyes and liver.
+- The lecture specifically lists renal dysfunction, CKD and enuresis.
+
+**Source:** Haematology sheet – Complications of sickle cell disease, Page 24.
+
+---
+
+# 26. Von Willebrand disease
+
+## Clinical Case 55 — Type I von Willebrand disease
+
+An adolescent girl presents with mild mucosal bleeding and a history of prolonged mucosal or post-procedure bleeding. The clinician explains that von Willebrand disease can be classified according to whether von Willebrand factor is partially reduced, functionally abnormal or completely absent.
+
+### Q175. Which type is described in the course sheet as a partial deficiency and the commonest form?
+
+A. Type III  
+B. Type II  
+C. Haemophilia A  
+D. Type I  
+E. Haemophilia B
+
+**Correct Answer:** D. Type I
+
+**Initial Explanation:**
+
+The lecture describes type I von Willebrand disease as a partial deficiency of vWF and the commonest type, accounting for approximately 60–80% in the sheet.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Type III is described as complete absence of vWF.
+- **B. Incorrect.** Type II is described as a qualitative defect in vWF.
+- **C. Incorrect.** Haemophilia A is factor VIII deficiency.
+- **D. Correct.** Type I is the partial vWF deficiency and is listed as the commonest type.
+- **E. Incorrect.** Haemophilia B is factor IX deficiency.
+
+**HIGH-YIELD POINTS:**
+
+- Type I: partial vWF deficiency; commonest in the sheet (about 60–80%).
+- Type II: qualitative vWF defect.
+- Type III: complete absence of vWF.
+- The lecture describes type I as generally mild and sometimes diagnosed around late puberty.
+
+**Source:** Haematology sheet – Von Willebrand disease, Page 33.
+
+---
+
+# 25. Haemophilia A and B
+
+## Clinical Case 56 — Grading the severity of haemophilia A
+
+A boy with recurrent joint bleeding is found to have factor VIII activity of 0.5% of normal. The clinical team uses the factor-level table in the course sheet to grade disease severity.
+
+### Q176. How is this level classified in the lecture?
+
+A. Mild haemophilia  
+B. Normal factor VIII activity  
+C. Moderate haemophilia  
+D. Von Willebrand disease  
+E. Severe haemophilia
+
+**Correct Answer:** E. Severe haemophilia
+
+**Initial Explanation:**
+
+The lecture defines severe haemophilia as factor VIII activity below 1%, with a tendency to spontaneous joint and muscle bleeding.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Mild disease is listed as factor VIII above 5% up to 40%.
+- **B. Incorrect.** A factor VIII activity of 0.5% is markedly reduced.
+- **C. Incorrect.** Moderate disease is listed as 1–5%.
+- **D. Incorrect.** The case gives a factor VIII activity level used to grade haemophilia; it does not describe vWF testing.
+- **E. Correct.** 0.5% is below the less-than-1% threshold for severe haemophilia.
+
+**HIGH-YIELD POINTS:**
+
+- Severe: factor VIII below 1%; spontaneous joint/muscle bleeds.
+- Moderate: 1–5%; bleeding after minor trauma.
+- Mild: above 5–40%; bleeding after surgery.
+
+**Source:** Haematology sheet – Haemophilia severity, Page 33.
+
+---
+
+# 36. Differential diagnosis of thrombocytopenia
+
+## Clinical Case 57 — Thrombocytopenia with a giant haemangioma
+
+An infant has a large giant haemangioma and develops a markedly reduced platelet count. The clinician reviews the non-immune causes of increased platelet destruction or consumption listed in the thrombocytopenia section.
+
+### Q177. Which syndrome is named in the course sheet in association with a giant haemangioma?
+
+A. Kasabach–Merritt syndrome  
+B. Evans syndrome  
+C. Wiskott–Aldrich syndrome  
+D. TAR syndrome  
+E. Bernard–Soulier syndrome
+
+**Correct Answer:** A. Kasabach–Merritt syndrome
+
+**Initial Explanation:**
+
+The lecture lists giant haemangioma with Kasabach–Merritt syndrome among non-immune causes of thrombocytopenia.
+
+**Detailed Explanation:**
+
+- **A. Correct.** This is the association explicitly named in the course sheet.
+- **B. Incorrect.** Evans syndrome is described as autoimmune haemolytic anaemia plus immune thrombocytopenia.
+- **C. Incorrect.** Wiskott–Aldrich is listed among congenital causes of thrombocytopenia.
+- **D. Incorrect.** TAR syndrome is associated with thrombocytopenia and absent radii.
+- **E. Incorrect.** Bernard–Soulier syndrome is listed among congenital platelet disorders.
+
+**HIGH-YIELD POINTS:**
+
+- The thrombocytopenia differential includes immune and non-immune causes.
+- The sheet lists giant haemangioma with Kasabach–Merritt syndrome.
+- Do not confuse it with Evans syndrome, TAR syndrome or Wiskott–Aldrich syndrome.
+
+**Source:** Haematology sheet – Causes of thrombocytopenia, Page 37.
+
+---
+
+# 28. Disseminated intravascular coagulation (DIC)
+
+## Clinical Case 58 — Supportive treatment of bleeding DIC
+
+A critically ill child with sepsis and shock develops bleeding from venepuncture sites. The platelet count and fibrinogen are low, coagulation times are prolonged and D-dimer is raised. The clinical picture is consistent with disseminated intravascular coagulation (DIC).
+
+### Q178. Which management package is listed in the course sheet for this situation?
+
+A. Oral iron and observation only  
+B. ICU care, treatment of shock and the underlying cause, with fresh frozen plasma and platelet transfusion as indicated  
+C. Routine splenectomy followed by lifelong penicillin  
+D. Desmopressin as the only treatment  
+E. Stop all treatment until the platelet count normalizes spontaneously
+
+**Correct Answer:** B. ICU care, treatment of shock and the underlying cause, with fresh frozen plasma and platelet transfusion as indicated
+
+**Initial Explanation:**
+
+The DIC section describes ICU care, treatment of shock and the underlying cause, and use of FFP and platelet transfusion as part of management.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Iron does not correct consumptive coagulopathy or shock.
+- **B. Correct.** This matches the treatment elements listed in the lecture.
+- **C. Incorrect.** Splenectomy is not a treatment for DIC.
+- **D. Incorrect.** Desmopressin is not listed as sole treatment for DIC.
+- **E. Incorrect.** The sheet emphasizes urgent supportive management and treatment of the cause.
+
+**HIGH-YIELD POINTS:**
+
+- DIC may cause both bleeding and thrombosis.
+- Treat the underlying cause, manage shock and provide supportive blood components when indicated.
+- The lecture notes that heparin use is controversial.
+
+**Source:** Haematology sheet – Disseminated intravascular coagulation, Page 40.
+
+---
+
+# 18. Sickle cell disease: prevention and sickle trait
+
+## Clinical Case 59 — Sickle cell trait and malaria
+
+A child is found to have HbAS on haemoglobin electrophoresis and is otherwise asymptomatic. The family lives in a region where malaria is endemic and asks about an association mentioned in the course sheet.
+
+### Q179. Which statement about sickle cell trait is listed in the lecture?
+
+A. It causes the same recurrent vaso-occlusive crises as HbSS.  
+B. It is associated with absent HbA and 90–95% HbS.  
+C. It is described as providing protection against malaria.  
+D. It invariably causes transfusion-dependent anaemia.  
+E. It causes severe neonatal hydrops fetalis.
+
+**Correct Answer:** C. It is described as providing protection against malaria.
+
+**Initial Explanation:**
+
+The sickle cell trait section describes HbAS as usually asymptomatic and lists protection against malaria.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** The lecture describes sickle cell trait as usually asymptomatic; HbSS is the sickle cell anaemia form.
+- **B. Incorrect.** The sheet gives HbA about 60–80% and HbS about 20–40% in trait.
+- **C. Correct.** Protection against malaria is specifically listed in the trait section.
+- **D. Incorrect.** Transfusion dependence is associated with severe beta-thalassaemia major, not ordinary HbAS trait.
+- **E. Incorrect.** Hydrops fetalis is associated with loss of all four alpha-globin genes (Hb Bart's), not sickle trait.
+
+**HIGH-YIELD POINTS:**
+
+- HbAS is usually asymptomatic.
+- The sheet lists HbS about 20–40% and HbA about 60–80%.
+- Protection against malaria is listed as an association of sickle cell trait.
+
+**Source:** Haematology sheet – Sickle cell trait, Page 24.
+
+---
+
+# 6. Folate deficiency and megaloblastic anaemia
+
+## Clinical Case 60 — Comparing body stores of folate and vitamin B12
+
+An adolescent with a restricted diet is being assessed for megaloblastic anaemia. The clinician compares the body's reserve of folate with that of vitamin B12, as described in the course sheet.
+
+### Q180. Which statement about body stores is correct according to the lecture?
+
+A. Folate stores usually last 2–3 years, while B12 stores last 2–4 months.  
+B. Both folate and B12 stores normally last only a few days.  
+C. Folate and B12 are stored for identical periods.  
+D. Folate stores last about 2–4 months, whereas B12 stores last about 2–3 years.  
+E. B12 is not stored in the body.
+
+**Correct Answer:** D. Folate stores last about 2–4 months, whereas B12 stores last about 2–3 years.
+
+**Initial Explanation:**
+
+The lecture lists body stores of folate as approximately 2–4 months and body stores of vitamin B12 as approximately 2–3 years.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** The two time periods are reversed.
+- **B. Incorrect.** The sheet describes substantially longer reserves for both vitamins.
+- **C. Incorrect.** Folate and B12 stores differ markedly in the lecture.
+- **D. Correct.** This is the comparison given on page 11.
+- **E. Incorrect.** The lecture states that B12 body stores last approximately 2–3 years.
+
+**HIGH-YIELD POINTS:**
+
+- Folate: body stores about 2–4 months.
+- Vitamin B12: body stores about 2–3 years.
+- Folate is absorbed in the small intestine; the B12–intrinsic factor complex is absorbed in the terminal ileum.
+
+**Source:** Haematology sheet – Folate and cyanocobalamin, Page 11.
+
+---
+
+# 34. ITP: treatment and clinical course
+
+## Clinical Case 61 — Screening in chronic immune thrombocytopenia
+
+A 13-year-old girl has immune thrombocytopenia that has persisted for more than 6 months. During follow-up, the clinician reviews associated causes that should be considered in chronic disease.
+
+### Q181. Which condition does the lecture specifically recommend screening for in a child with chronic ITP?
+
+A. Systemic lupus erythematosus (SLE)  
+B. Beta-thalassaemia major  
+C. Hereditary spherocytosis  
+D. G6PD deficiency  
+E. Sickle cell trait
+
+**Correct Answer:** A. Systemic lupus erythematosus (SLE)
+
+**Initial Explanation:**
+
+The chronic ITP section states that SLE screening should be performed because SLE is an important cause of a low platelet count.
+
+**Detailed Explanation:**
+
+- **A. Correct.** The lecture specifically recommends SLE screening in chronic ITP.
+- **B. Incorrect.** Beta-thalassaemia major is a chronic haemolytic anaemia, not the associated condition singled out for chronic ITP screening.
+- **C. Incorrect.** Hereditary spherocytosis is a red-cell membrane disorder.
+- **D. Incorrect.** G6PD deficiency is an enzyme-related haemolytic disorder.
+- **E. Incorrect.** Sickle cell trait is usually asymptomatic and is not the screening association listed for chronic ITP.
+
+**HIGH-YIELD POINTS:**
+
+- Chronic ITP is defined in the sheet as duration of at least 6 months.
+- The lecture specifically recommends SLE screening in chronic ITP.
+
+**Source:** Haematology sheet – Chronic ITP, Page 39.
+
+---
+
+# 36. Differential diagnosis of thrombocytopenia
+
+## Clinical Case 62 — Grading thrombocytopenia by platelet count
+
+A child is reviewed after a full blood count shows a platelet count of 18 × 10⁹/L. The clinician uses the severity categories in the course sheet to estimate bleeding risk.
+
+### Q182. How is this platelet count classified according to the lecture?
+
+A. Mild thrombocytopenia  
+B. Severe thrombocytopenia  
+C. Moderate thrombocytopenia  
+D. Normal platelet count  
+E. Thrombocytosis
+
+**Correct Answer:** B. Severe thrombocytopenia
+
+**Initial Explanation:**
+
+The lecture defines severe thrombocytopenia as a platelet count below 20 × 10⁹/L and associates it with a risk of spontaneous bleeding.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Mild thrombocytopenia is listed as 50–150 × 10⁹/L.
+- **B. Correct.** A count of 18 × 10⁹/L is below the severe threshold of 20 × 10⁹/L.
+- **C. Incorrect.** Moderate thrombocytopenia is listed as 20–50 × 10⁹/L.
+- **D. Incorrect.** The sheet gives the normal platelet range as 150–450 × 10⁹/L.
+- **E. Incorrect.** Thrombocytosis means an increased, not reduced, platelet count.
+
+**HIGH-YIELD POINTS:**
+
+- Normal platelet count in the lecture: 150–450 × 10⁹/L.
+- Mild thrombocytopenia: 50–150 × 10⁹/L.
+- Moderate thrombocytopenia: 20–50 × 10⁹/L.
+- Severe thrombocytopenia: below 20 × 10⁹/L, with risk of spontaneous bleeding.
+
+**Source:** Haematology sheet – Thrombocytopenia severity, Page 37.
+
+---
+
+# 25. Haemophilia A and B
+
+## Clinical Case 63 — Factor XI deficiency
+
+A child has a mild inherited bleeding tendency. Specific coagulation testing identifies reduced factor XI activity, while the history does not suggest the severe recurrent joint bleeding classically associated with severe haemophilia A or B.
+
+### Q183. Which condition is associated with factor XI deficiency in the course sheet?
+
+A. Haemophilia A  
+B. Haemophilia B  
+C. Haemophilia C  
+D. Von Willebrand disease type I  
+E. Disseminated intravascular coagulation
+
+**Correct Answer:** C. Haemophilia C
+
+**Initial Explanation:**
+
+The lecture identifies haemophilia C as factor XI deficiency. It is described as very rare, autosomal recessive and usually milder, with some patients having no bleeding.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Haemophilia A is factor VIII deficiency.
+- **B. Incorrect.** Haemophilia B is factor IX deficiency.
+- **C. Correct.** Haemophilia C is the factor XI deficiency described in the lecture.
+- **D. Incorrect.** Type I von Willebrand disease is a partial vWF deficiency.
+- **E. Incorrect.** DIC is an acquired consumptive coagulopathy, not an inherited factor XI deficiency.
+
+**HIGH-YIELD POINTS:**
+
+- Haemophilia A: factor VIII deficiency.
+- Haemophilia B: factor IX deficiency.
+- Haemophilia C: factor XI deficiency; very rare and described as autosomal recessive and generally milder in the sheet.
+
+**Source:** Haematology sheet – Inherited coagulation disorders, Page 33.
+
+---
+
+# 25. Haemophilia A and B
+
+## Clinical Case 64 — Inhibitors complicating haemophilia treatment
+
+A child with haemophilia has a reduced response to replacement treatment. The team considers the treatment-related complications described in the course sheet, including antibodies directed against the replacement clotting factor.
+
+### Q184. Which complication can reduce or completely inhibit the effect of factor VIII or factor IX replacement?
+
+A. Iron overload  
+B. Functional hyposplenism  
+C. Platelet sequestration  
+D. Development of inhibitors (antibodies to factor VIII or IX)  
+E. Vitamin B12 deficiency
+
+**Correct Answer:** D. Development of inhibitors (antibodies to factor VIII or IX)
+
+**Initial Explanation:**
+
+The lecture describes inhibitors as antibodies to factor VIII or IX that may reduce or completely inhibit treatment effect. It gives an occurrence of approximately 5–20%.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Iron overload is a complication of repeated transfusion, especially in transfusion-dependent thalassaemia.
+- **B. Incorrect.** Functional hyposplenism is associated with sickle cell disease and infection risk.
+- **C. Incorrect.** Platelet sequestration is not the factor-replacement complication described.
+- **D. Correct.** Inhibitors are antibodies to factor VIII or IX and can reduce or block replacement treatment.
+- **E. Incorrect.** B12 deficiency causes megaloblastic anaemia and may cause neurological manifestations.
+
+**HIGH-YIELD POINTS:**
+
+- The sheet gives inhibitor development in approximately 5–20%.
+- Inhibitors may reduce or completely inhibit factor treatment.
+- The lecture mentions very high factor doses or bypassing agents such as factor VIIa for bleeding, and possible immune-tolerance induction.
+
+**Source:** Haematology sheet – Complications of haemophilia treatment, Page 36.
+
+---
+
+# 26. Von Willebrand disease
+
+## Clinical Case 65 — A blood product no longer recommended for von Willebrand disease
+
+A child with von Willebrand disease requires treatment for a bleeding episode. The clinician reviews the products and measures discussed in the course sheet and avoids an older product that the lecture says is no longer used for this condition.
+
+### Q185. Which product does the lecture state is no longer used to treat von Willebrand disease because it has not undergone viral inactivation?
+
+A. Desmopressin  
+B. Tranexamic acid  
+C. Recombinant factor VIII in selected severe cases  
+D. Avoidance of trauma and NSAIDs  
+E. Cryoprecipitate
+
+**Correct Answer:** E. Cryoprecipitate
+
+**Initial Explanation:**
+
+The von Willebrand disease section states that cryoprecipitate is no longer used because it has not undergone viral inactivation.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Desmopressin is listed as a treatment option for suitable cases because it releases endogenous vWF and factor VIII.
+- **B. Incorrect.** Tranexamic acid is listed for mucosal bleeding.
+- **C. Incorrect.** Recombinant factor VIII is listed for severe types of vWD.
+- **D. Incorrect.** These are general preventive measures, not a blood product.
+- **E. Correct.** This is the product specifically identified in the lecture as no longer used for vWD.
+
+**HIGH-YIELD POINTS:**
+
+- Desmopressin may increase endogenous vWF and factor VIII in responsive patients.
+- Tranexamic acid is listed for mucosal bleeding.
+- The lecture states that cryoprecipitate is no longer used for vWD because it has not undergone viral inactivation.
+
+**Source:** Haematology sheet – Von Willebrand disease management, Pages 34–35.
+
+---
+
+## Re-audit notes and quality control
+
+- The supplement was expanded from 7 to 25 questions after rechecking the lecture page by page against the existing Q1–Q160 bank.
+- The previous question on renal papillary necrosis was removed because the concept already appeared in the explanation of Q35 in the original bank.
+- The new questions add distinct tested details rather than repeating the main diagnosis questions already present in the bank.
+- The source sheet contains an internal inconsistency about the iron content of breast milk and cow's milk (Pages 6–7); Q161 is deliberately limited to the absorption percentages in the numerical table.
+- The extracted ferritin unit in the thalassaemia section appears as “ng/dl”; verify against the original PDF before clinical use.
+- Some conditions are only named in the lecture without sufficient clinical detail for a fully supported case. Examples include hereditary elliptocytosis, neonatal alloimmune thrombocytopenia and TTP. No extra diagnostic criteria or management details have been invented for them.
+
+**Correct-answer distribution in this supplement:** A = 5, B = 5, C = 5, D = 5, E = 5.
+
+**Source:** *Hematology  colored 2024 د ع الجعكي.md*, Pages 3–40. The original question bank *Hematology Clinical Cases.md* was used for overlap checking.
