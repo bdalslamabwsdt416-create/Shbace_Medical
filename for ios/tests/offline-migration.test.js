@@ -274,6 +274,7 @@ function runVerifiedPlanHarness(options = {}) {
     READY_URL: new URL('./__shbace_offline_ready__', scope).href,
     urlFor(path) { return new URL(path, scope).href; },
     ensureServiceWorker: () => Promise.resolve(),
+    wait: () => Promise.resolve(),
     dbPut: () => Promise.resolve(true),
     fileValid: () => Promise.resolve(true),
     verifyAll: () => Promise.resolve(),
