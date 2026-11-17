@@ -201,6 +201,44 @@
       '<button type="button" class="btn block shb-af-copyinfo" id="shbCopyAppInfo">Copy app information</button>' +
       '<p class="meta">Send the copied details when reporting an app issue. No account or personal data is included.</p></section>';
   }
+  function updateSummary() {
+    var last=0,pending=0,info=null;
+    try { last=Number(window.shbaceLastUpdateCheck&&window.shbaceLastUpdateCheck())||0; pending=Number(window.shbaceUpdatePending&&window.shbaceUpdatePending())||0; info=window.shbaceVersionInfo&&window.shbaceVersionInfo(); } catch (_) {}
+    var installed=info&&info.installed,available=info&&info.available;
+    var version=installed&&installed.displayVersion?'Installed version '+installed.displayVersion+(installed.releaseDate?' · '+installed.releaseDate:'')+'. ':'';
+    var base=version+(last?'Last successful check: '+new Date(last).toLocaleString()+'. ':'')+'Automatic update checks run every 7 days. Only changed files are downloaded; your study progress and notes are kept.';
+    return pending?'An update is available'+(available&&available.displayVersion?' ('+available.displayVersion+')':'')+': '+pending+' changed file'+(pending===1?'':'s')+'. Choose Check for updates to review it. '+base:base;
+  }
+  function mountUpdateSettings(root) {
+    if (typeof window.shbaceCheckForUpdate!=='function') return;
+    var box=root.querySelector('#shbUpdateSettings');
+    if (!box) {
+      box=document.createElement('section');
+      box.className='card setcard shb-af-settings';
+      box.id='shbUpdateSettings';
+      box.innerHTML='<h3>App updates</h3><p class="meta">Check manually at any time, or let Shbace check automatically every 7 days. Only changed files are downloaded after you approve the update. Your answers, notes and saved progress are preserved.</p>'+
+        '<button type="button" class="btn block" id="shbUpdateCheck">Check for updates</button>'+
+        '<p class="meta" id="shbUpdateNote" aria-live="polite"></p>';
+      root.appendChild(box);
+      var button=box.querySelector('#shbUpdateCheck'),note=box.querySelector('#shbUpdateNote');
+      button.addEventListener('click',function(){
+        if(box.dataset.busy)return;
+        box.dataset.busy='1';button.disabled=true;button.textContent='Checking…';note.textContent='Checking the offline package…';
+        Promise.resolve(window.shbaceCheckForUpdate()).then(function(result){
+          var state=result&&result.state;
+          if(state==='latest')note.textContent='You already have the latest offline package. '+updateSummary();
+          else if(state==='update')note.textContent='An update is available. Review the update panel and choose Update now to install it. '+updateSummary();
+          else if(state==='setup')note.textContent='Some offline files need to be installed or restored. Follow the on-screen steps.';
+          else if(state==='offline')note.textContent='The update server could not be reached. Your previously saved offline package remains available; reconnect and try again.';
+          else if(state==='busy')note.textContent='An offline package operation is already in progress.';
+          else note.textContent='Manual update checks are available when Shbace is installed on the Home Screen.';
+        }).catch(function(){note.textContent='The update check could not be completed. Try again when connected.';})
+        .then(function(){delete box.dataset.busy;button.disabled=false;button.textContent='Check for updates';});
+      });
+    }
+    var note=box.querySelector('#shbUpdateNote');
+    if(note&&!box.dataset.busy)note.textContent=updateSummary();
+  }
   function mountSettings() {
     var root = document.querySelector('#phoneContent .rs');
     if (!root) return;
@@ -211,6 +249,7 @@
       box.innerHTML = featureSettingsHTML();
       while (box.firstElementChild) root.appendChild(box.firstElementChild);
     }
+    mountUpdateSettings(root);
   }
   function safeText(el) { return (el && (el.innerText || el.textContent) || '').replace(/\s+/g, ' ').trim(); }
   function cardQuestion(card) {

@@ -1,9 +1,9 @@
 'use strict';
-// build: ios-v18 (to-me core with preserved iOS offline lifecycle)
+// build: ios-v19 (To Me verified offline-package updater with preserved iOS lifecycle)
 
 const CACHE_NAME = 'shbace-medical-offline-v2';
 // App-shell updates are isolated from the verified offline package. Never overwrite offline resources during SW install.
-const SHELL_CACHE_NAME = 'shbace-medical-ios-shell-v151';
+const SHELL_CACHE_NAME = 'shbace-medical-ios-shell-v152';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
 const APP_SHELL = [
   './',
@@ -49,7 +49,7 @@ self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     await self.clients.claim();
     const cache = await caches.open(CACHE_NAME);
-    const migrationUrl = new URL('__shbace_silent_update_migration_151__', self.registration.scope).href;
+    const migrationUrl = new URL('__shbace_silent_update_migration_152__', self.registration.scope).href;
     if (!(await cache.match(migrationUrl))) {
       await cache.put(migrationUrl, new Response('done', {
         status: 200, headers: { 'Content-Type': 'text/plain', 'Cache-Control': 'no-store' }
@@ -63,7 +63,12 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
   if (url.pathname.endsWith('/sw.js')) return;
-  // v5: the in-app update check asks for pwa-version.json?shbcheck=… and must reach the network, not the cache.
+  // Package integrity downloads must reach the network; never hash a stale shell/offline-cache response.
+  if (url.searchParams.has('__shbace_integrity')) {
+    event.respondWith(fetch(request, { cache: 'reload' }));
+    return;
+  }
+  // Version and manifest checks must also bypass cached copies.
   if (url.searchParams.has('shbcheck')) return;
 
   event.respondWith((async () => {
