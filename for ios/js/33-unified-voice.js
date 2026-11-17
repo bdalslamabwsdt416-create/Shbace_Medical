@@ -536,4 +536,152 @@ try{
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mountVoiceSettings,{once:true});else mountVoiceSettings();
 computerVoiceMountSettings();
 computerVoiceDecorateQuestions();
+
+/* iPhone/PWA-compatible study experience controls.
+   Android-only haptics and scheduled native reminders are intentionally not exposed here. */
+var IOS_EXPERIENCE_KEY='shbace_ios_study_experience_v1';
+var iosStudyPrefs=(function(){
+ try{
+  var saved=JSON.parse(localStorage.getItem(IOS_EXPERIENCE_KEY)||'null');
+  return Object.assign({followSystemTheme:false,keepScreenAwake:false},
+    saved&&typeof saved==='object'&&!Array.isArray(saved)?saved:{});
+ }catch(_){return {followSystemTheme:false,keepScreenAwake:false}}
+})();
+var iosStudyMedia=null,iosStudyWakeLock=null,iosStudyWakeBusy=false,iosStudyThemeDriven=false;
+var iosStudyWakeStatus='';
+function iosStudySave(){try{localStorage.setItem(IOS_EXPERIENCE_KEY,JSON.stringify(iosStudyPrefs))}catch(_){}}
+function iosStudyWakeSupported(){
+ try{return !!(window.isSecureContext!==false&&navigator.wakeLock&&typeof navigator.wakeLock.request==='function')}catch(_){return false}
+}
+function iosStudyThemeUpdate(){
+ if(!iosStudyPrefs.followSystemTheme)return;
+ try{
+  if(!iosStudyMedia)iosStudyMedia=window.matchMedia('(prefers-color-scheme: light)');
+  var theme=iosStudyMedia.matches?'light':'dark';
+  if(typeof window.setSet==='function'&&window.__SET&&window.__SET.theme!==theme){
+   iosStudyThemeDriven=true;
+   try{window.setSet('theme',theme)}finally{iosStudyThemeDriven=false}
+  }else{
+   var phone=document.querySelector('.phone');
+   if(phone)phone.classList.toggle('light',theme==='light');
+   document.body.classList.toggle('light',theme==='light');
+  }
+ }catch(_){}
+ iosStudyUpdateUI();
+}
+function iosStudyUnbindTheme(){
+ try{if(iosStudyMedia){
+  if(iosStudyMedia.removeEventListener)iosStudyMedia.removeEventListener('change',iosStudyThemeUpdate);
+  else if(iosStudyMedia.removeListener)iosStudyMedia.removeListener(iosStudyThemeUpdate);
+ }}catch(_){}
+}
+function iosStudyBindTheme(){
+ try{
+  if(!window.matchMedia)return;
+  iosStudyMedia=window.matchMedia('(prefers-color-scheme: light)');
+  if(iosStudyMedia.addEventListener)iosStudyMedia.addEventListener('change',iosStudyThemeUpdate);
+  else if(iosStudyMedia.addListener)iosStudyMedia.addListener(iosStudyThemeUpdate);
+  iosStudyThemeUpdate();
+ }catch(_){}
+}
+if(typeof window.setSet==='function'&&!window.__shbIosThemePreferenceWrapped){
+ var iosOriginalSetSet=window.setSet;
+ window.setSet=function(key,value){
+  if(key==='theme'&&!iosStudyThemeDriven&&iosStudyPrefs.followSystemTheme){
+   iosStudyPrefs.followSystemTheme=false;iosStudySave();iosStudyUnbindTheme();
+  }
+  var result=iosOriginalSetSet.apply(this,arguments);
+  iosStudyUpdateUI();return result;
+ };
+ window.__shbIosThemePreferenceWrapped=true;
+}
+function iosStudyQuestionBankOpen(){
+ try{return !!document.querySelector('#phoneContent .rs.qb')||!!document.querySelector('#phoneContent .qcard')}catch(_){return false}
+}
+function iosStudyReleaseWakeLock(){
+ if(!iosStudyWakeLock)return;
+ var lock=iosStudyWakeLock;iosStudyWakeLock=null;
+ try{lock.release().catch(function(){})}catch(_){}
+}
+function iosStudySyncWakeLock(){
+ var should=iosStudyPrefs.keepScreenAwake&&iosStudyWakeSupported()&&iosStudyQuestionBankOpen()&&!document.hidden;
+ if(!should){iosStudyReleaseWakeLock();return}
+ if(iosStudyWakeLock||iosStudyWakeBusy)return;
+ iosStudyWakeBusy=true;
+ try{
+  navigator.wakeLock.request('screen').then(function(lock){
+   iosStudyWakeLock=lock;iosStudyWakeStatus='';
+   try{lock.addEventListener('release',function(){if(iosStudyWakeLock===lock)iosStudyWakeLock=null})}catch(_){}
+   iosStudyUpdateUI();
+  }).catch(function(){
+   iosStudyWakeStatus='The device did not grant screen wake lock. Keep the app open and use a supported iOS Home Screen version.';
+   iosStudyUpdateUI();
+  }).finally(function(){iosStudyWakeBusy=false});
+ }catch(_){iosStudyWakeBusy=false}
+}
+function iosStudyToggleMarkup(key,title,description,disabled){
+ var on=!!iosStudyPrefs[key];
+ return '<div class="setrow shb-ios-study-row"><span><b>'+title+'</b><small>'+description+'</small></span>'+
+  '<button type="button" class="drsw '+(on?'on':'')+'" role="switch" aria-checked="'+on+'" aria-label="'+title+'" data-shb-ios-experience="'+key+'" '+(disabled?'disabled':'')+'><i></i><span>'+(on?'ON':'OFF')+'</span></button></div>';
+}
+function iosStudyMountSettings(){
+ try{
+  var root=settingsRoot();if(!root)return;
+  if(!root.querySelector('#shbIosStudyExperienceSettings')){
+   var card=document.createElement('section');
+   card.className='card setcard';card.id='shbIosStudyExperienceSettings';
+   card.innerHTML='<h3>Study experience</h3>'+
+    '<p class="meta">iPhone-compatible controls for device appearance and focused Question Bank sessions.</p>'+
+    iosStudyToggleMarkup('followSystemTheme','Follow device appearance','Match the app to your iPhone light or dark appearance. Choosing a theme manually turns this off.',false)+
+    iosStudyToggleMarkup('keepScreenAwake','Keep screen awake','Prevent the screen from dimming while the Question Bank is open. Requires Screen Wake Lock support.',!iosStudyWakeSupported())+
+    '<p class="meta shb-ios-study-status" id="shbIosStudyWakeStatus" role="status" aria-live="polite"></p>';
+   root.appendChild(card);
+  }
+  iosStudyUpdateUI();
+ }catch(_){}
+}
+function iosStudyUpdateUI(){
+ try{
+  var root=document.getElementById('shbIosStudyExperienceSettings');if(!root)return;
+  root.querySelectorAll('[data-shb-ios-experience]').forEach(function(button){
+   var key=button.getAttribute('data-shb-ios-experience'),on=!!iosStudyPrefs[key];
+   button.classList.toggle('on',on);button.setAttribute('aria-checked',String(on));
+   var label=button.querySelector('span');if(label)label.textContent=on?'ON':'OFF';
+  });
+  var status=root.querySelector('#shbIosStudyWakeStatus');
+  if(status)status.textContent=!iosStudyWakeSupported()
+   ?'Screen wake lock is unavailable in this browser. On iPhone, use an up-to-date iOS Home Screen app (iOS 18.4 or newer).'
+   :iosStudyWakeStatus||'Screen wake lock is active only while the Question Bank is open.';
+ }catch(_){}
+}
+document.addEventListener('click',function(event){
+ try{
+  var button=event.target&&event.target.closest?event.target.closest('[data-shb-ios-experience]'):null;
+  if(!button)return;
+  event.preventDefault();event.stopPropagation();
+  var key=button.getAttribute('data-shb-ios-experience');
+  if(key!=='followSystemTheme'&&key!=='keepScreenAwake')return;
+  if(key==='keepScreenAwake'&&!iosStudyWakeSupported())return;
+  iosStudyPrefs[key]=!iosStudyPrefs[key];iosStudySave();
+  if(key==='followSystemTheme'){
+   if(iosStudyPrefs.followSystemTheme)iosStudyBindTheme();
+   else iosStudyUnbindTheme();
+  }else{iosStudyWakeStatus='';iosStudySyncWakeLock()}
+  iosStudyUpdateUI();
+ }catch(_){}
+},true);
+document.addEventListener('visibilitychange',function(){
+ if(document.hidden)iosStudyReleaseWakeLock();else iosStudySyncWakeLock();
+});
+window.addEventListener('pagehide',iosStudyReleaseWakeLock);
+try{
+ var iosStudyHost=document.getElementById('phoneContent');
+ if(iosStudyHost&&window.MutationObserver)new MutationObserver(function(){
+  iosStudyMountSettings();iosStudySyncWakeLock();
+ }).observe(iosStudyHost,{childList:true});
+}catch(_){}
+if(iosStudyPrefs.followSystemTheme)iosStudyBindTheme();
+iosStudyMountSettings();iosStudySyncWakeLock();
+window.shbaceSyncIosStudyExperience=iosStudySyncWakeLock;
+
 })();
