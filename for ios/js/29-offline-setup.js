@@ -628,7 +628,8 @@ function runPlan(){
    }else setTimeout(function(){location.reload()},180);
   }
  }).catch(function(error){
-  migrationInProgress=false;
+  /* Keep the manual migration intent in memory for the explicit Retry download action.
+     The persistent MIGRATION_KEY is still untouched until a later verified commit. */
   setStatus(error.message||'The download could not be completed.');
   setWarning('No file is marked complete unless the HTTP response, byte size, SHA-256 hash and local cache write all succeeded. Retry to continue from verified files.');
   setErrorList(errors.length?errors:[error.message||String(error)]);
