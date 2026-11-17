@@ -64,13 +64,20 @@ function createServiceWorkerHarness(options) {
         request.result = {
           objectStoreNames: { contains: name => name === 'meta' },
           transaction() {
-            return {
+            const tx = {
               objectStore() {
                 return {
                   get(key) {
                     const getRequest = {};
                     queueMicrotask(() => {
-                      const installed = options.installedRecord ? Object.assign({}, options.installedRecord, {\n                        version: options.installedRecord.version || '1.4.20', verified: true, fileCount: 1,\n                        files: Object.assign({ 'index.html': { sha256: 'a'.repeat(64), bytes: 1 } }, options.installedRecord.files || {})\n                      }) : undefined;\n                      getRequest.result = key === 'installed' ? installed : (key === 'ready' && installed ? { version: installed.version, verified: true, fileCount: installed.fileCount } : undefined);
+                      const installed = options.installedRecord ? Object.assign({}, options.installedRecord, {
+                        version: options.installedRecord.version || '1.4.20',
+                        verified: true,
+                        fileCount: 1,
+                        files: Object.assign({ 'index.html': { sha256: 'a'.repeat(64), bytes: 1 } }, options.installedRecord.files || {})
+                      }) : undefined;
+                      getRequest.result = key === 'installed' ? installed :
+                        (key === 'ready' && installed ? { version: installed.version, verified: true, fileCount: installed.fileCount } : undefined);
                       if (getRequest.onsuccess) getRequest.onsuccess();
                     });
                     return getRequest;
@@ -78,6 +85,8 @@ function createServiceWorkerHarness(options) {
                 };
               }
             };
+            queueMicrotask(() => queueMicrotask(() => { if (tx.oncomplete) tx.oncomplete(); }));
+            return tx;
           },
           close() {}
         };
