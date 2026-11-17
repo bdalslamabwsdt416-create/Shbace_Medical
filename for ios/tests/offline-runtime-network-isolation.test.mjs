@@ -15,7 +15,9 @@ test('question bank startup is local after install and network-enabled only for 
   const end = index.indexOf("try{performance.mark('shb-boot-start')}", start);
   assert.ok(start >= 0 && end > start, 'question-bank loader block exists');
   const loader = index.slice(start, end);
-  assert.match(loader, /hasVerifiedPackage\(\)/);\n  assert.match(loader, /if\(verified\)throw new Error/);\n  assert.match(loader, /first-install download/);
+  assert.match(loader, /hasVerifiedPackage\(\)/);
+  assert.match(loader, /if\(verified\)throw new Error/);
+  assert.match(loader, /first-install download/);
   assert.match(loader, /PACKAGE_CACHE_NAME='shbace-medical-offline-v2'/);
   assert.match(loader, /cacheHit\(packageCache/);
   assert.match(loader, /is missing from the installed offline storage/);
@@ -27,7 +29,8 @@ test('service worker is local-only except explicitly tagged updater traffic', ()
   assert.match(worker, /request\.headers\.get\(UPDATE_HEADER\) === '1'/);
   assert.match(worker, /request\.cache === 'no-store' && tagged/);
   assert.match(worker, /if \(integrityRequest && tagged\)/);
-  assert.match(worker, /hasVerifiedInstall\(\)/);\n  assert.match(worker, /verified \? localOnly\(request\) : fetch\(request\)/);
+  assert.match(worker, /hasVerifiedInstall\(\)/);
+  assert.match(worker, /verified \? localOnly\(request\) : fetch\(request\)/);
   assert.match(worker, /url\.origin !== self\.location\.origin/);
   assert.doesNotMatch(worker, /refreshCachedPwaVersion|networkFirstOnPackageMismatch/);
   assert.match(worker, /if \(request.method !== 'GET'\)/);

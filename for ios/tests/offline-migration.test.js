@@ -694,7 +694,8 @@ test('service worker bootstraps first install then is local-only except explicit
     "request.headers.get(UPDATE_HEADER) === '1'",
     "request.cache === 'no-store' && tagged",
     'if (integrityRequest && tagged)',
-    'hasVerifiedInstall()',\n    'verified ? localOnly(request) : fetch(request)',
+    'hasVerifiedInstall()',
+    'verified ? localOnly(request) : fetch(request)',
     'cache.match(INDEX_URL)',
     "if (request.method !== 'GET')"
   ]) assert.ok(sw.includes(marker), 'missing local-only worker marker: ' + marker);
@@ -801,7 +802,9 @@ test('iOS copies the latest To Me drawer and settings while retaining the iOS ma
 });
 
 test('build guards verified install commit, bootstrap/local-only runtime and manual repair entry point', () => {
-  assert.ok(build.includes('function finalizeVerifiedPlanCommit()'));\n  assert.ok(build.includes('function dbPutInstalled(record,ready)'));\n  assert.ok(build.includes('async function hasVerifiedInstall()'));
+  assert.ok(build.includes('function finalizeVerifiedPlanCommit()'));
+  assert.ok(build.includes('function dbPutInstalled(record,ready)'));
+  assert.ok(build.includes('async function hasVerifiedInstall()'));
   assert.ok(build.includes("if(migrationInProgress){lsSet(MIGRATION_KEY,'1')"));
   assert.ok(build.includes('function localRepairNeeded(installed)'));
   assert.ok(build.includes('function manualRepair()'));
