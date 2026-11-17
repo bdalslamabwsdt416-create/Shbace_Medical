@@ -11,6 +11,7 @@ var STAGING_NAME='shbace-staging-offline';
 var INSTALLED_KEY='installed';
 /* Update checks are throttled: one successful network check every 7 days; after a failed attempt (offline) retry no sooner than 2 hours. */
 var CHECK_OK_KEY='shbace_pkg_check_ok_v1',CHECK_TRY_KEY='shbace_pkg_check_try_v1';
+var MIGRATION_KEY='shbace_ios_migrated_1_4_14',migrationInProgress=false;
 var CHECK_EVERY=7*24*60*60*1000,CHECK_RETRY=2*60*60*1000;
 var PENDING_KEY='shbace_pkg_update_pending_v1',NOTIF_ID='update-available';
 var manifestFromNetwork=false,plan=null;
@@ -246,7 +247,7 @@ function cleanupPreviousCaches(){
  }).then(function(internalResults){
   return caches.keys().then(function(names){
    var stale=names.filter(function(name){
-    return (name.indexOf('shbace-chrome-offline-')===0&&name!==CACHE_NAME)||name.indexOf('shbace-to-me-chrome-offline-')===0||name==='shbace-medical-ios-shell-v151';
+    return (name.indexOf('shbace-chrome-offline-')===0&&name!==CACHE_NAME)||name.indexOf('shbace-to-me-chrome-offline-')===0||name.indexOf('shbace-medical-ios-shell-')===0;
    });
    return Promise.all(stale.map(function(name){
     return caches.delete(name).then(function(ok){return {name:name,ok:ok}}).catch(function(){return {name:name,ok:false}});
@@ -435,11 +436,11 @@ function fileMap(files){
  var map={};files.forEach(function(f){map[f.path]={sha256:f.sha256,bytes:f.bytes}});return map;
 }
 function saveInstalled(files){
- var record={version:manifest.version,files:fileMap(files),verified:true,fileCount:files.length,totalBytes:files.reduce(function(s,f){return s+(Number(f.bytes)||0)},0),completedAt:Date.now()};
+ var record={version:manifest.version,releaseVersion:manifest.releaseVersion||'',files:fileMap(files),verified:true,fileCount:files.length,totalBytes:files.reduce(function(s,f){return s+(Number(f.bytes)||0)},0),completedAt:Date.now()};
  return dbPut('meta',INSTALLED_KEY,record).then(function(){
-  return dbPut('meta','ready',{version:manifest.version,verified:true,fileCount:record.fileCount,totalBytes:record.totalBytes,completedAt:record.completedAt});
+  return dbPut('meta','ready',{version:manifest.version,releaseVersion:record.releaseVersion,verified:true,fileCount:record.fileCount,totalBytes:record.totalBytes,completedAt:record.completedAt});
  }).then(function(){
-  return cache.put(READY_URL,new Response(JSON.stringify({version:manifest.version,verified:true,completedAt:record.completedAt}),{status:200,headers:{'content-type':'application/json'}}));
+  return cache.put(READY_URL,new Response(JSON.stringify({version:manifest.version,releaseVersion:record.releaseVersion,verified:true,completedAt:record.completedAt}),{status:200,headers:{'content-type':'application/json'}}));
  });
 }
 function cacheUrlSet(){
@@ -468,7 +469,7 @@ function adoptLegacy(){
   return fileValid(f,true).then(function(ok){(ok?good:bad).push(f);return inspect()});
  }
  return inspect().then(function(){
-  var record={version:manifest.version,files:fileMap(good),verified:true,fileCount:good.length,completedAt:Date.now()};
+  var record={version:manifest.version,releaseVersion:manifest.releaseVersion||'',files:fileMap(good),verified:true,fileCount:good.length,completedAt:Date.now()};
   return dbPut('meta',INSTALLED_KEY,record).then(function(){return {good:good,bad:bad}});
  });
 }
@@ -573,6 +574,8 @@ function runPlan(){
   if(errors.length)throw new Error('The final integrity check found missing or unreadable files.');
   return commitPlan(target);
  }).then(function(){return cleanupPreviousCaches()}).then(function(){
+  /* A migration is marked complete only after the staged package has been committed and verified. */
+  if(migrationInProgress){lsSet(MIGRATION_KEY,'1');migrationInProgress=false;}
   /* A fully verified package counts as an up-to-date check: the seven-day timer restarts now. */
   lsSet(CHECK_OK_KEY,Date.now());setPending(0);markInstalledNow();
   ui.percent.textContent='100%';ui.count.textContent=plan.files.length+' / '+plan.files.length+' files';
@@ -667,9 +670,16 @@ function runFullCheck(splashFinished){
  lsSet(CHECK_TRY_KEY,Date.now());
  return decide().then(function(res){
   if(!res||res.kind==='none'){
-   /* Only a check that really reached the server counts; offline attempts leave the timer alone. */
-   if(manifestFromNetwork){lsSet(CHECK_OK_KEY,Date.now());setPending(0);lsDel(VER_AVAIL_KEY);fetchVersionInfo().then(rememberInstalled)}
+   /* Only a check that really reached the server counts; offline attempts leave the timer and migration flag alone. */
+   if(manifestFromNetwork){
+    lsSet(CHECK_OK_KEY,Date.now());setPending(0);lsDel(VER_AVAIL_KEY);fetchVersionInfo().then(rememberInstalled);
+    if(migrationInProgress){lsSet(MIGRATION_KEY,'1');migrationInProgress=false;}
+   }
    return;
+  }
+  /* Existing 1.4.10 installs apply this first migration update automatically: no Later button. */
+  if(migrationInProgress&&manifestFromNetwork&&res.plan){
+   return splashFinished.then(function(){showPlanNeeded(res.plan);runPlan()});
   }
   if(res.kind==='prompt'){
    /* Automatic 7-day check: bell notification + the update window (Later / Update now). The timer restarts now either way. */
@@ -738,8 +748,16 @@ function start(){
  }
  dbGet('meta',INSTALLED_KEY).catch(function(){return null}).then(function(rec){
   var hasRecord=!!(rec&&rec.files);
-  /* First install, legacy install, or a check that is due: do the full network check. */
-  if(!hasRecord||checkDue())return runFullCheck(splashFinished);
+  var migrationNeeded=hasRecord&&localStorage.getItem(MIGRATION_KEY)!=='1';
+  if(migrationNeeded){
+   migrationInProgress=true;
+   /* Force a fresh network check even when the seven-day timer was recently satisfied. */
+   lsDel(CHECK_OK_KEY);lsDel(CHECK_TRY_KEY);
+   /* Offline launches do not set the one-time flag; the next launch retries. */
+   if(navigator.onLine===false)return;
+  }
+  /* First install, the one-time 1.4.10 migration, or a scheduled check: contact the network. */
+  if(!hasRecord||migrationNeeded||checkDue())return runFullCheck(splashFinished);
   /* Otherwise stay off the network. Only repair when files are really missing and the device is online. */
   return localRepairNeeded().then(function(needs){
    if(needs&&navigator.onLine!==false)return runFullCheck(splashFinished);
