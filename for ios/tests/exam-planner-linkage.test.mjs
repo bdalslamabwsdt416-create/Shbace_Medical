@@ -80,7 +80,7 @@ test('Exam Planner appears in the iOS drawer after loading 20 then 36', () => {
   const { DR2, registered } = loadDrawerAndPlannerInOrder();
   assert.deepEqual(DR2.map(group => group[0]), ['REVIEW', 'YOUR PROGRESS', 'APP & SUPPORT']);
   const progress = DR2.find(group => group[0] === 'YOUR PROGRESS');
-  assert.deepEqual(progress[1].map(item => item[1]), ['examplanner', 'timer', 'stats', 'weak']);
+  assert.equal(progress[1].map(item => item[1]).join(','), 'examplanner,timer,stats,weak');
   assert.equal(progress[1][0][0], 'Exam goal planner');
   assert.equal(typeof registered.examplanner?.renderer, 'function');
   assert.equal(registered.examplanner.backTarget, 'subjects');

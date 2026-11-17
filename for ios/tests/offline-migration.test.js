@@ -255,7 +255,7 @@ test('behavior: mismatch applies network-first to every script, style and naviga
 
 test('iOS copies the latest To Me drawer and settings while retaining the iOS manual update control', () => {
   assert.ok(!drawerOrder.includes("['Updates'"), 'the separate Updates section must be absent like To Me');
-  assert.ok(drawerOrder.includes("['App & support',['Settings','Contact & Feedback','Changelog','About','Rate this app'].map(pick).filter(Boolean)]"),
+  assert.ok(drawerOrder.includes("['APP & SUPPORT',['Settings','Contact & Feedback','Changelog','About','Rate this app'].map(pick).filter(Boolean)]"),
     'App & support grouping must match To Me');
   assert.ok(drawerRuntime.includes('dr-top2') && drawerRuntime.includes('dr-body') && drawerRuntime.includes('dr-foot'),
     'the copied To Me side drawer must be present');
