@@ -1,10 +1,14 @@
 {
   "app": "Shbace Medical",
   "platform": "PWA",
-  "version": "1.4.14",
-  "displayVersion": "1.4.14",
+  "version": "1.4.15",
+  "displayVersion": "1.4.15",
   "releaseDate": "2026-11-17",
   "releaseNotes": [
+    "Preserves the active iOS app screen, filters, current question selection and scroll position when the app goes to the background.",
+    "When iOS evicts the suspended PWA page and reloads it, restores the saved app session immediately without replaying the startup Splash.",
+    "Keeps the ordinary startup Splash for first launches or when no recent app session is available.",
+    "Does not alter question answers, notes, bookmarks, quiz history, Smart Review records, IndexedDB identities or the offline cache.",
     "Updates the iOS side drawer to the latest To Me layout and grouping, including the close control and a dedicated Updates section for notifications.",
     "Keeps all existing iOS sidebar page handlers, Smart Review navigation safeguards, and local student data.",
     "Keeps the original iOS final two onboarding screens unchanged.",
