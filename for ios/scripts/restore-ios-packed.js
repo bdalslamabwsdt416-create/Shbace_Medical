@@ -198,6 +198,7 @@ if (!questionVoice.includes('toolbar.dataset.sig=signature') ||
 const featureRuntime = fs.readFileSync(safePath('js/09-app-features-v6.js'), 'utf8');
 const startupRuntime = offlineSetup.slice(offlineSetup.indexOf('function start()'), offlineSetup.indexOf('function boot()'));
 const repairRuntime = offlineSetup.slice(offlineSetup.indexOf('function localRepairNeeded(installed)'), offlineSetup.indexOf('function cleanupPreviousCaches()'));
+const scheduledRuntime = offlineSetup.slice(offlineSetup.indexOf('function checkDue()'), offlineSetup.indexOf('function scheduleCheckDue()'));
 if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !offlineSetup.includes("var DB_NAME='shbace-medical-offline-state-v1'") ||
     !offlineSetup.includes("var MIGRATION_KEY='shbace_ios_migrated_1_4_14'") ||
@@ -215,7 +216,20 @@ if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     repairRuntime.includes('fetch(') || repairRuntime.includes('runPlan(') || repairRuntime.includes('mount(') ||
     offlineSetup.includes('CHECK_TRY_KEY') ||
     offlineSetup.includes('CHECK_RETRY') ||
-    offlineSetup.includes('function checkDue(') ||
+    !offlineSetup.includes('function checkDue()') ||
+    !offlineSetup.includes('function scheduleCheckDue()') ||
+    !offlineSetup.includes('var CHECK_OK_KEY=') ||
+    !offlineSetup.includes('var CHECK_EVERY=7*24*60*60*1000') ||
+    !startupRuntime.includes('scheduleCheckDue()') ||
+    scheduledRuntime.includes('MIGRATION_KEY') ||
+    scheduledRuntime.includes('migrationInProgress') ||
+    scheduledRuntime.includes('mount(') ||
+    scheduledRuntime.includes('showUpdateSheet(') ||
+    scheduledRuntime.includes('showPlanNeeded(') ||
+    scheduledRuntime.includes('runPlan(') ||
+    scheduledRuntime.includes('fetchAndStore(') ||
+    !scheduledRuntime.includes('setPending(') ||
+    !scheduledRuntime.includes('manifestFromNetwork') ||
     !offlineSetup.includes('window.shbaceCheckForUpdate=manualCheck') ||
     !offlineSetup.includes('MANIFEST_FETCH_TIMEOUT=30000') ||
     !offlineSetup.includes('MANIFEST_FETCH_ATTEMPTS=2') ||
