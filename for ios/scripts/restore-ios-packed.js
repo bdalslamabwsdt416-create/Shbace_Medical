@@ -199,6 +199,7 @@ const featureRuntime = fs.readFileSync(safePath('js/09-app-features-v6.js'), 'ut
 const startupRuntime = offlineSetup.slice(offlineSetup.indexOf('function start()'), offlineSetup.indexOf('function boot()'));
 const repairRuntime = offlineSetup.slice(offlineSetup.indexOf('function localRepairNeeded(installed)'), offlineSetup.indexOf('function cleanupPreviousCaches()'));
 const scheduledRuntime = offlineSetup.slice(offlineSetup.indexOf('function checkDue()'), offlineSetup.indexOf('function scheduleCheckDue()'));
+const scheduleRuntime = offlineSetup.slice(offlineSetup.indexOf('function scheduleCheckDue()'), offlineSetup.indexOf('function manualCheck()'));
 if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !offlineSetup.includes("var DB_NAME='shbace-medical-offline-state-v1'") ||
     !offlineSetup.includes("var MIGRATION_KEY='shbace_ios_migrated_1_4_14'") ||
@@ -230,6 +231,16 @@ if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     scheduledRuntime.includes('fetchAndStore(') ||
     !scheduledRuntime.includes('setPending(') ||
     !scheduledRuntime.includes('manifestFromNetwork') ||
+    !scheduledRuntime.includes('CHECK_OK_KEY') ||
+    !scheduledRuntime.includes('CHECK_EVERY') ||
+    !scheduledRuntime.includes('Date.now()') ||
+    !scheduledRuntime.includes('lsSet(CHECK_OK_KEY,Date.now())') ||
+    !scheduledRuntime.includes('navigator.onLine===false') ||
+    scheduledRuntime.includes('document.') ||
+    scheduledRuntime.includes('ui.') ||
+    !scheduleRuntime.includes('setTimeout(') ||
+    !scheduleRuntime.includes('1200') ||
+    !scheduleRuntime.includes('requestIdleCallback') ||
     !offlineSetup.includes('window.shbaceCheckForUpdate=manualCheck') ||
     !offlineSetup.includes('MANIFEST_FETCH_TIMEOUT=30000') ||
     !offlineSetup.includes('MANIFEST_FETCH_ATTEMPTS=2') ||
