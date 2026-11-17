@@ -34,10 +34,33 @@ function missingOfflineResponse(url) {
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
-    /* Fetch only missing shell files; the offline updater owns subsequent release changes. */
+    /* Refresh the migration bootstrap from the network when this worker installs.
+       This replaces the old Computer HTML and installer in place, while keeping the
+       rest of the verified package for the staged SHA-256 updater to reconcile. */
+    const refreshOnInstall = new Set([
+      './index.html',
+      './manifest.webmanifest',
+      './pwa-version.json',
+      './offline-assets-manifest.json',
+      './css/bundle-core.css',
+      './css/bundle-late.css',
+      './css/chrome-computer.css',
+      './js/29-offline-setup.js'
+    ]);
     const missing = [];
     for (const url of APP_SHELL) {
-      if (!(await cache.match(url))) missing.push(url);
+      if (refreshOnInstall.has(url)) {
+        try {
+          const fresh = await fetch(url, { cache: 'reload' });
+          if (!fresh || !fresh.ok) throw new Error('Could not refresh ' + url);
+          await cache.put(url, fresh);
+        } catch (error) {
+          /* Do not destroy the existing working app if installation happens offline. */
+          if (!(await cache.match(url))) throw error;
+        }
+      } else if (!(await cache.match(url))) {
+        missing.push(url);
+      }
     }
     if (missing.length) await cache.addAll(missing);
     await self.skipWaiting();
