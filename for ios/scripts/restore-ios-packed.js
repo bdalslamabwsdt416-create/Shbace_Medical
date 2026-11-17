@@ -121,6 +121,7 @@ for (const icon of pwaManifest.icons || []) {
   const iconPath = String(icon.src || '').replace(/^\.\//, '');
   if (!iconPath || !fs.existsSync(safePath(iconPath))) throw new Error('PWA icon is missing: ' + icon.src);
 }
+/* IndexedDB compatibility is owned by the page-side updater; the Service Worker intentionally remains cache/network only. */
 const offlineSetup = fs.readFileSync(safePath('js/29-offline-setup.js'), 'utf8');
 const serviceWorker = fs.readFileSync(safePath('sw.js'), 'utf8');
 const featureRuntime = fs.readFileSync(safePath('js/09-app-features-v6.js'), 'utf8');
