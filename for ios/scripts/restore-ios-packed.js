@@ -253,10 +253,10 @@ if (!onboardingMain.includes('Which grade are you in?') ||
 }
 const pwaVersion = JSON.parse(fs.readFileSync(safePath('pwa-version.json'), 'utf8'));
 const packageMetadata = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-if (packageMetadata.version !== '1.4.17' || pwaVersion.version !== '1.4.17' || pwaVersion.displayVersion !== '1.4.17' ||
+if (packageMetadata.version !== '1.4.18' || pwaVersion.version !== '1.4.18' || pwaVersion.displayVersion !== '1.4.18' ||
     !Array.isArray(pwaVersion.releaseNotes) ||
     !pwaVersion.releaseNotes.includes("Adds iOS Question Bank tools for Share, Copy and Read aloud, groups bank controls in Settings, and scopes progress resets to the active bank, system and topic.")) {
-  throw new Error('The iOS 1.4.16 release metadata is missing or inconsistent.');
+  throw new Error('The iOS 1.4.18 release metadata is missing or inconsistent.');
 }
 
 if (manifest.files.some(item => ['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/32-ios-v7.js'].includes(item.path))) throw new Error('A retired iOS visual layer is still included in the offline runtime inventory.');
