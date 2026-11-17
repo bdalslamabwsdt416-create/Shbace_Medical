@@ -643,7 +643,8 @@ function waitForSplash(){
    if(finished||splash.isConnected)return;
    finished=true;if(observer)observer.disconnect();resolve();
   }
-  try{observer=new MutationObserver(done);observer.observe(document.body,{childList:true,subtree:true})}catch(e){}
+  /* The splash only disappears from its own parent; avoid watching the whole document. */
+  try{observer=new MutationObserver(done);if(splash.parentNode)observer.observe(splash.parentNode,{childList:true})}catch(e){}
   setTimeout(function(){if(!finished){finished=true;if(observer)observer.disconnect();resolve()}},14000);
  });
 }

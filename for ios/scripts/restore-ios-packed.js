@@ -223,6 +223,34 @@ if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !featureRuntime.includes('window.shbaceCheckForUpdate()')) {
   throw new Error('The manual-only iOS updater, first-install setup, cache cleanup, or version-aware service worker invariant failed.');
 }
+const voiceObserverRuntime = fs.readFileSync(safePath('js/33-unified-voice.js'), 'utf8');
+const settingsObserverRuntime = fs.readFileSync(safePath('js/36-exam-planner-settings-smartreview.js'), 'utf8');
+const onboardingBackgroundRuntime = fs.readFileSync(safePath('js/19-ob-shared-bg-v1-js.js'), 'utf8');
+const onboardingLifecycleRuntime = fs.readFileSync(safePath('js/21-onb-chips-lifecycle-v15.js'), 'utf8');
+const splashWaitRuntime = fs.readFileSync(safePath('js/29-offline-setup.js'), 'utf8');
+const stillPaneRuntime = fs.readFileSync(safePath('js/15-ob-fix-still-js.js'), 'utf8');
+if (voiceObserverRuntime.includes('observe(document.body') ||
+    !voiceObserverRuntime.includes("observe(voiceHost,{childList:true,subtree:true})") ||
+    !voiceObserverRuntime.includes('queueQuestionDecorationFromMutations') ||
+    !voiceObserverRuntime.includes('questionDecorationRunning') ||
+    !voiceObserverRuntime.includes('old.dataset.sig===signature') ||
+    settingsObserverRuntime.includes('observe(document.documentElement') ||
+    !settingsObserverRuntime.includes('observe(settingsHost,{childList:true})') ||
+    !settingsObserverRuntime.includes('settingsBusy') ||
+    !settingsObserverRuntime.includes('if(appearance&&appearance.parentElement!==target(\'appearance\'))') ||
+    !onboardingBackgroundRuntime.includes('if(should&&!has)pc.setAttribute') ||
+    !onboardingBackgroundRuntime.includes('queueSync') ||
+    !onboardingLifecycleRuntime.includes('sc.__in6armed') ||
+    !onboardingLifecycleRuntime.includes('scanQueued') ||
+    !onboardingLifecycleRuntime.includes('scanRunning') ||
+    !onboardingLifecycleRuntime.includes('new MutationObserver(queueScan).observe(pc,{childList:true})') ||
+    !stillPaneRuntime.includes('new MutationObserver(l=>') ||
+    !stillPaneRuntime.includes('.observe(phoneContent,{childList:true})') ||
+    splashWaitRuntime.includes('observe(document.body') ||
+    !splashWaitRuntime.includes('observer.observe(splash.parentNode,{childList:true})')) {
+  throw new Error('The iOS freeze observer scoping, coalescing, or idempotency invariant failed.');
+}
+
 const onboardingMain = fs.readFileSync(safePath('js/04-app-main.js'), 'utf8');
 if (!onboardingMain.includes('function gradeScreen()') || !onboardingMain.includes('function finishScreen()')) throw new Error('The final two onboarding screens are missing from the app core.');
 

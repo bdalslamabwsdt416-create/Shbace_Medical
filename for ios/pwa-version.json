@@ -5,6 +5,7 @@
   "displayVersion": "1.4.20",
   "releaseDate": "2026-11-17",
   "releaseNotes": [
+    "Scopes iOS question and Settings observers to #phoneContent, coalesces decoration and organization through requestAnimationFrame, and prevents repeated DOM writes on unchanged question toolbars or Settings cards.",
     "Fixes Settings navigation from the header and drawer by routing directly to the Settings screen.",
     "Consolidates iPhone-supported study controls into the To Me-aligned Study experience card.",
     "Stops the question toolbar MutationObserver re-render loop that could freeze question screens.",

@@ -167,7 +167,7 @@ function organizeSettings(){
     if(backup&&backup.parentElement!==target('data'))target('data').appendChild(backup);
     if(progress&&progress.parentElement!==target('progress'))target('progress').appendChild(progress);
   }catch(e){console.warn('Settings organization skipped:',e)}
-  settingsBusy=false;
+  finally{settingsBusy=false}
 }
 function queueSettingsOrganization(){
   if(settingsQueued)return;settingsQueued=true;
@@ -279,9 +279,19 @@ if(typeof originalRender==='function'&&!window.__shbUxEnhancementsInstalled){
     return result;
   };
 }
+/* Settings is rendered as a direct page child of #phoneContent. Observe only page swaps:
+   the organizer's own card moves happen below that level and cannot wake this observer. */
+function settingsHostMutationRelevant(records,host){
+ return (records||[]).some(function(record){return record.target===host});
+}
+function handleSettingsHostMutations(records,host){
+ if(settingsHostMutationRelevant(records,host))queueSettingsOrganization();
+}
 try{
-  var mo=new MutationObserver(function(){queueSettingsOrganization()});
-  if(document.documentElement)mo.observe(document.documentElement,{childList:true,subtree:true});
+  var settingsHost=document.getElementById('phoneContent');
+  if(settingsHost&&window.MutationObserver){
+    new MutationObserver(function(records){handleSettingsHostMutations(records,settingsHost)}).observe(settingsHost,{childList:true});
+  }
 }catch(_){}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',queueSettingsOrganization,{once:true});
 queueSettingsOrganization();

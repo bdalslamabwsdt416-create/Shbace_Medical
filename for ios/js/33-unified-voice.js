@@ -382,7 +382,7 @@ function computerVoiceQuestionText(card){
   return [stemText,options.length?options.join('. '):''].filter(Boolean).join('. ');
  }catch(_){return ''}
 }
-var questionDecorationScheduled=false;
+var questionDecorationScheduled=false,questionDecorationRunning=false;
 function scheduleQuestionDecoration(){
  if(questionDecorationScheduled)return;
  questionDecorationScheduled=true;
@@ -394,6 +394,8 @@ function scheduleQuestionDecoration(){
  else setTimeout(flush,16);
 }
 function computerVoiceDecorateQuestions(){
+ if(questionDecorationRunning)return;
+ questionDecorationRunning=true;
  try{
   var host=document.querySelector('#phoneContent');if(!host)return;
   var signature=[
@@ -419,7 +421,7 @@ function computerVoiceDecorateQuestions(){
    toolbar.innerHTML=actions.join('');
    stem.insertAdjacentElement('afterend',toolbar);
   });
- }catch(_){}
+ }catch(_){}finally{questionDecorationRunning=false}
 }
 function computerVoiceNotify(text){try{if(typeof window.toast==='function')window.toast(text)}catch(_){}}
 function computerVoiceFallbackCopy(text){
@@ -551,9 +553,46 @@ window.__shbUnifiedToggleQuestionReadAloud=function(card,text,button){computerVo
 computerVoiceInit();
 
 function mountVoiceSettings(){try{computerVoiceMountSettings()}catch(_){}}
+var voiceSettingsMountQueued=false,voiceSettingsMounting=false;
+function scheduleVoiceSettingsMount(){
+ if(voiceSettingsMountQueued||voiceSettingsMounting)return;
+ voiceSettingsMountQueued=true;
+ var raf=window.requestAnimationFrame||function(fn){return setTimeout(fn,16)};
+ raf(function(){
+  voiceSettingsMountQueued=false;if(voiceSettingsMounting)return;
+  voiceSettingsMounting=true;
+  try{mountVoiceSettings()}finally{voiceSettingsMounting=false}
+ });
+}
+/* Ignore our own toolbar insert/remove records. A question-card change remains relevant. */
+function computerVoiceQuestionMutationRelevant(record){
+ var target=record&&record.target;
+ var changed=Array.prototype.slice.call(record&&record.addedNodes||[]).concat(Array.prototype.slice.call(record&&record.removedNodes||[]));
+ if(changed.length&&changed.every(function(node){return node&&node.nodeType===1&&node.matches&&node.matches('.shb-question-tools')}))return false;
+ if(target&&target.closest&&target.closest('.shb-question-tools'))return false;
+ if(target&&target.closest&&target.closest('.qcard'))return true;
+ return changed.some(function(node){return node&&node.nodeType===1&&((node.matches&&node.matches('.qcard'))||(node.querySelector&&node.querySelector('.qcard')))});
+}
+function queueQuestionDecorationFromMutations(records){
+ if((records||[]).some(computerVoiceQuestionMutationRelevant))scheduleQuestionDecoration();
+}
+function queueVoiceSettingsMountFromMutations(records,host){
+ var relevant=(records||[]).some(function(record){
+  if(record.target!==host)return false;
+  var nodes=Array.prototype.slice.call(record.addedNodes||[]).concat(Array.prototype.slice.call(record.removedNodes||[]));
+  return nodes.some(function(node){return node&&node.nodeType===1&&((node.matches&&node.matches('.rs'))||(node.querySelector&&node.querySelector('.rs h1')))});
+ });
+ if(relevant)scheduleVoiceSettingsMount();
+}
 try{
- var ob=new MutationObserver(function(){mountVoiceSettings();scheduleQuestionDecoration()});
- if(document.body)ob.observe(document.body,{childList:true,subtree:true});
+ var voiceHost=document.getElementById('phoneContent');
+ if(voiceHost&&window.MutationObserver){
+  /* One scoped observer handles page swaps and question changes; its own toolbar/card writes are filtered. */
+  new MutationObserver(function(records){
+   queueVoiceSettingsMountFromMutations(records,voiceHost);
+   queueQuestionDecorationFromMutations(records);
+  }).observe(voiceHost,{childList:true,subtree:true});
+ }
 }catch(_){}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mountVoiceSettings,{once:true});else mountVoiceSettings();
 computerVoiceMountSettings();
@@ -646,7 +685,10 @@ function iosStudyToggleMarkup(key,title,description,disabled){
  return '<div class="setrow shb-ios-study-row"><span><b>'+title+'</b><small>'+description+'</small></span>'+
   '<button type="button" class="drsw '+(on?'on':'')+'" role="switch" aria-checked="'+on+'" aria-label="'+title+'" data-shb-ios-experience="'+key+'" '+(disabled?'disabled':'')+'><i></i><span>'+(on?'ON':'OFF')+'</span></button></div>';
 }
+var iosStudyMounting=false;
 function iosStudyMountSettings(){
+ if(iosStudyMounting)return;
+ iosStudyMounting=true;
  try{
   var root=settingsRoot();if(!root)return;
   /* These controls share the To Me Study experience card; only the iPhone-safe
@@ -660,20 +702,24 @@ function iosStudyMountSettings(){
     '<p class="meta shb-ios-study-status" id="shbIosStudyWakeStatus" role="status" aria-live="polite"></p>');
   }
   iosStudyUpdateUI();
- }catch(_){}
+ }catch(_){}finally{iosStudyMounting=false}
 }
 function iosStudyUpdateUI(){
  try{
   var root=document.getElementById('shbQuestionToolsSettings');if(!root)return;
   root.querySelectorAll('[data-shb-ios-experience]').forEach(function(button){
    var key=button.getAttribute('data-shb-ios-experience'),on=!!iosStudyPrefs[key];
-   button.classList.toggle('on',on);button.setAttribute('aria-checked',String(on));
-   var label=button.querySelector('span');if(label)label.textContent=on?'ON':'OFF';
+   if(button.classList.contains('on')!==on)button.classList.toggle('on',on);
+   if(button.getAttribute('aria-checked')!==String(on))button.setAttribute('aria-checked',String(on));
+   var label=button.querySelector('span'),next=on?'ON':'OFF';if(label&&label.textContent!==next)label.textContent=next;
   });
   var status=root.querySelector('#shbIosStudyWakeStatus');
-  if(status)status.textContent=!iosStudyWakeSupported()
-   ?'Screen wake lock is unavailable in this browser. On iPhone, use an up-to-date iOS Home Screen app (iOS 18.4 or newer).'
-   :iosStudyWakeStatus||'Screen wake lock is active only while the Question Bank is open.';
+  if(status){
+   var nextStatus=!iosStudyWakeSupported()
+    ?'Screen wake lock is unavailable in this browser. On iPhone, use an up-to-date iOS Home Screen app (iOS 18.4 or newer).'
+    :iosStudyWakeStatus||'Screen wake lock is active only while the Question Bank is open.';
+   if(status.textContent!==nextStatus)status.textContent=nextStatus;
+  }
  }catch(_){}
 }
 document.addEventListener('click',function(event){
@@ -696,11 +742,20 @@ document.addEventListener('visibilitychange',function(){
  if(document.hidden)iosStudyReleaseWakeLock();else iosStudySyncWakeLock();
 });
 window.addEventListener('pagehide',iosStudyReleaseWakeLock);
+var iosStudyRefreshQueued=false,iosStudyRefreshing=false;
+function queueIosStudyRefresh(){
+ if(iosStudyRefreshQueued||iosStudyRefreshing)return;
+ iosStudyRefreshQueued=true;
+ var raf=window.requestAnimationFrame||function(fn){return setTimeout(fn,16)};
+ raf(function(){
+  iosStudyRefreshQueued=false;if(iosStudyRefreshing)return;
+  iosStudyRefreshing=true;
+  try{iosStudyMountSettings();iosStudySyncWakeLock()}finally{iosStudyRefreshing=false}
+ });
+}
 try{
  var iosStudyHost=document.getElementById('phoneContent');
- if(iosStudyHost&&window.MutationObserver)new MutationObserver(function(){
-  iosStudyMountSettings();iosStudySyncWakeLock();
- }).observe(iosStudyHost,{childList:true});
+ if(iosStudyHost&&window.MutationObserver)new MutationObserver(queueIosStudyRefresh).observe(iosStudyHost,{childList:true});
 }catch(_){}
 if(iosStudyPrefs.followSystemTheme)iosStudyBindTheme();
 iosStudyMountSettings();iosStudySyncWakeLock();
