@@ -241,7 +241,9 @@ if (voiceObserverRuntime.includes('observe(document.body') ||
     !onboardingBackgroundRuntime.includes('if(should&&!has)pc.setAttribute') ||
     !onboardingBackgroundRuntime.includes('queueSync') ||
     !onboardingLifecycleRuntime.includes('sc.__in6armed') ||
-    !onboardingLifecycleRuntime.includes('new MutationObserver(scan).observe(pc,{childList:true})') ||
+    !onboardingLifecycleRuntime.includes('scanQueued') ||
+    !onboardingLifecycleRuntime.includes('scanRunning') ||
+    !onboardingLifecycleRuntime.includes('new MutationObserver(queueScan).observe(pc,{childList:true})') ||
     !stillPaneRuntime.includes('new MutationObserver(l=>') ||
     !stillPaneRuntime.includes('.observe(phoneContent,{childList:true})') ||
     splashWaitRuntime.includes('observe(document.body') ||

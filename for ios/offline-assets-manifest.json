@@ -1881,8 +1881,8 @@
     },
     {
       "path": "js/21-onb-chips-lifecycle-v15.js",
-      "bytes": 1611,
-      "sha256": "aee0ffe7e079be71fbe02c4a7a8d14351f1db1d579dd0d1f6d1301458e445b6e",
+      "bytes": 1933,
+      "sha256": "b6b262b2b31dce9aa10f2b7cf70c1adb3526a01f144381dbb3429337f447dc0f",
       "group": "app"
     },
     {
@@ -2031,8 +2031,8 @@
     }
   ],
   "fileCount": 338,
-  "totalBytes": 30046468,
+  "totalBytes": 30046790,
   "releaseVersion": "1.4.20",
-  "version": "e6fde236675f4cd1d804df4a68447b507f0886d170bcacea58980bf39c9d1732",
-  "generatedAt": "2026-11-17T15:45:35.526Z"
+  "version": "badc5a9f1c4f5f997e5424e26d959e7237536fd335bb9e9a0e691bcc84699f95",
+  "generatedAt": "2026-11-17T15:46:59.516Z"
 }
