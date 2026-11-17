@@ -370,7 +370,7 @@ function computerVoiceMountSettings(){
     '<div class="seg shb-question-tool-speed" role="group" aria-label="Reading speed">'+
     '<button type="button" data-shb-question-speed="slow">Slow</button>'+
     '<button type="button" data-shb-question-speed="normal">Normal</button>'+
-    '<button type="button" data-shb-question-speed="fast">Fast</button></div></div>'+;
+    '<button type="button" data-shb-question-speed="fast">Fast</button></div></div>';
    root.appendChild(tools);
   }
   computerVoiceUpdateUi();computerVoiceUpdateQuestionToolsUI();
