@@ -159,6 +159,17 @@ if (!onboardingMain.includes('Which grade are you in?') ||
   throw new Error('The original iOS final onboarding screens have changed unexpectedly.');
 }
 
+const sessionRuntime = fs.readFileSync(safePath('js/09-app-features-v6.js'), 'utf8');
+if (!onboardingMain.includes('window.__shbRestoreAppSession') ||
+    !onboardingMain.includes('window.__shbRestoreAppSession()') ||
+    !sessionRuntime.includes('shbace_app_resume_session_v1') ||
+    !sessionRuntime.includes('window.__shbRestoreAppSession=restoreSession') ||
+    !sessionRuntime.includes('window.__shbSaveAppSession=saveOnLeave') ||
+    !sessionRuntime.includes('appScrollY')) {
+  throw new Error('iOS background session save/restore or scroll recovery is missing.');
+}
+
+
 if (manifest.files.some(item => ['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/32-ios-v7.js'].includes(item.path))) throw new Error('A retired iOS visual layer is still included in the offline runtime inventory.');
 const scanFiles = manifest.files.filter(item => /\.(?:html|css|js|json|webmanifest)$/i.test(item.path));
 const missingImages = new Set();
