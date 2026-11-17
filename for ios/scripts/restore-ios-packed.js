@@ -14,7 +14,7 @@ const manifest = { schema: 1, files: [] };
 
 /* Always run the iOS offline migration regression tests, even when the hosting
    provider invokes this build file directly instead of npm run build:pwa. */
-for (const relative of ['js/09-app-features-v6.js', 'js/20-drawer-order-v12.js', 'js/33-unified-voice.js', 'js/36-exam-planner-settings-smartreview.js']) {
+for (const relative of ['js/09-app-features-v6.js', 'js/20-drawer-order-v12.js', 'js/29-offline-setup.js', 'js/33-unified-voice.js', 'js/36-exam-planner-settings-smartreview.js']) {
   const syntax = spawnSync(process.execPath, ['--check', relative], { cwd: root, stdio: 'inherit' });
   if (syntax.error) throw syntax.error;
   if (syntax.status !== 0) throw new Error('JavaScript syntax check failed: ' + relative);
