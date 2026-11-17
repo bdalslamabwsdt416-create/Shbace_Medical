@@ -9,7 +9,7 @@ if(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' &
 var CACHE_NAME='shbace-medical-offline-v2';
 var STAGING_NAME='shbace-staging-offline';
 var INSTALLED_KEY='installed';
-/* Update checks are throttled: one successful network check every 7 days; after a failed attempt (offline) retry no sooner than 2 hours. */
+/* Silent scheduled checks run no more than once per 7 days after a successful network check. Failures retry on the next launch. */
 var CHECK_OK_KEY='shbace_pkg_check_ok_v1';
 var MIGRATION_KEY='shbace_ios_migrated_1_4_14';
 var CHECK_EVERY=7*24*60*60*1000;
@@ -725,6 +725,36 @@ function runFullCheck(splashFinished){
   });
  });
 }
+/* Silent scheduled update check. It inspects metadata and cache keys only: no UI, download, migration arming or plan execution. */
+function checkDue(){
+ var last=lsNum(CHECK_OK_KEY);
+ if(last>0&&Date.now()-last<CHECK_EVERY)return Promise.resolve({state:'not-due'});
+ if(typeof navigator!=='undefined'&&navigator.onLine===false)return Promise.resolve({state:'offline'});
+ return loadManifest().then(function(data){
+  if(!manifestFromNetwork)return {state:'offline'};
+  manifest=data;
+  return caches.open(CACHE_NAME).then(function(c){cache=c;return dbGet('meta',INSTALLED_KEY)});
+ }).then(function(installed){
+  if(!installed||!installed.files)return {state:'no-install'};
+  return computePlan(installed).then(function(diff){
+   var changed=Number(diff.changed)||0,removed=Array.isArray(diff.removed)?diff.removed.length:0;
+   if(changed>0||removed>0)setPending(Math.max(1,(diff.files||[]).length+removed));
+   lsSet(CHECK_OK_KEY,Date.now());
+   return {state:changed>0||removed>0?'update-pending':'current'};
+  });
+ }).catch(function(){return {state:'offline'}});
+}
+function scheduleCheckDue(){
+ setTimeout(function(){
+  try{
+   if(typeof window.requestIdleCallback==='function'){
+    window.requestIdleCallback(function(){checkDue()},{timeout:2500});
+    return;
+   }
+  }catch(e){}
+  checkDue();
+ },1200);
+}
 /* Manual "Check for updates" (Settings). Ignores the scheduled seven-day timer and reports what happened. */
 function manualCheck(){
  if(!standalone()||!('caches' in window)||!window.crypto||!crypto.subtle||!window.indexedDB)return Promise.resolve({state:'unsupported'});
@@ -799,6 +829,7 @@ function start(){
   return localRepairNeeded(record).then(function(missing){
    if(missing>0)setRepairPending(missing);
    else if(lsNum(REPAIR_PENDING_KEY)>0)setRepairPending(0);
+   scheduleCheckDue();
   });
  });
 }
