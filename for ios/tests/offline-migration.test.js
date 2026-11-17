@@ -408,6 +408,7 @@ function runScheduledCheckHarness(options = {}) {
     CACHE_NAME: 'shbace-medical-offline-v2',
     MIGRATION_KEY: 'shbace_ios_migrated_1_4_14',
     migrationInProgress: false,
+    scheduledCheckInProgress: false,
     manifestFromNetwork: options.network !== false,
     navigator: { onLine: options.online !== false },
     localStorage, Date, Promise, Number, Math, Object, Array,
@@ -436,6 +437,7 @@ function runScheduledCheckHarness(options = {}) {
   return promise.then(state => ({
     state, store, writes, networkCalls, pending, uiCalls,
     migrationInProgress: sandbox.migrationInProgress,
+    scheduledCheckInProgress: sandbox.scheduledCheckInProgress,
     migrationFlag: store.shbace_ios_migrated_1_4_14 || null,
     initialTimestamp: last
   }));
@@ -449,6 +451,7 @@ test('silent seven-day check runs when the last successful check is older than s
   assert.deepEqual(result.uiCalls, []);
   assert.equal(result.migrationFlag, null);
   assert.equal(result.migrationInProgress, false);
+  assert.equal(result.scheduledCheckInProgress, false);
 });
 
 test('silent seven-day check is skipped when the last successful check is less than seven days old', async () => {
@@ -468,6 +471,7 @@ test('silent scheduled check stays silent and does not advance its timestamp off
     assert.deepEqual(result.pending, []);
     assert.equal(result.migrationFlag, null);
     assert.equal(result.migrationInProgress, false);
+    assert.equal(result.scheduledCheckInProgress, false);
   }
 });
 
@@ -478,6 +482,7 @@ test('silent scheduled update only marks pending and never opens UI, downloads o
   assert.deepEqual(result.uiCalls, []);
   assert.equal(result.migrationFlag, null);
   assert.equal(result.migrationInProgress, false);
+  assert.equal(result.scheduledCheckInProgress, false);
   assert.ok(Number(result.store.shbace_pkg_check_ok_v1) > result.initialTimestamp);
 });
 
