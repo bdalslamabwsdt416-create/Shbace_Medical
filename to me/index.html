@@ -361,6 +361,8 @@
  if(rm||!startWorker())startMain();
 })();
 </script>
+<!-- Setup gate bootstrap -->
+<script src="js/29-offline-setup.js"></script>
 <script id="shb-boot-v1">
 /* Boot v1 — first visual frame first, app scripts second.
    ROOT CAUSE of the slow start: ~14 MB of inline <script> (images, data, the 3.9 MB app, the 4.5 MB question-bank code ...) sat right after the splash markup and ran
@@ -375,11 +377,11 @@
 (function(){
  var el=document.getElementById('startupSplash');
  var hold=false,held={dcl:[],load:[]},domReady=false,painted=false,started=false,T=null;
- /* question bank (1.4 MB JSON): fetched in parallel with the splash; placed into <script id="qbData" type="application/json"> before the first app script runs, so the code that reads its textContent is unchanged */
+ /* Question-bank data is intentionally loaded only after the offline Setup gate resolves. */
  var selectedQB='original';try{selectedQB=localStorage.getItem('shbace_question_bank_version')==='reviewed'?'reviewed':'original'}catch(e){}
  var dataText=null,dataErr=null;
  /* v1.1: Original is the immutable college bank. Reviewed is assembled from the small verified patch plus review-log-only cautions. */
- var dataFetch=(function(){
+ function loadQuestionBank(){return (function(){
   if(!window.fetch)return Promise.reject(new Error('no fetch'));
   function markReady(){try{performance.mark('shb-qb-data-ready')}catch(e){}}
   function refresh(url,cache){if(!cache)return;fetch(url,{cache:'no-cache'}).then(function(r){if(r.ok)return cache.put(url,r.clone())}).catch(function(){});}
@@ -419,16 +421,33 @@
    markReady();
    return JSON.stringify(base);
   }
-  return (window.caches?caches.open('shbace-data-v1-1').catch(function(){return null}):Promise.resolve(null)).then(function(cache){
+  var packageCache=null;
+  function fetchFromInstalledPackage(url){
+   if(!packageCache)return Promise.resolve(null);
+   return packageCache.match(new URL(url,document.baseURI).href).catch(function(){return null});
+  }
+  return Promise.all([
+   (window.caches?caches.open('shbace-data-v1-1').catch(function(){return null}):Promise.resolve(null)),
+   (window.caches?caches.open('shbace-chrome-offline-v1.3.10.37').catch(function(){return null}):Promise.resolve(null))
+  ]).then(function(stores){
+   var cache=stores[0];packageCache=stores[1];
+   function packagedText(url){
+    return fetchFromInstalledPackage(url).then(function(hit){
+     if(!hit)return null;
+     if(cache)cache.put(url,hit.clone()).catch(function(){});
+     return hit.text();
+    });
+   }
    var baseURL='data/qbData.json';
-   if(selectedQB!=='reviewed')return fetchText(baseURL,cache).then(function(t){dataText=t;markReady();});
-   return Promise.all([
-    fetchText(baseURL,cache),
-    fetchText('data/qbData_reviewed_patch.json',cache),
-    fetchText('data/qbData_review_log.json',cache)
-   ]).then(function(items){dataText=assembleReviewed(items[0],items[1],items[2]);});
+   if(selectedQB!=='reviewed')return packagedText(baseURL).then(function(t){
+    if(t!=null){dataText=t;markReady();return;}
+    return fetchText(baseURL,cache).then(function(text){dataText=text;markReady();});
+   });
+   return Promise.all(['data/qbData.json','data/qbData_reviewed_patch.json','data/qbData_review_log.json'].map(function(url){
+    return packagedText(url).then(function(t){return t!=null?t:fetchText(url,cache);});
+   })).then(function(items){dataText=assembleReviewed(items[0],items[1],items[2]);});
   }).catch(function(e){dataErr=e;console.error('Shbace question bank load failed',e);});
- })();
+ })();}
  try{performance.mark('shb-boot-start')}catch(e){}
  function isWin(t){return t===window||t==null}
  function hook(){
@@ -525,12 +544,17 @@
   next();
  }
  function go(){if(started||!domReady||!painted)return;started=true;clearTimeout(T);
-  dataFetch.then(function(){
+  var bootGate=window.__SHBACE_OFFLINE_BOOT_PROMISE__;
+  if(!bootGate||typeof bootGate.then!=='function'){fatalBoot('offline-setup-bootstrap');return;}
+  bootGate.then(function(){return loadQuestionBank();}).then(function(){
    var q=document.getElementById('qbData');
    if(q&&dataText!=null)q.textContent=dataText;
    else console.error('shb-boot: question bank missing',dataErr);
    dataText=null;run()
-  })
+  }).catch(function(error){
+   console.error('shb-boot: Setup did not release the startup gate',error);
+   fatalBoot('offline-setup');
+  });
  }
  function markPainted(){
   if(painted)return;painted=true;
@@ -650,7 +674,6 @@
 
 <!-- ═══════════ 5) SCRIPTS: data first, then app code, then feature patches (original execution order; run by the boot loader) ═══════════ -->
 <!-- Embedded images (IMG) -->
-<script type="text/shb-deferred" id="shbace-offline-setup" data-src="js/29-offline-setup.js"></script>
 <!-- 5) SCRIPTS: data first, then app code, then feature patches (original execution order; run by the boot loader) ═══════════ --> <!-- Embedded images (IMG) -->
 <script type="text/shb-deferred" data-src="js/01-ui-images.js"></script>
 <!-- Embedded doctor images (DOC_EMB) -->
