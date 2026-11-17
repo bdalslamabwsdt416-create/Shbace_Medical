@@ -376,6 +376,7 @@ if (packageMetadata.version !== '1.4.22' || pwaVersion.version !== '1.4.22' || p
     !html.includes("if(src==='js/09-app-features-v6.js')") ||
     !html.includes('Cache Storage is optional on the web') ||
     !html.includes('Retry question bank') ||
+    !html.includes('exec(0);') ||
     !drawerFeatures.includes('window.__shbCoreReady = true;')) {
   throw new Error('The iOS 1.4.22 release metadata or non-blocking question-bank startup handoff is missing or inconsistent.');
 }
