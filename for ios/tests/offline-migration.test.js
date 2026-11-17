@@ -4,6 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const vm = require('node:vm');
 
 const root = path.resolve(__dirname, '..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
@@ -14,6 +15,121 @@ const html = read('index.html');
 const pkg = JSON.parse(read('package.json'));
 const pwa = JSON.parse(read('pwa-version.json'));
 const offlineManifest = JSON.parse(read('offline-assets-manifest.json'));
+
+/* Execute the real service-worker fetch listener with deterministic CacheStorage,
+   IndexedDB and fetch fakes. These tests assert returned bytes and network behavior. */
+function createServiceWorkerHarness(options) {
+  const scope = 'https://ios.example.test/';
+  const origin = new URL(scope).origin;
+  const listeners = new Map();
+  const entries = new Map();
+  const fetchCalls = [];
+  const toUrl = input => new URL(typeof input === 'string' ? input : input.url, scope);
+  const cache = {
+    async match(input, matchOptions) {
+      const key = toUrl(input);
+      if (matchOptions && matchOptions.ignoreSearch) key.search = '';
+      const response = entries.get(key.href);
+      return response ? response.clone() : null;
+    },
+    async put(input, response) {
+      entries.set(toUrl(input).href, response.clone());
+    },
+    async keys() {
+      return [...entries.keys()].map(url => ({ url }));
+    }
+  };
+  entries.set(new URL('pwa-version.json', scope).href,
+    new Response(JSON.stringify({ version: '1.4.15' }), {
+      status: 200, headers: { 'Content-Type': 'application/json' }
+    }));
+
+  const indexedDB = {
+    open() {
+      const request = {};
+      queueMicrotask(() => {
+        request.result = {
+          objectStoreNames: { contains: name => name === 'meta' },
+          transaction() {
+            return {
+              objectStore() {
+                return {
+                  get(key) {
+                    const getRequest = {};
+                    queueMicrotask(() => {
+                      getRequest.result = key === 'installed' ? options.installedRecord : undefined;
+                      if (getRequest.onsuccess) getRequest.onsuccess();
+                    });
+                    return getRequest;
+                  }
+                };
+              }
+            };
+          },
+          close() {}
+        };
+        if (request.onsuccess) request.onsuccess();
+      });
+      return request;
+    }
+  };
+
+  const self = {
+    registration: { scope },
+    location: { origin },
+    indexedDB,
+    clients: { claim: async () => {} },
+    skipWaiting: async () => {},
+    addEventListener(type, listener) { listeners.set(type, listener); }
+  };
+  const caches = {
+    open: async () => cache,
+    keys: async () => [],
+    delete: async () => false
+  };
+  async function fakeFetch(input, init) {
+    fetchCalls.push({
+      url: typeof input === 'string' ? input : input.url,
+      cache: init && init.cache
+    });
+    if (options.offline) throw new TypeError('Network unavailable');
+    return new Response('NETWORK COPY', { status: 200 });
+  }
+
+  vm.runInNewContext(options.source, {
+    self, caches, fetch: fakeFetch, URL, Response, Promise
+  });
+
+  return {
+    cache,
+    fetchCalls,
+    async seed(relativePath, body) {
+      await cache.put(new URL(relativePath, scope).href, new Response(body, { status: 200 }));
+    },
+    async cachedText(relativePath) {
+      const response = await cache.match(new URL(relativePath, scope).href);
+      return response ? response.text() : null;
+    },
+    async request(relativePath, mode, destination) {
+      let responsePromise;
+      const request = {
+        url: new URL(relativePath, scope).href,
+        method: 'GET',
+        mode: mode || 'same-origin',
+        destination: destination || '',
+        cache: 'default'
+      };
+      const listener = listeners.get('fetch');
+      assert.ok(listener, 'service worker fetch listener was registered');
+      listener({
+        request,
+        respondWith(value) { responsePromise = Promise.resolve(value); }
+      });
+      assert.ok(responsePromise, 'fetch listener called respondWith');
+      return responsePromise;
+    }
+  };
+}
 
 test('one-time migration forces a network check for an installed 1.4.10-era package', () => {
   for (const marker of [
@@ -69,9 +185,68 @@ test('service worker compares IndexedDB releaseVersion with cached pwa-version a
     'results[0] !== results[1]',
     'await refreshCachedPwaVersion()',
     "request.mode === 'navigate' ||",
+    "request.destination === 'script' ||",
+    "request.destination === 'style'",
     'networkFirstOnPackageMismatch(request)',
     'cache.match(INDEX_URL)'
   ]) assert.ok(sw.includes(marker), 'missing service worker marker: ' + marker);
+});
+
+
+test('behavior: old installed record without releaseVersion returns network js/04-app-main.js, not the stale cache copy', async () => {
+  const harness = createServiceWorkerHarness({
+    source: sw,
+    installedRecord: { version: '1.4.14', files: { 'js/04-app-main.js': { sha256: 'old' } } }
+  });
+  await harness.seed('js/04-app-main.js', 'OLD CACHED COPY');
+  const response = await harness.request('js/04-app-main.js', 'same-origin', 'script');
+  assert.equal(await response.text(), 'NETWORK COPY');
+  assert.equal(harness.fetchCalls.length, 1);
+  assert.equal(harness.fetchCalls[0].cache, 'reload');
+  assert.equal(await harness.cachedText('js/04-app-main.js'), 'NETWORK COPY');
+});
+
+test('behavior: matching installed and cached releaseVersion keeps the cached js/04-app-main.js copy', async () => {
+  const harness = createServiceWorkerHarness({
+    source: sw,
+    installedRecord: { version: '1.4.15', releaseVersion: '1.4.15', files: {} }
+  });
+  await harness.seed('js/04-app-main.js', 'VERIFIED CACHED COPY');
+  const response = await harness.request('js/04-app-main.js', 'same-origin', 'script');
+  assert.equal(await response.text(), 'VERIFIED CACHED COPY');
+  assert.equal(harness.fetchCalls.length, 0);
+});
+
+test('behavior: offline with a version mismatch falls back to the cached script instead of rejecting', async () => {
+  const harness = createServiceWorkerHarness({
+    source: sw,
+    installedRecord: { version: '1.4.14', files: {} },
+    offline: true
+  });
+  await harness.seed('js/04-app-main.js', 'OFFLINE CACHED COPY');
+  const response = await harness.request('js/04-app-main.js', 'same-origin', 'script');
+  assert.equal(await response.text(), 'OFFLINE CACHED COPY');
+  assert.equal(harness.fetchCalls.length, 1);
+  assert.equal(harness.fetchCalls[0].cache, 'reload');
+});
+
+test('behavior: mismatch applies network-first to every script, style and navigation request', async () => {
+  const cases = [
+    { path: 'js/04-app-main.js', mode: 'same-origin', destination: 'script' },
+    { path: 'css/bundle-core.css', mode: 'same-origin', destination: 'style' },
+    { path: 'index.html', mode: 'navigate', destination: 'document' }
+  ];
+  for (const item of cases) {
+    const harness = createServiceWorkerHarness({
+      source: sw,
+      installedRecord: { version: '1.4.14' }
+    });
+    await harness.seed(item.path, 'OLD ' + item.destination.toUpperCase());
+    const response = await harness.request(item.path, item.mode, item.destination);
+    assert.equal(await response.text(), 'NETWORK COPY', item.path + ' must return network bytes');
+    assert.equal(harness.fetchCalls.length, 1, item.path + ' must fetch network');
+    assert.equal(harness.fetchCalls[0].cache, 'reload', item.path + ' must bypass stale HTTP cache');
+  }
 });
 
 test('manifest build embeds releaseVersion and protects the migration/cache invariants', () => {
@@ -80,6 +255,8 @@ test('manifest build embeds releaseVersion and protects the migration/cache inva
     "MIGRATION_KEY='shbace_ios_migrated_1_4_14'",
     'shbace-medical-ios-shell-',
     'networkFirstOnPackageMismatch',
+    'indexRuntimeRefPattern',
+    'Unreferenced CSS/JS files in iOS runtime inventory',
     'Retired iOS runtime file must be deleted'
   ]) assert.ok(build.includes(marker), 'missing build guard: ' + marker);
 });
@@ -97,6 +274,8 @@ test('release remains 1.4.15 and records the mixed-cache repair note', () => {
   assert.equal(pwa.displayVersion, '1.4.15');
   assert.ok(pwa.releaseNotes.includes('Fixes mixed old/new files after updating from 1.4.10; cleans old caches'));
   assert.equal(offlineManifest.releaseVersion, '1.4.15');
-  assert.equal(offlineManifest.fileCount, 340);
+  assert.equal(offlineManifest.fileCount, 338);
   assert.equal(offlineManifest.files.length, offlineManifest.fileCount);
+  assert.ok(!offlineManifest.files.some(file => ['css/core.css', 'css/late.css'].includes(file.path)),
+    'unreferenced legacy CSS must not remain in the offline manifest');
 });

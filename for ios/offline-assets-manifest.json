@@ -1196,18 +1196,6 @@
       "group": "app"
     },
     {
-      "path": "css/core.css",
-      "bytes": 175884,
-      "sha256": "661a293c1b40049dc38523d7c4aa0272d6cb377acc7c7f9ccfb084470fb5ee6b",
-      "group": "app"
-    },
-    {
-      "path": "css/late.css",
-      "bytes": 193504,
-      "sha256": "941b24a781a9c3b8d97ecf6133ab20b32a0b2aa486ed147493139dda2b583f7f",
-      "group": "app"
-    },
-    {
       "path": "data/ai-generated/01-cns.json",
       "bytes": 181968,
       "sha256": "a18ec8d7731ebb3c0664f50ce17da448046bd97951bb16c11232499e0fbc9c80",
@@ -2042,8 +2030,8 @@
       "group": "app"
     }
   ],
-  "fileCount": 340,
-  "totalBytes": 30395179,
+  "fileCount": 338,
+  "totalBytes": 30025791,
   "releaseVersion": "1.4.15",
   "version": "4e3b2c36955e46fd5e67e5e4216291afe4b981c2a8f5dbb82dc7d208e6134e47",
   "generatedAt": "2026-11-17T11:42:45.728Z"

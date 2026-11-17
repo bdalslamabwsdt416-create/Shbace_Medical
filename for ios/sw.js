@@ -225,17 +225,14 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  /* A mismatched installed release must not reopen a stale cached HTML shell. The bootstrap
-     updater script is also refreshed so its one-time migration logic can run immediately. */
+  /* A version mismatch must never combine a new index.html with stale app JavaScript
+     or CSS. Apply the same network-first policy to every same-origin script, stylesheet
+     and navigation. Once versions match, networkFirstOnPackageMismatch delegates to
+     localFirst so the verified offline package remains the normal startup source. */
   if (request.mode === 'navigate' ||
-      (request.destination === 'script' && url.pathname.endsWith('/js/29-offline-setup.js'))) {
+      request.destination === 'script' ||
+      request.destination === 'style') {
     event.respondWith(networkFirstOnPackageMismatch(request));
-    return;
-  }
-
-  /* Other JavaScript and CSS remain local-first; the verified updater replaces changed assets. */
-  if (request.destination === 'script' || request.destination === 'style') {
-    event.respondWith(localFirst(request));
     return;
   }
 

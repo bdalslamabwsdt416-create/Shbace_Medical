@@ -122,6 +122,27 @@ const deferredRefs = [...html.matchAll(/data-src=["']([^"']+)["']/g)].map(match 
 for (const relative of deferredRefs) {
   if (!fs.existsSync(safePath(relative))) throw new Error('Deferred runtime asset is missing: ' + relative);
 }
+/* Runtime CSS/JS must be explicitly referenced by index.html. The offline updater
+   bootstrap (29-offline-setup.js) is registered separately by the app shell; SW and
+   data assets are not CSS/JS runtime modules and are intentionally exempt. */
+const indexRuntimeRefs = new Set();
+const indexRuntimeRefPattern = /(?:src|data-src|href)\s*=\s*["'](?:\.\/|\/)?((?:css|js)\/[^"'?#]+)(?:[?#][^"']*)?["']/gi;
+for (const match of html.matchAll(indexRuntimeRefPattern)) indexRuntimeRefs.add(match[1]);
+const runtimeCssJs = manifest.files.filter(item =>
+  /^(?:css|js)\//.test(item.path) &&
+  /\.(?:css|js)$/i.test(item.path) &&
+  item.path !== 'sw.js' &&
+  item.path !== 'js/29-offline-setup.js'
+);
+const unreferencedCssJs = runtimeCssJs.filter(item => !indexRuntimeRefs.has(item.path)).map(item => item.path);
+if (unreferencedCssJs.length) {
+  throw new Error('Unreferenced CSS/JS files in iOS runtime inventory: ' + unreferencedCssJs.join(', '));
+}
+const missingCssJs = [...indexRuntimeRefs].filter(relative =>
+  !manifest.files.some(item => item.path === relative));
+if (missingCssJs.length) {
+  throw new Error('index.html references CSS/JS files missing from the iOS runtime inventory: ' + missingCssJs.join(', '));
+}
 if (/js\/30-android-enhancements|js\/31-android-v13|js\/32-chrome-android/.test(html)) throw new Error('Android-only runtime module leaked into the iOS build.');
 if (['js/30-ios-v5.js','js/31-ios-v6.js'].some(function (file) { return html.indexOf(file) !== -1; })) throw new Error('A retired iOS-only runtime layer is still referenced; To Me app core plus the preserved onboarding should be the only platform-specific exception.');
 for (const retired of ['js/32-ios-study-tools.js','js/33-ios-exam-planner.js']) {
