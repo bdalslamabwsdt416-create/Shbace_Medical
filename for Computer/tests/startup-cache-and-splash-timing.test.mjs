@@ -74,7 +74,13 @@ test("LocalStorage-first metadata never gates the first post-Splash package down
   assert.ok(updater.includes("localStorage.setItem(key,raw)"));
   assert.ok(updater.includes("dbPut('meta',META_DB_PREFIX+key,raw)"));
   assert.ok(updater.includes("dbGet('meta',META_DB_PREFIX+key)"));
-  assert.ok(updater.indexOf("if(!hasRecord)return runFullCheck(splashFinished)") < updater.indexOf("return hydrateLocalMetadata().then(function(){"));
+  assert.ok(updater.includes("if(!hasRecord){"));
+  assert.ok(updater.includes("return splashFinished.then(showFirstInstallPrompt)"));
+  assert.ok(updater.includes("function showFirstInstallPrompt(){"));
+  assert.ok(updater.includes("ui.button.dataset.initialSetup==='1'"));
+  assert.ok(updater.includes("loadManifest().then(function(data){"));
+  assert.ok(updater.includes("},7000);"), "the splash gate must release after seven seconds");
+  assert.ok(updater.indexOf("return hydrateLocalMetadata().then(function(){") > updater.indexOf("if(!hasRecord){"));
   assert.ok(updater.includes("function boot(){start();}"));
   assert.ok(updater.includes("if(installed===false)return {kind:'setup',plan:planOf('install',manifest.files,[])}"));
 });
