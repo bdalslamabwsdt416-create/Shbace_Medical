@@ -1875,6 +1875,23 @@ function confirmBox(o,fn){const old=$('#cfwrap');old&&old.remove();const h=docum
 window.cfClose=function(){const h=$('#cfwrap');h&&h.remove()};
 
 let rBank='all',rSys='all',rTop=0;
+function resetScopeMatches(q,bank,system,topic){
+ return !!q&&bankOk(q,bank)&&(system==='all'||String(q.spec)===String(system))&&(!topic||Number(q.topic)===Number(topic));
+}
+function resetScopeFromStudyContext(page,activeBank,system,topic,records){
+ if(page!=='questions')return null;
+ const bank=bankValid(activeBank);
+ let selectedSystem=system&&system!=='all'?String(system):'all';
+ let selectedTopic=Number(topic)||0;
+ const questions=Array.isArray(records)?records:[];
+ const has=(spec,top)=>questions.some(q=>resetScopeMatches(q,bank,spec,top));
+ if(selectedTopic&&!has(selectedSystem,selectedTopic))selectedTopic=0;
+ if(selectedSystem!=='all'&&!has(selectedSystem,0)){selectedSystem='all';selectedTopic=0}
+ if(!has('all',0))return {bank:'all',system:'all',topic:0};
+ return {bank:bank,system:selectedSystem,topic:selectedTopic};
+}
+window.__shbResetScopeMatches=resetScopeMatches;
+window.__shbResetScopeFromStudyContext=resetScopeFromStudyContext;
 function settingsView(){
  const answers=Object.values(S.ans),n=answers.length,ok=answers.filter(a=>a.ok).length;
  const seg=(k,items)=>`<div class="seg wide">${items.map(([v,l])=>`<button type="button" class="${SET[k]===v?'on':''}" onclick="setSet('${k}','${v}')">${l}</button>`).join('')}</div>`;
@@ -1965,7 +1982,7 @@ window.shbaceSettingsCheckForUpdates=async function(button){
  }
 };
 
-const rsPool=()=>QB.filter(q=>bankOk(q,rBank)&&(rSys==='all'||q.spec===rSys)&&(!rTop||q.topic===rTop));
+const rsPool=()=>QB.filter(q=>resetScopeMatches(q,rBank,rSys,rTop));
 const rsSort=(a,b)=>String(a[1]).localeCompare(String(b[1]));
 function rsSystems(){const m=new Map();QB.forEach(q=>{if(bankOk(q,rBank)&&!m.has(q.spec))m.set(q.spec,SPEC_NAME[q.spec]||q.spec)});return [...m].sort(rsSort)}
 function rsTopics(){if(rSys==='all')return [];const m=new Map();QB.forEach(q=>{if(bankOk(q,rBank)&&q.spec===rSys&&q.topic&&TOPIC_NAME[q.topic])m.set(q.topic,TOPIC_NAME[q.topic])});return [...m].sort(rsSort)}
@@ -1982,6 +1999,22 @@ const __dp=window.ddPick;window.ddPick=function(id,v,e){if(id==='rbank'||id==='r
 window.resetScopeAsk=function(){const ids=rsPool().filter(q=>S.ans[q.id]).map(q=>q.id);if(!ids.length)return;const scope=rsScope();
  confirmBox({title:'Reset progress?',text:`This clears ${ids.length} answer${ids.length>1?'s':''} in “${scope}”.`,detail:'Saved questions, notes, reports and Smart Review are kept. This cannot be undone.',ok:'Reset',danger:true},()=>{ids.forEach(i=>delete S.ans[i]);qs.streak=0;save();renderAppDemo();toast(`Progress reset (${ids.length})`)})};
 window.resetTopicAsk=window.resetScopeAsk;
+/* Capture the active Question Bank page exactly once when Settings opens. Subsequent
+   Settings rerenders preserve the student's manual bank/system/topic selection. */
+var __shbResetScopeBaseRender=window.renderAppDemo;
+var __shbResetScopeLastPage=appPage;
+if(typeof __shbResetScopeBaseRender==='function'&&!window.__shbResetScopeRenderBound){
+ window.__shbResetScopeRenderBound=true;
+ window.renderAppDemo=function(){
+  if(appPage==='settings'&&__shbResetScopeLastPage!=='settings'){
+   var context=resetScopeFromStudyContext(__shbResetScopeLastPage,ACTIVE_QBANK,qs.spec,qs.topic,QB);
+   if(context){rBank=context.bank;rSys=context.system;rTop=context.topic}
+  }
+  var result=__shbResetScopeBaseRender.apply(this,arguments);
+  __shbResetScopeLastPage=appPage;
+  return result;
+ };
+}
 window.resetAllAsk=function(){const n=Object.keys(S.ans).length;if(!n)return;
  confirmBox({title:'Reset all study progress?',text:`This clears all ${n} answer${n>1?'s':''} and your progress.`,detail:'Saved questions, notes, reports and Smart Review are kept. This cannot be undone. Export a backup first if unsure.',ok:'Reset all',danger:true},()=>{S.ans={};qs.streak=0;save();renderAppDemo();toast('All study progress reset')})};
 

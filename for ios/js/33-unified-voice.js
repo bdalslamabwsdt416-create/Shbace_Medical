@@ -12,6 +12,43 @@ var computerVoiceFallback=false,computerVoiceFallbackFor='en-US';
 var computerVoiceMessage='',computerVoiceMessageOption='',computerVoicePendingChoice='';
 var computerVoiceNoticesShown={},computerVoiceSpeechToken=0,computerVoiceReadingButton=null;
 var computerVoiceRetryDelays=[250,650,1300,2600];
+var QUESTION_TOOLS_KEY='shbace_question_tools_v1';
+function computerVoiceReadQuestionTools(){
+ var defaults={shareQuestion:true,copyQuestion:true,readAloud:true,readingSpeed:'normal'},saved=null,legacy=null;
+ try{saved=JSON.parse(localStorage.getItem(QUESTION_TOOLS_KEY)||'null')}catch(_){}
+ if(!saved||typeof saved!=='object'||Array.isArray(saved)){
+  try{legacy=JSON.parse(localStorage.getItem('shbace_android_features_v1')||'null')}catch(_){}
+ }
+ var prefs=Object.assign({},defaults,saved&&typeof saved==='object'?saved:legacy&&typeof legacy==='object'?legacy:{});
+ if(!['slow','normal','fast'].includes(prefs.readingSpeed))prefs.readingSpeed='normal';
+ ['shareQuestion','copyQuestion','readAloud'].forEach(function(k){prefs[k]=prefs[k]!==false});
+ return prefs;
+}
+var computerQuestionTools=computerVoiceReadQuestionTools();
+function computerVoiceSaveQuestionTools(){
+ try{localStorage.setItem(QUESTION_TOOLS_KEY,JSON.stringify(computerQuestionTools))}catch(_){}
+ computerVoiceUpdateQuestionToolsUI();
+}
+function computerVoiceQuestionToolsRate(){
+ return computerQuestionTools.readingSpeed==='slow'?0.78:computerQuestionTools.readingSpeed==='fast'?1.08:0.92;
+}
+function computerVoiceQuestionToolSetting(key,title,description){
+ return '<div class="setrow shb-question-tool-setting"><span><b>'+title+'</b><small>'+description+'</small></span>'+
+  '<button type="button" class="drsw '+(computerQuestionTools[key]?'on':'')+'" role="switch" aria-checked="'+(!!computerQuestionTools[key])+'" data-shb-question-pref="'+key+'"><i></i><span>'+(computerQuestionTools[key]?'ON':'OFF')+'</span></button></div>';
+}
+function computerVoiceUpdateQuestionToolsUI(){
+ try{
+  var root=document.getElementById('shbQuestionToolsSettings');if(!root)return;
+  root.querySelectorAll('[data-shb-question-pref]').forEach(function(btn){
+   var key=btn.getAttribute('data-shb-question-pref'),on=!!computerQuestionTools[key];
+   btn.classList.toggle('on',on);btn.setAttribute('aria-checked',String(on));
+   var label=btn.querySelector('span');if(label)label.textContent=on?'ON':'OFF';
+  });
+  root.querySelectorAll('[data-shb-question-speed]').forEach(function(btn){
+   btn.classList.toggle('on',btn.getAttribute('data-shb-question-speed')===computerQuestionTools.readingSpeed);
+  });
+ }catch(_){}
+}
 function computerVoiceLanguageLabel(lang){
  return lang==='en-GB'?'English (UK)':lang==='ar'?'Arabic':'English (US)';
 }
@@ -228,7 +265,7 @@ function computerVoiceToggleQuestionReadAloud(card,text,button){
   if(!text)return;
   computerVoiceReadingButton=button||null;
   computerVoiceSetReadButton(computerVoiceReadingButton,true);
-  computerVoiceSpeak(String(text),0.92);
+  computerVoiceSpeak(String(text),computerVoiceQuestionToolsRate());
  }catch(_){computerVoiceStopQuestionReadAloud()}
 }
 function computerVoiceMakeUtterance(text,lang,voice,allowFallback,rate){
@@ -301,17 +338,34 @@ function computerVoiceSpeakSample(text,lang,voice){
 }
 function computerVoiceMountSettings(){
  try{
-  var root=settingsRoot();if(!root||root.querySelector('#shbUnifiedVoiceSettings'))return;
-  var card=document.createElement('section');
-  card.className='card setcard';card.id='shbUnifiedVoiceSettings';
-  card.innerHTML='<h3>Question voice</h3>'+
-   '<p class="meta">Questions are read in English only. SHBACE picks the clearest male English voice your device provides (natural or neural voices first), reads slightly slower, and spells out medical units. English (US) is the default.</p>'+
-   '<div class="shb-computer-voice-options" role="group" aria-label="Question reading voice">'+
-   '<button type="button" data-shb-unified-voice="en-US" aria-pressed="false">English (US)</button>'+
-   '<button type="button" data-shb-unified-voice="en-GB" aria-pressed="false">English (UK)</button>'+
-   '</div>'+
-   '<div class="shb-computer-voice-status" role="status" aria-live="polite" hidden><span class="shb-computer-voice-status-text"></span><button type="button" class="shb-computer-voice-dismiss" aria-label="Dismiss voice message" hidden>×</button></div>';
-  root.appendChild(card);computerVoiceUpdateUi();
+  var root=settingsRoot();if(!root)return;
+  if(!root.querySelector('#shbUnifiedVoiceSettings')){
+   var card=document.createElement('section');
+   card.className='card setcard';card.id='shbUnifiedVoiceSettings';
+   card.innerHTML='<h3>Question voice</h3>'+
+    '<p class="meta">Choose the English voice used when reading questions aloud. English (US) is the default; English (UK) is available when the device provides it.</p>'+
+    '<div class="shb-computer-voice-options" role="group" aria-label="Question reading voice">'+
+    '<button type="button" data-shb-unified-voice="en-US" aria-pressed="false">English (US)</button>'+
+    '<button type="button" data-shb-unified-voice="en-GB" aria-pressed="false">English (UK)</button>'+
+    '</div>'+
+    '<div class="shb-computer-voice-status" role="status" aria-live="polite" hidden><span class="shb-computer-voice-status-text"></span><button type="button" class="shb-computer-voice-dismiss" aria-label="Dismiss voice message" hidden>×</button></div>';
+   root.appendChild(card);
+  }
+  if(!root.querySelector('#shbQuestionToolsSettings')){
+   var tools=document.createElement('section');tools.className='card setcard';tools.id='shbQuestionToolsSettings';
+   tools.innerHTML='<h3>Question bank tools</h3>'+
+    '<p class="meta">Choose which actions appear on each question card. These controls also work in topic and single-question views.</p>'+
+    computerVoiceQuestionToolSetting('shareQuestion','Share a question','Share the question text using the iOS share sheet when available.')+
+    computerVoiceQuestionToolSetting('copyQuestion','Copy question text','Copy the question stem and answer options.')+
+    computerVoiceQuestionToolSetting('readAloud','Read questions aloud','Show or hide the voice playback control on question cards.')+
+    '<div class="setrow shb-question-tool-setting"><span><b>Reading speed</b><small>Applies to spoken question text.</small></span>'+
+    '<div class="seg shb-question-tool-speed" role="group" aria-label="Reading speed">'+
+    '<button type="button" data-shb-question-speed="slow">Slow</button>'+
+    '<button type="button" data-shb-question-speed="normal">Normal</button>'+
+    '<button type="button" data-shb-question-speed="fast">Fast</button></div></div>';
+   root.appendChild(tools);
+  }
+  computerVoiceUpdateUi();computerVoiceUpdateQuestionToolsUI();
  }catch(_){}
 }
 function computerVoiceQuestionText(card){
@@ -328,13 +382,63 @@ function computerVoiceQuestionText(card){
   return [stemText,options.length?options.join('. '):''].filter(Boolean).join('. ');
  }catch(_){return ''}
 }
-function computerVoiceDecorateQuestions(){ /* Unified Share / Copy / Read aloud toolbar is mounted by 30. */ }
+function computerVoiceDecorateQuestions(){
+ try{
+  var host=document.querySelector('#phoneContent');if(!host)return;
+  host.querySelectorAll('.qcard').forEach(function(card){
+   var old=card.querySelector('.shb-question-tools'),stem=card.querySelector('.qstem');
+   if(!stem)return;
+   if(old)old.remove();
+   var actions=[];
+   if(computerQuestionTools.shareQuestion)actions.push('<button type="button" class="shb-question-tool" data-shb-question-tool="share" aria-label="Share question"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg><span>Share</span></button>');
+   if(computerQuestionTools.copyQuestion)actions.push('<button type="button" class="shb-question-tool" data-shb-question-tool="copy" aria-label="Copy question"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg><span>Copy</span></button>');
+   if(computerQuestionTools.readAloud)actions.push('<button type="button" class="shb-question-tool shb-computer-read-aloud" data-shb-question-tool="readAloud" aria-label="Read question aloud" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg><span>Read aloud</span></button>');
+   if(!actions.length)return;
+   var toolbar=document.createElement('div');toolbar.className='shb-question-tools';toolbar.setAttribute('role','group');toolbar.setAttribute('aria-label','Question tools');toolbar.innerHTML=actions.join('');
+   stem.insertAdjacentElement('afterend',toolbar);
+  });
+ }catch(_){}
+}
+function computerVoiceNotify(text){try{if(typeof window.toast==='function')window.toast(text)}catch(_){}}
+function computerVoiceFallbackCopy(text){
+ var area=null;
+ try{
+  area=document.createElement('textarea');area.value=text;area.setAttribute('readonly','');
+  area.style.position='fixed';area.style.opacity='0';area.style.pointerEvents='none';
+  document.body.appendChild(area);area.select();
+  var ok=!!(document.execCommand&&document.execCommand('copy'));
+  area.remove();computerVoiceNotify(ok?'Question copied':'Could not copy question');
+ }catch(_){try{if(area)area.remove()}catch(__){}computerVoiceNotify('Could not copy question')}
+}
+function computerVoiceCopyQuestion(text){
+ if(!text)return;
+ try{
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+   navigator.clipboard.writeText(text).then(function(){computerVoiceNotify('Question copied')}).catch(function(){computerVoiceFallbackCopy(text)});
+  }else computerVoiceFallbackCopy(text);
+ }catch(_){computerVoiceFallbackCopy(text)}
+}
+function computerVoiceShareQuestion(text){
+ if(!text)return;
+ try{
+  if(typeof navigator.share==='function'){navigator.share({title:'Shbace Medical question',text:text}).catch(function(){});return}
+ }catch(_){}
+ computerVoiceCopyQuestion(text);
+}
 function computerVoiceInstallStyles(){
  try{
   if(document.getElementById('shbComputerVoiceStyles'))return;
   var style=document.createElement('style');style.id='shbComputerVoiceStyles';
   style.textContent=[
    '.shb-computer-voice-options{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px}',
+   '.shb-question-tools{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:10px 0 12px}',
+   '.shb-question-tools button.shb-question-tool{appearance:none;-webkit-appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:8px 12px;border:1px solid rgba(91,169,255,.34);border-radius:12px;background:linear-gradient(145deg,rgba(25,81,145,.46),rgba(8,30,67,.72));color:#e7f3ff;font:700 12px/1.2 system-ui,sans-serif;cursor:pointer;touch-action:manipulation}',
+   '.shb-question-tools button.shb-question-tool svg{display:block;width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}',
+   '.shb-question-tools button.shb-question-tool:active{transform:translateY(1px) scale(.98)}',
+   '.phone.light .shb-question-tools button.shb-question-tool{background:linear-gradient(145deg,#f7fbff,#e8f3ff);color:#174b7a;border-color:#c7def5}',
+   '.shb-question-tool-setting>span{min-width:0;flex:1}.shb-question-tool-setting>span b,.shb-question-tool-setting>span small{display:block}',
+   '.shb-question-tool-speed{flex:none;gap:5px}.shb-question-tool-speed button{font-size:10px;padding:7px 9px}',
+   '@media(max-width:360px){.shb-question-tools{gap:6px}.shb-question-tools button.shb-question-tool{flex:1 1 auto;padding:8px 9px;font-size:11px}}',
    '.shb-computer-voice-options button,.shb-computer-read-aloud{appearance:none;border:1px solid rgba(91,169,255,.36);border-radius:11px;background:rgba(20,61,105,.42);color:inherit;padding:9px 13px;font:600 12px/1.3 system-ui,sans-serif;cursor:pointer}',
    '.shb-computer-voice-options button.on{border-color:#44c9ff;background:rgba(28,126,190,.28);box-shadow:0 0 0 1px rgba(68,201,255,.2)}',
    '.shb-computer-voice-options button:disabled,.shb-computer-read-aloud:disabled{opacity:.48;cursor:not-allowed}',
@@ -372,6 +476,34 @@ function computerVoiceInit(){
   });
   document.addEventListener('click',function(event){
    try{
+    var questionTool=event.target&&event.target.closest?event.target.closest('[data-shb-question-tool]'):null;
+    if(questionTool){
+     event.preventDefault();event.stopPropagation();
+     var qcard=questionTool.closest('.qcard'),qtext=computerVoiceQuestionText(qcard),kind=questionTool.getAttribute('data-shb-question-tool');
+     if(kind==='share')computerVoiceShareQuestion(qtext);
+     else if(kind==='copy')computerVoiceCopyQuestion(qtext);
+     else if(kind==='readAloud')computerVoiceToggleQuestionReadAloud(qcard,qtext,questionTool);
+     return;
+    }
+    var pref=event.target&&event.target.closest?event.target.closest('[data-shb-question-pref]'):null;
+    if(pref){
+     event.preventDefault();event.stopPropagation();
+     var key=pref.getAttribute('data-shb-question-pref');
+     if(Object.prototype.hasOwnProperty.call(computerQuestionTools,key)){
+      computerQuestionTools[key]=!computerQuestionTools[key];computerVoiceSaveQuestionTools();
+      if(key==='readAloud'&&!computerQuestionTools.readAloud)computerVoiceStopQuestionReadAloud();
+      document.querySelectorAll('#phoneContent .shb-question-tools').forEach(function(node){node.remove()});
+      computerVoiceDecorateQuestions();
+     }
+     return;
+    }
+    var speed=event.target&&event.target.closest?event.target.closest('[data-shb-question-speed]'):null;
+    if(speed){
+     event.preventDefault();event.stopPropagation();
+     var nextSpeed=speed.getAttribute('data-shb-question-speed');
+     if(['slow','normal','fast'].indexOf(nextSpeed)>=0){computerQuestionTools.readingSpeed=nextSpeed;computerVoiceSaveQuestionTools()}
+     return;
+    }
     var target=event.target&&event.target.closest?event.target.closest('[data-shb-unified-voice]'):null;
     if(target){
      event.preventDefault();event.stopPropagation();
@@ -398,9 +530,10 @@ computerVoiceInit();
 
 function mountVoiceSettings(){try{computerVoiceMountSettings()}catch(_){}}
 try{
- var ob=new MutationObserver(function(){mountVoiceSettings()});
+ var ob=new MutationObserver(function(){mountVoiceSettings();computerVoiceDecorateQuestions()});
  if(document.body)ob.observe(document.body,{childList:true,subtree:true});
 }catch(_){}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mountVoiceSettings,{once:true});else mountVoiceSettings();
 computerVoiceMountSettings();
+computerVoiceDecorateQuestions();
 })();
