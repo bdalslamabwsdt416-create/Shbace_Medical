@@ -30,7 +30,7 @@ var VER_KEY='shbace_pkg_version_installed_v1',VER_AVAIL_KEY='shbace_pkg_version_
    keep a memory copy for the current session. Package files and READY state stay in
    their existing Cache/IndexedDB locations and are not renamed or migrated. */
 var META_DB_PREFIX='local-meta:',metaMemory=Object.create(null);
-var META_KEYS=[CHECK_OK_KEY,CHECK_TRY_KEY,PENDING_KEY,VER_KEY,VER_AVAIL_KEY,EXAM_KEY];
+var META_KEYS=[CHECK_OK_KEY,CHECK_TRY_KEY,PENDING_KEY,VER_KEY,VER_AVAIL_KEY];
 function metaRawGet(key){
  var value=null;
  try{value=localStorage.getItem(key)}catch(e){}
