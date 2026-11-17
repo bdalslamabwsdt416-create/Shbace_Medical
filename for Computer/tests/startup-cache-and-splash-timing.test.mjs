@@ -71,7 +71,8 @@ test("LocalStorage-first metadata never gates the first post-Splash package down
   assert.match(updater, /function metaRawGet\\(key\\)[\\s\\S]*?localStorage\\.getItem\\(key\\)[\\s\\S]*?metaMemory/);
   assert.match(updater, /function metaRawSet\\(key,value\\)[\\s\\S]*?localStorage\\.setItem\\(key,raw\\)[\\s\\S]*?dbPut\\('meta',META_DB_PREFIX\\+key,raw\\)/);
   assert.match(updater, /function hydrateLocalMetadata\\(\\)[\\s\\S]*?dbGet\\('meta',META_DB_PREFIX\\+key\\)/);
-  assert.match(updater, /function boot\\(\\)\\{hydrateLocalMetadata\\(\\)\\.then\\(start,start\\);\\}/);
-  assert.ok(updater.includes("if(!hasRecord||checkDue())return runFullCheck(splashFinished)"));
+  assert.match(updater, /if\(!hasRecord\)return runFullCheck\(splashFinished\);[\s\S]*?return hydrateLocalMetadata\(\)\.then\(function\(\)\{/);
+  assert.match(updater, /function boot\(\)\{start\(\);\}/);
+  assert.ok(updater.indexOf("if(!hasRecord)return runFullCheck(splashFinished)") < updater.indexOf("return hydrateLocalMetadata().then(function(){"));
   assert.ok(updater.includes("if(installed===false)return {kind:'setup',plan:planOf('install',manifest.files,[])}"));
 });
