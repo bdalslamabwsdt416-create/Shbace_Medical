@@ -410,6 +410,7 @@ test('existing install with missing cached files is detected locally and marked 
     cachedPaths: ['index.html', 'js/04-app-main.js']
   });
   assert.deepEqual(result.calls, ['cache-open:shbace-medical-offline-v2']);
+  assert.deepEqual(result.networkCalls, [], 'cache repair detection is local-only');
   assert.deepEqual(result.screens, []);
   assert.deepEqual(result.repairs, [1]);
   assert.equal(result.store.shbace_pkg_repair_pending_v1, '1');
@@ -434,6 +435,7 @@ test('existing install with all expected cached files and migration complete doe
   assert.deepEqual(result.pending, []);
   assert.deepEqual(result.repairs, []);
   assert.deepEqual(result.screens, []);
+  assert.deepEqual(result.networkCalls, [], 'a healthy existing install makes no startup request');
 });
 
 test('a manual Settings check arms migration only in memory before an update is committed', async () => {
