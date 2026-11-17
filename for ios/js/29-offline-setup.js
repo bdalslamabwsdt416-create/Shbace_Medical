@@ -253,7 +253,7 @@ function localRepairNeeded(installed){
    requests.forEach(function(request){have[request.url]=true});
    return Object.keys(installed.files).filter(function(path){return !have[urlFor(path)]}).length;
   });
- }).catch(function(){return 0});
+ }).catch(function(){return Object.keys(installed.files).length});
 }
 function cleanupPreviousCaches(){
  /* Keep only the current manifest assets, its manifest and its ready marker in
