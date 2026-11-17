@@ -668,7 +668,7 @@ function showUpdateSheet(p,info){
  el.querySelector('#shbUpdLater').addEventListener('click',function(){
   /* "Later": ask again after SNOOZE_DAYS (the next check becomes due then). The bell notification stays. */
   migrationInProgress=false;
-  lsSet(CHECK_OK_KEY,Date.now()-(CHECK_EVERY-SNOOZE_DAYS*86400000));el.remove();
+  lsSet(CHECK_OK_KEY,Date.now()-(CHECK_EVERY-SNOOZE_DAYS*86400000));lsSet(CHECK_ATTEMPT_KEY,Date.now()-(CHECK_EVERY-SNOOZE_DAYS*86400000));el.remove();
  });
  el.querySelector('#shbUpdNow').addEventListener('click',function(){
   el.remove();showPlanNeeded(p);runPlan();
