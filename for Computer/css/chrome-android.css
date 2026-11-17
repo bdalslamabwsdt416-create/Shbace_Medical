@@ -1,9 +1,0 @@
-/* Chrome Android PWA adaptations — browser-supported capabilities only. */
-#phoneContent #shbAndroidSettings ~ .shb-af-settings{display:none!important}
-#phoneContent .eg-reminder{display:none!important}
-#phoneContent .shb-chrome-tools{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
-#phoneContent .shb-chrome-tools button{min-height:42px;border-radius:12px;border:1px solid rgba(95,174,235,.32);background:linear-gradient(135deg,rgba(31,121,201,.20),rgba(31,174,166,.14));color:var(--text,#eaf4ff);font:700 12px system-ui,sans-serif;padding:8px 10px}
-#phoneContent .shb-chrome-tools button:disabled{opacity:.55}
-#phoneContent .shb-chrome-meta{margin:9px 1px 0;color:var(--muted,#9bb4d2);font-size:10px;line-height:1.5}
-.phone.light #phoneContent .shb-chrome-tools button{background:linear-gradient(135deg,#edf6ff,#effbf8);border-color:#c9e0f2;color:#244969}
-@media(max-width:340px){#phoneContent .shb-chrome-tools{grid-template-columns:1fr}}

@@ -1,4 +1,3 @@
-
 /* ===== Shbace Medical v6 — question bank controls, icons, mascot reactions, onboarding, stairs ===== */
 (function(){
 const $=s=>document.querySelector(s);
@@ -35,6 +34,31 @@ const VERIFY_RE=/needs?\s+(?:review|verification)|needs?\s+to\s+be\s+verified|(?
 const qUnsure=q=>!!(q&&(q.f||q.kx||VERIFY_RE.test(String(q.note||'')+' '+String(q.ex||''))));
 const FULL_KEY={'Respiratory':'respiratory','Cardiovascular System':'cardio','Gastrointestinal Tract':'git','Nephrology':'nephrology','Endocrinology':'endocrinology','Central Nervous System':'cns','Neonatology':'neonatology','Infectious Diseases & Vaccines':'infectious','Haematology':'haematology','Growth and Nutrition':'growth','Genetics & Dermatology':'genetics','Rheumatology / Metabolic / Poisoning / Immunology':'rheum',"Previous Years' Exam Questions":'exams'};
 const FULL_TAGS=['PDF Bank','Previous Years','Repeated Question','Repeated Topic'];
+/* Question-type tag (what the question asks), derived from the stem; shown next to the source tag. */
+const CUE=/\?|\b(which|what|how|why|when|all of the following|all the following|the following|except|most|best|correct|incorrect|true|false|choose|select|regarding|concerning|about|is|are)\b|:\s*$/i;
+function shbLastAsk(stem){
+  const t=String(stem||'').replace(/\s+/g,' ').trim();
+  const parts=t.split(/(?<=[.?!:])\s+/).filter(Boolean);
+  if(!parts.length)return t;
+  for(let i=parts.length-1;i>=0;i--){
+    if(/\b(which|what|how|why|when|following|except|choose|select|regarding|concerning)\b|\?|:\s*$/i.test(parts[i]))return parts[i];
+  }
+  return parts[parts.length-1];
+}
+const MGMT=/\b(treatment|treat|treated|drug of choice|therapy|next step|initial step|best initial|first[- ]line|prophylaxis|prophylactic|vaccin\w*|antidote|should be (given|started|done|avoided|used)|management (is|of|line|plan|includes|steps?)|managed|management)\b/i;
+const INV=/\b(investigations?|diagnostic test|test of choice|best test|gold standard|confirm|confirms|confirmed|confirmatory|screening|biopsy|x-?ray|chest film|imaging|ultrasound|ultrasonography|echocardiograph\w*|ecg|eeg|mri|ct scan|laboratory|lab (finding|result|test)s?|csf|culture|serum|blood (test|gas|film|picture)|urinalysis|would (show|reveal)|will show|radiolog\w*)\b/i;
+const DX=/\b((most likely|probable|likely|provisional|differential|final|working|clinical)\s+(diagnosis|dx)|diagnosis (is|of this)|what is the diagnosis|the diagnosis|dx)\b/i;
+const CASE=/(\b\d+(\.\d+)?[- ]?(year|yr|month|mo|week|wk|day|hour|h)s?[- ]?(-| )?(old)?\b|\b(newborn|neonate|infant|toddler|preterm|term baby|boy|girl|adolescent|school[- ]aged?)\b)/i;
+const CASE2=/\b(presents?|presented|presenting|brought|complain\w*|admitted|referred|came|history of|on examination|examination (shows|reveals|of)|is found|was found|has had|developed|noted|o\/e)\b/i;
+function shbKind(q){
+  const ask=shbLastAsk(q.q);
+  if(DX.test(ask))return 'Diagnosis';
+  if(MGMT.test(ask))return 'Management';
+  if(INV.test(ask))return 'Investigation';
+  if(CASE.test(q.q)&&CASE2.test(q.q)&&String(q.q).length>90)return 'Clinical Case';
+  return 'Knowledge';
+}
+
 let EXAMS={};
 if(USE_FULL_BANK){try{
  const QD=JSON.parse(document.getElementById('qbData').textContent),D=QD.questions,ORD=QD.order,PX=ORD.py,PYS="Previous Years' Exam Questions";EXAMS=PX.exams||{};
@@ -50,8 +74,8 @@ if(USE_FULL_BANK){try{
   L.forEach((q,n)=>{const ltr=q.o.map(o=>o[0]);const kx=ltr.indexOf(q.a)<0;const k=Math.max(0,ltr.indexOf(q.a));
    let e='';if(q.c)e+='The answer key was revised (solved with AI). The original explanation below may refer to the previous key.\n';
    if(q.ai&&q.f)e+='AI review: multiple, none or undetermined correct answers. Check your textbook.\n';
-   e+=q.e||'';if(q.note)e+='\n'+q.note;
-   FULL_QB.push({id:q.id,spec:key,topic:TID[(q.sy||'')+'\u0001'+q.t],tag:q.py?((q.rq||[]).length?'Repeated Question':(q.rc||[]).length?'Repeated Topic':'Previous Years'):'PDF Bank',
+   e+=q.e||'';if(q.note&&!/[\u0600-\u06FF]/.test(q.note))e+='\n'+q.note;
+   FULL_QB.push({id:q.id,spec:key,topic:TID[(q.sy||'')+'\u0001'+q.t],tag:q.py?((q.rq||[]).length?'Repeated Question':(q.rc||[]).length?'Repeated Topic':'Previous Years'):'PDF Bank',kind:shbKind(q),
     q:q.q,o:q.o.map(o=>o[1]),ol:ltr,kx,k,ex:e.trim(),no:n+1,src:q.src||'',cs:q.cs||null,cm:!!q.cm,rq:q.rq||[],rc:q.rc||[],ai:!!q.ai,f:!!q.f,py:!!q.py})});
   spec[key]={q:L.length,label:sub,topics}});
  if(!FULL_QB.length)throw new Error('empty bank');
@@ -114,23 +138,40 @@ const DEMO_QB=[
 ['URO-001','urology',25,'Investigation','Which investigation is the gold standard for diagnosing vesicoureteral reflux?',['Micturating cystourethrogram (MCUG)','Renal ultrasound','DMSA scan','Plain abdominal X-ray','Intravenous urogram'],0,'MCUG shows and grades reflux. Ultrasound screens for hydronephrosis and DMSA detects renal scarring.']
 ].map(a=>({id:a[0],spec:a[1],topic:a[2],tag:a[3],q:a[4],o:a[5],k:a[6],ex:a[7]}));
 const QB=BANK_ON?FULL_QB:DEMO_QB;
+/* SHB-BANK-SCOPE: Dr. Al-Joaki's bank (q.py !== true) vs Previous Questions (q.py === true).
+   View-only filter used by Quiz, Search and Smart Review. Question records are never modified. */
+const BANK_OPTS=[['all','All banks'],['aj','Dr. Al-Joaki'],['previous','Previous Questions'],['nelson','Nelson Textbook'],['kasr','Kasr Al-Ainy'],['clinical','Clinical Cases'],['egyptian','Egyptian Book']];
+const BANK_KEYS=new Set(BANK_OPTS.map(option=>option[0]).filter(key=>key!=='all'));
+const bankOf=q=>{
+ if(!q)return 'aj';
+ const hasBankFlag=value=>value===true||value===1||value==='1';
+ const legacy=hasBankFlag(q.nl)?'nelson':hasBankFlag(q.py)?'previous':hasBankFlag(q.eb)?'egyptian':hasBankFlag(q.cc)?'clinical':hasBankFlag(q.ao)?'kasr':'aj';
+ const flagged=legacy!=='aj'?legacy:null;
+ const canonical=flagged||(BANK_KEYS.has(q.bank)?q.bank:legacy);
+ if(q.bank!==canonical){try{q.bank=canonical}catch(e){}}
+ return canonical;
+};
+const bankValid=b=>BANK_OPTS.some(o=>o[0]===b&&b!=='all')?b:'all';
+const bankOk=(q,b)=>b==='all'||bankOf(q)===b;
+const bankHas=(spec,b)=>b==='all'||QB.some(q=>q.spec===spec&&bankOk(q,b));
 const TAGS=BANK_ON?FULL_TAGS:['Clinical Case','Diagnosis','Investigation','Knowledge','Management','PDF Bank'];
 window.__bank={on:BANK_ON,total:QB.length,demo:DEMO_QB};
 const FILTERS=[['all','All Questions'],['unanswered','Unanswered'],['correct','Correct'],['incorrect','Incorrect'],['bookmarked','Bookmarked']];
 
 /* ---------- state ---------- */
-const qs={spec:'endocrinology',topic:0,filter:'all',tag:'all',view:'single',idx:0,full:false,noteOpen:{},streak:0,dd:null};
+let ACTIVE_QBANK='all',ACTIVE_QBANK_TOPICS=null;
+const qs={spec:'endocrinology',topic:0,filter:'all',tag:'all',view:'all',lim:30,idx:0,full:false,noteOpen:{},streak:0,dd:null};
 window.__qs=qs;
 window.__shbQBVersionState={
  capture:function(){
   var activeId=null;
   try{if(appPage==='questions'){var current=filtered()[qs.idx];if(current)activeId=current.id;}}catch(e){}
   var pc=document.getElementById('phoneContent');
-  var review={};try{review={tab:srTab,run:!!srRun}}catch(e){}
+  var review={};try{review={tab:srTab,run:!!srRun,bank:SRBANK}}catch(e){}
   return {
    version:1,appPage:appPage,mode:mode,slide:slide,selectedGrade:selectedGrade,guideTab:guideTab,
    qs:JSON.parse(JSON.stringify(qs)),
-   search:{gq:gq,gSpec:gSpec,gTag:gTag,gSrc:gSrc,gTopic:gTopic,gSys:gSys,gSort:gSort,gLim:gLim},
+   search:{gq:gq,gBank:gBank,gSpec:gSpec,gTag:gTag,gSrc:gSrc,gTopic:gTopic,gSys:gSys,gSort:gSort,gLim:gLim},
    review:review,activeQuestionId:activeId,
    scroll:{windowY:window.scrollY||document.documentElement.scrollTop||0,phoneY:pc?pc.scrollTop:0}
   };
@@ -139,8 +180,8 @@ window.__shbQBVersionState={
   if(!state||state.version!==1)return false;
   try{
    if(state.qs&&typeof state.qs==='object')Object.assign(qs,state.qs);
-   if(state.search){gq=String(state.search.gq||'');gSpec=state.search.gSpec||'all';gTag=state.search.gTag||'all';gSrc=state.search.gSrc||'all';gTopic=state.search.gTopic||'all';gSys=state.search.gSys||'all';gSort=state.search.gSort||'bank';gLim=Math.max(40,Number(state.search.gLim)||40);gIdx=null;}
-   if(state.review){try{if(state.review.tab)srTab=state.review.tab;if(typeof state.review.run==='boolean')srRun=state.review.run}catch(e){}}
+   if(state.search){gq=String(state.search.gq||'');gBank=bankValid(state.search.gBank);gSpec=state.search.gSpec||'all';gTag=state.search.gTag||'all';gSrc=state.search.gSrc||'all';gTopic=state.search.gTopic||'all';gSys=state.search.gSys||'all';gSort=state.search.gSort||'bank';gLim=Math.max(40,Number(state.search.gLim)||40);gIdx=null;}
+   if(state.review){try{if(state.review.tab)srTab=state.review.tab;if(typeof state.review.run==='boolean')srRun=state.review.run;SRBANK=bankValid(state.review.bank)}catch(e){}}
    if(typeof state.appPage==='string'&&state.appPage)appPage=state.appPage;
    mode='app';
    if(Number(state.selectedGrade)>=1&&Number(state.selectedGrade)<=5)selectedGrade=Number(state.selectedGrade);
@@ -177,17 +218,18 @@ const SYS=[
  ['haematology','Haematology','s_haematology',0],['growth','Growth and Nutrition','s_growth',0],['genetics','Genetics & Dermatology','s_genetics',0],
  ['rheum','Rheumatology / Metabolic / Poisoning / Immunology','s_rheum',0],['exams','Previous Years\u2019 Exam Questions','s_exams',0]
 ];
-if(BANK_ON){/* demo-only specialty (Urology) has no questions in the full bank -> disabled with the demo set */for(let i=SYS.length-1;i>=0;i--)if(!REAL.spec[SYS[i][0]]&&SYS[i][0]==='urology')SYS.splice(i,1);SYS.forEach(r=>{r[3]=REAL.spec[r[0]]?1:0});SPEC_NAME={};SYS.forEach(r=>SPEC_NAME[r[0]]=r[1])}
+if(BANK_ON){/* Keep Urology when the separate Nelson collection supplies Urology questions, even if the main bank has none. */const hasNelsonUrology=Array.isArray(window.__SHB_NELSON_QUESTIONS__)&&window.__SHB_NELSON_QUESTIONS__.some(q=>q&&q.nl===true&&q.spec==='urology');for(let i=SYS.length-1;i>=0;i--)if(!REAL.spec[SYS[i][0]]&&SYS[i][0]==='urology'&&!hasNelsonUrology)SYS.splice(i,1);SYS.forEach(r=>{r[3]=REAL.spec[r[0]]?1:0});SPEC_NAME={};SYS.forEach(r=>SPEC_NAME[r[0]]=r[1])}
 const sysIcon=(img,cls='')=>img?`<img class="sysimg ${cls}" src="${IMG[img]}" alt="">`:`<span class="sysimg ${cls} uro">${URO_SVG}</span>`;
 
 /* ---------- helpers ---------- */
 const subjectQs=()=>QB;
-const inTopic=()=>(gradeHasPediatrics()?QB:[]).filter(q=>(qs.spec==='all'||q.spec===qs.spec)&&(!qs.topic||q.topic===qs.topic));
+const coreInTopic=()=>(gradeHasPediatrics()?QB:[]).filter(q=>(ACTIVE_QBANK==='all'||bankOf(q)===ACTIVE_QBANK)&&(ACTIVE_QBANK_TOPICS===null||ACTIVE_QBANK_TOPICS.indexOf(q.topic)>=0)&&(qs.spec==='all'||q.spec===qs.spec)&&(!qs.topic||q.topic===qs.topic));
+let inTopic=coreInTopic;
 function statusOf(q){const a=S.ans[q.id];return !a?'unanswered':(a.ok?'correct':'incorrect')}
 function filtered(){return inTopic().filter(q=>{
   if(qs.filter==='bookmarked'&&!S.saved[q.id])return false;
   if(['unanswered','correct','incorrect'].includes(qs.filter)&&statusOf(q)!==qs.filter)return false;
-  if(qs.tag!=='all'&&q.tag!==qs.tag)return false;return true})}
+  if(qs.tag!=='all'&&q.tag!==qs.tag&&q.kind!==qs.tag)return false;return true})}
 const answeredCount=list=>list.filter(q=>S.ans[q.id]).length;
 const topicTitle=()=>qs.topic?TOPIC_NAME[qs.topic]:'All topics';
 function pct(n,d){return d?Math.round(n*100/d):0}
@@ -205,21 +247,52 @@ const PRAISE2=['Excellent work. Keep building on what you know.','Well done — 
 /* ============================================================
    QUESTION BANK
    ============================================================ */
+const KIND_ORDER=['Clinical Case','Diagnosis','Investigation','Management','Knowledge'];
+function filterItems(){const L=inTopic(),c={unanswered:0,correct:0,incorrect:0,bookmarked:0};L.forEach(q=>{c[statusOf(q)]++;if(S.saved[q.id])c.bookmarked++});
+ const out=[['all','All Questions ('+L.length+')']];[['unanswered','Unanswered'],['correct','Correct'],['incorrect','Incorrect'],['bookmarked','Bookmarked']].forEach(([k,l])=>{if(c[k]||qs.filter===k)out.push([k,l+' ('+c[k]+')'])});return out}
+function tagItems(){const L=inTopic(),c={};L.forEach(q=>{[q.tag,q.kind].forEach(t=>{if(t)c[t]=(c[t]||0)+1})});
+ const order=[...KIND_ORDER,...FULL_TAGS];Object.keys(c).forEach(t=>{if(!order.includes(t))order.push(t)});
+ const out=[['all','All Tags ('+L.length+')']];order.forEach(t=>{if(c[t]||qs.tag===t)out.push([t,t+' ('+(c[t]||0)+')'])});return out}
+function filtersHTML(){return ddHTML('filter',filterItems(),qs.filter)+ddHTML('tag',tagItems(),qs.tag)}
 function ddHTML(id,items,val,label){const cur=(items.find(i=>i[0]===val)||items[0])[1];return `<div class="dd ${qs.dd===id?'open':''}" id="dd-${id}"><button type="button" class="dd-btn" aria-haspopup="listbox" aria-expanded="${qs.dd===id}" onclick="ddToggle('${id}',event)"><span>${esc(label||cur)}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="dd-list" role="listbox">${items.map(([v,l])=>`<button type="button" role="option" class="dd-item ${v===val?'sel':''}" onclick="ddPick('${id}','${String(v).replace(/'/g,"\\'")}',event)"><i></i><span>${esc(l)}</span></button>`).join('')}</div></div>`}
 window.ddToggle=function(id,e){e&&e.stopPropagation();qs.dd=qs.dd===id?null:id;refreshDD()};
 function refreshDD(){document.querySelectorAll('.dd').forEach(d=>{const o=d.id==='dd-'+qs.dd;d.classList.toggle('open',o);const b=d.querySelector('.dd-btn');b&&b.setAttribute('aria-expanded',o)})}
 document.addEventListener('click',e=>{if(qs.dd&&!e.target.closest('.dd')){qs.dd=null;refreshDD()}});
 window.ddPick=function(id,v,e){e&&e.stopPropagation();qs.dd=null;
- if(id==='filter'){qs.filter=v;qs.idx=0;paintBank()}
- else if(id==='tag'){qs.tag=v;qs.idx=0;paintBank()}
+ if(id==='filter'){qs.filter=v;qs.idx=0;qs.lim=30;paintBank()}
+ else if(id==='tag'){qs.tag=v;qs.idx=0;qs.lim=30;paintBank()}
  else if(id==='xscope'){exp.scope=v;paintExport()}
  else if(id==='xlayout'){exp.layout=v;paintExport()}
  refreshDD()};
 
-const exName=e=>String((EXAMS[e]||e)).replace("Previous Years' Exam Questions \u2014 ",'Exam ');
+/* Display-only: Arabic exam labels are shown in English; stored question data is never changed. */
+const AR_LBL={'فاينل':'Final','مقلوبة':'Reversed','مفاضلة':'Selection'};
+const enSrc=t=>String(t==null?'':t).replace(/فاينل|مقلوبة|مفاضلة/g,m=>AR_LBL[m]).replace(/\s{2,}/g,' ').trim();
+const exName=e=>enSrc(String((EXAMS[e]||e)).replace("Previous Years' Exam Questions \u2014 ",'Exam '));
 const repRef=a=>{const g={};a.forEach(([e,n])=>(g[e]=g[e]||[]).push(n));return Object.keys(g).map(e=>`<bdi>${esc(exName(e))}</bdi> \u2013 ${g[e].map(n=>'Q'+n).join(', ')}`).join(' \u00b7 ')};
-function qExtra(q){if(!BANK_ON)return '';let x='';
- if(q.py){if(q.src)x+=`<div class="qsrc">Source: <bdi>${esc(q.src)}</bdi></div>`;if(q.cs)x+=`<div class="qcase"><b>${esc(q.cs[0])}</b>\n${esc(q.cs[1])}</div>`;if(q.cm)x+='<div class="qrep"><span class="qflag w">Case text not in source file \u2013 classified by explanation</span></div>';
+/* Removes the "Curriculum alignment: ..." sentence from displayed explanations but keeps any "High-yield point / Review Notes" text that shares its line. */
+function cleanExplanationText(value){
+ return String(value==null?'':value).split(/\r?\n/).map(line=>/^[ \t]*Curriculum alignment:/i.test(line)?line.replace(/^[ \t]*Curriculum alignment:[\s\S]*?(?=\*\*High-yield|High-yield point|Review Notes:|$)/i,'').trim():line).join('\n').replace(/\*\*([^*\n]+)\*\*/g,'$1').replace(/\n{3,}/g,'\n\n').trim();
+}
+const EX_LABEL_RE=/^(High-yield point(?:\s*\/\s*Review Notes)?|Review Notes|Key point|Clinical pearl|Exam tip|Explanation)\s*:\s*/i;
+function fmtExplanationHTML(text){
+ return String(text||'').split(/\n{2,}/).map(p=>p.trim()).filter(Boolean).map(p=>{const m=p.match(EX_LABEL_RE);
+  if(!m)return '<p>'+esc(p)+'</p>';
+  const rest=p.slice(m[0].length).trim();
+  if(/^explanation$/i.test(m[1]))return rest?'<p>'+esc(rest)+'</p>':'';
+  return rest?'<p class="nl-sec"><b class="nl-lbl">'+esc(m[1])+'</b>'+esc(rest)+'</p>':''}).join('');
+}
+function nelsonDetails(q){
+ if(!q||(!q.nl&&!q.ao&&!q.cc&&!q.aiBank)||!q.more)return '';
+ const source=q.aiBank?String(q.src||'AI question bank source'):q.eb?(q.ebSourceFile||'Egyptian Book source'):q.cc?(q.ccSource||'Accepted Clinical Case source'):q.ao?(q.aoSource||'Source details unavailable'):'Nelson Textbook of Pediatrics.';
+ let moreBody=cleanExplanationText(q.more).replace(/^Explanation\s*:\s*/i,'');const lead=cleanExplanationText(q.ex).replace(/^Explanation\s*:\s*/i,'');
+ if(lead&&moreBody.startsWith(lead))moreBody=moreBody.slice(lead.length).trim();
+ const alt=q.ao&&!q.eb&&q.aoAltSource?'<p class="nl-source">Also found in: '+esc(q.aoAltSource)+'</p>':'';
+ const modelAnswer=q.cc&&q.ccOpen&&q.ccAnswer?'<p class="nl-source"><b>Model answer:</b> '+esc(q.ccAnswer)+'</p>':'';
+ return '<details class="nl-more"><summary>'+'Read More'+'</summary><div class="nl-more-body">'+modelAnswer+fmtExplanationHTML(moreBody)+'<p class="nl-source">'+'Source: '+esc(source)+'</p>'+alt+'</div></details>';
+}
+function qExtra(q){if(!BANK_ON||q.nl||q.ao||q.cc)return '';let x='';
+ if(q.py){if(q.src)x+=`<div class="qsrc">Source: <bdi>${esc(enSrc(q.src))}</bdi></div>`;if(q.cs)x+=`<div class="qcase"><b>${esc(q.cs[0])}</b>\n${esc(q.cs[1])}</div>`;if(q.cm)x+='<div class="qrep"><span class="qflag w">Case text not in source file \u2013 classified by explanation</span></div>';
   if(q.rq.length)x+=`<div class="qrep"><span class="qflag r">Repeated Question</span> also appears in: ${repRef(q.rq)}</div>`;if(q.rc.length)x+=`<div class="qrep"><span class="qflag w">Repeated Topic/Concept</span> also tested in: ${repRef(q.rc)}</div>`}
  if(q.f)x+='<span class="qflag w">Needs review</span>';if(q.ai)x+='<span class="qflag">Solved with AI</span>';
  if(qUnsure(q))x+=`<div class="qwarn" role="note"><b>\u26a0 Needs Review / Verification</b><span>${q.kx?'The answer key does not match any option \u2014 do not rely on it.':'This question or its answer key is not confirmed. Check your textbook before relying on the answer.'}</span></div>`;
@@ -232,7 +305,10 @@ function cardHTML(q,n,single){
  if(a){const ok=a.ok;const face=ok?'happy':(DOCF[q.id]||'sad');
   const msg=ok?(a.msg||PRAISE2[0]):(face==='angry'?'Let’s pause and review this one carefully.':face==='encouraging'?'A tough run — keep going, every mistake teaches you something.':'Not quite — the explanation below will help.');
   react=`<div class="qreact ${ok?'ok':'no'}">${docFace(face)}<div><b>${ok?(a.pr||'Excellent!'):(face==='angry'?'Careful!':face==='encouraging'?'Keep going!':'Incorrect')}</b><span>${esc(msg)}</span></div></div>
-  <div class="qfb ${ok?'ok':'no'}"><b>${ok?'Correct':'Incorrect'} · Correct answer: ${L(q.k)}. ${esc(q.o[q.k])}${qUnsure(q)?' <em class="qunsure">(unconfirmed key)</em>':''}</b><p>Explanation: ${esc(q.ex)}</p></div>`}
+  <div class="qfb ${ok?'ok':'no'}"><b>${ok?'Correct':'Incorrect'} · Correct answer: ${L(q.k)}. ${esc(q.o[q.k])}${qUnsure(q)&&!q.nl&&!q.ao?' <em class="qunsure">(unconfirmed key)</em>':''}</b><p>Explanation:  ${esc(cleanExplanationText(q.ex))}</p>${nelsonDetails(q)}</div>`}
+ else if(q.cc&&q.ccOpen){react=`<div class="qfb"><b>Open-ended case. Think through your response before revealing the model answer.</b>${nelsonDetails(q)}</div>`}
+ else if(q.cc&&q.kx){react=`<div class="qfb no"><b>No verified answer key is available for this question; answer selection is disabled.</b>${nelsonDetails(q)}</div>`}
+ else if((q.nl||q.ao||q.eb)&&q.kx){react=`<div class="qfb no"><b>Question data is incomplete, so answer selection is unavailable.</b><p>Explanation: ${esc(cleanExplanationText(q.ex))}</p>${nelsonDetails(q)}</div>`}
  else if(single){react=`<div class="qreact think"><div><b>Take your time</b><span>Think it through, then choose an answer.</span></div></div>`}
  const acts=`<div class="qacts">
   <button type="button" class="qa ${S.saved[q.id]?'on':''}" onclick="qSave('${q.id}')"><span>${S.saved[q.id]?'★':'☆'}</span>${S.saved[q.id]?'Saved':'Save'}</button>
@@ -241,16 +317,18 @@ function cardHTML(q,n,single){
 </div>`;
  const note=qs.noteOpen[q.id]?`<div class="qnote"><textarea placeholder="Write your note…" oninput="qNoteSave('${q.id}',this.value)">${esc(S.notes[q.id]||'')}</textarea></div>`:'';
  const sname=a?(a.ok?'Correct':'Incorrect'):'Unanswered';
- return `<article class="qcard" id="qc-${q.id}" data-id="${q.id}"><div class="qtop"><span class="qid">${q.id} · mcq</span><span class="qstat s-${st}">${sname}</span><span class="qtag">${esc(q.tag)}</span></div><div class="qtopic">${esc(TOPIC_NAME[q.topic])}</div>${qExtra(q)}<h3 class="qstem">Q${n}. ${esc(QSTEM(q))}</h3><div class="qopts">${opts}</div>${react}${acts}${note}</article>`}
+ const aiCaseBlock=q.aiCaseVignette?`<div class="qcase ai-case-context"><p>${esc(q.aiCaseVignette).replace(/\r?\n/g,'<br>')}</p></div>`:'';
+ return `<article class="qcard${(q.nl||q.ao)?' nl-clean':''}" id="qc-${q.id}" data-id="${q.id}">${aiCaseBlock}${qExtra(q)}<h3 class="qstem">Q${n}. ${esc(QSTEM(q))}</h3><div class="qopts">${opts}</div>${react}${acts}${note}</article>`}
 
 function bankBody(){
  const list=filtered();
  if(!list.length){const none=!inTopic().length;return `<div class="qempty"><img src="${IMG.f_think}" alt=""><b>${none?'No questions here yet':'No questions match this filter'}</b><span>${none?'Questions for this topic will appear here.':'Try another filter or tag.'}</span></div>`}
  if(qs.view==='single'){qs.idx=Math.min(Math.max(qs.idx,0),list.length-1);const q=list[qs.idx];
   return cardHTML(q,qs.idx+1,true)+`<div class="qnav"><button type="button" class="btn" onclick="qStep(-1)" ${qs.idx===0?'disabled':''}>← Previous</button><span>${qs.idx+1} / ${list.length}</span><button type="button" class="btn primary" onclick="qStep(1)" ${qs.idx>=list.length-1?'disabled':''}>Next →</button></div>`}
- return list.map((q,i)=>cardHTML(q,i+1,false)).join('')}
+ const lim=Math.max(qs.lim||30,(qs.idx||0)+12),shown=list.slice(0,lim);
+ return shown.map((q,i)=>cardHTML(q,i+1,false)).join('')+(list.length>lim?`<button type="button" class="btn block" onclick="qMore()">Show more (${list.length-lim} left)</button>`:'')}
 function progHTML(){const base=filtered();const t=inTopic();const n=answeredCount(base);const p=pct(n,base.length);return `<div class="qprog"><span>${n} / ${base.length} answered in this view</span><b>${p}%</b></div><div class="qbar"><i style="width:${p}%"></i></div>`}
-window.paintBank=function(){const b=$('#qbBody'),p=$('#qbProg');if(b)b.innerHTML=bankBody();if(p)p.innerHTML=progHTML();document.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.v===qs.view));const dd1=$('#dd-filter .dd-btn span'),dd2=$('#dd-tag .dd-btn span');if(dd1)dd1.textContent=(FILTERS.find(f=>f[0]===qs.filter)||FILTERS[0])[1];if(dd2)dd2.textContent=qs.tag==='all'?'All Tags':qs.tag;document.querySelectorAll('#dd-filter .dd-item').forEach(x=>x.classList.toggle('sel',x.textContent===(FILTERS.find(f=>f[0]===qs.filter)||[0,''])[1]));document.querySelectorAll('#dd-tag .dd-item').forEach(x=>x.classList.toggle('sel',x.textContent===(qs.tag==='all'?'All Tags':qs.tag)))};
+window.paintBank=function(){const b=$('#qbBody'),p=$('#qbProg');if(b)b.innerHTML=bankBody();if(p)p.innerHTML=progHTML();document.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.v===qs.view));const qf=$('.qfilters');if(qf)qf.innerHTML=filtersHTML()};
 function repaintCard(id){const q=QB.find(x=>x.id===id);const el=document.getElementById('qc-'+id);if(!q||!el)return null;const list=filtered();let n=list.findIndex(x=>x.id===id)+1;if(qs.view==='single')n=qs.idx+1;const wrap=document.createElement('div');wrap.innerHTML=cardHTML(q,n||1,qs.view==='single');el.replaceWith(wrap.firstElementChild);return document.getElementById('qc-'+id)}
 window.qAnswer=function(id,i){const q=QB.find(x=>x.id===id);if(!q||S.ans[id])return;const ok=i===q.k;
  S.ans[id]={sel:i,ok,t:Date.now()};if(ok){qs.streak=0;S.ans[id].pr=PRAISE[Math.floor(Math.random()*PRAISE.length)];S.ans[id].msg=PRAISE2[Math.floor(Math.random()*PRAISE2.length)]}else{qs.streak++;DOCF[id]=qs.streak>=3?'encouraging':qs.streak===2?'angry':'sad'}save();
@@ -264,7 +342,8 @@ window.qReport=function(id){if(!REPORT_ERROR_ENABLED)return;S.rep[id]?delete S.r
 window.qNote=function(id){qs.noteOpen[id]=!qs.noteOpen[id];repaintCard(id);if(qs.noteOpen[id]){const t=document.querySelector('#qc-'+id+' textarea');t&&t.focus()}};
 window.qNoteSave=function(id,v){v.trim()?S.notes[id]=v:delete S.notes[id];save()};
 
-window.setView=function(v){qs.view=v;qs.idx=0;paintBank()};
+window.setView=function(v){qs.view=v;qs.idx=0;qs.lim=30;paintBank()};
+window.qMore=function(){qs.lim=(qs.lim||30)+30;const b=$('#qbBody');if(b)b.innerHTML=bankBody()};
 window.qFull=function(){qs.full=!qs.full;const ph=$('.phone');ph&&ph.classList.toggle('qfull',qs.full);const b=$('#fsBtn');b&&(b.innerHTML=fsLabel());
  try{if(qs.full){const e=document.documentElement;(e.requestFullscreen||e.webkitRequestFullscreen||(()=>{})).call(e)}else if(document.fullscreenElement||document.webkitFullscreenElement){(document.exitFullscreen||document.webkitExitFullscreen).call(document)}}catch(e){}
  renderFullExit()};
@@ -275,17 +354,18 @@ document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement
 
 /* ---------- export PDF ---------- */
 const exp={open:false,scope:'filtered',layout:'study'};
-const SCOPES=()=>[['filtered',`Current filtered questions (${filtered().length})`],['topic',`Current topic (${inTopic().length})`],['subject',`Entire subject (${QB.length})`]];
+const activeSubjectQuestions=()=>QB.filter(q=>(ACTIVE_QBANK==='all'||bankOf(q)===ACTIVE_QBANK)&&(ACTIVE_QBANK_TOPICS===null||ACTIVE_QBANK_TOPICS.indexOf(q.topic)>=0));
+const SCOPES=()=>[['filtered',`Current filtered questions (${filtered().length})`],['topic',`Current topic (${inTopic().length})`],['subject',`Entire subject (${activeSubjectQuestions().length})`]];
 const LAYOUTS=[['study','Study Mode · answer and explanation under each question'],['exam','Exam Mode · answer key and explanations at the end']];
 function exportHTML(){return `<div class="xbk" onclick="xClose()"></div><div class="xsheet" role="dialog" aria-label="Export Questions to PDF"><div class="xhead"><h3>Export Questions to PDF</h3><button type="button" class="xclose" onclick="xClose()" aria-label="Close">✕</button></div><label>Export scope</label>${ddHTML('xscope',SCOPES(),exp.scope)}<label>PDF layout</label>${ddHTML('xlayout',LAYOUTS,exp.layout)}<button type="button" class="btn primary block" onclick="xCreate()">Create PDF</button><p class="xnote">A print-ready white document will open. Choose “Save as PDF” in the browser dialog.</p></div>`}
 function paintExport(){const h=$('#xwrap');if(h)h.innerHTML=exportHTML()}
 window.xOpen=function(){exp.open=true;let h=$('#xwrap');if(!h){h=document.createElement('div');h.id='xwrap';h.className='xwrap';($('.phone')||document.body).appendChild(h)}paintExport()};
 window.xClose=function(){exp.open=false;qs.dd=null;const h=$('#xwrap');h&&h.remove()};
-function pdfList(){return exp.scope==='subject'?QB:exp.scope==='topic'?inTopic():filtered()}
+function pdfList(){return exp.scope==='subject'?activeSubjectQuestions():exp.scope==='topic'?inTopic():filtered()}
 function buildPDF(list,layout){const L=(q,i)=>QLT(q,i);const title='Shbace Medical — Question Bank';const sub=`Pediatrics · ${qs.spec==='all'?'All specialties':SPEC_NAME[qs.spec]} · ${exp.scope==='subject'?'Entire subject':topicTitle()}`;
- const q1=(q,i)=>`<section class="q"><div class="meta">${q.id} · ${esc(TOPIC_NAME[q.topic])} · ${esc(q.tag)}</div><p class="stem"><b>Q${i+1}.</b> ${esc(QSTEM(q))}</p><ol type="A" style="list-style:none;padding-left:0">${q.o.map((t,j)=>`<li class="${layout==='study'&&j===q.k?'key':''}"><b>${L(q,j)}.</b> ${esc(t)}${layout==='study'&&j===q.k?' ✓':''}</li>`).join('')}</ol>${layout==='study'?`<div class="ans"><b>Correct answer: ${L(q,q.k)}. ${esc(q.o[q.k])}</b><p>${esc(q.ex)}</p></div>`:''}</section>`;
+ const q1=(q,i)=>`<section class="q"><div class="meta">${q.id} · ${esc(TOPIC_NAME[q.topic])} · ${esc(q.tag)}</div><p class="stem"><b>Q${i+1}.</b> ${esc(QSTEM(q))}</p><ol type="A" style="list-style:none;padding-left:0">${q.o.map((t,j)=>`<li class="${layout==='study'&&j===q.k?'key':''}"><b>${L(q,j)}.</b> ${esc(t)}${layout==='study'&&j===q.k?' ✓':''}</li>`).join('')}</ol>${layout==='study'?`<div class="ans"><b>Correct answer: ${L(q,q.k)}. ${esc(q.o[q.k])}</b><p>${esc(cleanExplanationText(q.ex))}</p></div>`:''}</section>`;
  let body=list.map(q1).join('');
- if(layout==='exam')body+=`<section class="keys"><h2>Answer key &amp; explanations</h2>${list.map((q,i)=>`<div class="k"><b>Q${i+1}. ${L(q,q.k)}. ${esc(q.o[q.k])}</b><p>${esc(q.ex)}</p></div>`).join('')}</section>`;
+ if(layout==='exam')body+=`<section class="keys"><h2>Answer key &amp; explanations</h2>${list.map((q,i)=>`<div class="k"><b>Q${i+1}. ${L(q,q.k)}. ${esc(q.o[q.k])}</b><p>${esc(cleanExplanationText(q.ex))}</p></div>`).join('')}</section>`;
  if(!list.length)body='<p>No questions in this selection.</p>';
  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><style>@page{margin:16mm}*{box-sizing:border-box}body{font:14px/1.55 Georgia,'Times New Roman',serif;color:#111;background:#DCE8F2;margin:0;padding:20px;max-width:800px;margin:0 auto}h1{font:700 22px/1.2 system-ui,sans-serif;margin:0 0 4px;color:#123a8f}.sub{font:13px system-ui,sans-serif;color:#555;margin:0 0 18px;padding-bottom:10px;border-bottom:2px solid #2b7bff}.q{break-inside:avoid;margin:0 0 18px}.meta{font:600 11px system-ui,sans-serif;color:#2b5fc2;letter-spacing:.04em}.stem{margin:4px 0 6px;font-size:15px}ol{margin:0;padding-left:26px}li{margin:2px 0}li.key{font-weight:700;color:#0a6b3a}.ans{margin-top:8px;padding:8px 10px;border-left:3px solid #2b7bff;background:#eef4ff;font-size:13px}.ans p{margin:3px 0 0}.keys{break-before:page}.keys h2{font:700 18px system-ui,sans-serif;color:#123a8f}.k{margin:0 0 10px;break-inside:avoid;font-size:13px}.k p{margin:2px 0 0;color:#333}.foot{font:11px system-ui,sans-serif;color:#777;margin-top:24px;text-align:center}</style><style id="doctor-mascot-tuning">
 /* Subtle doctor-character polish; the supplied expressions and doctor-off preference remain intact. */
@@ -463,11 +543,13 @@ window.xCreate=function(){const list=pdfList();window.__lastPDF=buildPDF(list,ex
 
 /* ---------- question bank view ---------- */
 questionBankView=function(){
+ if(qs.filter!=='all'&&!filterItems().some(x=>x[0]===qs.filter&&!/\(0\)$/.test(x[1])))qs.filter='all';
+ if(qs.tag!=='all'&&!tagItems().some(x=>x[0]===qs.tag&&!/\(0\)$/.test(x[1])))qs.tag='all';
  const sp=qs.spec==='all'?'All specialties':SPEC_NAME[qs.spec];
  return `${appHeader('Question bank')}<div class="rs qb"><h1>Question Bank</h1><p class="sub">Pediatrics · ${esc(sp)} · ${esc(topicTitle())}</p>
  <div class="qtools"><button type="button" class="btn" id="fsBtn" onclick="qFull()">${fsLabel()}</button><button type="button" class="btn" onclick="xOpen()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg>Export PDF</button></div>
- <div class="seg wide" style="margin:4px 0 8px"><button type="button" data-v="single" class="on" onclick="setView('single')">Single</button><button type="button" data-v="all" onclick="setView('all')">All</button></div>
- <div class="qfilters">${ddHTML('filter',FILTERS,qs.filter)}${ddHTML('tag',[['all','All Tags'],...TAGS.map(t=>[t,t])],qs.tag)}</div>
+ <div class="seg wide" style="margin:4px 0 8px"><button type="button" data-v="all" class="${qs.view==='all'?'on':''}" onclick="setView('all')">All</button><button type="button" data-v="single" class="${qs.view==='single'?'on':''}" onclick="setView('single')">Single</button></div>
+ <div class="qfilters">${filtersHTML()}</div>
  <div id="qbProg">${progHTML()}</div><div id="qbBody">${bankBody()}</div></div>`};
 
 /* ============================================================
@@ -479,29 +561,66 @@ window.openTopic=function(spec,id){qs.spec=spec;qs.topic=id;qs.filter='all';qs.t
 /* Pediatrics hero image. Override with window.SHBACE_PEDIA_HERO = 'path/or/url.webp' before this script to swap the asset. */
 const PEDIA_HERO_SRC=window.SHBACE_PEDIA_HERO||'/assets/img/9fbea08e77d0.webp';
 window.startPractice=function(ev){ev&&ev.stopPropagation();const un=QB.some(q=>!S.ans[q.id]);qs.spec='all';qs.topic=0;qs.tag='all';qs.filter=un?'unanswered':'all';qs.idx=0;appPage='questions';renderAppDemo()};
-subjectsView=function(){const n=answeredCount(QB),all=pct(n,QB.length);
- return `${appHeader('Subjects')}<div class="rs"><h1>Subjects</h1><p class="sub">Choose a subject to practise.</p>
- <div class="card hero-ped" role="button" tabindex="0" aria-label="Pediatrics, ${QB.length} questions, ${all}% completed" onclick="appPage='specialties';renderAppDemo()" onkeydown="if(event.key==='Enter')appPage='specialties',renderAppDemo()"><img class="hp-img" src="${PEDIA_HERO_SRC}" alt="A male pediatrician in a white coat with a stethoscope smiling at a happy child holding a teddy bear" width="1100" height="516"><div class="hp-ov"><div class="eyebrow">SUBJECT</div><h3>Pediatrics</h3><div class="hp-q">${QB.length} questions</div></div>
-  <div class="hp-foot"><div><div class="hp-pr"><span>${n} answered</span><b>${all}%</b></div><div class="bar"><span style="width:${all}%"></span></div></div><button type="button" class="btn primary" onclick="startPractice(event)">Start practice</button></div></div>
- <div class="card sc soon"><div class="sic">🩺</div><div><h3>More subjects</h3><div class="meta">Content is in development</div></div></div></div>`};
+/* Retired intermediate Subjects screen removed. Home v7 below is the sole live Home renderer. */
 specialtiesView=function(){const av=gradeHasPediatrics()?SYS.filter(s=>s[3]):[],soon=gradeHasPediatrics()?SYS.filter(s=>!s[3]):[];
  return `${appHeader('Pediatrics')}<div class="rs"><h1>Pediatrics</h1><p class="sub">${av.length} specialties · ${gradeHasPediatrics()?REAL.total:0} questions</p>
  ${av.map(([id,l,img])=>{const s=REAL.spec[id]||{q:0,topics:[]};const p=specProg(id);return `<div class="card sc spc" onclick="openSpec('${id}')">${sysIcon(img,'lg')}<div class="spc-tx"><h3>${l}</h3><div class="meta">${s.q} questions · ${s.topics.length} topics</div><div class="bar"><span style="width:${p}%"></span></div></div><span class="chev">›</span></div>`}).join('')}
  ${soon.length?`<div class="soon-h">Coming soon</div><div class="soon-grid">${soon.map(([id,l,img])=>`<div class="soon-t">${sysIcon(img,'md')}<span>${l}</span></div>`).join('')}</div>`:''}</div>`};
 const TOPIC_ICON_ASSET = {"respiratory|Asthma":"/assets/img/debd90e0fef6.webp","respiratory|Bronchiolitis, Croup & Stridor":"/assets/img/3d3feb82a064.webp","respiratory|Pneumonia":"/assets/img/adada4e0a86b.webp","respiratory|Cystic Fibrosis & Chronic Lung Disease":"/assets/img/cec184976243.webp","respiratory|Ear, Nose & Throat Infections":"/assets/img/4537b905a2d5.webp","respiratory|Foreign Body, Pneumothorax & Bronchoscopy":"/assets/img/b8ec11cc647c.webp","respiratory|Other / Mixed Questions":"/assets/img/491b78033ad8.webp","respiratory|Pertussis & Respiratory Infections":"/assets/img/a2d9c069ec03.webp","cardio|Tetralogy of Fallot":"/assets/img/3c095677ec87.webp","cardio|Infective Endocarditis":"/assets/img/84b4a909231d.webp","cardio|Cyanosis & Congenital Heart Disease (General)":"/assets/img/7c067d04bf4a.webp","cardio|Septal Defects & Patent Ductus Arteriosus":"/assets/img/564bedab668b.webp","cardio|Heart Failure":"/assets/img/aec9ca7eeabf.webp","cardio|Acute Rheumatic Fever":"/assets/img/f8940761f879.webp","cardio|Arrhythmias (Supraventricular Tachycardia, Wolff-Parkinson-White & Heart Block)":"/assets/img/77ffc9f10573.webp","cardio|Coarctation of the Aorta":"/assets/img/3fcc3c3b707a.webp","cardio|Innocent Murmurs & Cardiac Examination":"/assets/img/1daa68d32a37.webp","cardio|Transposition of the Great Arteries":"/assets/img/d4b8afc82331.webp","cardio|Myocarditis":"/assets/img/be6caf82b381.webp","git|Diarrhoea & Dehydration":"/assets/img/8267de0d1eb4.webp","git|Reflux, Vomiting & Pyloric Stenosis":"/assets/img/5161208444fa.webp","git|Coeliac Disease & Malabsorption":"/assets/img/74b97b9f8b81.webp","git|Constipation, Hirschsprung & Soiling":"/assets/img/4eafe7974238.webp","git|Intussusception & Acute Abdomen":"/assets/img/20f136574e30.webp","git|Inflammatory Bowel Disease":"/assets/img/f7f21a832364.webp","git|Liver Disease & Jaundice":"/assets/img/3e3fa001e012.webp","git|Other / Mixed Questions":"/assets/img/2ad0e3a8dd0a.webp","git|Gastrointestinal Bleeding & Foreign Bodies":"/assets/img/3aafd14fb97c.webp","nephrology|Urinary Tract Infection & Vesicoureteral Reflux":"/assets/img/6e50c70b32a8.webp","nephrology|Nephrotic Syndrome":"/assets/img/c92f00f20778.webp","nephrology|Glomerulonephritis (Post-Streptococcal, IgA & Others)":"/assets/img/a83234a60e79.webp","nephrology|Chronic Kidney Disease, Dialysis & Transplantation":"/assets/img/f991564871d8.webp","nephrology|Hemolytic Uremic Syndrome":"/assets/img/1ca5570ba411.webp","nephrology|Henoch-Schönlein Purpura":"/assets/img/10b94c932ac8.webp","nephrology|Tubular Disorders & Hereditary/Cystic Kidney Diseases":"/assets/img/b31e5d360df6.webp","nephrology|Hypertension in Children":"/assets/img/6dd6f38cdc11.webp","nephrology|Acute Kidney Injury, Fluids & Electrolytes":"/assets/img/86d16539a9ea.webp","nephrology|Renal & Abdominal Masses":"/assets/img/3590165c8b32.webp","nephrology|Voiding Disorders & Enuresis":"/assets/img/11d9f88ea3cd.webp","nephrology|Renal Basics, Urinalysis, Hematuria & Proteinuria":"/assets/img/0dcc03900570.webp","nephrology|Other / Mixed Questions":"/assets/img/652001211733.webp","endocrinology|Adrenal Disorders (CAH, Addison Disease & Cushing Syndrome)":"/assets/img/e88887f3e9ef.webp","endocrinology|Short Stature & Growth Disorders":"/assets/img/3997690bc1b2.webp","endocrinology|Diabetes Mellitus":"/assets/img/e0b1cda2fad7.webp","endocrinology|Puberty & Gonadal Disorders":"/assets/img/4bec0149cb36.webp","endocrinology|Diabetic Ketoacidosis & Hyperosmolar State":"/assets/img/a5463bacb96a.webp","endocrinology|Congenital Hypothyroidism & Cretinism":"/assets/img/19a6b685eaf2.webp","endocrinology|Hypoglycemia & Infant of Diabetic Mother":"/assets/img/7031c18331cf.webp","endocrinology|Posterior Pituitary: DI, SIADH & Vasopressin":"/assets/img/1d6134bdcef3.webp","endocrinology|Pituitary Disorders & Growth Hormone":"/assets/img/734e566d7dfc.webp","endocrinology|Hyperthyroidism (Graves Disease)":"/assets/img/852f9489a92d.webp","endocrinology|Thyroid Physiology & Function Tests":"/assets/img/73310ab50c36.webp","endocrinology|Calcium & Parathyroid Disorders":"/assets/img/459bdf1d7541.webp","endocrinology|Acquired Hypothyroidism, Thyroiditis, Goiter & Iodine Deficiency":"/assets/img/e9d5a26be138.webp","endocrinology|Other / Mixed Questions":"/assets/img/b760e2ed29ac.webp","cns|Meningitis & Encephalitis":"/assets/img/6ef3ea1c149b.webp","cns|Neuromuscular Disorders":"/assets/img/8105c9dff833.webp","cns|Epilepsy & Seizures":"/assets/img/8f6de7612180.webp","cns|Hydrocephalus & Neural Tube Defects":"/assets/img/a9666d0b7cf1.webp","cns|Other / Mixed Questions":"/assets/img/5b361303adc2.webp","cns|Autism, Attention-Deficit Hyperactivity Disorder & Developmental Delay":"/assets/img/fc43a3ade184.webp","cns|Headache, Ataxia, Stroke & Tumours":"/assets/img/9947c202f0f1.webp","cns|Febrile Seizures":"/assets/img/73a529842f55.webp","cns|Cerebral Palsy":"/assets/img/610793712610.webp","cns|Head Size & Craniosynostosis":"/assets/img/1f6a6e45780b.webp","neonatology|Newborn Examination & Normal Care":"/assets/img/117dd2cc6f5f.webp","neonatology|Prematurity & Respiratory Distress":"/assets/img/be3f2b9a3bc9.webp","neonatology|Birth Asphyxia, Resuscitation & Apgar":"/assets/img/81d8aef7b2d7.webp","neonatology|Neonatal Jaundice":"/assets/img/e9cd39caf56f.webp","neonatology|Neonatal Sepsis & Congenital Infections":"/assets/img/783207f29794.webp","neonatology|Other / Mixed Questions":"/assets/img/1ebdd733ecd6.webp","neonatology|Vitamin K & Neonatal Bleeding":"/assets/img/d25c6ac79069.webp","neonatology|Neonatal Gastrointestinal & Surgical Conditions":"/assets/img/6718bfdfd030.webp","neonatology|Neonatal Seizures & Intracranial Haemorrhage":"/assets/img/65c9f5ece122.webp","neonatology|Neonatal Metabolic Problems & Infants of Diabetic Mothers":"/assets/img/e4c4f9ff99de.webp","infectious|Exanthems & Viral Infections":"/assets/img/f32d58a1f147.webp","infectious|Vaccination & Immunisation":"/assets/img/777f0034278a.webp","infectious|Malaria & Parasitic Infections":"/assets/img/87f1928e27e9.webp","infectious|Fever, Sepsis & Bacterial Infections":"/assets/img/e0a5e7749061.webp","infectious|Human Immunodeficiency Virus (HIV)":"/assets/img/97df3fca2c76.webp","infectious|Tuberculosis":"/assets/img/6a45d0f9735a.webp","infectious|Other / Mixed Questions":"/assets/img/38301a5d0941.webp","infectious|Diarrhoea & Gastrointestinal Infections":"/assets/img/fbff0a69c0bd.webp","haematology|Bleeding Disorders":"/assets/img/fbae16a40475.webp","haematology|Haemolytic Anaemias":"/assets/img/41168e3fbda9.webp","haematology|Iron Deficiency & Nutritional Anaemia":"/assets/img/f5aefafed33e.webp","haematology|Leukaemia & Childhood Cancers":"/assets/img/e9efcb2a8c7d.webp","haematology|Transfusion & Other Blood Disorders":"/assets/img/5b2bd7013d31.webp","haematology|Other / Mixed Questions":"/assets/img/09d508d09239.webp","haematology|Aplastic Anaemia & Marrow Failure":"/assets/img/c2f5db19ca4e.webp","growth|Vitamins & Minerals":"/assets/img/67a070a02b53.webp","growth|Breastfeeding & Infant Feeding":"/assets/img/c5473526d238.webp","growth|Protein-Energy Malnutrition":"/assets/img/14a1bc2232ea.webp","growth|Other / Mixed Questions":"/assets/img/98b1e84a6187.webp","growth|Obesity":"/assets/img/5d41a0d2631e.webp","genetics|Other / Mixed Questions":"/assets/img/af025797053a.webp","genetics|Chromosomal Disorders":"/assets/img/fcd865173c09.webp","genetics|Inheritance & Single-Gene Disorders":"/assets/img/fc35ac2367e2.webp","genetics|Skin Disorders":"/assets/img/24ead7ae42d3.webp","rheum|Arthritis, Lupus, Kawasaki Disease & Vasculitis":"/assets/img/5afa6e92cea5.webp","rheum|Poisoning":"/assets/img/fe9392f0badd.webp","rheum|Other / Mixed Questions":"/assets/img/116d17e0a9ed.webp","rheum|Immunodeficiency & Allergy":"/assets/img/79063dbb6872.webp","rheum|Inborn Errors of Metabolism":"/assets/img/23438945e9a5.webp"};
-function topicIcon(sp,n,id){
- const src=TOPIC_ICON_ASSET[sp+'|'+n];
- return src
-  ? `<div class="tno ti"><img src="${src}" alt="${esc(n)}" width="176" height="176" loading="lazy" decoding="async"></div>`
-  : `<div class="tno">${String(id).padStart(2,'0')}</div>`;
+
+function topicIconMarkup(sp,n,id){
+ const row=SYS.find(function(x){return x&&(x[0]===sp||x[1]===sp)});
+ const key=row?row[0]:String(sp||'');
+ const name=String(n||'');
+ const src=TOPIC_ICON_ASSET[key+'|'+name];
+ if(src)return '<div class="tno ti"><img src="'+src+'" alt="'+esc(name)+'" width="176" height="176" loading="lazy" decoding="async"></div>';
+ const text=(key+' '+name).toLowerCase();
+ const motifs=[
+  [/bone|joint|arthritis|osteomyelitis|skeletal|orthop(a)?edic|fracture/, '<path d="M14 15c-3-3-1-8 3-8 3 0 4 2 5 4l5 5 4-1 4 4-2 4-5 1-5-5-5 5c-2 1-3 4-6 4-5 0-6-6-2-9l4-4Z"/><path d="m21 16 6 6m-9 1 5-5"/>'],
+  [/neonat.*(gastro|gut|intestin)|gastrointestinal.*neonat|neonatal.*surg|bowel|intestin|stomach|gastro|digestive/, '<path d="M14 10c-3 1-4 5-2 8l3 3c2 2 2 4 0 6-2 3-1 8 4 9 5 1 6-4 5-7-1-3 2-4 4-2 3 2 7 0 7-4 0-3-2-5-5-5-2 0-3 2-3 4 0 2-3 2-3-1l-1-8c-1-4-5-5-9-3Z"/><path d="M18 16c3-2 6 0 6 3m5 5c3-1 5 1 4 4"/>'],
+  [/cardio|heart|cardiac|septal|ventricular|atrial|tetralogy|endocard|arrhythm|murmur|vsd|asd|pda/, '<path d="M24 39S7 29 7 17c0-8 10-12 17-3 7-9 17-5 17 3 0 12-17 22-17 22Z"/><path d="M10 23h8l4-8 5 16 4-8h7"/>'],
+  [/respirat|lung|asthma|pneumonia|bronchi|croup|pertussis|airway/, '<path d="M23 9v14m2-14v14M23 19c-5 0-8 4-10 10l-3 8c-1 3 2 5 5 4l9-4V19Zm2 0c5 0 8 4 10 10l3 8c1 3-2 5-5 4l-9-4V19Z"/>'],
+  [/nephro|renal|kidney|urinary|urolog|nephrotic|glomerul|proteinuria|dialysis|bladder/, '<path d="M18 9c-7 0-11 8-9 17 1 7 6 11 11 8 4-2 3-7 2-11-1-5 1-14-4-14Zm12 0c7 0 11 8 9 17-1 7-6 11-11 8-4-2-3-7-2-11 1-5-1-14 4-14Z"/><path d="M24 27v10"/>'],
+  [/endocrin|hormone|thyroid|diabet|adrenal|pituitar|puberty|parathyroid|growth hormone/, '<path d="M24 7c-4 6-11 12-11 20a11 11 0 0 0 22 0C35 19 28 13 24 7Z"/><path d="M17 26c4-4 10-4 14 0m-7-8v13"/>'],
+  [/neonat|newborn|infant|prematur|birth|nursery/, '<circle cx="24" cy="17" r="9"/><path d="M18 17h.1m12 0h.1m-8 5c2 2 4 2 6 0M11 40c2-8 7-12 13-12s11 4 13 12"/><path d="M9 12c2-5 7-8 12-8"/>'],
+  [/infect|vaccin|immun|virus|bacter|fever|sepsis|malaria|tubercul|hiv|infection/, '<path d="M24 6 39 12v11c0 9-6 15-15 19C15 38 9 32 9 23V12l15-6Z"/><circle cx="24" cy="23" r="7"/><path d="M24 12v4m0 14v4m-12-11h4m16 0h4"/>'],
+  [/hemat|blood|anem|haemoglobin|hemoglobin|haematopoiesis|hematopoiesis|iron|sickle|leuk|lymphoma|bleeding|coagul|platelet|marrow/, '<path d="M24 6c-5 8-13 15-13 23a13 13 0 0 0 26 0C37 21 29 14 24 6Z"/><path d="M17 29c1 5 4 7 8 7"/><path d="M15 19c5-3 13-3 18 0"/>'],
+  [/growth|development|nutrition|milestone|feeding|obesity|vitamin|malnutrition|height/, '<path d="M9 39V9m0 30h30M15 33V24h6v9m5 0V16h6v17m5 0V10h4v23"/><path d="M9 9h7"/>'],
+  [/genetic|dna|chromosom|inherit|dermat|skin|eczema|allerg/, '<path d="M14 7c0 12 20 22 20 34M34 7C34 19 14 29 14 41"/><path d="M17 13h14M17 22h14M17 31h14"/>'],
+  [/brain|nervous|neurolog|seizure|epilep|mening|cns|enceph|cerebr|neural|headache|stroke|autism|cerebral palsy/, '<path d="M24 8c-4-4-11-2-11 4-5 1-6 8-2 11-3 5 1 11 6 11 2 5 8 5 10 1 3 4 9 3 10-2 5-1 7-7 3-11 3-5 0-10-5-10-1-6-7-7-11-4Z"/><path d="M24 9v27m-8-18 8 4 8-4m-8 8-7 5m7-5 7 5"/>'],
+  [/eye|vision|retina|ophthalm/, '<path d="M5 24s7-13 19-13 19 13 19 13-7 13-19 13S5 24 5 24Z"/><circle cx="24" cy="24" r="7"/><circle cx="24" cy="24" r="2"/>'],
+  [/ear|nose|throat|sinus|otitis|epiglott|stridor/, '<path d="M27 38c-5 4-10-1-8-7 1-4 5-6 5-11 0-4 2-7 6-7 5 0 8 4 7 9-.5 4-4 6-6 8-2 2-1 5-4 8Z"/><path d="M20 30c-4-3-6-7-5-12"/>'],
+  [/liver|hepat|biliary|jaundice|gallbladder/, '<path d="M7 21c7-9 18-12 33-8 1 10-3 22-15 25-7 2-15-1-18-7-2-4-2-7 0-10Z"/><path d="M26 17c-1 6 1 12 5 17"/>'],
+  [/dental|tooth|oral|mouth|cleft palate/, '<path d="M14 8c-7 1-8 8-5 16l4 14c1 4 5 4 7 0l4-9 4 9c2 4 6 4 7 0l4-14c3-8 2-15-5-16-4 0-7 3-10 3s-6-3-10-3Z"/>'],
+  [/rheumat|metabolic|poison|joint|arthritis|musculoskeletal|toxic/, '<circle cx="24" cy="24" r="6"/><path d="M24 7v7m0 20v7M7 24h7m20 0h7M12 12l5 5m14 14 5 5m0-24-5 5m-14 14-5 5"/>']
+ ];
+ const hit=motifs.find(function(x){return x[0].test(text)});
+ const motif=hit?hit[1]:'<path d="M24 6 39 15v18l-15 9L9 33V15l15-9Z"/><path d="M16 24h16m-8-8v16"/>';
+ let h=7;const seed=key+'|'+name;for(let i=0;i<seed.length;i++)h=(h*31+seed.charCodeAt(i))>>>0;
+ const hue=h%360,accent=(hue+22)%360;
+ const svg='<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false">'+
+  '<defs><radialGradient id="g" cx="30%" cy="23%" r="82%"><stop offset="0" stop-color="#1d5797"/><stop offset=".55" stop-color="#0b2c62"/><stop offset="1" stop-color="#06152f"/></radialGradient><linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a5f4ff"/><stop offset=".55" stop-color="#49c9f3"/><stop offset="1" stop-color="#1977c8"/></linearGradient><linearGradient id="r" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffb5a8"/><stop offset="1" stop-color="#d94361"/></linearGradient><filter id="glow"><feGaussianBlur stdDeviation="1.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>'+
+  '<rect x="1" y="1" width="46" height="46" rx="9" fill="url(#g)" stroke="#7acdf7" stroke-opacity=".82" stroke-width="1.1"/>'+
+  '<circle cx="23.5" cy="23.5" r="17.2" fill="none" stroke="url(#a)" stroke-width="1.1" opacity=".82"/>'+
+  '<circle cx="23.5" cy="23.5" r="13.1" fill="#0b2653" fill-opacity=".54" stroke="#6be4ff" stroke-width=".65" opacity=".92"/>'+
+  '<g fill="none" stroke="#e8faff" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">'+motif+'</g>'+
+  '<path d="M9 12c4 1 8 5 11 8" fill="none" stroke="url(#r)" stroke-width="2.3" stroke-linecap="round"/>'+
+  '<circle cx="36.2" cy="34.8" r="7.4" fill="#0a2b60" stroke="#73e6ff" stroke-width="1.05"/>'+
+  '<circle cx="36.2" cy="34.8" r="4.2" fill="none" stroke="#d9faff" stroke-width=".65"/>'+
+  '<circle cx="36.2" cy="34.8" r="1.25" fill="#ff8394"/>'+
+  '<circle cx="8.5" cy="26.5" r=".85" fill="#d5f8ff"/><circle cx="39.5" cy="10" r=".65" fill="#eaffff"/>'+
+  '</svg>';
+ return '<div class="tno ti shb-gen-icon" role="img" aria-label="'+esc(name)+'" style="--gh:'+hue+';--ga:'+accent+'">'+svg+'</div>';
 }
+function topicIcon(sp,n,id){return topicIconMarkup(sp,n,id);}
+
 
 function topicCards(){const sp=REAL.spec[qs.spec]||{topics:[]};
  let lastSy=null;return sp.topics.map(([id,n,c,sy])=>{const l=QB.filter(q=>q.topic===id);const done=answeredCount(l);const p=pct(done,l.length);let hd='';if(sy&&sy!==lastSy){lastSy=sy;hd=`<div class="soon-h">${esc(sy)}</div>`}return hd+`<div class="card sc tpc" onclick="openTopic('${qs.spec}',${id})">${topicIcon(qs.spec,n,id)}<div class="tpc-tx"><h3>${esc(n)}</h3><div class="meta">${c} questions${done?` · ${done} answered`:''}</div><div class="bar"><span style="width:${p}%"></span></div></div><span class="chev">›</span></div>`}).join('')}
 topicsView=function(){const sp=REAL.spec[qs.spec]||{q:0,topics:[]};
  return `${appHeader(SPEC_NAME[qs.spec]||'Topics')}<div class="rs"><h1>${SPEC_NAME[qs.spec]||'Topics'}</h1><p class="sub">${sp.topics.length} topics · ${sp.q} questions</p>
  <button type="button" class="btn primary block allq" onclick="openTopic('${qs.spec}',0)">All questions →</button><div id="topicList">${topicCards()}</div></div>`};
-let gq='',gSpec='all',gTag='all',gSrc='all',gTopic='all',gSys='all',gSort='bank',gLim=40,gIdx=null,gTmr=null;
+let gq='',gBank='all',gSpec='all',gTag='all',gSrc='all',gTopic='all',gSys='all',gSort='bank',gLim=40,gIdx=null,gTmr=null;
 /* ---- Unit 2: search engine (display/query only; question data is never modified) ---- */
 const AR_MARKS='\\u064B-\\u065F\\u0670\\u0640';
 const nz=s=>String(s==null?'':s).toLowerCase().replace(new RegExp('['+AR_MARKS+']','g'),'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه');
@@ -511,16 +630,16 @@ function tokRe(tok){const w=tok.filter(x=>x.length>1).map(nz);if(!w.length)retur
  const alt=w.map(t=>/[؀-ۿ]/.test(t)?[...t].map(c=>(AR_CLS[c]||gEsc(c))+'['+AR_MARKS+']*').join(''):gEsc(t));
  return new RegExp('('+alt.join('|')+')','ig')}
 function hl(t,tok){t=String(t==null?'':t);const re=tokRe(tok);if(!re)return esc(t);return t.split(re).map((p,i)=>i%2?'<mark>'+esc(p)+'</mark>':esc(p)).join('')}
-const gSrcGroup=s=>String(s||'').replace(/\s*[–—-]\s*Q\s*\d+\s*$/i,'').trim()||'Unknown source';
+const gSrcGroup=s=>enSrc(s).replace(/\s*[–—-]\s*Q\s*\d+\s*$/i,'').trim()||'Unknown source';
 function gIndex(){if(!gIdx)gIdx=QB.map(q=>{const nq=nz(q.q),no=nz(q.o.join(' \n')),ne=nz(q.ex||''),ns=nz(q.src||''),nt=nz(TOPIC_NAME[q.topic]||''),ny=nz((q.sy||'')+' '+(SPEC_NAME[q.spec]||q.spec)),ng=nz(q.id+' '+q.tag);
  return {q,sg:gSrcGroup(q.src),nq,no,ne,ns,nt,ny,ng,hay:[ng,nq,no,ne,ns,nt,ny].join(' \n')}});return gIdx}
-function gSources(){const m={};gIndex().forEach(x=>m[x.sg]=(m[x.sg]||0)+1);return Object.entries(m).sort((a,b)=>b[1]-a[1])}
-function gSystems(){const m={};QB.forEach(q=>{if(q.sy)m[q.sy]=(m[q.sy]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])}
+function gSources(){const m={};gIndex().forEach(x=>{if(bankOk(x.q,gBank))m[x.sg]=(m[x.sg]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])}
+function gSystems(){const m={};QB.forEach(q=>{if(q.sy&&bankOk(q,gBank))m[q.sy]=(m[q.sy]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])}
 const gPYKEY=()=>Object.keys(REAL.spec).find(k=>/^Previous Years/.test(REAL.spec[k].label||''))||null;
 const gNeedle=()=>nz(gq.trim()).split(/\s+/).filter(Boolean);
 const gRawTok=()=>gq.trim().toLowerCase().split(/\s+/).filter(Boolean);
 const gFilterOn=()=>gTag!=='all'||gSrc!=='all'||gTopic!=='all'||gSys!=='all';
-const gAnyOn=()=>gFilterOn()||gSpec!=='all'||!!gq.trim();
+const gAnyOn=()=>gFilterOn()||gSpec!=='all'||gBank!=='all'||!!gq.trim();
 function gFields(x,n){const has=s=>n.some(w=>s.includes(w)),r=[];
  if(has(x.nq))r.push('Question');if(has(x.no))r.push('Options');if(has(x.ne))r.push('Explanation');if(has(x.ns))r.push('Source');if(has(x.nt))r.push('Topic');if(has(x.ny))r.push('System');if(has(x.ng))r.push('ID / Tag');return r}
 function gScore(x,n){let s=0;n.forEach(w=>{if(x.nq.includes(w))s+=4;if(x.no.includes(w))s+=3;if(x.nt.includes(w))s+=2;if(x.ne.includes(w))s+=1;if(x.ns.includes(w))s+=.5});return s}
@@ -540,14 +659,14 @@ function gCard(x,n,tok){const q=x.q,f=tok.length?gFields(x,n):[];
  const a=S.ans[q.id];
  return `<div class="card sc gq" role="button" tabindex="0" data-qid="${esc(q.id)}" onclick="openQ('${q.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openQ('${q.id}')}"><div class="eyebrow">${esc(q.id)} · ${esc(q.sy||SPEC_NAME[q.spec]||q.spec)}</div><h3>${prev}</h3>${ev}${f.length?`<div class="gmf">${f.map(t=>`<span>${t}</span>`).join('')}</div>`:''}<div class="meta">${esc(TOPIC_NAME[q.topic]||'')} · ${esc(q.tag)} · ${esc(x.sg)}${a?' · '+(a.ok?'answered ✓':'answered ✕'):''}${qUnsure(q)?' · ⚠ needs review':''}</div></div>`}
 function searchResults(){const n=gNeedle(),tok=gRawTok();GQ_TOK=tok.length?tok:null;
- const specs=Object.entries(REAL.spec).filter(([s])=>gSpec==='all'||s===gSpec);
+ const specs=Object.entries(REAL.spec).filter(([s])=>(gSpec==='all'||s===gSpec)&&bankHas(s,gBank));
  if(!n.length&&!gFilterOn()){
   const rows=specs.map(([sid,sp])=>{let t=sp.topics.map(([id,nm,c,sy])=>[id,nm,QB.filter(q=>q.topic===id).length,sy]);
    if(gSort==='az')t.sort((a,b)=>a[1].localeCompare(b[1]));else if(gSort==='size')t.sort((a,b)=>b[2]-a[2]);else if(gSort==='progress')t.sort((a,b)=>pct(answeredCount(QB.filter(q=>q.topic===a[0])),a[2])-pct(answeredCount(QB.filter(q=>q.topic===b[0])),b[2]));
    return `<div class="soon-h">${esc(SPEC_NAME[sid]||sp.label||sid)} · ${t.length} topics</div>`+t.map(([id,nm,c,sy])=>topicRow(sid,id,nm,c,sy)).join('')}).join('');
   return rows||'<div class="card setcard"><p class="meta">No topics.</p></div>'}
  const tops=(n.length&&!gFilterOn())?specs.flatMap(([sid,sp])=>sp.topics.filter(([id,nm,c,sy])=>n.every(w=>nz(nm+' '+(SPEC_NAME[sid]||'')+' '+(sy||'')).includes(w))).map(([id,nm,c,sy])=>[sid,id,nm,c,sy])):[];
- let qs2=gIndex().filter(x=>(gSpec==='all'||x.q.spec===gSpec)&&(gTag==='all'||x.q.tag===gTag)&&(gSrc==='all'||x.sg===gSrc)&&(gTopic==='all'||String(x.q.topic)===gTopic)&&(gSys==='all'||x.q.sy===gSys)&&n.every(w=>x.hay.includes(w)));
+ let qs2=gIndex().filter(x=>bankOk(x.q,gBank)&&(gSpec==='all'||x.q.spec===gSpec)&&(gTag==='all'||x.q.tag===gTag)&&(gSrc==='all'||x.sg===gSrc)&&(gTopic==='all'||String(x.q.topic)===gTopic)&&(gSys==='all'||x.q.sy===gSys)&&n.every(w=>x.hay.includes(w)));
  if(n.length)qs2=qs2.map((x,i)=>[x,gScore(x,n),i]).sort((a,b)=>b[1]-a[1]||a[2]-b[2]).map(a=>a[0]);
  if(!tops.length&&!qs2.length)return `<div class="card setcard" style="text-align:center">${docFace('thinking','dr-top')}<h3>No results${tok.length?` for “${esc(gq.trim())}”`:''}</h3><p class="meta">Check the spelling, use fewer words, or remove some filters.</p><button type="button" class="btn block" onclick="gClear()">Clear search and filters</button></div>`;
  let out=`<div class="qreact think">${docFace('investigating')}<div><b>${tok.length?'Investigating…':'Filtered'}</b><span>${tops.length?tops.length+' topic'+(tops.length===1?'':'s')+' · ':''}${qs2.length} question${qs2.length===1?'':'s'} found</span></div></div>`;
@@ -555,8 +674,8 @@ function searchResults(){const n=gNeedle(),tok=gRawTok();GQ_TOK=tok.length?tok:n
  if(qs2.length){const shown=qs2.slice(0,gLim);out+=`<div class="soon-h">Questions · ${qs2.length}</div>`+shown.map(x=>gCard(x,n,tok)).join('')+(qs2.length>gLim?`<button type="button" class="btn block" onclick="gMore()">Show more (${qs2.length-gLim} left)</button>`:'')}
  return out}
 window.gMore=function(){gLim+=40;const e=$('#gResults');e&&(e.innerHTML=searchResults())};
-window.gClear=function(){gq='';gSpec='all';gTag='all';gSrc='all';gTopic='all';gSys='all';gLim=40;renderAppDemo();const i=$('#gSearch');i&&i.focus()};
-window.gSet=function(k,v){if(k==='spec'){gSpec=v;gTopic='all'}else if(k==='tag')gTag=v;else if(k==='src')gSrc=v;else if(k==='topic')gTopic=v;else if(k==='sys')gSys=v;else gSort=v;gLim=40;renderAppDemo()};
+window.gClear=function(){gq='';gBank='all';gSpec='all';gTag='all';gSrc='all';gTopic='all';gSys='all';gLim=40;renderAppDemo();const i=$('#gSearch');i&&i.focus()};
+window.gSet=function(k,v){if(k==='spec'){gSpec=v;gTopic='all'}else if(k==='bank'){gBank=bankValid(v);if(gSpec!=='all'&&!bankHas(gSpec,gBank))gSpec='all';gTopic='all';gSrc='all';gSys='all'}else if(k==='tag')gTag=v;else if(k==='src')gSrc=v;else if(k==='topic')gTopic=v;else if(k==='sys')gSys=v;else gSort=v;gLim=40;renderAppDemo()};
 runSearch=function(v){gq=v;gLim=40;const c=$('#gX');if(c)c.hidden=!v;clearTimeout(gTmr);gTmr=setTimeout(()=>{const e=$('#gResults');if(e)e.innerHTML=searchResults();const k=$('#gClr');if(k)k.hidden=!gAnyOn()},v?120:0)};
 window.openQ=function(id){const q=QB.find(x=>x.id===id);if(!q)return;if(typeof recordRecent==='function')recordRecent('topic',q.spec,q.topic);qs.spec=q.spec;qs.topic=q.topic;qs.filter='all';qs.tag='all';appPage='questions';qs.idx=Math.max(0,filtered().findIndex(x=>x.id===id));renderAppDemo();
  if(qs.view!=='single')setTimeout(()=>{const el=document.getElementById('qc-'+id);if(el){el.scrollIntoView({block:'start'});el.classList.add('flash')}},80)};
@@ -566,7 +685,8 @@ searchView=function(){const chip=(k,v,l,cur)=>`<button type="button" class="chip
  const showSys=(gSpec==='all'||gSpec===gPYKEY())&&gSystems().length>0;
  return `${appHeader('Search')}<div class="rs"><h1>Search &amp; topics</h1><p class="sub">Find topics and questions — in the question, options, explanation, source, system and tags.</p>
  <div class="sbox"><input class="field" id="gSearch" type="search" placeholder="Search questions, options, explanations…" value="${esc(gq)}" oninput="runSearch(this.value)" autocomplete="off" aria-label="Search"><button type="button" id="gX" class="sx" aria-label="Clear search" ${gq?'':'hidden'} onclick="gClear()">✕</button></div>
- <div class="chips fscroll" aria-label="Specialty filter">${chip('spec','all','All specialties',gSpec)}${Object.keys(REAL.spec).map(s=>chip('spec',s,SPEC_NAME[s]||s,gSpec)).join('')}</div>
+ <div class="chips fscroll" aria-label="Question bank">${BANK_OPTS.map(([v,l])=>chip('bank',v,l,gBank)).join('')}</div>
+ <div class="chips fscroll" aria-label="Specialty filter">${chip('spec','all','All specialties',gSpec)}${Object.keys(REAL.spec).filter(s=>bankHas(s,gBank)).map(s=>chip('spec',s,SPEC_NAME[s]||s,gSpec)).join('')}</div>
  <div class="chips fscroll" aria-label="Tag filter">${chip('tag','all','All tags',gTag)}${FULL_TAGS.map(t=>chip('tag',t,t,gTag)).join('')}</div>
  <div class="gfil">${sel('src',gSrc,'All sources',gSources().map(([v,c])=>[v,v+' ('+c+')']),'Source')}${gSpec!=='all'?sel('topic',gTopic,'All topics',topicOpts,'Topic'):''}${showSys?sel('sys',gSys,'All systems',gSystems().map(([v,c])=>[v,v+' ('+c+')']),'System (exams)'):''}</div>
  <button type="button" id="gClr" class="btn gclr" ${gAnyOn()?'':'hidden'} onclick="gClear()">✕ Clear search &amp; filters</button>
@@ -599,6 +719,11 @@ const SR_HT=['review','retry','drill','postpone','resched','skip','suspend','res
 const SR_ST_COL={'Not Started':'#7b8da3','Learning':'#ffb454','Improving':'#4da3ff','Strong':'#35cf82','Mastered':'#b58cff'};
 
 /* ---------- static topic index (derived from the bank; nothing is copied or stored) ---------- */
+let SRBANK='all';
+/* Applies only while the Smart Review screens (Build / Overview / Schedule / Weak) are open and no session is running,
+   so badges, notifications and Statistics keep counting every question. */
+const srEffBank=()=>{try{return(appPage==='review'&&!srRun&&(srTab==='topics'||srTab==='dash'||srTab==='sched'||srTab==='weak'))?SRBANK:'all'}catch(e){return 'all'}};
+const srBankOk=q=>bankOk(q,srEffBank());
 const SRT=[],SRT_BY=new Map(),SRT_Q=new Map();
 Object.keys(REAL.spec).forEach(sk=>{const sp=REAL.spec[sk];(sp.topics||[]).forEach(t=>{const o={id:t[0],name:t[1],sy:t[3]||'',spec:sk,specLabel:sp.label||SPEC_NAME[sk]||sk,key:sk+'|'+(t[3]||'')+'|'+t[1]};SRT.push(o);SRT_BY.set(o.id,o);SRT_Q.set(o.id,[])})});
 QB.forEach(q=>{const a=SRT_Q.get(q.topic);if(a)a.push(q)});
@@ -623,7 +748,7 @@ let SR3=(()=>{
  o.spd=(Array.isArray(o.spd)?o.spd:[]).filter(Number.isFinite).slice(-40);
  if(!_o(o.seen))o.seen={};
  o.goal=Number.isFinite(o.goal)?Math.min(200,Math.max(1,Math.round(o.goal))):20;
- o.size=[10,15,20].includes(o.size)?o.size:15;
+ o.size=Number.isInteger(o.size)&&o.size>=1&&o.size<=200?o.size:15;
  if(o.sess&&!(_o(o.sess)&&Array.isArray(o.sess.queue)&&Array.isArray(o.sess.plan)&&_o(o.sess.first)&&_o(o.sess.rt)&&Array.isArray(o.sess.att)))o.sess=null;
  if(!_o(o.last))o.last=null;
  return o})();
@@ -632,7 +757,7 @@ function srSave(){srCache=null;
  try{localStorage.setItem(SR3KEY,JSON.stringify(SR3));srSaveFail=false;return true}
  catch(e){if(!srSaveFail){srSaveFail=true;try{toast('Could not save Smart Review progress (storage is full)')}catch(_){}}return false}}
 window.__sr3=()=>SR3; /* read-only handle used by the self-tests */
-window.__sr3x=()=>({SRT,SRT_Q,QB,qmap,srTopicStats,srTotals,srLevel,srIsWeak,srPickTopic,srSpeedRef,srCompose,srCalc,srAutoGrade,dueList,srPool});
+window.__sr3x=()=>({SRT,SRT_Q,QB,qmap,srTopicStats,srTotals,srLevel,srIsWeak,srSpeedRef,srCompose,srCalc,srAutoGrade,dueList,srPool,SRUI});
 
 /* ---------- one-time, idempotent migration of REAL v2 reviews (never imports Question Bank history) ---------- */
 function sr3Migrate(){
@@ -732,10 +857,10 @@ function srDayStat(ok,ms,wasNew,drill){const k=dkey(),d=SR3.days[k]||(SR3.days[k
 function srStatus(e){if(!e.rev)return 'Not Started';
  if(e.pct>=85&&e.fresh<=Math.ceil(e.tot*.1)&&!e.weak)return 'Mastered';
  if(e.pct>=65)return 'Strong';if(e.pct>=35)return 'Improving';return 'Learning'}
-function srTopicStats(){const now=Date.now();if(srCache&&now-srCache.t<20000)return srCache.m;
+function srTopicStats(){const now=Date.now();const eb=srEffBank();if(srCache&&srCache.b===eb&&now-srCache.t<20000)return srCache.m;
  const M=new Map(),t0=dStart(now);
  SRT.forEach(t=>M.set(t.id,{t,id:t.id,tot:0,sus:0,fresh:0,rev:0,due:0,od:0,weak:0,lv:{new:0,learning:0,reviewing:0,known:0,mastered:0},credit:0,last:0,ok:0,n:0,next:0}));
- QB.forEach(q=>{const e=M.get(q.topic);if(!e)return;const r=SR3.q[q.id];
+ QB.forEach(q=>{const e=M.get(q.topic);if(!e||!bankOk(q,eb))return;const r=SR3.q[q.id];
   if(r&&r.sus){e.sus++;return}
   e.tot++;if(!r||!r.n){e.fresh++;e.lv.new++;return}
   e.rev++;const lv=srLevel(r);e.lv[lv]++;const wk=srIsWeak(r);if(wk)e.weak++;
@@ -745,13 +870,13 @@ function srTopicStats(){const now=Date.now();if(srCache&&now-srCache.t<20000)ret
   e.credit+=c;if(r.last>e.last)e.last=r.last;
   const v=rvs(r).slice(-6);e.n+=v.length;e.ok+=v.filter(x=>x.ok).length});
  M.forEach(e=>{e.pct=e.tot?Math.round(100*e.credit/e.tot):0;e.status=srStatus(e)});
- srCache={t:now,m:M};return M}
+ srCache={t:now,m:M,b:eb};return M}
 function srTotals(){const M=srTopicStats(),o={tot:0,fresh:0,rev:0,due:0,od:0,weak:0,credit:0,lv:{new:0,learning:0,reviewing:0,known:0,mastered:0},topics:0,started:0};
  M.forEach(e=>{o.tot+=e.tot;o.fresh+=e.fresh;o.rev+=e.rev;o.due+=e.due;o.od+=e.od;o.weak+=e.weak;o.credit+=e.credit;o.topics++;if(e.rev)o.started++;for(const k in e.lv)o.lv[k]+=e.lv[k]});
  o.pct=o.tot?Math.round(100*o.credit/o.tot):0;
  const d=SR3.days[dkey()]||{n:0,ok:0,ms:0,nw:0,dr:0};o.today=d.n;o.todayOk=d.ok;o.todayNew=d.nw||0;
  const now=Date.now(),t1=dNext(now);o.dueToday=0;o.upcoming=0;o.week=0;
- Object.keys(SR3.q).forEach(id=>{const r=SR3.q[id];if(r.sus||!qmap.has(id))return;if(r.due<t1)o.dueToday++;else{o.upcoming++;if(r.due<t1+6*DAY+36e5)o.week++}});
+ Object.keys(SR3.q).forEach(id=>{const r=SR3.q[id];if(r.sus||!qmap.has(id)||!srBankOk(qmap.get(id)))return;if(r.due<t1)o.dueToday++;else{o.upcoming++;if(r.due<t1+6*DAY+36e5)o.week++}});
  return o}
 function srRingCol(p,started){if(!started)return '#4b5d73';
  const st=[[0,[255,140,107]],[35,[255,180,84]],[65,[77,163,255]],[85,[53,207,130]],[100,[181,140,255]]];
@@ -759,22 +884,8 @@ function srRingCol(p,started){if(!started)return '#4b5d73';
   return 'rgb('+[0,1,2].map(k=>Math.round(a[1][k]+(b[1][k]-a[1][k])*f)).join(',')+')'}}
  return 'rgb(181,140,255)'}
 
-/* ---------- Smart Pick ---------- */
-function srPickTopic(){const M=srTopicStats(),now=Date.now();let best=null;
- M.forEach(e=>{if(!e.tot||!(e.due+e.weak+e.fresh))return;
-  const stale=e.rev&&e.last?Math.min(30,(now-e.last)/DAY)/30:0;
-  const s=.30*Math.min(1,e.due/20)+.08*Math.min(1,e.od/10)+.22*Math.min(1,e.weak/12)+.15*(1-e.pct/100)*(e.rev?1:.6)+.10*stale+.10*Math.min(1,e.fresh/20);
-  e.s=s;if(!best||s>best.s)best=e});
- if(!best)return null;
- const lines=[];if(best.due)lines.push([best.due+(best.due===1?' Question Due':' Questions Due'),'due']);
- if(best.weak)lines.push([best.weak+(best.weak===1?' Weak Question':' Weak Questions'),'weak']);
- if(best.fresh&&(lines.length<2||!best.rev))lines.push([best.fresh+(best.fresh===1?' New Question':' New Questions'),'new']);
- if(best.rev&&best.last&&lines.length<3)lines.push(['Last reviewed '+srAgo(best.last).toLowerCase(),'time']);
- const prio=best.s>=.45?'High Priority for Improvement':best.s>=.25?'Recommended Next':best.rev?'Good Place to Continue':'Good Place to Start';
- return{e:best,s:best.s,lines,prio,hi:best.s>=.45}}
-
 /* ---------- automatic question selection (nothing is added by hand) ---------- */
-function srPool(topic){const qs=topic==null?QB:(SRT_Q.get(topic)||[]),now=Date.now(),due=[],weak=[],fresh=[];
+function srPool(topic){const qs=(topic==null?QB:(SRT_Q.get(topic)||[])).filter(srBankOk),now=Date.now(),due=[],weak=[],fresh=[];
  qs.forEach(q=>{const r=SR3.q[q.id];if(!r||!r.n){if(!(r&&r.sus))fresh.push(q);return}if(r.sus)return;
   const wk=srIsWeak(r);
   if(r.due<=now){const late=Math.min(3,Math.max(0,(now-r.due)/Math.max(DAY,r.iv||DAY)));
@@ -809,23 +920,64 @@ function srCompose(topic,size){
  return seq.map(q=>q.id)}
 
 /* ---------- session state ---------- */
-let srTab='topics',srRun=false,SU={qid:null},SRSUM=null,SRX={open:null,lim:{}},SRH={lim:10,open:null},SRUI={filter:'all',q:'',open:{},rings:{},celebrated:null};
+let srTab='topics',srRun=false,SU={qid:null},SRSUM=null,SRX={open:null,lim:{}},SRH={lim:10,open:null},SRUI={filter:'all',q:'',open:{},rings:{},celebrated:null,selected:[],counts:{}};
 let srFaceIx={};
 function srSid(){return 's'+Date.now().toString(36)+Math.floor(Math.random()*1296).toString(36)}
 function srM0(ids){const M=srTopicStats(),m={};ids.forEach(id=>{const q=qmap.get(id);if(q&&!m[q.topic]){const e=M.get(q.topic);if(e)m[q.topic]={p:e.pct,s:e.status}}});return m}
 function srNewSession(o){
  if(SR3.sess&&Object.keys(SR3.sess.first).length)srFinish(true); /* never lose a half-finished session */
- SR3.sess=Object.assign({sid:srSid(),start:Date.now(),mode:'topic',topic:null,label:'Review',plan:[],queue:[],first:{},rt:{},att:[],n0:0,m0:{},cur:null},o);
+ srIntroMark();SR3.sess=Object.assign({sid:srSid(),start:Date.now(),mode:'topic',topic:null,label:'Review',plan:[],queue:[],first:{},rt:{},att:[],n0:0,m0:{},cur:null},o);
  SR3.sess.n0=SR3.sess.plan.length;SR3.sess.queue=SR3.sess.plan.slice();SR3.sess.m0=srM0(SR3.sess.plan);
  SU={qid:null};SRSUM=null;srRun=true;srTab='topics';srSave();renderAppDemo();
  requestAnimationFrame(()=>{const sc=document.getElementById('phoneContent');if(sc)sc.scrollTop=0})}
 window.srStart=function(topic){topic=(topic==null||topic==='')?null:Number(topic);
  const ids=srCompose(topic,SR3.size);if(!ids.length){toast(topic==null?'No questions are available right now':'No questions are available in this topic');return}
  srNewSession({mode:topic==null?'all':'topic',topic,label:topic==null?'All Topics':(SRT_BY.get(topic)||{}).name||'Topic',plan:ids})};
-window.srPickStart=function(){const p=srPickTopic();if(!p){toast('Nothing to review right now');return}srStart(p.e.id)};
+function srSyncSelectionUI(changedId){
+ const chosen=srSelectedSummary(),panel=document.querySelector('.sr3-selected-panel');if(!panel)return;
+ const head=panel.querySelector('.sr3-selected-head');
+ if(head){
+  const b=head.querySelector('b'),sm=head.querySelector('small');
+  if(b)b.textContent=chosen.list.length+' topic'+(chosen.list.length===1?'':'s')+' selected';
+  if(sm)sm.textContent=chosen.total+' question'+(chosen.total===1?'':'s')+' in this session';
+ }
+ const chips=panel.querySelector('#srSelectedChips');
+ if(chips)chips.innerHTML=chosen.list.map(x=>'<span>'+esc(x.e.t.name)+' <b>'+x.count+'</b></span>').join('');
+ const start=panel.querySelector('.sr3-start-selected');
+ if(start){start.disabled=!chosen.total;start.textContent='Start session · '+chosen.total+' question'+(chosen.total===1?'':'s')}
+ if(changedId!=null){
+  const e=srTopicStats().get(Number(changedId)),field=document.getElementById('srCount-'+Number(changedId));
+  if(e&&field){
+   const count=srCountFor(e),max=srAvailable(e),controls=field.parentElement,buttons=controls?controls.querySelectorAll('button'):[];
+   field.value=String(count);field.max=String(max);
+   if(buttons[0])buttons[0].disabled=count<=1;
+   if(buttons[1])buttons[1].disabled=count>=max;
+   const help=field.closest('.sr3-qset')&&field.closest('.sr3-qset').querySelector('small');
+   if(help)help.textContent='Choose any number from 1 to '+max;
+  }
+ }
+}
+window.srToggleTopic=function(id){id=Number(id);const e=srTopicStats().get(id);if(!e||!srAvailable(e))return;const i=SRUI.selected.indexOf(id);if(i>=0){SRUI.selected.splice(i,1);delete SRUI.counts[id]}else{SRUI.selected.push(id);if(!Number.isInteger(Number(SRUI.counts[id]))||Number(SRUI.counts[id])<1)SRUI.counts[id]=Math.min(10,srAvailable(e))}renderAppDemo()};
+window.srSetTopicCount=function(id,value){id=Number(id);const e=srTopicStats().get(id);if(!e||!SRUI.selected.includes(id))return;const max=srAvailable(e),n=Number(value);if(!Number.isInteger(n)||n<1){toast('Choose a whole number from 1 to '+max);srSyncSelectionUI(id);return}SRUI.counts[id]=Math.min(max,n);srSyncSelectionUI(id)};
+window.srBumpTopicCount=function(id,delta){id=Number(id);const e=srTopicStats().get(id);if(!e||!SRUI.selected.includes(id))return;const n=srCountFor(e)+Number(delta||0);SRUI.counts[id]=Math.min(srAvailable(e),Math.max(1,n));srSyncSelectionUI(id)};
+window.srClearSelection=function(){SRUI.selected=[];SRUI.counts={};renderAppDemo()};
+
+window.srChooseTopic=function(id){id=Number(id);const e=srTopicStats().get(id);if(!e||!srAvailable(e))return;SRUI.selected=[id];SRUI.counts={[id]:Math.min(10,srAvailable(e))};srTab='topics';renderAppDemo()};
+window.srStartSelected=function(){
+ const M=srTopicStats(),selected=SRUI.selected.map(id=>M.get(Number(id))).filter(e=>e&&srAvailable(e));
+ if(!selected.length){toast('Select at least one topic first');return}
+ const plans=selected.map(e=>{const count=srCountFor(e),base=srCompose(e.t.id,count),seen=new Set(base),pool=srPool(e.t.id),rest=pool.due.concat(pool.weak).map(x=>x.q).concat(pool.fresh).filter(q=>!seen.has(q.id));
+  const ids=base.slice();for(const q of rest){if(ids.length>=count)break;if(!seen.has(q.id)){ids.push(q.id);seen.add(q.id)}}
+  return{topic:e.t,ids:ids.slice(0,count)}});
+ const merged=[];let i=0,more=true;while(more){more=false;plans.forEach(p=>{if(i<p.ids.length){merged.push(p.ids[i]);more=true}});i++}
+ if(!merged.length){toast('No questions are available in the selected topics');return}
+ const label=selected.length===1?selected[0].t.name:selected.length+' selected topics';
+ srNewSession({mode:selected.length===1?'topic':'multi',topic:selected.length===1?selected[0].t.id:null,label,plan:merged});
+};
+
 window.srResume=function(){if(!SR3.sess)return;SU={qid:null};SRSUM=null;srRun=true;renderAppDemo()};
 window.srPause=function(){srTPause(true);srRun=false;SU={qid:null};srSave();renderAppDemo()};
-window.srSize=function(n){n=Number(n);if(![10,15,20].includes(n))return;SR3.size=n;srSave();renderAppDemo()};
+window.srSize=function(n){n=Number(n);if(!Number.isInteger(n)||n<1||n>200)return;SR3.size=n;srSave();renderAppDemo()};
 window.srEnd=function(){const s=SR3.sess;if(!s)return;const n=Object.keys(s.first).length;
  confirmBox({title:'End this session?',text:n?`${n} answered question${n>1?'s':''} will be kept and scheduled. The rest stay as they are.`:'No questions were answered in this session.',detail:'Unanswered questions are never counted.',ok:'End session'},()=>{srFinish();renderAppDemo()})};
 window.srDrill=function(){const sum=SRSUM||SR3.last;if(!sum||!Array.isArray(sum.weak))return;
@@ -902,12 +1054,6 @@ window.srSetGrade=function(g){
 window.srSuspendCur=function(){const id=SU.qid;if(id)srSuspend(id,true)};
 
 /* ---------- finishing, summary, drill source ---------- */
-function srNextAction(){const t=srTotals(),pick=srPickTopic();
- if(t.weak>0)return{k:'weak',title:'Strengthen your weak questions',text:t.weak+(t.weak===1?' question is':' questions are')+' still shaky. They return automatically — or practise them now.',btn:['Open weak topics',"srTabSet('weak')"]};
- if(t.due>0&&pick)return{k:'due',title:'Keep the momentum',text:t.due+(t.due===1?' review is':' reviews are')+' due. Smart Pick suggests '+pick.e.t.name+'.',btn:['Start recommended session','srPickStart()']};
- let nx=0,c=0;Object.keys(SR3.q).forEach(id=>{const r=SR3.q[id];if(r.sus||!qmap.has(id)||r.due<=Date.now())return;if(!nx||r.due<nx){nx=r.due;c=1}else if(dStart(r.due)===dStart(nx))c++});
- if(pick&&pick.e.fresh)return{k:'new',title:'Nothing urgent — explore',text:'You are caught up. '+pick.e.t.name+' has '+pick.e.fresh+' new question'+(pick.e.fresh>1?'s':'')+'.',btn:['Start recommended session','srPickStart()']};
- return{k:'rest',title:'You are all caught up',text:nx?'Next reviews: '+srDueTxt(nx).toLowerCase()+'.':'Nothing is scheduled right now.',btn:null}}
 function srFinish(silent){
  const s=SR3.sess;SR3.sess=null;srRun=false;SU={qid:null};
  if(!s){return}
@@ -924,10 +1070,10 @@ function srFinish(silent){
  tp.sort((a,b)=>b.n-a.n||(b.to-b.from)-(a.to-a.from));
  const up=tp.filter(x=>x.s1==='Mastered'&&x.s0!=='Mastered').map(x=>x.id);
  const sum={id:s.sid,t:s.start,end:Date.now(),n,ok:okN,ms,newN,revN:n-newN,mode:s.mode,topic:s.topic,label:s.label,g,impr,weak,tp:tp.slice(0,8),up,
-  retries:Object.values(s.rt).reduce((a,x)=>a+x,0),left:s.queue.length,act:srNextAction()};
+  retries:Object.values(s.rt).reduce((a,x)=>a+x,0),left:s.queue.length};
  SR3.ses.unshift({id:sum.id,t:sum.t,end:sum.end,n,ok:okN,ms,newN,label:sum.label,mode:sum.mode,g,wk:weak.length});SR3.ses=SR3.ses.slice(0,60);
  SR3.last={id:sum.id,t:sum.t,end:sum.end,n,ok:okN,ms,newN,revN:sum.revN,mode:sum.mode,topic:sum.topic,label:sum.label,g,impr,weak,tp:sum.tp,up,retries:sum.retries,left:sum.left};
- SRSUM=Object.assign({},SR3.last,{act:sum.act});srTab='summary';srSave();
+ SRSUM=Object.assign({},SR3.last);srTab='summary';srSave();
  if(!silent)try{addNotif('src-'+s.sid,'Smart Review session complete',`${n} question${n>1?'s':''} · ${pct(okN,n)}% correct`,'review')}catch(e){}
  srNotify();updateBadges()}
 
@@ -983,50 +1129,59 @@ const srStChip=s=>`<span class="sr3-st" style="--c:${SR_ST_COL[s]}">${s}</span>`
 
 /* ---------- shell + tabs ---------- */
 function srTabs(){const cur=srTab==='summary'?'topics':srTab;
- return `<div class="sr2-tabs sr3-tabs" role="tablist">${[['topics','Topics'],['dash','Overview'],['sched','Schedule'],['weak','Weak'],['hist','History']].map(([k,l])=>`<button type="button" role="tab" aria-selected="${cur===k}" class="${cur===k?'on':''}" onclick="srTabSet('${k}')">${l}</button>`).join('')}</div>`}
-const srShell=(inner,tabs)=>`${appHeader('Smart review')}<div class="rs sr2 sr3"><h1>Smart review</h1><p class="sub">Your personal review coach — pick a topic and start.</p>${tabs===false?'':srTabs()}<div class="sr2-in">${inner}</div></div>`;
+ return `<div class="sr2-tabs sr3-tabs" role="tablist">${[['topics','Build session'],['dash','Overview'],['sched','Schedule'],['weak','Weak'],['hist','History']].map(([k,l])=>`<button type="button" role="tab" aria-selected="${cur===k}" class="${cur===k?'on':''}" onclick="srTabSet('${k}')">${l}</button>`).join('')}</div>`}
+function srBankBar(){if(!(srTab==='topics'||srTab==='dash'||srTab==='sched'||srTab==='weak'))return '';
+ return `<div class="sr3-fl sr3-bank" role="group" aria-label="Question bank">${BANK_OPTS.map(([v,l])=>`<button type="button" class="${SRBANK===v?'on':''}" onclick="srBank('${v}')">${l}</button>`).join('')}</div>`}
+window.srBank=function(b){b=bankValid(b);if(SRBANK===b)return;SRBANK=b;srCache=null;SRUI.selected=[];SRUI.counts={};renderAppDemo()};
+const srShell=(inner,tabs)=>`${appHeader('Smart review')}<div class="rs sr2 sr3"><h1>Smart review</h1><p class="sub">Choose your topics and set the question count for each one.</p>${tabs===false?'':srTabs()+srBankBar()}<div class="sr2-in">${inner}</div></div>`;
 const srNote=()=>`<p class="meta sr2-note">Reminders appear in Notifications when you open the app. This version does not send background notifications.</p>`;
 
 /* ---------- TOPICS (home of Smart Review) ---------- */
 function srCounts(e){const z=n=>n?'':' z';
  return `<span class="sr3-n due${z(e.due)}"><b>${e.due}</b> Due</span><span class="sr3-n new${z(e.fresh)}"><b>${e.fresh}</b> New</span><span class="sr3-n weak${z(e.weak)}"><b>${e.weak}</b> Weak</span>`}
-function srTopicCard(e){const t=e.t,dis=!e.tot||!(e.due+e.weak+e.fresh);
- return `<button type="button" class="sr3-tc${e.status==='Mastered'?' mst':''}${e.due?' hasdue':''}" data-tid="${t.id}" ${dis?'disabled':''} onclick="srStart(${t.id})" aria-label="${esc(t.name)} — ${e.status}, ${e.pct}% mastery, ${e.due} due, ${e.fresh} new, ${e.weak} weak">
+function srAvailable(e){const p=srPool(e.t.id);return p.due.length+p.weak.length+p.fresh.length}
+function srCountFor(e){const max=srAvailable(e),v=Number(SRUI.counts[e.t.id]);return max?Math.min(max,Math.max(1,Number.isInteger(v)&&v>0?v:Math.min(10,max))):0}
+function srSelectedSummary(){const M=srTopicStats(),list=(SRUI.selected||[]).map(id=>M.get(Number(id))).filter(e=>e&&srAvailable(e)).map(e=>({e,count:srCountFor(e)}));return{list,total:list.reduce((n,x)=>n+x.count,0)}}
+function srTopicCard(e){const t=e.t,selected=(SRUI.selected||[]).includes(t.id),available=srAvailable(e),count=srCountFor(e),disabled=!available;
+ return `<article class="sr3-pick-item${selected?' selected':''}">
+ <button type="button" class="sr3-tc sr3-selectable${e.status==='Mastered'?' mst':''}${e.due?' hasdue':''}${selected?' selected':''}" data-tid="${t.id}" ${disabled?'disabled':''} onclick="srToggleTopic(${t.id})" aria-pressed="${selected?'true':'false'}" aria-label="${esc(t.name)} — ${available} questions available, ${selected?'selected':'not selected'}">
+  <span class="sr3-select-mark" aria-hidden="true">${selected?'✓':'+'}</span>
   ${srRing(e.pct,e.rev>0,54,t.key,{glow:e.status==='Mastered'})}
   <span class="sr3-tx"><span class="sr3-tt"><b>${esc(t.name)}</b>${srStChip(e.status)}</span>
-  <small>${esc(t.specLabel)}${t.sy?' · '+esc(t.sy):''}</small>
+  <small>${esc(e.t.specLabel)}${t.sy?' · '+esc(t.sy):''}</small>
   <span class="sr3-ns">${srCounts(e)}</span>
-  <span class="sr3-ft"><span>${e.lv.mastered} of ${e.tot} mastered</span><span>${e.rev?'Last: '+srAgo(e.last):'Not reviewed yet'}</span></span></span></button>`}
+  <span class="sr3-ft"><span>${e.lv.mastered} of ${e.tot} mastered</span><span>${e.rev?'Last: '+srAgo(e.last):'Not reviewed yet'}</span></span></span>
+ </button>
+ <div class="sr3-pick-meta"><span>${available?available+' available for a session':'No questions available right now'}</span>${selected?'<b>Selected</b>':''}</div>
+ ${selected?`<div class="sr3-qset"><label for="srCount-${t.id}">Questions from this topic</label><div class="sr3-qset-controls"><button type="button" aria-label="Decrease question count" onclick="srBumpTopicCount(${t.id},-1)" ${count<=1?'disabled':''}>−</button><input id="srCount-${t.id}" type="number" inputmode="numeric" min="1" max="${available}" step="1" value="${count}" onchange="srSetTopicCount(${t.id},this.value)" aria-label="Question count for ${esc(t.name)}"><button type="button" aria-label="Increase question count" onclick="srBumpTopicCount(${t.id},1)" ${count>=available?'disabled':''}>+</button></div><small>Choose any number from 1 to ${available}</small></div>`:''}
+ </article>`}
 function srFilterOk(e){const f=SRUI.filter;
  if(f==='due')return e.due>0;if(f==='weak')return e.weak>0;if(f==='prog')return e.rev>0&&e.status!=='Mastered';if(f==='new')return e.rev===0;return true}
 function srTopicList(){const M=srTopicStats(),q=SRUI.q.trim().toLowerCase(),active=q||SRUI.filter!=='all';
  const groups=[];const bySpec=new Map();
- SRT.forEach(t=>{const e=M.get(t.id);if(!e)return;if(q&&!(t.name+' '+t.specLabel+' '+t.sy).toLowerCase().includes(q))return;if(!srFilterOk(e))return;
+ SRT.forEach(t=>{const e=M.get(t.id);if(!e)return;if(srEffBank()!=='all'&&!(e.tot+e.sus))return;if(q&&!(t.name+' '+t.specLabel+' '+t.sy).toLowerCase().includes(q))return;if(!srFilterOk(e))return;
   if(!bySpec.has(t.spec)){const g={spec:t.spec,label:t.specLabel,items:[]};bySpec.set(t.spec,g);groups.push(g)}bySpec.get(t.spec).items.push(e)});
  if(!groups.length)return `<div class="card"><p class="meta" style="margin:0">No topics match this view.</p></div>`;
  return groups.map(g=>{const tot=g.items.reduce((a,e)=>a+e.tot,0),cr=g.items.reduce((a,e)=>a+e.credit,0),p=tot?Math.round(100*cr/tot):0;
-  const started=g.items.some(e=>e.rev>0||e.due>0);
-  const open=active||(SRUI.open[g.spec]!=null?SRUI.open[g.spec]:started);
-  const due=g.items.reduce((a,e)=>a+e.due,0);
-  return `<section class="sr3-grp${open?' open':''}" data-spec="${esc(g.spec)}"><button type="button" class="sr3-gh" aria-expanded="${open}" onclick="srGroup('${esc(g.spec)}')"><span class="sr3-gt"><b>${esc(g.label)}</b><small>${g.items.length} topic${g.items.length>1?'s':''}${due?' · '+due+' due':''}</small></span><span class="sr3-gp" style="color:${srRingCol(p,cr>0)}">${p}%</span><span class="sr3-gc">${srI.chev}</span></button>
+  const started=g.items.some(e=>e.rev>0||e.due>0),selected=g.items.filter(e=>(SRUI.selected||[]).includes(e.t.id)).length;
+  const open=active||selected>0||(SRUI.open[g.spec]!=null?SRUI.open[g.spec]:(started||g.spec===groups[0].spec));
+  const due=g.items.reduce((a,e)=>a+e.due,0),avail=g.items.reduce((a,e)=>a+srAvailable(e),0);
+  return `<section class="sr3-grp${open?' open':''}" data-spec="${esc(g.spec)}"><button type="button" class="sr3-gh" aria-expanded="${open}" onclick="srGroup('${esc(g.spec)}')"><span class="sr3-gt"><b>${esc(g.label)}</b><small>${g.items.length} topics · ${avail} available${selected?' · '+selected+' selected':''}</small></span><span class="sr3-gp" style="color:${srRingCol(p,cr>0)}">${p}%</span><span class="sr3-gc">${srI.chev}</span></button>
    ${open?`<div class="sr3-gb">${g.items.map(srTopicCard).join('')}</div>`:''}</section>`}).join('')}
-function srTopicsHTML(){const T=srTotals(),pick=srPickTopic(),s=SR3.sess;let h='';
- if(s&&Object.keys(s.first).length+s.queue.length>0){const done=Object.keys(s.first).length;
-  h+=`<div class="card sr3-resume"><div><b>Session in progress</b><small>${esc(s.label)} · ${s.queue.length} left · ${done} answered</small></div><div class="sr3-rb"><button type="button" class="btn primary" onclick="srResume()">Resume</button><button type="button" class="btn" onclick="srEnd()">End</button></div></div>`}
- if(pick){const e=pick.e;
-  h+=`<div class="card sr3-pick${pick.hi?' hi':''}"><div class="sr3-pk-top"><span class="sr3-kick">${srI.spark} SMART PICK</span><span class="sr3-prio">${pick.prio}</span></div>
-   <div class="sr3-pk-body">${srRing(e.pct,e.rev>0,64,e.t.key)}<div class="sr3-pk-tx"><h3>${esc(e.t.name)}</h3><small>${esc(e.t.specLabel)}${e.t.sy?' · '+esc(e.t.sy):''}</small>
-   <ul class="sr3-why">${pick.lines.map(([l,k])=>`<li class="${k}"><i></i>${l}</li>`).join('')}</ul></div></div>
-   <button type="button" class="btn primary block sr3-go" onclick="srPickStart()">${srI.play} Start Recommended Session</button></div>`}
- else h+=`<div class="card sr3-pick"><div class="sr3-pk-top"><span class="sr3-kick">${srI.spark} SMART PICK</span></div><h3 style="margin:8px 0 4px">Nothing to review right now</h3><p class="meta" style="margin:0">Every question is either suspended or has no available questions. Restore suspended questions from the Schedule tab.</p></div>`;
- const allAvail=T.due+T.weak+T.fresh;
- h+=`<div class="card sr3-all"><div class="sr3-all-t"><span class="sr3-all-i">${srI.layers}</span><div><b>All Topics</b><small>${T.due} due · ${T.weak} weak · ${T.fresh} new — mixed by priority</small></div></div>
-  <button type="button" class="btn" ${allAvail?'':'disabled'} onclick="srStart()">Start</button></div>
-  <div class="sr3-size"><span>Session size</span><div class="seg">${[10,15,20].map(n=>`<button type="button" class="${SR3.size===n?'on':''}" onclick="srSize(${n})">${n}</button>`).join('')}</div></div>
-  <div class="sr3-sec"><h2>Topics</h2><small>${T.started} of ${T.topics} started · ${T.lv.mastered} of ${T.tot} questions mastered</small></div>
-  <input class="field sr3-search" type="search" id="srSearch" placeholder="Search topics" value="${esc(SRUI.q)}" oninput="srSearch(this.value)" autocomplete="off">
-  <div class="sr3-fl" role="group" aria-label="Filter topics">${[['all','All'],['due','Due'],['weak','Weak'],['prog','In progress'],['new','Not started']].map(([k,l])=>`<button type="button" class="${SRUI.filter===k?'on':''}" onclick="srFilter('${k}')">${l}</button>`).join('')}</div>
-  <div id="srTL">${srTopicList()}</div>`;
+function srIntroSeen(){try{return localStorage.getItem('shb_sr_intro_seen_v1')==='1'||Object.keys(SR3.q||{}).length>0}catch(e){return false}}
+function srIntroMark(){try{localStorage.setItem('shb_sr_intro_seen_v1','1')}catch(e){}}
+function srTopicsHTML(){const T=srTotals(),session=SR3.sess,chosen=srSelectedSummary();let h='';
+ if(session&&Object.keys(session.first).length+session.queue.length>0){const done=Object.keys(session.first).length;
+  h+=`<div class="card sr3-resume"><div><b>Session in progress</b><small>${esc(session.label)} · ${session.queue.length} left · ${done} answered</small></div><div class="sr3-rb"><button type="button" class="btn primary" onclick="srResume()">Resume</button><button type="button" class="btn" onclick="srEnd()">End</button></div></div>`}
+ h+=(srIntroSeen()?'':`<section class="sr3-builder-hero"><div><span class="sr3-builder-kicker">SMART REVIEW · SESSION BUILDER</span><h2>Build your review session</h2><p>Select one or more topics, then choose how many questions to take from each.</p></div></section>`)+`
+ <section class="sr3-selected-panel"><div class="sr3-selected-head"><div><span class="sr3-builder-kicker">YOUR SESSION</span><b>${chosen.list.length} topic${chosen.list.length===1?'':'s'} selected</b><small>${chosen.total} question${chosen.total===1?'':'s'} in this session</small></div><button type="button" class="btn sr3-clear-selection" onclick="srClearSelection()" ${chosen.list.length?'':'disabled'}>Clear</button></div>
+ ${chosen.list.length?`<div class="sr3-selected-chips" id="srSelectedChips">${chosen.list.map(x=>`<span>${esc(x.e.t.name)} <b>${x.count}</b></span>`).join('')}</div>`:`<p class="sr3-selection-empty">No topics selected yet. Select any topic below to add it to your session.</p>`}
+ <button type="button" class="btn primary block sr3-start-selected" onclick="srStartSelected()" ${chosen.total?'':'disabled'}>Start session · ${chosen.total} question${chosen.total===1?'':'s'}</button>
+ </section>
+ <div class="sr3-sec sr3-topic-heading"><div><h2>Choose topics</h2><small>${T.topics} topics · select as many as you need</small></div></div>
+ <input class="field sr3-search" type="search" id="srSearch" placeholder="Search topics or medical systems" value="${esc(SRUI.q)}" oninput="srSearch(this.value)" autocomplete="off">
+ <div class="sr3-fl" role="group" aria-label="Filter topics">${[['all','All'],['due','Due'],['weak','Weak'],['prog','In progress'],['new','Not started']].map(([k,l])=>`<button type="button" class="${SRUI.filter===k?'on':''}" onclick="srFilter('${k}')">${l}</button>`).join('')}</div>
+ <div id="srTL">${srTopicList()}</div>`;
  return h}
 window.srSearch=function(v){SRUI.q=v;const el=document.getElementById('srTL');if(el){el.innerHTML=srTopicList();srPost()}};
 window.srFilter=function(f){SRUI.filter=f;renderAppDemo()};
@@ -1036,12 +1191,12 @@ window.srJump=function(id){const t=SRT_BY.get(id);if(!t)return;SRUI.filter='all'
 
 /* ---------- OVERVIEW ---------- */
 function srMapHTML(){const M=srTopicStats(),by=new Map();
- SRT.forEach(t=>{const e=M.get(t.id);if(!e)return;if(!by.has(t.spec))by.set(t.spec,{label:t.specLabel,items:[]});by.get(t.spec).items.push(e)});
+ SRT.forEach(t=>{const e=M.get(t.id);if(!e)return;if(srEffBank()!=='all'&&!(e.tot+e.sus))return;if(!by.has(t.spec))by.set(t.spec,{label:t.specLabel,items:[]});by.get(t.spec).items.push(e)});
  return [...by.values()].map(g=>`<div class="sr3-mg"><div class="sr3-mh">${esc(g.label)}</div><div class="sr3-mr">${g.items.map(e=>`<button type="button" class="sr3-mc${e.status==='Mastered'?' mst':''}" onclick="srJump(${e.t.id})" aria-label="${esc(e.t.name)}: ${e.status}, ${e.pct}%" title="${esc(e.t.name)} · ${e.pct}%">${srRing(e.pct,e.rev>0,34,e.t.key,{txt:false,sw:4,glow:e.status==='Mastered'})}${e.due?'<i class="dot due"></i>':''}${e.status==='Mastered'?'<i class="dot star">★</i>':''}</button>`).join('')}</div></div>`).join('')}
-function srDashHTML(){const T=srTotals(),pick=srPickTopic(),s=SR3.sess,gp=Math.min(100,pct(T.today,SR3.goal)),remain=Math.max(SR3.goal-T.today,0);
+function srDashHTML(){const T=srTotals(),s=SR3.sess,gp=Math.min(100,pct(T.today,SR3.goal)),remain=Math.max(SR3.goal-T.today,0);
  const dueT=T.dueToday;
  const hero=`<div class="card sr2-hero"><div class="sr2-big"><b>${dueT}</b><span>${dueT===1?'question':'questions'} due today${T.od?` <em>· ${T.od} overdue</em>`:''}</span></div>
-  <button type="button" class="btn primary block sr2-go" ${pick||s?'':'disabled'} onclick="${s?'srResume()':'srPickStart()'}">${srI.play} ${s?'Resume session · '+s.queue.length+' left':'Start Recommended Session'}</button>
+  <button type="button" class="btn primary block sr2-go" onclick="${s?'srResume()':"srTabSet('topics')"}">${srI.play} ${s?'Resume session · '+s.queue.length+' left':'Build a review session'}</button>
   <div class="sr2-goal"><div><b>${T.today}</b> / ${SR3.goal} questions today</div><span>${gp>=100?'Goal reached':remain+' to go'}</span></div><div class="bar"><i style="width:${gp}%"></i></div></div>`;
  const stat=(v,l,c)=>`<div class="sr2-st"><b style="${c?'color:'+c:''}">${v}</b><small>${l}</small></div>`;
  const grid=`<div class="sr2-grid">${stat(T.dueToday-T.od,'Due today','#8fc6ff')}${stat(T.od,'Overdue',T.od?'#ffb454':'')}${stat(T.upcoming,'Upcoming')}${stat(T.today,'Reviewed today','#35cf82')}${stat(T.lv.mastered,'Mastered','#b58cff')}${stat(T.weak,'Need more review',T.weak?'#ff8c8c':'')}</div>`;
@@ -1064,8 +1219,8 @@ function srRowHTML(x){const {q,r}=x,open=SRX.open===q.id,d=dkey(Math.max(Date.no
   <p class="meta" style="margin:8px 0 0">Postponing is not a review and never raises mastery. Stopping a question does not delete it from the Question Bank.</p>`}</div>`:''}</div>`}
 function srSection(title,arr,key){if(!arr.length)return '';const lim=SRX.lim[key]||8;
  return `<div class="soon-h">${title} · ${arr.length}</div>${arr.slice(0,lim).map(x=>srRowHTML(x)).join('')}${arr.length>lim?`<button type="button" class="btn block" onclick="srMore('${key}')">Show ${Math.min(12,arr.length-lim)} more</button>`:''}`}
-function srSchedHTML(){const all=srList(),now=Date.now(),t0=dStart(now),t1=dNext(now);
- const sus=Object.keys(SR3.q).filter(id=>SR3.q[id].sus&&qmap.has(id)).map(id=>({q:qmap.get(id),r:SR3.q[id]}));
+function srSchedHTML(){const all=srList().filter(x=>srBankOk(x.q)),now=Date.now(),t0=dStart(now),t1=dNext(now);
+ const sus=Object.keys(SR3.q).filter(id=>SR3.q[id].sus&&qmap.has(id)&&srBankOk(qmap.get(id))).map(id=>({q:qmap.get(id),r:SR3.q[id]}));
  if(!all.length&&!sus.length)return `<div class="card sr2-empty"><h3>Nothing is scheduled yet</h3><p class="meta">Start a topic from the Topics tab. Every question you answer gets its own review date and appears here — overdue, today and the next seven days.</p><button type="button" class="btn primary block" onclick="srTabSet('topics')">Choose a topic</button></div>`;
  const od=all.filter(x=>x.r.due<t0),td=all.filter(x=>x.r.due>=t0&&x.r.due<t1),up=all.filter(x=>x.r.due>=t1),days={};
  up.forEach(x=>{const k=dStart(x.r.due);if(x.r.due<t1+7*DAY)(days[k]||(days[k]=[])).push(x)});
@@ -1082,7 +1237,7 @@ function srWeakHTML(){const M=srTopicStats();
  const l=[...M.values()].filter(e=>e.weak>0||(e.rev&&e.n-e.ok>0&&e.due>0)).map(e=>Object.assign(e,{p:e.weak*3+(e.n-e.ok)*2+e.due})).sort((a,b)=>b.p-a.p);
  if(!l.length)return `<div class="card"><h3 style="margin:0 0 6px">No weak topics yet</h3><p class="meta" style="margin:0">Topics appear here when you keep missing questions during reviews. You can start any topic from the Topics tab.</p></div>`;
  return `<p class="meta" style="margin:0 0 10px">Ranked by repeated mistakes, weak questions and reviews due.</p>${l.slice(0,30).map((e,i)=>`<div class="card sr2-wk"><div class="sr2-wh"><span class="sr2-rank">${i+1}</span><div style="min-width:0;flex:1"><b>${esc(e.t.name)}</b><small>${esc(e.t.specLabel)} · ${e.weak} weak of ${e.tot}${e.n?' · '+pct(e.ok,e.n)+'% recent accuracy':''}${e.due?' · '+e.due+' due':''}</small></div>${srRing(e.pct,e.rev>0,44,e.t.key)}</div>
-  <div class="bar"><i style="width:${Math.min(100,pct(e.weak,e.tot))}%;background:#ff8c8c"></i></div><button type="button" class="btn block" onclick="srStart(${e.t.id})">${srI.play} Practise this topic</button></div>`).join('')}`}
+  <div class="bar"><i style="width:${Math.min(100,pct(e.weak,e.tot))}%;background:#ff8c8c"></i></div><button type="button" class="btn block" onclick="srChooseTopic(${e.t.id})">Choose questions for this topic</button></div>`).join('')}`}
 
 /* ---------- HISTORY ---------- */
 function srTrail(r){return r.h.slice(-12).reverse().map(x=>{
@@ -1155,16 +1310,13 @@ function srSummaryHTML(){const s=SRSUM||SR3.last;if(!s)return srShell(srTopicsHT
  const impr=(s.impr||[]).slice(0,6).map(id=>item(id,`<span class="sr3-arrow">${srChip(SR_LV.find(x=>x[0]===srLevel(SR3.q[id]))[1],SR_LV_COL[srLevel(SR3.q[id])])}</span>`)).join('');
  const weak=(s.weak||[]).slice(0,6).map(id=>item(id,srChip(SR3.q[id]&&SR3.q[id].rl?'Weak':'Practise','#ff8c8c'))).join('');
  const tp=(s.tp||[]).map(x=>{const e=M.get(x.id);if(!e)return '';const d=x.to-x.from;return `<div class="sr3-tp"><span>${srRing(e.pct,e.rev>0,40,e.t.key)}</span><div><b>${esc(e.t.name)}</b><small>${x.from}% → <b style="color:${d>0?'#35cf82':d<0?'#ff8c8c':'#9aadc1'}">${x.to}%</b> ${d>0?'(+'+d+')':d<0?'('+d+')':''} · ${x.s1}${x.s0!==x.s1?' (was '+x.s0+')':''}</small></div></div>`}).join('');
- const act=s.act||srNextAction();
  const due=dueList().length;
  return srShell(`<div class="card sr2-sum sr3-sum">${docFace(face,'dr-top sr3-face')}<div class="sr3-kick2">${drill?'DRILL COMPLETE':'SESSION COMPLETE'}</div><h3>${title}</h3><p class="meta" style="margin:0 0 4px">${esc(s.label)} · ${s.n} question${s.n>1?'s':''}${s.retries?' · '+s.retries+' retr'+(s.retries>1?'ies':'y'):''}${s.left?' · '+s.left+' not reached':''}</p></div>
   <div class="sr3-sec"><h2>Your performance</h2></div>${perf}
   ${impr?`<div class="sr3-sec"><h2>What you mastered</h2><small>Questions that moved up a level</small></div>${impr}`:''}
   ${weak?`<div class="sr3-sec"><h2>Needs more practice</h2><small>Missed or still shaky — they return automatically</small></div>${weak}`:''}
   ${tp?`<div class="sr3-sec"><h2>Topic progress</h2></div><div class="card">${tp}</div>`:''}
-  <div class="card sr3-act"><div class="sr2-h">Next recommended action</div><b>${esc(act.title)}</b><p class="meta" style="margin:4px 0 0">${esc(act.text)}</p></div>
   ${(s.weak||[]).length?`<button type="button" class="btn primary block sr3-drill" onclick="srDrill()">${srI.play} Drill Weak Ones · ${Math.min(20,s.weak.length)}</button>`:''}
-  ${act.btn?`<button type="button" class="btn ${(s.weak||[]).length?'':'primary '}block" onclick="${act.btn[1]}">${act.btn[0]}</button>`:''}
   <button type="button" class="btn block" onclick="srBack()">Back to topics</button>`,false)}
 
 /* ---------- view router + hooks ---------- */
@@ -1187,8 +1339,15 @@ function srPost(){
 const __srRAD=renderAppDemo;renderAppDemo=function(){const r=__srRAD.apply(this,arguments);try{srPost()}catch(e){console.error('Smart Review post-render',e)}return r};
 
 function updateBadges(){const n=dueList().length+srList().filter(x=>x.r.due>Date.now()).length;const d=dueList().length;document.querySelectorAll('.app-nav button[data-p="review"] .nbadge').forEach(e=>e.remove());if(d){document.querySelectorAll('.app-nav button[data-p="review"]').forEach(b=>b.insertAdjacentHTML('beforeend',`<em class="nbadge">${d}</em>`))}}
-appNav=function(){const it=[['subjects','Home'],['search','Search'],['quiz','Quiz'],['review','Review']];const grp={subjects:['subjects','specialties','topics','questions','menu','saved','wrong'],quiz:['quiz','quizrun','quizresult','quizhistory']};
- return `<div class="app-nav">${it.map(([id,n])=>`<button data-p="${id}" class="${(grp[id]||[id]).includes(appPage)?'active':''}" onclick="appPage='${id}';renderAppDemo()">${NAVI[id]}<span>${n}</span>${id==='review'&&dueList().length?`<em class="nbadge">${dueList().length}</em>`:''}</button>`).join('')}</div>`};
+window.__shbNavTap=function(id){
+ if(id==='review'){
+  if(srRun&&SR3.sess){srTPause(true);srRun=false;SU={qid:null};srSave()}
+  srTab='topics';SRSUM=null;SRX.open=null;
+ }
+ appPage=id;renderAppDemo();
+};
+appNav=function(){const it=[['subjects','Home'],['search','Search'],['quiz','Quiz'],['review','Review']];const grp={subjects:['subjects','pedcollections','specialties','topics','questions','menu','saved','wrong'],quiz:['quiz','quizrun','quizresult','quizhistory']};
+ return `<div class="app-nav">${it.map(([id,n])=>`<button data-p="${id}" class="${(grp[id]||[id]).includes(appPage)?'active':''}" onclick="__shbNavTap('${id}')">${NAVI[id]}<span>${n}</span>${id==='review'&&dueList().length?`<em class="nbadge">${dueList().length}</em>`:''}</button>`).join('')}</div>`};
 /* drawer: Saved / Wrong answers work, Smart review badge is live */
 DR2[1][1][0][1]='saved';DR2[1][1][1][1]='wrong';
 const __menu=menuView;
@@ -1715,13 +1874,11 @@ function confirmBox(o,fn){const old=$('#cfwrap');old&&old.remove();const h=docum
  ($('.phone')||document.body).appendChild(h);$('#cfOk').onclick=()=>{cfClose();fn()}}
 window.cfClose=function(){const h=$('#cfwrap');h&&h.remove()};
 
-let rTopic=1;
+let rBank='all',rSys='all',rTop=0;
 function settingsView(){
  const answers=Object.values(S.ans),n=answers.length,ok=answers.filter(a=>a.ok).length;
  const seg=(k,items)=>`<div class="seg wide">${items.map(([v,l])=>`<button type="button" class="${SET[k]===v?'on':''}" onclick="setSet('${k}','${v}')">${l}</button>`).join('')}</div>`;
  const row=(t,d,c)=>`<div class="setrow"><b>${t}</b><small>${d}</small>${c}</div>`;
- const topics=[];Object.values(REAL.spec).forEach(sp=>sp.topics.forEach(t=>topics.push([String(t[0]),t[1]])));
- const tn=QB.filter(q=>q.topic===rTopic&&S.ans[q.id]).length;
  const last=SET.lastBackup?'Last backup: '+new Date(SET.lastBackup).toLocaleString():'No backup created yet.';
  return `${appHeader('Settings')}<div class="rs"><h1>Settings</h1><p class="sub">Appearance, backup and study progress</p>
  <div class="card setcard"><h3>Appearance</h3>
@@ -1733,11 +1890,25 @@ function settingsView(){
   <div class="setrow"><b>Last Onboarding Page</b><small>When ON, the final “Your journey starts here” page is shown at app start. Turn it OFF to skip it.</small><button type="button" class="drsw ${SET.obLast==='on'?'on':''}" role="switch" aria-checked="${SET.obLast==='on'}" aria-label="Last Onboarding Page" onclick="setSet('obLast','${SET.obLast==='on'?'off':'on'}')"><i></i><span>${SET.obLast==='on'?'ON':'OFF'}</span></button></div></div>
  <input type="file" id="bkFile" accept=".json,application/json" hidden onchange="restoreBackup(this)">
  <div class="card setcard"><h3>Study progress</h3><p class="meta">${n} answered · ${ok} correct</p><p class="meta">Reset clears answers and progress only. Saved questions, notes, reports and Smart Review are kept.</p>
-  <div class="setrow"><b>Reset one topic</b>${ddHTML('rtopic',topics,String(rTopic))}<button type="button" class="btn danger block" style="margin-top:10px" ${tn?'':'disabled'} onclick="resetTopicAsk()">Reset topic progress${tn?` (${tn})`:''}</button></div>
+  ${resetScopeHTML()}
   <div class="setrow"><b>Reset everything</b><button type="button" class="btn danger block" style="margin-top:10px" ${n?'':'disabled'} onclick="resetAllAsk()">Reset all study progress${n?` (${n})`:''}</button></div></div></div>`}
-const __dp=window.ddPick;window.ddPick=function(id,v,e){if(id==='rtopic'){e&&e.stopPropagation();qs.dd=null;rTopic=+v;renderAppDemo();return}__dp(id,v,e)};
-window.resetTopicAsk=function(){const ids=QB.filter(q=>q.topic===rTopic&&S.ans[q.id]).map(q=>q.id);if(!ids.length)return;
- confirmBox({title:'Reset topic progress?',text:`This clears ${ids.length} answer${ids.length>1?'s':''} in “${TOPIC_NAME[rTopic]}”.`,detail:'Saved questions, notes, reports and Smart Review are kept. This cannot be undone.',ok:'Reset topic',danger:true},()=>{ids.forEach(i=>delete S.ans[i]);qs.streak=0;save();renderAppDemo();toast(`Topic progress reset (${ids.length})`)})};
+const rsPool=()=>QB.filter(q=>bankOk(q,rBank)&&(rSys==='all'||q.spec===rSys)&&(!rTop||q.topic===rTop));
+const rsSort=(a,b)=>String(a[1]).localeCompare(String(b[1]));
+function rsSystems(){const m=new Map();QB.forEach(q=>{if(bankOk(q,rBank)&&!m.has(q.spec))m.set(q.spec,SPEC_NAME[q.spec]||q.spec)});return [...m].sort(rsSort)}
+function rsTopics(){if(rSys==='all')return [];const m=new Map();QB.forEach(q=>{if(bankOk(q,rBank)&&q.spec===rSys&&q.topic&&TOPIC_NAME[q.topic])m.set(q.topic,TOPIC_NAME[q.topic])});return [...m].sort(rsSort)}
+function rsScope(){return rTop?(TOPIC_NAME[rTop]||'this topic'):rSys!=='all'?(SPEC_NAME[rSys]||rSys):rBank==='all'?'all banks':((BANK_OPTS.find(o=>o[0]===rBank)||[0,rBank])[1])}
+function resetScopeHTML(){
+ const sys=rsSystems();if(rSys!=='all'&&!sys.some(x=>x[0]===rSys)){rSys='all';rTop=0}
+ const top=rsTopics(),n=rsPool().filter(q=>S.ans[q.id]).length;
+ return `<div class="setrow"><b>Reset by bank, system or topic</b><small>Pick a bank first, then a system and, where the bank has topics, a topic.</small>
+  <small class="rs-lbl">Bank</small>${ddHTML('rbank',BANK_OPTS,rBank)}
+  <small class="rs-lbl">System</small>${ddHTML('rsys',[['all','All systems']].concat(sys),rSys)}
+  ${top.length?`<small class="rs-lbl">Topic</small>${ddHTML('rtop',[['0','All topics']].concat(top.map(x=>[String(x[0]),x[1]])),String(rTop))}`:''}
+  <button type="button" class="btn danger block" style="margin-top:10px" ${n?'':'disabled'} onclick="resetScopeAsk()">Reset ${esc(rsScope())} progress${n?` (${n})`:''}</button></div>`}
+const __dp=window.ddPick;window.ddPick=function(id,v,e){if(id==='rbank'||id==='rsys'||id==='rtop'){e&&e.stopPropagation();qs.dd=null;if(id==='rbank'){rBank=bankValid(v);rSys='all';rTop=0}else if(id==='rsys'){rSys=String(v);rTop=0}else rTop=Number(v)||0;renderAppDemo();return}__dp(id,v,e)};
+window.resetScopeAsk=function(){const ids=rsPool().filter(q=>S.ans[q.id]).map(q=>q.id);if(!ids.length)return;const scope=rsScope();
+ confirmBox({title:'Reset progress?',text:`This clears ${ids.length} answer${ids.length>1?'s':''} in “${scope}”.`,detail:'Saved questions, notes, reports and Smart Review are kept. This cannot be undone.',ok:'Reset',danger:true},()=>{ids.forEach(i=>delete S.ans[i]);qs.streak=0;save();renderAppDemo();toast(`Progress reset (${ids.length})`)})};
+window.resetTopicAsk=window.resetScopeAsk;
 window.resetAllAsk=function(){const n=Object.keys(S.ans).length;if(!n)return;
  confirmBox({title:'Reset all study progress?',text:`This clears all ${n} answer${n>1?'s':''} and your progress.`,detail:'Saved questions, notes, reports and Smart Review are kept. This cannot be undone. Export a backup first if unsure.',ok:'Reset all',danger:true},()=>{S.ans={};qs.streak=0;save();renderAppDemo();toast('All study progress reset')})};
 
@@ -1840,8 +2011,8 @@ function howToUseCard(){
   {title:'المراجعة الذكية Smart Review',body:
    '<p>تعمل المراجعة الذكية بذاكرة وجدولة منفصلتين عن إجابات بنك الأسئلة ونتائج الاختبارات. وهي ترتّب الأسئلة بحسب موعد المراجعة ومستوى التذكّر.</p>'+
    '<ol><li>افتح '+en('Review')+' ثم اختر '+en('Topics')+' أو '+en('Overview')+' أو '+en('Schedule')+' أو '+en('Weak')+' أو '+en('History')+'.</li>'+
-   '<li>ابدأ من '+en('Start Recommended Session')+' لمراجعة الأسئلة المقترحة، أو اختر موضوعاً محدداً، أو ابدأ جلسة لكل الموضوعات.</li>'+
-   '<li>يمكنك تغيير حجم الجلسة إلى 10 أو 15 أو 20 سؤالاً، واستخدام مرشحات '+en('Due')+' و'+en('Weak')+' و'+en('In progress')+' و'+en('Not started')+'.</li>'+
+   '<li>اختر Topic واحداً أو أكثر، وحدد عدد الأسئلة لكل موضوع من الحقل الرقمي المفتوح.</li>'+
+   '<li>يمكنك استخدام مرشحات '+en('Due')+' و'+en('Weak')+' و'+en('In progress')+' و'+en('Not started')+' لتنظيم المواضيع.</li>'+
    '<li>بعد إظهار الإجابة قيّم تذكّرك باستخدام '+en('Again')+' أو '+en('Hard')+' أو '+en('Good')+' أو '+en('Easy')+'. تستخدم المراجعة تقييمك لجدولة الموعد التالي.</li></ol>'+
    '<p class="how-tip"><b>مهم:</b> يمكنك إيقاف الجلسة واستئنافها لاحقاً، ومراجعة سجلّك من تبويب '+en('History')+'.</p>'},
   {title:'الأسئلة الخاطئة والمحفوظة',body:
@@ -2021,33 +2192,61 @@ const __ah=appHeader;appHeader=function(l){const h=__ah(l),u=unreadN();return u?
 let QZ=(()=>{const v=LS.get(QKEY,null);const A=isObj(v)&&Array.isArray(v.attempts)?v.attempts.filter(a=>isObj(a)&&typeof a.id==='string'&&Array.isArray(a.items)&&Number.isFinite(a.end)):[];return {attempts:A.slice(0,200),active:isObj(v)&&isObj(v.active)&&Array.isArray(v.active.ids)&&v.active.ids.length?v.active:null}})();
 const qzSave=()=>LS.set(QKEY,QZ);
 const QBY=new Map(QB.map(q=>[q.id,q]));
-QZ.attempts.forEach(a=>{a.items=a.items.filter(i=>isObj(i)&&QBY.has(i.id))});
-if(QZ.active)QZ.active.ids=QZ.active.ids.filter(id=>QBY.has(id));if(QZ.active&&!QZ.active.ids.length)QZ.active=null;
-let QC=Object.assign({scope:'all',specs:[],topics:[],filt:'any',mode:'practice',fb:'instant',order:'random',count:20,mins:0},(()=>{const v=LS.get(QCKEY,{});return isObj(v)?v:{}})());
+const qzDeferredBankId=id=>/^(ai07|ai08)-/.test(String(id||''));
+QZ.attempts.forEach(a=>{a.items=a.items.filter(i=>isObj(i)&&(QBY.has(i.id)||qzDeferredBankId(i.id)))});
+if(QZ.active)QZ.active.ids=QZ.active.ids.filter(id=>QBY.has(id)||qzDeferredBankId(id));if(QZ.active&&!QZ.active.ids.length)QZ.active=null;
+let QC=Object.assign({scope:'all',bank:'all',banks:[],specs:[],topics:[],filt:'any',mode:'practice',fb:'instant',order:'random',count:20,mins:0},(()=>{const v=LS.get(QCKEY,{});return isObj(v)?v:{}})());
 (()=>{const E={scope:['all','sel','custom'],filt:['any','new','wrong','saved'],mode:['practice','timed'],fb:['instant','end'],order:['random','bank']};Object.keys(E).forEach(k=>{if(!E[k].includes(QC[k]))QC[k]=E[k][0]});
- QC.specs=Array.isArray(QC.specs)?QC.specs.filter(s=>REAL.spec[s]):[];QC.topics=Array.isArray(QC.topics)?QC.topics.filter(t=>TOPIC_NAME[t]):[];
+ QC.banks=Array.isArray(QC.banks)?[...new Set(QC.banks.filter(b=>bankValid(b)===b&&b!=='all'))]:((QC.bank&&bankValid(QC.bank)===QC.bank&&QC.bank!=='all')?[QC.bank]:[]);QC.bank=QC.banks.length===1?QC.banks[0]:'all';
+ QC.specs=Array.isArray(QC.specs)?QC.specs.filter(s=>typeof s==='string'&&s):[];QC.topics=Array.isArray(QC.topics)?QC.topics.filter(t=>TOPIC_NAME[t]):[];
  QC.count=Number.isInteger(QC.count)&&QC.count>0?QC.count:20;QC.mins=Number.isInteger(QC.mins)&&QC.mins>0?QC.mins:0})();
 const qcSave=()=>LS.set(QCKEY,QC);
 let qzViewId=null,qzPal=false,qzRevF='all',qzAnim=false,qzBack=null;
-function qzPool(cfg=QC){if(!gradeHasPediatrics())return [];let l=QB;
+/* ---- Quiz scope helpers: several banks, systems and topics can be combined ---- */
+const SYS_CANON=[['cardio','Cardiovascular System',/cardio/i],['respiratory','Respiratory System',/respir/i],['endocrine','Endocrinology',/endocr/i],['git','Gastrointestinal Tract',/gastro|(^|-)git$/i],['hepatology','Hepatology',/hepat/i],['heme','Haematology',/ha?emat/i],['neonatology','Neonatology',/neonat/i],['nephrology','Nephrology',/nephro/i],['neuro','Neurology / CNS',/neuro|^cns$/i],['genetics','Genetics',/genet/i],['dermatology','Dermatology & Child Protection',/dermat|skin/i],['growth','Growth & Development',/growth/i],['nutrition','Nutrition',/nutrit/i],['infectious','Infectious Diseases',/infect/i],['rheum','Rheumatology',/rheum/i],['immunology','Immunology & Allergy',/immun|allerg/i],['emergency','Emergency & Toxicology',/emerg|toxic/i],['general','General Pediatrics',/general/i],['integrated','Integrated Exam Practice',/integrated|exam practice/i]];
+const sysGroupKey=sp=>{const m=SYS_CANON.find(c=>c[2].test(String(sp)));return m?m[0]:String(sp)};
+const cfgBanks=cfg=>Array.isArray(cfg.banks)?cfg.banks:((cfg.bank&&cfg.bank!=='all')?[cfg.bank]:[]);
+const bankIn=(q,banks)=>!banks.length||banks.includes(bankOf(q));
+let _qsg=null,_qsgN=-1;
+function quizGroups(){ /* canonical systems across every bank: {key,name,ids:[raw spec ids],topics:[[id,name]]} */
+ if(_qsg&&_qsgN===QB.length)return _qsg;const m=new Map();
+ QB.forEach(q=>{if(!q||!q.spec)return;const k=sysGroupKey(q.spec);if(!m.has(k)){const c=SYS_CANON.find(x=>x[0]===k);m.set(k,{key:k,name:c?c[1]:(SPEC_NAME[q.spec]||q.spec),ids:[],topics:[]})}const g=m.get(k);if(!g.ids.includes(q.spec))g.ids.push(q.spec)});
+ m.forEach(g=>{g.ids.forEach(id=>{const sp=REAL.spec[id];if(sp)sp.topics.forEach(t=>{if(!g.topics.some(x=>x[0]===t[0]))g.topics.push([t[0],t[1]])})})});
+ _qsg=[...m.values()].sort((a,b)=>a.name.localeCompare(b.name));_qsgN=QB.length;return _qsg}
+const groupHas=(g,banks)=>QB.some(q=>g.ids.includes(q.spec)&&bankIn(q,banks));
+const groupTopicsFor=(g,banks)=>g.topics.filter(t=>QB.some(q=>g.ids.includes(q.spec)&&q.topic===t[0]&&bankIn(q,banks)));
+/* Banks that carry no topic labels are matched to a chosen topic by its name inside the question text. */
+const _kw=new Map(),_hay=new WeakMap();
+const KW_STOP=new Set(['disorders','disease','diseases','other','general','management','syndrome','infections','infection','children','congenital','acquired','problems']);
+function topicKw(id){if(_kw.has(id))return _kw.get(id);const nm=String(TOPIC_NAME[id]||'');
+ const parts=nm.split(/[,&\/()\u2013\u2014:;]| and /i).map(x=>x.trim().toLowerCase()).filter(x=>x.length>=4&&!KW_STOP.has(x));
+ const re=parts.length?new RegExp('(^|[^a-z])('+parts.map(x=>x.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')'):null;_kw.set(id,re);return re}
+function qHay(q){let h=_hay.get(q);if(h==null){h=[q.q,(q.o||[]).join(' '),q.ex||'',q.aoTitle||'',q.ccTopic||''].join(' \n ').toLowerCase();_hay.set(q,h)}return h}
+function topicMatch(q,tids){return tids.some(t=>{const re=topicKw(t);return re&&re.test(qHay(q))})}
+const topicSpecOf=t=>Object.keys(REAL.spec).find(k=>REAL.spec[k].topics.some(x=>x[0]===t));
+function qzPool(cfg=QC){if(!gradeHasPediatrics())return [];let l=QB;const banks=cfgBanks(cfg);
  if(cfg.scope==='sel'){
-  const tsp=new Set((cfg.topics||[]).filter(t=>(cfg.specs||[]).some(sp=>REAL.spec[sp]&&REAL.spec[sp].topics.some(x=>x[0]===t))));
-  const hasT=sp=>REAL.spec[sp].topics.some(x=>tsp.has(x[0]));
-  l=QB.filter(q=>(cfg.specs||[]).includes(q.spec)&&(!hasT(q.spec)||tsp.has(q.topic)));
+  const specs=new Set((cfg.specs||[]).map(sysGroupKey)),by={};
+  (cfg.topics||[]).forEach(t=>{const sp=topicSpecOf(t);if(!sp)return;const k=sysGroupKey(sp);if(specs.has(k))(by[k]=by[k]||[]).push(t)});
+  l=QB.filter(q=>{if(!specs.has(sysGroupKey(q.spec)))return false;const sel=by[sysGroupKey(q.spec)];if(!sel)return true;if(sel.includes(q.topic))return true;if(TOPIC_NAME[q.topic])return false;return topicMatch(q,sel)});
  }else if(cfg.scope==='custom'){
   l=QB.filter(q=>cfg.filt==='any'||(cfg.filt==='new'&&!S.ans[q.id])||(cfg.filt==='wrong'&&S.ans[q.id]&&!S.ans[q.id].ok)||(cfg.filt==='saved'&&S.saved[q.id]));
  }
- return l;
+ return banks.length?l.filter(q=>bankIn(q,banks)):l;
 }
 const qzEff=(p,cfg=QC)=>Math.max(1,Math.min(cfg.count,p));
-const qzClone=cfg=>Object.assign({},cfg,{specs:(cfg.specs||[]).slice(),topics:(cfg.topics||[]).slice()});
+const qzClone=cfg=>Object.assign({},cfg,{banks:(cfg.banks||[]).slice(),specs:(cfg.specs||[]).slice(),topics:(cfg.topics||[]).slice()});
 let QCD=qzClone(QC),QCD_DIRTY=false;
 function qcdPool(){return qzPool(QCD)}
 function qcdUpdateUI(){
  document.querySelectorAll('[data-qcd-key]').forEach(el=>{const k=el.dataset.qcdKey,v=el.dataset.qcdValue;el.classList.toggle('on',Array.isArray(QCD[k])?QCD[k].includes(v):String(QCD[k])===String(v));});
- document.querySelectorAll('[data-qcd-spec]').forEach(el=>el.classList.toggle('on',QCD.specs.includes(el.dataset.qcdSpec)));
- document.querySelectorAll('[data-qcd-topic-panel]').forEach(el=>{el.hidden=!QCD.specs.includes(el.dataset.qcdTopicPanel)});
- document.querySelectorAll('[data-qcd-topic]').forEach(el=>{el.checked=QCD.topics.includes(Number(el.dataset.qcdTopic));});
+ const QG=quizGroups(),QB_=cfgBanks(QCD),gOn=g=>g.ids.some(id=>QCD.specs.includes(id));
+ document.querySelectorAll('[data-qcd-bank]').forEach(el=>{const k=el.dataset.qcdBank;el.classList.toggle('on',k==='all'?!QB_.length:QB_.includes(k))});
+ document.querySelectorAll('[data-qcd-group]').forEach(el=>{const g=QG.find(x=>x.key===el.dataset.qcdGroup);if(!g)return;el.classList.toggle('on',gOn(g));el.style.display=groupHas(g,QB_)?'':'none'});
+ document.querySelectorAll('[data-qcd-topic-panel]').forEach(el=>{const g=QG.find(x=>x.key===el.dataset.qcdTopicPanel);el.hidden=!(g&&gOn(g)&&groupHas(g,QB_))});
+ document.querySelectorAll('[data-qcd-topic-count]').forEach(el=>{const g=QG.find(x=>x.key===el.dataset.qcdTopicCount);if(!g)return;const topics=groupTopicsFor(g,QB_);const n=topics.filter(t=>QCD.topics.includes(t[0])).length;el.textContent=n?n+' selected':'all'});
+ const eligibleTopics=new Set(QG.reduce((a,g)=>a.concat(groupTopicsFor(g,QB_).map(t=>t[0])),[]));
+ document.querySelectorAll('[data-qcd-topic]').forEach(el=>{const id=Number(el.dataset.qcdTopic);el.hidden=!eligibleTopics.has(id);el.checked=QCD.topics.includes(id);});
  document.querySelectorAll('[data-qcd-panel]').forEach(el=>{el.hidden=el.dataset.qcdPanel!==QCD.scope});
  const timer=document.getElementById('qcd-timer');if(timer)timer.hidden=QCD.mode!=='timed';
  const pool=qcdPool(),available=pool.length,chosen=available?Math.min(QCD.count,available):0;
@@ -2057,9 +2256,12 @@ function qcdUpdateUI(){
  const begin=document.getElementById('qcd-start');if(begin){begin.disabled=QCD_DIRTY||!available;begin.textContent=`Start quiz · ${chosen} questions${QCD.mode==='timed'?' · '+(QCD.mins||chosen)+' min':''}`;}
 }
 window.qcDraftSet=function(k,v){if(!['scope','mode','fb','order','filt'].includes(k))return;QCD[k]=v;QCD_DIRTY=true;qcdUpdateUI()};
-window.qcDraftToggle=function(k,v){if(k==='specs'){
-  const i=QCD.specs.indexOf(v);if(i<0)QCD.specs.push(v);else{QCD.specs.splice(i,1);const ids=REAL.spec[v].topics.map(t=>t[0]);QCD.topics=QCD.topics.filter(t=>!ids.includes(t));}
- }else if(k==='topics'){const n=Number(v),i=QCD.topics.indexOf(n);if(i<0)QCD.topics.push(n);else QCD.topics.splice(i,1);}else return;
+function qcdPrune(){const QG=quizGroups(),b=cfgBanks(QCD),keep=new Set();QG.forEach(g=>{if(groupHas(g,b))g.ids.forEach(id=>keep.add(id))});QCD.specs=QCD.specs.filter(id=>keep.has(id));const okT=new Set();QG.forEach(g=>{if(g.ids.some(id=>QCD.specs.includes(id)))groupTopicsFor(g,b).forEach(t=>okT.add(t[0]))});QCD.topics=QCD.topics.filter(t=>okT.has(t))}
+window.qcDraftToggle=function(k,v){
+ if(k==='banks'){if(v==='all')QCD.banks=[];else{const i=QCD.banks.indexOf(v);if(i<0)QCD.banks.push(v);else QCD.banks.splice(i,1)}QCD.bank=QCD.banks.length===1?QCD.banks[0]:'all';qcdPrune()}
+ else if(k==='group'){const g=quizGroups().find(x=>x.key===v);if(!g)return;if(g.ids.some(id=>QCD.specs.includes(id))){QCD.specs=QCD.specs.filter(id=>!g.ids.includes(id));const tids=g.topics.map(t=>t[0]);QCD.topics=QCD.topics.filter(t=>!tids.includes(t))}else g.ids.forEach(id=>{if(!QCD.specs.includes(id))QCD.specs.push(id)})}
+ else if(k==='topics'){const n=Number(v),i=QCD.topics.indexOf(n);if(i<0)QCD.topics.push(n);else QCD.topics.splice(i,1)}
+ else return;
  QCD_DIRTY=true;qcdUpdateUI();
 };
 window.qcDraftInput=function(k,el){const v=String(el.value||'').trim();if(k==='count')QCD.count=v?Math.max(1,Math.min(5000,parseInt(v,10)||1)):1;else if(k==='mins')QCD.mins=v?Math.max(1,Math.min(600,parseInt(v,10)||1)):0;else return;QCD_DIRTY=true;qcdUpdateUI()};
@@ -2070,19 +2272,22 @@ window.qcApplyDraft=function(){
  QC=qzClone(QCD);qcSave();QCD=qzClone(QC);QCD_DIRTY=false;const countInput=document.getElementById('qzCount');if(countInput)countInput.value=QCD.count;qcdUpdateUI();
  const st=document.getElementById('qcd-status');if(st)st.textContent='✓ Settings applied and saved. Your quiz is ready.';
 };
-const qcdSeg=(key,items)=>`<div class="seg wide">${items.map(([v,l])=>`<button type="button" data-qcd-key="${key}" data-qcd-value="${v}" class="${QCD[key]===v?'on':''}" onclick="qcDraftSet('${key}','${v}')">${l}</button>`).join('')}</div>`;
+const qcdSeg=(key,items,wrap)=>`<div class="seg wide"${wrap?' style="flex-wrap:wrap"':''}>${items.map(([v,l])=>`<button type="button" data-qcd-key="${key}" data-qcd-value="${v}" class="${QCD[key]===v?'on':''}" onclick="qcDraftSet('${key}','${v}')">${l}</button>`).join('')}</div>`;
 quizView=function(){
  QCD=qzClone(QC);QCD_DIRTY=false;
  const act=QZ.active,pool=qcdPool(),n=pool.length?qzEff(pool.length,QCD):0,mins=QCD.mins||n;
  let resume='';if(act){const done=Object.keys(act.ans).length;resume=`<div class="card setcard qz-resume"><h3>Quiz in progress</h3><p class="meta">${act.ids.length} questions · ${done} answered · ${act.mode==='timed'?'Timed':'Practice'}</p><div class="setbtns"><button type="button" class="btn primary" onclick="qzResume()">Resume</button><button type="button" class="btn danger" onclick="qzDiscard()">Discard</button></div></div>`}
- const specs=gradeHasPediatrics()?Object.keys(REAL.spec):[];
- const specButtons=specs.map(sp=>`<button type="button" class="chip qcd-spec${QCD.specs.includes(sp)?' on':''}" data-qcd-spec="${sp}" onclick="qcDraftToggle('specs','${sp}')">${esc(SPEC_NAME[sp]||sp)}</button>`).join('');
- const topicPanels=specs.map(sp=>`<details class="qzd qcd-topics" data-qcd-topic-panel="${sp}" ${QCD.specs.includes(sp)?'':'hidden'}><summary>${esc(SPEC_NAME[sp]||sp)} topics <small>${REAL.spec[sp].topics.filter(t=>QCD.topics.includes(t[0])).length||'all'} selected</small></summary>${REAL.spec[sp].topics.map(t=>`<label class="qzt"><input type="checkbox" data-qcd-topic="${t[0]}" ${QCD.topics.includes(t[0])?'checked':''} onchange="qcDraftToggle('topics',${t[0]})"><span>${esc(t[1])}</span></label>`).join('')}<p class="meta">No topic selected in this specialty means all its topics are included.</p></details>`).join('');
+const QG=gradeHasPediatrics()?quizGroups():[],QBK=cfgBanks(QCD),gOn=g=>g.ids.some(id=>QCD.specs.includes(id));
+ const bankIcon=k=>{const i=window.__shbBankIcon?window.__shbBankIcon(k):'';return i?`<i class="qbk-ic">${i}</i>`:''};
+ const bankChips=[['all','All banks']].concat(BANK_OPTS.filter(o=>o[0]!=='all')).map(([k,l])=>`<button type="button" class="chip qcd-bank${(k==='all'?!QBK.length:QBK.includes(k))?' on':''}" data-qcd-bank="${k}" aria-pressed="${k==='all'?!QBK.length:QBK.includes(k)}" onclick="qcDraftToggle('banks','${k}')">${bankIcon(k)}<span>${esc(l)}</span></button>`).join('');
+ const specButtons=QG.map(g=>`<button type="button" class="chip qcd-spec${gOn(g)?' on':''}" data-qcd-group="${esc(g.key)}"${groupHas(g,QBK)?'':' style="display:none"'} onclick="qcDraftToggle('group','${esc(g.key)}')">${esc(g.name)}</button>`).join('');
+ const topicPanels=QG.map(g=>{const topics=groupTopicsFor(g,QBK);if(!topics.length)return '';return `<details class="qzd qcd-topics" data-qcd-topic-panel="${esc(g.key)}" ${gOn(g)&&groupHas(g,QBK)?'':'hidden'}><summary>${esc(g.name)} topics <small data-qcd-topic-count="${esc(g.key)}">${topics.filter(t=>QCD.topics.includes(t[0])).length||'all'}${topics.some(t=>QCD.topics.includes(t[0]))?' selected':''}</small></summary>${topics.map(t=>`<label class="qzt"><input type="checkbox" data-qcd-topic="${t[0]}" ${QCD.topics.includes(t[0])?'checked':''} onchange="qcDraftToggle('topics',${t[0]})"><span>${esc(t[1])}</span></label>`).join('')}<p class="meta">No topic selected means the whole system. Banks without topic labels are matched by the topic name inside the question.</p></details>`;}).join('');
  return `${appHeader('Quiz')}<div class="rs quiz-premium"><h1>Quiz mode</h1><p class="sub">Choose everything first. Your selections are saved together only when you confirm.</p>${resume}${QZ.attempts.length?`<button type="button" class="btn block qz-history" style="margin-bottom:10px" onclick="appPage='quizhistory';renderAppDemo()">Quiz history · ${QZ.attempts.length}</button>`:''}
  <section class="card setcard qz-config"><div class="qz-section-head"><span class="qz-step">01</span><div><h3>Question source</h3><small>Choose where your questions come from</small></div></div>
-  ${qcdSeg('scope',[['all','All questions'],['sel','By Specialty'],['custom','My study list']])}
-  <div class="qcd-panel" data-qcd-panel="all"><p class="qz-help">Use the complete Question Bank. No specialty or topic filter will be applied.</p></div>
-  <div class="qcd-panel" data-qcd-panel="sel" hidden><p class="qz-help">Select one or more specialties, then open a specialty to choose topics. Leave its topics unchecked to include all of them.</p><div class="chips qcd-specs">${specButtons}</div>${topicPanels}</div>
+  <div class="setrow qz-bank-row"><b>Question banks</b><small>Pick one or more banks, or keep All banks.</small><div class="chips qcd-banks">${bankChips}</div></div>
+  ${qcdSeg('scope',[['all','All questions'],['sel','By System'],['custom','My study list']])}
+  <div class="qcd-panel" data-qcd-panel="all"><p class="qz-help">Use every question in the selected banks. No system or topic filter will be applied.</p></div>
+  <div class="qcd-panel" data-qcd-panel="sel" hidden><p class="qz-help">Select one or more systems, then open a system to choose one or more topics. Leave its topics unchecked to include the whole system. Systems and topics are combined across all the banks you picked.</p><div class="chips qcd-specs">${specButtons}</div>${topicPanels}</div>
   <div class="qcd-panel" data-qcd-panel="custom" hidden><p class="qz-help">Build a quiz from your own study state.</p>${qcdSeg('filt',[['any','Any'],['new','Unanswered'],['wrong','Answered wrong'],['saved','Saved']])}</div>
   <div class="setrow qz-count-row"><div><b>Number of questions</b><small id="qcd-available">${pool.length} questions available · ${n} selected</small></div><div class="qz-count-controls"><input class="field" id="qzCount" type="number" inputmode="numeric" min="1" max="5000" value="${QCD.count}" oninput="qcDraftInput('count',this)" aria-label="Number of questions"><button type="button" class="btn" onclick="qcDraftAll()">All</button></div></div>
  </section>
@@ -2100,7 +2305,7 @@ window.qzStart=function(){
  const pool=qzPool(QC);if(!pool.length)return;
  const go=()=>{const n=qzEff(pool.length,QC);const ids=(QC.order==='random'?shuffle(pool).slice(0,n):pool.slice(0,n)).map(q=>q.id);
   const now=Date.now(),mins=QC.mins||n;
-  QZ.active={id:'A'+now.toString(36),start:now,scope:QC.scope,mode:QC.mode,fb:QC.fb,order:QC.order,ids,ans:{},mark:{},idx:0,limit:QC.mode==='timed'?mins*60000:0,deadline:QC.mode==='timed'?now+mins*60000:0,spent:0,kind:'new',cfg:{scope:QC.scope,specs:QC.scope==='sel'?QC.specs.slice():[],topics:QC.scope==='sel'?QC.topics.slice():[],filt:QC.scope==='custom'?QC.filt:null}};
+  QZ.active={id:'A'+now.toString(36),start:now,scope:QC.scope,mode:QC.mode,fb:QC.fb,order:QC.order,ids,ans:{},mark:{},idx:0,limit:QC.mode==='timed'?mins*60000:0,deadline:QC.mode==='timed'?now+mins*60000:0,spent:0,kind:'new',cfg:{scope:QC.scope,banks:QC.banks.slice(),specs:QC.scope==='sel'?QC.specs.slice():[],topics:QC.scope==='sel'?QC.topics.slice():[],filt:QC.scope==='custom'?QC.filt:null}};
   qcSave();qzSave();qzPal=false;appPage='quizrun';renderAppDemo()};
  if(QZ.active)confirmBox({title:'Replace the quiz in progress?',text:'Starting a new quiz discards the unfinished one. It will not be counted in your statistics.',ok:'Start new',danger:true},go);else go();};
 window.qzResume=function(){if(QZ.active){appPage='quizrun';renderAppDemo()}};
@@ -2174,8 +2379,8 @@ function qzBegin(ids,base,kind){const go=()=>{const now=Date.now(),timed=base.mo
 window.qzRetake=function(id){const a=QZ.attempts.find(x=>x.id===id);if(!a)return;const ids=a.items.map(i=>i.id).filter(i=>QBY.has(i));if(!ids.length)return;qzBegin(a.order==='random'?shuffle(ids):ids,a,'retake')};
 window.qzRetryWrong=function(id){const a=QZ.attempts.find(x=>x.id===id);if(!a)return;const ids=a.items.filter(i=>i.sel>=0&&!i.ok&&QBY.has(i.id)).map(i=>i.id);if(!ids.length)return;qzBegin(a.order==='random'?shuffle(ids):ids,a,'retry')};
 window.qzRevMarked=function(){qzRevF='mk';renderAppDemo();setTimeout(()=>{const e=$('#qzRevTop');e&&e.scrollIntoView({block:'start'})},60)};
-window.qzTopicQuiz=function(spec,topic){QC.scope='sel';QC.specs=[spec];QC.topics=[topic];qcSave();appPage='quiz';renderAppDemo()};
-window.qzWeakQuiz=function(id){const a=QZ.attempts.find(x=>x.id===id);if(!a)return;const g=qzAgg(a.items),w=Object.values(g.tp).filter(o=>qzTier(o)==='weak');if(!w.length)return;QC.scope='sel';QC.specs=[...new Set(w.map(o=>o.spec))];QC.topics=w.map(o=>o.id);qcSave();appPage='quiz';renderAppDemo()};
+window.qzTopicQuiz=function(spec,topic){QC.scope='sel';QC.bank='all';QC.banks=[];QC.specs=[spec];QC.topics=[topic];qcSave();appPage='quiz';renderAppDemo()};
+window.qzWeakQuiz=function(id){const a=QZ.attempts.find(x=>x.id===id);if(!a)return;const g=qzAgg(a.items),w=Object.values(g.tp).filter(o=>qzTier(o)==='weak');if(!w.length)return;QC.scope='sel';QC.bank='all';QC.banks=[];QC.specs=[...new Set(w.map(o=>o.spec))];QC.topics=w.map(o=>o.id);qcSave();appPage='quiz';renderAppDemo()};
 window.qzOpen=function(id,from){if(!QZ.attempts.some(a=>a.id===id))return;qzViewId=id;qzRevF='all';qzBack=from||null;appPage='quizresult';renderAppDemo()};
 const qzRowHTML=(name,o,extra)=>{const p=pct(o.c,o.n),t=qzTier(o);return `<div class="strow"><div><b>${esc(name)}</b><small>${o.c}/${o.n} correct${o.w?` · ${o.w} incorrect`:''}${o.u?` · ${o.u} unanswered`:''}${extra||''}</small></div><span>${p}%</span><div class="bar"><span style="width:${p}%"></span></div>${t==='few'?'':`<small class="qtier ${t}">${QZ_TIER_LBL[t]}</small>`}</div>`};
 quizResultView=function(){const at=QZ.attempts.find(a=>a.id===qzViewId)||QZ.attempts[0];if(!at)return `${appHeader('Quiz result')}<div class="rs"><h1>Quiz result</h1><div class="card setcard"><p class="meta">No completed quiz yet.</p><button type="button" class="btn primary block" onclick="appPage='quiz';renderAppDemo()">Build a quiz</button></div></div>`;
@@ -2302,9 +2507,18 @@ function stBarHTML(){const c=ST.cur,run=!!(c&&c.running),state=!c?'idle':run?'ru
  const btns=!c?'<button type="button" class="go" onclick="stTimerStart()" aria-label="Start study timer">▶ Start</button>':run?'<button type="button" onclick="stTimerPause()" aria-label="Pause study timer">❚❚</button><button type="button" onclick="stTimerFinish()" aria-label="Finish and save session">■</button>':'<button type="button" class="go" onclick="stTimerStart()" aria-label="Resume study timer">▶</button><button type="button" onclick="stTimerFinish()" aria-label="Finish and save session">■</button>';
  return `<div class="sst-bar ${state}" role="group" aria-label="Study timer">${ico}<span class="sst-lab">${lab}</span><b class="sst-time">${stClock(stCurMs(c))}</b>${btns}</div>`}
 function stBarRefresh(){const o=document.querySelector('.sst-bar');if(!o)return;const t=document.createElement('div');t.innerHTML=stBarHTML();o.replaceWith(t.firstElementChild)}
-function stInject(){document.querySelectorAll('.sst-bar').forEach(n=>n.remove());if(appPage!=='questions')return;const host=document.querySelector('.phone-content .rs');if(!host)return;const t=document.createElement('div');t.innerHTML=stBarHTML();host.insertBefore(t.firstElementChild,host.firstChild)}
+function stInject(){
+ document.querySelectorAll('.sst-bar,.qb-mini-clock').forEach(n=>n.remove());
+ if(appPage!=='questions')return;
+ const host=document.querySelector('#phoneContent .rs.qb,.phone-content .rs.qb');if(!host)return;
+ host.classList.add('qb-clock-host');
+ const b=document.createElement('button');b.type='button';b.className='qb-mini-clock';b.id='qbMiniClock';b.setAttribute('aria-label','Open Study Timer');
+ b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8.2"></circle><path d="M12 8v5l3 2M9.5 2.5h5"></path></svg><span>FOCUS</span><b id="qbMiniClockDigits">'+stClock(Math.max(0,ST.goal*60000-stCurMs(ST.cur)))+'</b>';
+ b.addEventListener('click',function(){appPage='timer';renderAppDemo()});
+ host.appendChild(b);
+}
 window.stTimerStart=stStart;window.stTimerPause=()=>stPause(false);window.stTimerFinish=stFinish;
-const stTick=()=>{const c=ST.cur;if(!c||!c.running)return;const ms=stCurMs(c);if(++stN%10===0)stSave();document.querySelectorAll('.sst-time').forEach(el=>{el.textContent=stClock(ms)});try{window.stTimerTick&&window.stTimerTick(ms)}catch(e){}};
+const stTick=()=>{const c=ST.cur;if(!c||!c.running)return;const ms=stCurMs(c);if(++stN%10===0)stSave();document.querySelectorAll('.sst-time').forEach(el=>{el.textContent=stClock(ms)});const mini=document.getElementById('qbMiniClockDigits');if(mini)mini.textContent=stClock(Math.max(0,ST.goal*60000-ms));try{window.stTimerTick&&window.stTimerTick(ms)}catch(e){}};
 setInterval(stTick,500);
 ['pointerdown','keydown','scroll','touchstart'].forEach(ev=>addEventListener(ev,()=>{stIdleAt=Date.now()},{passive:true,capture:true}));
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stSave();else{stLast=Date.now();stTick()}});
@@ -2419,7 +2633,7 @@ PAGES.notifs=notifsView;PAGES.quizhistory=qzHistoryView;PAGES.timer=timerView;
 window.wkPractice=function(){const tp=stTopicPerf();if(!tp.length)return;
  let pick=tp.filter(t=>t.acc<75);if(!pick.length)pick=tp.slice(0,3);pick=pick.slice(0,5);
  const specs=[...new Set(pick.map(t=>(QB.find(q=>q.topic===t.id)||{}).spec).filter(Boolean))];
- QC.scope='sel';QC.specs=specs;QC.topics=pick.map(t=>t.id);qcSave();appPage='quiz';renderAppDemo()};
+ QC.scope='sel';QC.bank='all';QC.banks=[];QC.specs=specs;QC.topics=pick.map(t=>t.id);qcSave();appPage='quiz';renderAppDemo()};
 window.wkTopic=function(id){const q=QB.find(x=>x.topic===id);if(q)qzTopicQuiz(q.spec,id)};
 function weakView(){const tp=stTopicPerf(),n=tp.length,wk=tp.filter(t=>t.acc<50).length,mid=tp.filter(t=>t.acc>=50&&t.acc<75).length,ok=n-wk-mid;
  const tier=a=>a<50?['Weak','#ff8c8c']:a<75?['Needs work','#ffb454']:['Strong','#5fe0cf'];
@@ -2451,8 +2665,7 @@ function gradeView(){const g=selectedGrade||5,list=GRADE_SUBJECTS[g]||[],st=grSt
  ${cards}
  <div class="soon-h">Change grade</div><div class="tm-chips" role="group" aria-label="Grade">${chips}</div>${note}</div>`}
 PAGES.grade=gradeView;
-{const _sv=subjectsView;subjectsView=function(){const g=selectedGrade;if(!g||g===5)return _sv.apply(this,arguments);
- const list=GRADE_SUBJECTS[g]||[];return `${appHeader('Subjects')}<div class="rs"><h1>Subjects</h1><p class="sub">Grade ${g} · ${list.length} subjects</p>${list.map(nm=>`<div class="card sc soon"><div class="sic">${GR_ICO[nm]||'📘'}</div><div><h3>${nm}</h3><div class="meta">Coming soon</div></div></div>`).join('')}<button type="button" class="btn primary block" style="margin-top:12px" onclick="appPage='grade';renderAppDemo()">Change grade</button></div>`}}
+/* Grade visibility is handled directly by Home v7; the old Subjects wrapper is retired. */
 
 DR2.forEach(g=>g[1].forEach(it=>{if(it[0]==='Notifications')it[1]='notifs'}));
 {const pg=DR2.find(g=>g[0]==='Progress');if(pg&&!pg[1].some(it=>it[0]==='Study timer'))pg[1].push(['Study timer','timer','<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9.5 2.5h5"/>'])}
@@ -2545,7 +2758,6 @@ function activity(){
 }
 function greet(){const h=new Date().getHours();return h<12?'Good Morning':h<18?'Good Afternoon':'Good Evening'}
 /* ---- Home view ---- */
-const legacy=window.subjectsView||subjectsView;
 window.measureDailyFactOverflow=measureDailyFactOverflow;
 function measureDailyFactOverflow(){
  try{
@@ -2603,7 +2815,6 @@ const home=function(){
   <div class="h7-rh">${IC.clock}<h3>Recent Activity</h3><button type="button" class="h7-chipbtn" style="align-self:center;margin:0" onclick="h7RecentSheet()">View All${IC.chev}</button></div>
   ${act.length?act.map(a=>`<button type="button" class="h7-row" onclick="h7OpenRecent('${a.k}','${$e(a.spec)}',${a.topic})">${a.ic}<span class="h7-rt">${$e(a.txt)}</span><span class="h7-rw">${ago(a.t)}</span><span class="h7-rc">${IC.chev}</span></button>`).join(''):'<p class="h7-none">Topics you study will appear here. Pinned topics remain in Pinned Items.</p>'}
  </section>`:''}</div>`};
-window.__legacySubjectsView=legacy;
 subjectsView=home;
 /* ---- read-only details sheet ---- */
 function closeSheet(){const s=document.querySelector('.h7-sheet');s&&s.remove()}
@@ -2717,6 +2928,46 @@ const __fontScaleRender=renderAppDemo;
 renderAppDemo=function(){const result=__fontScaleRender.apply(this,arguments);applyAppFontScaleStage();return result};
 /* Apply once if an app screen was already mounted before this hook was registered. */
 applyAppFontScaleStage();
+
+/*SHB-BRIDGE-START*/
+/* Bridge for the separate scripts 13 and 35. This file is one closed IIFE, so QB, SYS, qs, REC, inTopic,
+   topicIcon, topicCards ... were invisible to them: 35 threw ReferenceError and "Start Studying" /
+   "Continue Studying" did nothing. Nothing here changes data, logic or markup. */
+window.__SHB_BRIDGE={
+ qs:qs,SYS:SYS,QB:QB,bankOf:bankOf,sysIcon:sysIcon,isPinned:isPinned,answeredCount:answeredCount,TOPIC_ICON_ASSET:TOPIC_ICON_ASSET,topicIconHtml:topicIconMarkup,
+ get REC(){return REC},get SPEC_NAME(){return SPEC_NAME},get TOPIC_NAME(){return TOPIC_NAME},get REAL(){return REAL},get QBY(){return QBY},get qmap(){return qmap},get SRT(){return SRT},get SRT_Q(){return SRT_Q},get SRT_BY(){return SRT_BY},get BANK_OPTS(){return BANK_OPTS},get BANK_KEYS(){return BANK_KEYS},get S(){return S},get coreInTopic(){return coreInTopic},save:save,
+ setActiveBank:function(key,topicIds){ACTIVE_QBANK=bankValid(key);ACTIVE_QBANK_TOPICS=Array.isArray(topicIds)?topicIds.slice():null;return ACTIVE_QBANK},
+ registerExternalBank:function(key,label,groups){
+  if(!key||!Array.isArray(groups))throw new Error('Invalid external question bank registration.');
+  if(!BANK_KEYS.has(key)){BANK_KEYS.add(key);BANK_OPTS.push([key,label||key]);}
+  var known=new Set(QB.map(function(q){return q&&q.id}).filter(Boolean));
+  var base=key==='clinical-ai'?8200000:8400000,added=0;
+  groups.forEach(function(g,index){
+   var spec=String(g.spec||'rheum'),topicId=base+index,topicName=String(g.topicName||'Other / Mixed Questions'),questions=Array.isArray(g.questions)?g.questions:[];
+   if(!REAL.spec[spec])REAL.spec[spec]={q:0,topics:[],label:String(g.systemLabel||SPEC_NAME[spec]||spec)};
+   if(!Array.isArray(REAL.spec[spec].topics))REAL.spec[spec].topics=[];
+   if(!SPEC_NAME[spec])SPEC_NAME[spec]=String(g.systemLabel||spec);
+   g.topicId=topicId;TOPIC_NAME[topicId]=topicName;
+   if(!REAL.spec[spec].topics.some(function(t){return Number(t[0])===topicId}))REAL.spec[spec].topics.push([topicId,topicName,questions.length,String(g.bankLabel||label||key)]);
+   var topicQuestions=[];
+   questions.forEach(function(q){
+    if(!q||!q.id||known.has(q.id))return;
+    q.bank=key;q.spec=spec;q.topic=topicId;q.o=Array.isArray(q.o)?q.o:[];q.k=Number.isInteger(q.k)?q.k:0;
+    QB.push(q);known.add(q.id);QBY.set(q.id,q);qmap.set(q.id,q);topicQuestions.push(q);added++;
+   });
+   REAL.spec[spec].q=(Number(REAL.spec[spec].q)||0)+topicQuestions.length;
+   SRT_Q.set(topicId,topicQuestions);
+   var topicRecord={id:topicId,name:topicName,sy:String(g.systemName||g.bankLabel||label||key),spec:spec,specLabel:SPEC_NAME[spec]||spec,key:spec+'|'+String(g.systemName||g.bankLabel||label||key)+'|'+topicName};
+   SRT.push(topicRecord);SRT_BY.set(topicId,topicRecord);
+  });
+  REAL.total=QB.length;window.__bank.total=QB.length;gIdx=null;srCache=null;_qsg=null;_qsgN=-1;
+  return {added:added,topics:groups.length,total:QB.length};
+ },
+ get inTopic(){return inTopic},set inTopic(f){inTopic=f},
+ get topicIcon(){return topicIcon},set topicIcon(f){topicIcon=f},
+ get topicCards(){return topicCards},set topicCards(f){topicCards=f}
+};
+/*SHB-BRIDGE-END*/
 
 /* =====================================================================
    SHBACE_STUDENT_MODULES_V2
@@ -2922,6 +3173,9 @@ addNotif=function(id,title,body,page,ref){
   })}catch(e){console.warn('Android notification mirror unavailable',e)}
  }
 };
+/* Bridge for js/29-offline-setup.js: lets the update checker add one in-app bell notification. Calls the current addNotif (de-duplicated by id). */
+window.shbAddNotif=function(id,title,body,page,ref){addNotif(id,title,body,page,ref);try{if(appPage==='subjects'||appPage==='notifs'||appPage==='settings')renderAppDemo()}catch(e){}};
+window.shbRemoveNotif=function(id){const i=NOTIF.findIndex(n=>n.id===id);if(i<0)return;NOTIF.splice(i,1);LS.set(NKEY,NOTIF);try{if(appPage==='subjects'||appPage==='notifs'||appPage==='settings')renderAppDemo()}catch(e){}};
 NOTIF.forEach(n=>{if(!n.kind)n.kind=u10Kind(n.id,n.title);if(!n.priority)n.priority=u10Priority[n.kind]||1;if(!n.updatedAt)n.updatedAt=n.t});
 LS.set(NKEY,NOTIF);
 window.nToggle=function(id,ev){ev&&ev.stopPropagation();const n=NOTIF.find(x=>x.id===id);if(!n)return;n.read=!n.read;n.readAt=n.read?Date.now():0;LS.set(NKEY,NOTIF);renderAppDemo()};
@@ -3193,4 +3447,3 @@ PAGES.notifs=notifsView;PAGES.settings=settingsView;
 
 })();
 })();
-

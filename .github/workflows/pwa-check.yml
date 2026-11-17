@@ -1,16 +1,19 @@
 name: PWA checks
 on:
   pull_request:
-    paths: ["to me/**"]
+    paths: ["to me/**", "for Computer/**"]
   push:
     branches-ignore: [main]
-    paths: ["to me/**"]
+    paths: ["to me/**", "for Computer/**"]
 jobs:
   check:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: ["to me", "for Computer"]
     defaults:
       run:
-        working-directory: to me
+        working-directory: ${{ matrix.app }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
