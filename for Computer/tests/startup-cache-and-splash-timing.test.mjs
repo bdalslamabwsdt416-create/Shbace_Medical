@@ -88,7 +88,8 @@ test("returning installs probe release metadata online without replacing package
 });
 
 test("Service Worker discovery runs on app launch and reconnect independently of the seven-day metadata timer", () => {
-  assert.ok(app.includes("navigator.serviceWorker.register('./sw.js'"));
+  const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+  assert.ok(index.includes("navigator.serviceWorker.register('./sw.js'"));
   const bridge = readFileSync(new URL("../js/32-chrome-android.js", import.meta.url), "utf8");
   assert.ok(bridge.includes("function scheduledCheck(forceWorker)"));
   assert.ok(bridge.includes("navigator.serviceWorker.ready.then(function(){scheduledCheck(true)})"));
