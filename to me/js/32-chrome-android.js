@@ -32,7 +32,7 @@ function mountSettings(){
  mountUpdateCard(root);
  refreshSettings();
 }
-/* Manual update check. The app also checks by itself, but never more than once every 7 days. */
+/* Manual update check. Automatic manifest polling is owned by the offline engine (48-hour cadence). */
 function updateNote(){
  var t=0,p=0,vi=null;try{t=Number(window.shbaceLastUpdateCheck&&window.shbaceLastUpdateCheck())||0;p=Number(window.shbaceUpdatePending&&window.shbaceUpdatePending())||0;vi=window.shbaceVersionInfo&&window.shbaceVersionInfo()}catch(_){}
  var inst=vi&&vi.installed,av=vi&&vi.available;
