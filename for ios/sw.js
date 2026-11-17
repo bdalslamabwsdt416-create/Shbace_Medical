@@ -84,12 +84,15 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   const request = event.request;
-  if (request.method !== 'GET') return;
-
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) {
     /* Remote APIs, scripts, fonts and media are not part of app runtime. */
     event.respondWith(Promise.reject(new TypeError('Shbace Medical runtime is offline-only.')));
+    return;
+  }
+
+  if (request.method !== 'GET') {
+    event.respondWith(Promise.reject(new TypeError('Shbace Medical runtime allows only local GET requests.')));
     return;
   }
 
