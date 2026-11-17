@@ -27,7 +27,9 @@ function bankHelpers() {
     extractFunction(features, 'resetScopeFromStudyContext')
   ].join('\n');
   return vm.runInNewContext(features.slice(start, end) + '\n' + helpers +
-    '\n({BANK_OPTS,bankOf,bankValid,bankOk,resetScopeMatches,resetScopeFromStudyContext})');
+    '\n({BANK_OPTS,bankOf,bankValid,bankOk,resetScopeMatches,resetScopeFromStudyContext})', {
+      BANK_ON: false, FULL_TAGS: [], DEMO_QB: [], QB: [], window: {}
+    });
 }
 
 test('iOS Settings retains appearance, onboarding, notifications, backup and progress controls', () => {
