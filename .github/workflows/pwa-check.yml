@@ -1,16 +1,16 @@
 name: PWA checks
 on:
   pull_request:
-    paths: ["to me/**", "for Computer/**"]
+    paths: ["to me/**", "for Computer/**", "for Chrome/**"]
   push:
     branches-ignore: [main]
-    paths: ["to me/**", "for Computer/**"]
+    paths: ["to me/**", "for Computer/**", "for Chrome/**"]
 jobs:
   check:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: ["to me", "for Computer"]
+        app: ["to me", "for Computer", "for Chrome"]
     defaults:
       run:
         working-directory: ${{ matrix.app }}
