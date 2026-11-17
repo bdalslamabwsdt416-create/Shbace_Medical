@@ -363,15 +363,35 @@
  var dataFetch=(function(){
   if(!window.fetch)return Promise.reject(new Error('no fetch'));
   function markReady(){try{performance.mark('shb-qb-data-ready')}catch(e){}}
-  function refresh(url,cache){if(!cache)return;fetch(url,{cache:'no-cache'}).then(function(r){if(r.ok)return cache.put(url,r.clone())}).catch(function(){});}
-  function fetchText(url,cache){
-   if(!cache)return fetch(url,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(url+' HTTP '+r.status);return r.text()});
-   return cache.match(url).then(function(hit){
-    if(hit){refresh(url,cache);return hit.text();}
-    return fetch(url,{cache:'no-cache'}).then(function(r){
-     if(!r.ok)throw new Error(url+' HTTP '+r.status);
-     var copy=r.clone();
-     return r.text().then(function(t){cache.put(url,copy).catch(function(){});return t;});
+  /* Match the verified offline-package cache first. The package installer stores qbData here,
+     not in the legacy data cache opened below. Never require a network round-trip for an installed package. */
+  var PACKAGE_CACHE_NAME='shbace-medical-offline-v2';
+  function bounded(promise,ms,label){
+   return new Promise(function(resolve,reject){
+    var settled=false,timer=setTimeout(function(){if(settled)return;settled=true;reject(new Error(label+' timed out after '+ms+'ms'));},ms);
+    Promise.resolve(promise).then(function(value){if(settled)return;settled=true;clearTimeout(timer);resolve(value);},function(error){if(settled)return;settled=true;clearTimeout(timer);reject(error);});
+   });
+  }
+  function cacheHit(cache,url,label){
+   if(!cache)return Promise.resolve(null);
+   return bounded(cache.match(url),10000,label+' cache lookup').then(function(hit){
+    return hit?bounded(hit.text(),20000,label+' cached read'):null;
+   });
+  }
+  function fetchText(url,cache,packageCache){
+   var absolute=new URL(url,document.baseURI).href;
+   return cacheHit(packageCache,absolute,url+' offline package').then(function(packaged){
+    if(packaged!==null)return packaged;
+    return cacheHit(cache,absolute,url+' data cache').then(function(cached){
+     if(cached!==null)return cached;
+     return bounded(fetch(absolute,{cache:'no-cache'}),20000,url+' fetch').then(function(response){
+      if(!response.ok)throw new Error(url+' HTTP '+response.status);
+      var copy=response.clone();
+      return bounded(response.text(),25000,url+' response read').then(function(t){
+       if(cache)cache.put(absolute,copy).catch(function(){});
+       return t;
+      });
+     });
     });
    });
   }
@@ -400,13 +420,17 @@
    markReady();
    return JSON.stringify(base);
   }
-  return (window.caches?caches.open('shbace-data-v1-1').catch(function(){return null}):Promise.resolve(null)).then(function(cache){
+  return Promise.all([
+   (window.caches?bounded(caches.open(PACKAGE_CACHE_NAME),10000,'offline package cache open').catch(function(e){console.warn('shb-boot: package cache unavailable',e);return null;}):Promise.resolve(null)),
+   (window.caches?bounded(caches.open('shbace-data-v1-1'),10000,'data cache open').catch(function(){return null;}):Promise.resolve(null))
+  ]).then(function(cachesOpened){
+   var packageCache=cachesOpened[0],cache=cachesOpened[1];
    var baseURL='data/qbData.json';
-   if(selectedQB!=='reviewed')return fetchText(baseURL,cache).then(function(t){dataText=t;markReady();});
+   if(selectedQB!=='reviewed')return fetchText(baseURL,cache,packageCache).then(function(t){dataText=t;markReady();});
    return Promise.all([
     fetchText(baseURL,cache),
-    fetchText('data/qbData_reviewed_patch.json',cache),
-    fetchText('data/qbData_review_log.json',cache)
+    fetchText('data/qbData_reviewed_patch.json',cache,packageCache),
+    fetchText('data/qbData_review_log.json',cache,packageCache)
    ]).then(function(items){dataText=assembleReviewed(items[0],items[1],items[2]);});
   }).catch(function(e){dataErr=e;console.error('Shbace question bank load failed',e);});
  })();
@@ -508,8 +532,19 @@
  function go(){if(started||!domReady||!painted)return;started=true;clearTimeout(T);
   dataFetch.then(function(){
    var q=document.getElementById('qbData');
-   if(q&&dataText!=null)q.textContent=dataText;
-   else console.error('shb-boot: question bank missing',dataErr);
+   if(!q||dataText==null){
+    console.error('shb-boot: required question bank is unavailable',dataErr);
+    window.__shbBooted=false;
+    var panel=document.getElementById('shb-boot-failure');
+    if(!panel){
+     panel=document.createElement('section');panel.id='shb-boot-failure';panel.setAttribute('role','alert');
+     panel.style.cssText='position:fixed;z-index:2147483647;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px;background:#071321;color:#f4f8ff;font:16px system-ui;text-align:center';
+     panel.innerHTML='<h2 style="margin:0">Shbace Medical could not load the question bank</h2><p style="max-width:520px;line-height:1.6">The installed offline package does not contain a readable copy of the required question-bank file. Your saved answers and progress have not been changed.</p><button type="button" style="border:0;border-radius:12px;padding:13px 24px;background:#1d9bf0;color:white;font-weight:700" onclick="location.reload()">Retry loading</button>';
+     document.body.appendChild(panel);
+    }
+    return;
+   }
+   q.textContent=dataText;
    dataText=null;run()
   })
  }
