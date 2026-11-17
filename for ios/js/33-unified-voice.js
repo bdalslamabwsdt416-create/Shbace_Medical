@@ -353,8 +353,8 @@ function computerVoiceMountSettings(){
   }
   if(!root.querySelector('#shbQuestionToolsSettings')){
    var tools=document.createElement('section');tools.className='card setcard';tools.id='shbQuestionToolsSettings';
-   tools.innerHTML='<h3>Question bank tools</h3>'+
-    '<p class="meta">Choose which actions appear on each question card. These controls also work in topic and single-question views.</p>'+
+   tools.innerHTML='<h3>Study experience</h3>'+
+    '<p class="meta">Controls for study sessions and question tools on this iPhone.</p>'+
     computerVoiceQuestionToolSetting('shareQuestion','Share a question','Share the question text using the iOS share sheet when available.')+
     computerVoiceQuestionToolSetting('copyQuestion','Copy question text','Copy the question stem and answer options.')+
     computerVoiceQuestionToolSetting('readAloud','Read questions aloud','Show or hide the voice playback control on question cards.')+
@@ -649,22 +649,22 @@ function iosStudyToggleMarkup(key,title,description,disabled){
 function iosStudyMountSettings(){
  try{
   var root=settingsRoot();if(!root)return;
-  if(!root.querySelector('#shbIosStudyExperienceSettings')){
-   var card=document.createElement('section');
-   card.className='card setcard';card.id='shbIosStudyExperienceSettings';
-   card.innerHTML='<h3>Study experience</h3>'+
-    '<p class="meta">iPhone-compatible controls for device appearance and focused Question Bank sessions.</p>'+
-    iosStudyToggleMarkup('followSystemTheme','Follow device appearance','Match the app to your iPhone light or dark appearance. Choosing a theme manually turns this off.',false)+
-    iosStudyToggleMarkup('keepScreenAwake','Keep screen awake','Prevent the screen from dimming while the Question Bank is open. Requires Screen Wake Lock support.',!iosStudyWakeSupported())+
-    '<p class="meta shb-ios-study-status" id="shbIosStudyWakeStatus" role="status" aria-live="polite"></p>';
-   root.appendChild(card);
+  /* These controls share the To Me Study experience card; only the iPhone-safe
+     appearance and Screen Wake Lock options are added on this platform. */
+  var card=root.querySelector('#shbQuestionToolsSettings');
+  if(!card){computerVoiceMountSettings();card=root.querySelector('#shbQuestionToolsSettings')}
+  if(card&&!card.querySelector('[data-shb-ios-experience]')){
+   card.insertAdjacentHTML('beforeend',
+    iosStudyToggleMarkup('keepScreenAwake','Keep screen awake','Prevent the display from sleeping while the Question Bank is open.',!iosStudyWakeSupported())+
+    iosStudyToggleMarkup('followSystemTheme','Follow device theme','Automatically match the device light or dark appearance.',false)+
+    '<p class="meta shb-ios-study-status" id="shbIosStudyWakeStatus" role="status" aria-live="polite"></p>');
   }
   iosStudyUpdateUI();
  }catch(_){}
 }
 function iosStudyUpdateUI(){
  try{
-  var root=document.getElementById('shbIosStudyExperienceSettings');if(!root)return;
+  var root=document.getElementById('shbQuestionToolsSettings');if(!root)return;
   root.querySelectorAll('[data-shb-ios-experience]').forEach(function(button){
    var key=button.getAttribute('data-shb-ios-experience'),on=!!iosStudyPrefs[key];
    button.classList.toggle('on',on);button.setAttribute('aria-checked',String(on));
