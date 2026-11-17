@@ -1349,12 +1349,11 @@ window.__shbNavTap=function(id){
 };
 appNav=function(){const it=[['subjects','Home'],['search','Search'],['quiz','Quiz'],['review','Review']];const grp={subjects:['subjects','pedcollections','specialties','topics','questions','menu','saved','wrong'],quiz:['quiz','quizrun','quizresult','quizhistory']};
  return `<div class="app-nav">${it.map(([id,n])=>`<button data-p="${id}" class="${(grp[id]||[id]).includes(appPage)?'active':''}" onclick="__shbNavTap('${id}')">${NAVI[id]}<span>${n}</span></button>`).join('')}</div>`};
-/* drawer: Saved / Wrong answers work, Smart review badge is live */
+/* drawer: Saved / Wrong answers work; Smart Review due counts are intentionally not displayed. */
 DR2[1][1][0][1]='saved';DR2[1][1][1][1]='wrong';
 const __menu=menuView;
 menuView=function(){if(appPage==='saved'||appPage==='wrong'){qs.spec='all';qs.topic=0;qs.tag='all';qs.filter=appPage==='saved'?'bookmarked':'incorrect';return questionBankView()}return __menu()};
-const __td=toggleDrawer;
-toggleDrawer=function(f){return __td(f)};
+
 /* leaving the bank leaves fullscreen */
 const __rad=renderAppDemo;
 renderAppDemo=function(){if(qs.full&&appPage!=='questions'){qs.full=false;const ph=$('.phone');ph&&ph.classList.remove('qfull');renderFullExit();try{document.fullscreenElement&&document.exitFullscreen()}catch(e){}}
