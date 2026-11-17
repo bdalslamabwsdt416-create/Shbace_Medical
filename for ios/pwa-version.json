@@ -5,6 +5,7 @@
   "displayVersion": "1.4.19",
   "releaseDate": "2026-11-17",
   "releaseNotes": [
+    "Consolidates iPhone-supported study controls into the To Me-aligned Study experience card.",
     "Stops the question toolbar MutationObserver re-render loop that could freeze question screens.",
     "Disables scheduled startup update checks, automatic migration, and local repair prompts; existing installs update only from Settings.",
     "Adds iPhone-compatible Follow device appearance and Keep screen awake controls, while preserving Question Bank tools and iOS update controls.",
