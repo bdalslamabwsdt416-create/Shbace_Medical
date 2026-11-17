@@ -8,6 +8,7 @@ const read = (relative) => fs.readFileSync(fileURLToPath(new URL(relative, impor
 const features = read('../js/09-app-features-v6.js');
 const voice = read('../js/33-unified-voice.js');
 const settings = read('../js/36-exam-planner-settings-smartreview.js');
+const restoreBuild = read('../scripts/restore-ios-packed.js');
 const androidEnhancements = read('../../to me/js/30-android-enhancements.js');
 const toMeSettings = read('../../to me/js/36-exam-planner-settings-smartreview.js');
 const toMeVoice = read('../../to me/js/33-unified-voice.js');
@@ -98,6 +99,13 @@ test('Settings places Question voice with Appearance and keeps the single Study 
   assert.ok(settings.includes("root.lastElementChild!==questionTools"));
   assert.ok(!settings.includes("target('appearance').appendChild(questionTools)"));
   assert.ok(!settings.includes('studyExperience'));
+});
+
+test('PWA build invariants match the single root-level Study experience card and dynamic manifest inventory', () => {
+  assert.ok(restoreBuild.includes("root.appendChild(questionTools)"));
+  assert.ok(restoreBuild.includes("root.lastElementChild!==questionTools"));
+  assert.ok(restoreBuild.includes("target('appearance').appendChild(questionTools)") === false);
+  assert.ok(restoreBuild.includes('manifest.fileCount = manifest.files.length'));
 });
 
 test('opening Settings from a Question Bank captures active source bank, system and topic', () => {
