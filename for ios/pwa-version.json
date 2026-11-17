@@ -1,10 +1,11 @@
 {
   "app": "Shbace Medical",
   "platform": "PWA",
-  "version": "1.4.19",
-  "displayVersion": "1.4.19",
+  "version": "1.4.20",
+  "displayVersion": "1.4.20",
   "releaseDate": "2026-11-17",
   "releaseNotes": [
+    "Fixes Settings navigation from the header and drawer by routing directly to the Settings screen.",
     "Consolidates iPhone-supported study controls into the To Me-aligned Study experience card.",
     "Stops the question toolbar MutationObserver re-render loop that could freeze question screens.",
     "Disables scheduled startup update checks, automatic migration, and local repair prompts; existing installs update only from Settings.",
