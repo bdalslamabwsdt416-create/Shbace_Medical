@@ -84,11 +84,12 @@ test("Installer gate blocks question-bank fetching and module preloads until Set
 
 test("First-install Service Worker registration cannot race the package download", () => {
   const start = block(updater, "function start()", "if(document.readyState");
-  const firstInstall = block(updater, "if(mode==='install'){", "}else announceReady();");
+  const firstInstall = block(updater, "await saveInstalled(manifest);", "}else announceReady();");
   assert.ok(!start.includes("registerSW();"), "do not register a shell-caching worker before Setup");
   assert.ok(firstInstall.includes("registerSW();"), "register only after the complete package is committed");
   assert.ok(firstInstall.indexOf("saveInstalled(manifest)") < firstInstall.indexOf("registerSW();"));
   assert.ok(updater.includes("if(await cache.match(url)) return;"), "worker install must reuse files already downloaded by Setup");
+  assert.ok(!sw.includes("'./',"), "Service Worker must not fetch the root document a second time after Setup");
 });
 
 test("Returning installs release the gate locally and use one 48-hour updater", () => {
@@ -103,7 +104,8 @@ test("Returning installs release the gate locally and use one 48-hour updater", 
   assert.ok(!updater.includes("HEAL_EVERY"));
   assert.ok(checkFlow.includes("if(opts.manual){showSheetLater(res.plan,info)}"));
   assert.ok(checkFlow.includes("else if(autoAllowed()&&!examSoon()){next={plan:res.plan,mode:'update'}}"));
-  assert.ok(!checkFlow.includes("showSheetLater(res.plan,info)\n   return"), "automatic checks must not open a modal");
+  assert.equal((checkFlow.match(/showSheetLater\\(res\\.plan,info\\)/g) || []).length, 1,
+    "only a manual check may open the update sheet");
 });
 
 test("Chrome Settings keeps the manual action but has no duplicate version polling", () => {
@@ -120,14 +122,14 @@ test("Integrity downloads bypass Service Worker cache and are verified by the in
   const i = sw.indexOf("if (url.searchParams.has('__shbace_integrity'))");
   assert.notEqual(i, -1);
   assert.ok(sw.slice(i, i + 100).includes("return;"));
-  assert.ok(updater.includes("sha256(buf)"));
+  assert.match(updater, /function sha256\\(buf\\)/);
   assert.ok(updater.includes("await isVerified(f,tname,target)"));
   assert.ok(updater.includes("await markVerified(f,tname)"));
 });
 
 test("The build manifest covers the complete copied package and validates the bootstrap script", () => {
   assert.ok(build.includes("const inventoryFiles = listOutputFiles(output)"));
-  assert.ok(build.includes("sha256: createHash('sha256')"));
+  assert.match(build, /sha256:\\s*createHash\\(["']sha256["']\\)/);
   assert.ok(build.includes("fileCount: offlineFiles.length"));
   assert.ok(build.includes("/(?:data-src|src)="), "parser-loaded Setup script must be syntax-checked by the build");
   assert.equal(pkg.version, pwa.version);
