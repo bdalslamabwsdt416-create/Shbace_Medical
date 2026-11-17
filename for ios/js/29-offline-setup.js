@@ -12,9 +12,14 @@
 (function(){
 'use strict';
 
+/* The HTML boot loader waits on this gate only for a true first installation. */
+var setupGateResolve=null,setupGateReleased=false;
+var setupGatePromise=new Promise(function(resolve){setupGateResolve=resolve});
+window.__SHBACE_OFFLINE_SETUP_GATE__=setupGatePromise;
+function releaseSetupGate(){if(setupGateReleased)return;setupGateReleased=true;if(setupGateResolve)setupGateResolve({ready:true})}
 /* Native Capacitor builds ship the full asset bundle inside the APK. Nothing to do there. */
-if(window.Capacitor&&typeof window.Capacitor.isNativePlatform==='function'&&window.Capacitor.isNativePlatform())return;
-if(window.__SHBACE_OFFLINE_V2__)return;
+if(window.Capacitor&&typeof window.Capacitor.isNativePlatform==='function'&&window.Capacitor.isNativePlatform()){releaseSetupGate();return}
+if(window.__SHBACE_OFFLINE_V2__){releaseSetupGate();return}
 window.__SHBACE_OFFLINE_V2__=true;
 
 /* ---------- constants ---------- */
@@ -27,7 +32,7 @@ var CHECK_OK_KEY='shbace_pkg_check_ok_v1',CHECK_TRY_KEY='shbace_pkg_check_try_v1
 var PENDING_KEY='shbace_pkg_update_pending_v1',NOTIF_ID='update-available';
 var VER_KEY='shbace_pkg_version_installed_v1',VER_AVAIL_KEY='shbace_pkg_version_available_v1',EXAM_KEY='shbace_exam_goal_planner_v1';
 var DAY=86400000;
-var CHECK_EVERY=7*DAY,CHECK_RETRY=2*3600000,HEAL_EVERY=14*DAY,SNOOZE_DAYS=2,EXAM_QUIET_DAYS=7;
+var CHECK_EVERY=2*DAY,CHECK_RETRY=2*3600000,HEAL_EVERY=14*DAY,SNOOZE_DAYS=2,EXAM_QUIET_DAYS=7;
 var MANIFEST_TIMEOUT=10000,STALL_MS=45000,CONCURRENCY=3,MAX_TRIES=3,RETRY_DELAYS=[15000,60000,300000];
 var MANIFEST_URL=new URL('./offline-assets-manifest.json',location.href).href;
 var READY_URL=new URL('./__shbace_offline_ready__',location.href).href;
@@ -152,10 +157,12 @@ function dbPut(s,k,v){return dbOp(s,'readwrite',function(o){return o.put(v,k)})}
    needs-network / error are recoverable and retry on their own. */
 var state='boot',S={pct:0,done:0,total:0,bytes:0,totalBytes:0,msg:'',announce:false};
 var splashDone=false,splashP=null,chip=null,lastPaint='',announceTimer=null;
+var initialSetupPending=false,setupPackageReady=false,setupUI=null;
 function setState(s,extra){
  state=s;
  if(extra){for(var k in extra)if(Object.prototype.hasOwnProperty.call(extra,k))S[k]=extra[k]}
  paintChip();
+ paintSetup();
 }
 function injectCss(){
  if(document.getElementById('shbOfflineCss'))return;
@@ -185,9 +192,11 @@ function ensureChip(){
 }
 function paintChip(){
  if(!document.body||!splashDone)return;
+ if(initialSetupPending&&!setupPackageReady){if(chip)chip.classList.remove('on');return}
  var text='',pct=null,act='',label='',show=false;
  switch(state){
   case 'installing':show=true;text='Downloading offline package · '+S.pct+'%';pct=S.pct;break;
+  case 'verifying':show=true;text='Verifying offline package';pct=S.pct;break;
   case 'repairing':show=true;text=(S.msg||'Repairing local files')+' · '+S.pct+'%';pct=S.pct;break;
   case 'updating':show=true;text='Downloading update · '+S.pct+'%';pct=S.pct;break;
   case 'update-ready':if(!examSoon()){show=true;text='Update ready';act='restart';label='Restart'}break;
@@ -207,6 +216,97 @@ function paintChip(){
  if(act){b.textContent=label;b.setAttribute('data-act',act);b.classList.add('on')}else b.classList.remove('on');
  c.classList.add('on');
 }
+
+/* First-install Setup. It is prepared under the ECG splash; only the first complete
+   package install uses this full-screen UI. Later repairs/updates use the compact chip. */
+function mountInitialSetup(){
+ if(setupUI&&setupUI.root&&setupUI.root.isConnected)return setupUI;
+ if(!document.body)return null;
+ var root=document.createElement('div');
+ root.id='shbaceOfflineSetup';root.className='shb-offline-setup';root.style.visibility='hidden';
+ root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby','shbOfflineTitle');
+ root.innerHTML=
+  '<div class="shb-offline-card">'+
+   '<div class="shb-offline-brand"><span class="shb-offline-mark">S</span><span>SHBACE <b>MEDICAL</b></span><span class="shb-offline-pill">ONE-TIME SETUP</span></div>'+
+   '<div class="shb-offline-kicker">LOCAL INSTALLATION</div>'+
+   '<h1 id="shbOfflineTitle">Prepare Shbace for offline study</h1>'+
+   '<p class="shb-offline-intro">Download the complete app package once. We will save every required file on this device, verify it, and then open your study experience.</p>'+
+   '<div class="shb-offline-status" id="shbOfflineStatus" aria-live="polite">Preparing the installation checklist…</div>'+
+   '<div class="shb-offline-progress-head"><b id="shbOfflinePercent">0%</b><span id="shbOfflineCount">Preparing file list…</span></div>'+
+   '<div class="shb-offline-track" role="progressbar" aria-label="Offline installation progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="shbOfflineTrack"><i id="shbOfflineBar"></i></div>'+
+   '<div class="shb-offline-bytes"><span id="shbOfflineBytes">Preparing package size…</span><span id="shbOfflineStage">Preparing</span></div>'+
+   '<div class="shb-offline-stages" id="shbOfflineStages">'+
+    '<div class="shb-offline-stage is-active" data-step="download"><span class="shb-offline-stage-dot"></span><span>Application and learning files</span><b id="shbOfflineDownloadState">Preparing</b></div>'+
+    '<div class="shb-offline-stage" data-step="verify"><span class="shb-offline-stage-dot"></span><span>Integrity verification</span><b id="shbOfflineVerifyState">Pending</b></div>'+
+   '</div>'+
+   '<div class="shb-offline-warning" id="shbOfflineWarning">Keep the app open and connected to the internet until the first setup is complete.</div>'+
+   '<div class="shb-offline-errors" id="shbOfflineErrors" hidden></div>'+
+   '<button type="button" class="shb-offline-action" id="shbOfflineAction" disabled>Preparing…</button>'+
+   '<p class="shb-offline-footnote" id="shbOfflineFootnote">Your existing answers and study progress are kept in the app’s existing local storage.</p>'+
+  '</div>';
+ document.body.appendChild(root);
+ setupUI={
+  root:root,status:root.querySelector('#shbOfflineStatus'),percent:root.querySelector('#shbOfflinePercent'),
+  count:root.querySelector('#shbOfflineCount'),track:root.querySelector('#shbOfflineTrack'),bar:root.querySelector('#shbOfflineBar'),
+  bytes:root.querySelector('#shbOfflineBytes'),stage:root.querySelector('#shbOfflineStage'),stages:root.querySelector('#shbOfflineStages'),
+  downloadState:root.querySelector('#shbOfflineDownloadState'),verifyState:root.querySelector('#shbOfflineVerifyState'),
+  warning:root.querySelector('#shbOfflineWarning'),errors:root.querySelector('#shbOfflineErrors'),
+  button:root.querySelector('#shbOfflineAction'),foot:root.querySelector('#shbOfflineFootnote')
+ };
+ setupUI.button.addEventListener('click',function(){
+  if(setupUI.button.dataset.action!=='retry')return;
+  setupUI.button.disabled=true;setupUI.button.dataset.action='';
+  setupUI.button.textContent='Retrying…';retryN=0;runFullCheck({force:true});
+ });
+ if(document.querySelector('.phone.light'))root.classList.add('is-light');
+ revealInitialSetup();paintSetup();return setupUI;
+}
+function revealInitialSetup(){
+ if(!initialSetupPending||!setupUI||!splashDone)return;
+ setupUI.root.style.visibility='visible';setupUI.root.style.pointerEvents='auto';
+}
+function paintSetup(){
+ if(!setupUI||!initialSetupPending)return;
+ revealInitialSetup();
+ var pct=setupPackageReady?100:Math.max(0,Math.min(99,Number(S.pct)||0));
+ setupUI.percent.textContent=pct+'%';setupUI.track.setAttribute('aria-valuenow',String(pct));setupUI.bar.style.width=pct+'%';
+ setupUI.count.textContent=S.total?(S.done+' / '+S.total+' files'):'Preparing file list…';
+ setupUI.bytes.textContent=S.totalBytes?(fmtBytes(S.bytes)+' / '+fmtBytes(S.totalBytes)):'Preparing package size…';
+ var verify=state==='verifying'||setupPackageReady;
+ setupUI.stage.textContent=setupPackageReady?'Ready':(verify?'Verifying':'Downloading');
+ setupUI.downloadState.textContent=setupPackageReady?'Saved':(verify?'Downloaded':(S.total?(S.done+' / '+S.total):'Preparing'));
+ setupUI.verifyState.textContent=setupPackageReady?'Complete':(verify?'In progress':'Pending');
+ Array.prototype.forEach.call(setupUI.stages.querySelectorAll('[data-step]'),function(node){
+  var active=node.getAttribute('data-step')===(verify?'verify':'download');
+  node.classList.toggle('is-active',active&&!setupPackageReady);
+  node.classList.toggle('is-done',setupPackageReady||(verify&&node.getAttribute('data-step')==='download'));
+ });
+ if(setupPackageReady){
+  setupUI.status.textContent='All files have been saved and verified. Preparing your first screen…';
+  setupUI.warning.textContent='The offline package is ready. The app is now loading its first screen from the verified local package.';
+  setupUI.button.disabled=true;setupUI.button.dataset.action='';setupUI.button.textContent='Opening Shbace Medical…';
+  setupUI.foot.textContent='Offline package verified · '+fmtBytes(S.totalBytes)+' stored.';
+  setupUI.errors.hidden=true;return;
+ }
+ if(state==='needs-network'||state==='error'){
+  setupUI.status.textContent=state==='needs-network'?'Connect to the internet once to finish the offline installation.':(S.msg||'The offline setup needs to retry.');
+  setupUI.warning.textContent='Your existing student data is safe. Reconnect, then retry the setup.';
+  setupUI.errors.hidden=false;setupUI.errors.textContent=S.msg||'The app needs an internet connection for its first offline installation.';
+  setupUI.button.disabled=false;setupUI.button.dataset.action='retry';setupUI.button.textContent='Retry setup';return;
+ }
+ setupUI.errors.hidden=true;
+ setupUI.status.textContent=state==='verifying'?'All package files are downloaded. Verifying file sizes and SHA-256 integrity…':(state==='installing'?'Downloading and saving the complete offline package…':'Preparing the offline installation…');
+ setupUI.warning.textContent='The installer is preparing the complete app package. The onboarding and question-bank modules will start only after verification finishes.';
+ setupUI.button.disabled=true;setupUI.button.dataset.action='';
+ setupUI.button.textContent=state==='verifying'?'Verifying…':(state==='installing'?'Installing…':'Preparing…');
+}
+function removeSetupOverlay(){if(setupUI&&setupUI.root&&setupUI.root.parentNode)setupUI.root.parentNode.removeChild(setupUI.root);setupUI=null}
+function finishInitialSetupPackage(){
+ setupPackageReady=true;S.pct=100;S.done=S.total;S.bytes=S.totalBytes;
+ setState('ready',{pct:100,done:S.total,total:S.total,bytes:S.totalBytes,totalBytes:S.totalBytes,announce:false,msg:''});
+ paintSetup();releaseSetupGate();
+}
+
 function announceReady(){
  setState('ready',{announce:true});
  clearTimeout(announceTimer);
@@ -329,7 +429,7 @@ function bump(n){
  S.bytes=Math.max(0,S.bytes+n);
  S.pct=S.totalBytes?Math.min(99,Math.floor(S.bytes*100/S.totalBytes)):0;
  if(n>0)tick();
- paintChip();
+ paintChip();paintSetup();
 }
 function scheduleRetry(){
  if(retryTimer||retryN>=RETRY_DELAYS.length)return;
@@ -397,7 +497,7 @@ async function runPlan(plan,mode){
     try{
      if(await isVerified(f,tname,target)){bump(Number(f.bytes)||0)}
      else{await target.delete(urlFor(f.path));await downloadFile(f,target,sig);await markVerified(f,tname)}
-     S.done++;tick();
+     S.done++;tick();paintSetup();
     }catch(e){
      if(sig.aborted)return;
      if(isQuota(e)){fatal=e;runCtl.abort();return}
@@ -410,6 +510,7 @@ async function runPlan(plan,mode){
   if(fatal)throw fatal;
   if(sig.aborted){var ab=new Error(stalled?'Connection stalled. Retrying automatically.':'Interrupted. Retrying automatically.');throw ab}
   if(errors.length)throw new Error('Some files could not be downloaded ('+errors.length+'). Saved files are kept; retrying automatically.');
+  setState('verifying',{pct:Math.max(99,S.pct),msg:'Verifying the offline package…'});
   var have=await urlSetOf(target);
   var missing=plan.files.filter(function(f){return !have[urlFor(f.path)]});
   if(missing.length)throw new Error('The final check found '+missing.length+' missing file(s). Retrying automatically.');
@@ -422,7 +523,7 @@ async function runPlan(plan,mode){
    await saveInstalled(manifest);
    for(var j=0;j<plan.removed.length;j++)await (await caches.open(CACHE_NAME)).delete(urlFor(plan.removed[j]));
    lsSet(CHECK_OK_KEY,Date.now());retryN=0;setPending(0);markInstalledNow();
-   announceReady();
+   if(mode==='install'&&initialSetupPending)finishInitialSetupPackage();else announceReady();
   }
  }catch(e){
   setState('error',{msg:friendly(e)});
@@ -564,6 +665,11 @@ async function runFullCheck(opts){
    else if(!examSoon()){showSheetLater(res.plan,info)}
    return {state:'update'};
   }
+  if(res.kind==='install'&&initialSetupPending){
+   /* Prepare the manifest during ECG; start the package download as soon as the splash ends. */
+   if(splashP)await splashP;
+   splashDone=true;revealInitialSetup();paintSetup();
+  }
   next={plan:res.plan,mode:res.kind};
   return {state:'setup'};
  }catch(err){
@@ -628,12 +734,20 @@ function registerSW(){
 async function boot(){
  var rec=await dbGet('meta',INSTALLED_KEY).catch(function(){return null});
  var hasRec=!!(rec&&rec.files);
+ var legacy=await dbGet('meta','ready').catch(function(){return null});
+ var hasLegacy=!!(legacy&&legacy.verified);
  var st=await dbGet('meta',STAGED_KEY).catch(function(){return null});
  if(st&&st.ready){
-  if(hasRec&&rec.version!==st.version&&(await stagingIntact(st))){setState('ready');return applyStagedNow()}
-  await dbPut('meta',STAGED_KEY,null).catch(noop);
-  caches.delete(STAGING_NAME).catch(noop);
+  if(hasRec&&rec.version!==st.version&&(await stagingIntact(st))){setState('ready');await applyStagedNow();releaseSetupGate();return}
+  await dbPut('meta',STAGED_KEY,null).catch(noop);caches.delete(STAGING_NAME).catch(noop);
  }
+ if(!hasRec&&!hasLegacy){
+  initialSetupPending=true;mountInitialSetup();revealInitialSetup();
+  if(!online()){setState('needs-network');return}
+  return runFullCheck({firstInstall:true});
+ }
+ /* Existing installations open immediately; checks and small repairs continue in the background. */
+ releaseSetupGate();removeSetupOverlay();
  if(!hasRec)return runFullCheck();
  setState('ready');
  if(online()){
@@ -649,19 +763,19 @@ async function boot(){
 }
 function kick(){
  if(!started||busy||!online())return;
+ if(initialSetupPending){retryN=0;runFullCheck({force:true});return}
  if(state==='needs-network'||state==='error'){if(Date.now()-lsNum(CHECK_TRY_KEY)<5*60000)return;retryN=0;runFullCheck({force:true})}
  else if(checkDue())runFullCheck();
 }
 function start(){
- if(!document.body)return;
- if(!supported())return;
- /* Same rule as before: the offline package belongs to the installed app, not to a browser tab. */
- if(!standalone()){if(iosDevice())waitForSplash().then(showInstallHint);return}
- started=true;
- registerSW();
- splashP=waitForSplash();
- splashP.then(function(){splashDone=true;paintChip()});
- boot().catch(function(){});
+ if(!document.body){releaseSetupGate();return}
+ if(!supported()){releaseSetupGate();return}
+ /* The package installer belongs to the installed home-screen app, not a Safari tab. */
+ if(!standalone()){releaseSetupGate();if(iosDevice())waitForSplash().then(showInstallHint);return}
+ started=true;registerSW();splashP=waitForSplash();mountInitialSetup();
+ splashP.then(function(){splashDone=true;revealInitialSetup();paintChip();paintSetup()});
+ document.addEventListener('shb-scripts-ready',function(){if(!setupPackageReady)return;removeSetupOverlay();initialSetupPending=false;setupPackageReady=false});
+ boot().catch(function(error){if(initialSetupPending)setState('error',{msg:friendly(error)});else releaseSetupGate()});
  window.addEventListener('online',function(){setTimeout(kick,1500)});
  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')kick()});
 }
