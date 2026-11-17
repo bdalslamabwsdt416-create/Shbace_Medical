@@ -378,13 +378,37 @@
     return hit?bounded(hit.text(),20000,label+' cached read'):null;
    });
   }
-  function fetchText(url,cache,packageCache){
+  function hasVerifiedPackage(){
+   return new Promise(function(resolve){
+    if(!window.indexedDB){resolve(false);return}
+    var settled=false,timer=setTimeout(function(){finish(false)},2500);
+    function finish(v){if(settled)return;settled=true;clearTimeout(timer);resolve(v)}
+    var req;try{req=indexedDB.open('shbace-medical-offline-state-v1',1)}catch(e){finish(false);return}
+    req.onupgradeneeded=function(){if(!req.result.objectStoreNames.contains('meta'))req.result.createObjectStore('meta')};
+    req.onerror=function(){finish(false)};
+    req.onsuccess=function(){
+     var db=req.result;
+     try{
+      var tx=db.transaction('meta','readonly'),s=tx.objectStore('meta'),a=s.get('installed'),b=s.get('ready');
+      tx.oncomplete=function(){
+       var x=a.result,y=b.result,file=x&&x.files&&x.files['index.html'];
+       var valid=!!(x&&y&&x.verified===true&&y.verified===true&&x.version&&x.version===y.version&&file&&/^[a-f0-9]{64}$/.test(String(file.sha256||''))&&Number(file.bytes)>0);
+       try{db.close()}catch(e){}finish(valid);
+      };
+      tx.onerror=tx.onabort=function(){try{db.close()}catch(e){}finish(false)};
+     }catch(e){try{db.close()}catch(x){}finish(false)}
+    };
+   });
+  }
+  function fetchText(url,cache,packageCache,verified){
    var absolute=new URL(url,document.baseURI).href;
    return cacheHit(packageCache,absolute,url+' offline package').then(function(packaged){
     if(packaged!==null)return packaged;
     return cacheHit(cache,absolute,url+' data cache').then(function(cached){
      if(cached!==null)return cached;
-     throw new Error(url+' is missing from the installed offline storage');
+     if(verified)throw new Error(url+' is missing from the installed offline storage');
+     return bounded(fetch(absolute,{credentials:'same-origin'}),30000,url+' first-install download')
+      .then(function(response){if(!response||!response.ok)throw new Error(url+' first-install request failed');return bounded(response.text(),20000,url+' network read')});
     });
    });
   }
@@ -417,14 +441,15 @@
    (window.caches?bounded(caches.open(PACKAGE_CACHE_NAME),10000,'offline package cache open').catch(function(e){console.warn('shb-boot: package cache unavailable',e);return null;}):Promise.resolve(null)),
    (window.caches?bounded(caches.open('shbace-data-v1-1'),10000,'data cache open').catch(function(){return null;}):Promise.resolve(null))
   ]).then(function(cachesOpened){
-   var packageCache=cachesOpened[0],cache=cachesOpened[1];
-   var baseURL='data/qbData.json';
-   if(selectedQB!=='reviewed')return fetchText(baseURL,cache,packageCache).then(function(t){dataText=t;markReady();});
-   return Promise.all([
-    fetchText(baseURL,cache,packageCache),
-    fetchText('data/qbData_reviewed_patch.json',cache,packageCache),
-    fetchText('data/qbData_review_log.json',cache,packageCache)
-   ]).then(function(items){dataText=assembleReviewed(items[0],items[1],items[2]);});
+   var packageCache=cachesOpened[0],cache=cachesOpened[1],baseURL='data/qbData.json';
+   return hasVerifiedPackage().then(function(verified){
+    if(selectedQB!=='reviewed')return fetchText(baseURL,cache,packageCache,verified).then(function(t){dataText=t;markReady();});
+    return Promise.all([
+     fetchText(baseURL,cache,packageCache,verified),
+     fetchText('data/qbData_reviewed_patch.json',cache,packageCache,verified),
+     fetchText('data/qbData_review_log.json',cache,packageCache,verified)
+    ]).then(function(items){dataText=assembleReviewed(items[0],items[1],items[2]);});
+   });
   }).catch(function(e){dataErr=e;console.error('Shbace question bank load failed',e);});
  })();
  try{performance.mark('shb-boot-start')}catch(e){}

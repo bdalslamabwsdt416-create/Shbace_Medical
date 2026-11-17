@@ -53,6 +53,40 @@ async function localOnly(request) {
   }
 }
 
+/* Only a matching verified IndexedDB pair enables strict local-only runtime. */
+async function hasVerifiedInstall() {
+  if (!self.indexedDB) return false;
+  return new Promise(resolve => {
+    let done = false;
+    const finish = value => { if (!done) { done = true; resolve(value); } };
+    const timer = setTimeout(() => finish(false), 2500);
+    let req;
+    try { req = self.indexedDB.open(DB_NAME, 1); }
+    catch (_) { clearTimeout(timer); finish(false); return; }
+    req.onupgradeneeded = () => {
+      if (!req.result.objectStoreNames.contains('meta')) req.result.createObjectStore('meta');
+    };
+    req.onerror = req.onblocked = () => { clearTimeout(timer); finish(false); };
+    req.onsuccess = () => {
+      const db = req.result;
+      try {
+        const tx = db.transaction('meta', 'readonly'), store = tx.objectStore('meta');
+        const a = store.get('installed'), b = store.get('ready');
+        tx.oncomplete = () => {
+          const x = a.result, y = b.result, file = x && x.files && x.files['index.html'];
+          const valid = !!(x && y && x.verified === true && y.verified === true &&
+            x.version && x.version === y.version && file &&
+            /^[a-f0-9]{64}$/.test(String(file.sha256 || '')) && Number(file.bytes) > 0 &&
+            Number(x.fileCount) > 0 && Number(y.fileCount) === Number(x.fileCount));
+          try { db.close(); } catch (_) {}
+          clearTimeout(timer); finish(valid);
+        };
+        tx.onerror = tx.onabort = () => { try { db.close(); } catch (_) {} clearTimeout(timer); finish(false); };
+      } catch (_) { try { db.close(); } catch (_) {} clearTimeout(timer); finish(false); }
+    };
+  });
+}
+
 async function updateMetadata(request) {
   const cache = await caches.open(CACHE_NAME);
   try {
@@ -116,6 +150,8 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  /* A retry query is normalized to the canonical local cache key. It never bypasses storage. */
-  event.respondWith(localOnly(request));
+  /* Bootstrap the first install from same-origin network; verified installs stay local-only. */
+  event.respondWith(hasVerifiedInstall().then(verified =>
+    verified ? localOnly(request) : fetch(request)
+  ).catch(() => fetch(request)));
 });

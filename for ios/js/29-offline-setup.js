@@ -225,6 +225,18 @@ function dbPut(store,key,value){
   });
  });
 }
+function dbPutInstalled(record,ready){
+ return db().then(function(database){
+  return new Promise(function(resolve,reject){
+   var tx=database.transaction('meta','readwrite');
+   tx.objectStore('meta').put(record,INSTALLED_KEY);
+   tx.objectStore('meta').put(ready,'ready');
+   tx.oncomplete=function(){resolve(true)};
+   tx.onerror=function(){reject(tx.error||new Error('Could not commit the verified installation.'))};
+   tx.onabort=function(){reject(tx.error||new Error('Verified installation commit was interrupted.'))};
+  });
+ });
+}
 function hashBytes(bytes){
  if(!window.crypto||!crypto.subtle)throw new Error('Secure file verification is unavailable. Open the installed app over HTTPS.');
  return crypto.subtle.digest('SHA-256',bytes).then(function(hash){
@@ -468,11 +480,11 @@ function fileMap(files){
  var map={};files.forEach(function(f){map[f.path]={sha256:f.sha256,bytes:f.bytes}});return map;
 }
 function saveInstalled(files){
- var record={version:manifest.version,releaseVersion:manifest.releaseVersion||'',files:fileMap(files),verified:true,fileCount:files.length,totalBytes:files.reduce(function(s,f){return s+(Number(f.bytes)||0)},0),completedAt:Date.now()};
- return dbPut('meta',INSTALLED_KEY,record).then(function(){
-  return dbPut('meta','ready',{version:manifest.version,releaseVersion:record.releaseVersion,verified:true,fileCount:record.fileCount,totalBytes:record.totalBytes,completedAt:record.completedAt});
- }).then(function(){
-  return cache.put(READY_URL,new Response(JSON.stringify({version:manifest.version,releaseVersion:record.releaseVersion,verified:true,completedAt:record.completedAt}),{status:200,headers:{'content-type':'application/json'}}));
+ var completedAt=Date.now();
+ var record={version:manifest.version,releaseVersion:manifest.releaseVersion||'',files:fileMap(files),verified:true,fileCount:files.length,totalBytes:files.reduce(function(s,f){return s+(Number(f.bytes)||0)},0),completedAt:completedAt};
+ var ready={version:record.version,releaseVersion:record.releaseVersion,verified:true,fileCount:record.fileCount,totalBytes:record.totalBytes,completedAt:completedAt};
+ return dbPutInstalled(record,ready).then(function(){
+  return cache.put(READY_URL,new Response(JSON.stringify(ready),{status:200,headers:{'content-type':'application/json'}})).catch(function(){return false});
  });
 }
 function cacheUrlSet(){
@@ -702,7 +714,8 @@ function showSetupError(error){
 
 /* Initial package discovery only. Existing installations update only through the explicit Settings action. */
 function runFullCheck(splashFinished){
- return decide(false).then(function(res){
+ /* This path is called only when no installed record exists: first install needs the network manifest. */
+ return decide(true).then(function(res){
   if(!res||res.kind==='none'){
    /* Only a check that really reached the server counts; offline attempts leave the timer and migration flag alone. */
    if(manifest){

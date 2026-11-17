@@ -10,12 +10,12 @@ const index = read('index.html');
 const worker = read('sw.js');
 const updater = read('js/29-offline-setup.js');
 
-test('question bank startup reads local caches only', () => {
+test('question bank startup is local after install and network-enabled only for first install', () => {
   const start = index.indexOf('var dataFetch=');
   const end = index.indexOf("try{performance.mark('shb-boot-start')}", start);
   assert.ok(start >= 0 && end > start, 'question-bank loader block exists');
   const loader = index.slice(start, end);
-  assert.doesNotMatch(loader, /\bfetch\s*\(/, 'question-bank loader must not make network requests');
+  assert.match(loader, /hasVerifiedPackage\(\)/);\n  assert.match(loader, /if\(verified\)throw new Error/);\n  assert.match(loader, /first-install download/);
   assert.match(loader, /PACKAGE_CACHE_NAME='shbace-medical-offline-v2'/);
   assert.match(loader, /cacheHit\(packageCache/);
   assert.match(loader, /is missing from the installed offline storage/);
@@ -27,11 +27,11 @@ test('service worker is local-only except explicitly tagged updater traffic', ()
   assert.match(worker, /request\.headers\.get\(UPDATE_HEADER\) === '1'/);
   assert.match(worker, /request\.cache === 'no-store' && tagged/);
   assert.match(worker, /if \(integrityRequest && tagged\)/);
-  assert.match(worker, /event\.respondWith\(localOnly\(request\)\)/);
+  assert.match(worker, /hasVerifiedInstall\(\)/);\n  assert.match(worker, /verified \? localOnly\(request\) : fetch\(request\)/);
   assert.match(worker, /url\.origin !== self\.location\.origin/);
   assert.doesNotMatch(worker, /refreshCachedPwaVersion|networkFirstOnPackageMismatch/);
   assert.match(worker, /if \(request.method !== 'GET'\)/);
-  assert.equal((worker.match(/\bfetch\s*\(/g) || []).length, 2, 'only the tagged update functions may fetch');
+  assert.equal((worker.match(/\bfetch\s*\(/g) || []).length, 3, 'tagged updater and bootstrap are the only network paths');
 });
 
 test('startup update metadata is local; manual and seven-day checks opt into network', () => {
