@@ -5,11 +5,24 @@ const path = require('path');
 const zlib = require('zlib');
 const crypto = require('crypto');
 const vm = require('vm');
+const { spawnSync } = require('child_process');
 const sharp = require('sharp');
 
 const root = path.resolve(__dirname, '..');
 const out = path.join(root, 'dist');
 const manifest = { schema: 1, files: [] };
+
+/* Always run the iOS offline migration regression tests, even when the hosting
+   provider invokes this build file directly instead of npm run build:pwa. */
+const migrationTests = spawnSync(process.execPath, ['--test', 'tests/offline-migration.test.js'], {
+  cwd: root,
+  stdio: 'inherit'
+});
+if (migrationTests.error) throw migrationTests.error;
+if (migrationTests.status !== 0) {
+  throw new Error('iOS offline migration regression tests failed (exit ' + migrationTests.status + ').');
+}
+console.log('iOS offline migration regression tests passed.');
 
 function safePath(relative) {
   if (typeof relative !== 'string' || relative.startsWith('/') || relative.split(/[\\/]/).includes('..')) {
