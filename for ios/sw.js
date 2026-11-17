@@ -2,6 +2,8 @@
 
 /* Runtime data always comes from the verified package. Keep these identities stable. */
 const CACHE_NAME = 'shbace-medical-offline-v2';
+/* Preserve the shared database identity; this worker never opens or mutates it at startup. */
+const DB_NAME = 'shbace-medical-offline-state-v1';
 const INDEX_URL = new URL('index.html', self.registration.scope).href;
 const UPDATE_HEADER = 'X-Shbace-Update-Check';
 const UPDATE_METADATA_PATHS = new Set([
@@ -23,7 +25,8 @@ function missingOfflineResponse(url) {
 }
 
 function isTaggedUpdateRequest(request) {
-  return request.headers.get(UPDATE_HEADER) === '1';
+  return !!(request && request.headers && typeof request.headers.get === 'function' &&
+    request.headers.get(UPDATE_HEADER) === '1');
 }
 
 async function cachedResponse(request) {
