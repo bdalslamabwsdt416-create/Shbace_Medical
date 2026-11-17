@@ -1,5 +1,5 @@
 'use strict';
-// build: ios-v17 (compact two-second offline toast)
+// build: ios-v18 (to-me core with preserved iOS offline lifecycle)
 
 const CACHE_NAME = 'shbace-medical-offline-v2';
 // App-shell updates are isolated from the verified offline package. Never overwrite offline resources during SW install.
@@ -15,9 +15,10 @@ const APP_SHELL = [
   './js/04-app-main.js',
   './js/09-app-features-v6.js',
   './js/30-ios-v5.js',
+  './js/31-ios-v6.js',
   './js/32-ios-v7.js',
-  './css/core.css',
-  './css/late.css',
+  './css/bundle-core.css',
+  './css/bundle-late.css',
   './css/ios-v5.css',
   './css/ios-v6.css',
   './css/ios-v7.css',
