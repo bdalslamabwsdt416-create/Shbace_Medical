@@ -1,9 +1,14 @@
 {
   "name": "shbace-medical-chrome-android",
-  "version": "1.3.5",
+  "version": "1.3.10-chrome.1",
   "private": true,
-  "description": "SHBACE Medical — independent Chrome Android PWA delivery.",
+  "description": "SHBACE Medical — unified Chrome Android PWA delivery.",
   "scripts": {
-    "build:pwa": "node scripts/build-pwa.mjs"
+    "build:pwa": "node scripts/check-root-duplicates.mjs && node scripts/check-bank.mjs && node scripts/build-pwa.mjs",
+    "check:bank": "node scripts/check-root-duplicates.mjs && node scripts/check-bank.mjs",
+    "test:unit": "node --test"
+  },
+  "dependencies": {
+    "sharp": "0.35.5"
   }
 }

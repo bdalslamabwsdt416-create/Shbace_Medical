@@ -26,6 +26,7 @@
   ],
   "display_override": [
     "fullscreen",
-    "standalone"
+    "standalone",
+    "minimal-ui"
   ]
 }
