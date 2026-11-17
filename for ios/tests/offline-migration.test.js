@@ -200,6 +200,7 @@ function runOfflineStartup(installedRecord, options = {}) {
     migrationPendingAtLaunch: false,
     cache: null,
     runFullCheck() { calls.push('first-install-check'); networkCalls.push('first-install-check'); return Promise.resolve(); },
+    scheduleCheckDue() {},
     Promise, Object, Number, Math
   };
   const code = [
@@ -387,6 +388,97 @@ test('Home fallback is dismissible inline and offers explicit Repair without a m
   assert.match(markup, /shbaceDismissRepairNotice/);
   assert.match(markup, /role="status"/);
   assert.doesNotMatch(markup, /role="dialog"|aria-modal/);
+});
+
+function runScheduledCheckHarness(options = {}) {
+  const store = Object.create(null), writes = [], networkCalls = [], pending = [], uiCalls = [];
+  const now = Date.now();
+  const last = options.recent ? now - (7 * 24 * 60 * 60 * 1000) + 1000 :
+    (options.lastCheck === undefined ? now - (7 * 24 * 60 * 60 * 1000) - 1000 : options.lastCheck);
+  if (last !== null) store.shbace_pkg_check_ok_v1 = String(last);
+  const localStorage = {
+    getItem(key) { return Object.prototype.hasOwnProperty.call(store, key) ? store[key] : null; },
+    setItem(key, value) { store[key] = String(value); writes.push([key, String(value)]); },
+    removeItem(key) { delete store[key]; }
+  };
+  const cache = {};
+  const sandbox = {
+    CHECK_OK_KEY: 'shbace_pkg_check_ok_v1',
+    CHECK_EVERY: 7 * 24 * 60 * 60 * 1000,
+    CACHE_NAME: 'shbace-medical-offline-v2',
+    MIGRATION_KEY: 'shbace_ios_migrated_1_4_14',
+    migrationInProgress: false,
+    manifestFromNetwork: options.network !== false,
+    navigator: { onLine: options.online !== false },
+    localStorage, Date, Promise, Number, Math, Object, Array,
+    lsNum(key) { return Number(localStorage.getItem(key)) || 0; },
+    lsSet(key, value) { localStorage.setItem(key, value); },
+    loadManifest() {
+      networkCalls.push('manifest');
+      return options.fail ? Promise.reject(new Error('network failed')) :
+        Promise.resolve({ version: '1.4.20', files: [{ path: 'index.html' }] });
+    },
+    caches: { open(name) { networkCalls.push('cache-open:' + name); return Promise.resolve(cache); } },
+    dbGet() { return Promise.resolve({ files: { 'index.html': { sha256: 'old' } } }); },
+    computePlan() {
+      return Promise.resolve(options.update
+        ? { files: [{ path: 'index.html' }], changed: 1, removed: [] }
+        : { files: [], changed: 0, removed: [] });
+    },
+    setPending(value) { pending.push(value); },
+    mount() { uiCalls.push('mount'); },
+    showUpdateSheet() { uiCalls.push('update-sheet'); },
+    showPlanNeeded() { uiCalls.push('plan-needed'); },
+    runPlan() { uiCalls.push('run-plan'); },
+    fetchAndStore() { uiCalls.push('download'); }
+  };
+  const promise = vm.runInNewContext(extractFunction(offline, 'checkDue') + '\ncheckDue();', sandbox);
+  return promise.then(state => ({
+    state, store, writes, networkCalls, pending, uiCalls,
+    migrationInProgress: sandbox.migrationInProgress,
+    migrationFlag: store.shbace_ios_migrated_1_4_14 || null,
+    initialTimestamp: last
+  }));
+}
+
+test('silent seven-day check runs when the last successful check is older than seven days', async () => {
+  const result = await runScheduledCheckHarness();
+  assert.deepEqual(result.state, { state: 'current' });
+  assert.ok(result.networkCalls.includes('manifest'));
+  assert.ok(Number(result.store.shbace_pkg_check_ok_v1) > result.initialTimestamp);
+  assert.deepEqual(result.uiCalls, []);
+  assert.equal(result.migrationFlag, null);
+  assert.equal(result.migrationInProgress, false);
+});
+
+test('silent seven-day check is skipped when the last successful check is less than seven days old', async () => {
+  const result = await runScheduledCheckHarness({ recent: true });
+  assert.deepEqual(result.state, { state: 'not-due' });
+  assert.deepEqual(result.networkCalls, []);
+  assert.equal(result.store.shbace_pkg_check_ok_v1, String(result.initialTimestamp));
+  assert.deepEqual(result.uiCalls, []);
+});
+
+test('silent scheduled check stays silent and does not advance its timestamp offline or after failure', async () => {
+  for (const options of [{ online: false }, { fail: true }]) {
+    const result = await runScheduledCheckHarness(options);
+    assert.deepEqual(result.state, { state: 'offline' });
+    assert.equal(result.store.shbace_pkg_check_ok_v1, String(result.initialTimestamp));
+    assert.deepEqual(result.uiCalls, []);
+    assert.deepEqual(result.pending, []);
+    assert.equal(result.migrationFlag, null);
+    assert.equal(result.migrationInProgress, false);
+  }
+});
+
+test('silent scheduled update only marks pending and never opens UI, downloads or arms migration', async () => {
+  const result = await runScheduledCheckHarness({ update: true });
+  assert.deepEqual(result.state, { state: 'update-pending' });
+  assert.deepEqual(result.pending, [1]);
+  assert.deepEqual(result.uiCalls, []);
+  assert.equal(result.migrationFlag, null);
+  assert.equal(result.migrationInProgress, false);
+  assert.ok(Number(result.store.shbace_pkg_check_ok_v1) > result.initialTimestamp);
 });
 
 test('existing install with an unset migration flag stays silent and marks an update pending', async () => {
@@ -610,7 +702,14 @@ test('build guards the migration commit, local-only launch detector and manual r
   assert.ok(build.includes('shbaceSettingsRepairOffline'));
   assert.ok(!offline.includes('CHECK_TRY_KEY'));
   assert.ok(!offline.includes('CHECK_RETRY'));
-  assert.ok(!offline.includes('function checkDue('));
+  assert.ok(offline.includes('function checkDue()'));
+  assert.ok(offline.includes('function scheduleCheckDue()'));
+  const scheduled = offline.slice(offline.indexOf('function checkDue()'), offline.indexOf('function scheduleCheckDue()'));
+  assert.ok(!scheduled.includes('MIGRATION_KEY'));
+  assert.ok(!scheduled.includes('migrationInProgress'));
+  assert.ok(!scheduled.includes('mount(') && !scheduled.includes('showUpdateSheet(') && !scheduled.includes('showPlanNeeded('));
+  assert.ok(!scheduled.includes('runPlan(') && !scheduled.includes('fetchAndStore('));
+  assert.ok(scheduled.includes('setPending('));
   assert.ok(offline.includes('function localRepairNeeded(installed)'));
 });
 
