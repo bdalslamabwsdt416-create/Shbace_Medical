@@ -1907,8 +1907,9 @@ function shbaceSettingsUpdateMeta(){
   info=window.shbaceVersionInfo&&window.shbaceVersionInfo();
  }catch(e){}
  const installed=info&&info.installed,available=info&&info.available;
- const version=installed&&installed.displayVersion
-  ?'Version '+installed.displayVersion+(installed.releaseDate?' · '+installed.releaseDate:'')
+ const shown=installed&&installed.displayVersion?installed:available;
+ const version=shown&&shown.displayVersion
+  ?'Version '+shown.displayVersion+(shown.releaseDate?' · '+shown.releaseDate:'')
   :'Installed version details are not available yet';
  const checked=last>0
   ?'Last successful check: '+new Date(last).toLocaleString()
