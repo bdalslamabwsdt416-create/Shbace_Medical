@@ -10,15 +10,8 @@ const root = path.resolve(__dirname, '..');
 const out = path.join(root, 'dist');
 const manifest = { schema: 1, files: [] };
 
-const packed = {
-  'js/30-ios-v5.js': ['v5-01.b64', 'v5-02.b64', 'v5-03.b64', 'v5-04.b64'],
-  'js/31-ios-v6.js': ['v6-01.b64', 'v6-02.b64', 'v6-03.b64']
-};
-
-const expected = {
-  'js/30-ios-v5.js': { bytes: 31301, sha256: '12f7876ebdcfa8f6dd6b1f1e2b87e82a1d00335d919b24704dac0c238ac56a87' },
-  'js/31-ios-v6.js': { bytes: 14188, sha256: '1c0669c83d403b641a9fc300056201df230deca4918a5f1993c819c21ad865f5' }
-};
+const packed = {};
+const expected = {};
 
 function safePath(relative) {
   if (typeof relative !== 'string' || relative.startsWith('/') || relative.split(/[\\/]/).includes('..')) {
@@ -58,7 +51,7 @@ function runtimeFiles() {
     walkRuntimeDirectory(directory, files);
   }
   files.push(...Object.keys(packed));
-  return [...new Set(files)].filter(relative => relative !== 'offline-assets-manifest.json' && !['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css'].includes(relative)).sort((a, b) => a.localeCompare(b));
+  return [...new Set(files)].filter(relative => relative !== 'offline-assets-manifest.json' && !['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/30-ios-v5.js','js/31-ios-v6.js'].includes(relative)).sort((a, b) => a.localeCompare(b));
 }
 
 fs.rmSync(out, { recursive: true, force: true });
@@ -165,6 +158,7 @@ for (const relative of deferredRefs) {
   if (!fs.existsSync(safePath(relative))) throw new Error('Deferred runtime asset is missing: ' + relative);
 }
 if (/js\/30-android-enhancements|js\/31-android-v13|js\/32-chrome-android/.test(html)) throw new Error('Android-only runtime module leaked into the iOS build.');
+if (/js\/30-ios-v5|js\/31-ios-v6/.test(html)) throw new Error('The retired iOS-specific updater/storage layer is still referenced.');
 for (const relative of ['js/32-ios-study-tools.js','js/33-ios-exam-planner.js']) {
   if (!fs.existsSync(safePath(relative)) || !deferredRefs.includes(relative)) throw new Error('The shared iOS design module is missing: ' + relative);
 }
@@ -172,8 +166,7 @@ const iosStudyTools = fs.readFileSync(safePath('js/32-ios-study-tools.js'), 'utf
 const iosExamPlanner = fs.readFileSync(safePath('js/33-ios-exam-planner.js'), 'utf8');
 if (!iosStudyTools.includes('featureSettingsHTML') || !iosStudyTools.includes('decorateQuestionCards')) throw new Error('To Me Settings and question actions are missing.');
 if (!iosExamPlanner.includes('__shbaceV13') || !iosExamPlanner.includes('Exam goal planner') || /shbace_onboarding_v3_grade|function gradeScreen|function finishScreen/.test(iosExamPlanner)) throw new Error('To Me planner is incomplete or alters onboarding.');
-for (const relative of ['css/bundle-core.css','css/bundle-late.css',
-  'js/30-ios-v5.js','js/31-ios-v6.js','js/44-islamic-reminders.js']) {
+for (const relative of ['css/bundle-core.css','css/bundle-late.css','js/44-islamic-reminders.js']) {
   if (!fs.existsSync(safePath(relative))) throw new Error('Required iOS runtime asset is missing: ' + relative);
 }
 const baseBank = JSON.parse(fs.readFileSync(safePath('data/qbData.json'), 'utf8'));
@@ -183,20 +176,19 @@ for (const icon of pwaManifest.icons || []) {
   const iconPath = String(icon.src || '').replace(/^\.\//, '');
   if (!iconPath || !fs.existsSync(safePath(iconPath))) throw new Error('PWA icon is missing: ' + icon.src);
 }
-const iosOfflineSetup = fs.readFileSync(safePath('js/29-offline-setup.js'), 'utf8');
+const offlineSetup = fs.readFileSync(safePath('js/29-offline-setup.js'), 'utf8');
 const serviceWorker = fs.readFileSync(safePath('sw.js'), 'utf8');
-if (!iosOfflineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
-    !iosOfflineSetup.includes("var DB_NAME='shbace-medical-offline-state-v1'") ||
-    !serviceWorker.includes("const CACHE_NAME = 'shbace-medical-offline-v2'") ||
-    !serviceWorker.includes("const SHELL_CACHE_NAME = 'shbace-medical-ios-shell-v151'")) {
-  throw new Error('The iOS offline cache or saved-state database identifiers changed unexpectedly.');
+const featureRuntime = fs.readFileSync(safePath('js/09-app-features-v6.js'), 'utf8');
+if (!offlineSetup.includes("var CACHE_NAME='shbace-chrome-offline-v1.3.10.37'") ||
+    !offlineSetup.includes('window.shbaceCheckForUpdate=manualCheck') ||
+    !serviceWorker.includes("const CACHE_NAME = 'shbace-chrome-offline-v1.3.10.37'") ||
+    !featureRuntime.includes('onclick="shbaceSettingsCheckForUpdates(this)"') ||
+    !featureRuntime.includes('window.shbaceCheckForUpdate()')) {
+  throw new Error('The shared To Me offline updater or its Settings button is missing.');
 }
 const onboardingMain = fs.readFileSync(safePath('js/04-app-main.js'), 'utf8');
 if (!onboardingMain.includes('function gradeScreen()') || !onboardingMain.includes('function finishScreen()')) throw new Error('The final two onboarding screens are missing from the app core.');
-const iosStorageRuntime = fs.readFileSync(safePath('js/31-ios-v6.js'), 'utf8');
-if (!iosStorageRuntime.includes('persist:true') || !iosStorageRuntime.includes('navigator.storage.persist')) throw new Error('The iOS persistent-storage request is missing.');
-const iosContinuityRuntime = fs.readFileSync(safePath('js/30-ios-v5.js'), 'utf8');
-if (!iosContinuityRuntime.includes('autoUpdate:true') || !iosContinuityRuntime.includes('getRegistration')) throw new Error('The silent iOS updater is missing.');
+
 if (manifest.files.some(item => ['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/32-ios-v7.js'].includes(item.path))) throw new Error('A retired iOS visual layer is still included in the offline runtime inventory.');
 const scanFiles = manifest.files.filter(item => /\.(?:html|css|js|json|webmanifest)$/i.test(item.path));
 const missingImages = new Set();
@@ -220,7 +212,7 @@ manifest.generatedAt = new Date().toISOString();
 fs.writeFileSync(path.join(out, 'offline-assets-manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 
 console.log('Shbace Medical iOS PWA build successful');
-console.log('iOS cache and saved-state identifiers verified.');
+console.log('Shared To Me offline updater and Settings control verified.');
 console.log('Base question bank: '+baseBank.questions.length);
 console.log('Deferred runtime assets verified: '+deferredRefs.length);
 console.log('Offline inventory: '+manifest.fileCount+' files ('+(manifest.totalBytes/1024/1024).toFixed(2)+' MiB).');
