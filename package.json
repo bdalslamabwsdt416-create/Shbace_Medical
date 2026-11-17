@@ -1,0 +1,23 @@
+{
+  "name": "shbace-medical",
+  "version": "1.3.5",
+  "private": true,
+  "description": "Shbace Medical Android native delivery using the unified to-me web application source.",
+  "scripts": {
+    "android:debug": "cd android && ./gradlew :app:assembleDebug",
+    "android:release": "cd android && ./gradlew :app:assembleRelease",
+    "test:pwa": "npm --prefix \"to me\" run test:unit",
+    "check:pwa": "npm --prefix \"to me\" run check:bank",
+    "build:pwa": "npm --prefix \"to me\" run build:pwa"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.6.0",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.6.0",
+    "@capacitor/haptics": "8.0.2",
+    "@capacitor/local-notifications": "8.3.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.6.0"
+  }
+}

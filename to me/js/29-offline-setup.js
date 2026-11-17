@@ -1,6 +1,10 @@
 (function(){
 'use strict';
 
+/* Native Capacitor builds ship a complete local asset bundle inside the signed APK.
+   Do not run the browser/PWA Cache Storage installer or updater inside the APK. */
+if(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) return;
+
 /* Persistent offline-package cache. NEVER rotate this name for an app release: the manifest/hash planner updates only changed files inside it. */
 var CACHE_NAME='shbace-chrome-offline-v1.3.10.37';
 var STAGING_NAME='shbace-staging-offline';

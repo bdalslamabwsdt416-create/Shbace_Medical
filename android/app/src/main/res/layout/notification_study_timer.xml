@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="68dp"
+    android:background="@drawable/bg_study_timer_notification"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp">
+    <Chronometer
+        android:id="@+id/study_timer_chronometer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textColor="#F4F8FF"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        android:fontFeatureSettings="tnum"
+        android:includeFontPadding="false"
+        android:contentDescription="Study session elapsed time"
+        android:singleLine="true"
+        android:ellipsize="none" />
+</FrameLayout>
