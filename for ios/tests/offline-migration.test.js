@@ -901,6 +901,12 @@ test('web startup runs core scripts before waiting for the question bank', () =>
     'normal web startup remains available when Cache Storage is unsupported');
   assert.ok(html.includes('Retry question bank'),
     'a failed question-bank request shows a visible recovery action rather than leaving Splash stuck');
+  const gateStart = html.indexOf("if(src==='js/09-app-features-v6.js')");
+  const gateEnd = html.indexOf('function exec(attempt)', gateStart);
+  assert.ok(gateStart >= 0 && gateEnd > gateStart, 'the first bank-dependent script gate is present');
+  const gate = html.slice(gateStart, gateEnd);
+  assert.ok(gate.includes('q.textContent=dataText;') && gate.includes('exec(0);'),
+    'the deferred loader executes the held question-bank module after injecting its data');
 });
 
 
