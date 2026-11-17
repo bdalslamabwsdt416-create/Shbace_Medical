@@ -83,7 +83,7 @@ test("LocalStorage-first metadata never gates the first post-Splash package down
 test("returning installs probe release metadata online without replacing package files", () => {
   assert.ok(updater.includes("releaseChanged=!!(remote&&remote.version&&(!local||local.version!==remote.version))"));
   assert.ok(updater.includes("if(releaseChanged)return runFullCheck(splashFinished)"));
-  assert.ok(updater.includes("Only fetches pwa-version.json"));
+  assert.ok(updater.includes("package files are still untouched until the student accepts Update now"));
   assert.ok(updater.includes("function rememberInstalled(info){if(info)lsSetJson(VER_KEY,{version:info.version"));
 });
 
