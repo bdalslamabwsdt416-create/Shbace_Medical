@@ -1,10 +1,11 @@
 {
   "app": "Shbace Medical",
   "platform": "PWA",
-  "version": "1.4.21",
-  "displayVersion": "1.4.21",
+  "version": "1.4.22",
+  "displayVersion": "1.4.22",
   "releaseDate": "2026-11-17",
   "releaseNotes": [
+    "Starts the core web app before waiting for the question bank, keeps the Splash from being held by bank downloads, and supports browsers without Cache Storage.",
     "Releases the startup Splash once the core app runtime is ready, without waiting for nonessential enhancement modules to finish loading.",
     "Keeps existing iOS installs silent at launch; a legacy migration remains pending until a user-started update is verified, committed and cleaned up.",
     "Checks the installed offline file inventory locally at launch and offers an explicit online-only Repair action in Settings, with a dismissible Home fallback.",
