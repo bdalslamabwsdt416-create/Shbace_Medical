@@ -4,24 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script id="shb-offline-first-gate">
-/* Installed iOS PWA: setup checks run behind the Splash; only the app boot gate is released immediately by the checker. */
+/* The shared To Me updater runs after the Splash; the app shell is never blocked by a separate iOS installer. */
 (function(){
- var standalone=false;
- try{
-  standalone=navigator.standalone===true ||
-   !!(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches);
- }catch(e){}
- var resolveGate;
- window.__shbOfflineGateReleased=!standalone;
- window.__shbOfflineGatePromise=new Promise(function(resolve){resolveGate=resolve});
+ window.__shbOfflineGateReleased=true;
+ window.__shbOfflineGatePromise=Promise.resolve();
  window.__shbReleaseOfflineGate=function(){
-  if(window.__shbOfflineGateReleased)return;
   window.__shbOfflineGateReleased=true;
   try{document.documentElement.classList.remove('shb-offline-pending')}catch(e){}
-  try{resolveGate()}catch(e){}
  };
- if(standalone)document.documentElement.classList.add('shb-offline-pending');
- else window.__shbReleaseOfflineGate();
 })();
 </script>
 <!-- ═══════════ FIRST PAINT: runs before anything else (splash gate, background, status-bar safe area) ═══════════ -->
@@ -111,8 +101,6 @@
 
 </head>
 <body>
-<script id="shbace-offline-setup-pre-splash" src="js/29-offline-setup.js?shbcheck=1.4.11" onerror="window.__shbReleaseOfflineGate&&window.__shbReleaseOfflineGate()"></script>
-
 <!-- ═══════════ 1) SPLASH SCREEN: markup ═══════════ -->
 
 <div id="startupSplash" aria-label="Shbace Medical startup splash" role="status" style="--splash-bg:url(/assets/img/d407f81c5a39.webp)">
@@ -644,6 +632,7 @@
 <!-- ═══════════ 5) SCRIPTS: data first, then app code, then feature patches (original execution order; run by the boot loader) ═══════════ -->
 <!-- Embedded images (IMG) -->
 <!-- 5) SCRIPTS: data first, then app code, then feature patches (original execution order; run by the boot loader) ═══════════ --> <!-- Embedded images (IMG) -->
+<script type="text/shb-deferred" id="shbace-offline-setup" data-src="js/29-offline-setup.js"></script>
 <script type="text/shb-deferred" data-src="js/01-ui-images.js"></script>
 <!-- Embedded doctor images (DOC_EMB) -->
 <!-- Embedded doctor images (DOC_EMB) -->
@@ -766,10 +755,6 @@
 <script type="text/shb-deferred" id="grade-sync-v46" data-src="js/28-grade-sync-v46.js"></script>
 <script type="text/shb-deferred" data-src="js/29-reviewed-bank-controls.js"></script>
 
-<script type="text/shb-deferred" id="shb-ios-v5" data-src="js/30-ios-v5.js"></script>
-<script type="text/shb-deferred" id="shb-ios-v6" data-src="js/31-ios-v6.js"></script>
-<script type="text/shb-deferred" id="shb-to-me-study-tools" data-src="js/32-ios-study-tools.js"></script>
-<script type="text/shb-deferred" id="shb-to-me-exam-planner" data-src="js/33-ios-exam-planner.js"></script>
 <script type="text/shb-deferred" id="unified-question-voice" data-src="js/33-unified-voice.js"></script>
 <script type="text/shb-deferred" id="focus-countdown-timer" data-src="js/34-study-countdown.js"></script>
 <script type="text/shb-deferred" id="pediatrics-source-collections" data-src="js/35-pediatrics-collections.js"></script>
