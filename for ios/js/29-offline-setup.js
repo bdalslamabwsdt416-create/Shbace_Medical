@@ -11,8 +11,8 @@ var STAGING_NAME='shbace-staging-offline';
 var INSTALLED_KEY='installed';
 /* Update checks are throttled: one successful network check every 7 days; after a failed attempt (offline) retry no sooner than 2 hours. */
 var CHECK_OK_KEY='shbace_pkg_check_ok_v1',CHECK_TRY_KEY='shbace_pkg_check_try_v1';
-var MIGRATION_KEY='shbace_ios_migrated_1_4_14',migrationInProgress=false;
-var CHECK_EVERY=7*24*60*60*1000,CHECK_RETRY=2*60*60*1000;
+var MIGRATION_KEY='shbace_ios_migrated_1_4_14';
+var CHECK_EVERY=7*24*60*60*1000;
 var PENDING_KEY='shbace_pkg_update_pending_v1',NOTIF_ID='update-available';
 var manifestFromNetwork=false,plan=null;
 var DB_NAME='shbace-medical-offline-state-v1';
@@ -69,12 +69,6 @@ function examSoon(){
   var p=String(x&&x.date||'').split('-').map(Number);if(p.length!==3||p.some(isNaN))return false;
   var d=Math.round((Date.UTC(p[0],p[1]-1,p[2])-t)/86400000);return d>=0&&d<=EXAM_QUIET_DAYS;
  });
-}
-function checkDue(){
- var now=Date.now(),ok=lsNum(CHECK_OK_KEY),tried=lsNum(CHECK_TRY_KEY);
- if(ok&&ok<=now&&now-ok<CHECK_EVERY)return false;
- if(tried&&tried<=now&&now-tried<CHECK_RETRY)return false;
- return true;
 }
 function standalone(){
  try{return !!(navigator.standalone===true || (window.matchMedia&&(
@@ -577,8 +571,6 @@ function runPlan(){
   if(errors.length)throw new Error('The final integrity check found missing or unreadable files.');
   return commitPlan(target);
  }).then(function(){return cleanupPreviousCaches()}).then(function(){
-  /* A migration is marked complete only after the staged package has been committed and verified. */
-  if(migrationInProgress){lsSet(MIGRATION_KEY,'1');migrationInProgress=false;}
   /* A fully verified package counts as an up-to-date check: the seven-day timer restarts now. */
   lsSet(CHECK_OK_KEY,Date.now());setPending(0);markInstalledNow();
   ui.percent.textContent='100%';ui.count.textContent=plan.files.length+' / '+plan.files.length+' files';
@@ -668,7 +660,7 @@ function showSetupError(error){
  ui.button.disabled=false;ui.button.textContent='Retry setup';ui.button.dataset.done='0';ui.button.dataset.retryCheck='1';
 }
 
-/* Network check (reads the file list from the server). Runs only when it is due, on first install, or when local files are missing. */
+/* Initial package discovery only. Existing installations update only through the explicit Settings action. */
 function runFullCheck(splashFinished){
  lsSet(CHECK_TRY_KEY,Date.now());
  return decide().then(function(res){
@@ -676,16 +668,11 @@ function runFullCheck(splashFinished){
    /* Only a check that really reached the server counts; offline attempts leave the timer and migration flag alone. */
    if(manifestFromNetwork){
     lsSet(CHECK_OK_KEY,Date.now());setPending(0);lsDel(VER_AVAIL_KEY);fetchVersionInfo().then(rememberInstalled);
-    if(migrationInProgress){lsSet(MIGRATION_KEY,'1');migrationInProgress=false;}
    }
    return;
   }
-  /* Existing 1.4.10 installs apply this first migration update automatically: no Later button. */
-  if(migrationInProgress&&manifestFromNetwork&&res.plan){
-   return splashFinished.then(function(){showPlanNeeded(res.plan);runPlan()});
-  }
   if(res.kind==='prompt'){
-   /* Automatic 7-day check: bell notification + the update window (Later / Update now). The timer restarts now either way. */
+   /* Present a first-time package choice; never apply an update silently. */
    lsSet(CHECK_OK_KEY,Date.now());setPending(res.plan.files.length);
    return fetchVersionInfo().then(function(info){
     if(info)lsSetJson(VER_AVAIL_KEY,info);
@@ -704,21 +691,6 @@ function runFullCheck(splashFinished){
    });
   });
  });
-}
-/* Local-only look (no network): are saved files missing from this device? Uses the manifest already stored on the device. */
-function localRepairNeeded(){
- return caches.open(CACHE_NAME).then(function(c){
-  cache=c;
-  return c.match(MANIFEST_URL).then(function(hit){
-   if(!hit)return false;
-   return hit.json().then(function(data){
-    if(!data||data.schema!==1||!Array.isArray(data.files)||!data.files.length)return false;
-    return cacheUrlSet().then(function(have){
-     return data.files.some(function(f){return !have[urlFor(f.path)]});
-    });
-   });
-  });
- }).catch(function(){return false});
 }
 /* Manual "Check for updates" (Settings). Ignores the scheduled seven-day timer and reports what happened. */
 function manualCheck(){
@@ -744,6 +716,9 @@ function start(){
   return;
  }
  if(!document.body)return;
+ /* Retire the old automatic migration path. Existing installs must never launch
+    an update check or local restore screen merely because the app was opened. */
+ lsSet(MIGRATION_KEY,'1');
  var splashFinished=waitForSplash();
  if(!('caches' in window)||!window.crypto||!crypto.subtle||!window.indexedDB){
   splashFinished.then(showSetupUnavailable);
@@ -751,20 +726,7 @@ function start(){
  }
  dbGet('meta',INSTALLED_KEY).catch(function(){return null}).then(function(rec){
   var hasRecord=!!(rec&&rec.files);
-  var migrationNeeded=hasRecord&&lsNum(MIGRATION_KEY)!==1;
-  if(migrationNeeded){
-   migrationInProgress=true;
-   /* Force a fresh network check even when the seven-day timer was recently satisfied. */
-   lsDel(CHECK_OK_KEY);lsDel(CHECK_TRY_KEY);
-   /* Offline launches do not set the one-time flag; the next launch retries. */
-   if(navigator.onLine===false)return;
-  }
-  /* First install, the one-time 1.4.10 migration, or a scheduled check: contact the network. */
-  if(!hasRecord||migrationNeeded||checkDue())return runFullCheck(splashFinished);
-  /* Otherwise stay off the network. Only repair when files are really missing and the device is online. */
-  return localRepairNeeded().then(function(needs){
-   if(needs&&navigator.onLine!==false)return runFullCheck(splashFinished);
-  });
+  if(!hasRecord)return runFullCheck(splashFinished);
  });
 }
 function boot(){start();}
