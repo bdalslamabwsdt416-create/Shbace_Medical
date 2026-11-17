@@ -14,7 +14,7 @@ var CHECK_OK_KEY='shbace_pkg_check_ok_v1';
 var MIGRATION_KEY='shbace_ios_migrated_1_4_14';
 var CHECK_EVERY=7*24*60*60*1000;
 var PENDING_KEY='shbace_pkg_update_pending_v1',REPAIR_PENDING_KEY='shbace_pkg_repair_pending_v1',NOTIF_ID='update-available';
-var manifestFromNetwork=false,plan=null,migrationInProgress=false,migrationPendingAtLaunch=false;
+var manifestFromNetwork=false,plan=null,migrationInProgress=false,migrationPendingAtLaunch=false,scheduledCheckInProgress=false;
 var DB_NAME='shbace-medical-offline-state-v1';
 var MANIFEST_FETCH_TIMEOUT=30000,MANIFEST_FETCH_ATTEMPTS=2;
 var MANIFEST_URL=new URL('./offline-assets-manifest.json',location.href).href;
@@ -730,7 +730,9 @@ function checkDue(){
  var last=lsNum(CHECK_OK_KEY);
  if(last>0&&Date.now()-last<CHECK_EVERY)return Promise.resolve({state:'not-due'});
  if(typeof navigator!=='undefined'&&navigator.onLine===false)return Promise.resolve({state:'offline'});
- return loadManifest().then(function(data){
+ if(scheduledCheckInProgress)return Promise.resolve({state:'busy'});
+ scheduledCheckInProgress=true;
+ return Promise.resolve().then(function(){return loadManifest()}).then(function(data){
   if(!manifestFromNetwork)return {state:'offline'};
   manifest=data;
   return caches.open(CACHE_NAME).then(function(c){cache=c;return dbGet('meta',INSTALLED_KEY)});
@@ -742,7 +744,10 @@ function checkDue(){
    lsSet(CHECK_OK_KEY,Date.now());
    return {state:changed>0||removed>0?'update-pending':'current'};
   });
- }).catch(function(){return {state:'offline'}});
+ }).catch(function(){return {state:'offline'}}).then(function(result){
+  scheduledCheckInProgress=false;
+  return result;
+ });
 }
 function scheduleCheckDue(){
  setTimeout(function(){
