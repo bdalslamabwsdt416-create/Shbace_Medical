@@ -222,7 +222,8 @@ if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !offlineSetup.includes('var CHECK_OK_KEY=') ||
     !offlineSetup.includes('var CHECK_EVERY=7*24*60*60*1000') ||
     !offlineSetup.includes("CHECK_ATTEMPT_KEY='shbace_pkg_check_attempt_v1'") ||
-    !offlineSetup.includes('function runFullCheck(splashFinished){\\n return decide(false)') ||
+    !offlineSetup.includes('function runFullCheck(splashFinished){') ||
+    !offlineSetup.includes('return decide(false).then(function(res){') ||
     !startupRuntime.includes('scheduleCheckDue()') ||
     scheduledRuntime.includes('MIGRATION_KEY') ||
     scheduledRuntime.includes('migrationInProgress') ||
