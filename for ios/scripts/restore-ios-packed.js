@@ -116,16 +116,18 @@ if(V5.autoUpdate&&swReady()){
       source = source.replace(pattern, '$1false,');
     }
     source = source.replace("oH:'iPhone / iPad options',oSub:'Turn on only what you need.'","oH:'Local storage & backups',oSub:'Storage protection, saved data, backup and repair.'");
-    const settingsStart = source.indexOf("  var rate=Number(ls('shbace_v6_rate'))||.95;");
-    const settingsEnd = source.indexOf("  rs.appendChild(d);", settingsStart);
-    if (settingsStart < 0 || settingsEnd < 0) throw new Error('Could not locate iOS Settings insertion block.');
-    const storageOnlyCard = `  var d=document.createElement('div');d.className='card setcard v6-card';d.dir=DIR;
+    const cardMarker = source.indexOf('v6-card');
+    const settingsStart = source.lastIndexOf('var d=', cardMarker);
+    const appendMarker = 'rs.appendChild(d);';
+    const settingsEnd = source.indexOf(appendMarker, cardMarker);
+    if (cardMarker < 0 || settingsStart < 0 || settingsEnd < 0) throw new Error('Could not locate iOS Settings insertion block. Card context: '+source.slice(Math.max(0, cardMarker-180), cardMarker+260));
+    const storageOnlyCard = `var d=document.createElement('div');d.className='card setcard v6-card';d.dir=DIR;
   d.innerHTML='<h3>'+L.oH+'</h3><p class="meta">'+L.oSub+'</p>'+
    '<div class="setrow"><b>'+L.storeH+'</b><small class="v6-store">…</small></div>'+
    '<button type="button" class="btn block v6-sharebk" style="margin-top:10px">'+L.shareBk+'</button>'+
    '<button type="button" class="btn danger block v6-repair" style="margin-top:10px">'+L.repair+'</button>';
-`;
-    source = source.slice(0, settingsStart) + storageOnlyCard + source.slice(settingsEnd);
+  rs.appendChild(d);`;
+    source = source.slice(0, settingsStart) + storageOnlyCard + source.slice(settingsEnd + appendMarker.length);
     const themeStart = source.indexOf('/* ---------- 28. theme follows the device (off by default) ---------- */');
     const repairStart = source.indexOf('/* ---------- 32. repair: clear saved app files and download them again (student data is not touched) ---------- */');
     if (themeStart < 0 || repairStart < 0 || repairStart <= themeStart) throw new Error('Could not locate legacy iOS theme override.');
