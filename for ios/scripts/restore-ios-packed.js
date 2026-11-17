@@ -12,14 +12,12 @@ const manifest = { schema: 1, files: [] };
 
 const packed = {
   'js/30-ios-v5.js': ['v5-01.b64', 'v5-02.b64', 'v5-03.b64', 'v5-04.b64'],
-  'js/31-ios-v6.js': ['v6-01.b64', 'v6-02.b64', 'v6-03.b64'],
-  'js/32-ios-v7.js': ['v7-01.b64', 'v7-02.b64']
+  'js/31-ios-v6.js': ['v6-01.b64', 'v6-02.b64', 'v6-03.b64']
 };
 
 const expected = {
   'js/30-ios-v5.js': { bytes: 31301, sha256: '12f7876ebdcfa8f6dd6b1f1e2b87e82a1d00335d919b24704dac0c238ac56a87' },
-  'js/31-ios-v6.js': { bytes: 14188, sha256: '1c0669c83d403b641a9fc300056201df230deca4918a5f1993c819c21ad865f5' },
-  'js/32-ios-v7.js': { bytes: 10780, sha256: '18bc123e3728234fa303a2293657e87baa74f37d509fed79d354fb58d9fd10ff' }
+  'js/31-ios-v6.js': { bytes: 14188, sha256: '1c0669c83d403b641a9fc300056201df230deca4918a5f1993c819c21ad865f5' }
 };
 
 function safePath(relative) {
@@ -60,33 +58,32 @@ function runtimeFiles() {
     walkRuntimeDirectory(directory, files);
   }
   files.push(...Object.keys(packed));
-  return [...new Set(files)].filter(relative => relative !== 'offline-assets-manifest.json').sort((a, b) => a.localeCompare(b));
+  return [...new Set(files)].filter(relative => relative !== 'offline-assets-manifest.json' && !/^css\\/ios-v[567]\\.css$/.test(relative)).sort((a, b) => a.localeCompare(b));
 }
 
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
 
 function patchPackedAsset(relative, originalBytes) {
-  if (relative !== 'js/30-ios-v5.js' && relative !== 'js/32-ios-v7.js') return originalBytes;
+  if (!packed[relative]) return originalBytes;
   let source = originalBytes.toString('utf8');
-
-  const oldGuide = "إذا ظهر '+E('A new version is available')+'، اتصل بالإنترنت واضغط زر التحديث واترك العملية تكتمل قبل إغلاق الصفحة.";
-  const newGuide = "يتم فحص تحديثات التطبيق وتطبيقها تلقائياً في الخلفية، ولن تظهر رسالة تحديث أو يعاد تحميل الصفحة أثناء استخدامك. ستُستخدم الملفات الجديدة عند فتح التطبيق لاحقاً، مع بقاء بياناتك المحلية محفوظة.";
-
   if (relative === 'js/30-ios-v5.js') {
     const flag = 'updateBanner:true,';
     if (!source.includes(flag)) throw new Error('Expected iOS update-banner flag was not found.');
-    source = source.replace(flag, 'updateBanner:false,\n autoUpdate:true,');
+    source = source.replace(flag, 'updateBanner:false,\\n autoUpdate:true,');
+    source = source.replace("lang:'ar',", "lang:'en',");
+    for (const name of ['landscape','haptics','badge','keyboard','speak','progressCard','swipe','shareQuestion','inputHints']) {
+      const pattern = new RegExp('('+name+':)true,');
+      if (!pattern.test(source)) throw new Error('Expected iOS feature flag was not found: '+name);
+      source = source.replace(pattern, '$1false,');
+    }
     const offlineTimer = 'if(good)offT=setTimeout(hideBar,2200);';
     if (!source.includes(offlineTimer)) throw new Error('Expected persistent offline notification timer was not found.');
     source = source.replace(offlineTimer, 'offT=setTimeout(hideBar,2000);');
-
     const startMarker = '/* ---------- 8. new version available ---------- */';
     const endMarker = '/* ---------- 9. weekly backup reminder';
-    const start = source.indexOf(startMarker);
-    const end = source.indexOf(endMarker, start);
+    const start = source.indexOf(startMarker), end = source.indexOf(endMarker, start);
     if (start < 0 || end < 0) throw new Error('Could not locate the legacy iOS update-banner block.');
-
     const silentUpdates = `/* ---------- 8. silent automatic PWA updates during the startup Splash ---------- */
 var VER_KEY='shbace_v5_seen_version';
 function swReady(){return 'serviceWorker' in navigator}
@@ -97,31 +94,43 @@ if(V5.autoUpdate&&swReady()){
   if(!force&&now-lastCheck<30*60*1000)return;
   lastCheck=now;
   if(navigator.onLine===false)return;
-  navigator.serviceWorker.getRegistration('./').then(function(reg){
-   if(reg)return reg.update().catch(function(){});
-  }).catch(function(){});
-  fetch('pwa-version.json?shbcheck='+Date.now(),{cache:'no-store'})
-   .then(function(r){return r.ok?r.json():null})
-   .then(function(v){if(v&&v.version)lsSet(VER_KEY,v.version)})
-   .catch(function(){});
+  navigator.serviceWorker.getRegistration('./').then(function(reg){if(reg)return reg.update().catch(function(){});}).catch(function(){});
+  fetch('pwa-version.json?shbcheck='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(v){if(v&&v.version)lsSet(VER_KEY,v.version)}).catch(function(){});
  }
  setTimeout(function(){checkUpdates(true)},400);
  setInterval(function(){checkUpdates(false)},30*60*1000);
- document.addEventListener('visibilitychange',function(){
-  if(!document.hidden)setTimeout(function(){checkUpdates(true)},1200);
- });
+ document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(function(){checkUpdates(true)},1200)});
  addEventListener('online',function(){setTimeout(function(){checkUpdates(true)},1200)});
-}`
+}`;
     source = source.slice(0, start) + silentUpdates + source.slice(end);
+    const guideStart = source.indexOf('/* Extend the About > How to Use guide with every shipped iPhone/iPad addition (v5-v7). */');
+    const finalClose = source.lastIndexOf('})();');
+    if (guideStart < 0 || finalClose < guideStart) throw new Error('Could not locate legacy iOS guide section.');
+    source = source.slice(0, guideStart) + '\\n})();\\n';
   }
-
-  // The older instruction appears only in some packed revisions; replace it when present without blocking a valid build.
-  if (source.includes(oldGuide)) source = source.replace(oldGuide, newGuide);
-  source = source.replace("upd:'نسخة جديدة متوفرة',updBtn:'اضغط للتحديث',updWait:'جارٍ التحديث…',updFail:'ارجع اتصل وحاول ثانية',copyQ:'انسخ نص السؤال',",
-                          "upd:'',updBtn:'',updWait:'',updFail:'',copyQ:'انسخ نص السؤال',");
-  source = source.replace("upd:'A new version is available',updBtn:'Tap to update',updWait:'Updating…',updFail:'Reconnect and try again',copyQ:'Copy question text',",
-                          "upd:'',updBtn:'',updWait:'',updFail:'',copyQ:'Copy question text',");
-  source = source.replace('autoUpdate:true,    /* 8  "new version available" */','autoUpdate:true,    /* 8  silent background updates */');
+  if (relative === 'js/31-ios-v6.js') {
+    source = source.replace("lang:'ar',", "lang:'en',");
+    for (const name of ['touchPolish','keyboardFix','titleToTop']) {
+      const pattern = new RegExp('('+name+':)true,');
+      if (!pattern.test(source)) throw new Error('Expected iOS feature flag was not found: '+name);
+      source = source.replace(pattern, '$1false,');
+    }
+    source = source.replace("oH:'iPhone / iPad options',oSub:'Turn on only what you need.'","oH:'Local storage & backups',oSub:'Storage protection, saved data, backup and repair.'");
+    const settingsStart = source.indexOf("  var rate=Number(ls('shbace_v6_rate'))||.95;");
+    const settingsEnd = source.indexOf("  rs.appendChild(d);", settingsStart);
+    if (settingsStart < 0 || settingsEnd < 0) throw new Error('Could not locate iOS Settings insertion block.');
+    const storageOnlyCard = `  var d=document.createElement('div');d.className='card setcard v6-card';d.dir=DIR;
+  d.innerHTML='<h3>'+L.oH+'</h3><p class="meta">'+L.oSub+'</p>'+
+   '<div class="setrow"><b>'+L.storeH+'</b><small class="v6-store">…</small></div>'+
+   '<button type="button" class="btn block v6-sharebk" style="margin-top:10px">'+L.shareBk+'</button>'+
+   '<button type="button" class="btn danger block v6-repair" style="margin-top:10px">'+L.repair+'</button>';
+`;
+    source = source.slice(0, settingsStart) + storageOnlyCard + source.slice(settingsEnd);
+    const themeStart = source.indexOf('/* ---------- 28. theme follows the device (off by default) ---------- */');
+    const repairStart = source.indexOf('/* ---------- 32. repair: clear saved app files and download them again (student data is not touched) ---------- */');
+    if (themeStart < 0 || repairStart < 0 || repairStart <= themeStart) throw new Error('Could not locate legacy iOS theme override.');
+    source = source.slice(0, themeStart) + source.slice(repairStart);
+  }
   return Buffer.from(source, 'utf8');
 }
 
@@ -154,8 +163,8 @@ for (const relative of deferredRefs) {
   if (!fs.existsSync(safePath(relative))) throw new Error('Deferred runtime asset is missing: ' + relative);
 }
 if (/js\/30-android-enhancements|js\/31-android-v13|js\/32-chrome-android/.test(html)) throw new Error('Android-only runtime module leaked into the iOS build.');
-for (const relative of ['css/bundle-core.css','css/bundle-late.css','css/ios-v5.css','css/ios-v6.css','css/ios-v7.css',
-  'js/30-ios-v5.js','js/31-ios-v6.js','js/32-ios-v7.js','js/44-islamic-reminders.js']) {
+for (const relative of ['css/bundle-core.css','css/bundle-late.css',
+  'js/30-ios-v5.js','js/31-ios-v6.js','js/44-islamic-reminders.js']) {
   if (!fs.existsSync(safePath(relative))) throw new Error('Required iOS runtime asset is missing: ' + relative);
 }
 const baseBank = JSON.parse(fs.readFileSync(safePath('data/qbData.json'), 'utf8'));
