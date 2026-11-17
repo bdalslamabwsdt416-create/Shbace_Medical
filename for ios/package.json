@@ -2,7 +2,7 @@
   "name": "shbace-medical",
   "version": "1.4.15",
   "private": true,
-  "description": "Shbace Medical iOS PWA — restores the active app screen and scroll position after iOS background process eviction.",
+  "description": "Shbace Medical iOS PWA — To Me sidebar and navigation with preserved iOS onboarding and offline setup.",
   "scripts": {
     "android:debug": "cd android && ./gradlew :app:assembleDebug",
     "android:release": "cd android && ./gradlew :app:assembleRelease",

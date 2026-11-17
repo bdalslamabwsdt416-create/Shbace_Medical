@@ -167,14 +167,13 @@ window.__shbQBVersionState={
   var activeId=null;
   try{if(appPage==='questions'){var current=filtered()[qs.idx];if(current)activeId=current.id;}}catch(e){}
   var pc=document.getElementById('phoneContent');
-  var appScroll=document.querySelector('#phoneContent .app-scroll');
   var review={};try{review={tab:srTab,run:!!srRun,bank:SRBANK}}catch(e){}
   return {
    version:1,appPage:appPage,mode:mode,slide:slide,selectedGrade:selectedGrade,guideTab:guideTab,
    qs:JSON.parse(JSON.stringify(qs)),
    search:{gq:gq,gBank:gBank,gSpec:gSpec,gTag:gTag,gSrc:gSrc,gTopic:gTopic,gSys:gSys,gSort:gSort,gLim:gLim},
    review:review,activeQuestionId:activeId,
-   scroll:{windowY:window.scrollY||document.documentElement.scrollTop||0,phoneY:pc?pc.scrollTop:0,appScrollY:appScroll?appScroll.scrollTop:0}
+   scroll:{windowY:window.scrollY||document.documentElement.scrollTop||0,phoneY:pc?pc.scrollTop:0}
   };
  },
  restore:function(state){
@@ -196,9 +195,7 @@ window.__shbQBVersionState={
    renderAppDemo();
    function restoreScroll(){
     var pc=document.getElementById('phoneContent');
-    var appScroll=document.querySelector('#phoneContent .app-scroll');
     if(pc&&state.scroll&&Number.isFinite(state.scroll.phoneY))pc.scrollTop=state.scroll.phoneY;
-    if(appScroll&&state.scroll&&Number.isFinite(state.scroll.appScrollY))appScroll.scrollTop=state.scroll.appScrollY;
     if(state.scroll&&Number.isFinite(state.scroll.windowY))window.scrollTo(0,state.scroll.windowY);
     if(state.activeQuestionId&&appPage==='questions'&&(!state.scroll||!state.scroll.phoneY)){
      var q=document.getElementById('qc-'+state.activeQuestionId);if(q)q.scrollIntoView({block:'start'});
@@ -3307,7 +3304,7 @@ window.shbaceEnablePush=async function(){
 
 /* Unit 11: versioned, integrity-checked backup of all app-prefixed student stores,
    including the separate Quiz History store. Never includes the static QB data script. */
-const U11_EXCLUDED_KEYS=new Set(['shbace_splash_completed_session_v1','shbace_fcm_token_v1','shbace_push_auth_v1','shbace_question_bank_version','shbace_app_resume_session_v1']);
+const U11_EXCLUDED_KEYS=new Set(['shbace_splash_completed_session_v1','shbace_fcm_token_v1','shbace_push_auth_v1','shbace_question_bank_version']);
 function u11DataKeys(){const keys=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('shbace_')&&!U11_EXCLUDED_KEYS.has(k)&&!/token|secret|credential/i.test(k))keys.push(k)}return keys.sort()}
 function u11Capture(){const stores={};u11DataKeys().forEach(k=>{const v=localStorage.getItem(k);if(v!==null)stores[k]=v});return stores}
 function u11Checksum(stores){const payload=Object.keys(stores).sort().map(k=>k+'\u0000'+stores[k]).join('\u0001');let h=2166136261;for(let i=0;i<payload.length;i++){h^=payload.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(16).padStart(8,'0')}
@@ -3499,62 +3496,5 @@ PAGES.notifs=notifsView;PAGES.settings=settingsView;
 /* Push setup guidance is intentionally explicit: this HTML has no Firebase project,
    native Android folder, google-services.json or deployed backend endpoint to bind. */
 
-
-/* iOS PWA lifecycle recovery:
-   iOS may evict a suspended WebKit page under memory pressure. Persist only the current UI route/filter/scroll snapshot;
-   question answers, quiz attempts, Smart Review and settings continue using their existing stores. */
-(function(){
- const RESUME_KEY='shbace_app_resume_session_v1';
- const RESUME_MAX_AGE=24*60*60*1000;
- let restoring=false,lastSnapshot='',lastSavedAt=0;
- function saveSession(force){
-  if(restoring||mode!=='app'||!window.__shbQBVersionState||typeof window.__shbQBVersionState.capture!=='function')return false;
-  try{
-   const state=window.__shbQBVersionState.capture();
-   if(!state||state.mode!=='app'||typeof state.appPage!=='string')return false;
-   const encoded=JSON.stringify(state);
-   if(!force&&encoded===lastSnapshot&&Date.now()-lastSavedAt<10*60*1000)return true;
-   const savedAt=Date.now();
-   localStorage.setItem(RESUME_KEY,JSON.stringify({schema:1,savedAt:savedAt,state:state}));
-   lastSnapshot=encoded;lastSavedAt=savedAt;
-   return true;
-  }catch(e){console.warn('Shbace session snapshot could not be saved:',e);return false}
- }
- function restoreSession(){
-  let record;
-  try{
-   const raw=localStorage.getItem(RESUME_KEY);
-   if(!raw)return false;
-   record=JSON.parse(raw);
-   if(!record||record.schema!==1||!Number.isFinite(record.savedAt)||!record.state||record.state.mode!=='app'||typeof record.state.appPage!=='string')return false;
-   if(Date.now()-record.savedAt>RESUME_MAX_AGE){localStorage.removeItem(RESUME_KEY);return false}
-   if(!window.__shbQBVersionState||typeof window.__shbQBVersionState.restore!=='function')return false;
-   restoring=true;
-   const ok=window.__shbQBVersionState.restore(record.state)===true;
-   if(ok){lastSnapshot=JSON.stringify(record.state);lastSavedAt=record.savedAt;}
-   return ok;
-  }catch(e){console.warn('Shbace session snapshot could not be restored:',e);return false}
-  finally{restoring=false}
- }
- const baseRender=window.renderAppDemo;
- if(typeof baseRender==='function'){
-  window.renderAppDemo=function(){
-   const result=baseRender.apply(this,arguments);
-   if(!restoring)saveSession(false);
-   return result;
-  };
- }
- const saveOnLeave=()=>saveSession(true);
- document.addEventListener('visibilitychange',()=>{if(document.hidden)saveOnLeave()});
- window.addEventListener('pagehide',saveOnLeave);
- window.addEventListener('blur',saveOnLeave);
- document.addEventListener('freeze',saveOnLeave);
- document.addEventListener('pause',saveOnLeave,false);
- /* A periodic checkpoint covers iOS WebKit process eviction when pagehide is not delivered. */
- setInterval(()=>{if(mode==='app'&&!document.hidden)saveSession(false)},2000);
- window.__shbRestoreAppSession=restoreSession;
- window.__shbSaveAppSession=saveOnLeave;
- window.__shbClearAppSession=function(){try{localStorage.removeItem(RESUME_KEY);lastSnapshot='';lastSavedAt=0}catch(e){}};
-})(); 
 })();
 })();

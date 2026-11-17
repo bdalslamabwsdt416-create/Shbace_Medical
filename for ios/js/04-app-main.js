@@ -366,22 +366,14 @@ const splashPreReady=()=>splashLoadAt>0&&performance.now()-splashLoadAt>700&&per
 function launchExperience(){
  /* Warm up artwork while the seven-second splash is visible. */
  try{[IMG.iconBig,IMG.icon].forEach(src=>{if(!src)return;const im=new Image();im.src=src;im.decode&&im.decode().catch(()=>{})})}catch(e){}
- let dailyTipAdvanced=false;
- function advanceDailyTip(){if(dailyTipAdvanced)return;dailyTipAdvanced=true;try{const raw=localStorage.getItem('shbace_home_tip_index_v3');activeDailyTip=(Number(raw||'-1')+1)%5;localStorage.setItem('shbace_home_tip_index_v3',String(activeDailyTip));}catch(e){}}
+ try{const raw=localStorage.getItem('shbace_home_tip_index_v3');activeDailyTip=(Number(raw||'-1')+1)%5;localStorage.setItem('shbace_home_tip_index_v3',String(activeDailyTip));}catch(e){}
  const overlay=document.getElementById('startupSplash');
  if(!overlay){
-  if(window.__shbBooted===true){
-   if(typeof window.__shbRestoreAppSession==='function'&&window.__shbRestoreAppSession())return;
-   advanceDailyTip();routeAfterSplash();return;
-  }
-  document.addEventListener('shb-scripts-ready',function(){
-   if(window.__shbBooted!==true)return;
-   if(typeof window.__shbRestoreAppSession==='function'&&window.__shbRestoreAppSession())return;
-   advanceDailyTip();routeAfterSplash();
-  },{once:true});
+  if(window.__shbBooted===true){routeAfterSplash();return;}
+  document.addEventListener('shb-scripts-ready',function(){if(window.__shbBooted===true)routeAfterSplash()},{once:true});
   return;
  }
- /* Fresh starts show the startup Splash. A saved iOS app session is restored above it without replaying the Splash. */
+ /* The startup splash is replayed for every app document load. Automatic update checks have their own seven-day clock. */
  splashDeadline=(function(){const e=window.__spEcg;return Date.now()-((e&&e.t0!==null)?Math.max(0,performance.now()-e.t0):0)})()+SPLASH_DURATION_MS;      /* end of the 7 s hold (same clock as the ECG head); the transition starts here */
  splashFinalized=false;splashRouteDone=false;spBeats=0;
  startSplashHaptics();
@@ -393,16 +385,6 @@ function launchExperience(){
    splashCompletionTimer=window.setTimeout(tick,100);
    return;
   }
-  /* iOS may discard a background PWA WebKit process. Restore its last app page immediately instead of replaying the startup Splash. */
-  if(typeof window.__shbRestoreAppSession==='function'&&window.__shbRestoreAppSession()){
-   splashFinalized=true;splashRouteDone=true;
-   clearTimeout(splashCompletionTimer);splashCompletionTimer=null;
-   cancelSplashHaptics();
-   if(overlay&&overlay.isConnected)overlay.remove();
-   splashPre=false;
-   return;
-  }
-  advanceDailyTip();
   const remaining=splashDeadline-Date.now();
   if(!splashRouteDone&&(remaining<=SPLASH_PRE_MS||splashPreReady())){splashRouteDone=true;splashPre=true;routeAfterSplash();}   /* draw Onboarding / Home under the opaque splash: as soon as every script has loaded (early, so the heavy build never lands in the last ECG sweep); 0.9 s before the end at the latest */
   if(remaining<=0){whenSplashEcgDone(()=>completeSplashOnce(overlay));return;}
