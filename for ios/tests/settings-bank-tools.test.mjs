@@ -53,7 +53,7 @@ test('question cards in the iOS bank receive Share, Copy and Read aloud controls
   assert.ok(voice.includes('computerVoiceToggleQuestionReadAloud(qcard,qtext,questionTool)'));
   assert.ok(voice.includes('computerVoiceCopyQuestion(qtext)'));
   assert.ok(voice.includes('computerVoiceShareQuestion(qtext)'));
-  assert.ok(voice.includes('new MutationObserver(function(){mountVoiceSettings();computerVoiceDecorateQuestions()}'));
+  assert.ok(voice.includes('new MutationObserver(function(){mountVoiceSettings();scheduleQuestionDecoration()}'));
   assert.ok(features.includes('function u11DataKeys()') && features.includes("k.startsWith('shbace_')"),
     'the new question-tools preference is included in the existing app-prefixed backup');
 });
@@ -110,4 +110,91 @@ test('iOS loads shared voice and bank controls without importing Android-only sc
   assert.ok(index.indexOf('js/09-app-features-v6.js') < index.indexOf('js/29-reviewed-bank-controls.js'));
   assert.ok(index.indexOf('js/29-reviewed-bank-controls.js') < index.indexOf('js/33-unified-voice.js'));
   assert.ok(index.indexOf('js/33-unified-voice.js') < index.indexOf('js/36-exam-planner-settings-smartreview.js'));
+});
+
+function questionToolbarHarness() {
+  const state = { toolbar: null, created: 0, removed: 0 };
+  const stem = {
+    insertAdjacentElement(position, element) {
+      assert.equal(position, 'afterend');
+      state.toolbar = element;
+    }
+  };
+  const card = {
+    querySelector(selector) {
+      if (selector === '.shb-question-tools') return state.toolbar;
+      if (selector === '.qstem') return stem;
+      return null;
+    }
+  };
+  const host = { querySelectorAll: () => [card] };
+  const document = {
+    querySelector(selector) { return selector === '#phoneContent' ? host : null; },
+    createElement() {
+      state.created++;
+      return {
+        dataset: {},
+        setAttribute() {},
+        remove() {
+          state.removed++;
+          if (state.toolbar === this) state.toolbar = null;
+        }
+      };
+    }
+  };
+  const prefs = { shareQuestion: true, copyQuestion: true, readAloud: true };
+  const api = vm.runInNewContext(
+    extractFunction(voice, 'computerVoiceDecorateQuestions') +
+      String.fromCharCode(10) + '({computerVoiceDecorateQuestions})',
+    { document, computerQuestionTools: prefs }
+  );
+  return { state, prefs, api };
+}
+
+test('question toolbar decoration is idempotent and only rebuilds when preferences change', () => {
+  const { state, prefs, api } = questionToolbarHarness();
+  api.computerVoiceDecorateQuestions();
+  const first = state.toolbar;
+  assert.ok(first);
+  assert.equal(first.dataset.sig, '1:1:1');
+  api.computerVoiceDecorateQuestions();
+  assert.equal(state.toolbar, first, 'unchanged toolbar must be preserved');
+  assert.equal(state.created, 1, 'a second pass must not create another toolbar');
+  assert.equal(state.removed, 0, 'a second pass must not remove the existing toolbar');
+
+  prefs.readAloud = false;
+  api.computerVoiceDecorateQuestions();
+  assert.notEqual(state.toolbar, first, 'changed settings create a new toolbar');
+  assert.equal(state.created, 2);
+  assert.equal(state.removed, 1);
+
+  prefs.shareQuestion = false;
+  prefs.copyQuestion = false;
+  api.computerVoiceDecorateQuestions();
+  assert.equal(state.toolbar, null, 'no toolbar remains when every action is disabled');
+  assert.equal(state.created, 2);
+  assert.equal(state.removed, 2);
+});
+
+test('question decoration requests are coalesced into one animation frame', () => {
+  const frames = [];
+  const calls = [];
+  const sandbox = {
+    window: { requestAnimationFrame(callback) { frames.push(callback); return frames.length; } },
+    computerVoiceDecorateQuestions() { calls.push('decorate'); },
+    setTimeout
+  };
+  const api = vm.runInNewContext(
+    'var questionDecorationScheduled=false;' + String.fromCharCode(10) +
+      extractFunction(voice, 'scheduleQuestionDecoration') + String.fromCharCode(10) +
+      '({scheduleQuestionDecoration})',
+    sandbox
+  );
+  api.scheduleQuestionDecoration();
+  api.scheduleQuestionDecoration();
+  api.scheduleQuestionDecoration();
+  assert.equal(frames.length, 1, 'many observer callbacks in one frame schedule one decoration pass');
+  frames[0]();
+  assert.deepEqual(calls, ['decorate']);
+  assert.ok(voice.includes('new MutationObserver(function(){mountVoiceSettings();scheduleQuestionDecoration()}'));
 });
