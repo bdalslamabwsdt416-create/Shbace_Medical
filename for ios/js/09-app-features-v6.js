@@ -1888,10 +1888,61 @@ function settingsView(){
  <div class="card setcard"><h3>Onboarding</h3>
   <div class="setrow"><b>First Onboarding Page</b><small>When ON, the welcome page is shown at app start. Turn it OFF to skip it.</small><button type="button" class="drsw ${SET.obFirst==='on'?'on':''}" role="switch" aria-checked="${SET.obFirst==='on'}" aria-label="First Onboarding Page" onclick="setSet('obFirst','${SET.obFirst==='on'?'off':'on'}')"><i></i><span>${SET.obFirst==='on'?'ON':'OFF'}</span></button></div>
   <div class="setrow"><b>Last Onboarding Page</b><small>When ON, the final “Your journey starts here” page is shown at app start. Turn it OFF to skip it.</small><button type="button" class="drsw ${SET.obLast==='on'?'on':''}" role="switch" aria-checked="${SET.obLast==='on'}" aria-label="Last Onboarding Page" onclick="setSet('obLast','${SET.obLast==='on'?'off':'on'}')"><i></i><span>${SET.obLast==='on'?'ON':'OFF'}</span></button></div></div>
+
+ <div class="card setcard" id="shbAppUpdates"><h3>App updates</h3>
+  <p class="meta">Automatic update checks run every seven days. You can also check manually at any time.</p>
+  <button type="button" class="btn primary block" id="shbaceSettingsUpdateButton" onclick="shbaceSettingsCheckForUpdates(this)">Check for updates</button>
+  <p class="meta" id="shbaceSettingsUpdateStatus" role="status" aria-live="polite">Manual checks look for changed files. Your answers, notes and study progress remain saved.</p></div>
  <input type="file" id="bkFile" accept=".json,application/json" hidden onchange="restoreBackup(this)">
  <div class="card setcard"><h3>Study progress</h3><p class="meta">${n} answered · ${ok} correct</p><p class="meta">Reset clears answers and progress only. Saved questions, notes, reports and Smart Review are kept.</p>
   ${resetScopeHTML()}
   <div class="setrow"><b>Reset everything</b><button type="button" class="btn danger block" style="margin-top:10px" ${n?'':'disabled'} onclick="resetAllAsk()">Reset all study progress${n?` (${n})`:''}</button></div></div></div>`}
+
+window.shbaceSettingsCheckForUpdates=async function(button){
+ const btn=button||document.getElementById('shbaceSettingsUpdateButton');
+ const status=document.getElementById('shbaceSettingsUpdateStatus');
+ if(!btn||!status)return false;
+ if(btn.dataset.checking==='1')return false;
+ btn.dataset.checking='1';btn.disabled=true;btn.textContent='Checking…';
+ status.textContent='Checking the installed app and the latest release…';
+ try{
+  if(typeof window.shbaceCheckForUpdate!=='function'){
+   status.textContent='The update checker is not ready. Close and reopen Shbace Medical, then try again.';
+   return false;
+  }
+  const result=await window.shbaceCheckForUpdate();
+  switch(result&&result.state){
+   case 'latest':
+    status.textContent='Shbace Medical is up to date.';
+    break;
+   case 'update':
+    status.textContent='An update is available. Review the update panel and choose Update now to install it.';
+    break;
+   case 'offline':
+    status.textContent='The update server could not be reached. Connect to the internet and try again.';
+    break;
+   case 'busy':
+    status.textContent='An update check or installation is already running.';
+    break;
+   case 'unsupported':
+    status.textContent='Open the installed Shbace Medical app from your Home Screen to check for updates.';
+    break;
+   case 'setup':
+    status.textContent='The offline package needs to be installed or repaired. Follow the instructions shown on screen.';
+    break;
+   default:
+    status.textContent='The update check did not return a result. Please try again.';
+  }
+  return result;
+ }catch(error){
+  console.error('Manual app update check failed:',error);
+  status.textContent='The update check failed. Please try again when the app is online.';
+  return false;
+ }finally{
+  btn.dataset.checking='0';btn.disabled=false;btn.textContent='Check for updates';
+ }
+};
+
 const rsPool=()=>QB.filter(q=>bankOk(q,rBank)&&(rSys==='all'||q.spec===rSys)&&(!rTop||q.topic===rTop));
 const rsSort=(a,b)=>String(a[1]).localeCompare(String(b[1]));
 function rsSystems(){const m=new Map();QB.forEach(q=>{if(bankOk(q,rBank)&&!m.has(q.spec))m.set(q.spec,SPEC_NAME[q.spec]||q.spec)});return [...m].sort(rsSort)}
