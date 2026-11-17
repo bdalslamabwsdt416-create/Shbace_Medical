@@ -1791,14 +1791,14 @@
     },
     {
       "path": "js/06-drawer-menu.js",
-      "bytes": 4056,
-      "sha256": "80421d5da9893c474a8a94b5e17b28b8b19ead38ca97ac143c5756eb4b566929",
+      "bytes": 4038,
+      "sha256": "361f26b2c6a65c810ec2f66f070c22c8e2e862d6b712e8b162d416d0f9a7a7d6",
       "group": "app"
     },
     {
       "path": "js/07-returning-student-migration.js",
-      "bytes": 4394,
-      "sha256": "15ec15164f14efbf9d39f53b2b1558839d30741dbdab84d82b3ac8fbda4835d7",
+      "bytes": 4301,
+      "sha256": "fa3359d2b33eec211c4e69c653f23f9fba0407228a7960aae8919b042c3daf05",
       "group": "app"
     },
     {
@@ -1809,8 +1809,8 @@
     },
     {
       "path": "js/09-app-features-v6.js",
-      "bytes": 435920,
-      "sha256": "4b05f522870a72dbe9efd04c3d47b6ad902627bf54044d5937854efa9329a228",
+      "bytes": 435919,
+      "sha256": "84972a3fd4c83a5119996b881eafa6ade51a500aaf0fd08b42a40444a4c5df05",
       "group": "app"
     },
     {
@@ -1875,8 +1875,8 @@
     },
     {
       "path": "js/20-drawer-order-v12.js",
-      "bytes": 1296,
-      "sha256": "4fc4ffc32d4288a7795522966d15f8ebe071dca8ede79a8b70b67c04b248ed84",
+      "bytes": 1280,
+      "sha256": "94d7c44dedb17b4151f785a6ea20f271b644be9d3ec7e82b4f6b0fd25648b44e",
       "group": "app"
     },
     {
@@ -2031,8 +2031,8 @@
     }
   ],
   "fileCount": 338,
-  "totalBytes": 30025661,
+  "totalBytes": 30025533,
   "releaseVersion": "1.4.15",
-  "version": "19686fa33b2b9175f536e8c2e698f79417e470cbffae3a3570faee31b00a8f26",
+  "version": "01e72f911c1fede3b52c2bd543572d7b0d3fb3268764ffd7d166b746ee0bdca7",
   "generatedAt": "2026-11-17T11:42:45.728Z"
 }

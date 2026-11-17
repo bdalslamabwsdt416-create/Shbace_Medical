@@ -15,6 +15,7 @@ const html = read('index.html');
 const pkg = JSON.parse(read('package.json'));
 const pwa = JSON.parse(read('pwa-version.json'));
 const offlineManifest = JSON.parse(read('offline-assets-manifest.json'));
+const drawerMenuBase = read('js/06-drawer-menu.js');
 const drawerOrder = read('js/20-drawer-order-v12.js');
 const drawerRuntime = read('js/07-returning-student-migration.js');
 const drawerFeatures = read('js/09-app-features-v6.js');
@@ -252,12 +253,16 @@ test('behavior: mismatch applies network-first to every script, style and naviga
   }
 });
 
-test('iOS drawer matches To Me grouping while preserving close control and manual App updates', () => {
-  assert.ok(!drawerOrder.includes("['Updates'"), 'there must not be a separate Updates section');
-  assert.ok(drawerOrder.includes("['App & support',['Notifications','Settings','Contact & Feedback','Changelog','About','Rate this app'].map(pick).filter(Boolean)]"),
-    'Notifications must stay available under App & support');
-  assert.ok(drawerRuntime.includes('dr-x dr2-x'), 'the iPhone drawer close control must remain available');
-  assert.ok(drawerFeatures.includes('id="shbAppUpdates"'), 'the App updates settings card must remain visible');
+test('iOS copies the latest To Me drawer and settings while retaining the iOS manual update control', () => {
+  assert.ok(!drawerOrder.includes("['Updates'"), 'the separate Updates section must be absent like To Me');
+  assert.ok(drawerOrder.includes("['App & support',['Settings','Contact & Feedback','Changelog','About','Rate this app'].map(pick).filter(Boolean)]"),
+    'App & support grouping must match To Me');
+  assert.ok(drawerRuntime.includes('dr-top2') && drawerRuntime.includes('dr-body') && drawerRuntime.includes('dr-foot'),
+    'the copied To Me side drawer must be present');
+  assert.ok(!drawerRuntime.includes('dr-x dr2-x'), 'the copied To Me drawer must not add the retired close button');
+  assert.ok(drawerMenuBase.includes("hdrTap('Notifications')") && drawerFeatures.includes('PAGES.notifs=notifsView'),
+    'the notification header route must remain available');
+  assert.ok(drawerFeatures.includes('id="shbAppUpdates"'), 'the iOS App updates settings card must remain visible');
   assert.ok(drawerFeatures.includes('onclick="shbaceSettingsCheckForUpdates(this)"'), 'manual update action must remain wired');
   assert.ok(drawerFeatures.includes('window.shbaceCheckForUpdate()'), 'manual update checker must remain connected');
 });
