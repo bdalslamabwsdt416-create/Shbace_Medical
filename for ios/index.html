@@ -361,17 +361,54 @@
  var dataText=null,dataErr=null;
  /* v1.1: Original is the immutable college bank. Reviewed is assembled from the small verified patch plus review-log-only cautions. */
  var dataFetch=(function(){
-  if(!window.fetch)return Promise.reject(new Error('no fetch'));
+  if(!window.caches)return Promise.reject(new Error('Cache Storage is unavailable'));
   function markReady(){try{performance.mark('shb-qb-data-ready')}catch(e){}}
-  function refresh(url,cache){if(!cache)return;fetch(url,{cache:'no-cache'}).then(function(r){if(r.ok)return cache.put(url,r.clone())}).catch(function(){});}
-  function fetchText(url,cache){
-   if(!cache)return fetch(url,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(url+' HTTP '+r.status);return r.text()});
-   return cache.match(url).then(function(hit){
-    if(hit){refresh(url,cache);return hit.text();}
-    return fetch(url,{cache:'no-cache'}).then(function(r){
-     if(!r.ok)throw new Error(url+' HTTP '+r.status);
-     var copy=r.clone();
-     return r.text().then(function(t){cache.put(url,copy).catch(function(){});return t;});
+  /* Match the verified offline-package cache first. The package installer stores qbData here,
+     not in the legacy data cache opened below. Never require a network round-trip for an installed package. */
+  var PACKAGE_CACHE_NAME='shbace-medical-offline-v2';
+  function bounded(promise,ms,label){
+   return new Promise(function(resolve,reject){
+    var settled=false,timer=setTimeout(function(){if(settled)return;settled=true;reject(new Error(label+' timed out after '+ms+'ms'));},ms);
+    Promise.resolve(promise).then(function(value){if(settled)return;settled=true;clearTimeout(timer);resolve(value);},function(error){if(settled)return;settled=true;clearTimeout(timer);reject(error);});
+   });
+  }
+  function cacheHit(cache,url,label){
+   if(!cache)return Promise.resolve(null);
+   return bounded(cache.match(url),10000,label+' cache lookup').then(function(hit){
+    return hit?bounded(hit.text(),20000,label+' cached read'):null;
+   });
+  }
+  function hasVerifiedPackage(){
+   return new Promise(function(resolve){
+    if(!window.indexedDB){resolve(false);return}
+    var settled=false,timer=setTimeout(function(){finish(false)},2500);
+    function finish(v){if(settled)return;settled=true;clearTimeout(timer);resolve(v)}
+    var req;try{req=indexedDB.open('shbace-medical-offline-state-v1',1)}catch(e){finish(false);return}
+    req.onupgradeneeded=function(){if(!req.result.objectStoreNames.contains('meta'))req.result.createObjectStore('meta')};
+    req.onerror=function(){finish(false)};
+    req.onsuccess=function(){
+     var db=req.result;
+     try{
+      var tx=db.transaction('meta','readonly'),s=tx.objectStore('meta'),a=s.get('installed'),b=s.get('ready');
+      tx.oncomplete=function(){
+       var x=a.result,y=b.result,file=x&&x.files&&x.files['index.html'];
+       var valid=!!(x&&y&&x.verified===true&&y.verified===true&&x.version&&x.version===y.version&&file&&/^[a-f0-9]{64}$/.test(String(file.sha256||''))&&Number(file.bytes)>0);
+       try{db.close()}catch(e){}finish(valid);
+      };
+      tx.onerror=tx.onabort=function(){try{db.close()}catch(e){}finish(false)};
+     }catch(e){try{db.close()}catch(x){}finish(false)}
+    };
+   });
+  }
+  function fetchText(url,cache,packageCache,verified){
+   var absolute=new URL(url,document.baseURI).href;
+   return cacheHit(packageCache,absolute,url+' offline package').then(function(packaged){
+    if(packaged!==null)return packaged;
+    return cacheHit(cache,absolute,url+' data cache').then(function(cached){
+     if(cached!==null)return cached;
+     if(verified)throw new Error(url+' is missing from the installed offline storage');
+     return bounded(fetch(absolute,{credentials:'same-origin'}),30000,url+' first-install download')
+      .then(function(response){if(!response||!response.ok)throw new Error(url+' first-install request failed');return bounded(response.text(),20000,url+' network read')});
     });
    });
   }
@@ -400,14 +437,19 @@
    markReady();
    return JSON.stringify(base);
   }
-  return (window.caches?caches.open('shbace-data-v1-1').catch(function(){return null}):Promise.resolve(null)).then(function(cache){
-   var baseURL='data/qbData.json';
-   if(selectedQB!=='reviewed')return fetchText(baseURL,cache).then(function(t){dataText=t;markReady();});
-   return Promise.all([
-    fetchText(baseURL,cache),
-    fetchText('data/qbData_reviewed_patch.json',cache),
-    fetchText('data/qbData_review_log.json',cache)
-   ]).then(function(items){dataText=assembleReviewed(items[0],items[1],items[2]);});
+  return Promise.all([
+   (window.caches?bounded(caches.open(PACKAGE_CACHE_NAME),10000,'offline package cache open').catch(function(e){console.warn('shb-boot: package cache unavailable',e);return null;}):Promise.resolve(null)),
+   (window.caches?bounded(caches.open('shbace-data-v1-1'),10000,'data cache open').catch(function(){return null;}):Promise.resolve(null))
+  ]).then(function(cachesOpened){
+   var packageCache=cachesOpened[0],cache=cachesOpened[1],baseURL='data/qbData.json';
+   return hasVerifiedPackage().then(function(verified){
+    if(selectedQB!=='reviewed')return fetchText(baseURL,cache,packageCache,verified).then(function(t){dataText=t;markReady();});
+    return Promise.all([
+     fetchText(baseURL,cache,packageCache,verified),
+     fetchText('data/qbData_reviewed_patch.json',cache,packageCache,verified),
+     fetchText('data/qbData_review_log.json',cache,packageCache,verified)
+    ]).then(function(items){dataText=assembleReviewed(items[0],items[1],items[2]);});
+   });
   }).catch(function(e){dataErr=e;console.error('Shbace question bank load failed',e);});
  })();
  try{performance.mark('shb-boot-start')}catch(e){}
@@ -449,7 +491,7 @@
   panel.id='shb-boot-failure';
   panel.setAttribute('role','alert');
   panel.style.cssText='position:fixed;z-index:2147483647;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px;background:#071321;color:#f4f8ff;font:16px system-ui;text-align:center';
-  panel.innerHTML='<h2 style="margin:0">Shbace Medical could not finish loading</h2><p style="max-width:520px;line-height:1.6">A required app component did not load. Your saved answers and progress have not been changed. Check your connection, then try again.</p><button type="button" style="border:0;border-radius:12px;padding:13px 24px;background:#1d9bf0;color:white;font-weight:700" onclick="location.reload()">Retry loading</button>';
+  panel.innerHTML='<h2 style="margin:0">Shbace Medical could not finish loading</h2><p style="max-width:520px;line-height:1.6">A required app file is missing from local storage. Your saved answers and progress have not been changed. Open Settings → App updates to check or repair the offline package.</p><button type="button" style="border:0;border-radius:12px;padding:13px 24px;background:#1d9bf0;color:white;font-weight:700" onclick="location.reload()">Retry loading</button>';
   document.body.appendChild(panel);
  }
  /* Fetch every deferred module in parallel, but keep execution ordered below.
@@ -508,8 +550,19 @@
  function go(){if(started||!domReady||!painted)return;started=true;clearTimeout(T);
   dataFetch.then(function(){
    var q=document.getElementById('qbData');
-   if(q&&dataText!=null)q.textContent=dataText;
-   else console.error('shb-boot: question bank missing',dataErr);
+   if(!q||dataText==null){
+    console.error('shb-boot: required question bank is unavailable',dataErr);
+    window.__shbBooted=false;
+    var panel=document.getElementById('shb-boot-failure');
+    if(!panel){
+     panel=document.createElement('section');panel.id='shb-boot-failure';panel.setAttribute('role','alert');
+     panel.style.cssText='position:fixed;z-index:2147483647;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px;background:#071321;color:#f4f8ff;font:16px system-ui;text-align:center';
+     panel.innerHTML='<h2 style="margin:0">Shbace Medical could not load the question bank</h2><p style="max-width:520px;line-height:1.6">The question-bank files are not readable in local storage. Your saved answers and progress have not been changed. Open Settings → App updates to check or repair the offline package.</p><button type="button" style="border:0;border-radius:12px;padding:13px 24px;background:#1d9bf0;color:white;font-weight:700" onclick="location.reload()">Retry loading</button>';
+     document.body.appendChild(panel);
+    }
+    return;
+   }
+   q.textContent=dataText;
    dataText=null;run()
   })
  }

@@ -10,13 +10,13 @@ var CACHE_NAME='shbace-medical-offline-v2';
 var STAGING_NAME='shbace-staging-offline';
 var INSTALLED_KEY='installed';
 /* Silent scheduled checks run no more than once per 7 days after a successful network check. Failures retry on the next launch. */
-var CHECK_OK_KEY='shbace_pkg_check_ok_v1';
+var CHECK_OK_KEY='shbace_pkg_check_ok_v1',CHECK_ATTEMPT_KEY='shbace_pkg_check_attempt_v1';
 var MIGRATION_KEY='shbace_ios_migrated_1_4_14';
 var CHECK_EVERY=7*24*60*60*1000;
 var PENDING_KEY='shbace_pkg_update_pending_v1',REPAIR_PENDING_KEY='shbace_pkg_repair_pending_v1',NOTIF_ID='update-available';
 var manifestFromNetwork=false,plan=null,migrationInProgress=false,migrationPendingAtLaunch=false,scheduledCheckInProgress=false;
 var DB_NAME='shbace-medical-offline-state-v1';
-var MANIFEST_FETCH_TIMEOUT=30000,MANIFEST_FETCH_ATTEMPTS=2;
+var MANIFEST_FETCH_TIMEOUT=30000,MANIFEST_FETCH_ATTEMPTS=2,UPDATE_HEADER='X-Shbace-Update-Check';
 var MANIFEST_URL=new URL('./offline-assets-manifest.json',location.href).href;
 var READY_URL=new URL('./__shbace_offline_ready__',location.href).href;
 var manifest=null,cache=null,ui=null,started=false;
@@ -64,7 +64,7 @@ function fetchVersionInfo(){
   var done=false;function fin(v){if(!done){done=true;resolve(v)}}
   setTimeout(function(){fin(null)},6000);
   try{
-   fetch(new URL('./pwa-version.json',location.href).href,{cache:'no-store',credentials:'same-origin'}).then(function(r){if(!r.ok)throw new Error('http');return r.json()}).then(function(j){
+   fetch(new URL('./pwa-version.json',location.href).href,{cache:'no-store',credentials:'same-origin',headers:{'X-Shbace-Update-Check':'1'}}).then(function(r){if(!r.ok)throw new Error('http');return r.json()}).then(function(j){
     var notes=Array.isArray(j.summary)?j.summary:(typeof j.summary==='string'&&j.summary?[j.summary]:(Array.isArray(j.releaseNotes)?j.releaseNotes.slice(0,3):[]));
     fin({version:String(j.version||''),displayVersion:String(j.displayVersion||j.version||''),releaseDate:String(j.releaseDate||''),
      notes:notes.slice(0,3).map(function(x){x=String(x);return x.length>150?x.slice(0,147)+'…':x})});
@@ -75,7 +75,7 @@ function fetchVersionInfo(){
 function rememberInstalled(info){if(info)lsSetJson(VER_KEY,{displayVersion:info.displayVersion,releaseDate:info.releaseDate})}
 function markInstalledNow(){
  var av=lsGetJson(VER_AVAIL_KEY);
- if(av){rememberInstalled(av);lsDel(VER_AVAIL_KEY)}else fetchVersionInfo().then(rememberInstalled);
+ if(av){rememberInstalled(av);lsDel(VER_AVAIL_KEY)}
 }
 /* True when any saved exam is today or within the next EXAM_QUIET_DAYS days: the automatic window stays quiet (the bell still shows the update). */
 function examSoon(){
@@ -225,6 +225,18 @@ function dbPut(store,key,value){
   });
  });
 }
+function dbPutInstalled(record,ready){
+ return db().then(function(database){
+  return new Promise(function(resolve,reject){
+   var tx=database.transaction('meta','readwrite');
+   tx.objectStore('meta').put(record,INSTALLED_KEY);
+   tx.objectStore('meta').put(ready,'ready');
+   tx.oncomplete=function(){resolve(true)};
+   tx.onerror=function(){reject(tx.error||new Error('Could not commit the verified installation.'))};
+   tx.onabort=function(){reject(tx.error||new Error('Verified installation commit was interrupted.'))};
+  });
+ });
+}
 function hashBytes(bytes){
  if(!window.crypto||!crypto.subtle)throw new Error('Secure file verification is unavailable. Open the installed app over HTTPS.');
  return crypto.subtle.digest('SHA-256',bytes).then(function(hash){
@@ -278,18 +290,24 @@ function cleanupPreviousCaches(){
   });
  });
 }
-function loadManifest(){
+function loadManifest(allowNetwork){
  return caches.open(CACHE_NAME).then(function(c){
   /* Fresh list first; tolerate slower iOS network wake-up and retry once before using
      the last saved list. A failed network check must never erase a valid local manifest. */
   manifestFromNetwork=false;
+  if(allowNetwork!==true){
+   return c.match(MANIFEST_URL).then(function(hit){
+    if(!hit)throw new Error('The offline asset manifest is missing from local storage. Use Check for updates to repair the package.');
+    return hit.json();
+   });
+  }
   function requestNetwork(attempt){
    var ctl=null,timer=null,timedOut=false;
    try{
     ctl=new AbortController();
     timer=setTimeout(function(){timedOut=true;try{ctl.abort()}catch(e){}},MANIFEST_FETCH_TIMEOUT);
    }catch(e){}
-   return fetch(MANIFEST_URL,{credentials:'same-origin',cache:'no-store',signal:ctl?ctl.signal:undefined}).then(function(r){
+   return fetch(MANIFEST_URL,{credentials:'same-origin',cache:'no-store',headers:{'X-Shbace-Update-Check':'1'},signal:ctl?ctl.signal:undefined}).then(function(r){
     if(!r.ok)throw new Error('Offline asset manifest returned HTTP '+r.status+'.');
     var copy=r.clone();
     return r.json().then(function(data){
@@ -401,7 +419,7 @@ function fetchAndStore(file,target){
  /* Integrity downloads bypass any stale Service Worker/CDN copy; the verified bytes are stored under the canonical URL. */
  var freshTarget=url+(url.indexOf('?')>=0?'&':'?')+'__shbace_integrity='+encodeURIComponent(manifest.version+'-'+file.sha256.slice(0,16));
  function attempt(n){
-  return fetch(freshTarget,{credentials:'same-origin',cache:'reload'}).then(function(response){
+  return fetch(freshTarget,{credentials:'same-origin',cache:'reload',headers:{'X-Shbace-Update-Check':'1'}}).then(function(response){
    if(!response||!response.ok)throw new Error('HTTP '+(response?response.status:'no response'));
    return response.arrayBuffer().then(function(bytes){
     if(bytes.byteLength!==file.bytes)throw new Error('Size check failed ('+bytes.byteLength+' of '+file.bytes+' bytes).');
@@ -462,11 +480,11 @@ function fileMap(files){
  var map={};files.forEach(function(f){map[f.path]={sha256:f.sha256,bytes:f.bytes}});return map;
 }
 function saveInstalled(files){
- var record={version:manifest.version,releaseVersion:manifest.releaseVersion||'',files:fileMap(files),verified:true,fileCount:files.length,totalBytes:files.reduce(function(s,f){return s+(Number(f.bytes)||0)},0),completedAt:Date.now()};
- return dbPut('meta',INSTALLED_KEY,record).then(function(){
-  return dbPut('meta','ready',{version:manifest.version,releaseVersion:record.releaseVersion,verified:true,fileCount:record.fileCount,totalBytes:record.totalBytes,completedAt:record.completedAt});
- }).then(function(){
-  return cache.put(READY_URL,new Response(JSON.stringify({version:manifest.version,releaseVersion:record.releaseVersion,verified:true,completedAt:record.completedAt}),{status:200,headers:{'content-type':'application/json'}}));
+ var completedAt=Date.now();
+ var record={version:manifest.version,releaseVersion:manifest.releaseVersion||'',files:fileMap(files),verified:true,fileCount:files.length,totalBytes:files.reduce(function(s,f){return s+(Number(f.bytes)||0)},0),completedAt:completedAt};
+ var ready={version:record.version,releaseVersion:record.releaseVersion,verified:true,fileCount:record.fileCount,totalBytes:record.totalBytes,completedAt:completedAt};
+ return dbPutInstalled(record,ready).then(function(){
+  return cache.put(READY_URL,new Response(JSON.stringify(ready),{status:200,headers:{'content-type':'application/json'}})).catch(function(){return false});
  });
 }
 function cacheUrlSet(){
@@ -499,8 +517,8 @@ function adoptLegacy(){
   return dbPut('meta',INSTALLED_KEY,record).then(function(){return {good:good,bad:bad}});
  });
 }
-function decide(){
- return loadManifest().then(function(data){
+function decide(allowNetwork){
+ return loadManifest(allowNetwork===true).then(function(data){
   manifest=data;
   return caches.open(CACHE_NAME);
  }).then(function(c){
@@ -603,7 +621,7 @@ function runPlan(){
   /* Migration is committed only after every file is verified, copied and stale-cache cleanup succeeds. */
   finalizeVerifiedPlanCommit();
   /* A fully verified package counts as an up-to-date check: the seven-day timer restarts now. */
-  lsSet(CHECK_OK_KEY,Date.now());setPending(migrationPendingAtLaunch?1:0);markInstalledNow();
+  lsSet(CHECK_OK_KEY,Date.now());lsSet(CHECK_ATTEMPT_KEY,Date.now());setPending(migrationPendingAtLaunch?1:0);markInstalledNow();
   ui.percent.textContent='100%';ui.count.textContent=plan.files.length+' / '+plan.files.length+' files';
   ui.track.setAttribute('aria-valuenow','100');ui.bar.style.width='100%';
   ui.bytes.textContent=fmtBytes(plan.bytes)+' / '+fmtBytes(plan.bytes);
@@ -662,7 +680,7 @@ function showUpdateSheet(p,info){
  el.querySelector('#shbUpdLater').addEventListener('click',function(){
   /* "Later": ask again after SNOOZE_DAYS (the next check becomes due then). The bell notification stays. */
   migrationInProgress=false;
-  lsSet(CHECK_OK_KEY,Date.now()-(CHECK_EVERY-SNOOZE_DAYS*86400000));el.remove();
+  lsSet(CHECK_OK_KEY,Date.now()-(CHECK_EVERY-SNOOZE_DAYS*86400000));lsSet(CHECK_ATTEMPT_KEY,Date.now()-(CHECK_EVERY-SNOOZE_DAYS*86400000));el.remove();
  });
  el.querySelector('#shbUpdNow').addEventListener('click',function(){
   el.remove();showPlanNeeded(p);runPlan();
@@ -696,11 +714,13 @@ function showSetupError(error){
 
 /* Initial package discovery only. Existing installations update only through the explicit Settings action. */
 function runFullCheck(splashFinished){
- return decide().then(function(res){
+ /* This path is called only when no installed record exists: first install needs the network manifest. */
+ return decide(true).then(function(res){
   if(!res||res.kind==='none'){
    /* Only a check that really reached the server counts; offline attempts leave the timer and migration flag alone. */
-   if(manifestFromNetwork){
-    lsSet(CHECK_OK_KEY,Date.now());setPending(0);lsDel(VER_AVAIL_KEY);fetchVersionInfo().then(rememberInstalled);
+   if(manifest){
+    /* Cached setup metadata is local data, not a successful network update check. */
+    setPending(0);lsDel(VER_AVAIL_KEY);
    }
    return;
   }
@@ -727,12 +747,13 @@ function runFullCheck(splashFinished){
 }
 /* Silent scheduled update check. It inspects metadata and cache keys only: no UI, download, migration arming or plan execution. */
 function checkDue(){
- var last=lsNum(CHECK_OK_KEY);
+ var last=lsNum(CHECK_ATTEMPT_KEY)||lsNum(CHECK_OK_KEY);
  if(last>0&&Date.now()-last<CHECK_EVERY)return Promise.resolve({state:'not-due'});
  if(typeof navigator!=='undefined'&&navigator.onLine===false)return Promise.resolve({state:'offline'});
  if(scheduledCheckInProgress)return Promise.resolve({state:'busy'});
  scheduledCheckInProgress=true;
- return Promise.resolve().then(function(){return loadManifest()}).then(function(data){
+ lsSet(CHECK_ATTEMPT_KEY,Date.now());
+ return Promise.resolve().then(function(){return loadManifest(true)}).then(function(data){
   if(!manifestFromNetwork)return {state:'offline'};
   manifest=data;
   return caches.open(CACHE_NAME).then(function(c){cache=c;return dbGet('meta',INSTALLED_KEY)});
@@ -751,23 +772,30 @@ function checkDue(){
  });
 }
 function scheduleCheckDue(){
- setTimeout(function(){
-  try{
-   if(typeof window.requestIdleCallback==='function'){
-    window.requestIdleCallback(function(){checkDue()},{timeout:2500});
-    return;
-   }
-  }catch(e){}
-  checkDue();
- },1200);
+ var queued=false;
+ function afterSplash(){
+  if(queued)return;queued=true;
+  setTimeout(function(){
+   try{
+    if(typeof window.requestIdleCallback==='function'){
+     window.requestIdleCallback(function(){checkDue()},{timeout:2500});
+     return;
+    }
+   }catch(e){}
+   checkDue();
+  },1200);
+ }
+ if(window.__shbSplashComplete===true||!document.getElementById('startupSplash'))afterSplash();
+ else document.addEventListener('shb-splash-complete',afterSplash,{once:true});
 }
 /* Manual "Check for updates" (Settings). Ignores the scheduled seven-day timer and reports what happened. */
 function manualCheck(){
  if(!standalone()||!('caches' in window)||!window.crypto||!crypto.subtle||!window.indexedDB)return Promise.resolve({state:'unsupported'});
  if(started)return Promise.resolve({state:'busy'});
+ lsSet(CHECK_ATTEMPT_KEY,Date.now());
  return dbGet('meta',INSTALLED_KEY).catch(function(){return null}).then(function(record){
   migrationInProgress=!!(record&&record.files&&localStorage.getItem(MIGRATION_KEY)!=='1');
-  return decide();
+  return decide(true);
  }).then(function(res){
   if(!manifestFromNetwork){migrationInProgress=false;return {state:'offline'}}
   if(!res||res.kind==='none'){
@@ -786,8 +814,9 @@ function manualRepair(){
  if(!standalone()||!('caches' in window)||!window.crypto||!crypto.subtle||!window.indexedDB)return Promise.resolve({state:'unsupported'});
  if(typeof navigator!=='undefined'&&navigator.onLine===false)return Promise.resolve({state:'offline'});
  if(started)return Promise.resolve({state:'busy'});
+ lsSet(CHECK_ATTEMPT_KEY,Date.now());
  migrationInProgress=false;
- return decide().then(function(res){
+ return decide(true).then(function(res){
   if(!manifestFromNetwork)return {state:'offline'};
   if(res&&res.kind==='setup'&&res.plan&&res.plan.mode==='restore'){
    showPlanNeeded(res.plan);runPlan();return {state:'repair'};
