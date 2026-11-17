@@ -29,8 +29,8 @@ This branch is a reorganized working copy based on `main`. The original `version
 ## iPhone and iPad PWA experience
 
 - Install Shbace Medical from Safari with Share → Add to Home Screen, then open the home-screen app.
-- The first offline package download starts in the background after the splash; the app is not covered by a full-screen setup dialog. A compact progress chip reports installation, repair, update, or retry status.
-- The app serves verified local files first. Missing files can use a bounded network fallback while the offline package is repaired.
-- First installation and repairs download the required files in the background. Updates are staged separately, checked by byte size and SHA-256, then committed together before the app performs one safe restart.
-- Automatic update checks remain on the seven-day schedule; Settings → Check for updates remains available at any time.
+- During the first installation, the installer prepares the manifest and local storage while the ECG splash is visible. The full-screen Setup screen appears immediately after the splash and owns the complete package download and integrity verification.
+- App modules, onboarding scripts, and question-bank data remain deferred until first-install verification succeeds, so they do not compete with Setup for network bandwidth or startup resources.
+- After the first installation, the app opens from the saved local package. Repairs and updates run in the background with a compact progress chip; updates are staged, checked by byte size and SHA-256, then committed together before one safe restart.
+- Automatic update checks run every 48 hours; Settings → Check for updates can trigger a manual check at any time.
 - The existing iOS Cache Storage name (`shbace-medical-offline-v2`), IndexedDB database (`shbace-medical-offline-state-v1`), iOS home-screen icon, onboarding screens, and student progress stores are retained.
