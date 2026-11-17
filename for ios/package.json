@@ -1,6 +1,6 @@
 {
   "name": "shbace-medical",
-  "version": "1.4.11",
+  "version": "1.4.12",
   "private": true,
   "description": "Shbace Medical iOS PWA — unified shared app core with iOS-specific offline delivery",
   "scripts": {
