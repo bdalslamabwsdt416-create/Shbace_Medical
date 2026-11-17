@@ -9,6 +9,7 @@ const vm = require('node:vm');
 const root = path.resolve(__dirname, '..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const offline = read('js/29-offline-setup.js');
+const voice = read('js/33-unified-voice.js');
 const sw = read('sw.js');
 const build = read('scripts/restore-ios-packed.js');
 const html = read('index.html');
@@ -22,6 +23,14 @@ const drawerFeatures = read('js/09-app-features-v6.js');
 
 /* Execute the real service-worker fetch listener with deterministic CacheStorage,
    IndexedDB and fetch fakes. These tests assert returned bytes and network behavior. */
+function extractFunction(source, name) {
+  const start = source.indexOf('function ' + name + '(');
+  assert.ok(start >= 0, name + ' exists');
+  const end = source.indexOf(String.fromCharCode(10) + '}', start);
+  assert.ok(end > start, name + ' has a closing brace');
+  return source.slice(start, end + 2);
+}
+
 function createServiceWorkerHarness(options) {
   const scope = 'https://ios.example.test/';
   const origin = new URL(scope).origin;
@@ -135,33 +144,46 @@ function createServiceWorkerHarness(options) {
   };
 }
 
-test('one-time migration forces a network check for an installed 1.4.10-era package', () => {
-  for (const marker of [
-    "var MIGRATION_KEY='shbace_ios_migrated_1_4_14'",
-    'migrationNeeded=hasRecord&&lsNum(MIGRATION_KEY)!==1',
-    'lsDel(CHECK_OK_KEY);lsDel(CHECK_TRY_KEY)',
-    'if(navigator.onLine===false)return',
-    'if(!hasRecord||migrationNeeded||checkDue())'
-  ]) assert.ok(offline.includes(marker), 'missing migration marker: ' + marker);
+function runOfflineStartup(installedRecord) {
+  const calls = [];
+  const writes = [];
+  const sandbox = {
+    standalone: () => true,
+    document: { body: {} },
+    window: { caches: {}, crypto: { subtle: {} }, indexedDB: {} },
+    crypto: { subtle: {} },
+    waitForSplash: () => Promise.resolve(),
+    showInstallHint() {},
+    showSetupUnavailable() {},
+    dbGet: () => Promise.resolve(installedRecord),
+    INSTALLED_KEY: 'installed',
+    MIGRATION_KEY: 'shbace_ios_migrated_1_4_14',
+    lsSet(key, value) { writes.push([key, String(value)]); },
+    runFullCheck() { calls.push('first-install-check'); return Promise.resolve(); },
+    Promise
+  };
+  vm.runInNewContext(extractFunction(offline, 'start') +
+    String.fromCharCode(10) + 'start();', sandbox);
+  return new Promise(resolve => setImmediate(() => resolve({ calls, writes })));
+}
+
+test('opening an already-installed app does not schedule updates or run local repair', async () => {
+  assert.ok(!offline.includes('function checkDue('));
+  assert.ok(!offline.includes('function localRepairNeeded('));
+  assert.ok(!offline.includes('migrationInProgress'));
+  assert.ok(offline.includes("lsSet(MIGRATION_KEY,'1')"));
+  assert.ok(offline.includes('if(!hasRecord)return runFullCheck(splashFinished)'));
+  assert.ok(offline.includes('window.shbaceCheckForUpdate=manualCheck'),
+    'the explicit Settings update action must remain available');
+  const result = await runOfflineStartup({ version: '1.4.18', files: { 'index.html': {} } });
+  assert.deepEqual(result.calls, [], 'an installed package does not start an update/restore flow on launch');
+  assert.deepEqual(result.writes, [['shbace_ios_migrated_1_4_14', '1']]);
 });
 
-test('migration applies the verified update automatically without the Later sheet', () => {
-  const start = offline.indexOf('if(migrationInProgress&&manifestFromNetwork&&res.plan)');
-  const end = offline.indexOf("if(res.kind==='prompt')", start);
-  assert.ok(start >= 0 && end > start, 'migration branch must precede the ordinary prompt');
-  const migrationBranch = offline.slice(start, end);
-  assert.ok(migrationBranch.includes('showPlanNeeded(res.plan);runPlan()'));
-  assert.ok(!migrationBranch.includes('showUpdateSheet') && !migrationBranch.includes('shbUpdLater'));
-});
-
-test('migration flag is set only after a successful online check or verified commit', () => {
-  const networkSuccess = offline.indexOf('if(manifestFromNetwork){');
-  const networkFlag = offline.indexOf("lsSet(MIGRATION_KEY,'1')", networkSuccess);
-  assert.ok(networkSuccess >= 0 && networkFlag > networkSuccess);
-  const commit = offline.indexOf('return commitPlan(target)');
-  const cleanup = offline.indexOf('return cleanupPreviousCaches()', commit);
-  const commitFlag = offline.indexOf("lsSet(MIGRATION_KEY,'1')", commit);
-  assert.ok(commit >= 0 && cleanup > commit && commitFlag > cleanup);
+test('offline package discovery runs automatically only for a first install', async () => {
+  const result = await runOfflineStartup(null);
+  assert.deepEqual(result.calls, ['first-install-check']);
+  assert.deepEqual(result.writes, [['shbace_ios_migrated_1_4_14', '1']]);
 });
 
 test('only retired iOS shell caches are deleted; offline package and student database identities remain stable', () => {
@@ -287,9 +309,9 @@ test('retired iOS modules are absent and are not referenced by the live HTML', (
 });
 
 test('release is 1.4.18 and records the iOS To Me navigation and update-details changes', () => {
-  assert.equal(pkg.version, '1.4.18');
-  assert.equal(pwa.version, '1.4.18');
-  assert.equal(pwa.displayVersion, '1.4.18');
+  assert.equal(pkg.version, '1.4.19');
+  assert.equal(pwa.version, '1.4.19');
+  assert.equal(pwa.displayVersion, '1.4.19');
   assert.ok(pwa.releaseNotes.includes("Aligns the iOS sidebar with To Me, exposes Exam Goal Planner, removes Smart Review badges, and shows installed/update version details in Settings."));
   assert.equal(offlineManifest.fileCount, 338);
   assert.equal(offlineManifest.files.length, offlineManifest.fileCount);
