@@ -3,7 +3,7 @@
 (function () {
   'use strict';
 
-  const BANK_TOTAL = 1598;
+  const BANK_TOTAL = 1840;
   const STORE_KEY = 'shbace_clinical_case_answers_v1';
   const $esc = value => String(value == null ? '' : value).replace(/[&<>"']/g, c => ({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'

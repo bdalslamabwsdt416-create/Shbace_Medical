@@ -5712,3 +5712,1884 @@ The sheet presents the Schwartz estimate as height multiplied by a constant (K),
 ## Supplementary coverage note
 
 This additional question explicitly tests the Schwartz formula variables shown on page 3. The previous 26 cases and Q1–Q180 remain unchanged.
+
+---
+
+# 26. Proteinuria and Orthostatic Proteinuria
+
+## Clinical Case 28 — Protein in the daytime sample
+
+A healthy 11-year-old boy is referred after two school urine dipsticks show protein. He has no oedema, haematuria, urinary symptoms or recent illness. His blood pressure, serum creatinine and examination are normal. A urine sample collected immediately after waking is negative for protein, while a sample obtained after several hours upright is positive.
+
+**Case focus:** Normal protein excretion, transient proteinuria, nephrotic-range proteinuria and orthostatic proteinuria.
+
+### Q182. [Moderate] Which explanation best fits the difference between the morning and daytime urine samples?
+
+A. Persistent glomerulonephritis  
+B. Nephrotic syndrome  
+C. Orthostatic (postural) proteinuria  
+D. Acute pyelonephritis  
+E. Renal tubular acidosis  
+
+**Correct Answer:** C. Orthostatic (postural) proteinuria
+
+**Initial Explanation:**
+
+Protein appears when the child is upright but disappears or markedly decreases in the supine, early-morning sample. This is the characteristic pattern of orthostatic proteinuria.
+
+**Detailed Explanation:**
+
+- **A. Persistent glomerulonephritis — Incorrect.** Persistent glomerular disease would not be expected to produce this isolated posture-dependent pattern with otherwise normal findings.
+- **B. Nephrotic syndrome — Incorrect.** This would usually produce heavy, persistent proteinuria and often oedema or hypoalbuminaemia.
+- **C. Orthostatic proteinuria — Correct.** Protein excretion occurs during the upright position and decreases or disappears while supine.
+- **D. Pyelonephritis — Incorrect.** Fever, systemic illness, urinary symptoms or inflammatory urine findings would be expected.
+- **E. Renal tubular acidosis — Incorrect.** It causes acid–base and tubular abnormalities, not isolated postural proteinuria.
+
+**HIGH-YIELD POINTS:**
+
+- Orthostatic proteinuria is common in school-age children.
+- Blood pressure, renal function and examination are usually normal.
+- Compare early-morning supine urine with a sample obtained after the child has been upright.
+
+**Source:** Nephrology sheet — Page 16.
+
+### Q183. [Moderate] Which finding would most strongly support reassurance rather than an extensive renal investigation in a child with a single episode of mild proteinuria during a febrile illness?
+
+A. Proteinuria that disappears after the fever resolves, with no renal symptoms  
+B. Persistent heavy proteinuria with oedema  
+C. Hypertension with impaired renal function  
+D. Gross haematuria and red-cell casts  
+E. Persistent proteinuria in repeated early-morning samples  
+
+**Correct Answer:** A. Proteinuria that disappears after the fever resolves, with no renal symptoms
+
+**Initial Explanation:**
+
+Transient proteinuria may occur with fever, exercise, dehydration, heart failure or seizures. It is usually self-limiting and does not require a full renal evaluation when it resolves and there are no concerning findings.
+
+**Detailed Explanation:**
+
+- **A. Correct.** A temporary mild finding during fever that resolves is consistent with transient proteinuria.
+- **B. Incorrect.** Heavy proteinuria with oedema requires assessment for nephrotic syndrome.
+- **C. Incorrect.** Hypertension and impaired renal function are warning signs.
+- **D. Incorrect.** Gross haematuria and red-cell casts suggest glomerular disease.
+- **E. Incorrect.** Persistent early-morning proteinuria is not the typical benign orthostatic pattern and requires further assessment.
+
+**HIGH-YIELD POINTS:**
+
+- Transient causes in the sheet: fever, exercise, heart failure, dehydration and seizures.
+- The sheet describes transient proteinuria as usually mild (+ or ++), benign and self-limiting.
+
+**Source:** Nephrology sheet — Page 16.
+
+### Q184. [Easy] A child has a urine protein-to-creatinine ratio of 0.12 and a negative-to-trace dipstick result. How should this result be interpreted using the sheet's reference values?
+
+A. Nephrotic-range proteinuria  
+B. Heavy persistent proteinuria  
+C. Definite steroid-resistant nephrotic syndrome  
+D. Within the stated normal range  
+E. Severe tubular protein loss  
+
+**Correct Answer:** D. Within the stated normal range
+
+**Initial Explanation:**
+
+The sheet gives a normal urine protein-to-creatinine ratio below 0.2 and a dipstick result of negative or trace.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Nephrotic-range proteinuria is associated with a much higher ratio.
+- **B. Incorrect.** The given result does not indicate heavy protein loss.
+- **C. Incorrect.** Steroid resistance is a treatment-response category and cannot be diagnosed from this result.
+- **D. Correct.** Both the ratio and dipstick result fall within the reference values in the sheet.
+- **E. Incorrect.** The result does not establish tubular protein loss.
+
+**HIGH-YIELD POINTS:**
+
+- Normal 24-hour urinary protein: less than 150 mg/day.
+- Normal urine protein-to-creatinine ratio in the sheet: less than 0.2.
+- Normal dipstick: negative or trace.
+
+**Source:** Nephrology sheet — Page 16.
+
+### Q185. [Moderate] Which combination best represents nephrotic-range protein loss in the supplied sheet?
+
+A. Dipstick negative, ratio below 0.2 and less than 150 mg/day  
+B. Dipstick + or ++, ratio 0.2–2 and 4–40 mg/m²/day  
+C. Dipstick trace with normal albumin  
+D. Isolated microscopic haematuria  
+E. Dipstick +++ or more, ratio above 2 and more than 40 mg/m²/day  
+
+**Correct Answer:** E. Dipstick +++ or more, ratio above 2 and more than 40 mg/m²/day
+
+**Initial Explanation:**
+
+The sheet identifies +++ or more on dipstick, a urine protein-to-creatinine ratio above 2 and urinary protein above 40 mg/m²/day as nephrotic-range findings.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** These are normal-range values.
+- **B. Incorrect.** These values fall within the non-nephrotic range in the sheet.
+- **C. Incorrect.** Trace protein alone does not meet the heavy-proteinuria threshold.
+- **D. Incorrect.** Haematuria is not a measurement of protein excretion.
+- **E. Correct.** All three findings indicate heavy/nephrotic-range proteinuria.
+
+**HIGH-YIELD POINTS:**
+
+- Non-nephrotic range in the sheet: dipstick + or ++, ratio 0.2–2 and 4–40 mg/m²/day.
+- Nephrotic range: dipstick +++ or more, ratio above 2 and more than 40 mg/m²/day.
+
+**Source:** Nephrology sheet — Page 16.
+
+---
+
+# 4. Nephrotic Syndrome
+
+## Clinical Case 29 — Severe oedema at first presentation
+
+A 5-year-old girl develops progressive eyelid swelling followed by abdominal distension and lower-limb oedema. Her mother notices persistent froth in the urine and rapid weight gain. Urine dipstick is ++++, the urine protein-to-creatinine ratio is 3.4, serum albumin is 1.8 g/dL and cholesterol is 285 mg/dL. Blood pressure and renal function are initially normal, and there is no macroscopic haematuria. During observation she becomes dizzy, has abdominal discomfort and passes very little urine.
+
+**Case focus:** Biochemical confirmation, typical minimal-change presentation, assessment of intravascular volume, oedema treatment and initial corticosteroid therapy.
+
+### Q186. [Moderate] Which interpretation best integrates the urine and blood results?
+
+A. The child has isolated microscopic haematuria  
+B. The findings are most consistent with nephrotic syndrome  
+C. The child has uncomplicated cystitis  
+D. The results establish haemolytic uraemic syndrome  
+E. The findings are diagnostic of renal tubular acidosis  
+
+**Correct Answer:** B. The findings are most consistent with nephrotic syndrome
+
+**Initial Explanation:**
+
+Heavy proteinuria, marked hypoalbuminaemia, oedema and hyperlipidaemia form the characteristic nephrotic pattern.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Microscopic haematuria does not explain the marked protein loss and low serum albumin.
+- **B. Correct.** The combination is characteristic of nephrotic syndrome.
+- **C. Incorrect.** Cystitis does not cause this degree of protein loss and hypoalbuminaemia.
+- **D. Incorrect.** HUS requires the triad of microangiopathic haemolytic anaemia, thrombocytopenia and acute kidney injury.
+- **E. Incorrect.** RTA causes a tubular acid–base disturbance, not this nephrotic biochemical pattern.
+
+**HIGH-YIELD POINTS:**
+
+- The sheet lists serum albumin below 2.5 g/dL and cholesterol above 250 mg/dL among the supportive findings.
+- Heavy proteinuria is the central urinary abnormality.
+
+**Source:** Nephrology sheet — Pages 17–19.
+
+### Q187. [Moderate] Which additional pattern would make minimal-change nephropathy the most likely underlying diagnosis in this child?
+
+A. Persistent hypertension, low C3 and impaired renal function  
+B. Gross haematuria, systemic manifestations and non-selective proteinuria  
+C. Normal blood pressure, normal complement and preserved renal function  
+D. A renal mass with bilateral hydronephrosis  
+E. Severe thrombocytopenia and schistocytes  
+
+**Correct Answer:** C. Normal blood pressure, normal complement and preserved renal function
+
+**Initial Explanation:**
+
+The sheet describes typical steroid-sensitive minimal-change nephrotic syndrome as commonly occurring in young children with normal blood pressure, normal complement and normal renal function.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** These are atypical features and should prompt consideration of another glomerular disease.
+- **B. Incorrect.** Gross haematuria and non-selective proteinuria are warning features.
+- **C. Correct.** This is the typical pattern described for minimal-change disease.
+- **D. Incorrect.** A mass and hydronephrosis suggest a structural or obstructive problem.
+- **E. Incorrect.** Thrombocytopenia and schistocytes point toward HUS.
+
+**HIGH-YIELD POINTS:**
+
+- Typical minimal-change pattern: young age, normal BP, normal complement, normal renal function, selective proteinuria and good steroid response.
+- Renal biopsy is not routinely indicated in a typical presentation.
+
+**Source:** Nephrology sheet — Pages 19 and 23.
+
+### Q188. [Hard] The child becomes dizzy, has abdominal discomfort, oliguria and a low blood pressure despite having generalized oedema. Which complication should be suspected?
+
+A. Intravascular volume depletion (hypovolaemia)  
+B. Hypervolaemia without circulatory compromise  
+C. Isolated hyperlipidaemia  
+D. Orthostatic proteinuria  
+E. Renal tumour  
+
+**Correct Answer:** A. Intravascular volume depletion (hypovolaemia)
+
+**Initial Explanation:**
+
+A child with nephrotic oedema can still have reduced effective circulating volume. Dizziness, abdominal pain, low blood pressure and poor urine output are warning features of hypovolaemia.
+
+**Detailed Explanation:**
+
+- **A. Correct.** The clinical pattern suggests inadequate intravascular volume despite fluid accumulation in the tissues.
+- **B. Incorrect.** Generalized oedema alone does not prove adequate circulating volume; the low BP and dizziness argue against this.
+- **C. Incorrect.** Hyperlipidaemia does not explain the circulatory symptoms.
+- **D. Incorrect.** Orthostatic proteinuria is an isolated urine finding and does not cause this acute presentation.
+- **E. Incorrect.** A renal tumour would not explain the characteristic nephrotic biochemical pattern and acute volume-depletion signs.
+
+**HIGH-YIELD POINTS:**
+
+- The sheet associates low urinary sodium (below 10 mmol/L) and raised haemoglobin/haematocrit with hypovolaemia.
+- This requires urgent assessment and treatment rather than simply escalating diuretics.
+
+**Source:** Nephrology sheet — Page 19.
+
+### Q189. [Hard] A child with nephrotic syndrome has severe generalized oedema requiring inpatient treatment. Which sequence is specifically described in the sheet for severe oedema?
+
+A. Start oral antibiotics, then restrict all protein  
+B. Give corticosteroids only and discharge immediately  
+C. Give repeated furosemide before assessing circulating volume  
+D. Give 20% IV albumin first, followed by IV furosemide when indicated  
+E. Perform immediate bilateral nephrectomy  
+
+**Correct Answer:** D. Give 20% IV albumin first, followed by IV furosemide when indicated
+
+**Initial Explanation:**
+
+For severe generalized oedema, the sheet describes intravenous 20% human albumin infusion followed by intravenous furosemide.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Antibiotics are not routine oedema treatment, and protein restriction is not the described intervention.
+- **B. Incorrect.** Severe oedema may require admission and close monitoring.
+- **C. Incorrect.** Diuretic use without assessing intravascular volume can worsen hypovolaemia.
+- **D. Correct.** This is the sequence described in the sheet for severe oedema.
+- **E. Incorrect.** Nephrectomy is not a treatment for ordinary childhood nephrotic syndrome.
+
+**HIGH-YIELD POINTS:**
+
+- Severe generalized oedema or complications may require admission.
+- Monitor blood pressure, weight, input, output and clinical response.
+- The sheet also emphasizes salt and fluid restriction as appropriate to the child's clinical state.
+
+**Source:** Nephrology sheet — Page 20.
+
+### Q190. [Moderate] Once the child is assessed and the clinician decides to start standard initial steroid treatment for typical idiopathic nephrotic syndrome, which starting regimen is written in the supplied sheet?
+
+A. Prednisolone 5 mg once weekly  
+B. Prednisolone 60 mg/m²/day or 2 mg/kg/day  
+C. Prednisolone 1 mg/kg every month  
+D. Hydrocortisone as a single dose only  
+E. No corticosteroid treatment is used in minimal-change disease  
+
+**Correct Answer:** B. Prednisolone 60 mg/m²/day or 2 mg/kg/day
+
+**Initial Explanation:**
+
+The sheet lists oral prednisolone 60 mg/m²/day or 2 mg/kg/day as the initial daily regimen.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** This is not the daily induction regimen listed.
+- **B. Correct.** It matches the dose stated in the sheet.
+- **C. Incorrect.** This is not the regimen described.
+- **D. Incorrect.** A single hydrocortisone dose is not the listed nephrotic-syndrome regimen.
+- **E. Incorrect.** The sheet describes a good steroid response in most children with minimal-change disease.
+
+**HIGH-YIELD POINTS:**
+
+- The source sheet describes daily prednisolone followed by a remission-guided continuation/tapering schedule.
+- Verify the exact duration and taper from the original teaching PDF and current local protocol before prescribing.
+
+**Source:** Nephrology sheet — Pages 20–21.
+
+### Q191. [Hard] Which monitoring plan best matches the important clinical response measures during treatment of a child with severe nephrotic oedema?
+
+A. Monitor only the urine colour once a week  
+B. Measure height only and ignore fluid balance  
+C. Monitor blood pressure, weight, fluid input and urine output  
+D. Repeat brain imaging daily  
+E. Stop monitoring once the oedema begins to improve  
+
+**Correct Answer:** C. Monitor blood pressure, weight, fluid input and urine output
+
+**Initial Explanation:**
+
+The sheet specifically lists blood pressure, weight, input/output and clinical improvement as monitoring targets during oedema treatment.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Urine colour alone cannot assess volume status or treatment response.
+- **B. Incorrect.** Fluid balance and cardiovascular status are essential in a child with major oedema.
+- **C. Correct.** These are the core monitoring parameters listed in the sheet.
+- **D. Incorrect.** Routine daily brain imaging is not part of nephrotic oedema monitoring.
+- **E. Incorrect.** Monitoring must continue while the child remains at risk of fluid shifts and treatment complications.
+
+**HIGH-YIELD POINTS:**
+
+- Observe BP, weight, input/output and clinical response.
+- Reassess for hypovolaemia, infection, thrombosis and treatment adverse effects.
+
+**Source:** Nephrology sheet — Pages 19–20.
+
+---
+
+# 4. Nephrotic Syndrome
+
+## Clinical Case 30 — Repeated relapses and an atypical response
+
+A 9-year-old boy was treated for nephrotic syndrome. His urine initially became negative for protein, but he has since had repeated relapses. On the current assessment he has persistent hypertension, microscopic haematuria and reduced renal function. Complement is low. Despite a full course of daily prednisolone, he has not achieved remission after several weeks.
+
+**Case focus:** Steroid-response definitions, frequent relapse, steroid dependence, renal biopsy indications, steroid-resistant histology and alternative treatment options.
+
+### Q192. [Moderate] A different child in the clinic achieves complete remission within four weeks of starting corticosteroids. How is this response classified in the sheet?
+
+A. Steroid-dependent nephrotic syndrome  
+B. Steroid-resistant nephrotic syndrome  
+C. Steroid-sensitive nephrotic syndrome  
+D. Congenital nephrotic syndrome  
+E. Secondary hypertension  
+
+**Correct Answer:** C. Steroid-sensitive nephrotic syndrome
+
+**Initial Explanation:**
+
+The sheet defines steroid-sensitive nephrotic syndrome as remission within four weeks of steroid therapy.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Steroid dependence is characterized by relapse soon after steroids are stopped.
+- **B. Incorrect.** Steroid resistance means failure to achieve remission after the specified full-dose treatment period.
+- **C. Correct.** Remission within four weeks meets the sheet's definition.
+- **D. Incorrect.** Congenital nephrotic syndrome is defined by very early onset, not treatment response.
+- **E. Incorrect.** This is a blood-pressure diagnosis, not a nephrotic response category.
+
+**HIGH-YIELD POINTS:**
+
+- Remission: no or trace proteinuria for three consecutive days.
+- Steroid-sensitive: remission within four weeks of steroid treatment.
+
+**Source:** Nephrology sheet — Page 21.
+
+### Q193. [Hard] A child remains protein-positive despite receiving full-dose prednisolone for the treatment period described in the sheet. Which classification is most appropriate?
+
+A. Steroid-resistant nephrotic syndrome  
+B. Infrequent-relapsing nephrotic syndrome  
+C. Steroid-dependent nephrotic syndrome  
+D. Orthostatic proteinuria  
+E. Complete remission  
+
+**Correct Answer:** A. Steroid-resistant nephrotic syndrome
+
+**Initial Explanation:**
+
+The sheet classifies a child who does not achieve remission after approximately 4–6 weeks of full-dose steroid therapy as having steroid-resistant nephrotic syndrome.
+
+**Detailed Explanation:**
+
+- **A. Correct.** Failure to remit after the stated full-dose period is the defining feature.
+- **B. Incorrect.** Infrequent relapse describes a child who responds initially but relapses occasionally.
+- **C. Incorrect.** Steroid dependence involves relapse within 14 days of stopping steroid treatment.
+- **D. Incorrect.** Orthostatic proteinuria is posture-dependent and is not a steroid-response category.
+- **E. Incorrect.** Persistent proteinuria is the opposite of remission.
+
+**HIGH-YIELD POINTS:**
+
+- Steroid-resistant NS: no remission after 4–6 weeks of full-dose treatment in the sheet.
+- Reassess the diagnosis and consider renal biopsy when resistance or atypical features are present.
+
+**Source:** Nephrology sheet — Page 21.
+
+### Q194. [Moderate] A child repeatedly becomes protein-positive within two weeks of stopping prednisolone. Which pattern does this describe?
+
+A. Steroid-sensitive remission  
+B. Steroid-dependent nephrotic syndrome  
+C. Steroid-resistant nephrotic syndrome  
+D. Transient proteinuria  
+E. Orthostatic proteinuria  
+
+**Correct Answer:** B. Steroid-dependent nephrotic syndrome
+
+**Initial Explanation:**
+
+The sheet defines steroid-dependent nephrotic syndrome by relapse within 14 days of stopping corticosteroid therapy.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Steroid sensitivity describes achieving remission within four weeks, not the timing of relapse after withdrawal.
+- **B. Correct.** Relapse within 14 days of stopping treatment meets the stated definition.
+- **C. Incorrect.** Steroid resistance is failure to achieve remission during full-dose treatment.
+- **D. Incorrect.** Transient proteinuria is short-lived and associated with triggers such as fever or exercise.
+- **E. Incorrect.** Orthostatic proteinuria depends on posture, not steroid withdrawal.
+
+**HIGH-YIELD POINTS:**
+
+- Steroid-dependent NS: relapse within 14 days after steroid cessation.
+- Confirm relapse using the urine definition: +++ or more for three consecutive days.
+
+**Source:** Nephrology sheet — Page 21.
+
+### Q195. [Moderate] A child has three relapses during the last five months. Which category best matches the relapse frequency thresholds in the sheet?
+
+A. Steroid-resistant nephrotic syndrome  
+B. Congenital nephrotic syndrome  
+C. Isolated transient proteinuria  
+D. Frequently relapsing nephrotic syndrome  
+E. Orthostatic proteinuria  
+
+**Correct Answer:** D. Frequently relapsing nephrotic syndrome
+
+**Initial Explanation:**
+
+The sheet defines frequent relapses as two or more relapses within six months, or four or more within twelve months.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Resistance is failure to achieve remission with full-dose steroids.
+- **B. Incorrect.** Congenital NS presents in the first three months of life.
+- **C. Incorrect.** Transient proteinuria resolves and does not produce this relapse pattern.
+- **D. Correct.** Three relapses within five months exceed the two-relapse threshold within six months.
+- **E. Incorrect.** Orthostatic proteinuria is posture-dependent, not a relapse-frequency classification.
+
+**HIGH-YIELD POINTS:**
+
+- Frequent relapse: at least 2 relapses in 6 months or at least 4 in 12 months.
+- These categories help identify children who may require an alternative treatment strategy.
+
+**Source:** Nephrology sheet — Page 21.
+
+### Q196. [Hard] Which combination in the current child most strongly supports renal biopsy rather than assuming typical minimal-change disease?
+
+A. Age 3 years, normal BP and normal renal function  
+B. Selective proteinuria with normal complement  
+C. Good steroid response and no macroscopic haematuria  
+D. Normal renal function and no systemic features  
+E. Persistent hypertension, haematuria, low complement and impaired renal function  
+
+**Correct Answer:** E. Persistent hypertension, haematuria, low complement and impaired renal function
+
+**Initial Explanation:**
+
+Persistent hypertension, haematuria, low complement and abnormal renal function are atypical features and are listed as indications for renal biopsy in the sheet.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** This is a typical presentation in which biopsy is not routinely indicated.
+- **B. Incorrect.** Selective proteinuria and normal complement support typical minimal-change disease.
+- **C. Incorrect.** A good steroid response and absence of macroscopic haematuria are reassuring features.
+- **D. Incorrect.** These findings do not suggest an atypical glomerular process.
+- **E. Correct.** Multiple atypical features make histological assessment important.
+
+**HIGH-YIELD POINTS:**
+
+- Other biopsy warning features in the sheet include age below 1 year or above 10 years, systemic/extrarenal manifestations, non-selective proteinuria, frequent relapse, steroid dependence, steroid resistance and congenital NS.
+
+**Source:** Nephrology sheet — Page 22.
+
+### Q197. [Hard] Biopsy in a child with steroid-resistant nephrotic syndrome shows segmental areas of glomerular sclerosis, with IgM and C3 deposits described on immunofluorescence. Which diagnosis is most likely?
+
+A. Minimal-change nephropathy  
+B. Focal segmental glomerulosclerosis  
+C. Post-streptococcal glomerulonephritis  
+D. Alport syndrome  
+E. Acute pyelonephritis  
+
+**Correct Answer:** B. Focal segmental glomerulosclerosis
+
+**Initial Explanation:**
+
+The sheet describes focal segmental glomerulosclerosis (FSGS) by segmental sclerosis and notes IgM and C3 deposits on immunofluorescence. It is an important cause of steroid-resistant nephrotic syndrome.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Minimal-change disease has essentially normal light microscopy and immunofluorescence, with foot-process effacement on electron microscopy.
+- **B. Correct.** Segmental sclerosis is the defining histological clue.
+- **C. Incorrect.** PSGN is an acute nephritic disease associated with low C3 and evidence of preceding streptococcal infection.
+- **D. Incorrect.** Alport syndrome is a hereditary type IV collagen disorder.
+- **E. Incorrect.** Pyelonephritis is an infection and does not produce this biopsy pattern.
+
+**HIGH-YIELD POINTS:**
+
+- FSGS is listed as the most common cause of steroid-resistant NS.
+- The sheet notes progression to advanced CKD in a proportion of patients and recurrence after transplantation.
+
+**Source:** Nephrology sheet — Page 23.
+
+### Q198. [Moderate] A child has frequent relapses and significant adverse effects from repeated high-dose corticosteroids. Which approach is supported by the alternative-treatment list in the sheet?
+
+A. Stop all follow-up permanently  
+B. Use antibiotics as the only long-term treatment  
+C. Consider a steroid-sparing agent such as levamisole, a calcineurin inhibitor or another listed alternative  
+D. Perform nephrectomy  
+E. Treat with an antihypertensive drug alone regardless of proteinuria  
+
+**Correct Answer:** C. Consider a steroid-sparing agent such as levamisole, a calcineurin inhibitor or another listed alternative
+
+**Initial Explanation:**
+
+The sheet lists alternative therapy for steroid resistance, frequent relapse, severe steroid adverse effects and relapse while on a high prednisolone dose.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Ongoing follow-up is essential in nephrotic syndrome.
+- **B. Incorrect.** Antibiotics do not replace immunosuppressive treatment for the underlying nephrotic disease.
+- **C. Correct.** The listed options include cyclosporine, cyclophosphamide, levamisole, tacrolimus, mycophenolate mofetil and rituximab.
+- **D. Incorrect.** Nephrectomy is not routine management of relapsing idiopathic NS.
+- **E. Incorrect.** Blood-pressure treatment alone does not address the underlying nephrotic syndrome.
+
+**HIGH-YIELD POINTS:**
+
+- Select alternative therapy according to the response pattern, adverse effects and specialist assessment.
+- Calcineurin inhibitors include cyclosporine and tacrolimus.
+
+**Source:** Nephrology sheet — Pages 21 and 23.
+
+### Q199. [Hard] A child receiving cyclophosphamide for nephrotic syndrome is being monitored. Which adverse-effect combination is particularly important to screen for according to the sheet?
+
+A. Hypertrichosis and gum hyperplasia only  
+B. Isolated hypotension  
+C. Hearing loss and cataract only  
+D. Polycythaemia and hypercalcaemia  
+E. Leukopenia, haemorrhagic cystitis and possible infertility  
+
+**Correct Answer:** E. Leukopenia, haemorrhagic cystitis and possible infertility
+
+**Initial Explanation:**
+
+The sheet lists leukopenia, bone-marrow suppression, haemorrhagic cystitis, alopecia and infertility among cyclophosphamide adverse effects. It recommends regular CBC monitoring.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Hirsutism and gum hyperplasia are associated with cyclosporine in the sheet.
+- **B. Incorrect.** Hypotension is not the key toxicity profile described for cyclophosphamide.
+- **C. Incorrect.** These are not the characteristic cyclophosphamide toxicities listed.
+- **D. Incorrect.** This is not the adverse-effect pattern described.
+- **E. Correct.** These are important toxicities requiring monitoring and specialist supervision.
+
+**HIGH-YIELD POINTS:**
+
+- The sheet recommends weekly CBC monitoring and stopping cyclophosphamide if WBC falls below 5,000, as stated in that teaching material.
+- Cyclosporine adverse effects listed separately include nephrotoxicity, hypertension, hirsutism and gingival hyperplasia.
+
+**Source:** Nephrology sheet — Page 23.
+
+---
+
+# 16. Renal Agenesis and Multicystic Dysplastic Kidney (MCDK)
+
+## Clinical Case 31 — An antenatal renal abnormality
+
+A newborn is delivered after a pregnancy complicated by severe oligohydramnios. The baby has respiratory distress and characteristic Potter-like facial features. Antenatal imaging had suggested absent renal structures bilaterally. In a separate child seen in clinic, ultrasound shows a unilateral cluster of large non-communicating renal cysts with little recognizable renal tissue.
+
+**Case focus:** Renal agenesis, Potter sequence, multicystic dysplastic kidney and the paediatric forms of polycystic kidney disease.
+
+### Q200. [Moderate] Which mechanism best explains the respiratory problem in the newborn described in the first vignette?
+
+A. Severe oligohydramnios leading to pulmonary hypoplasia  
+B. Excess fetal urine production causing pulmonary overgrowth  
+C. Isolated urethral inflammation after birth  
+D. Increased surfactant production  
+E. Congenital nephrotic protein loss  
+
+**Correct Answer:** A. Severe oligohydramnios leading to pulmonary hypoplasia
+
+**Initial Explanation:**
+
+Bilateral renal agenesis markedly reduces fetal urine production. The resulting oligohydramnios is associated with pulmonary hypoplasia and Potter sequence.
+
+**Detailed Explanation:**
+
+- **A. Correct.** Reduced fetal urine leads to severe oligohydramnios, impaired lung development and respiratory failure.
+- **B. Incorrect.** The problem is reduced fetal urine, not excess urine.
+- **C. Incorrect.** Urethral inflammation does not explain the antenatal sequence.
+- **D. Incorrect.** Increased surfactant production is not the mechanism described.
+- **E. Incorrect.** Congenital NS causes heavy protein loss and oedema, not this classic Potter sequence.
+
+**HIGH-YIELD POINTS:**
+
+- Bilateral renal agenesis: severe oligohydramnios, Potter facies and pulmonary hypoplasia.
+- The sheet describes bilateral renal agenesis with Potter sequence as usually fatal because of pulmonary hypoplasia.
+
+**Source:** Nephrology sheet — Page 9.
+
+### Q201. [Moderate] The second child's ultrasound shows large fluid-filled cysts, absent normal renal parenchyma and no connection with the bladder. Which diagnosis best fits?
+
+A. Acute pyelonephritis  
+B. Vesicoureteric reflux  
+C. Multicystic dysplastic kidney  
+D. Minimal-change nephropathy  
+E. Renal tubular acidosis  
+
+**Correct Answer:** C. Multicystic dysplastic kidney
+
+**Initial Explanation:**
+
+Multicystic dysplastic kidney is described as a non-functioning cystic structure with large fluid-filled cysts, little or no normal renal tissue and no communication with the bladder.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Pyelonephritis is an infection and does not produce this congenital cystic architecture.
+- **B. Incorrect.** VUR is retrograde urine flow from the bladder to the ureter/renal pelvis.
+- **C. Correct.** The ultrasound description matches MCDK.
+- **D. Incorrect.** Minimal-change disease is a glomerular disorder causing proteinuria.
+- **E. Incorrect.** RTA is a tubular acid–base disorder.
+
+**HIGH-YIELD POINTS:**
+
+- Many unilateral MCDKs involute during early childhood.
+- Nephrectomy is generally reserved in the sheet for a kidney that remains very large or causes hypertension; this is uncommon.
+
+**Source:** Nephrology sheet — Page 9.
+
+### Q204. [Easy] A newborn has unilateral absence of a kidney on imaging but is otherwise clinically well. Which statement best reflects the description in the sheet?
+
+A. Every case immediately causes fatal pulmonary hypoplasia  
+B. The finding may be discovered incidentally or during evaluation for another anomaly  
+C. It is diagnostic of nephrotic syndrome  
+D. It always requires emergency dialysis  
+E. It is the same lesion as bilateral multicystic dysplastic kidneys  
+
+**Correct Answer:** B. The finding may be discovered incidentally or during evaluation for another anomaly
+
+**Initial Explanation:**
+
+Unilateral renal agenesis may be asymptomatic and discovered incidentally or during evaluation for associated anomalies.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** The severe Potter sequence described in the sheet is associated with bilateral renal agenesis.
+- **B. Correct.** This is the stated presentation of unilateral agenesis.
+- **C. Incorrect.** Agenesis is a structural congenital anomaly, not a protein-losing glomerular syndrome.
+- **D. Incorrect.** A well child with a solitary functioning kidney does not automatically require dialysis.
+- **E. Incorrect.** MCDK is a cystic dysplastic structure, whereas agenesis is absence of the kidney.
+
+**HIGH-YIELD POINTS:**
+
+- Distinguish unilateral from bilateral renal agenesis.
+- Bilateral disease has a much more severe fetal and neonatal consequence.
+
+**Source:** Nephrology sheet — Page 9.
+
+# 17. Polycystic Kidney Disease: ARPKD and ADPKD
+
+## Clinical Case 32 — An antenatal renal abnormality
+
+A newborn is delivered after a pregnancy complicated by severe oligohydramnios. The baby has respiratory distress and characteristic Potter-like facial features. Antenatal imaging had suggested absent renal structures bilaterally. In a separate child seen in clinic, ultrasound shows a unilateral cluster of large non-communicating renal cysts with little recognizable renal tissue.
+
+**Case focus:** Renal agenesis, Potter sequence, multicystic dysplastic kidney and the paediatric forms of polycystic kidney disease.
+
+### Q202. [Moderate] A newborn has bilaterally enlarged kidneys, hypertension and respiratory distress. Later follow-up identifies hepatic periportal fibrosis with portal hypertension. Which condition is most likely?
+
+A. Adult-type autosomal dominant polycystic kidney disease  
+B. Autosomal recessive polycystic kidney disease  
+C. Unilateral renal agenesis  
+D. Orthostatic proteinuria  
+E. Posterior urethral valves  
+
+**Correct Answer:** B. Autosomal recessive polycystic kidney disease
+
+**Initial Explanation:**
+
+The infantile autosomal recessive form is associated with bilateral enlarged kidneys and congenital hepatic periportal fibrosis. Severe disease may cause respiratory distress due to pulmonary hypoplasia.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** ADPKD more commonly presents later and is associated with liver/pancreatic cysts and other adult-type extrarenal features.
+- **B. Correct.** The neonatal presentation and hepatic association are characteristic of ARPKD.
+- **C. Incorrect.** Unilateral agenesis does not cause bilateral renal enlargement.
+- **D. Incorrect.** Orthostatic proteinuria does not cause enlarged kidneys or portal hypertension.
+- **E. Incorrect.** PUV causes bladder outlet obstruction in boys and may produce bilateral hydronephrosis, but does not explain the hepatic association.
+
+**HIGH-YIELD POINTS:**
+
+- ARPKD: antenatal oligohydramnios may be present; postnatal findings include bilateral renal enlargement, hypertension and respiratory distress.
+- Congenital hepatic periportal fibrosis may lead to cirrhosis and portal hypertension.
+
+**Source:** Nephrology sheet — Page 10.
+
+### Q203. [Moderate] A teenager with a family history of cystic kidney disease is found to have renal cysts. The clinician also asks about hepatic and pancreatic cysts and intracranial aneurysm risk. Which disorder is being considered?
+
+A. Multicystic dysplastic kidney  
+B. ARPKD only  
+C. Renal agenesis  
+D. Autosomal dominant polycystic kidney disease  
+E. Fanconi syndrome  
+
+**Correct Answer:** D. Autosomal dominant polycystic kidney disease
+
+**Initial Explanation:**
+
+The sheet describes ADPKD as associated with cysts in the liver and pancreas, cerebral aneurysms and mitral valve prolapse.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** MCDK is a usually unilateral, non-functioning cystic renal structure.
+- **B. Incorrect.** ARPKD is the infantile form emphasized with congenital hepatic periportal fibrosis and early bilateral renal enlargement.
+- **C. Incorrect.** Renal agenesis means absence of renal tissue, not multiple cysts.
+- **D. Correct.** The extrarenal features listed point toward ADPKD.
+- **E. Incorrect.** Fanconi syndrome is a proximal tubular disorder.
+
+**HIGH-YIELD POINTS:**
+
+- ADPKD is usually recognized later than the severe infantile ARPKD pattern.
+- Family history and extrarenal cystic/vascular associations are useful clues.
+
+**Source:** Nephrology sheet — Page 10.
+
+### Q205. [Hard] Which feature most strongly separates the infantile ARPKD pattern from the ADPKD pattern described in the sheet?
+
+A. Both conditions are defined by a single non-functioning unilateral cystic kidney  
+B. ADPKD is always associated with Potter sequence at birth  
+C. ARPKD is associated with congenital hepatic periportal fibrosis and early bilateral renal enlargement  
+D. ARPKD is caused by glomerular immune-complex deposition  
+E. ADPKD causes posterior urethral obstruction in male infants  
+
+**Correct Answer:** C. ARPKD is associated with congenital hepatic periportal fibrosis and early bilateral renal enlargement
+
+**Initial Explanation:**
+
+The sheet emphasizes the infantile presentation of ARPKD, with bilateral enlarged kidneys and congenital hepatic periportal fibrosis.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** A single non-functioning cystic kidney describes MCDK more closely.
+- **B. Incorrect.** Potter sequence is associated with severe fetal oligohydramnios, not a defining feature of ADPKD.
+- **C. Correct.** This is the key distinction emphasized in the sheet.
+- **D. Incorrect.** Immune-complex deposition is a glomerular mechanism, not the cause of ARPKD.
+- **E. Incorrect.** ADPKD does not cause congenital urethral valve obstruction.
+
+**HIGH-YIELD POINTS:**
+
+- ARPKD: infantile, bilateral renal enlargement, congenital hepatic fibrosis.
+- ADPKD: later presentation and extrarenal cysts/vascular associations.
+
+**Source:** Nephrology sheet — Page 10.
+
+---
+
+# 21. Posterior Urethral Valves (PUV) and Prune-Belly Syndrome
+
+## Clinical Case 33 — A male infant with a weak urinary stream
+
+A 2-month-old boy has a persistently poor urinary stream, dribbling and recurrent urinary infection. Ultrasound demonstrates a large bladder and bilateral hydronephrosis. The antenatal scan had also suggested urinary tract dilatation.
+
+**Case focus:** Congenital bladder outlet obstruction, its complications and definitive treatment.
+
+### Q206. [Moderate] Which congenital lesion best explains the combination of sex, weak urinary stream and bilateral upper-tract dilatation?
+
+A. Vesicoureteric reflux in a female infant  
+B. Hypospadias  
+C. Unilateral renal agenesis  
+D. Posterior urethral valves  
+E. Minimal-change nephropathy  
+
+**Correct Answer:** D. Posterior urethral valves
+
+**Initial Explanation:**
+
+Posterior urethral valves are a congenital obstructive lesion occurring only in boys. They obstruct urine flow from the bladder and may cause bilateral hydronephrosis.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** VUR may cause recurrent UTI and renal damage but does not explain the characteristic congenital urethral obstruction in a male infant.
+- **B. Incorrect.** Hypospadias is an abnormally placed urethral meatus on the ventral penis.
+- **C. Incorrect.** Unilateral agenesis does not produce bilateral hydronephrosis from bladder outlet obstruction.
+- **D. Correct.** The age, sex, weak stream and bilateral dilatation are classic clues.
+- **E. Incorrect.** Minimal-change nephropathy causes heavy proteinuria and oedema.
+
+**HIGH-YIELD POINTS:**
+
+- PUV occurs only in male infants.
+- It can lead to VUR, hydronephrosis, pyelonephritis and chronic kidney disease if not treated early.
+
+**Source:** Nephrology sheet — Page 12.
+
+### Q207. [Moderate] After initial stabilization and assessment, which treatment is described in the sheet as the definitive intervention for posterior urethral valves?
+
+A. Endoscopic valve ablation  
+B. Long-term corticosteroids  
+C. Routine nephrectomy  
+D. Circumcision alone  
+E. Prednisolone followed by tapering  
+
+**Correct Answer:** A. Endoscopic valve ablation
+
+**Initial Explanation:**
+
+The sheet lists endoscopic valve ablation as the treatment for PUV; urinary diversion may be needed in selected cases.
+
+**Detailed Explanation:**
+
+- **A. Correct.** Endoscopic ablation relieves the congenital urethral obstruction.
+- **B. Incorrect.** Steroids do not correct a mechanical outlet obstruction.
+- **C. Incorrect.** Nephrectomy is not the routine definitive treatment.
+- **D. Incorrect.** Circumcision does not remove the obstructing posterior urethral membrane.
+- **E. Incorrect.** This is not a treatment for a structural urinary obstruction.
+
+**HIGH-YIELD POINTS:**
+
+- Early recognition and relief of obstruction help limit renal damage.
+- Monitor for hydronephrosis, VUR, infection and CKD.
+
+**Source:** Nephrology sheet — Page 12.
+
+---
+
+# 18. Hypospadias
+
+## Clinical Case 34 — Findings during a newborn examination
+
+During a newborn examination, a boy is found to have a urethral opening on the ventral surface of the penis. The parents request circumcision. The same examination identifies a painless, transilluminating scrotal swelling in another infant, while a third child has an empty hemiscrotum with a palpable inguinal testis.
+
+**Case focus:** Hypospadias, hydrocele, undescended testes and the important management points in the sheet.
+
+### Q208. [Moderate] Why should circumcision be deferred in the newborn with the ventrally displaced urethral opening?
+
+A. Circumcision causes posterior urethral valves  
+B. The foreskin may be needed for later surgical reconstruction  
+C. The condition always resolves after circumcision  
+D. The procedure causes renal agenesis  
+E. Circumcision is the definitive treatment for hypospadias  
+
+**Correct Answer:** B. The foreskin may be needed for later surgical reconstruction
+
+**Initial Explanation:**
+
+The sheet specifically advises that infants with hypospadias should not be circumcised because preputial tissue may be required for reconstruction.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Circumcision does not cause PUV.
+- **B. Correct.** Preserving foreskin tissue may assist later repair.
+- **C. Incorrect.** Circumcision does not correct the abnormal meatal position.
+- **D. Incorrect.** There is no causal relationship with renal agenesis.
+- **E. Incorrect.** Surgical correction of the urethral position is the treatment; circumcision is not the repair.
+
+**HIGH-YIELD POINTS:**
+
+- Hypospadias: urethral meatus opens on the ventral side of the penis.
+- The sheet lists surgical correction around 1–2 years of age.
+
+**Source:** Nephrology sheet — Page 11.
+
+# 19. Hydrocele
+
+## Clinical Case 35 — Findings during a newborn examination
+
+During a newborn examination, a boy is found to have a urethral opening on the ventral surface of the penis. The parents request circumcision. The same examination identifies a painless, transilluminating scrotal swelling in another infant, while a third child has an empty hemiscrotum with a palpable inguinal testis.
+
+**Case focus:** Hypospadias, hydrocele, undescended testes and the important management points in the sheet.
+
+### Q209. [Moderate] A painless scrotal swelling transilluminates and is thought to be a hydrocele. Which plan best matches the natural history described in the sheet?
+
+A. Immediate orchiectomy in every newborn  
+B. Emergency chemotherapy  
+C. Observation initially, with repair considered if it persists beyond 18–24 months  
+D. Antibiotics for six months in every case  
+E. No examination is required  
+
+**Correct Answer:** C. Observation initially, with repair considered if it persists beyond 18–24 months
+
+**Initial Explanation:**
+
+Most infant hydroceles resolve spontaneously by 12 months. The sheet suggests repair if a hydrocele persists beyond approximately 18–24 months.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Orchiectomy is not the treatment for a simple hydrocele.
+- **B. Incorrect.** Chemotherapy has no role in uncomplicated hydrocele.
+- **C. Correct.** This matches the observation and persistence thresholds in the sheet.
+- **D. Incorrect.** A simple hydrocele is fluid in the tunica vaginalis, not a bacterial infection.
+- **E. Incorrect.** Examination is needed to distinguish hydrocele from hernia and other scrotal causes.
+
+**HIGH-YIELD POINTS:**
+
+- Hydrocele: fluid in the tunica vaginalis, often painless and transilluminating.
+- Most resolve by 12 months; persistent cases may need repair after 18–24 months.
+
+**Source:** Nephrology sheet — Page 11.
+
+# 20. Undescended Testis (Cryptorchidism)
+
+## Clinical Case 36 — Findings during a newborn examination
+
+During a newborn examination, a boy is found to have a urethral opening on the ventral surface of the penis. The parents request circumcision. The same examination identifies a painless, transilluminating scrotal swelling in another infant, while a third child has an empty hemiscrotum with a palpable inguinal testis.
+
+**Case focus:** Hypospadias, hydrocele, undescended testes and the important management points in the sheet.
+
+### Q210. [Hard] A 1-year-old boy still has an undescended palpable testis. Which intervention is described in the sheet, and what additional step is urgent if both testes are impalpable?
+
+A. Reassurance only; no further assessment is ever required  
+B. Hydrocele repair; no genetic assessment is needed  
+C. Circumcision; repeat examination at puberty  
+D. Orchidopexy; urgent karyotype if both testes are impalpable  
+E. Nephrectomy; urgent renal biopsy  
+
+**Correct Answer:** D. Orchidopexy; urgent karyotype if both testes are impalpable
+
+**Initial Explanation:**
+
+The sheet recommends orchidopexy for an undescended testis, ideally around one year. Bilateral impalpable testes require urgent karyotyping.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Persistent undescended testes need assessment and treatment because of later risks.
+- **B. Incorrect.** Hydrocele repair does not correct an undescended testis.
+- **C. Incorrect.** Circumcision is unrelated to testicular position.
+- **D. Correct.** Both the treatment and the urgent investigation are stated in the sheet.
+- **E. Incorrect.** Nephrectomy and renal biopsy do not address this genital finding.
+
+**HIGH-YIELD POINTS:**
+
+- Complications of undescended testes include torsion, infertility and malignancy.
+- If impalpable, laparoscopy may be required to identify whether a testis is present.
+
+**Source:** Nephrology sheet — Page 11.
+
+---
+
+# 12. IgA Vasculitis (Henoch–Schönlein Purpura) and Renal Involvement
+
+## Clinical Case 37 — Purpura followed by urinary abnormalities
+
+A 7-year-old boy develops palpable purpura over the lower legs and buttocks. He also has ankle pain and episodes of colicky abdominal pain. Two weeks later, urine testing shows microscopic haematuria and proteinuria. Blood pressure is currently normal.
+
+**Case focus:** The multisystem pattern of IgA vasculitis, delayed renal involvement, risk of progressive kidney disease and follow-up.
+
+### Q211. [Moderate] Which diagnosis best explains the combination of dependent palpable purpura, joint symptoms, abdominal pain and renal findings?
+
+A. Immune thrombocytopenia  
+B. Acute cystitis  
+C. Wilms tumour  
+D. IgA vasculitis (Henoch–Schönlein purpura)  
+E. Minimal-change nephropathy  
+
+**Correct Answer:** D. IgA vasculitis (Henoch–Schönlein purpura)
+
+**Initial Explanation:**
+
+IgA vasculitis is a small-vessel vasculitis characterized by palpable purpura, arthritis/arthralgia, abdominal pain and possible nephritis.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** ITP is associated with thrombocytopenia; the sheet notes platelet counts are usually normal or slightly high in HSP.
+- **B. Incorrect.** Cystitis does not explain the purpura, arthritis and colicky abdominal pain.
+- **C. Incorrect.** Wilms tumour typically presents with an abdominal mass.
+- **D. Correct.** The four-system pattern is characteristic of IgA vasculitis.
+- **E. Incorrect.** Minimal-change disease causes nephrotic syndrome but not the classic purpura–joint–gut pattern.
+
+**HIGH-YIELD POINTS:**
+
+- HSP is also called IgA vasculitis.
+- The sheet describes it as the commonest systemic vasculitis in childhood.
+- The classic systems involved are skin, joints, gastrointestinal tract and kidneys.
+
+**Source:** Nephrology sheet — Page 36.
+
+### Q212. [Moderate] The child initially has only the skin and joint findings. Which later development should be actively sought because renal involvement may appear after the rash?
+
+A. Persistent haematuria or proteinuria  
+B. Isolated hypospadias  
+C. Neonatal jaundice  
+D. Painless hydrocele  
+E. Congenital cataract  
+
+**Correct Answer:** A. Persistent haematuria or proteinuria
+
+**Initial Explanation:**
+
+Renal involvement may occur during the acute illness or weeks later. Urinalysis and blood-pressure monitoring are therefore important even when the initial presentation is mainly cutaneous and articular.
+
+**Detailed Explanation:**
+
+- **A. Correct.** Haematuria and proteinuria are the main renal findings to monitor.
+- **B. Incorrect.** Hypospadias is a congenital genital anomaly.
+- **C. Incorrect.** Jaundice is not the delayed renal feature of HSP.
+- **D. Incorrect.** Hydrocele is not a marker of HSP nephritis.
+- **E. Incorrect.** Cataract is not the expected renal complication.
+
+**HIGH-YIELD POINTS:**
+
+- The sheet estimates renal involvement in approximately 40–50% of cases.
+- Renal signs may begin during the acute phase or weeks later.
+
+**Source:** Nephrology sheet — Page 36.
+
+### Q213. [Hard] Which child with HSP has the greatest risk of progressive chronic kidney disease according to the sheet?
+
+A. A child with a brief rash and normal urine  
+B. A child with mild ankle pain only  
+C. A child with isolated transient abdominal discomfort  
+D. A child whose purpura resolves without renal findings  
+E. A child with heavy proteinuria, oedema, hypertension and deteriorating renal function  
+
+**Correct Answer:** E. A child with heavy proteinuria, oedema, hypertension and deteriorating renal function
+
+**Initial Explanation:**
+
+The sheet lists heavy proteinuria, oedema, hypertension and worsening renal function as risk factors for progressive CKD in HSP nephritis.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Normal urine and absence of renal involvement are reassuring.
+- **B. Incorrect.** Joint symptoms alone do not indicate progressive renal disease.
+- **C. Incorrect.** Abdominal pain alone is not a marker of renal progression.
+- **D. Incorrect.** Resolution without renal findings is reassuring.
+- **E. Correct.** These are the renal warning features listed in the sheet.
+
+**HIGH-YIELD POINTS:**
+
+- Most children recover, but significant renal involvement needs closer and longer follow-up.
+- Persistent renal involvement or need for treatment warrants long-term nephrology follow-up.
+
+**Source:** Nephrology sheet — Pages 36–37.
+
+### Q214. [Moderate] Which follow-up strategy is specifically emphasized for children with HSP?
+
+A. No follow-up once the rash disappears  
+B. Long-term urine and BP surveillance, with the sheet recommending follow-up for one year to detect persistent renal abnormalities  
+C. Daily renal biopsy for one month  
+D. Routine nephrectomy after every episode  
+E. Stop urine testing if abdominal pain resolves  
+
+**Correct Answer:** B. Long-term urine and BP surveillance, with the sheet recommending follow-up for one year to detect persistent renal abnormalities
+
+**Initial Explanation:**
+
+The sheet recommends follow-up for a year to detect persistent haematuria or proteinuria. It also lists urinalysis and blood-pressure measurement during follow-up.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Renal involvement may appear after the rash and can persist after skin symptoms resolve.
+- **B. Correct.** Urinalysis and BP monitoring detect ongoing renal disease.
+- **C. Incorrect.** Routine repeated biopsy is not recommended.
+- **D. Incorrect.** Nephrectomy has no routine role in HSP.
+- **E. Incorrect.** Resolution of abdominal pain does not exclude renal involvement.
+
+**HIGH-YIELD POINTS:**
+
+- The sheet says all children should be followed for one year.
+- Children with persistent renal involvement or who need treatment for nephritis require longer follow-up.
+
+**Source:** Nephrology sheet — Pages 36–37.
+
+### Q215. [Hard] A child with HSP develops severe abdominal pain with gastrointestinal bleeding and significant nephritis. Which treatment approach is described for severe disease in the sheet?
+
+A. No treatment under any circumstances  
+B. Circumcision  
+C. Corticosteroids may be used in severe nephritis or severe abdominal/GI manifestations  
+D. Routine chemotherapy  
+E. Immediate renal transplantation  
+
+**Correct Answer:** C. Corticosteroids may be used in severe nephritis or severe abdominal/GI manifestations
+
+**Initial Explanation:**
+
+Most HSP is self-limiting and treated supportively. The sheet reserves corticosteroids for severe renal, gastrointestinal, scrotal, CNS or pulmonary manifestations.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Supportive treatment is common, but severe disease may require corticosteroids or specialist-directed immunosuppression.
+- **B. Incorrect.** Circumcision is unrelated to vasculitis.
+- **C. Correct.** This matches the severe-disease indications in the sheet.
+- **D. Incorrect.** Chemotherapy is not routine HSP therapy.
+- **E. Incorrect.** Transplantation is not an acute treatment for HSP.
+
+**HIGH-YIELD POINTS:**
+
+- Most cases are self-limiting; supportive care includes hydration and symptom control.
+- Severe nephritis, abdominal pain/bleeding, scrotal oedema, CNS involvement or pulmonary haemorrhage may require corticosteroids.
+- Immunosuppressive agents may be used by specialists for significant kidney disease.
+
+**Source:** Nephrology sheet — Page 37.
+
+---
+
+# 13. Fanconi Syndrome
+
+## Clinical Case 38 — Poor growth with multiple urinary losses
+
+A 2-year-old child has faltering growth, excessive thirst, polyuria and recurrent dehydration. Examination reveals features of rickets. Blood testing shows hypokalaemic, hyperchloraemic metabolic acidosis. Urine testing demonstrates glucose and phosphate loss despite no evidence of diabetes mellitus. Another child in the clinic has recurrent dehydration, hypokalaemic metabolic alkalosis and hypercalciuria, while an older child has hypomagnesaemia and low urinary calcium.
+
+**Case focus:** Generalized proximal tubular dysfunction and the clinical/laboratory differences between Bartter and Gitelman syndromes.
+
+### Q216. [Moderate] Which renal defect best explains the first child's simultaneous urinary loss of glucose, phosphate, amino acids and bicarbonate?
+
+A. Isolated glomerular basement membrane injury  
+B. Generalized proximal tubular dysfunction (Fanconi syndrome)  
+C. Distal urethral obstruction  
+D. Primary hypertension  
+E. Minimal-change nephropathy  
+
+**Correct Answer:** B. Generalized proximal tubular dysfunction (Fanconi syndrome)
+
+**Initial Explanation:**
+
+Fanconi syndrome is a generalized proximal tubular defect causing urinary loss of several normally reabsorbed substances, including glucose, phosphate, amino acids, bicarbonate, uric acid, sodium and water.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Glomerular disease causes protein or blood leakage, not this generalized proximal tubular wasting pattern.
+- **B. Correct.** Multiple proximal tubular solutes are lost together.
+- **C. Incorrect.** Urethral obstruction causes impaired urine flow, not selective solute wasting.
+- **D. Incorrect.** Hypertension does not explain glycosuria and phosphaturia.
+- **E. Incorrect.** Minimal-change disease causes heavy proteinuria rather than multiple tubular losses.
+
+**HIGH-YIELD POINTS:**
+
+- Fanconi syndrome: generalized proximal tubule defect.
+- Look for glycosuria, phosphaturia, aminoaciduria, bicarbonate loss, polyuria and dehydration.
+
+**Source:** Nephrology sheet — Page 38.
+
+### Q217. [Moderate] Which combination of clinical and biochemical findings best fits Fanconi syndrome?
+
+A. Oedema, hyperkalaemia and metabolic alkalosis  
+B. Hypertension, low urinary glucose and respiratory alkalosis  
+C. Polyuria, polydipsia, dehydration, failure to thrive and hypophosphataemic rickets  
+D. Gross haematuria, low C3 and hypertension  
+E. Severe thrombocytopenia and schistocytes  
+
+**Correct Answer:** C. Polyuria, polydipsia, dehydration, failure to thrive and hypophosphataemic rickets
+
+**Initial Explanation:**
+
+Loss of water and solutes through the proximal tubule causes polyuria, dehydration, poor growth and phosphate-deficiency bone disease.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** The sheet describes hypokalaemia and metabolic acidosis rather than hyperkalaemic alkalosis.
+- **B. Incorrect.** Glycosuria and phosphate wasting are expected.
+- **C. Correct.** This is the clinical pattern described for Fanconi syndrome.
+- **D. Incorrect.** This is a nephritic pattern such as PSGN.
+- **E. Incorrect.** These findings suggest HUS.
+
+**HIGH-YIELD POINTS:**
+
+- Fanconi syndrome can produce hypokalaemia and hyperchloraemic metabolic acidosis.
+- Rickets results from phosphate loss.
+
+**Source:** Nephrology sheet — Page 38.
+
+### Q218. [Moderate] A child develops Fanconi syndrome after exposure to a nephrotoxic medication. Which cause is included in the sheet?
+
+A. Aminoglycoside exposure  
+B. Inhaled salbutamol alone  
+C. Topical emollient use  
+D. Routine oral iron  
+E. Uncomplicated hydrocele  
+
+**Correct Answer:** A. Aminoglycoside exposure
+
+**Initial Explanation:**
+
+The sheet lists aminoglycosides and toxins among acquired causes of Fanconi syndrome. It also lists inherited and metabolic conditions such as cystinosis and Lowe syndrome.
+
+**Detailed Explanation:**
+
+- **A. Correct.** Aminoglycosides are listed as a possible acquired cause.
+- **B. Incorrect.** Salbutamol is not listed as a cause of generalized proximal tubular dysfunction.
+- **C. Incorrect.** Topical emollients do not explain Fanconi syndrome.
+- **D. Incorrect.** Routine iron treatment is not a listed cause.
+- **E. Incorrect.** Hydrocele is a scrotal fluid collection, not a tubular disorder.
+
+**HIGH-YIELD POINTS:**
+
+- Causes in the sheet include cystinosis, Lowe syndrome, tyrosinaemia, galactosaemia, glycogen storage disease, Wilson disease, aminoglycosides and toxins.
+
+**Source:** Nephrology sheet — Page 38.
+
+### Q219. [Moderate] Which management combination best addresses the major losses in Fanconi syndrome?
+
+A. Fluid restriction and loop diuretic alone  
+B. Steroids and penicillin for every child  
+C. Nephrectomy and chemotherapy  
+D. Adequate hydration, bicarbonate/alkali, potassium and phosphate replacement, with active vitamin D for bone disease  
+E. High-dose sodium restriction without replacement  
+
+**Correct Answer:** D. Adequate hydration, bicarbonate/alkali, potassium and phosphate replacement, with active vitamin D for bone disease
+
+**Initial Explanation:**
+
+Treatment replaces fluid and the substances lost through the proximal tubule. The sheet lists hydration, sodium bicarbonate/alkali, potassium, phosphate and active vitamin D for bone disease.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Fluid restriction may worsen dehydration and does not replace lost solutes.
+- **B. Incorrect.** Steroids and penicillin do not correct proximal tubular wasting.
+- **C. Incorrect.** These are not treatments for Fanconi syndrome.
+- **D. Correct.** This approach addresses hydration, acidosis, potassium and phosphate depletion.
+- **E. Incorrect.** Restricting replacement without correcting losses is inappropriate.
+
+**HIGH-YIELD POINTS:**
+
+- Treat dehydration and metabolic acidosis.
+- Replace potassium and phosphate as needed.
+- Treat rickets with phosphate and active vitamin D under specialist care.
+
+**Source:** Nephrology sheet — Page 38.
+
+# 14. Bartter and Gitelman Syndromes
+
+## Clinical Case 39 — Poor growth with multiple urinary losses
+
+A 2-year-old child has faltering growth, excessive thirst, polyuria and recurrent dehydration. Examination reveals features of rickets. Blood testing shows hypokalaemic, hyperchloraemic metabolic acidosis. Urine testing demonstrates glucose and phosphate loss despite no evidence of diabetes mellitus. Another child in the clinic has recurrent dehydration, hypokalaemic metabolic alkalosis and hypercalciuria, while an older child has hypomagnesaemia and low urinary calcium.
+
+**Case focus:** Generalized proximal tubular dysfunction and the clinical/laboratory differences between Bartter and Gitelman syndromes.
+
+### Q220. [Hard] A neonate has severe polyuria, dehydration, failure to thrive, hypokalaemic metabolic alkalosis and high urinary calcium. Which disorder is most consistent with the sheet's comparison?
+
+A. Gitelman syndrome  
+B. Bartter syndrome  
+C. Fanconi syndrome  
+D. Distal renal tubular acidosis  
+E. Nephrotic syndrome  
+
+**Correct Answer:** B. Bartter syndrome
+
+**Initial Explanation:**
+
+Bartter syndrome is caused by a defect in the sodium–potassium–chloride transporter in the thick ascending limb of the loop of Henle. It is often more severe and may present in the neonatal period or infancy, with hypercalciuria.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Gitelman syndrome usually presents later, is less severe and is associated with low urinary calcium and low serum magnesium.
+- **B. Correct.** Early severe presentation and hypercalciuria point toward Bartter syndrome.
+- **C. Incorrect.** Fanconi syndrome causes proximal tubular solute wasting and metabolic acidosis.
+- **D. Incorrect.** Distal RTA causes metabolic acidosis, not metabolic alkalosis.
+- **E. Incorrect.** Nephrotic syndrome causes protein loss and oedema.
+
+**HIGH-YIELD POINTS:**
+
+- Bartter: loop of Henle transporter defect, early/severe presentation, hypokalaemic metabolic alkalosis, hypercalciuria and possible nephrocalcinosis.
+- The sheet lists fluids, potassium and indomethacin as treatment.
+
+**Source:** Nephrology sheet — Page 38.
+
+### Q221. [Hard] An older child has milder salt-wasting symptoms, hypokalaemic metabolic alkalosis, low serum magnesium and low urinary calcium. Which diagnosis best fits?
+
+A. Bartter syndrome  
+B. Fanconi syndrome  
+C. Gitelman syndrome  
+D. Type IV RTA  
+E. Acute glomerulonephritis  
+
+**Correct Answer:** C. Gitelman syndrome
+
+**Initial Explanation:**
+
+Gitelman syndrome is due to a defect in the distal convoluted tubule sodium–chloride cotransporter. It is usually less severe, presents later and is associated with hypomagnesaemia and hypocalciuria.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Bartter syndrome is more often earlier and more severe, with hypercalciuria.
+- **B. Incorrect.** Fanconi syndrome produces generalized proximal tubular losses and metabolic acidosis.
+- **C. Correct.** The later, milder pattern with low magnesium and low urinary calcium is characteristic.
+- **D. Incorrect.** Type IV RTA causes hyperkalaemia and metabolic acidosis.
+- **E. Incorrect.** Glomerulonephritis produces haematuria and often hypertension.
+
+**HIGH-YIELD POINTS:**
+
+- Gitelman: distal convoluted tubule defect, later presentation, hypokalaemic alkalosis, low serum magnesium and low urinary calcium.
+- The sheet lists potassium and magnesium supplementation.
+
+**Source:** Nephrology sheet — Page 38.
+
+---
+
+# 15. Renal Tubular Acidosis (RTA) and Acid–Base Concepts
+
+## Clinical Case 40 — Poor growth with persistent hyperchloraemic acidosis
+
+An infant has poor weight gain, recurrent vomiting, muscle weakness and polyuria. Blood tests repeatedly show low bicarbonate, low potassium and high chloride with a normal anion gap. Urine remains inappropriately alkaline despite systemic acidosis. Imaging later shows nephrocalcinosis.
+
+**Case focus:** Normal-anion-gap metabolic acidosis, distal and proximal RTA, type IV RTA and safe correction of potassium and acidosis.
+
+### Q222. [Moderate] Which acid–base pattern is most consistent with renal tubular acidosis in the supplied sheet?
+
+A. High anion gap metabolic alkalosis  
+B. Respiratory acidosis  
+C. Respiratory alkalosis  
+D. Normal-anion-gap, hyperchloraemic metabolic acidosis  
+E. High anion gap metabolic alkalosis with hyperkalaemia  
+
+**Correct Answer:** D. Normal-anion-gap, hyperchloraemic metabolic acidosis
+
+**Initial Explanation:**
+
+RTA is described as a chronic normal-anion-gap metabolic acidosis, typically with hyperchloraemia. Potassium is often low in types I and II.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** RTA produces acidosis, not alkalosis.
+- **B. Incorrect.** Respiratory acidosis is caused by inadequate carbon dioxide elimination.
+- **C. Incorrect.** Respiratory alkalosis is not the primary acid–base disorder described.
+- **D. Correct.** This is the characteristic pattern in the sheet.
+- **E. Incorrect.** Type IV RTA can involve hyperkalaemia, but the defining acid–base disturbance remains metabolic acidosis, not alkalosis.
+
+**HIGH-YIELD POINTS:**
+
+- RTA: normal anion gap, hyperchloraemic metabolic acidosis.
+- Types I and II are commonly associated with hypokalaemia; type IV is associated with hyperkalaemia.
+
+**Source:** Nephrology sheet — Pages 39 and 41.
+
+### Q223. [Hard] The child's urine pH remains above 5.5 despite systemic acidosis, and nephrocalcinosis is present. Which tubular defect is most likely?
+
+A. Failure of distal hydrogen-ion secretion (type I distal RTA)  
+B. Failure of glomerular filtration  
+C. Excess bicarbonate reabsorption  
+D. Increased aldosterone effect  
+E. Isolated urinary infection  
+
+**Correct Answer:** A. Failure of distal hydrogen-ion secretion (type I distal RTA)
+
+**Initial Explanation:**
+
+Distal RTA results from impaired hydrogen-ion secretion in the distal tubule. The urine cannot be appropriately acidified and may remain above pH 5.5–6.0.
+
+**Detailed Explanation:**
+
+- **A. Correct.** Failure to excrete hydrogen ions explains the inappropriately high urine pH during systemic acidosis.
+- **B. Incorrect.** Reduced filtration alone does not define distal RTA.
+- **C. Incorrect.** Proximal bicarbonate handling is the main defect in type II RTA.
+- **D. Incorrect.** Increased aldosterone effect does not explain distal acidification failure.
+- **E. Incorrect.** UTI may alter urine pH but does not explain the persistent tubular acidification defect and clinical pattern.
+
+**HIGH-YIELD POINTS:**
+
+- Type I distal RTA: failure of H⁺ excretion by the distal tubule.
+- Urine pH may remain above 5.5–6.0.
+- The sheet links distal RTA with renal stones/nephrocalcinosis.
+
+**Source:** Nephrology sheet — Pages 39–40.
+
+### Q224. [Moderate] Another child has proximal bicarbonate wasting. As systemic acidosis becomes established, which urine pH behaviour is possible in type II RTA?
+
+A. Urine pH must remain above 8 in every sample  
+B. Urine pH can fall below 5.5  
+C. Urine pH cannot ever change  
+D. Urine is always protein-free and glucose-free  
+E. Urine pH is diagnostic of nephrotic syndrome  
+
+**Correct Answer:** B. Urine pH can fall below 5.5
+
+**Initial Explanation:**
+
+In proximal RTA, bicarbonate reabsorption is impaired in the proximal tubule. Once serum bicarbonate has fallen sufficiently, the distal nephron may still acidify the urine, allowing urine pH to fall below 5.5.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Persistently high urine pH despite systemic acidosis is more characteristic of distal RTA.
+- **B. Correct.** The sheet notes that urine pH can fall below 5.5 in proximal RTA.
+- **C. Incorrect.** Urine pH varies with the acid–base state and tubular response.
+- **D. Incorrect.** This is not a defining feature of proximal RTA.
+- **E. Incorrect.** Urine pH does not diagnose nephrotic syndrome.
+
+**HIGH-YIELD POINTS:**
+
+- Type II proximal RTA: failure of bicarbonate reabsorption by the proximal tubule.
+- Urine pH can fall below 5.5 after serum bicarbonate has fallen.
+
+**Source:** Nephrology sheet — Page 39.
+
+### Q225. [Moderate] A child has hyperkalaemia, hyperchloraemic metabolic acidosis and evidence of reduced aldosterone production or response. Which type of RTA should be considered?
+
+A. Type I distal RTA  
+B. Type II proximal RTA  
+C. Type III mixed RTA only  
+D. Type IV RTA  
+E. No renal tubular disorder is possible  
+
+**Correct Answer:** D. Type IV RTA
+
+**Initial Explanation:**
+
+Type IV RTA is associated with reduced aldosterone production or reduced responsiveness to aldosterone and causes hyperkalaemia with metabolic acidosis.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Type I distal RTA is usually associated with hypokalaemia and impaired distal H⁺ secretion.
+- **B. Incorrect.** Type II proximal RTA is associated with bicarbonate wasting and commonly hypokalaemia.
+- **C. Incorrect.** The sheet describes type III as a mixed type I and II pattern, not the characteristic aldosterone-related hyperkalaemic pattern.
+- **D. Correct.** This is the described mechanism of type IV RTA.
+- **E. Incorrect.** This combination is specifically described in the sheet.
+
+**HIGH-YIELD POINTS:**
+
+- Type IV RTA: reduced aldosterone production or end-organ response.
+- It may cause sodium loss, potassium retention, hyperchloraemia and metabolic acidosis.
+
+**Source:** Nephrology sheet — Page 41.
+
+### Q226. [Hard] A child with distal RTA has both hypokalaemia and metabolic acidosis. Which safety point is emphasized in the sheet when planning replacement?
+
+A. Give bicarbonate first and ignore potassium  
+B. Avoid potassium replacement permanently  
+C. Correct potassium before or alongside carefully supervised alkali therapy because bicarbonate correction can worsen hypokalaemia  
+D. Use fluid restriction as the only treatment  
+E. Give loop diuretics to increase potassium loss  
+
+**Correct Answer:** C. Correct potassium before or alongside carefully supervised alkali therapy because bicarbonate correction can worsen hypokalaemia
+
+**Initial Explanation:**
+
+The sheet warns that correcting acidosis before potassium supplementation may precipitate life-threatening hypokalaemia. Potassium replacement must therefore be considered carefully before or during alkali correction under clinical supervision.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** This ignores the warning in the sheet.
+- **B. Incorrect.** Potassium may need replacement when low.
+- **C. Correct.** It reflects the safety point emphasized in the teaching material.
+- **D. Incorrect.** Fluid restriction alone does not correct the tubular acid–base defect.
+- **E. Incorrect.** Additional potassium loss could worsen hypokalaemia.
+
+**HIGH-YIELD POINTS:**
+
+- Treatment aims to correct acidosis, support normal growth and prevent nephrocalcinosis.
+- Potassium and bicarbonate/alkali replacement are used according to the type and laboratory findings.
+- Correct potassium safely; monitor electrolytes and acid–base status.
+
+**Source:** Nephrology sheet — Page 40.
+
+---
+
+# 24. Renal Calculi and Nephrocalcinosis
+
+## Clinical Case 41 — Recurrent loin pain and haematuria
+
+A 10-year-old child presents with intermittent loin pain, visible haematuria and one episode of urinary infection. Urine testing is requested, and the clinician asks about dietary fluid intake, family history and possible metabolic abnormalities. Imaging confirms renal calculi.
+
+**Case focus:** Infective and metabolic risk factors, common stone types, nephrocalcinosis, investigation and prevention.
+
+### Q227. [Moderate] A child has calcium-containing renal stones, and metabolic testing reveals increased urinary calcium without another identified cause. Which abnormality is described as the most common metabolic risk factor?
+
+A. Idiopathic hypercalciuria  
+B. Hypouricosuria  
+C. Low urinary oxalate  
+D. Isolated hypoglycaemia  
+E. Low urinary calcium  
+
+**Correct Answer:** A. Idiopathic hypercalciuria
+
+**Initial Explanation:**
+
+The sheet identifies idiopathic hypercalciuria as the most common metabolic abnormality associated with calcium-containing stones.
+
+**Detailed Explanation:**
+
+- **A. Correct.** Increased urinary calcium predisposes to calcium-containing calculi.
+- **B. Incorrect.** The sheet also mentions increased urate excretion as a contributor, not low urate.
+- **C. Incorrect.** Hyperoxaluria is a risk factor for calcium deposition, not low oxalate.
+- **D. Incorrect.** Hypoglycaemia is unrelated to stone formation.
+- **E. Incorrect.** Reduced urinary calcium does not explain calcium stone formation.
+
+**HIGH-YIELD POINTS:**
+
+- Calcium-containing stones may be associated with idiopathic hypercalciuria and increased urinary urate or oxalate.
+- Cystine and xanthine stones are described as rare.
+
+**Source:** Nephrology sheet — Page 46.
+
+### Q228. [Hard] A child with distal RTA develops calcium deposition within the renal parenchyma rather than a free stone in the collecting system. What is this called?
+
+A. Hydronephrosis  
+B. Vesicoureteric reflux  
+C. Nephrocalcinosis  
+D. Renal agenesis  
+E. Renal vein thrombosis  
+
+**Correct Answer:** C. Nephrocalcinosis
+
+**Initial Explanation:**
+
+Nephrocalcinosis is calcium deposition within the renal parenchyma. The sheet links it with hypercalciuria, hyperoxaluria and distal RTA, and also notes it may occur after neonatal furosemide therapy.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Hydronephrosis is dilatation of the collecting system.
+- **B. Incorrect.** VUR is retrograde urine flow.
+- **C. Correct.** This is the definition of nephrocalcinosis.
+- **D. Incorrect.** Renal agenesis is absence of renal tissue.
+- **E. Incorrect.** Renal vein thrombosis is a vascular complication.
+
+**HIGH-YIELD POINTS:**
+
+- Nephrocalcinosis is distinct from a discrete renal calculus.
+- Consider hypercalciuria, hyperoxaluria, distal RTA and neonatal furosemide exposure.
+
+**Source:** Nephrology sheet — Page 46.
+
+### Q229. [Moderate] Which advice should be included for all children with renal stones according to the sheet, alongside cause-specific management?
+
+A. Restrict fluids severely  
+B. Encourage high fluid intake  
+C. Avoid all movement  
+D. Stop all dietary calcium without assessment  
+E. Give corticosteroids routinely  
+
+**Correct Answer:** B. Encourage high fluid intake
+
+**Initial Explanation:**
+
+The sheet recommends high fluid intake for all affected children. If a metabolic cause is found, specific treatment may also be possible.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Severe fluid restriction increases urinary concentration and is contrary to the advice in the sheet.
+- **B. Correct.** High fluid intake is recommended for all children with stones.
+- **C. Incorrect.** Immobility does not prevent stone formation.
+- **D. Incorrect.** The sheet does not recommend blanket calcium restriction.
+- **E. Incorrect.** Corticosteroids are not routine stone therapy.
+
+**HIGH-YIELD POINTS:**
+
+- Investigations may include urinalysis, urine pH, urinary calcium, phosphate, oxalate, cystine, uric acid, citrate and creatinine, blood renal function tests and CT imaging.
+- Management may require lithotripsy or surgery for selected stones, plus high fluid intake and correction of the underlying metabolic cause.
+
+**Source:** Nephrology sheet — Page 46.
+
+---
+
+# 22. Wilms Tumour and Neuroblastoma
+
+## Clinical Case 42 — An abdominal mass in a young child
+
+A 4-year-old child is brought because the parents noticed an abdominal mass while bathing him. The child is otherwise relatively well but has occasional haematuria and elevated blood pressure. Imaging shows a unilateral renal mass. A second child of a similar age has an abdominal mass that crosses the midline, weight loss, pallor and periorbital bruising.
+
+**Case focus:** Tumour origin, clinical clues, associated syndromes, investigation and the differences between Wilms tumour and neuroblastoma.
+
+### Q230. [Moderate] Which diagnosis best fits the first child's painless renal mass with haematuria and hypertension?
+
+A. Neuroblastoma  
+B. Wilms tumour (nephroblastoma)  
+C. Multicystic dysplastic kidney  
+D. Renal tubular acidosis  
+E. Acute glomerulonephritis  
+
+**Correct Answer:** B. Wilms tumour (nephroblastoma)
+
+**Initial Explanation:**
+
+Wilms tumour arises from embryonal renal tissue and commonly presents in young children with an abdominal mass. Haematuria and hypertension may occur.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Neuroblastoma arises from neural crest tissue and may originate in the adrenal gland or sympathetic chain.
+- **B. Correct.** The renal origin, young age and clinical findings support Wilms tumour.
+- **C. Incorrect.** MCDK is a congenital cystic renal anomaly.
+- **D. Incorrect.** RTA does not cause an abdominal mass.
+- **E. Incorrect.** Glomerulonephritis may cause haematuria and hypertension but not a solid renal mass.
+
+**HIGH-YIELD POINTS:**
+
+- Wilms tumour is the most common renal tumour in childhood in the sheet.
+- It usually presents between 1 and 5 years of age.
+
+**Source:** Nephrology sheet — Page 42.
+
+### Q231. [Moderate] Which examination finding would support Wilms tumour rather than neuroblastoma in a child with an abdominal mass?
+
+A. A mass that typically crosses the midline  
+B. Opsoclonus–myoclonus  
+C. Raccoon eyes  
+D. A mass that usually does not cross the midline  
+E. Bone marrow metastases as the defining initial feature  
+
+**Correct Answer:** D. A mass that usually does not cross the midline
+
+**Initial Explanation:**
+
+The sheet describes Wilms tumour as usually unilateral, with a renal mass that typically does not cross the midline. Neuroblastoma more often crosses the midline.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Crossing the midline is more characteristic of neuroblastoma in the comparison table.
+- **B. Incorrect.** Opsoclonus–myoclonus is a recognized neuroblastoma association.
+- **C. Incorrect.** Raccoon eyes may occur with metastatic neuroblastoma.
+- **D. Correct.** This is the distinguishing feature given for Wilms tumour.
+- **E. Incorrect.** Bone marrow involvement is a metastatic feature of neuroblastoma, not the defining presentation of Wilms tumour.
+
+**HIGH-YIELD POINTS:**
+
+- Wilms: usually unilateral and does not cross the midline.
+- Neuroblastoma: may cross the midline and has characteristic metastatic/paraneoplastic features.
+
+**Source:** Nephrology sheet — Page 42.
+
+### Q232. [Hard] The second child has an abdominal mass crossing the midline, periorbital bruising and possible opsoclonus. Which investigation is particularly useful in the diagnostic work-up described in the sheet?
+
+A. Serum C3 only  
+B. Urine VMA and HVA  
+C. Urine protein-to-creatinine ratio only  
+D. Anti-streptolysin O titre  
+E. Sweat chloride test  
+
+**Correct Answer:** B. Urine VMA and HVA
+
+**Initial Explanation:**
+
+Neuroblastoma arises from neural crest cells and may produce catecholamine metabolites. The sheet lists urinary vanillylmandelic acid (VMA) and homovanillic acid (HVA) in its investigation section.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** C3 is used in selected glomerular disease assessments.
+- **B. Correct.** Urinary VMA/HVA are listed for neuroblastoma.
+- **C. Incorrect.** This evaluates proteinuria, not a neural-crest tumour.
+- **D. Incorrect.** ASO helps assess recent streptococcal infection.
+- **E. Incorrect.** Sweat chloride is used in cystic fibrosis evaluation.
+
+**HIGH-YIELD POINTS:**
+
+- Neuroblastoma: neural crest origin; may arise in adrenal, neck or pelvic sites.
+- The sheet also lists imaging, CBC, bone marrow assessment and urinary metabolites.
+
+**Source:** Nephrology sheet — Pages 42–43.
+
+### Q233. [Moderate] A child with a renal mass is found to have aniridia and a genitourinary anomaly. Which tumour association should raise concern?
+
+A. WAGR syndrome and Wilms tumour  
+B. Gitelman syndrome  
+C. Fanconi syndrome  
+D. IgA vasculitis  
+E. Bartter syndrome  
+
+**Correct Answer:** A. WAGR syndrome and Wilms tumour
+
+**Initial Explanation:**
+
+The sheet lists aniridia, Beckwith–Wiedemann syndrome, WAGR and Denys–Drash syndrome among associations of Wilms tumour.
+
+**Detailed Explanation:**
+
+- **A. Correct.** WAGR includes Wilms tumour, aniridia, genitourinary anomalies and developmental impairment.
+- **B. Incorrect.** Gitelman syndrome is a renal tubular salt-wasting disorder.
+- **C. Incorrect.** Fanconi syndrome is a proximal tubular disorder.
+- **D. Incorrect.** IgA vasculitis is a systemic small-vessel vasculitis.
+- **E. Incorrect.** Bartter syndrome is a loop-of-Henle salt-wasting disorder.
+
+**HIGH-YIELD POINTS:**
+
+- Wilms tumour associations in the sheet: aniridia, Beckwith–Wiedemann, WAGR and Denys–Drash.
+- Recognizing syndromic features is important when assessing a child with a renal mass.
+
+**Source:** Nephrology sheet — Page 42.
+
+### Q234. [Hard] Which treatment combination is described for Wilms tumour in the supplied sheet?
+
+A. Steroids and fluid restriction only  
+B. Long-term antibiotics alone  
+C. Nephrectomy, chemotherapy and radiotherapy in selected/advanced cases  
+D. Dialysis as the definitive treatment  
+E. Endoscopic urethral valve ablation  
+
+**Correct Answer:** C. Nephrectomy, chemotherapy and radiotherapy in selected/advanced cases
+
+**Initial Explanation:**
+
+The sheet describes multidisciplinary management that includes nephrectomy and chemotherapy, with radiotherapy used in selected or advanced cases.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** These measures do not treat a renal malignancy.
+- **B. Incorrect.** Antibiotics do not eradicate Wilms tumour.
+- **C. Correct.** This matches the treatment approach listed.
+- **D. Incorrect.** Dialysis is renal replacement therapy, not definitive tumour treatment.
+- **E. Incorrect.** This is treatment for posterior urethral valves.
+
+**HIGH-YIELD POINTS:**
+
+- Management is multidisciplinary.
+- The sheet describes a generally good prognosis for Wilms tumour, with a cure rate around 80% in its summary.
+
+**Source:** Nephrology sheet — Page 43.
+
+### Q235. [Hard] Which additional finding most strongly supports neuroblastoma over Wilms tumour in a child with an abdominal mass?
+
+A. Isolated proteinuria with normal imaging  
+B. A mass confined to one kidney without systemic features  
+C. A history of orthostatic proteinuria  
+D. Raccoon eyes with bone pain or marrow involvement  
+E. A simple transilluminating hydrocele  
+
+**Correct Answer:** D. Raccoon eyes with bone pain or marrow involvement
+
+**Initial Explanation:**
+
+The sheet describes neuroblastoma with possible bone and bone-marrow metastases, bone pain, proptosis/raccoon eyes and skin nodules.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** This does not suggest a tumour.
+- **B. Incorrect.** A unilateral renal mass is more characteristic of Wilms tumour.
+- **C. Incorrect.** Orthostatic proteinuria is a benign urinary protein pattern.
+- **D. Correct.** These are metastatic features listed for neuroblastoma.
+- **E. Incorrect.** Hydrocele is a benign scrotal fluid collection and does not suggest an abdominal malignancy.
+
+**HIGH-YIELD POINTS:**
+
+- Neuroblastoma: neural crest origin, may cross the midline, and may present with metastatic or paraneoplastic features.
+- Opsoclonus–myoclonus is another association listed in the sheet.
+
+**Source:** Nephrology sheet — Page 42.
+
+---
+
+# 23. Hypertension in Children
+
+## Clinical Case 43 — Repeated high blood-pressure readings
+
+A 12-year-old boy is found to have repeatedly elevated blood-pressure readings during clinic visits. He is overweight and has a family history of hypertension. The clinician repeats the measurement after the child rests and checks that the cuff fits correctly. Urinalysis and renal investigations are requested because renal disease is an important secondary cause in children.
+
+**Case focus:** Paediatric BP thresholds, correct measurement, primary versus secondary hypertension, investigations and management.
+
+### Q236. [Moderate] For a child aged 1–13 years, which blood-pressure finding is most consistent with hypertension according to the threshold summarized on page 45 of the sheet?
+
+A. Any reading above the 50th percentile  
+B. A reading at or above the 95th percentile, or at least 130/80 mmHg if that is the lower threshold  
+C. A reading above the 75th percentile only  
+D. A single reading above the 90th percentile always establishes stage 2 hypertension  
+E. A reading below the 90th percentile  
+
+**Correct Answer:** B. A reading at or above the 95th percentile, or at least 130/80 mmHg if that is the lower threshold
+
+**Initial Explanation:**
+
+The sheet states that in children aged 1–13 years, hypertension is at least the 95th percentile or at least 130/80 mmHg, whichever is lower. The child's age, sex and height are relevant to percentile interpretation.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** The 50th percentile is around the middle of the reference distribution.
+- **B. Correct.** This matches the threshold stated on page 45.
+- **C. Incorrect.** The 75th percentile is not the stated diagnostic threshold.
+- **D. Incorrect.** The 90th percentile relates to elevated BP, not stage 2 hypertension.
+- **E. Incorrect.** Below the 90th percentile is within the normal category in the summary table.
+
+**HIGH-YIELD POINTS:**
+
+- The sheet classifies normal BP as below the 90th percentile.
+- It uses age, sex and height centiles for children.
+- The sheet separately states that in young people aged 13 years and above, hypertension is at least 130/80 mmHg.
+
+**Source:** Nephrology sheet — Pages 44–45.
+
+### Q237. [Moderate] The nurse obtains a high reading while the child is anxious and using an adult-sized cuff that is too small. What is the best next step?
+
+A. Diagnose hypertension immediately without repeating the measurement  
+B. Measure BP while the child is standing and moving  
+C. Repeat the measurement after the child is relaxed, using an appropriate cuff and correct arm positioning  
+D. Use the same cuff for every child regardless of arm size  
+E. Measure BP over clothing only  
+
+**Correct Answer:** C. Repeat the measurement after the child is relaxed, using an appropriate cuff and correct arm positioning
+
+**Initial Explanation:**
+
+Accurate measurement requires an appropriate cuff, a relaxed and comfortable child, and positioning the machine, heart and limb at the same level.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** A single poorly performed measurement should not establish the diagnosis.
+- **B. Incorrect.** Movement and poor positioning reduce reliability.
+- **C. Correct.** It follows the technique described in the sheet.
+- **D. Incorrect.** Cuff size must be appropriate for the child's arm.
+- **E. Incorrect.** BP should be measured using correct standardized technique, not over clothing.
+
+**HIGH-YIELD POINTS:**
+
+- Ensure correct cuff size.
+- Allow the child to rest and relax.
+- Keep the arm at heart level and use consistent technique.
+
+**Source:** Nephrology sheet — Page 44.
+
+### Q238. [Hard] In a child with newly confirmed hypertension, which category of secondary cause should be prioritized in the initial evaluation according to the sheet?
+
+A. Renal parenchymal or renovascular disease  
+B. Isolated hydrocele  
+C. Uncomplicated orthostatic proteinuria  
+D. Hypospadias  
+E. Seasonal allergic rhinitis  
+
+**Correct Answer:** A. Renal parenchymal or renovascular disease
+
+**Initial Explanation:**
+
+The sheet identifies renal disease as the most important secondary cause of childhood hypertension. Examples include glomerulonephritis, pyelonephritis, CKD, renal artery stenosis and renal vein thrombosis.
+
+**Detailed Explanation:**
+
+- **A. Correct.** Renal causes are emphasized as the leading secondary category.
+- **B. Incorrect.** Hydrocele is not a recognized cause of hypertension.
+- **C. Incorrect.** Orthostatic proteinuria is usually benign and does not explain hypertension.
+- **D. Incorrect.** Hypospadias is a congenital genital anomaly.
+- **E. Incorrect.** Allergic rhinitis is not the key secondary cause described.
+
+**HIGH-YIELD POINTS:**
+
+- The sheet describes secondary hypertension as more common in children than primary hypertension.
+- Other secondary causes include endocrine disease, coarctation of the aorta, CNS disease and medications such as steroids.
+- Primary hypertension is more common in adolescents and is associated with factors such as obesity and family history.
+
+**Source:** Nephrology sheet — Page 45.
+
+### Q239. [Hard] A child with hypertension has no obvious endocrine features. Which initial investigations are included in the sheet's work-up?
+
+A. Urine culture alone  
+B. Brain MRI in every child  
+C. Sweat test and stool culture  
+D. Electrolytes/urea, urinalysis, renal ultrasound and selected cardiac/vascular assessment  
+E. No investigation is needed if the child is overweight  
+
+**Correct Answer:** D. Electrolytes/urea, urinalysis, renal ultrasound and selected cardiac/vascular assessment
+
+**Initial Explanation:**
+
+The sheet lists urea/electrolytes and urinalysis, ultrasound, echocardiography and Doppler studies, with further tests such as ABG, thyroid function, renal biopsy, renin and aldosterone according to the case.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Urine culture alone does not evaluate the broad renal and cardiovascular causes of hypertension.
+- **B. Incorrect.** Brain MRI is not a routine first-line test for every child with hypertension.
+- **C. Incorrect.** These tests do not address the main causes listed.
+- **D. Correct.** This reflects the investigation set in the sheet.
+- **E. Incorrect.** Overweight may contribute to primary hypertension, but secondary causes still need consideration.
+
+**HIGH-YIELD POINTS:**
+
+- Initial assessment: electrolytes/urea, urinalysis and renal ultrasound.
+- Additional tests may include echocardiography, Doppler, ABG, TFT, renal biopsy and plasma renin/aldosterone.
+
+**Source:** Nephrology sheet — Pages 45–46.
+
+### Q240. [Moderate] A child with persistent primary hypertension is overweight and has a high-salt diet. Which initial management package best matches the sheet?
+
+A. Complete bed rest and no fluids  
+B. Nephrectomy  
+C. Long-term antibiotics  
+D. Steroids for all children  
+E. Weight reduction when needed, increased physical activity, salt restriction and medication when indicated  
+
+**Correct Answer:** E. Weight reduction when needed, increased physical activity, salt restriction and medication when indicated
+
+**Initial Explanation:**
+
+The sheet recommends general measures such as weight reduction, physical activity and salt restriction. Drug options listed include ACE inhibitors, diuretics, hydralazine and calcium-channel blockers, alongside treatment of any underlying cause.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Bed rest and fluid deprivation are not the recommended lifestyle measures.
+- **B. Incorrect.** Nephrectomy is not treatment for primary hypertension.
+- **C. Incorrect.** Antibiotics are only used for an appropriate infection, not hypertension itself.
+- **D. Incorrect.** Steroids are not routine antihypertensive therapy and may themselves contribute to hypertension.
+- **E. Correct.** This reflects the lifestyle and medication options in the sheet.
+
+**HIGH-YIELD POINTS:**
+
+- Treat the underlying cause when hypertension is secondary.
+- Lifestyle management includes weight reduction, activity and salt restriction.
+- The sheet lists ACE inhibitors, diuretics, hydralazine and calcium-channel blockers as drug options.
+
+**Source:** Nephrology sheet — Page 46.
+
+---
+
+## End of New Nephrology Supplement
+
+**New material added:** 12 clinical cases (Cases 12–23), 60 new MCQs (Q77–Q136).
+
+**Original material preserved:** All content in `Nephrology Clinical Cases.md` remains unchanged. This supplement is intentionally separate so the new questions can be reviewed independently before any future integration.

@@ -6214,3 +6214,913 @@ The lecture lists thyroid ultrasound and radionuclide scanning with high uptake 
 
 **Source:** Endocrine sheet — Page 16.
 
+---
+
+# 2. Growth Hormone Deficiency and Hypopituitarism
+
+## Clinical Case 50 — Children with growth failure referred for endocrine assessment
+
+**Case focus:** Acquired causes of hypopituitarism, hypothalamic vs pituitary localisation (GHRH test), IUGR and failure of catch-up, adverse effects of GH therapy.
+
+### Q194. [Hard] A 9-year-old boy received cranial irradiation at age 4 years for a brain tumour. For 3 years his height velocity has been low and he has gained truncal fat. Bone age on a left hand–wrist radiograph is 6.5 years. IGF-1 and IGF-binding protein are low, and GH responses to two provocation tests are inadequate. Thyroid function tests and morning cortisol are normal, and pituitary MRI shows no mass lesion. Which test would best determine whether the defect is hypothalamic or pituitary?
+
+A. Repeat random serum GH measurement  
+B. Repeat left hand–wrist radiograph for bone age  
+C. GHRH stimulation test  
+D. Water deprivation test  
+E. Karyotype  
+
+**Correct Answer:** C. GHRH stimulation test
+
+**Initial Explanation:**
+
+The clinical and biochemical picture already establishes GH deficiency. The remaining question is where the lesion lies. The sheet lists the GHRH stimulation test specifically to differentiate pituitary from hypothalamic causes.
+
+**Detailed Explanation:**
+
+- **Reasoning from the vignette.** Cranial irradiation is a listed acquired cause of hypopituitarism. Low IGF-1/IGFBP and failure of two provocation tests confirm GHD. A normal MRI means no structural explanation.
+- **A. Incorrect.** GH is secreted in pulses, so a random sample is of little value and would add nothing after failed provocation tests.
+- **B. Incorrect.** Bone age is already delayed, as expected in GHD. Repeating it does not localise the defect.
+- **C. Correct.** If the pituitary responds to exogenous GHRH, the somatotrophs are intact and the problem is upstream (hypothalamic). No response suggests pituitary damage.
+- **D. Incorrect.** The water deprivation test evaluates diabetes insipidus, not the GH axis.
+- **E. Incorrect.** Karyotype is for children with dysmorphic features or suspected chromosomal short stature. Nothing here suggests it.
+
+**HIGH-YIELD POINTS:**
+
+- Acquired causes of hypopituitarism: tumour (e.g. craniopharyngioma), cranial surgery/trauma, meningitis, cranial irradiation, infiltration (e.g. histiocytosis), structural brain malformation or hydrocephalus.
+- GHRH stimulation test: separates pituitary from hypothalamic causes of GHD.
+- When a brain tumour is suspected, perform a detailed eye and fundus examination.
+- Other pituitary axes (TFT, cortisol) must be checked because deficiencies may be combined.
+
+**Source:** Endocrine sheet — Hypopituitarism: causes (Page 5); investigations (Pages 6–7).
+
+### Q196. [Medium] An 11-year-old girl with Turner syndrome (45,X) has received daily subcutaneous GH for 18 months. She now has a limp and pain in the hip and thigh that worsens on walking. Which adverse effect of GH therapy should be suspected?
+
+A. Pseudotumour cerebri  
+B. Gynaecomastia  
+C. Leukaemia  
+D. Worsening insulin resistance  
+E. Slipped upper femoral epiphysis  
+
+**Correct Answer:** E. Slipped upper femoral epiphysis
+
+**Initial Explanation:**
+
+Slipped upper femoral epiphysis (SUFE) is one of the side effects of GH therapy listed in the sheet. A limp with hip or thigh pain in a child on GH therapy should prompt this diagnosis.
+
+**Detailed Explanation:**
+
+- **E. Correct.** The vignette gives a limp and hip/thigh pain during GH treatment, the typical presentation of SUFE.
+- **A. Incorrect.** Pseudotumour cerebri is also a listed GH side effect, but it presents with headache, vomiting and visual symptoms.
+- **B. Incorrect.** Gynaecomastia is listed but is a breast finding, not a hip complaint.
+- **C. Incorrect.** Increased leukaemia risk is listed, but leukaemia would not present as an isolated limp with this time course.
+- **D. Incorrect.** Insulin resistance is listed but is detected biochemically, not by pain.
+
+**HIGH-YIELD POINTS:**
+
+- GH therapy side effects in the sheet: pseudotumour cerebri, SUFE, gynaecomastia, increased insulin resistance, increased leukaemia risk.
+- Turner syndrome is a listed indication for GH.
+- GH is given as a daily evening subcutaneous injection until epiphyseal closure.
+
+**Source:** Endocrine sheet — Hypopituitarism: GH therapy and side effects (Page 7).
+
+---
+
+# 18. Short Stature and Growth Assessment
+
+## Clinical Case 51 — Children with growth failure referred for endocrine assessment
+
+**Case focus:** Acquired causes of hypopituitarism, hypothalamic vs pituitary localisation (GHRH test), IUGR and failure of catch-up, adverse effects of GH therapy.
+
+### Q195. [Medium] A healthy 3-year-old girl was born at 36 weeks with intrauterine growth restriction. She has not shown catch-up growth and her height is now below the 3rd centile. Screening for chronic disease (blood count, creatinine, tissue transglutaminase, thyroid function) is normal. Her parents ask about her future height. Which statement is most appropriate?
+
+A. About one third of children with IUGR remain short, and those who fail to catch up are among the recognised candidates for GH therapy  
+B. Children with IUGR always catch up by 2 years, so no further follow-up is needed  
+C. GH therapy is contraindicated in short children born with IUGR  
+D. IUGR causes disproportionate short stature with short limbs  
+E. Short stature after IUGR indicates GH receptor resistance (Laron syndrome)  
+
+**Correct Answer:** A. About one third of children with IUGR remain short, and those who fail to catch up are among the recognised candidates for GH therapy
+
+**Initial Explanation:**
+
+The sheet states that roughly one third of children born after IUGR (or extreme prematurity) remain short. It also lists "IUGR with failure of catch-up growth" as an indication for recombinant GH.
+
+**Detailed Explanation:**
+
+- **A. Correct.** Persistent short stature after IUGR is common (about one third), and failure of catch-up is a listed indication for GH therapy after exclusion of other causes, as done here.
+- **B. Incorrect.** One third of these children do not catch up, so continued growth surveillance is required.
+- **C. Incorrect.** The sheet lists this exact situation as an indication.
+- **D. Incorrect.** The sheet places IUGR among causes of proportionate short stature. Short limbs suggest skeletal dysplasia such as achondroplasia.
+- **E. Incorrect.** Laron syndrome shows high GH with low IGF-1. Nothing in this case suggests it.
+
+**HIGH-YIELD POINTS:**
+
+- IUGR and extreme prematurity: about one third remain short.
+- GH indications in the sheet: GHD, Turner syndrome, CKD, Prader–Willi syndrome, idiopathic short stature, IUGR without catch-up, SHOX deficiency.
+- Exclude chronic disease before attributing short stature to IUGR.
+
+**Source:** Endocrine sheet — Short stature, causes (Page 47); GH therapy indications (Page 7).
+
+# 3. Thyroid Hormone Physiology and Congenital Hypothyroidism
+
+## Clinical Case 52 — Four children seen in thyroid clinic
+
+**Case focus:** Congenital hypothyroidism in Down syndrome, thyroid scan and inheritance, euthyroid Hashimoto thyroiditis, relapse of Graves disease.
+
+### Q197. [Medium] A term infant with trisomy 21 is seen at 3 weeks of age because of persistent jaundice, constipation, poor feeding, a hoarse cry and a large anterior fontanelle. The family attributes everything to Down syndrome, and the newborn screening result cannot be found. What is the best next step?
+
+A. Reassure, as these features are expected in Down syndrome  
+B. Serum TSH and free T4 now  
+C. Repeat karyotype  
+D. Echocardiography  
+E. Left wrist radiograph for bone age  
+
+**Correct Answer:** B. Serum TSH and free T4 now
+
+**Initial Explanation:**
+
+Congenital hypothyroidism is more common in Down syndrome, and most affected infants look normal early on. Jaundice, constipation, hoarse cry and a large fontanelle are classic features. Because the screening result is missing, thyroid function must be measured immediately.
+
+**Detailed Explanation:**
+
+- **Reasoning.** The listed features of congenital hypothyroidism are prolonged physiological jaundice, constipation, hoarse cry, large fontanelle, hypotonia and umbilical hernia. The sheet notes the higher incidence in Down syndrome. Treatment started within the first 2 weeks protects intellectual development, and this infant is already 3 weeks old, so delay is harmful.
+- **A. Incorrect.** Attributing symptoms to Down syndrome risks missing a treatable cause of intellectual impairment.
+- **B. Correct.** TSH and free T4 diagnose primary congenital hypothyroidism (high TSH, low free T4).
+- **C. Incorrect.** The chromosomal diagnosis is already known.
+- **D. Incorrect.** Congenital heart disease may coexist, but it does not explain these features or replace thyroid testing.
+- **E. Incorrect.** Bone age by hand–wrist film is not the investigation used in neonates. The knee radiograph is used, and imaging should not delay biochemistry.
+
+**HIGH-YIELD POINTS:**
+
+- Congenital hypothyroidism: about 1 in 3,000–4,000 births, more common in Down syndrome.
+- It is the most common preventable cause of intellectual disability.
+- Clinical diagnosis is unreliable in the first month, so screening is essential.
+- Early treatment (first 2 weeks) reduces impaired intellectual development.
+
+**Source:** Endocrine sheet — Congenital hypothyroidism: epidemiology (Page 10), clinical features (Pages 10–11), treatment (Page 12).
+
+### Q198. [Hard] A 5-week-old infant has primary congenital hypothyroidism (high TSH, low free T4). The thyroid is diffusely enlarged and a technetium scan shows increased uptake. Maternal thyroid function is normal, and the mother took no antithyroid drugs. The parents ask about the risk for a future child. Which diagnosis and counselling are correct?
+
+A. Thyroid agenesis; the condition is sporadic and the gland takes up no tracer  
+B. Ectopic thyroid; the scan would show a single localised area of uptake and no goitre  
+C. Transient hypothyroidism from maternal TSH-blocking antibodies; it resolves by 6–12 months  
+D. Thyroid dyshormonogenesis, an autosomal recessive disorder; each future pregnancy carries a 1 in 4 risk  
+E. Secondary hypothyroidism from pituitary disease; TSH would be low  
+
+**Correct Answer:** D. Thyroid dyshormonogenesis, an autosomal recessive disorder; each future pregnancy carries a 1 in 4 risk
+
+**Initial Explanation:**
+
+Dyshormonogenesis (the second most common cause, about 10%) is associated with a goitre and increased uptake, and is autosomal recessive. Dysgenesis (about 90%) gives no goitre and absent or ectopic tissue.
+
+**Detailed Explanation:**
+
+- **Key clues.** Goitre plus increased uptake means the gland is present and trying to work, but hormone synthesis is defective. Normal maternal thyroid status and no drug exposure exclude transient maternal causes.
+- **A. Incorrect.** Agenesis shows decreased/absent uptake and no goitre.
+- **B. Incorrect.** Ectopic tissue localises uptake at an abnormal site, and dysgenesis presents without goitre.
+- **C. Incorrect.** Transient disease requires maternal antibodies or antithyroid drugs, both absent here.
+- **D. Correct.** Autosomal recessive inheritance means 25% recurrence risk for each pregnancy of carrier parents.
+- **E. Incorrect.** Secondary hypothyroidism has low TSH, whereas this infant has high TSH.
+
+**HIGH-YIELD POINTS:**
+
+- Dysgenesis (about 90%): ectopic, agenesis or hypoplasia; no goitre; scan shows localised uptake (ectopic) or decreased uptake (aplasia).
+- Dyshormonogenesis (about 10%): autosomal recessive, goitre, increased uptake. Pendred syndrome adds sensorineural hearing loss.
+- TFT pattern: primary = low T4, high TSH; secondary and tertiary = low T4, low TSH.
+
+**Source:** Endocrine sheet — Congenital hypothyroidism: causes (Pages 9–10), investigations: TFT and thyroid scan (Pages 11–12).
+
+# 4. Acquired Hypothyroidism and Hashimoto Thyroiditis
+
+## Clinical Case 53 — Four children seen in thyroid clinic
+
+**Case focus:** Congenital hypothyroidism in Down syndrome, thyroid scan and inheritance, euthyroid Hashimoto thyroiditis, relapse of Graves disease.
+
+### Q199. [Hard] An 11-year-old boy with type 1 diabetes has a smooth, firm, non-tender goitre found at a routine visit. He is asymptomatic and growing normally. Free T4 and TSH are normal, and anti-TPO antibodies are strongly positive. What is the most appropriate management?
+
+A. Start levothyroxine immediately for lifelong replacement  
+B. Diagnose autoimmune thyroiditis, avoid treatment for now and monitor clinically and with periodic thyroid function tests  
+C. Start carbimazole to shrink the goitre  
+D. Arrange subtotal thyroidectomy  
+E. Give radioactive iodine  
+
+**Correct Answer:** B. Diagnose autoimmune thyroiditis, avoid treatment for now and monitor clinically and with periodic thyroid function tests
+
+**Initial Explanation:**
+
+This is Hashimoto thyroiditis in a euthyroid state. The sheet notes that thyroid function tests may be normal early on, and that levothyroxine is given when thyroid hormone is low. Follow-up in the endocrine clinic is essential.
+
+**Detailed Explanation:**
+
+- **Diagnosis.** A smooth, firm, non-tender goitre with positive anti-TPO in a child with another autoimmune disease (type 1 diabetes) is autoimmune thyroiditis. Normal free T4 and TSH show a euthyroid state.
+- **A. Incorrect.** The sheet links levothyroxine to low T3/T4. This boy has normal thyroid hormones.
+- **B. Correct.** Monitor growth, symptoms and TFT; treat when hypothyroidism develops.
+- **C. Incorrect.** Antithyroid drugs treat hyperthyroidism (Graves disease), not this condition.
+- **D. Incorrect.** Surgery is not needed for an asymptomatic autoimmune goitre.
+- **E. Incorrect.** Radioiodine is a second-line option for Graves disease.
+
+**HIGH-YIELD POINTS:**
+
+- Hashimoto thyroiditis: the most common cause of acquired hypothyroidism and of sporadic goitre in childhood and adolescence.
+- Antibodies (anti-TPO, anti-Tg) are positive in about 85%, so 10–15% are antibody-negative.
+- Associations include type 1 diabetes, Addison disease, vitiligo, alopecia, coeliac disease, Down and Turner syndromes.
+- Prognosis is very good and depends partly on whether other autoimmune disease develops.
+
+**Source:** Endocrine sheet — Acquired hypothyroidism and Hashimoto thyroiditis (Pages 13–14).
+
+# 5. Hyperthyroidism and Graves Disease
+
+## Clinical Case 54 — Four children seen in thyroid clinic
+
+**Case focus:** Congenital hypothyroidism in Down syndrome, thyroid scan and inheritance, euthyroid Hashimoto thyroiditis, relapse of Graves disease.
+
+### Q200. [Hard] A 16-year-old girl with Graves disease has completed two separate 2-year courses of carbimazole. Both times she relapsed within months of stopping. She again has palpitations, tremor and weight loss, with high free T4, suppressed TSH and positive TSH-receptor antibodies. Her exophthalmos has not resolved. What is the most appropriate plan?
+
+A. A third 2-year course of carbimazole alone, since relapse rates fall with each course  
+B. Propranolol alone, as relapse means the drug has failed  
+C. Levothyroxine to suppress thyroid activity  
+D. Stop all treatment and observe, as eye signs persist regardless of treatment  
+E. Definitive therapy with radioiodine or subtotal thyroidectomy, with lifelong follow-up for hypothyroidism  
+
+**Correct Answer:** E. Definitive therapy with radioiodine or subtotal thyroidectomy, with lifelong follow-up for hypothyroidism
+
+**Initial Explanation:**
+
+Medical treatment (carbimazole or propylthiouracil) is first line and given for about 2 years. Relapse is common. Radioiodine (older child) or subtotal thyroidectomy is second-line definitive therapy. Both usually lead to hypothyroidism, so long-term follow-up and levothyroxine are needed.
+
+**Detailed Explanation:**
+
+- **Reasoning.** Two failed courses with a positive TSH-receptor antibody indicate persistent disease. At age 16 she is an older child, so radioiodine is suitable.
+- **A. Incorrect.** Repeating the same drug course has already failed twice. The sheet describes definitive therapy as the second-line step.
+- **B. Incorrect.** Propranolol only relieves symptoms (anxiety, tremor, tachycardia). It does not control hormone excess.
+- **C. Incorrect.** Levothyroxine would add thyroid hormone to a thyrotoxic patient.
+- **D. Incorrect.** Eye signs may persist after control of thyroid hormone excess, but that does not justify leaving thyrotoxicosis untreated.
+- **E. Correct.** This is the second-line pathway, with follow-up for the hypothyroidism that commonly follows.
+
+**HIGH-YIELD POINTS:**
+
+- Graves disease: stimulatory antibodies to the TSH receptor, positive in about 95%.
+- Antithyroid drugs carry a risk of neutropenia: urgent blood count if sore throat and high fever.
+- Eye signs may not resolve with medical treatment.
+- After first- or second-line therapy, thyroxine replacement may be needed, so follow-up is always required.
+
+**Source:** Endocrine sheet — Graves disease: treatment (Page 16).
+
+---
+
+# 28. Cushing Syndrome — ACTH Classification and Biochemical Features
+
+## Clinical Case 55 — Obesity, atypical genitalia and a collapsing infant
+
+**Case focus:** Cushing syndrome vs simple obesity, 46,XY undervirilisation, emergency management of salt-wasting CAH.
+
+### Q201. [Medium] A 10-year-old girl with marked obesity is brought because her mother fears "Cushing disease". She is taller than 90% of children her age, her growth velocity is normal, and her bone age is 2 years advanced. Blood pressure and fasting glucose are normal. What is the best interpretation?
+
+A. Cushing disease; MRI of the pituitary should be arranged urgently  
+B. Exogenous Cushing syndrome from hidden steroid exposure  
+C. Simple obesity, as growth acceleration with advanced bone age argues against cortisol excess  
+D. GH deficiency, which gives truncal obesity with accelerated growth  
+E. Hypothyroidism, which gives obesity with advanced bone age  
+
+**Correct Answer:** C. Simple obesity, as growth acceleration with advanced bone age argues against cortisol excess
+
+**Initial Explanation:**
+
+In children, Cushing syndrome produces weight gain with growth failure (reduced height velocity) and delayed bone age. Simple obesity is associated with tall stature and advanced bone age.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Cushing disease would cause reduced growth velocity with delayed bone age. Imaging is premature without biochemical evidence.
+- **B. Incorrect.** Exogenous steroids also suppress growth, so the same logic excludes it.
+- **C. Correct.** Tall stature and advanced bone age point to simple obesity. Idiopathic obesity is a listed cause of tall stature and advanced bone age.
+- **D. Incorrect.** GH deficiency causes short stature with delayed bone age.
+- **E. Incorrect.** Hypothyroidism causes growth failure with delayed bone age.
+
+**HIGH-YIELD POINTS:**
+
+- Cushing syndrome in children: obesity plus growth failure, delayed puberty and delayed bone age.
+- Simple obesity: tall stature, advanced bone age.
+- The diagnosis of Cushing syndrome is questioned mainly in obese children who are also short.
+- Delayed bone age: hypothyroidism, hypopituitarism, Cushing syndrome, delayed puberty, chronic illness. Advanced bone age: hyperthyroidism, simple obesity, CAH, precocious puberty.
+
+**Source:** Endocrine sheet — Cushing syndrome (Pages 18–19); causes of delayed and advanced bone age, and tall stature (Page 48).
+
+# 8. Disorders of Sex Development and Ambiguous Genitalia
+
+## Clinical Case 56 — Obesity, atypical genitalia and a collapsing infant
+
+**Case focus:** Cushing syndrome vs simple obesity, 46,XY undervirilisation, emergency management of salt-wasting CAH.
+
+### Q202. [Hard] A newborn has perineal hypospadias, a bifid scrotum and a small phallus. Gonads are palpable in the inguinal canals. Karyotype is 46,XY. Sodium, potassium and glucose are normal, and 17-hydroxyprogesterone is normal. Basal testosterone is normal for age, but dihydrotestosterone (DHT) is very low. Which mechanism best explains the findings?
+
+A. Impaired conversion of testosterone to DHT (5α-reductase deficiency)  
+B. 21-hydroxylase deficiency with androgen excess  
+C. Androgen receptor unresponsiveness, with normal or high DHT  
+D. Absence of the SRY gene, with ovarian development  
+E. Antenatal exposure to maternal androgenic drugs  
+
+**Correct Answer:** A. Impaired conversion of testosterone to DHT (5α-reductase deficiency)
+
+**Initial Explanation:**
+
+The sheet explains that SRY drives testis formation, and that testosterone and its metabolite DHT virilise male external genitalia. If testosterone is normal but DHT is low, external virilisation fails while testes are present. This is the 5α-reductase deficiency listed among causes of ambiguous genitalia.
+
+**Detailed Explanation:**
+
+- **Stepwise reasoning.** 46,XY with palpable gonads means SRY and testis development occurred. Normal 17-OHP and electrolytes exclude CAH. Normal testosterone with low DHT localises the defect to the conversion step.
+- **A. Correct.** DHT is needed for virilisation of the external genitalia, so low DHT gives undervirilisation despite normal testosterone.
+- **B. Incorrect.** 21-hydroxylase deficiency virilises a 46,XX fetus and raises 17-OHP, which is normal here.
+- **C. Incorrect.** In androgen insensitivity, hormone levels (including DHT) are not low. The problem is inadequate androgen action at the receptor.
+- **D. Incorrect.** Without SRY the gonads become ovaries, but this infant has palpable testes.
+- **E. Incorrect.** Antenatal drugs are a listed cause of virilisation of female fetuses, and do not explain low DHT with normal testosterone in a 46,XY infant.
+
+**HIGH-YIELD POINTS:**
+
+- SRY on the Y chromosome → testis; absent SRY → ovary and female genitalia.
+- Testosterone and DHT virilise male genitalia.
+- Causes of ambiguous genitalia: CAH (46,XX virilisation), androgen insensitivity (46,XY), 5α-reductase deficiency, antenatal drugs.
+- Approach: do not guess the sex, history and examination, abdominal ultrasound, karyotype, 17-OHP, multidisciplinary team and psychological support.
+
+**Source:** Endocrine sheet — Ambiguous genitalia / DSD (Pages 21–22).
+
+# 7. Primary Adrenal Insufficiency and Adrenal Crisis
+
+## Clinical Case 57 — Obesity, atypical genitalia and a collapsing infant
+
+**Case focus:** Cushing syndrome vs simple obesity, 46,XY undervirilisation, emergency management of salt-wasting CAH.
+
+### Q203. [Hard] A 17-day-old boy is brought with poor feeding, vomiting, weight loss and lethargy. The heart rate is 190/min, peripheries are cool and blood pressure is low. His genitalia look normal. Sodium is 119 mmol/L, potassium 7.4 mmol/L, glucose 28 mg/dL, and blood gas shows pH 7.10 with bicarbonate 8 mmol/L. An older brother died at 3 weeks of age from "gastroenteritis". Which initial management is most appropriate?
+
+A. Oral rehydration solution and fludrocortisone, with hydrocortisone only after the 17-OHP result  
+B. Fluid restriction and treatment of hyperkalaemia, awaiting karyotype  
+C. Slow hypotonic fluids over 48 hours, as for diabetic ketoacidosis  
+D. ABC, 0.9% saline bolus of 20 mL/kg, 10% dextrose 2–5 mL/kg for hypoglycaemia and IV hydrocortisone, taking a 17-OHP sample without delaying treatment  
+E. Surgical consultation for pyloric stenosis, with correction of alkalosis  
+
+**Correct Answer:** D. ABC, 0.9% saline bolus of 20 mL/kg, 10% dextrose 2–5 mL/kg for hypoglycaemia and IV hydrocortisone, taking a 17-OHP sample without delaying treatment
+
+**Initial Explanation:**
+
+This is a salt-wasting adrenal crisis from CAH. A 46,XY infant can look normal at birth and present at 1–3 weeks. Treatment is the "3 S": Saline, Sugar, Steroid, after ABC.
+
+**Detailed Explanation:**
+
+- **Reasoning.** Shock, hyponatraemia, hyperkalaemia, hypoglycaemia and metabolic acidosis at 2–3 weeks, plus a family history of sudden neonatal death, define salt-wasting CAH. Normal-looking genitalia in a male do not exclude it.
+- **A. Incorrect.** Oral treatment is inadequate in shock. Steroids must not wait for confirmatory tests.
+- **B. Incorrect.** Fluid restriction is dangerous in shock, and karyotype does not guide emergency management.
+- **C. Incorrect.** Slow hypotonic fluid correction is an approach for DKA, not for shock with hyponatraemia.
+- **D. Correct.** This follows the sheet's adrenal crisis protocol.
+- **E. Incorrect.** Pyloric stenosis gives hypochloraemic alkalosis, not hyponatraemia with hyperkalaemia and acidosis.
+
+**HIGH-YIELD POINTS:**
+
+- Salt-wasting CAH: the most lethal form of 21-hydroxylase deficiency, adrenal crisis at 2–6 weeks.
+- Males may appear normal at birth.
+- Adrenal crisis treatment: ABC, saline bolus (20 mL/kg), D10% 2–5 mL/kg, IV hydrocortisone (dose per local protocol).
+- Diagnosis: very high 17-OHP, low Na, high K, low glucose, metabolic acidosis.
+
+**Source:** Endocrine sheet — Adrenal crisis (Page 21); CAH clinical picture (Pages 23–24), diagnosis and management (Page 25).
+
+---
+
+# 13. Honeymoon Phase, Somogyi Phenomenon, Dawn Phenomenon and Type 2 Diabetes
+
+## Clinical Case 58 — Children with type 1 diabetes seen in clinic and at school
+
+**Case focus:** Somogyi vs dawn phenomenon management, unconscious hypoglycaemia, sick-day insulin, complication screening.
+
+### Q204. [Hard] A 12-year-old boy with type 1 diabetes on basal–bolus insulin has had fasting glucose values of 250–300 mg/dL for 10 days. His parents increased the bedtime long-acting dose twice, but morning values rose further and he now wakes with headaches and night sweats. Continuous glucose monitoring shows 48 mg/dL at about 2–3 AM, rising to 280 mg/dL by 7 AM. What is the most appropriate adjustment?
+
+A. Increase the evening insulin dose by a further 10%  
+B. Reduce the evening insulin dose by about 10% and review overnight glucose  
+C. Add a larger pre-breakfast correction bolus only  
+D. Stop the long-acting insulin completely  
+E. Start metformin  
+
+**Correct Answer:** B. Reduce the evening insulin dose by about 10% and review overnight glucose
+
+**Initial Explanation:**
+
+This is the Somogyi phenomenon: excess evening insulin causes nocturnal hypoglycaemia at about 2–3 AM. Counter-regulatory hormones (glucagon and others) then cause morning hyperglycaemia. Treatment is to reduce the evening insulin.
+
+**Detailed Explanation:**
+
+- **Pattern recognition.** Documented 2–3 AM hypoglycaemia, symptoms of nocturnal hypoglycaemia (headache, sweats) and worsening fasting glucose after each increase in the evening dose fit Somogyi.
+- **A. Incorrect.** Increasing the dose worsens nocturnal hypoglycaemia and the rebound. This is the error already made twice.
+- **B. Correct.** Decreasing the evening dose (about 10%) removes the hypoglycaemic trigger.
+- **C. Incorrect.** Treating the morning number alone ignores the cause and risks hypoglycaemia later.
+- **D. Incorrect.** Insulin must never be stopped in type 1 diabetes.
+- **E. Incorrect.** Metformin is for type 2 diabetes, not type 1.
+
+**HIGH-YIELD POINTS:**
+
+- Somogyi: normal glucose at bedtime, then nocturnal hypoglycaemia (2–3 AM), counter-regulatory surge, morning hyperglycaemia. Treatment: decrease evening insulin (~10%).
+- Dawn phenomenon: normal glucose overnight, early-morning hyperglycaemia from rising GH and other hormones. Treatment: increase evening insulin (~10%).
+- Overnight glucose data (e.g. CGM) distinguish the two.
+
+**Source:** Endocrine sheet — Honeymoon period, Somogyi and dawn phenomenon (Page 38).
+
+### Q205. [Medium] A 14-year-old girl with type 1 diabetes has morning glucose values of 220–240 mg/dL. Overnight monitoring shows steady values of 100–120 mg/dL from midnight to 4 AM, then a steady rise to 230 mg/dL by 7 AM. No hypoglycaemia is recorded. What is the best adjustment?
+
+A. Reduce the evening insulin dose by about 10%  
+B. Add a large bedtime snack of fast-acting carbohydrate  
+C. Omit the breakfast insulin  
+D. Admit for treatment of diabetic ketoacidosis  
+E. Increase the evening insulin dose by about 10% and recheck overnight glucose  
+
+**Correct Answer:** E. Increase the evening insulin dose by about 10% and recheck overnight glucose
+
+**Initial Explanation:**
+
+Normal glucose overnight followed by an early-morning rise, without hypoglycaemia, is the dawn phenomenon. It is driven by early-morning increases in GH and other counter-regulatory hormones. The evening insulin dose is increased slightly.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Reducing the dose is the treatment for Somogyi, where nocturnal hypoglycaemia is present. Here it is absent.
+- **B. Incorrect.** Fast-acting carbohydrate at bedtime would raise, not lower, morning glucose.
+- **C. Incorrect.** Omitting insulin in type 1 diabetes risks DKA.
+- **D. Incorrect.** DKA requires ketones and acidosis, and nothing here suggests it.
+- **E. Correct.** A modest increase (about 10%) in the evening insulin addresses the early-morning rise.
+
+**HIGH-YIELD POINTS:**
+
+- Dawn: no preceding hypoglycaemia. Somogyi: nocturnal hypoglycaemia first.
+- Opposite adjustments: dawn → increase evening insulin; Somogyi → decrease it.
+- Always check overnight glucose before adjusting the evening dose.
+
+**Source:** Endocrine sheet — Somogyi and dawn phenomenon (Page 38).
+
+# 15. Childhood Hypoglycaemia
+
+## Clinical Case 59 — Children with type 1 diabetes seen in clinic and at school
+
+**Case focus:** Somogyi vs dawn phenomenon management, unconscious hypoglycaemia, sick-day insulin, complication screening.
+
+### Q206. [Medium] At school sports day, a 9-year-old boy with type 1 diabetes becomes unresponsive and has a brief seizure. He is pale and sweaty, and the meter reads 34 mg/dL. The teacher has an emergency kit but no IV access is available, and the ambulance is 15 minutes away. What is the best immediate treatment?
+
+A. Intramuscular glucagon  
+B. A sugary drink poured into his mouth  
+C. A dose of rapid-acting insulin  
+D. Wait for the ambulance in the recovery position  
+E. Glucose tablets placed under the tongue  
+
+**Correct Answer:** A. Intramuscular glucagon
+
+**Initial Explanation:**
+
+An unconscious child cannot safely take anything by mouth. The sheet gives two options for the unconscious child: IV 10% dextrose (2 mL/kg) or intramuscular glucagon. With no IV access, glucagon is the correct choice.
+
+**Detailed Explanation:**
+
+- **A. Correct.** Glucagon is given intramuscularly and works without IV access.
+- **B. Incorrect.** Oral fluids to an unconscious or convulsing child risk aspiration. Oral glucose is for conscious children (the "rule of 15" approach).
+- **C. Incorrect.** Insulin would worsen hypoglycaemia.
+- **D. Incorrect.** The recovery position is right while waiting, but waiting without treating allows brain injury.
+- **E. Incorrect.** Tablets are not appropriate for a patient who cannot swallow safely.
+
+**HIGH-YIELD POINTS:**
+
+- Hypoglycaemia in diabetes: glucose below 70 mg/dL. Check glucose immediately.
+- Conscious: rapidly absorbed oral glucose (tablets or sugary drink).
+- Unconscious: IV dextrose 10% 2 mL/kg or IM glucagon.
+- Young children may present with pallor and behavioural change.
+
+**Source:** Endocrine sheet — Recognition and treatment of hypoglycaemia in diabetes (Page 31).
+
+# 11. Type 1 Diabetes — Insulin Therapy, Education and Long-Term Management
+
+## Clinical Case 60 — Children with type 1 diabetes seen in clinic and at school
+
+**Case focus:** Somogyi vs dawn phenomenon management, unconscious hypoglycaemia, sick-day insulin, complication screening.
+
+### Q207. [Hard] A 12-year-old with type 1 diabetes (total daily insulin dose 40 units) has fever and tonsillitis and is eating little. His glucose is 342 mg/dL and urine ketones are moderate. He is not vomiting. His mother wants to skip insulin because he is not eating. Which advice is correct?
+
+A. Omit the basal insulin until he eats normally  
+B. Give an extra 50% of the total daily dose as intermediate-acting insulin  
+C. Continue usual insulin and add extra rapid-acting insulin of about 10–15% of the total daily dose (about 4–6 units), with frequent glucose and ketone checks  
+D. Replace insulin with an oral hypoglycaemic agent  
+E. Withhold insulin until the ketones clear and encourage fluids  
+
+**Correct Answer:** C. Continue usual insulin and add extra rapid-acting insulin of about 10–15% of the total daily dose (about 4–6 units), with frequent glucose and ketone checks
+
+**Initial Explanation:**
+
+The sheet states that insulin must always be continued in sick-day management. Extra short-acting insulin is given when glucose exceeds 300 mg/dL or ketones are present, estimated at 10–15% of the total daily dose.
+
+**Detailed Explanation:**
+
+- **Calculation.** 10–15% of 40 units = 4–6 units.
+- **A. Incorrect.** Stopping basal insulin during illness precipitates DKA.
+- **B. Incorrect.** 50% is far above the 10–15% in the sheet and risks dangerous hypoglycaemia.
+- **C. Correct.** This follows the sick-day rules: continue insulin, add extra short-acting insulin, monitor glucose and ketones.
+- **D. Incorrect.** Oral agents are used in type 2 diabetes, not type 1.
+- **E. Incorrect.** Withholding insulin when ketones are present is the route to DKA.
+
+**HIGH-YIELD POINTS:**
+
+- Sick-day rules: never stop insulin; extra short-acting insulin if glucose >300 mg/dL or ketones present; 10–15% of total daily dose.
+- Monitor glucose and ketones more often during illness.
+- Sick-day management is part of family education to prevent DKA.
+- Follow the local protocol for exact dosing.
+
+**Source:** Endocrine sheet — Sick-day management (Page 32); family education (Page 29).
+
+# 31. Type 1 Diabetes — Epidemiology, Aetiology and Follow-up
+
+## Clinical Case 61 — Children with type 1 diabetes seen in clinic and at school
+
+**Case focus:** Somogyi vs dawn phenomenon management, unconscious hypoglycaemia, sick-day insulin, complication screening.
+
+### Q208. [Medium] An 11-year-old girl with type 1 diabetes since age 7 attends her routine review. Her parents ask which complication screening begins now. Which statement is correct?
+
+A. Annual retinal photography, microalbuminuria and blood pressure checks must start immediately because the duration exceeds 2 years  
+B. Nothing is needed except HbA1c until puberty  
+C. Only cataract screening is needed, as retinopathy never occurs in children  
+D. Height, weight, BMI and annual thyroid screening continue now; annual blood pressure, microalbuminuria and retinal screening begin from age 12  
+E. Annual blood pressure, microalbuminuria and retinal examination are only needed after 18 years  
+
+**Correct Answer:** D. Height, weight, BMI and annual thyroid screening continue now; annual blood pressure, microalbuminuria and retinal screening begin from age 12
+
+**Initial Explanation:**
+
+The sheet sets annual blood pressure, microalbuminuria (early sign of nephropathy) and eye screening from 12 years of age. Growth, pubertal development and BMI are assessed at every visit, and thyroid screening is annual.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** The sheet's starting age for these three screens is 12 years, not duration-based.
+- **B. Incorrect.** HbA1c alone misses growth, thyroid and other planned assessments.
+- **C. Incorrect.** Retinopathy and cataract are rare in children, but monitoring is still advised from 12 years.
+- **D. Correct.** This matches the sheet's schedule.
+- **E. Incorrect.** Screening begins in adolescence, long before adulthood.
+
+**HIGH-YIELD POINTS:**
+
+- Each visit: height, weight and BMI plotted on the growth chart, pubertal staging, injection sites.
+- Annual from age 12: blood pressure, microalbuminuria, retinal photography.
+- Check foot pulses and sensation; promote foot care.
+- Screen thyroid function annually; coeliac screening at diagnosis and again if symptomatic.
+- Annual influenza vaccination and dental review.
+
+**Source:** Endocrine sheet — Regular assessment of the child with diabetes (Pages 32–33).
+
+---
+
+# 35. Diabetes Monitoring and DKA Severity/Management Details
+
+## Clinical Case 62 — A child on treatment for severe DKA
+
+**Case focus:** Fluid choice when glucose falls, interpretation of sodium, treatment of cerebral oedema, transition to subcutaneous insulin.
+
+### Q209. [Hard] A 9-year-old girl (30 kg) with DKA (pH 7.05, glucose 620 mg/dL) received a 10 mL/kg saline bolus over 20 minutes for shock, then maintenance plus deficit fluid with 0.9% saline. IV regular insulin 0.1 U/kg/h was started 1 hour after rehydration began. Six hours later glucose is 236 mg/dL, pH 7.24, bicarbonate 12 mmol/L, potassium 3.9 mmol/L and ketones remain positive. What is the next step?
+
+A. Stop the insulin infusion because glucose is below 250 mg/dL  
+B. Give IV sodium bicarbonate to correct the acidosis faster  
+C. Double the insulin infusion rate to clear ketones faster  
+D. Continue the same fluid and insulin without change  
+E. Continue insulin and change the fluid to 5% dextrose in 0.9% saline (or half dextrose-saline) to avoid hypoglycaemia  
+
+**Correct Answer:** E. Continue insulin and change the fluid to 5% dextrose in 0.9% saline (or half dextrose-saline) to avoid hypoglycaemia
+
+**Initial Explanation:**
+
+When glucose falls to 250 mg/dL or below, fluids are changed to dextrose-containing saline to avoid hypoglycaemia. Insulin is continued because ketosis and acidosis are not yet corrected.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Stopping insulin lets ketogenesis continue. Insulin is needed to reverse ketosis and acidosis, so dextrose is added instead.
+- **B. Incorrect.** Bicarbonate is avoided unless pH <7.1 with bicarbonate <5, because it increases cerebral oedema risk. This child's pH is 7.24.
+- **C. Incorrect.** A faster glucose fall is harmful. The sheet advises against dropping glucose by more than 100 mg/dL per hour.
+- **D. Incorrect.** Unchanged saline with continuing insulin risks hypoglycaemia.
+- **E. Correct.** This matches the sheet.
+
+**HIGH-YIELD POINTS:**
+
+- Shock: 10–20 mL/kg 0.9% saline over 20 minutes; then correct dehydration gradually over 48–72 hours to avoid cerebral oedema.
+- Insulin: regular insulin 0.05–0.1 U/kg/h by pump, started after 1 hour of rehydration.
+- Glucose ≤250 mg/dL: change to dextrose-containing saline. Do not lower glucose faster than 100 mg/dL/h.
+- Potassium replacement starts once urine is passed (20–40 mEq per 500 mL of fluid) with ECG and serum monitoring.
+
+**Source:** Endocrine sheet — Treatment of DKA (Pages 35–36).
+
+### Q210. [Medium] A child with DKA has glucose 860 mg/dL, sodium 125 mmol/L, potassium 5.2 mmol/L and pH 7.04. A junior doctor wants to give hypertonic saline for the low sodium. What is the best interpretation?
+
+A. Dilutional lowering of sodium by water drawn out of cells by the high glucose; interpret sodium alongside glucose and trend it during treatment  
+B. True sodium depletion that needs 3% saline  
+C. SIADH, which requires fluid restriction  
+D. Coexisting diabetes insipidus  
+E. Hyponatraemia caused by excess hypotonic fluids already given  
+
+**Correct Answer:** A. Dilutional lowering of sodium by water drawn out of cells by the high glucose; interpret sodium alongside glucose and trend it during treatment
+
+**Initial Explanation:**
+
+The sheet notes that very high glucose draws water out of cells by osmosis, which makes the measured serum sodium appear low. Sodium should be interpreted with the glucose level and followed over time.
+
+**Detailed Explanation:**
+
+- **A. Correct.** The osmotic effect of glucose explains the low value. Monitoring sodium (and potassium) is part of DKA care.
+- **B. Incorrect.** Hypertonic saline is not indicated for an apparent fall caused by hyperglycaemia.
+- **C. Incorrect.** SIADH is not suggested, and fluid restriction would be harmful in DKA.
+- **D. Incorrect.** Diabetes insipidus would produce high, not low, sodium.
+- **E. Incorrect.** Fluids have not yet been given in this scenario.
+
+**HIGH-YIELD POINTS:**
+
+- Monitor electrolytes (especially K and Na), ABG and glucose regularly, plus fluid balance and neurological state.
+- Initial potassium is often high but falls with insulin and rehydration.
+- Do not give bicarbonate except for very severe acidosis (pH <7.1 and bicarbonate <5).
+
+**Source:** Endocrine sheet — DKA monitoring (Page 36).
+
+### Q211. [Hard] A 6-year-old boy with new-onset type 1 diabetes is treated for severe DKA. Six hours into treatment he develops a severe headache, repeated vomiting and drowsiness. His heart rate falls from 120 to 52/min, blood pressure rises to 140/85 mmHg, breathing is irregular and pupils are sluggish. Glucose is 290 mg/dL. What is the best immediate management?
+
+A. A further 20 mL/kg saline bolus  
+B. IV sodium bicarbonate  
+C. Semi-sitting position and IV mannitol 0.5–1 g/kg over 30 minutes (or 3% saline), with PICU transfer and airway support if needed  
+D. Increase the insulin infusion rate  
+E. Lumbar puncture  
+
+**Correct Answer:** C. Semi-sitting position and IV mannitol 0.5–1 g/kg over 30 minutes (or 3% saline), with PICU transfer and airway support if needed
+
+**Initial Explanation:**
+
+Headache, vomiting, falling heart rate, rising blood pressure and irregular breathing (Cushing triad) in a child on DKA treatment mean cerebral oedema. Treatment reduces intracranial pressure: semi-sitting position, mannitol or hypertonic saline, and PICU care with intubation and ventilation if required.
+
+**Detailed Explanation:**
+
+- **Risk factors present.** Young age and new-onset diabetes, with severe acidosis, are listed risk factors.
+- **A. Incorrect.** More fluid would raise intracranial pressure further.
+- **B. Incorrect.** Bicarbonate is itself a risk factor for cerebral oedema.
+- **C. Correct.** This is the sheet's treatment of cerebral oedema.
+- **D. Incorrect.** A faster fall in glucose worsens risk. Insulin is not the treatment.
+- **E. Incorrect.** Lumbar puncture is dangerous with raised intracranial pressure.
+
+**HIGH-YIELD POINTS:**
+
+- Cerebral oedema: the major life-threatening DKA complication (about 1%), with high mortality and neurological morbidity.
+- Risk factors: age <5 years, new-onset diabetes, severe acidosis, high initial urea, rapid hypotonic fluids, IV insulin bolus or early infusion, bicarbonate.
+- Signs: headache, vomiting, cranial nerve palsy, convulsion, apnoea, bradycardia (Cushing triad), confusion, coma.
+- Other DKA complications: arrhythmia and electrolyte imbalance, acute tubular necrosis, intracranial thrombosis, pancreatitis, aspiration pneumonia, DIC and multiorgan failure.
+
+**Source:** Endocrine sheet — Complications of DKA and cerebral oedema (Page 37).
+
+### Q212. [Medium] A child treated for DKA has improved: pH 7.34, bicarbonate 20 mmol/L, alert and tolerating oral intake. The IV insulin infusion is still running and subcutaneous insulin is prescribed. Which sequence is correct?
+
+A. Stop the IV infusion immediately, then give subcutaneous insulin  
+B. Give the first subcutaneous dose, continue the IV infusion for about another hour, then stop it  
+C. Stop IV insulin and wait 6 hours before the first subcutaneous dose  
+D. Continue the IV infusion until HbA1c normalises  
+E. Give subcutaneous insulin only after discharge the next day  
+
+**Correct Answer:** B. Give the first subcutaneous dose, continue the IV infusion for about another hour, then stop it
+
+**Initial Explanation:**
+
+Subcutaneous insulin takes time to be absorbed. The IV infusion is therefore stopped about 1 hour after the subcutaneous dose, so insulin cover is not interrupted.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Stopping IV insulin first leaves a gap in cover and risks recurrent ketosis.
+- **B. Correct.** This is the sheet's overlap rule.
+- **C. Incorrect.** A 6-hour gap would allow ketoacidosis to recur.
+- **D. Incorrect.** HbA1c reflects 2–3 months and is not a stopping criterion.
+- **E. Incorrect.** Delaying subcutaneous insulin leaves the child without basal cover.
+
+**HIGH-YIELD POINTS:**
+
+- Once improved clinically and on ABG, stop IV fluids and restart oral diet.
+- Start subcutaneous insulin, then stop the IV infusion 1 hour later.
+- Antibiotics are not routinely prescribed in DKA. Identify and treat the precipitating cause (infection, missed insulin, pump failure).
+
+**Source:** Endocrine sheet — Treatment of DKA, transition to subcutaneous insulin (Page 36).
+
+---
+
+# 39. Polyuria and Polydipsia — Differential Diagnosis Beyond DI
+
+## Clinical Case 63 — A child with polydipsia and large volumes of dilute urine
+
+**Case focus:** Distinguishing diabetes insipidus from primary polydipsia using osmolality.
+
+### Q213. [Hard] A 7-year-old girl drinks about 3 L daily and passes about 2.8 L of urine, with nocturnal enuresis. Plasma glucose is normal. Serum sodium is 134 mmol/L, calcium 9.6 mg/dL and potassium 4.0 mmol/L. Plasma osmolality is 278 mOsm/kg and urine osmolality is 90 mOsm/kg. Which diagnosis fits best?
+
+A. Central diabetes insipidus  
+B. Nephrogenic diabetes insipidus  
+C. Type 1 diabetes mellitus  
+D. Primary polydipsia  
+E. Hypercalcaemia-related polyuria  
+
+**Correct Answer:** D. Primary polydipsia
+
+**Initial Explanation:**
+
+Polyuria is confirmed (above 40 mL/kg/24 h), but the plasma is not concentrated. In diabetes insipidus the sheet gives serum osmolality above 300 mOsm/kg (with high sodium) and urine osmolality below 300. Here plasma osmolality and sodium are low-normal and the dilute urine is an appropriate response to water excess.
+
+**Detailed Explanation:**
+
+- **A and B. Incorrect.** Both central and nephrogenic DI produce hypernatraemia and serum osmolality >300 mOsm/kg because water is lost. This girl's plasma is dilute.
+- **C. Incorrect.** Normal glucose excludes diabetes mellitus.
+- **D. Correct.** Excess water intake dilutes the plasma, and the kidneys appropriately excrete dilute urine.
+- **E. Incorrect.** Calcium is normal, so hypercalcaemia does not explain the polyuria.
+
+**HIGH-YIELD POINTS:**
+
+- DI: serum osmolality >300 mOsm/kg, urine osmolality <300, high sodium. Water deprivation and DDAVP response separate central from nephrogenic DI.
+- Causes of polyuria and polydipsia: diabetes mellitus, DI, primary polydipsia, renal causes (CKD, RTA, Fanconi, Bartter), hypercalcaemia, hypokalaemia, drugs.
+- Polyuria: >40 mL/kg/24 h or >2000 mL/m²/24 h.
+
+**Source:** Endocrine sheet — Diabetes insipidus, diagnosis (Page 43); causes of polyuria and polydipsia (Page 43).
+
+---
+
+# 20. Precocious Puberty — Central and Peripheral Causes
+
+## Clinical Case 64 — Four children referred for pubertal or growth concerns
+
+**Case focus:** Hypothyroidism presenting with early breast development, peripheral precocious puberty in a boy, normal pubertal sequence, hypergonadotropic delay in a tall boy.
+
+### Q214. [Hard] A 7-year-old girl has Tanner breast stage 3, pubic hair stage 2 and one episode of vaginal spotting. She is short (2 SD below the mean), overweight and has constipation, dry skin and a heart rate of 58/min. Bone age is 4.5 years. TSH is markedly elevated with low free T4. Pelvic ultrasound shows enlarged ovaries with cysts. What is the most appropriate initial management?
+
+A. Levothyroxine for primary hypothyroidism, reassessing puberty once euthyroid  
+B. Long-acting GnRH analogue for central precocious puberty  
+C. Oestrogen-receptor antagonist as for peripheral precocious puberty  
+D. Oophorectomy for the ovarian cysts  
+E. MRI of the brain, then GnRH analogue  
+
+**Correct Answer:** A. Levothyroxine for primary hypothyroidism, reassessing puberty once euthyroid
+
+**Initial Explanation:**
+
+Precocious puberty can rarely occur in hypothyroidism, and the sheet lists hypothyroidism among the causes. The pattern here, with growth failure and delayed bone age, is the opposite of true precocious puberty (accelerated growth and advanced bone age). The cause, hypothyroidism, must be treated.
+
+**Detailed Explanation:**
+
+- **Key discriminators.** Short stature, bradycardia, constipation, dry skin, delayed bone age and very high TSH point to severe primary hypothyroidism. Progressive true precocious puberty would show tall stature and advanced bone age.
+- **A. Correct.** Treat the underlying cause. The pubertal signs commonly regress with thyroid replacement.
+- **B. Incorrect.** GnRH analogues treat true central precocious puberty. The cause here is thyroid failure.
+- **C. Incorrect.** Receptor antagonists are for peripheral causes of oestrogen excess, which this is not.
+- **D. Incorrect.** The cysts are secondary and need no surgery.
+- **E. Incorrect.** Neuro-imaging and GnRH treatment would not address the cause.
+
+**HIGH-YIELD POINTS:**
+
+- Precocious puberty: signs before 8 years in girls and before 9 years in boys.
+- Hypothyroidism: delayed puberty is typical, but precocious puberty may occur (rare).
+- Delayed bone age: hypothyroidism, hypopituitarism, Cushing syndrome. Advanced bone age: precocious puberty, CAH, hyperthyroidism, simple obesity.
+- Treat the cause; GnRH analogues are for true (central) precocious puberty.
+
+**Source:** Endocrine sheet — Acquired hypothyroidism (Pages 11, 14); precocious puberty causes and treatment (Pages 51–52); bone age (Page 48).
+
+# 9. Congenital Adrenal Hyperplasia
+
+## Clinical Case 65 — Four children referred for pubertal or growth concerns
+
+**Case focus:** Hypothyroidism presenting with early breast development, peripheral precocious puberty in a boy, normal pubertal sequence, hypergonadotropic delay in a tall boy.
+
+### Q215. [Hard] A 5-year-old boy is tall (above the 99th centile). He has pubic hair stage 3 and penile enlargement. Both testes are small and symmetrical (2 mL), and basal LH and FSH are prepubertal. Bone age is 8.5 years. Blood pressure and electrolytes are normal. What is the best next test?
+
+A. MRI of the pituitary  
+B. Pelvic ultrasound  
+C. GH stimulation test  
+D. Thyroid scan  
+E. Serum 17-hydroxyprogesterone  
+
+**Correct Answer:** E. Serum 17-hydroxyprogesterone
+
+**Initial Explanation:**
+
+Pubic hair and penile enlargement with prepubertal testes and low LH/FSH indicate gonadotropin-independent (peripheral) puberty. In boys, the first sign of true puberty is testicular enlargement to about 4 mL. Adrenal androgen excess from simple virilising CAH explains tall stature, advanced bone age and these signs.
+
+**Detailed Explanation:**
+
+- **Reasoning.** Signs that are not concordant (virilisation without testicular growth) point to androgens from outside the pituitary-gonadal axis. The sheet lists adrenal disorders including CAH, testicular Leydig-cell tumours and exogenous steroids as causes. Symmetrical prepubertal testes make a Leydig-cell tumour unlikely.
+- **A. Incorrect.** MRI is for suspected central precocious puberty, which is unlikely with prepubertal testes and low gonadotropins.
+- **B. Incorrect.** Pelvic ultrasound is used in girls.
+- **C. Incorrect.** GH assessment is irrelevant. Tall stature is explained by androgens.
+- **D. Incorrect.** Nothing suggests thyroid disease.
+- **E. Correct.** Very high 17-OHP confirms 21-hydroxylase deficiency (simple virilising form), which presents with early pubic hair, penile enlargement, accelerated growth and advanced bone age. Adult height will be short without treatment.
+
+**HIGH-YIELD POINTS:**
+
+- Male puberty starts with testicular enlargement (about 4 mL by orchidometer), 9–14 years.
+- Precocious puberty in males is rare and usually pathological, so causes must be excluded.
+- Central precocious puberty: concordant signs, high LH/FSH. Peripheral: discordant signs, low LH/FSH.
+- Simple virilising CAH: early pubic hair, accelerated growth, advanced bone age, short adult height.
+
+**Source:** Endocrine sheet — Puberty in boys (Page 49); precocious puberty (Pages 51–52); CAH (Page 24).
+
+# 19. Normal Puberty and Tanner Staging
+
+## Clinical Case 66 — Four children referred for pubertal or growth concerns
+
+**Case focus:** Hypothyroidism presenting with early breast development, peripheral precocious puberty in a boy, normal pubertal sequence, hypergonadotropic delay in a tall boy.
+
+### Q216. [Medium] A 11.5-year-old girl had breast budding at 9.5 years and pubic hair at 10 years. Axillary hair has appeared and she has grown rapidly this year, but she has not had a period. Her mother fears delayed menstruation. What is the best response?
+
+A. Karyotype and gonadotropin levels for delayed puberty  
+B. Pelvic ultrasound and a trial of oestradiol  
+C. This is a normal sequence; menarche is the last sign and typically occurs about 2.5 years after puberty begins, after the growth spurt  
+D. MRI of the brain to exclude a pituitary lesion  
+E. Treatment with a GnRH analogue to slow progression  
+
+**Correct Answer:** C. This is a normal sequence; menarche is the last sign and typically occurs about 2.5 years after puberty begins, after the growth spurt
+
+**Initial Explanation:**
+
+In girls, puberty starts with breast enlargement, followed by pubic hair, axillary hair and menarche. The growth spurt occurs early, immediately after breast enlargement. Menarche is the last sign, on average 2.5 years after onset.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Delayed puberty means no development by 13 years in girls. She started at 9.5 years.
+- **B. Incorrect.** No investigation or oestrogen is needed for a normal progression.
+- **C. Correct.** Onset at 9.5 years is within the normal 8–13 years range. Menarche at about 12 years is expected.
+- **D. Incorrect.** There are no neurological or atypical features.
+- **E. Incorrect.** Onset after 8 years is not precocious.
+
+**HIGH-YIELD POINTS:**
+
+- Girls: onset 8–13 years; first sign thelarche (Tanner breast stage 2). Boys: onset 9–14 years; first sign testicular volume about 4 mL.
+- Girls' growth spurt is early; boys' growth spurt occurs late (about 18 months after testicular enlargement).
+- Menarche (girls) and first ejaculation (boys) are the last signs of puberty.
+
+**Source:** Endocrine sheet — Puberty: features and sequence (Page 49).
+
+# 22. Delayed Puberty
+
+## Clinical Case 67 — Four children referred for pubertal or growth concerns
+
+**Case focus:** Hypothyroidism presenting with early breast development, peripheral precocious puberty in a boy, normal pubertal sequence, hypergonadotropic delay in a tall boy.
+
+### Q217. [Hard] A 15-year-old boy is tall (above the 97th centile) and has no pubertal development. Testicular volume is 3 mL. LH and FSH are raised and testosterone is low. Thyroid function is normal. Which investigation will confirm the most likely diagnosis?
+
+A. GnRH stimulation test  
+B. MRI of the pituitary  
+C. GH stimulation test  
+D. Karyotype  
+E. Serum 17-hydroxyprogesterone  
+
+**Correct Answer:** D. Karyotype
+
+**Initial Explanation:**
+
+Delayed puberty with high gonadotropins signals gonadal failure. Of the high-gonadotropin causes in the sheet (Turner syndrome, Klinefelter syndrome, gonadal injury), only Klinefelter syndrome (47,XXY) occurs in a boy and is also a listed syndromic cause of tall stature.
+
+**Detailed Explanation:**
+
+- **Reasoning.** Low testosterone with raised LH/FSH shows the pituitary is working and the testes are failing (hypergonadotropic). Tall stature plus male sex leads to Klinefelter syndrome.
+- **A. Incorrect.** A GnRH test would be relevant for hypogonadotropic states.
+- **B. Incorrect.** MRI looks for hypothalamic-pituitary disease, which gives low gonadotropins.
+- **C. Incorrect.** GH assessment does not apply to a tall boy.
+- **D. Correct.** Karyotype shows 47,XXY. The sheet advises karyotype for suspected sex chromosome causes of delayed puberty.
+- **E. Incorrect.** 17-OHP assesses CAH, which does not cause this picture.
+
+**HIGH-YIELD POINTS:**
+
+- Delayed puberty (no development by 13 years in girls, 14 in boys): low gonadotropins (hypothalamic-pituitary disorders, GnRH deficiency, Kallmann, systemic disease, hypothyroidism) vs high gonadotropins (Turner, Klinefelter, gonadal damage).
+- Klinefelter syndrome (47,XXY) is also a listed cause of tall stature.
+- Karyotype, thyroid and sex steroid hormones, and MRI if pituitary pathology is suspected.
+
+**Source:** Endocrine sheet — Delayed puberty (Page 53); causes of tall stature (Page 48).
+
+---
+
+# 26. Hyperparathyroidism and Hypercalcaemia
+
+## Clinical Case 68 — A toddler with vomiting, constipation and polyuria
+
+**Case focus:** Recognising PTH-independent hypercalcaemia and its management.
+
+### Q218. [Hard] A 2.5-year-old boy has had anorexia, vomiting, constipation, irritability, polyuria and polydipsia for 2 weeks. For 4 months his parents have given a vitamin D supplement far above the recommended amount "to strengthen bones". Serum calcium is 13.8 mg/dL and PTH is suppressed. What is the best management?
+
+A. Urgent parathyroidectomy  
+B. Stop vitamin D and calcium supplements and give IV hydration; steroids are effective in vitamin D intoxication  
+C. IV calcium gluconate  
+D. Desmopressin  
+E. Fluid restriction to treat the polyuria  
+
+**Correct Answer:** B. Stop vitamin D and calcium supplements and give IV hydration; steroids are effective in vitamin D intoxication
+
+**Initial Explanation:**
+
+High calcium with a suppressed PTH means PTH-independent hypercalcaemia. Vitamin D toxicity is a listed cause. Treatment is to stop the cause, give IV fluids, and use steroids, which the sheet states are effective in vitamin D intoxication.
+
+**Detailed Explanation:**
+
+- **Symptoms.** Vomiting, constipation and anorexia are the "abdominal groans"; irritability fits "psychic moans"; polyuria and polydipsia reflect hypercalcaemia-related concentrating defect.
+- **A. Incorrect.** Surgery is for primary hyperparathyroidism due to an adenoma, where PTH is high.
+- **B. Correct.** Remove the source, hydrate, and use steroids for vitamin D intoxication. For severe hypercalcaemia, IV fluids with furosemide and IV bisphosphonate (e.g. pamidronate) are also described.
+- **C. Incorrect.** Giving calcium would worsen hypercalcaemia.
+- **D. Incorrect.** Desmopressin treats central DI. This polyuria is caused by hypercalcaemia.
+- **E. Incorrect.** Fluid restriction would worsen dehydration and hypercalcaemia.
+
+**HIGH-YIELD POINTS:**
+
+- Primary hyperparathyroidism: high calcium, low phosphate, high PTH (single adenoma or familial), treated surgically.
+- Other causes of hypercalcaemia: vitamin D toxicity, excess calcium intake, drugs (thiazides, hypervitaminosis A), Williams syndrome, ectopic causes (TB, sarcoidosis, Addison disease), prolonged immobilisation.
+- Steroids help in hypercalcaemia of sarcoidosis, vitamin D intoxication, malignancy and subcutaneous fat necrosis.
+- Mnemonic: stones, bones, abdominal groans and psychic moans.
+
+**Source:** Endocrine sheet — Hyperparathyroidism and hypercalcaemia (Pages 56–57).
+
+---

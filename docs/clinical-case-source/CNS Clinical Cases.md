@@ -5835,3 +5835,202 @@ Von Hippel-Lindau disease is listed among the neurocutaneous syndromes in the le
 - The printed/OCR text for VHL on the final page is poorly extracted; verify further lecture-specific details from the PDF/teacher if needed.
 
 **Source:** CNS lecture - Page 50; final-page OCR is incomplete.
+
+---
+
+# 9. Neuromuscular Disorders
+
+## Clinical Case 34 — Progressive weakness following a gastrointestinal illness
+
+A 6-year-old boy is brought to hospital because of progressive difficulty walking. Two weeks earlier, he had an episode of gastroenteritis. Weakness began in both feet and has gradually progressed to involve the legs and hands. Examination shows symmetrical flaccid weakness and absent tendon reflexes. He reports tingling in his toes. During observation, his heart rate and blood pressure fluctuate.
+
+### Q183. [Hard] Which cerebrospinal fluid result, when obtained during the second week of illness, would best support the suspected diagnosis over poliomyelitis?
+
+A. Marked pleocytosis with a predominantly neutrophilic pattern and low glucose  
+B. Normal protein with a markedly reduced CSF white-cell count  
+C. Increased protein with a normal CSF cell count  
+D. Increased white-cell count with normal protein and isolation of poliovirus  
+E. Low protein with lymphocytic pleocytosis  
+
+**Correct Answer:** C. Increased protein with a normal CSF cell count
+
+**Initial Explanation:**
+
+The clinical pattern suggests Guillain–Barré syndrome (GBS), an acute post-infectious autoimmune demyelinating polyneuropathy. The characteristic CSF finding is albuminocytological dissociation: raised protein with a normal cell count, typically evident in the second week.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** This is an inflammatory CSF pattern more suggestive of CNS infection than the characteristic GBS pattern.
+- **B. Incorrect.** A normal protein level does not demonstrate the albuminocytological dissociation described in the lecture.
+- **C. Correct.** GBS typically produces increased CSF protein with a normal cell count, particularly by the second week.
+- **D. Incorrect.** The lecture contrasts poliomyelitis with GBS: polio may produce increased CSF cells and virus isolation, and usually causes asymmetric, predominantly motor paralysis.
+- **E. Incorrect.** This is not the characteristic CSF pattern described for GBS.
+
+The preceding gastrointestinal illness, symmetrical ascending weakness, areflexia, sensory tingling and autonomic involvement collectively favour GBS. The lecture contrasts this with poliomyelitis, which more typically causes asymmetric pure motor paralysis, anterior horn cell destruction and a CSF white-cell increase.
+
+**High-Yield Points:**
+
+- GBS: acute post-infectious autoimmune demyelinating polyneuropathy.
+- Typical pattern: symmetrical ascending flaccid weakness with areflexia.
+- Sensory symptoms and autonomic dysfunction may occur.
+- CSF: increased protein with normal cells (albuminocytological dissociation), particularly in the second week.
+- Poliomyelitis: usually asymmetric, predominantly motor paralysis; CSF cells may be increased and poliovirus may be isolated.
+
+**Source:** CNS lecture, Pages 32–33 — Guillain–Barré syndrome; GBS versus poliomyelitis.
+
+### Q184. [Hard] During admission, the child develops a weak cough, difficulty swallowing and episodes of bradycardia alternating with tachycardia. Which management priority is most appropriate?
+
+A. Admit for close respiratory and cardiovascular monitoring, provide supportive care, and escalate to ICU care if severe  
+B. Discharge with outpatient physiotherapy because most children recover  
+C. Start corticosteroids as the specific treatment because they accelerate recovery in GBS  
+D. Restrict monitoring to limb power because autonomic abnormalities are not associated with GBS  
+E. Delay respiratory assessment until the weakness reaches the upper limbs  
+
+**Correct Answer:** A. Admit for close respiratory and cardiovascular monitoring, provide supportive care, and escalate to ICU care if severe
+
+**Initial Explanation:**
+
+Bulbar weakness, a weak cough and fluctuating heart rate indicate potentially serious respiratory and autonomic involvement in GBS. The lecture emphasizes hospital admission, respiratory support and monitoring, with ICU care in severe cases.
+
+**Detailed Explanation:**
+
+- **A. Correct.** GBS can progress to bulbar dysfunction, aspiration risk, respiratory muscle paralysis and respiratory failure. Autonomic dysfunction may cause tachycardia, bradycardia, arrhythmias and blood-pressure instability. Close inpatient monitoring and escalation to ICU when severe are therefore essential.
+- **B. Incorrect.** Outpatient management is unsafe when bulbar, respiratory or autonomic complications are developing.
+- **C. Incorrect.** The lecture specifically states that corticosteroids have no beneficial effect in GBS and may delay recovery. IV immunoglobulin is listed as the drug of choice; plasmapheresis is an alternative.
+- **D. Incorrect.** Autonomic dysfunction is a recognized feature and can be clinically dangerous.
+- **E. Incorrect.** Respiratory involvement can develop during progression and must be assessed early rather than waiting for a particular distribution of limb weakness.
+
+**High-Yield Points:**
+
+- GBS may affect motor, sensory and autonomic nerves.
+- Bulbar weakness increases aspiration risk.
+- Respiratory muscle involvement can cause respiratory failure.
+- Dysautonomia may cause tachycardia, bradycardia, arrhythmias and blood-pressure instability.
+- Admit, monitor respiratory and cardiovascular status, and use ICU care when severe.
+- Lecture-specific treatment: IVIG is the drug of choice; plasmapheresis is an alternative. Corticosteroids are not beneficial according to the lecture.
+
+**Source:** CNS lecture, Pages 32–33 — GBS clinical picture, autonomic dysfunction, supportive and specific treatment.
+
+---
+
+# 11. Head Abnormalities — Shape and Size
+
+## Clinical Case 35 — A child with a persistently small head circumference
+
+A 14-month-old child is referred because serial measurements show that head circumference is below the third centile for age and sex. The child had significant perinatal asphyxia and a prolonged neonatal admission. The parents ask whether a small head circumference is always inherited.
+
+### Q185. [Moderate] Which approach best reflects the causes of microcephaly listed in the lecture?
+
+A. Consider hydrocephalus and familial macrocephaly as the only relevant explanations  
+B. Assume that all cases are due to craniosynostosis and proceed directly to surgery  
+C. Attribute the finding to normal variation without reviewing pregnancy and neonatal history  
+D. Distinguish primary causes, including familial and chromosomal/syndromic causes, from secondary causes such as perinatal asphyxia, meningitis, TORCH infection, irradiation, metabolic disease and maternal drug exposure  
+E. Diagnose a neurocutaneous syndrome whenever head circumference is below the third centile  
+
+**Correct Answer:** D. Distinguish primary causes, including familial and chromosomal/syndromic causes, from secondary causes such as perinatal asphyxia, meningitis, TORCH infection, irradiation, metabolic disease and maternal drug exposure
+
+**Initial Explanation:**
+
+The lecture divides microcephaly into primary and secondary causes. The history of perinatal asphyxia in this child makes a secondary cause important to consider, but the wider differential must also be reviewed.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Hydrocephalus and familial macrocephaly are causes of an enlarged head, not the listed explanation for microcephaly.
+- **B. Incorrect.** Craniosynostosis is one possible cause listed, but it is not the only cause and the clinical context does not justify assuming it.
+- **C. Incorrect.** A persistently low head circumference requires assessment of the child's history and possible underlying causes.
+- **D. Correct.** This reflects the lecture's distinction between primary microcephaly (familial, chromosomal and syndromic causes) and secondary microcephaly (perinatal asphyxia, meningitis, TORCH infection, irradiation, metabolic causes such as PKU and maternal drug exposure).
+- **E. Incorrect.** A small head circumference alone does not establish a neurocutaneous syndrome.
+
+The important reasoning step is to classify the small head circumference and use the antenatal, perinatal, developmental and family history to guide the search for an underlying cause.
+
+**High-Yield Points:**
+
+- Microcephaly: head circumference below the third centile (or more than 2 SD below the mean) in the lecture.
+- Primary causes include familial and chromosomal/syndromic causes.
+- Secondary causes include perinatal asphyxia, meningitis, TORCH infection, irradiation, metabolic disease and maternal drug exposure.
+- Interpret head circumference in the context of serial growth and clinical history.
+
+**Source:** CNS lecture, Page 40 — Abnormal head size; microcephaly.
+
+---
+
+# 14. Bell Palsy and Facial Nerve Palsy
+
+## Clinical Case 36 — Acute unilateral facial weakness with ear pain
+
+An 8-year-old child develops sudden weakness of the entire left side of the face. The child cannot wrinkle the left forehead, close the left eye tightly or retain air in the left cheek. There are painful vesicles around the left external ear.
+
+### Q186. [Hard] In addition to protecting the exposed eye, which specific treatment should be considered because of the associated finding?
+
+A. Carbamazepine for presumed focal epilepsy  
+B. Acyclovir because the painful external-ear vesicles suggest an associated herpes infection  
+C. IV immunoglobulin for presumed Guillain–Barré syndrome  
+D. Long-term sodium valproate to prevent recurrent facial weakness  
+E. No additional treatment because vesicles are unrelated to facial nerve palsy  
+
+**Correct Answer:** B. Acyclovir because the painful external-ear vesicles suggest an associated herpes infection
+
+**Initial Explanation:**
+
+The complete ipsilateral facial weakness, including loss of forehead movement and inability to close the eye, indicates a lower motor neuron facial nerve palsy. The lecture notes that painful vesicles around the external ear may indicate an associated herpes infection and advises acyclovir when herpes is suspected.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Carbamazepine is listed for focal seizures and does not treat facial nerve palsy.
+- **B. Correct.** The painful external-ear vesicles are a clue to a possible herpes-associated cause; the lecture recommends acyclovir if herpes is suspected.
+- **C. Incorrect.** IVIG is the specific treatment listed for GBS, which presents with an acute polyneuropathy rather than an isolated unilateral facial palsy.
+- **D. Incorrect.** Sodium valproate is an antiseizure medication and has no role in treating this facial palsy.
+- **E. Incorrect.** The vesicles are clinically relevant because the lecture identifies herpes simplex virus as a possible associated cause.
+
+Eye protection remains essential because inability to close the eyelid can cause exposure keratitis. The lecture also lists prednisone when given during the first week to speed recovery, alongside lubricating drops or ointment and eye protection.
+
+**High-Yield Points:**
+
+- Bell's palsy is an isolated LMN paresis of the seventh cranial nerve.
+- LMN facial palsy affects the whole ipsilateral half of the face, including the forehead.
+- Painful vesicles around the external ear suggest an associated herpes infection.
+- Consider acyclovir if herpes is suspected.
+- Protect the eye with lubrication and appropriate covering because incomplete closure can cause exposure keratitis.
+- The lecture lists prednisone during the first week as a treatment that may speed recovery.
+
+**Source:** CNS lecture, Page 44 — Bell palsy and facial nerve palsies.
+
+---
+
+# 19. Neurocutaneous Syndromes
+
+## Clinical Case 37 — Hypertension in a child with neurofibromatosis type 1
+
+A 9-year-old child is followed for multiple café-au-lait macules and axillary freckling. At a routine review, repeated blood-pressure measurements are elevated. There is no acute illness to explain the finding.
+
+### Q187. [Hard] Which associated complications should be considered when investigating the child's hypertension?
+
+A. Tuberous sclerosis-related renal angiomyolipomas only  
+B. A VP-shunt infection and shunt nephritis  
+C. Optic glioma as the only recognized cause of hypertension in NF1  
+D. Congenital hydrocephalus and aqueductal stenosis  
+E. Pheochromocytoma or renal artery stenosis associated with NF1  
+
+**Correct Answer:** E. Pheochromocytoma or renal artery stenosis associated with NF1
+
+**Initial Explanation:**
+
+The clinical findings support neurofibromatosis type 1 (NF1). The lecture specifically lists hypertension associated with pheochromocytoma or renal artery stenosis as a complication of NF1.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Renal angiomyolipomas are listed under tuberous sclerosis, not as the NF1-associated explanation emphasized here.
+- **B. Incorrect.** Shunt infection and shunt nephritis are complications of ventriculoperitoneal shunts.
+- **C. Incorrect.** Optic glioma is an important NF1 complication, but it does not account for the hypertension association listed in the lecture.
+- **D. Incorrect.** These are causes or associations of hydrocephalus and do not explain the specific NF1 association.
+- **E. Correct.** The lecture identifies pheochromocytoma and renal artery stenosis as complications associated with hypertension in NF1.
+
+**High-Yield Points:**
+
+- NF1 is an autosomal dominant disorder associated with café-au-lait macules, neurofibromas, axillary freckling and other diagnostic features.
+- Important complications include benign and malignant tumours, optic glioma, learning difficulties, epilepsy, scoliosis and visual or auditory impairment.
+- Hypertension in a child with NF1 should prompt consideration of pheochromocytoma and renal artery stenosis.
+
+**Source:** CNS lecture, Page 50 — Neurofibromatosis type 1; clinical features and complications.
+
+---

@@ -20,9 +20,9 @@ SYSTEMS = [
 Q_RE = re.compile(r"(?m)^###\s*Q\s*(\d+)\s*[.)]?\s*(.*)$")
 TOPIC_RE = re.compile(r"^#\s+(\d+)\.\s+(.+?)\s*$")
 CASE_RE = re.compile(r"^#{1,3}\s*Clinical\s+Case\s*(?:(\d+)\s*)?[-–—:?\uFFFD]*\s*(.*)$", re.I)
-CORRECT_RE = re.compile(r"\*\*Correct Answer:\*\*\s*([A-E])\.\s*(.*?)\s*$", re.I|re.M)
+CORRECT_RE = re.compile(r"(?im)^\*\*Correct Answer:\*\*\s*([A-E])(?:\.\s*(.*?))?\s*$")
 OPTION_RE = re.compile(r"(?m)^([A-E])\.\s*(.*?)\s*$")
-RATIONALE_RE = re.compile(r"(?m)^\s*-\s+\*\*([A-E])\.\s*.*?\b(Correct|Incorrect)\.\*\*")
+RATIONALE_RE = re.compile(r"(?im)^\s*-\s+\*\*([A-E](?:\s*(?:,|and)\s*[A-E])*)\.\s*.*?\b(Correct|Incorrect|Included)(?:\s*\([^)]*\))?\.\*\*")
 PAGE_RE = re.compile(r"\bPages?\s+([^.;]+)", re.I)
 
 def clean(s):
@@ -70,8 +70,8 @@ def parse_system(filename, sysid, sysname):
         block=clean(raw[m.start():q_end])
         header=m.group(2).strip()
         # Difficulty is explicitly supplied in square brackets on most source questions.
-        dm=re.match(r"\[(Easy|Moderate|Hard)\]\s*(.*)$",header,re.I)
-        difficulty=dm.group(1).title() if dm else "Unspecified"
+        dm=re.match(r"\[(Easy|Moderate|Medium|Hard)\]\s*(.*)$",header,re.I)
+        difficulty=("Moderate" if dm.group(1).lower()=="medium" else dm.group(1).title()) if dm else "Unspecified"
         stem=dm.group(2).strip() if dm else header
         # Track the most recent topic and case headings before this question.
         before=[h for h in headings if h[1] < line_no]
@@ -80,7 +80,7 @@ def parse_system(filename, sysid, sysname):
         if topic_h:
             topic_name=topic_h[3]
             topic_ord=topic_h[2]
-            topic_key=f"{sysid}-topic-{int(topic_ord):02d}"
+            topic_key=f"{sysid}-topic-intro" if int(topic_ord)==0 else f"{sysid}-topic-{int(topic_ord):02d}"
         else:
             topic_name="Introductory / Unsectioned Questions"
             topic_ord="0"
@@ -114,7 +114,9 @@ def parse_system(filename, sysid, sysname):
         # Extract options and key.
         cm=CORRECT_RE.search(block)
         answer=cm.group(1).upper() if cm else ""
-        answer_text=clean(cm.group(2)) if cm else ""
+        answer_text=clean(cm.group(2) or "") if cm else ""
+        if not answer_text and answer in "ABCDE":
+            answer_text=next((o["text"] for o in options if o["label"]==answer),"")
         pre=block[:cm.start()] if cm else block
         options=sorted([{"label":x.group(1),"text":clean(x.group(2))} for x in OPTION_RE.finditer(pre)], key=lambda x:x["label"])
         # Sections are delimited by the next named section.
@@ -128,8 +130,9 @@ def parse_system(filename, sysid, sysname):
         pm=PAGE_RE.search(source_raw)
         pages=clean(pm.group(1)) if pm else ""
         sheet=clean(source_raw[:pm.start()]).rstrip(" -–—:") if pm else source_raw
-        rationales=Counter(x.group(1).upper() for x in RATIONALE_RE.finditer(detailed))
-        correct_markers=[x.group(1).upper() for x in RATIONALE_RE.finditer(detailed) if x.group(2).lower()=="correct"]
+        rationale_matches=list(RATIONALE_RE.finditer(detailed))
+        rationales=Counter(letter for match in rationale_matches for letter in re.findall(r"\b[A-E]\b",match.group(1).upper()))
+        correct_markers=[letter for match in rationale_matches if match.group(2).lower()=="correct" for letter in re.findall(r"\b[A-E]\b",match.group(1).upper())]
         errors=[]
         warnings=[]
         labels=[o["label"] for o in options]

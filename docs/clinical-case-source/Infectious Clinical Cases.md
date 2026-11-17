@@ -3890,3 +3890,250 @@ The source lists Henoch-Schönlein purpura, thrombocytopenia such as ITP and vas
 
 **Source:** Infectious Diseases sheet/PDF - Page 20.
 
+---
+
+# 7. Varicella and Herpes Zoster
+
+## Clinical Case 30 — A child deteriorates after an initially uncomplicated varicella eruption
+
+A 5-year-old child develops fever and a generalized, intensely itchy vesicular eruption in successive crops. After several days, the child appears to be improving. On the following day, the fever rises again, and several lesions become increasingly tender with expanding surrounding erythema and purulent discharge. The child is now markedly unwell.
+
+### Q122. [Hard] Which complication described in the varicella section of the lecture sheet best explains this change in the clinical course?
+
+A. Post-infectious cerebellitis  
+B. Reactivation of latent varicella-zoster virus as herpes zoster  
+C. Secondary bacterial infection of the skin lesions by staphylococci or streptococci  
+D. Acute glomerulonephritis  
+E. Viral myocarditis or pericarditis  
+
+**Correct Answer:** C. Secondary bacterial infection of the skin lesions by staphylococci or streptococci
+
+**Initial Explanation:**
+
+A renewed fever accompanied by increasing local tenderness, erythema and purulent discharge suggests bacterial superinfection of varicella lesions. The lecture sheet specifically lists secondary skin infection by staphylococci or streptococci as a complication.
+
+**Detailed Explanation:**
+
+- **C. Correct.** The source identifies secondary bacterial skin infections by *Staphylococcus* or *Streptococcus* among the complications associated with chickenpox. The new fever and deterioration in the appearance of previously vesicular lesions support this complication rather than an uncomplicated viral course. The source also links severe secondary infection with necrotizing fasciitis and toxic shock syndrome.
+- **A. Incorrect.** Cerebellitis/ataxia is included in the source's enterovirus complication material; it would cause neurological features such as gait incoordination, not purulent and increasingly tender skin lesions.
+- **B. Incorrect.** Herpes zoster is caused by reactivation of latent VZV and produces a dermatomal vesicular eruption. It does not explain the described purulent change in existing chickenpox lesions.
+- **D. Incorrect.** Glomerulonephritis is a renal complication listed in the viral disease comparison, but it does not account for the local skin findings and renewed fever.
+- **E. Incorrect.** Myocarditis/pericarditis are cardiovascular complications listed in the viral-complication material; they do not explain the evolving infected skin lesions.
+
+**HIGH-YIELD POINTS:**
+
+- Varicella lesions may develop secondary bacterial infection.
+- The lecture sheet names staphylococci and streptococci as causes.
+- Severe secondary infection may be associated with necrotizing fasciitis or toxic shock syndrome.
+- A new fever or marked deterioration after initial improvement should prompt reassessment for a complication.
+
+**Source:** Infectious Diseases lecture sheet — Page 9, *Chickenpox: complications*.
+
+---
+
+# 9. Herpes Simplex Virus Infections
+
+## Clinical Case 31 — Selecting a lesion-based test in suspected neonatal HSV
+
+A 12-day-old neonate is admitted with fever, poor feeding and lethargy. Several grouped vesicles are noted on the skin. The mother had active genital vesicles around the time of delivery. The team obtains a sample from one of the infant's vesicular lesions for virological investigation.
+
+### Q123. [Moderate] Which molecular investigation specifically listed in the lecture sheet should be performed on the vesicular-fluid sample?
+
+A. Anti-HAV IgM testing  
+B. Thick and thin Giemsa-stained blood films  
+C. Mantoux testing with measurement of induration  
+D. Stool examination for *Entamoeba histolytica* cysts  
+E. PCR of vesicular fluid for HSV  
+
+**Correct Answer:** E. PCR of vesicular fluid for HSV
+
+**Initial Explanation:**
+
+The HSV section lists PCR of vesicular fluid as a diagnostic investigation. The maternal history and neonatal vesicles make HSV an important diagnosis to investigate urgently.
+
+**Detailed Explanation:**
+
+- **E. Correct.** PCR of vesicular fluid is specifically listed in the HSV diagnostic section and directly uses material from the lesion described in the case.
+- **A. Incorrect.** Anti-HAV IgM is used to identify recent hepatitis A infection; it is unrelated to a neonatal vesicular eruption.
+- **B. Incorrect.** Thick and thin Giemsa-stained blood films are the key parasitological investigation listed for malaria.
+- **C. Incorrect.** Mantoux testing assesses immune reactivity to TB antigens and is not a diagnostic test for HSV lesions.
+- **D. Incorrect.** Stool microscopy for cysts is part of the amoebiasis work-up, not the investigation of vesicular skin lesions.
+
+The lecture sheet also lists a Tzanck (written as “Zank” in the OCR text) smear. The question asks specifically for the molecular test performed on vesicular fluid, for which PCR is the matching answer.
+
+**HIGH-YIELD POINTS:**
+
+- HSV diagnosis in the lecture sheet includes clinical assessment, PCR of vesicular fluid and Tzanck smear.
+- Neonatal HSV may present as localized disease, CNS disease or disseminated infection.
+- A neonatal sepsis-like presentation with maternal/perinatal HSV exposure requires urgent evaluation.
+
+**Source:** Infectious Diseases lecture sheet — Page 9, *HSV infection: diagnosis and complications*.
+
+---
+
+# 30. Bone and Joint Infections (Septic Arthritis and Osteomyelitis)
+
+## Clinical Case 32 — A febrile child with simultaneous joint and bone involvement
+
+A 7-year-old child is brought with fever and a rapidly painful, swollen knee. The child refuses to bear weight. Examination suggests an acute suppurative joint infection, and the clinical team is also concerned about adjacent osteomyelitis. The treating physician reviews the organisms specifically associated with these two conditions in the lecture sheet.
+
+### Q124. [Hard] Which organism is explicitly linked in the lecture sheet to both suppurative arthritis and osteomyelitis?
+
+A. *Staphylococcus aureus*  
+B. *Bordetella pertussis*  
+C. *Salmonella Typhi*  
+D. *Borrelia burgdorferi*  
+E. *Enterobius vermicularis*  
+
+**Correct Answer:** A. *Staphylococcus aureus*
+
+**Initial Explanation:**
+
+The bacterial-infection section specifically lists *Staphylococcus aureus* as a cause of suppurative arthritis and osteomyelitis. The paired joint and bone infections therefore point to the organism named in that list.
+
+**Detailed Explanation:**
+
+- **A. Correct.** The lecture sheet's *Staphylococcus aureus* disease list includes sepsis, suppurative arthritis and osteomyelitis. Both suspected sites of infection in this vignette are therefore linked to the same organism in the source.
+- **B. Incorrect.** *Bordetella pertussis* is the cause of whooping cough in the course material; it is not the organism listed for these suppurative bone and joint infections.
+- **C. Incorrect.** *Salmonella Typhi* causes enteric fever and is associated in the sheet with intestinal and systemic complications, not this paired list of staphylococcal infections.
+- **D. Incorrect.** *Borrelia burgdorferi* causes Lyme disease, which is associated with erythema migrans and later neurological, cardiac and joint manifestations. It is not the organism named for suppurative arthritis plus osteomyelitis in the staphylococcal section.
+- **E. Incorrect.** *Enterobius vermicularis* causes enterobiasis, classically associated with nocturnal perianal itching.
+
+**HIGH-YIELD POINTS:**
+
+- The lecture sheet lists *S. aureus* as a cause of sepsis, suppurative arthritis and osteomyelitis.
+- The same section also lists impetigo, folliculitis, furuncles, carbuncles, parotitis, membranous tracheitis complicating viral croup and pneumonia.
+- This question completes the invasive bone/joint-infection portion of the *Staphylococcus aureus* list, which was not directly assessed in the existing bank.
+
+**Source:** Infectious Diseases lecture sheet — Page 17, *Staphylococcus & streptococcal disease: diseases caused by Staphylococcus aureus*.
+
+---
+
+# 12. Scarlet Fever
+
+## Clinical Case 33 — Choosing a throat investigation in suspected scarlet fever
+
+A 7-year-old child presents with fever and sore throat. The tongue is initially coated and later becomes red and prominent, while a rough, diffuse rash has appeared over the trunk and is accentuated in the flexural creases. The clinician wants to investigate the suspected group A streptococcal throat infection using a specimen-based test named in the lecture sheet.
+
+### Q125. [Moderate] Which investigation best matches that request?
+
+A. Thick and thin blood films stained with Giemsa  
+B. Three stool samples for microscopy  
+C. Mantoux testing followed by IGRA  
+D. Throat swab for culture and sensitivity  
+E. Nasopharyngeal PCR for *Bordetella pertussis*  
+
+**Correct Answer:** D. Throat swab for culture and sensitivity
+
+**Initial Explanation:**
+
+The scarlet fever section lists throat swab culture and sensitivity as part of the diagnostic work-up. It also lists serology, including ASO titre and anti-DNase antibodies.
+
+**Detailed Explanation:**
+
+- **D. Correct.** A throat swab for culture and sensitivity is the specimen-based pharyngeal investigation explicitly listed in the scarlet fever section.
+- **A. Incorrect.** Giemsa-stained thick and thin blood films are used in the malaria investigation pathway.
+- **B. Incorrect.** Stool microscopy using multiple samples is listed for intestinal amoebiasis, not streptococcal pharyngitis.
+- **C. Incorrect.** Mantoux and IGRA are tests used in the assessment of TB infection.
+- **E. Incorrect.** Nasopharyngeal sampling for PCR/other testing is included in the pertussis section, not the scarlet fever investigation list.
+
+The source also lists ASO titre and anti-DNase antibodies under serological investigations. They are not the specimen-based throat test asked for in this case.
+
+**HIGH-YIELD POINTS:**
+
+- Scarlet fever is associated with group A beta-haemolytic streptococci and pyrogenic exotoxin.
+- The lecture sheet lists clinical assessment, ASO titre/anti-DNase antibodies and throat swab culture and sensitivity.
+- The typical clinical pattern includes sore throat, strawberry tongue, sandpaper-like rash and Pastia lines.
+
+**Source:** Infectious Diseases lecture sheet — Pages 13–14, *Scarlet fever: diagnosis and clinical features*.
+
+---
+
+# 24. Malaria
+
+## Clinical Case 34 — A child with severe falciparum malaria develops metabolic and neurological complications
+
+A 5-year-old child with confirmed *Plasmodium falciparum* infection becomes drowsy and then develops convulsions. Bedside testing also identifies hypoglycaemia. The child is anaemic and hypotensive. Alongside appropriate antimalarial therapy, the team plans supportive management based on the measures listed in the lecture sheet.
+
+### Q126. [Hard] Which supportive-management bundle most closely matches the malaria section of the lecture sheet?
+
+A. Treat the fever only and avoid correcting metabolic abnormalities until the blood film becomes negative  
+B. Provide rehydration and antipyretics, treat convulsions and hypoglycaemia, and address anaemia and hypotension  
+C. Give albendazole and repeat it after two weeks, without other supportive measures  
+D. Use topical antibiotics and observe the child without monitoring circulation  
+E. Give INH chemoprophylaxis as the sole treatment for the acute episode  
+
+**Correct Answer:** B. Provide rehydration and antipyretics, treat convulsions and hypoglycaemia, and address anaemia and hypotension
+
+**Initial Explanation:**
+
+The malaria treatment section lists supportive measures that include antipyretics, rehydration, treatment of convulsions, correction of hypoglycaemia, treatment of anaemia and management of hypotension. The vignette contains several of these complications.
+
+**Detailed Explanation:**
+
+- **B. Correct.** This option brings together the supportive measures explicitly listed in the malaria section. The neurological and metabolic findings in the case make seizure and hypoglycaemia management particularly important, while anaemia and hypotension also require attention.
+- **A. Incorrect.** The source does not recommend limiting treatment to fever control or delaying correction of hypoglycaemia and convulsions.
+- **C. Incorrect.** Albendazole is an anthelmintic used for helminth infections such as enterobiasis; it is not malaria treatment.
+- **D. Incorrect.** Topical antibiotics are not part of the listed malaria management, and the child has systemic and neurological complications requiring supportive care.
+- **E. Incorrect.** Isoniazid is listed for TB chemoprophylaxis, not as treatment for acute malaria.
+
+The medication list in the course sheet names chloroquine phosphate, quinine sulfate and primaquine (for prevention of relapse). It does not provide a species-specific treatment protocol or doses in the material used for this question; these should not be inferred from this question.
+
+**HIGH-YIELD POINTS:**
+
+- Cerebral malaria in the sheet includes drowsiness, convulsions and coma.
+- Hypoglycaemia and metabolic acidosis are specifically noted in cerebral malaria.
+- Supportive management listed: antipyretics, rehydration, treatment of convulsions, correction of hypoglycaemia, treatment of anaemia and management of hypotension.
+- The source names chloroquine phosphate, quinine sulfate and primaquine; it does not set out a complete species-specific regimen in these pages.
+
+**Source:** Infectious Diseases lecture sheet — Pages 23–24, *Malaria: cerebral malaria, diagnosis and treatment*.
+
+---
+
+# 24. Malaria
+
+## Clinical Case 35 — Planning prophylaxis before travel to a malaria-endemic area
+
+The parents of a 10-year-old child are preparing for a prolonged family visit to a malaria-endemic area. During a pre-travel review, they ask when the chloroquine prophylaxis schedule in their paediatric lecture notes is supposed to begin and when it should end after the family returns.
+
+### Q127. [Moderate] According to the schedule written in the 2024 course sheet, which timing is given for chloroquine prophylaxis?
+
+A. Start on the day of departure and stop on the day of return  
+B. Start 8 weeks before departure and stop 2 weeks after return  
+C. Start 3 days before departure and continue for 3 days after return  
+D. Start 2 weeks before travel and continue for 8 weeks after return  
+E. Start only after fever develops and continue until the blood film is negative  
+
+**Correct Answer:** D. Start 2 weeks before travel and continue for 8 weeks after return
+
+**Initial Explanation:**
+
+The malaria prophylaxis section of the 2024 course sheet states that chloroquine is started 2 weeks before travel to an endemic area and continued for 8 weeks after return.
+
+**Detailed Explanation:**
+
+- **D. Correct.** This is the exact timing stated in the lecture sheet's malaria prophylaxis section.
+- **A. Incorrect.** The source specifies that prophylaxis begins before travel and continues after return; it is not limited to the travel dates.
+- **B. Incorrect.** The pre-travel and post-travel durations are reversed relative to the course sheet.
+- **C. Incorrect.** These durations are not the schedule stated in the source.
+- **E. Incorrect.** Prophylaxis is described for travel to an endemic area, not as a treatment started after symptoms develop.
+
+**HIGH-YIELD POINTS:**
+
+- The 2024 lecture sheet lists chloroquine prophylaxis for travel to an endemic area.
+- Timing in that sheet: begin 2 weeks before travel and continue for 8 weeks after return.
+- The sheet separately lists personal/vector prevention: covering exposed skin, insect repellents, mosquito nets and vector-control measures.
+- This item records the course-sheet schedule for examination coverage; it is not a substitute for current destination-specific travel-medicine advice or local resistance guidance.
+
+**Source:** Infectious Diseases lecture sheet — Page 24, *Malaria: prophylaxis and prevention*.
+
+---
+
+## Final Quality-Control Record
+
+- New questions created: **6** (Q122–Q127).
+- Each question has one best answer and five options (A–E).
+- Each question includes an Initial Explanation, a Detailed Explanation addressing all five options, High-Yield Points and a precise lecture-sheet page/topic reference.
+- Answer-key distribution: **A = 1, B = 1, C = 1, D = 2, E = 1**. No two consecutive questions have the same correct-answer letter, and no fixed A–E cycle is used.
+- The questions are based on material present in the uploaded lecture-sheet text. No new material was added for Giardiasis or PUO because the uploaded teaching pages contain no dedicated lesson for either topic.
+- The uploaded lecture sheet is an OCR-derived text export. The question set avoids uncertain OCR-derived doses, ambiguous numerical cut-offs and unclear wording. Confirm course-note schedules against the original teaching PDF and current local guidance before applying them clinically.

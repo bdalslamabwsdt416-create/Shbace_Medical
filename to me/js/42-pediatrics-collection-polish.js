@@ -26,8 +26,9 @@
       '.ped-collection-avatar{overflow:hidden}'+
       '.ped-collection-avatar>img{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:cover;border-radius:inherit}'+
       '.cc-icon-art>img,.ai08-icon-art>img{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:cover;border-radius:11px}'+
-      '.tno.ti.shb-gen-icon{display:grid;place-items:center;color:hsl(var(--gh,200) 78% 80%);background:linear-gradient(145deg,hsl(var(--gh,200) 46% 26%),hsl(var(--gh,200) 52% 12%));border:1px solid hsl(var(--gh,200) 55% 48% / .5)}'+
-      '.tno.ti.shb-gen-icon svg{display:block;width:58%;height:58%;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}';
+      '.tno.ti.shb-gen-icon{position:relative;overflow:hidden;display:grid;place-items:center;color:#e8fbff;background:radial-gradient(circle at 28% 23%,rgba(77,210,255,.35),transparent 34%),radial-gradient(circle at 76% 78%,rgba(15,90,180,.34),transparent 44%),linear-gradient(145deg,#153d7d,#071833 72%,#0c2856);border:1px solid rgba(121,219,255,.62);box-shadow:inset 0 1px 2px rgba(255,255,255,.22),inset 0 -4px 10px rgba(0,0,0,.28),0 5px 14px rgba(2,11,31,.32)}'+
+      '.tno.ti.shb-gen-icon:before{content:"";position:absolute;inset:5px;border-radius:inherit;border:1px solid rgba(109,226,255,.28);box-shadow:0 0 12px rgba(55,202,255,.16)}'+
+      '.tno.ti.shb-gen-icon svg{position:relative;z-index:1;display:block;width:100%;height:100%;fill:none;stroke:#eafcff;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 2px rgba(99,225,255,.65))}';
     document.head.appendChild(style);
   }
 
@@ -185,17 +186,7 @@
     const alias = TOPIC_ALIASES.find(([re]) => re.test(String(topicName || '')));
     if (alias && map[alias[1] + '|' + alias[2]]) return map[alias[1] + '|' + alias[2]];
 
-    const words = topic.split(' ').filter(word => word.length > 2 && !['the','and','for','with','from','that','into','other','general','approach','child','children'].includes(word));
-    let best = null;
-    entries.forEach(item => {
-      if (!item.startsWith(key + '|')) return;
-      const label = norm(item.slice(item.indexOf('|') + 1));
-      const candidate = label.split(' ').filter(word => word.length > 2 && !['the','and','for','with','from','that','into','other','general'].includes(word));
-      const overlap = words.filter(word => candidate.some(part => part === word || (word.length > 5 && part.length > 5 && (part.includes(word) || word.includes(part)))));
-      const score = overlap.length / Math.max(1, Math.min(words.length, candidate.length));
-      if (!best || score > best.score) best = { item, score };
-    });
-    return best && best.score >= 0.42 ? map[best.item] : '';
+    return '';
   }
 
   function applySystemImage(box, name) {
@@ -327,6 +318,7 @@
   function hashOf(text) { let h = 7; for (let i = 0; i < text.length; i++) h = (h * 31 + text.charCodeAt(i)) >>> 0; return h; }
   function generatedTile(systemName, topicName) {
     const label = displayTopic(topicName);
+    if (typeof B.topicIconHtml === 'function') return B.topicIconHtml(systemName, label, hashOf(norm(label) + '|' + norm(systemName)));
     const hue = hashOf(norm(label) + '|' + norm(systemName)) % 360;
     const hit = GEN_SHAPES.find(([re]) => re.test((label + ' ' + systemName).toLowerCase()));
     return '<div class="tno ti shb-gen-icon" role="img" aria-label="' + attr(label) + '" style="--gh:' + hue + '"><svg viewBox="0 0 48 48" aria-hidden="true">' + (hit ? hit[1] : GEN_DEFAULT) + '</svg></div>';
@@ -342,6 +334,7 @@
     if (!topic) return out;
     const entries = Object.keys(map).filter(item => !key || item.startsWith(key + '|'));
     entries.forEach(item => { if (norm(item.slice(item.indexOf('|') + 1)) === topic) push(map[item]); });
+    if (/ventricular septal defect|\\bvsd\\b/i.test(String(topicName || ''))) return out;
     const alias = TOPIC_ALIASES.find(([re]) => re.test(String(topicName || '')));
     if (alias) push(map[alias[1] + '|' + alias[2]]);
     const words = topic.split(' ').filter(w => w.length > 2 && NOISE.indexOf(w) < 0);

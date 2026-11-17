@@ -5650,3 +5650,623 @@ The wheezy-chest differential on page 42 includes recurrent anaphylaxis, for exa
 ## Supplementary coverage note
 
 These questions add direct assessment of the remaining infectious stridor list and the recurrent-anaphylaxis/chronic-aspiration wheeze differential from pages 11 and 42. The previous 25 cases and Q1–Q175 remain unchanged.
+
+---
+
+# 2. Common Cold (Coryza)
+
+## Clinical Case 27 — Why a blocked nose matters in a young infant
+
+**Case focus:** Infant airway anatomy (obligatory nasal breathing, small airways) and the recognised risk factors for childhood respiratory disease.
+
+### Q178. [Medium] A 3-week-old term infant is brought with a 2-day history of marked nasal blockage and clear nasal discharge. He repeatedly stops sucking during feeds to breathe. His respiratory rate is 62/min with mild subcostal recession, SpO2 is 97% in air and the chest is clear. Which statement best explains why a simple blocked nose causes this degree of distress at his age?
+
+A. The right main bronchus is wider and straighter, so nasal secretions are readily aspirated into the lungs  
+B. The lower airways dilate during inspiration, so nasal secretions are drawn straight into the bronchioles  
+C. Newborns and young infants are obligatory nasal breathers with small airways, so nasal blockage markedly raises the work of breathing  
+D. Eustachian tube dysfunction transmits the nasal obstruction to the middle ear and causes reflex tachypnoea  
+E. Adenoid hypertrophy obstructs the airway at the level of the vocal cords in the first month of life  
+
+**Correct Answer:** C. Newborns and young infants are obligatory nasal breathers with small airways, so nasal blockage markedly raises the work of breathing
+
+**Initial Explanation:**
+
+Newborns and young infants breathe mainly through the nose and have small airways, so even a common cold can cause feeding difficulty and respiratory distress.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** The wider, straighter right main bronchus explains why inhaled foreign bodies lodge on the right. It does not explain distress from nasal blockage when the chest is clear.
+- **B. Incorrect.** The lower airways do dilate in inspiration, but secretions are not "drawn" into the bronchioles. A clear chest and normal saturation point to an upper-airway (nasal) problem.
+- **C. Correct.** Obligatory nasal breathing plus small, still-growing airways means that nasal obstruction in an infant behaves like a significant airway obstruction.
+- **D. Incorrect.** Eustachian tube anatomy predisposes infants to acute otitis media, not to tachypnoea.
+- **E. Incorrect.** The adenoids lie in the nasopharynx. Adenoid hypertrophy causes snoring or sleep apnoea in older children; it does not obstruct the vocal cords.
+
+**HIGH-YIELD POINTS:**
+
+- Newborns and infants are obligatory nasal breathers.
+- Smaller airways and growing lungs mean that the younger the child, the more severe the respiratory disease, especially lower respiratory infection.
+- The common cold is the commonest childhood infection, is usually viral, and is treated supportively.
+- The right main bronchus is wider and straighter, which is why foreign bodies commonly lodge there.
+
+**Source:** Respiratory sheet — Page 3 (Introduction: upper vs lower airway, anatomy figure and notes); Page 6 (Common cold).
+
+# 18. Integrated Respiratory Assessment and Childhood Infection Patterns
+
+## Clinical Case 28 — Why a blocked nose matters in a young infant
+
+**Case focus:** Infant airway anatomy (obligatory nasal breathing, small airways) and the recognised risk factors for childhood respiratory disease.
+
+### Q179. [Medium] A 9-month-old boy is admitted for the third time with a lower respiratory tract infection. He was born at 31 weeks, weighing 1.3 kg. His mother smoked throughout pregnancy, and the family of nine lives in a small overcrowded house. He was exclusively breastfed, his vaccinations are complete and an echocardiogram was normal. Which set of this child's background features corresponds to recognised risk factors for respiratory disease in the sheet?
+
+A. Male sex, prematurity/very low birth weight, maternal smoking in pregnancy and overcrowding  
+B. Exclusive breastfeeding, complete immunisation, normal cardiac anatomy and overcrowding  
+C. Male sex, complete immunisation, exclusive breastfeeding and a large house  
+D. Prematurity/very low birth weight, normal echocardiogram, exclusive breastfeeding and maternal smoking  
+E. Overcrowding, complete immunisation, normal cardiac anatomy and male sex  
+
+**Correct Answer:** A. Male sex, prematurity/very low birth weight, maternal smoking in pregnancy and overcrowding
+
+**Initial Explanation:**
+
+The sheet lists male sex, prematurity or VLBW, maternal smoking during pregnancy and overcrowding among the risk factors for respiratory disease in children.
+
+**Detailed Explanation:**
+
+- **A. Correct.** All four are listed risk factors.
+- **B. Incorrect.** Only overcrowding is a listed risk factor. Breastfeeding, immunisation and normal cardiac anatomy are not risk factors.
+- **C. Incorrect.** Male sex is a risk factor, but the other three items are not. A large house is not listed, whereas overcrowding and a large family are.
+- **D. Incorrect.** Prematurity/VLBW and maternal smoking are risk factors, but a normal echocardiogram and breastfeeding are not. Congenital heart anomalies would be a risk factor, and this child does not have one.
+- **E. Incorrect.** Overcrowding and male sex are listed; immunisation and normal cardiac anatomy are not.
+
+**HIGH-YIELD POINTS:**
+
+- Risk factors: poor socio-economic status and overcrowding, large family size, parental genetic predisposition and smoking (maternal during pregnancy), male sex, prematurity or VLBW, cystic fibrosis, congenital heart or lung anomalies, and (rarely) immune deficiency.
+- Respiratory illness accounts for about 50% of illness in children under 5 years and about 30% of hospital admissions.
+- About 80% of respiratory infections are upper respiratory tract infections, and 80–90% are viral.
+- Pneumonia is the leading cause of death under 5 years in low- and middle-income countries.
+
+**Source:** Respiratory sheet — Page 6 (Respiratory disorders and risk factors); Page 3 (anatomy figure); Page 22 (Pneumonia definition).
+
+---
+
+# 22. Additional Integrated Respiratory Clinical Reasoning
+
+## Clinical Case 29 — Reading the cough and grading the distress
+
+**Case focus:** Recognising cough patterns as diagnostic clues, and applying the respiratory-rate thresholds and distress grades together.
+
+### Q180. [Medium] Four children attend a paediatric clinic on the same day. (1) A 7-year-old has bouts of coughing whenever he runs during games. (2) A 10-year-old coughs mainly in the early morning, clears his throat often and feels mucus running down the back of his throat. (3) A 6-week-old afebrile infant has a repetitive staccato cough with sticky eyes. (4) A 3-year-old began coughing suddenly after choking on a peanut. Which option pairs each child with the most characteristic diagnosis in the sheet?
+
+A. (1) Croup; (2) Pertussis; (3) Chlamydia infection; (4) Foreign body aspiration  
+B. (1) Exercise-induced asthma; (2) Posterior nasal drip; (3) Pertussis; (4) Foreign body aspiration  
+C. (1) Exercise-induced asthma; (2) GERD; (3) Chlamydia infection; (4) Foreign body aspiration  
+D. (1) Foreign body aspiration; (2) Posterior nasal drip; (3) Chlamydia infection; (4) Exercise-induced asthma  
+E. (1) Exercise-induced asthma; (2) Posterior nasal drip; (3) Chlamydia infection; (4) Foreign body aspiration  
+
+**Correct Answer:** E. (1) Exercise-induced asthma; (2) Posterior nasal drip; (3) Chlamydia infection; (4) Foreign body aspiration
+
+**Initial Explanation:**
+
+Each cough has a characteristic association in the sheet: recurrent cough with exercise (exercise-induced asthma), early-morning cough (posterior nasal drip), staccato cough (Chlamydia) and sudden cough after choking (foreign body aspiration).
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Croup gives a barking cough with stridor, and pertussis gives a spasmodic whooping cough. Neither matches children 1 and 2.
+- **B. Incorrect.** Child 3 has a staccato cough with sticky eyes (Chlamydia), not whooping cough.
+- **C. Incorrect.** GERD is a cause of chronic cough, but an early-morning cough with a mucus-down-the-throat sensation is the pattern of posterior nasal drip.
+- **D. Incorrect.** The pairings of children 1 and 4 are swapped.
+- **E. Correct.** All four pairings follow the cough-characteristics table in the sheet.
+
+**HIGH-YIELD POINTS:**
+
+- Spasmodic whooping cough → pertussis; barking (brassy) cough → croup; staccato cough → Chlamydia infection.
+- Sudden cough after a choking episode → foreign body aspiration.
+- Night-time (nocturnal) cough → asthma; recurrent cough with exercise → exercise-induced asthma.
+- Morning cough → sinusitis or allergic rhinitis; early-morning cough → posterior nasal drip.
+- Chronic cough = daily cough for more than 4 weeks (4–6 weeks).
+
+**Source:** Respiratory sheet — Page 4 (Symptoms and signs: cough characteristics); Page 24 (Chlamydia trachomatis pneumonia).
+
+# 18. Integrated Respiratory Assessment and Childhood Infection Patterns
+
+## Clinical Case 30 — Reading the cough and grading the distress
+
+**Case focus:** Recognising cough patterns as diagnostic clues, and applying the respiratory-rate thresholds and distress grades together.
+
+### Q181. [Hard] A 3-year-old boy has had cough and fever for 2 days. His respiratory rate is 52/min. He has nasal flaring, subcostal and intercostal recession and an audible expiratory grunt. He is alert and not cyanosed. Which statement correctly describes his respiratory status according to the sheet?
+
+A. He is not tachypnoeic, because the threshold for his age is more than 60 breaths/min  
+B. Grade II (moderate) distress, because grunting is a feature of grade IV  
+C. Grade I (mild) distress, because nasal flaring is present  
+D. Grade III (severe) distress, with a respiratory rate above the age threshold of 40/min  
+E. Grade IV (advanced) distress, because recession and grunting are both present  
+
+**Correct Answer:** D. Grade III (severe) distress, with a respiratory rate above the age threshold of 40/min
+
+**Initial Explanation:**
+
+A rate of 52/min exceeds the 1–5-year threshold (>40/min). Tachypnoea, flaring and recession plus grunting make grade III. Grade IV additionally needs cyanosis and a disturbed conscious level.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** More than 60/min is the neonatal threshold. For a 1–5-year-old it is more than 40/min.
+- **B. Incorrect.** Grade II has recession but no grunting. Grunting defines grade III.
+- **C. Incorrect.** Grade I is only tachypnoea plus nasal flaring.
+- **D. Correct.** Tachypnoea + flaring + recession + grunting = grade III, and the rate is above the age-specific threshold.
+- **E. Incorrect.** Grade IV requires cyanosis and a disturbed conscious level, and he is alert and pink.
+
+**HIGH-YIELD POINTS:**
+
+- Tachypnoea thresholds: birth–2 months >60; 2 months–1 year >50; 1–5 years >40; school age >30.
+- Grade I = tachypnoea + flaring; II = + recession; III = + grunting; IV = + cyanosis and disturbed conscious level.
+- Recession can be subcostal, intercostal, suprasternal, and sternal in newborns. Grunting is expiratory against a partly closed glottis.
+- Tachypnoea is sensitive but not specific, and it also occurs in heart failure, metabolic disorders and sepsis.
+
+**Source:** Respiratory sheet — Pages 5–6 (Signs of respiratory distress; grades of RD).
+
+---
+
+# B. Upper Respiratory Tract Infections
+
+# 4. Acute Otitis Media (AOM) and Otitis Media with Effusion (OME)
+
+## Clinical Case 31 — Ear and sinus infections: presentation, advice and complications
+
+**Case focus:** AOM in infants, what does and does not help, intracranial complications, and sinusitis in a child with asthma.
+
+### Q182. [Medium] A 9-month-old boy has had fever, irritability, poor feeding, vomiting and two loose stools for 24 hours. He has mild coryza, a respiratory rate of 38/min, clear and equal breath sounds and a flat anterior fontanelle, and he is consolable between cries. What is the most appropriate next step?
+
+A. Treat as gastroenteritis with oral rehydration and reassure, because vomiting and diarrhoea exclude an ear source  
+B. Examine both tympanic membranes with an otoscope, because fever with irritability, vomiting and diarrhoea may be due to AOM  
+C. Request a chest X-ray, because irritability and poor feeding in an infant are signs of lower respiratory disease  
+D. Start intravenous antibiotics for presumed sepsis without further examination  
+E. Start nebulised salbutamol, because poor feeding in an infant means bronchiolitis  
+
+**Correct Answer:** B. Examine both tympanic membranes with an otoscope, because fever with irritability, vomiting and diarrhoea may be due to AOM
+
+**Initial Explanation:**
+
+Infants with AOM often have non-specific features such as fever, irritability, poor feeding, vomiting or diarrhoea. The sheet advises examining the tympanic membranes of every febrile infant or young child.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Vomiting and diarrhoea are listed features of AOM in infants and do not exclude an ear source.
+- **B. Correct.** Otoscopy (a congested, bulging membrane with loss of the light reflex) is the key diagnostic step.
+- **C. Incorrect.** The respiratory rate is normal for age and the chest is clear, so there is no evidence of lower respiratory disease.
+- **D. Incorrect.** The child is consolable with a flat fontanelle. A simple, treatable source should be sought first.
+- **E. Incorrect.** There is no wheeze or respiratory distress to suggest bronchiolitis.
+
+**HIGH-YIELD POINTS:**
+
+- Infants with AOM: fever, irritability, poor feeding, vomiting, diarrhoea and ear discharge. Older children: fever, otalgia and otorrhoea.
+- Examine the tympanic membranes of every febrile infant or young child.
+- Diagnosis = history + otoscopy (congested, bulging membrane, lost light reflex, sometimes perforation). Pneumatic otoscopy tests membrane movement.
+- Peak age is 6–24 months, and the Eustachian tube in infants is short, horizontal and functions poorly.
+
+**Source:** Respiratory sheet — Pages 8–9 (Acute otitis media: clinical presentations and diagnosis).
+
+### Q183. [Medium] A 14-month-old boy is diagnosed with AOM on day 2 of illness. He is drinking well and has no complications. His mother asks for a decongestant, an antihistamine and ear drops "to protect his hearing", and wants antibiotics for the same reason. Which advice is consistent with the sheet?
+
+A. Paracetamol or ibuprofen for pain; decongestants, antihistamines and ear drops add no benefit, and antibiotics have not been shown to reduce hearing loss  
+B. A decongestant and an antihistamine, because they shorten the illness and prevent glue ear; antibiotics are unnecessary  
+C. Antibiotic ear drops, because local medication is the main treatment and systemic antibiotics are never used  
+D. Amoxicillin, because it has been shown to reduce hearing loss, together with a decongestant for the Eustachian tube  
+E. No analgesia, because pain relief masks complications, with immediate referral for grommet insertion  
+
+**Correct Answer:** A. Paracetamol or ibuprofen for pain; decongestants, antihistamines and ear drops add no benefit, and antibiotics have not been shown to reduce hearing loss
+
+**Initial Explanation:**
+
+AOM usually resolves spontaneously. Analgesia and antipyretics are the mainstay. Decongestants, antihistamines and ear drops are not beneficial, and antibiotics only marginally shorten pain without proven protection against hearing loss.
+
+**Detailed Explanation:**
+
+- **A. Correct.** This matches the treatment statements in the sheet.
+- **B. Incorrect.** Neither decongestants nor antihistamines are beneficial in AOM.
+- **C. Incorrect.** The sheet states there is no role for local ear drops in the treatment of AOM.
+- **D. Incorrect.** Antibiotics have not been shown to reduce the risk of hearing loss, and decongestants are not beneficial.
+- **E. Incorrect.** Analgesia and antipyretics are part of treatment. Grommets are for persistent effusion (glue ear) after watchful waiting, not for acute AOM.
+
+**HIGH-YIELD POINTS:**
+
+- Treat pain and fever with paracetamol or ibuprofen.
+- Amoxicillin is the drug of choice when antibiotics are indicated (the sheet gives 80–90 mg/kg/day; verify doses against the original and local guidance).
+- Antibiotics marginally shorten pain and do not reduce hearing loss. Decongestants, antihistamines and ear drops are not beneficial.
+- Complications: recurrent otitis media with effusion, conductive hearing loss with speech and learning problems, acute mastoiditis, meningitis and dural venous thrombosis.
+
+**Source:** Respiratory sheet — Page 9 (Treatment of AOM).
+
+### Q184. [Hard] A 3-year-old girl finished amoxicillin for AOM 10 days ago. She now has high fever, repeated vomiting, severe headache, marked irritability, neck stiffness and dislike of light. There is no swelling or tenderness behind the ear. Which complication of AOM should be suspected?
+
+A. Otitis media with effusion, because it commonly causes high fever and severe headache  
+B. Conductive hearing loss, because it explains vomiting and dislike of light  
+C. Acute mastoiditis, because it presents with headache and no signs behind the ear  
+D. Meningitis, with dural venous thrombosis as a related intracranial complication  
+E. Recurrent AOM, because each recurrence produces neck stiffness  
+
+**Correct Answer:** D. Meningitis, with dural venous thrombosis as a related intracranial complication
+
+**Initial Explanation:**
+
+Fever, vomiting, severe headache, neck stiffness and photophobia after AOM indicate an intracranial complication. The sheet lists meningitis and dural venous thrombosis among the complications of AOM.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Glue ear causes conductive hearing loss and is typically not febrile with severe headache and neck stiffness.
+- **B. Incorrect.** Hearing loss is a consequence of effusion. It does not explain a systemic illness with meningeal signs.
+- **C. Incorrect.** Mastoiditis is a complication of AOM, but it shows as a mastoid swelling and tenderness, which are absent here.
+- **D. Correct.** The meningeal picture is explained by an intracranial spread of middle-ear infection.
+- **E. Incorrect.** Recurrence of AOM does not by itself explain meningeal signs.
+
+**HIGH-YIELD POINTS:**
+
+- Complications of AOM: recurrent OME (glue ear), conductive hearing loss with speech and learning difficulties, acute mastoiditis, meningitis and dural vein thrombosis.
+- OME is the commonest cause of conductive hearing loss in children (common at 2–7 years), usually resolves spontaneously, and is managed by watchful waiting for 3 months, then ENT review and possible grommets.
+- Always look for red-flag signs: persistent fever, severe headache, vomiting and meningism.
+
+**Source:** Respiratory sheet — Page 9 (Complications of AOM; OME; mastoiditis).
+
+# 5. Sinusitis
+
+## Clinical Case 32 — Ear and sinus infections: presentation, advice and complications
+
+**Case focus:** AOM in infants, what does and does not help, intracranial complications, and sinusitis in a child with asthma.
+
+### Q185. [Medium] A 4-year-old boy with known asthma has had 10 days of fever, purulent nasal discharge, cough and cheek tenderness after a cold. His asthma control has worsened, with more night cough. His mother asks whether the sinuses above the eyes (the frontal sinuses) are involved. Which statement is most accurate?
+
+A. Frontal sinusitis is the commonest form at this age because the frontal sinuses are fully formed at birth  
+B. The worsening asthma is unrelated, because sinusitis cannot influence the lower airways  
+C. Maxillary or ethmoid involvement is more likely, because frontal sinuses start developing around 7 years, and sinusitis can exacerbate asthma  
+D. Sphenoid sinusitis is impossible at this age, because the sphenoid sinuses do not form until adolescence  
+E. The illness is always viral, so antibiotics and imaging have no role at any stage  
+
+**Correct Answer:** C. Maxillary or ethmoid involvement is more likely, because frontal sinuses start developing around 7 years, and sinusitis can exacerbate asthma
+
+**Initial Explanation:**
+
+Maxillary and ethmoid sinuses are present at birth, the sphenoid begins at 2–3 years, and the frontal begins at about 7 years. Sinusitis is also listed as a cause of asthma exacerbation.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Frontal sinuses begin to develop at about 7 years and complete by 12. Frontal sinusitis is uncommon in the first decade.
+- **B. Incorrect.** Exacerbation of bronchial asthma is a listed complication of sinusitis.
+- **C. Correct.** It combines the sinus development timeline with the asthma link.
+- **D. Incorrect.** The sphenoid sinuses begin at 2–3 years and are complete by 5 years.
+- **E. Incorrect.** Bacterial causes (S. pneumoniae, Hib, S. aureus) are listed. Treatment includes analgesia and antibiotics, and plain X-ray or CT can be used.
+
+**HIGH-YIELD POINTS:**
+
+- Sinus development: maxillary and ethmoid at birth; sphenoid 2–3 years (complete by 5); frontal from 7 years (complete by 12).
+- Complications of sinusitis: orbital cellulitis, dural sinus thrombosis and meningitis, frontal bone osteomyelitis, and exacerbation of bronchial asthma.
+- Features: fever, headache, cough, mucopurulent or watery discharge, and cheek pain, swelling and tenderness with maxillary involvement.
+
+**Source:** Respiratory sheet — Page 10 (Sinusitis: complications; key points on sinus pneumatization).
+
+---
+
+# C. Stridor and Upper-Airway Obstruction
+
+# 23. Acute and Chronic Stridor — Additional Differential Diagnosis
+
+## Clinical Case 33 — Croup and epiglottitis: imaging, disposition, counselling and confirmation
+
+**Case focus:** Radiological signs and whether they are needed, deciding between home and hospital care in croup, parent counselling, and how epiglottitis is actually confirmed.
+
+### Q186. [Medium] Two children are seen in the emergency department. Child A is an 18-month-old with 2 days of coryza followed by a barking cough, hoarseness and harsh stridor when upset; an AP neck film taken for another reason shows a steeple sign. Child B is a 4-year-old with abrupt high fever, drooling and a muffled voice; a junior doctor asks for a lateral neck X-ray to look for a thumb sign before any intervention. Which statement is correct?
+
+A. The steeple sign points to epiglottitis, and the thumb sign is the diagnostic sign of viral croup  
+B. Both children need a neck X-ray before any airway intervention in order to confirm the diagnosis  
+C. Child B should go to radiology first for a lateral neck film, because it is quick and safe in suspected epiglottitis  
+D. Child A cannot be diagnosed without an AP neck film, because croup has no recognised clinical picture  
+E. The steeple sign is linked to croup, which is diagnosed clinically, and the thumb sign to epiglottitis, but airway management must not wait for a neck film  
+
+**Correct Answer:** E. The steeple sign is linked to croup, which is diagnosed clinically, and the thumb sign to epiglottitis, but airway management must not wait for a neck film
+
+**Initial Explanation:**
+
+Croup is a clinical diagnosis (steeple sign on AP neck view is the associated radiograph sign). The thumb sign of epiglottitis is seen on a lateral neck film, but the sheet states this is not done when epiglottitis is suspected, because the airway is the priority.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** The two signs are reversed. Steeple sign is linked to croup, and thumb sign to epiglottitis.
+- **B. Incorrect.** In suspected upper-airway obstruction one should not lose time with unnecessary radiological requests.
+- **C. Incorrect.** Sending a child with suspected epiglottitis for imaging delays airway control and is unsafe. The lateral film is not done in this setting.
+- **D. Incorrect.** The diagnosis of croup is mainly clinical (history and examination).
+- **E. Correct.** It matches the sheet: clinical diagnosis for croup and airway first for epiglottitis.
+
+**HIGH-YIELD POINTS:**
+
+- Croup: diagnosed mainly clinically; steeple sign on AP neck view.
+- Epiglottitis: thumb sign on lateral neck X-ray, which is not performed in the suspected case.
+- In suspected upper-airway obstruction: do not use a tongue depressor, do not lay the child flat, do not delay for blood tests or radiology, and keep the child calm (on the mother's lap).
+
+**Source:** Respiratory sheet — Page 14 (Croup: diagnosis); Page 16 (Epiglottitis: diagnosis).
+
+# 7. Viral Croup and Spasmodic Croup
+
+## Clinical Case 34 — Croup and epiglottitis: imaging, disposition, counselling and confirmation
+
+**Case focus:** Radiological signs and whether they are needed, deciding between home and hospital care in croup, parent counselling, and how epiglottitis is actually confirmed.
+
+### Q187. [Hard] At 2 a.m., a 9-month-old girl is brought with a barking cough, hoarse voice and inspiratory stridor when she cries, with mild subcostal recession; she is comfortable at rest. Oxygen saturation is normal and she is drinking. The family lives 45 minutes from the nearest hospital and has no transport. Which decision best fits the sheet?
+
+A. Manage at home with warm moist air alone, because moist air is the main treatment and there is no stridor at rest  
+B. Give a single dose of dexamethasone and admit for observation, because age under 12 months, night-time and distance from hospital all favour admission  
+C. Discharge with oral antibiotics, because croup at this age is usually bacterial  
+D. Examine the throat with a tongue depressor to exclude epiglottitis before any decision  
+E. Send for an urgent lateral neck X-ray and blood cultures before giving any treatment  
+
+**Correct Answer:** B. Give a single dose of dexamethasone and admit for observation, because age under 12 months, night-time and distance from hospital all favour admission
+
+**Initial Explanation:**
+
+She has moderate croup (cough plus stridor with some distress). Steroids are indicated, and the sheet says the decision between home and hospital depends on severity, time of day, access to hospital and age, with children under 12 months needing admission more often because of their narrow airway.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Warm moist air is not beneficial in the sheet, and the other factors favour admission.
+- **B. Correct.** Steroid treatment plus admission applies the four decision factors listed.
+- **C. Incorrect.** Viral croup (parainfluenza) does not need antibiotics.
+- **D. Incorrect.** Examining the throat with a tongue depressor is contraindicated in suspected upper-airway obstruction.
+- **E. Incorrect.** Imaging and blood tests should not delay treatment, and cultures are not part of croup management.
+
+**HIGH-YIELD POINTS:**
+
+- Severity: mild = cough mainly; moderate = cough + stridor with moderate distress; severe = stridor at rest with severe distress, restlessness or dusky colour, low SpO2.
+- Home vs hospital depends on severity, time of day, ease of access to hospital and age (under 12 months have a narrower airway).
+- Steroid (dexamethasone single dose or nebulised budesonide) for mild to severe; nebulised adrenaline (racemic epinephrine) for severe, with 3–4 hours of observation.
+- Intubation is very rarely needed in viral croup.
+
+**Source:** Respiratory sheet — Page 15 (Croup management table and decision to admit).
+
+### Q188. [Medium] The parents of a 2-year-old recovering from viral croup ask three questions: whether steaming the bathroom or warm mist would have shortened the illness, how long recovery usually takes, and whether a vaccine can prevent it. Which answer is correct according to the sheet?
+
+A. Warm moist air is the most effective treatment; recovery takes about 3 weeks; a parainfluenza vaccine is routinely given  
+B. Warm moist air works only when combined with antibiotics; recovery takes about 4 weeks; a vaccine is given at 2 months  
+C. Humidified air replaces corticosteroids; recovery takes about 10 days; a vaccine is available if requested  
+D. Warm moist air has not been shown to help; recovery usually occurs in 2–5 days; there is no vaccine for the parainfluenza viruses  
+E. Warm moist air prevents viral pneumonia, which affects most children; recovery takes 1 day; a vaccine exists  
+
+**Correct Answer:** D. Warm moist air has not been shown to help; recovery usually occurs in 2–5 days; there is no vaccine for the parainfluenza viruses
+
+**Initial Explanation:**
+
+The sheet marks inhalation of warm moist air as not beneficial, gives an excellent prognosis with recovery in 2–5 days, and states there is no vaccine against parainfluenza viruses.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Moist air is not beneficial, and no parainfluenza vaccine exists.
+- **B. Incorrect.** Moist air does not need antibiotics to "work", and the recovery time is much shorter than 4 weeks.
+- **C. Incorrect.** Humidified air does not replace steroids, which reduce severity and duration.
+- **D. Correct.** It matches all three points in the sheet.
+- **E. Incorrect.** Viral pneumonia is an uncommon complication (about 2%), not a feature in most children.
+
+**HIGH-YIELD POINTS:**
+
+- Complication: viral pneumonia (about 2%).
+- Prognosis: excellent; recovery usually in 2–5 days.
+- Prevention: no vaccine for parainfluenza viruses.
+- Parents should watch the child at home for signs of increasing severity.
+
+**Source:** Respiratory sheet — Page 15 (Croup: treatment table, complication, prognosis and prevention).
+
+# 8. Acute Epiglottitis and Bacterial Tracheitis
+
+## Clinical Case 35 — Croup and epiglottitis: imaging, disposition, counselling and confirmation
+
+**Case focus:** Radiological signs and whether they are needed, deciding between home and hospital care in croup, parent counselling, and how epiglottitis is actually confirmed.
+
+### Q189. [Hard] A 5-year-old girl, whose family declined the Hib vaccine, has a temperature of 39.4 °C and appears toxic. She is drooling, sitting forward with her mouth open, and has a muffled voice with soft stridor. The team is deciding how to investigate and confirm the diagnosis. Which plan agrees with the sheet?
+
+A. Send CBC and blood culture (neutrophilia and Hib growth expected), avoid a lateral neck film, and inspect the epiglottis by laryngoscopy only in the operating room under general anaesthesia, where a cherry-red swollen epiglottis is expected  
+B. Inspect the throat with a tongue depressor in the emergency room to see a cherry-red epiglottis, then request a lateral neck film to confirm the thumb sign  
+C. Send her to radiology for a lateral neck X-ray and secure the airway only if no thumb sign is seen  
+D. Take a throat swab in the emergency room and start oral penicillin, with review in 24 hours  
+E. Arrange a lumbar puncture and CT of the neck before making any airway plan  
+
+**Correct Answer:** A. Send CBC and blood culture (neutrophilia and Hib growth expected), avoid a lateral neck film, and inspect the epiglottis by laryngoscopy only in the operating room under general anaesthesia, where a cherry-red swollen epiglottis is expected
+
+**Initial Explanation:**
+
+Epiglottitis is an airway emergency, so the child goes to ICU with anaesthesia and ENT support. The supportive tests are CBC (neutrophilia) and blood culture (Hib), and direct inspection is done only in the operating room under general anaesthesia.
+
+**Detailed Explanation:**
+
+- **A. Correct.** It matches the investigation plan in the sheet.
+- **B. Incorrect.** A tongue depressor can provoke laryngospasm and total airway obstruction. It is contraindicated.
+- **C. Incorrect.** The lateral neck film (thumb sign) is not done in suspected epiglottitis, and waiting for it delays airway control.
+- **D. Incorrect.** Throat manipulation is unsafe, and oral penicillin is not the treatment. IV third-generation cephalosporin is used.
+- **E. Incorrect.** Neither lumbar puncture nor CT is part of the plan, and both delay airway management.
+
+**HIGH-YIELD POINTS:**
+
+- Epiglottitis: CBC shows raised WBC mainly neutrophils; blood culture is positive for Hib; direct laryngoscopy only in the operating room under GA.
+- Management: airway first (intubation; rarely urgent tracheostomy), oxygen, IV fluids, IV third-generation cephalosporin, direct ICU admission with anaesthesia, ENT and paediatric teams.
+- Steroids and adrenaline are ineffective. Prevention: Hib vaccine at 2, 4 and 6 months; rifampicin prophylaxis for close contacts.
+- Features: abrupt onset, toxic, fever above 38.5 °C, drooling, muffled voice, soft stridor, little or no cough, tripod position, age 2–7 years.
+
+**Source:** Respiratory sheet — Pages 16–17 (Acute epiglottitis: diagnosis, management and prevention).
+
+---
+
+# D. Bronchiolitis and Respiratory Distress in Infants
+
+# 18. Integrated Respiratory Assessment and Childhood Infection Patterns
+
+## Clinical Case 36 — Not every breathless infant has bronchiolitis
+
+**Case focus:** Extra-pulmonary causes of tachypnoea in infants, and the long-term lung complication that follows severe adenoviral bronchiolitis.
+
+### Q190. [Hard] A 5-month-old infant presents with 2 days of rapid, deep breathing and poor feeding after several days of profuse watery diarrhoea. He has sunken eyes and dry mucous membranes. There is no coryza, fever or wheeze. Air entry is equal and the chest is clear, with no crackles and no recession. Which statement best explains his tachypnoea and the right approach?
+
+A. Bronchiolitis, because tachypnoea in an infant is always caused by RSV; give oxygen only  
+B. Pneumonia, because tachypnoea is specific to lung parenchymal disease; start antibiotics  
+C. Foreign body aspiration, because deep breathing is its typical sign; request bronchoscopy  
+D. Pleural effusion, because tachypnoea occurs only with pleural disease; request thoracocentesis  
+E. Metabolic acidosis from dehydration; tachypnoea is sensitive but not specific, so assess hydration and acid–base status instead of treating as bronchiolitis  
+
+**Correct Answer:** E. Metabolic acidosis from dehydration; tachypnoea is sensitive but not specific, so assess hydration and acid–base status instead of treating as bronchiolitis
+
+**Initial Explanation:**
+
+A clear chest with no wheeze, crackles or recession and a history of fluid loss points to an extra-pulmonary cause of tachypnoea. The sheet lists metabolic acidosis, heart failure, severe anaemia and sepsis among causes of tachypnoea and distress in infants.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Bronchiolitis follows a coryzal illness and gives wheeze, crackles and recession. None of these is present.
+- **B. Incorrect.** Tachypnoea is sensitive but not specific, and there are no focal chest signs or fever.
+- **C. Incorrect.** Foreign body aspiration follows a choking episode and gives unilateral signs.
+- **D. Incorrect.** Pleural effusion would give reduced movement, stony dullness and reduced air entry.
+- **E. Correct.** The deep breathing with dehydration suggests compensatory tachypnoea from metabolic acidosis.
+
+**HIGH-YIELD POINTS:**
+
+- Causes of acute respiratory distress in an infant: bronchiolitis, viral episodic wheeze, pneumonia, heart failure, foreign body, anaphylaxis, pneumothorax or pleural effusion, metabolic acidosis and severe anaemia.
+- Tachypnoea is one of the most sensitive signs of respiratory illness, but is not specific.
+- Breathlessness may come from airway disease, parenchymal disease, pleural disease or extra-pulmonary disease (heart, blood, metabolic).
+
+**Source:** Respiratory sheet — Page 19 (Causes of acute respiratory distress in an infant); Page 5 (Tachypnoea); Page 4 (Breathlessness).
+
+# 9. Acute Bronchiolitis
+
+## Clinical Case 37 — Not every breathless infant has bronchiolitis
+
+**Case focus:** Extra-pulmonary causes of tachypnoea in infants, and the long-term lung complication that follows severe adenoviral bronchiolitis.
+
+### Q191. [Hard] A 10-month-old infant was admitted 5 weeks ago with severe bronchiolitis due to adenovirus type 7. Since discharge he has had persistent cough, wheeze and tachypnoea that do not respond to bronchodilators. There is no history of choking, no steatorrhoea and his growth is normal. Which complication of bronchiolitis is most likely, and what chronic lung disease can it lead to?
+
+A. Pneumothorax, which resolves spontaneously and leaves no chronic lung disease  
+B. Reinfection with RSV, which always resolves within 1–2 weeks  
+C. Bronchiolitis obliterans, a recognised sequel of adenovirus types 3 and 7 that can also lead to bronchiectasis  
+D. Cystic fibrosis, because persistent wheeze after bronchiolitis is a direct complication of RSV  
+E. Missed foreign body aspiration, because bronchiolitis commonly hides a foreign body  
+
+**Correct Answer:** C. Bronchiolitis obliterans, a recognised sequel of adenovirus types 3 and 7 that can also lead to bronchiectasis
+
+**Initial Explanation:**
+
+Bronchiolitis obliterans is a listed complication of bronchiolitis, linked to adenovirus 3 and 7. It also appears in the sheet as an acquired cause of bronchiectasis and as a cause of persistent wheeze.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Pneumothorax is an acute complication and would not explain weeks of persistent symptoms.
+- **B. Incorrect.** Reinfection can occur, but it would not cause continuous symptoms unresponsive to bronchodilators after severe adenoviral illness.
+- **C. Correct.** The adenovirus type, the persistent symptoms after severe bronchiolitis and the poor bronchodilator response fit this complication.
+- **D. Incorrect.** CF is a genetic disease and not a complication of RSV or bronchiolitis. There is no malabsorption or poor growth here.
+- **E. Incorrect.** There is no choking history or focal signs.
+
+**HIGH-YIELD POINTS:**
+
+- Complications of bronchiolitis: apnoea and respiratory failure, dehydration, secondary bacterial infection, pneumothorax, recurrence, and bronchiolitis obliterans (adenovirus 3 and 7).
+- Bronchiolitis obliterans also appears as a cause of persistent wheeze and of bronchiectasis (acquired).
+- Most bronchiolitis cases recover in 1–2 weeks, and mortality is about 1% from respiratory failure, apnoea and dehydration.
+
+**Source:** Respiratory sheet — Page 21 (Bronchiolitis: complications and prognosis); Page 42 (Wheezy chest differential); Page 48 (Bronchiectasis: causes).
+
+---
+
+# E. Pneumonia and Aspiration
+
+# 19. Organism-Specific Pneumonia and Aspiration
+
+## Clinical Case 38 — Choosing antibiotics by age and organism
+
+**Case focus:** Age-based pathogens and initial antibiotic choice, atypical pneumonia, and non-antibiotic management.
+
+### Q192. [Hard] A 10-day-old term neonate has fever, a respiratory rate of 72/min, grunting and subcostal recession. The delivery was vaginal. The chest X-ray shows bilateral patchy opacities. Which choice of likely organisms and initial treatment matches the sheet?
+
+A. RSV and rhinovirus; supportive care only, with no antibiotics  
+B. Group B streptococci and Gram-negative enteric organisms such as E. coli; IV ampicillin plus gentamicin, or a third-generation cephalosporin  
+C. Mycoplasma pneumoniae and Chlamydia pneumoniae; an oral macrolide at home  
+D. Streptococcus pneumoniae and Hib; oral amoxicillin at home  
+E. Staphylococcus aureus only; oral cloxacillin at home  
+
+**Correct Answer:** B. Group B streptococci and Gram-negative enteric organisms such as E. coli; IV ampicillin plus gentamicin, or a third-generation cephalosporin
+
+**Initial Explanation:**
+
+Newborn pneumonia is caused by organisms from the maternal genital tract (group B streptococci, Gram-negative enterococci such as E. coli). The sheet gives IV ampicillin plus gentamicin, or a third-generation cephalosporin, for newborns.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Viruses predominate in infants and young children, not in the early neonatal period, and this neonate is severely ill.
+- **B. Correct.** The organisms and regimen match the age-based table.
+- **C. Incorrect.** Mycoplasma and Chlamydia pneumoniae are organisms of school-age children, and oral home treatment is unsafe in a neonate.
+- **D. Incorrect.** Oral amoxicillin is for older infants and young children with mild-to-moderate disease.
+- **E. Incorrect.** Staphylococcus can cause severe pneumonia, but it is not the only expected organism, and oral treatment is not appropriate.
+
+**HIGH-YIELD POINTS:**
+
+- Newborn: group B streptococci and Gram-negative enteric bacilli; IV ampicillin + gentamicin, or a third-generation cephalosporin.
+- Older infant and young child: viruses (RSV) commonest; amoxicillin or co-amoxiclav (oral in mild to moderate cases).
+- Over 5 years: amoxicillin and/or a macrolide (erythromycin, clarithromycin, azithromycin).
+- Antibiotic choice depends on age, severity and chest X-ray. TB should be considered at all ages.
+
+**Source:** Respiratory sheet — Page 23 (Pneumonia by age); Page 26 (Treatment: antibiotic choice).
+
+### Q193. [Hard] A 9-year-old boy has had 10 days of dry cough and low-grade fever. He is playing and eating normally, with few chest signs, but the chest X-ray shows extensive bilateral infiltrates and the cold agglutinin titre is positive. Which statement is most appropriate?
+
+A. This is typical lobar pneumococcal pneumonia; give IV cloxacillin  
+B. This is Chlamydia trachomatis pneumonia acquired at birth; no treatment is needed  
+C. This is bacterial pneumonia in which the X-ray is expected to look milder than the child; give amoxicillin alone  
+D. This is viral bronchiolitis; give no antibiotics and use nebulised adrenaline  
+E. This is Mycoplasma pneumonia, where the X-ray is often worse than the clinical picture ("walking pneumonia"); a macrolide is appropriate  
+
+**Correct Answer:** E. This is Mycoplasma pneumonia, where the X-ray is often worse than the clinical picture ("walking pneumonia"); a macrolide is appropriate
+
+**Initial Explanation:**
+
+Insidious cough and low-grade fever in a school-age child, positive cold agglutinins and radiology worse than the clinical state are the pattern of Mycoplasma pneumonia, treated with a macrolide.
+
+**Detailed Explanation:**
+
+- **A. Incorrect.** Pneumococcal pneumonia presents more acutely, with a typical lobar pattern, and is treated with amoxicillin or co-amoxiclav. Cloxacillin is for staphylococcal disease.
+- **B. Incorrect.** Chlamydia trachomatis pneumonia occurs in the first 3 months of life.
+- **C. Incorrect.** In Mycoplasma pneumonia the radiograph looks worse than the child, not milder, and a macrolide is used.
+- **D. Incorrect.** Bronchiolitis is a disease of infants under 2 years, and adrenaline is not its treatment.
+- **E. Correct.** All features match the sheet.
+
+**HIGH-YIELD POINTS:**
+
+- Mycoplasma: age 5–15 years, insidious onset, low-grade fever; chest X-ray worse than clinical findings (walking pneumonia); cold agglutinins (IgM); macrolides.
+- Extra-pulmonary features: erythema multiforme/Stevens–Johnson syndrome, meningoencephalitis, Guillain–Barré syndrome, arthritis, myocarditis, pericarditis, autoimmune haemolytic anaemia and protein-losing enteropathy.
+- Staphylococcus: sudden severe illness in infancy, complications (lung abscess, empyema, pneumatocele), cloxacillin or vancomycin.
+
+**Source:** Respiratory sheet — Page 24 (Important types of bacterial pneumonia: Mycoplasma); Page 26 (Investigations for the causative organism).
+
+# 10. Pneumonia
+
+## Clinical Case 39 — Choosing antibiotics by age and organism
+
+**Case focus:** Age-based pathogens and initial antibiotic choice, atypical pneumonia, and non-antibiotic management.
+
+### Q194. [Medium] A 3-year-old boy with lobar pneumonia is admitted with SpO2 of 90% in air, a respiratory rate of 55/min, mild dehydration and fever. His mother asks whether chest physiotherapy will speed recovery and whether the chest X-ray will need to be repeated. Which management plan matches the sheet?
+
+A. Humidified oxygen, IV fluids for dehydration, an antipyretic and close monitoring; physiotherapy has no proven role here, and a repeat X-ray at about 4–6 weeks can confirm resolution  
+B. Chest physiotherapy twice daily as essential treatment, with a repeat X-ray every 48 hours  
+C. Antibiotics alone, with oxygen withheld until cyanosis and no monitoring after admission  
+D. Nebulised hypertonic saline and DNase to loosen secretions, followed by daily bronchoscopy  
+E. Mandatory chest physiotherapy and CT chest in every case, with no follow-up X-ray  
+
+**Correct Answer:** A. Humidified oxygen, IV fluids for dehydration, an antipyretic and close monitoring; physiotherapy has no proven role here, and a repeat X-ray at about 4–6 weeks can confirm resolution
+
+**Initial Explanation:**
+
+Supportive care for pneumonia is oxygen for hypoxia, IV fluids when dehydrated or tachypnoeic, an antipyretic and monitoring. Physiotherapy has no proven role except in CF or bronchiectasis. The sheet also lists a repeat X-ray after 4–6 weeks to assess resolution.
+
+**Detailed Explanation:**
+
+- **A. Correct.** It matches the supportive and follow-up measures in the sheet.
+- **B. Incorrect.** Physiotherapy has no proven role in uncomplicated pneumonia, and X-rays every 48 hours are not recommended.
+- **C. Incorrect.** Hypoxia (SpO2 below 92%) needs oxygen now, and RR, distress, apnoea and oximetry need monitoring.
+- **D. Incorrect.** Hypertonic saline and DNase are mucolytic treatments used in CF, and daily bronchoscopy is not indicated.
+- **E. Incorrect.** Physiotherapy is not mandatory, and CT is only needed in selected cases.
+
+**HIGH-YIELD POINTS:**
+
+- Supportive: humidified oxygen for hypoxia, IV fluids if dehydrated or high RR, antipyretic, monitoring of RR, distress signs, apnoea and pulse oximetry.
+- Physiotherapy has no proven role except in CF or bronchiectasis.
+- Chest X-ray is necessary if there is doubt about the diagnosis, is repeated after 4–6 weeks to assess resolution, and CT may be needed.
+- Admission criteria: severe distress, grunting, feeding difficulty or dehydration, SpO2 below 92%, recurrent apnoea, immunodeficiency, complications, age under 3–6 months and no response to oral treatment.
+
+**Source:** Respiratory sheet — Page 26 (Chest X-ray, indications for admission and supportive treatment).
