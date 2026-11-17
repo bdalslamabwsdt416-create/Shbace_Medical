@@ -1,8 +1,8 @@
 {
   "name": "shbace-medical",
-  "version": "1.4.12",
+  "version": "1.4.13",
   "private": true,
-  "description": "Shbace Medical iOS PWA — To Me app core with preserved iOS onboarding.",
+  "description": "Shbace Medical iOS PWA — To Me offline bootstrap fixes with preserved iOS onboarding.",
   "scripts": {
     "android:debug": "cd android && ./gradlew :app:assembleDebug",
     "android:release": "cd android && ./gradlew :app:assembleRelease",
