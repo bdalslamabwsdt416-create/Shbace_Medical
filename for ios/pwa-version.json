@@ -1,10 +1,11 @@
 {
   "app": "Shbace Medical",
   "platform": "PWA",
-  "version": "1.4.15",
-  "displayVersion": "1.4.15",
+  "version": "1.4.16",
+  "displayVersion": "1.4.16",
   "releaseDate": "2026-11-17",
   "releaseNotes": [
+    "Aligns the iOS sidebar with To Me, exposes Exam Goal Planner, removes Smart Review badges, and shows installed/update version details in Settings.",
     "Fixes mixed old/new files after updating from 1.4.10; cleans old caches",
     "Updates the iOS side drawer to the latest To Me layout and grouping, including the close control and a dedicated Updates section for notifications.",
     "Keeps all existing iOS sidebar page handlers, Smart Review navigation safeguards, and local student data.",

@@ -1338,7 +1338,8 @@ function srPost(){
  if(srTab==='summary'&&!srRun&&(SRSUM||SR3.last)&&!SRUI.celebrated){const s=SRSUM||SR3.last;SRUI.celebrated=s.id;const a=pct(s.ok,s.n);if((s.up&&s.up.length)||a>=85){const h=document.querySelector('.sr3-sum');h&&confetti(h,s.up&&s.up.length?44:30)}}}
 const __srRAD=renderAppDemo;renderAppDemo=function(){const r=__srRAD.apply(this,arguments);try{srPost()}catch(e){console.error('Smart Review post-render',e)}return r};
 
-function updateBadges(){const n=dueList().length+srList().filter(x=>x.r.due>Date.now()).length;const d=dueList().length;document.querySelectorAll('.app-nav button[data-p="review"] .nbadge').forEach(e=>e.remove());if(d){document.querySelectorAll('.app-nav button[data-p="review"]').forEach(b=>b.insertAdjacentHTML('beforeend',`<em class="nbadge">${d}</em>`))}}
+function updateBadges(){document.querySelectorAll('.app-nav button[data-p="review"] .nbadge').forEach(e=>e.remove())}
+
 window.__shbNavTap=function(id){
  if(id==='review'){
   if(srRun&&SR3.sess){srTPause(true);srRun=false;SU={qid:null};srSave()}
@@ -1347,13 +1348,13 @@ window.__shbNavTap=function(id){
  appPage=id;renderAppDemo();
 };
 appNav=function(){const it=[['subjects','Home'],['search','Search'],['quiz','Quiz'],['review','Review']];const grp={subjects:['subjects','pedcollections','specialties','topics','questions','menu','saved','wrong'],quiz:['quiz','quizrun','quizresult','quizhistory']};
- return `<div class="app-nav">${it.map(([id,n])=>`<button data-p="${id}" class="${(grp[id]||[id]).includes(appPage)?'active':''}" onclick="__shbNavTap('${id}')">${NAVI[id]}<span>${n}</span>${id==='review'&&dueList().length?`<em class="nbadge">${dueList().length}</em>`:''}</button>`).join('')}</div>`};
+ return `<div class="app-nav">${it.map(([id,n])=>`<button data-p="${id}" class="${(grp[id]||[id]).includes(appPage)?'active':''}" onclick="__shbNavTap('${id}')">${NAVI[id]}<span>${n}</span></button>`).join('')}</div>`};
 /* drawer: Saved / Wrong answers work, Smart review badge is live */
 DR2[1][1][0][1]='saved';DR2[1][1][1][1]='wrong';
 const __menu=menuView;
 menuView=function(){if(appPage==='saved'||appPage==='wrong'){qs.spec='all';qs.topic=0;qs.tag='all';qs.filter=appPage==='saved'?'bookmarked':'incorrect';return questionBankView()}return __menu()};
 const __td=toggleDrawer;
-toggleDrawer=function(f){const n=dueList().length;DR2[1][1][2][3]=n?String(n):'';return __td(f)};
+toggleDrawer=function(f){return __td(f)};
 /* leaving the bank leaves fullscreen */
 const __rad=renderAppDemo;
 renderAppDemo=function(){if(qs.full&&appPage!=='questions'){qs.full=false;const ph=$('.phone');ph&&ph.classList.remove('qfull');renderFullExit();try{document.fullscreenElement&&document.exitFullscreen()}catch(e){}}
@@ -1890,7 +1891,7 @@ function settingsView(){
   <div class="setrow"><b>Last Onboarding Page</b><small>When ON, the final “Your journey starts here” page is shown at app start. Turn it OFF to skip it.</small><button type="button" class="drsw ${SET.obLast==='on'?'on':''}" role="switch" aria-checked="${SET.obLast==='on'}" aria-label="Last Onboarding Page" onclick="setSet('obLast','${SET.obLast==='on'?'off':'on'}')"><i></i><span>${SET.obLast==='on'?'ON':'OFF'}</span></button></div></div>
 
  <div class="card setcard" id="shbAppUpdates"><h3>App updates</h3>
-  <p class="meta">Automatic update checks run every seven days. You can also check manually at any time.</p>
+  <p class="meta">Automatic update checks run every seven days. ${shbaceSettingsUpdateMeta()}</p>
   <button type="button" class="btn primary block" id="shbaceSettingsUpdateButton" onclick="shbaceSettingsCheckForUpdates(this)">Check for updates</button>
   <p class="meta" id="shbaceSettingsUpdateStatus" role="status" aria-live="polite">Manual checks look for changed files. Your answers, notes and study progress remain saved.</p></div>
  <input type="file" id="bkFile" accept=".json,application/json" hidden onchange="restoreBackup(this)">
@@ -1898,50 +1899,72 @@ function settingsView(){
   ${resetScopeHTML()}
   <div class="setrow"><b>Reset everything</b><button type="button" class="btn danger block" style="margin-top:10px" ${n?'':'disabled'} onclick="resetAllAsk()">Reset all study progress${n?` (${n})`:''}</button></div></div></div>`}
 
+function shbaceSettingsUpdateMeta(){
+ let last=0,pending=0,info=null;
+ try{
+  last=Number(window.shbaceLastUpdateCheck&&window.shbaceLastUpdateCheck())||0;
+  pending=Math.max(0,Math.floor(Number(window.shbaceUpdatePending&&window.shbaceUpdatePending())||0));
+  info=window.shbaceVersionInfo&&window.shbaceVersionInfo();
+ }catch(e){}
+ const installed=info&&info.installed,available=info&&info.available;
+ const version=installed&&installed.displayVersion
+  ?'Version '+installed.displayVersion+(installed.releaseDate?' · '+installed.releaseDate:'')
+  :'Installed version details are not available yet';
+ const checked=last>0
+  ?'Last successful check: '+new Date(last).toLocaleString()
+  :'No successful update check recorded yet';
+ const pendingText=pending+' changed file'+(pending===1?'':'s')+' pending'+
+  (pending&&available&&available.displayVersion?' for '+available.displayVersion:'');
+ return version+'. '+checked+'. '+pendingText+'.';
+}
 window.shbaceSettingsCheckForUpdates=async function(button){
  const btn=button||document.getElementById('shbaceSettingsUpdateButton');
  const status=document.getElementById('shbaceSettingsUpdateStatus');
  if(!btn||!status)return false;
  if(btn.dataset.checking==='1')return false;
+ const setStatus=function(message){status.textContent=message+' '+shbaceSettingsUpdateMeta()};
  btn.dataset.checking='1';btn.disabled=true;btn.textContent='Checking…';
- status.textContent='Checking the installed app and the latest release…';
+ setStatus('Checking the installed app and the latest release…');
  try{
   if(typeof window.shbaceCheckForUpdate!=='function'){
-   status.textContent='The update checker is not ready. Close and reopen Shbace Medical, then try again.';
+   setStatus('The update checker is not ready. Close and reopen Shbace Medical, then try again.');
    return false;
   }
   const result=await window.shbaceCheckForUpdate();
+  let message='';
   switch(result&&result.state){
    case 'latest':
-    status.textContent='Shbace Medical is up to date.';
+    message='Shbace Medical is up to date.';
     break;
    case 'update':
-    status.textContent='An update is available. Review the update panel and choose Update now to install it.';
+    message='An update is available. Review the update panel and choose Update now to install it.';
     break;
    case 'offline':
-    status.textContent='The update server could not be reached. Connect to the internet and try again.';
+    message='The update server could not be reached. Connect to the internet and try again.';
     break;
    case 'busy':
-    status.textContent='An update check or installation is already running.';
+    message='An update check or installation is already running.';
     break;
    case 'unsupported':
-    status.textContent='Open the installed Shbace Medical app from your Home Screen to check for updates.';
+    message='Open the installed Shbace Medical app from your Home Screen to check for updates.';
     break;
    case 'setup':
-    status.textContent='The offline package needs to be installed or repaired. Follow the instructions shown on screen.';
+    message='The offline package needs to be installed or repaired. Follow the instructions shown on screen.';
     break;
    default:
-    status.textContent='The update check did not return a result. Please try again.';
+    message='The update check did not return a result. Please try again.';
   }
+  setStatus(message);
   return result;
  }catch(error){
   console.error('Manual app update check failed:',error);
-  status.textContent='The update check failed. Please try again when the app is online.';
+  setStatus('The update check failed. Please try again when the app is online.');
   return false;
  }finally{
   btn.dataset.checking='0';btn.disabled=false;btn.textContent='Check for updates';
  }
 };
+
 const rsPool=()=>QB.filter(q=>bankOk(q,rBank)&&(rSys==='all'||q.spec===rSys)&&(!rTop||q.topic===rTop));
 const rsSort=(a,b)=>String(a[1]).localeCompare(String(b[1]));
 function rsSystems(){const m=new Map();QB.forEach(q=>{if(bankOk(q,rBank)&&!m.has(q.spec))m.set(q.spec,SPEC_NAME[q.spec]||q.spec)});return [...m].sort(rsSort)}

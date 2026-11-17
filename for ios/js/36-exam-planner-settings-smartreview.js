@@ -119,18 +119,6 @@ window.shbExamDelete=function(id){
   if(typeof toast==='function')toast('Exam removed from your plan.');
 };
 if(typeof window.__shbRegisterPage==='function')window.__shbRegisterPage('examplanner',examPlannerView,'subjects');
-try{
-  /* The original planner already lives under YOUR PROGRESS as "examgoal".
-     Remove only this extension's duplicate menu entry; keep the registered page
-     available internally so existing links/data are not broken. */
-  if(typeof DR2!=='undefined'&&Array.isArray(DR2)){
-    DR2.forEach(function(group){
-      if(!group||!Array.isArray(group[1]))return;
-      group[1]=group[1].filter(function(item){return !item||item[1]!=='examplanner'});
-    });
-  }
-}catch(e){console.warn('Duplicate exam planner menu cleanup skipped:',e)}
-
 /* Clear Settings hierarchy: keep existing controls and stores, only change their visual order. */
 var settingsBusy=false,settingsQueued=false;
 function getSettingsRoot(){

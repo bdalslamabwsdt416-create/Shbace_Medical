@@ -44,7 +44,7 @@ function createServiceWorkerHarness(options) {
     }
   };
   entries.set(new URL('pwa-version.json', scope).href,
-    new Response(JSON.stringify({ version: '1.4.15' }), {
+    new Response(JSON.stringify({ version: '1.4.16' }), {
       status: 200, headers: { 'Content-Type': 'application/json' }
     }));
 
@@ -213,7 +213,7 @@ test('behavior: old installed record without releaseVersion returns network js/0
 test('behavior: matching installed and cached releaseVersion keeps the cached js/04-app-main.js copy', async () => {
   const harness = createServiceWorkerHarness({
     source: sw,
-    installedRecord: { version: '1.4.15', releaseVersion: '1.4.15', files: {} }
+    installedRecord: { version: '1.4.16', releaseVersion: '1.4.16', files: {} }
   });
   await harness.seed('js/04-app-main.js', 'VERIFIED CACHED COPY');
   const response = await harness.request('js/04-app-main.js', 'same-origin', 'script');
@@ -286,12 +286,11 @@ test('retired iOS modules are absent and are not referenced by the live HTML', (
   }
 });
 
-test('release remains 1.4.15 and records the mixed-cache repair note', () => {
-  assert.equal(pkg.version, '1.4.15');
-  assert.equal(pwa.version, '1.4.15');
-  assert.equal(pwa.displayVersion, '1.4.15');
-  assert.ok(pwa.releaseNotes.includes('Fixes mixed old/new files after updating from 1.4.10; cleans old caches'));
-  assert.equal(offlineManifest.releaseVersion, '1.4.15');
+test('release is 1.4.16 and records the iOS To Me navigation and update-details changes', () => {
+  assert.equal(pkg.version, '1.4.16');
+  assert.equal(pwa.version, '1.4.16');
+  assert.equal(pwa.displayVersion, '1.4.16');
+  assert.ok(pwa.releaseNotes.includes("Aligns the iOS sidebar with To Me, exposes Exam Goal Planner, removes Smart Review badges, and shows installed/update version details in Settings."));
   assert.equal(offlineManifest.fileCount, 338);
   assert.equal(offlineManifest.files.length, offlineManifest.fileCount);
   assert.ok(!offlineManifest.files.some(file => ['css/core.css', 'css/late.css'].includes(file.path)),
