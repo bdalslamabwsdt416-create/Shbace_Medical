@@ -203,7 +203,8 @@ const scheduleRuntime = offlineSetup.slice(offlineSetup.indexOf('function schedu
 if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !offlineSetup.includes("var DB_NAME='shbace-medical-offline-state-v1'") ||
     !offlineSetup.includes("var MIGRATION_KEY='shbace_ios_migrated_1_4_14'") ||
-    !offlineSetup.includes('function finalizeVerifiedPlanCommit()') ||\n    !offlineSetup.includes('function dbPutInstalled(record,ready)') ||
+    !offlineSetup.includes('function finalizeVerifiedPlanCommit()') ||
+    !offlineSetup.includes('function dbPutInstalled(record,ready)') ||
     !offlineSetup.includes("if(migrationInProgress){lsSet(MIGRATION_KEY,'1')") ||
     !offlineSetup.includes('function localRepairNeeded(installed)') ||
     !offlineSetup.includes('function syncPendingNotice()') ||
@@ -263,7 +264,9 @@ if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     serviceWorker.includes('readInstalledReleaseVersion') ||
     serviceWorker.includes('networkFirstOnPackageMismatch(request)') ||
     serviceWorker.includes('refreshCachedPwaVersion') ||
-    !serviceWorker.includes('function localOnly(request)') ||\n    !serviceWorker.includes('async function hasVerifiedInstall()') ||\n    !serviceWorker.includes('verified ? localOnly(request) : fetch(request)') ||
+    !serviceWorker.includes('function localOnly(request)') ||
+    !serviceWorker.includes('async function hasVerifiedInstall()') ||
+    !serviceWorker.includes('verified ? localOnly(request) : fetch(request)') ||
     !serviceWorker.includes("request.headers.get(UPDATE_HEADER) === '1'") ||
     serviceWorker.includes('cache.addAll(') ||
     !serviceWorker.includes("url.searchParams.has('__shbace_integrity')") ||
