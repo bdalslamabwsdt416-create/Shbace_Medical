@@ -9,6 +9,8 @@ const features = read('../js/09-app-features-v6.js');
 const voice = read('../js/33-unified-voice.js');
 const settings = read('../js/36-exam-planner-settings-smartreview.js');
 const index = read('../index.html');
+const drawer = read('../js/06-drawer-menu.js');
+const returning = read('../js/07-returning-student-migration.js');
 
 function extractFunction(source, name) {
   const start = source.indexOf('function ' + name + '(');
@@ -31,6 +33,22 @@ function bankHelpers() {
       BANK_ON: false, FULL_TAGS: [], DEMO_QB: [], QB: [], window: {}
     });
 }
+
+
+test('Settings navigation opens the actual Settings renderer from the header and drawer', () => {
+  assert.ok(drawer.includes("if(n==='Settings'){appPage='settings';renderAppDemo();return}"),
+    'header Settings control must navigate instead of showing a placeholder toast');
+  assert.ok(drawer.includes("['Settings','settings']"),
+    'legacy drawer Settings item must carry a real route');
+  assert.ok(returning.includes("['Settings','settings','<circle"),
+    'current drawer Settings item must carry a real route');
+  assert.ok(features.includes("window.__shbRenderSettings=function(){return settingsView()}"),
+    'the real Settings renderer must be exported for the navigation bridge');
+  assert.ok(features.includes("window.__shbOpenSettings=function(){appPage='settings';renderAppDemo();return true}"),
+    'the explicit Settings navigation action must set the route and render');
+  assert.ok(features.includes("PAGES.settings=settingsView"),
+    'the Settings route must be registered in the final page renderer');
+});
 
 test('iOS Settings retains appearance, onboarding, notifications, backup and progress controls', () => {
   for (const marker of [
