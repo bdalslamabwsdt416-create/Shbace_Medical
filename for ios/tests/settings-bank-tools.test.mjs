@@ -480,7 +480,7 @@ test('behavior: Settings organizer is idempotent and never re-appends unchanged 
   const firstWrites=state.writes;
   assert.ok(firstWrites>0,'first organization creates zones and positions cards');
   assert.deepEqual(state.zones,['appearance','banks','notifications','updates','experience','data','progress']);
-  const toMeZones=[...toMeSettings.matchAll(/makeSettingZone\\(order,'([^']+)'/g)].map(match=>match[1]);
+  const toMeZones=[...toMeSettings.matchAll(/makeSettingZone\(order,'([^']+)'/g)].map(match=>match[1]);
   const iosCoreZones=state.zones.filter(zone=>toMeZones.includes(zone));
   assert.deepEqual(iosCoreZones,toMeZones,'the shared Settings zones preserve To Me order');
   assert.equal(state.cards[6].parentElement.name,'items:appearance','Question voice is grouped with Appearance');
