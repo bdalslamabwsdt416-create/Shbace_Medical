@@ -6,7 +6,8 @@
   "scripts": {
     "android:debug": "cd android && ./gradlew :app:assembleDebug",
     "android:release": "cd android && ./gradlew :app:assembleRelease",
-    "build:pwa": "node scripts/restore-ios-packed.js"
+    "build:pwa": "node scripts/restore-ios-packed.js",
+    "test": "node --test tests/offline-migration.test.js"
   },
   "dependencies": {
     "@capacitor/android": "8.6.0",

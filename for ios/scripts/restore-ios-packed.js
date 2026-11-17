@@ -5,11 +5,24 @@ const path = require('path');
 const zlib = require('zlib');
 const crypto = require('crypto');
 const vm = require('vm');
+const { spawnSync } = require('child_process');
 const sharp = require('sharp');
 
 const root = path.resolve(__dirname, '..');
 const out = path.join(root, 'dist');
 const manifest = { schema: 1, files: [] };
+
+/* Always run the iOS offline migration regression tests, even when the hosting
+   provider invokes this build file directly instead of npm run build:pwa. */
+const migrationTests = spawnSync(process.execPath, ['--test', 'tests/offline-migration.test.js'], {
+  cwd: root,
+  stdio: 'inherit'
+});
+if (migrationTests.error) throw migrationTests.error;
+if (migrationTests.status !== 0) {
+  throw new Error('iOS offline migration regression tests failed (exit ' + migrationTests.status + ').');
+}
+console.log('iOS offline migration regression tests passed.');
 
 function safePath(relative) {
   if (typeof relative !== 'string' || relative.startsWith('/') || relative.split(/[\\/]/).includes('..')) {
@@ -32,7 +45,7 @@ function runtimeFiles() {
   for (const directory of ['assets', 'css', 'data', 'js', 'fonts', 'audio', 'media', 'videos', 'documents', 'img', 'img1', 'img2']) {
     walkRuntimeDirectory(directory, files);
   }
-  return [...new Set(files)].filter(relative => relative !== 'offline-assets-manifest.json' && !['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/30-ios-v5.js','js/31-ios-v6.js','js/32-ios-study-tools.js','js/33-ios-exam-planner.js'].includes(relative)).sort((a, b) => a.localeCompare(b));
+  return [...new Set(files)].filter(relative => relative !== 'offline-assets-manifest.json' && !['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/30-ios-v5.js','js/31-ios-v6.js'].includes(relative)).sort((a, b) => a.localeCompare(b));
 }
 
 fs.rmSync(out, { recursive: true, force: true });
@@ -109,8 +122,32 @@ const deferredRefs = [...html.matchAll(/data-src=["']([^"']+)["']/g)].map(match 
 for (const relative of deferredRefs) {
   if (!fs.existsSync(safePath(relative))) throw new Error('Deferred runtime asset is missing: ' + relative);
 }
+/* Runtime CSS/JS must be explicitly referenced by index.html. The offline updater
+   bootstrap (29-offline-setup.js) is registered separately by the app shell; SW and
+   data assets are not CSS/JS runtime modules and are intentionally exempt. */
+const indexRuntimeRefs = new Set();
+const indexRuntimeRefPattern = /(?:src|data-src|href)\s*=\s*["'](?:\.\/|\/)?((?:css|js)\/[^"'?#]+)(?:[?#][^"']*)?["']/gi;
+for (const match of html.matchAll(indexRuntimeRefPattern)) indexRuntimeRefs.add(match[1]);
+const runtimeCssJs = manifest.files.filter(item =>
+  /^(?:css|js)\//.test(item.path) &&
+  /\.(?:css|js)$/i.test(item.path) &&
+  item.path !== 'sw.js' &&
+  item.path !== 'js/29-offline-setup.js'
+);
+const unreferencedCssJs = runtimeCssJs.filter(item => !indexRuntimeRefs.has(item.path)).map(item => item.path);
+if (unreferencedCssJs.length) {
+  throw new Error('Unreferenced CSS/JS files in iOS runtime inventory: ' + unreferencedCssJs.join(', '));
+}
+const missingCssJs = [...indexRuntimeRefs].filter(relative =>
+  !manifest.files.some(item => item.path === relative));
+if (missingCssJs.length) {
+  throw new Error('index.html references CSS/JS files missing from the iOS runtime inventory: ' + missingCssJs.join(', '));
+}
 if (/js\/30-android-enhancements|js\/31-android-v13|js\/32-chrome-android/.test(html)) throw new Error('Android-only runtime module leaked into the iOS build.');
-if (['js/30-ios-v5.js','js/31-ios-v6.js','js/32-ios-study-tools.js','js/33-ios-exam-planner.js'].some(function (file) { return html.indexOf(file) !== -1; })) throw new Error('An iOS-only runtime layer is still referenced; To Me app core plus the preserved onboarding should be the only platform-specific exception.');
+if (['js/30-ios-v5.js','js/31-ios-v6.js'].some(function (file) { return html.indexOf(file) !== -1; })) throw new Error('A retired iOS-only runtime layer is still referenced; To Me app core plus the preserved onboarding should be the only platform-specific exception.');
+for (const retired of ['js/32-ios-study-tools.js','js/33-ios-exam-planner.js']) {
+  if (fs.existsSync(path.join(root, retired))) throw new Error('Retired iOS runtime file must be deleted: ' + retired);
+}
 for (const relative of ['css/bundle-core.css','css/bundle-late.css','js/44-islamic-reminders.js']) {
   if (!fs.existsSync(safePath(relative))) throw new Error('Required iOS runtime asset is missing: ' + relative);
 }
@@ -125,16 +162,25 @@ const offlineSetup = fs.readFileSync(safePath('js/29-offline-setup.js'), 'utf8')
 const serviceWorker = fs.readFileSync(safePath('sw.js'), 'utf8');
 const featureRuntime = fs.readFileSync(safePath('js/09-app-features-v6.js'), 'utf8');
 if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
+    !offlineSetup.includes("var DB_NAME='shbace-medical-offline-state-v1'") ||
+    !offlineSetup.includes("var MIGRATION_KEY='shbace_ios_migrated_1_4_14'") ||
+    !offlineSetup.includes('migrationInProgress&&manifestFromNetwork&&res.plan') ||
+    !offlineSetup.includes("lsSet(MIGRATION_KEY,'1')") ||
+    !offlineSetup.includes("name.indexOf('shbace-medical-ios-shell-')===0") ||
     !offlineSetup.includes('window.shbaceCheckForUpdate=manualCheck') ||
     !offlineSetup.includes('MANIFEST_FETCH_TIMEOUT=30000') ||
     !offlineSetup.includes('MANIFEST_FETCH_ATTEMPTS=2') ||
     !offlineSetup.includes('function waitForServiceWorkerReady') ||
     offlineSetup.includes("},10000)") ||
     !serviceWorker.includes("const CACHE_NAME = 'shbace-medical-offline-v2'") ||
+    !serviceWorker.includes("const DB_NAME = 'shbace-medical-offline-state-v1'") ||
+    !serviceWorker.includes("name.startsWith('shbace-medical-ios-shell-')") ||
+    !serviceWorker.includes('readInstalledReleaseVersion') ||
+    !serviceWorker.includes('networkFirstOnPackageMismatch(request)') ||
     !serviceWorker.includes("url.searchParams.has('__shbace_integrity')") ||
     !featureRuntime.includes('onclick="shbaceSettingsCheckForUpdates(this)"') ||
     !featureRuntime.includes('window.shbaceCheckForUpdate()')) {
-  throw new Error('The shared To Me updater, retry-safe iOS bootstrap, integrity route, or Settings control is missing.');
+  throw new Error('The shared To Me updater, one-time migration, cache cleanup, or version-aware service worker is missing.');
 }
 const onboardingMain = fs.readFileSync(safePath('js/04-app-main.js'), 'utf8');
 if (!onboardingMain.includes('function gradeScreen()') || !onboardingMain.includes('function finishScreen()')) throw new Error('The final two onboarding screens are missing from the app core.');
@@ -158,6 +204,12 @@ if (!onboardingMain.includes('Which grade are you in?') ||
     !onboardingMain.includes('cp-finish-layout')) {
   throw new Error('The original iOS final onboarding screens have changed unexpectedly.');
 }
+const pwaVersion = JSON.parse(fs.readFileSync(safePath('pwa-version.json'), 'utf8'));
+if (pwaVersion.version !== '1.4.15' || pwaVersion.displayVersion !== '1.4.15' ||
+    !Array.isArray(pwaVersion.releaseNotes) ||
+    !pwaVersion.releaseNotes.includes('Fixes mixed old/new files after updating from 1.4.10; cleans old caches')) {
+  throw new Error('The iOS 1.4.15 release metadata is missing or inconsistent.');
+}
 
 if (manifest.files.some(item => ['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/32-ios-v7.js'].includes(item.path))) throw new Error('A retired iOS visual layer is still included in the offline runtime inventory.');
 const scanFiles = manifest.files.filter(item => /\.(?:html|css|js|json|webmanifest)$/i.test(item.path));
@@ -173,10 +225,12 @@ if (missingImages.size) throw new Error('Missing referenced images: ' + [...miss
 
 manifest.fileCount = manifest.files.length;
 manifest.totalBytes = manifest.files.reduce(function (sum, item) { return sum + item.bytes; }, 0);
-// Keep the offline package version tied to the exact deployed file inventory and hashes.
+manifest.releaseVersion = pwaVersion.version;
+// Keep the offline package version tied to the release version and exact deployed file inventory/hashes.
 manifest.version = crypto.createHash('sha256')
-  .update(manifest.files.slice().sort(function (a, b) { return a.path.localeCompare(b.path); })
-    .map(function (item) { return item.path + ':' + item.sha256; }).join('\n'))
+  .update('release:' + manifest.releaseVersion + '\n' +
+    manifest.files.slice().sort(function (a, b) { return a.path.localeCompare(b.path); })
+      .map(function (item) { return item.path + ':' + item.sha256; }).join('\n'))
   .digest('hex');
 manifest.generatedAt = new Date().toISOString();
 fs.writeFileSync(path.join(out, 'offline-assets-manifest.json'), JSON.stringify(manifest, null, 2) + '\n');

@@ -4,6 +4,8 @@
 const CACHE_NAME = 'shbace-medical-offline-v2';
 const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
 const INDEX_URL = new URL('index.html', self.registration.scope).href;
+const PWA_VERSION_URL = new URL('pwa-version.json', self.registration.scope).href;
+const DB_NAME = 'shbace-medical-offline-state-v1';
 const APP_SHELL = [
   './',
   './index.html',
@@ -43,14 +45,102 @@ self.addEventListener('install', event => {
 
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
-    await self.clients.claim();
     const names = await caches.keys();
-    /* Remove only obsolete caches from the retired naming scheme. Keep the verified current package. */
+    /* Retired iOS shell caches are obsolete; never remove the verified offline package or its IndexedDB. */
     await Promise.all(names
-      .filter(name => name.startsWith('shbace-to-me-chrome-offline-'))
+      .filter(name => name.startsWith('shbace-to-me-chrome-offline-') ||
+                      name.startsWith('shbace-medical-ios-shell-'))
       .map(name => caches.delete(name)));
+    /* Refresh the release marker before deciding whether a cached navigation belongs to this package. */
+    await refreshCachedPwaVersion();
+    await self.clients.claim();
   })());
 });
+
+/* Read the app release version stored with the verified package record. If the database
+   does not exist yet, abort the implicit upgrade so the service worker never creates an
+   empty IndexedDB that could block the app's own version-1 schema setup. */
+function readInstalledReleaseVersion() {
+  return new Promise(resolve => {
+    if (!self.indexedDB) { resolve(null); return; }
+    let request;
+    try { request = self.indexedDB.open(DB_NAME); }
+    catch (_) { resolve(null); return; }
+    request.onupgradeneeded = () => {
+      try { request.transaction.abort(); } catch (_) {}
+    };
+    request.onsuccess = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains('meta')) {
+        db.close();
+        resolve(null);
+        return;
+      }
+      let tx;
+      try { tx = db.transaction('meta', 'readonly'); }
+      catch (_) { db.close(); resolve(null); return; }
+      const get = tx.objectStore('meta').get('installed');
+      get.onsuccess = () => {
+        const value = get.result && typeof get.result.releaseVersion === 'string'
+          ? get.result.releaseVersion : null;
+        db.close();
+        resolve(value || null);
+      };
+      get.onerror = () => { db.close(); resolve(null); };
+      tx.onabort = () => { db.close(); resolve(null); };
+    };
+    request.onerror = () => resolve(null);
+    request.onblocked = () => resolve(null);
+  });
+}
+
+async function readCachedPwaVersion(cache) {
+  try {
+    const response = await cache.match(PWA_VERSION_URL, { ignoreSearch: true });
+    if (!response) return null;
+    const json = await response.json();
+    return json && typeof json.version === 'string' ? json.version : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+async function refreshCachedPwaVersion() {
+  const cache = await caches.open(CACHE_NAME);
+  try {
+    const response = await fetch(PWA_VERSION_URL, { cache: 'reload' });
+    if (response && response.ok) await cache.put(PWA_VERSION_URL, response.clone());
+  } catch (_) {
+    /* Offline activation keeps the last cached version marker; navigation falls back safely. */
+  }
+}
+
+async function packageVersionMismatch(cache) {
+  const results = await Promise.all([
+    readInstalledReleaseVersion(),
+    readCachedPwaVersion(cache)
+  ]);
+  /* Missing releaseVersion means a pre-migration installation and must be refreshed online. */
+  return !results[0] || !results[1] || results[0] !== results[1];
+}
+
+async function networkFirstOnPackageMismatch(request) {
+  const cache = await caches.open(CACHE_NAME);
+  if (!(await packageVersionMismatch(cache))) return localFirst(request);
+  try {
+    const fresh = await fetch(request, { cache: 'reload' });
+    if (fresh && fresh.ok) {
+      const key = request.mode === 'navigate' ? INDEX_URL : request.url;
+      try { await cache.put(key, fresh.clone()); } catch (_) {}
+    }
+    return fresh;
+  } catch (_) {
+    const hit = request.mode === 'navigate'
+      ? await cache.match(INDEX_URL) || await cache.match(request, { ignoreSearch: true })
+      : await cache.match(request, { ignoreSearch: true });
+    return hit || missingOfflineResponse(request.url);
+  }
+}
 
 /* Local-first: after the updater verifies and stores the package, startup uses those local bytes.
    A genuinely missing file gets one network fallback and is saved locally after a successful response. */
@@ -135,11 +225,14 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  /* HTML, JavaScript and CSS are local-first and therefore do not wait on network round-trips. */
+  /* A version mismatch must never combine a new index.html with stale app JavaScript
+     or CSS. Apply the same network-first policy to every same-origin script, stylesheet
+     and navigation. Once versions match, networkFirstOnPackageMismatch delegates to
+     localFirst so the verified offline package remains the normal startup source. */
   if (request.mode === 'navigate' ||
       request.destination === 'script' ||
       request.destination === 'style') {
-    event.respondWith(localFirst(request));
+    event.respondWith(networkFirstOnPackageMismatch(request));
     return;
   }
 
