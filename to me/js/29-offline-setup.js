@@ -1,12 +1,13 @@
 /* Shbace Medical — Offline System v2
 
    Principles
-   - The app always starts from the local copy. Nothing here ever blocks the screen.
-   - First install, repairs and updates run in the background with a small progress chip (no full-screen setup page).
-   - Updates are downloaded into a staging cache, verified (size + SHA-256), then swapped in together. A half-finished
-     update can never leave the app in a mixed state, and an interrupted download resumes where it stopped.
-   - Every network step has a timeout and a stall watchdog. Failures retry by themselves with growing delays.
-   - Saved files are re-verified now and then and repaired silently.
+   - First install: show Setup immediately after the Splash finishes; download the complete package manifest and verify
+     every file before releasing the app boot gate or allowing onboarding / question-bank modules to start.
+   - Returning installs: trust the committed local ready record and open directly without a full-package hash scan.
+   - Updates: check one manifest at most every 48 hours (or through the Settings action), stage only changed files,
+     verify them and commit safely. Download progress is shown in the compact background chip.
+   - Repair is targeted to files found missing or changed by a manifest comparison; no recurring whole-package scan.
+   - Every network step has a timeout and a stall watchdog. Interrupted downloads keep verified files for retry.
 
    Compatible with the previous version: same cache name, same IndexedDB state, same public window.* functions. */
 (function(){
@@ -336,10 +337,29 @@ function waitForSplash(){
  return new Promise(function(resolve){
   var splash=document.getElementById('startupSplash');
   if(!splash||!splash.isConnected){resolve();return}
-  var finished=false,observer=null;
-  function done(){if(finished||splash.isConnected)return;finished=true;if(observer)observer.disconnect();resolve()}
-  try{observer=new MutationObserver(done);observer.observe(document.body,{childList:true,subtree:true})}catch(e){}
-  setTimeout(function(){if(!finished){finished=true;if(observer)observer.disconnect();resolve()}},14000);
+  var finished=false,timer=null,observer=null;
+  function done(){
+   if(finished)return;finished=true;
+   if(timer)clearTimeout(timer);
+   if(observer)observer.disconnect();
+   document.removeEventListener('spEcgDone',onEcgDone);
+   resolve();
+  }
+  function onEcgDone(){/* Let the existing ECG fade finish before Setup covers the Splash. */setTimeout(done,650)}
+  document.addEventListener('spEcgDone',onEcgDone,{once:true});
+  /* Reduced-motion mode completes the splash trace synchronously without dispatching spEcgDone. */
+  try{
+   if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    var ready=document.getElementById('startupSplash');
+    if(ready&&ready.classList.contains('sp-ready'))setTimeout(done,1200);
+    else{
+     observer=new MutationObserver(function(){if(ready&&ready.classList.contains('sp-ready')){observer.disconnect();setTimeout(done,1200)}});
+     observer.observe(ready,{attributes:true,attributeFilter:['class']});
+    }
+   }
+  }catch(e){}
+  /* Safety fallback for browsers where Worker / ECG completion events are unavailable. */
+  timer=setTimeout(done,10500);
  });
 }
 
@@ -506,6 +526,8 @@ async function runPlan(plan,mode){
    for(var j=0;j<plan.removed.length;j++)await (await caches.open(CACHE_NAME)).delete(urlFor(plan.removed[j]));
    lsSet(CHECK_OK_KEY,Date.now());retryN=0;setPending(0);markInstalledNow();
    if(mode==='install'){
+    /* The verified package is now complete, so register the worker only after Setup has finished its downloads. */
+    registerSW();
     setState('setup-complete',{pct:100,done:plan.files.length,total:plan.files.length,bytes:plan.bytes,totalBytes:plan.bytes});
    }else announceReady();
   }
@@ -646,8 +668,9 @@ async function runFullCheck(opts){
    if(info)lsSetJson(VER_AVAIL_KEY,info);
    setState('ready');
    if(opts.manual){showSheetLater(res.plan,info)}
-   else if(autoAllowed()){next={plan:res.plan,mode:'update'}}
-   else if(!examSoon()){showSheetLater(res.plan,info)}
+   else if(autoAllowed()&&!examSoon()){next={plan:res.plan,mode:'update'}}
+   /* Automatic checks never interrupt the student with an update sheet. If auto-download is unsuitable
+      (Data Saver, slow connection, or exam quiet window), leave the package untouched until a later check/manual request. */
    return {state:'update'};
   }
   next={plan:res.plan,mode:res.kind};
@@ -712,6 +735,7 @@ async function boot(){
  }
  /* Existing install: trust the committed local ready record and never hash or scan the whole package on launch. */
  setState('ready');
+ registerSW();
  releaseBootGate();
  /* One background manifest comparison at most every 48 hours; it never delays app startup. */
  if(online()&&checkDue())runFullCheck({force:true}).catch(noop);
@@ -735,7 +759,6 @@ function start(){
   return;
  }
  started=true;
- registerSW();
  splashP.then(function(){splashDone=true;paintChip()});
  boot().catch(function(error){
   splashP.then(function(){mountSetupOverlay();setState('error',{msg:friendly(error)});});
