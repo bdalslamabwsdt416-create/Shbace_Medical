@@ -10,7 +10,7 @@ var CACHE_NAME='shbace-medical-offline-v2';
 var STAGING_NAME='shbace-staging-offline';
 var INSTALLED_KEY='installed';
 /* Silent scheduled checks run no more than once per 7 days after a successful network check. Failures retry on the next launch. */
-var CHECK_OK_KEY='shbace_pkg_check_ok_v1';
+var CHECK_OK_KEY='shbace_pkg_check_ok_v1',CHECK_ATTEMPT_KEY='shbace_pkg_check_attempt_v1';
 var MIGRATION_KEY='shbace_ios_migrated_1_4_14';
 var CHECK_EVERY=7*24*60*60*1000;
 var PENDING_KEY='shbace_pkg_update_pending_v1',REPAIR_PENDING_KEY='shbace_pkg_repair_pending_v1',NOTIF_ID='update-available';
@@ -609,7 +609,7 @@ function runPlan(){
   /* Migration is committed only after every file is verified, copied and stale-cache cleanup succeeds. */
   finalizeVerifiedPlanCommit();
   /* A fully verified package counts as an up-to-date check: the seven-day timer restarts now. */
-  lsSet(CHECK_OK_KEY,Date.now());setPending(migrationPendingAtLaunch?1:0);markInstalledNow();
+  lsSet(CHECK_OK_KEY,Date.now());lsSet(CHECK_ATTEMPT_KEY,Date.now());setPending(migrationPendingAtLaunch?1:0);markInstalledNow();
   ui.percent.textContent='100%';ui.count.textContent=plan.files.length+' / '+plan.files.length+' files';
   ui.track.setAttribute('aria-valuenow','100');ui.bar.style.width='100%';
   ui.bytes.textContent=fmtBytes(plan.bytes)+' / '+fmtBytes(plan.bytes);
@@ -734,11 +734,12 @@ function runFullCheck(splashFinished){
 }
 /* Silent scheduled update check. It inspects metadata and cache keys only: no UI, download, migration arming or plan execution. */
 function checkDue(){
- var last=lsNum(CHECK_OK_KEY);
+ var last=lsNum(CHECK_ATTEMPT_KEY)||lsNum(CHECK_OK_KEY);
  if(last>0&&Date.now()-last<CHECK_EVERY)return Promise.resolve({state:'not-due'});
  if(typeof navigator!=='undefined'&&navigator.onLine===false)return Promise.resolve({state:'offline'});
  if(scheduledCheckInProgress)return Promise.resolve({state:'busy'});
  scheduledCheckInProgress=true;
+ lsSet(CHECK_ATTEMPT_KEY,Date.now());
  return Promise.resolve().then(function(){return loadManifest(true)}).then(function(data){
   if(!manifestFromNetwork)return {state:'offline'};
   manifest=data;
@@ -778,6 +779,7 @@ function scheduleCheckDue(){
 function manualCheck(){
  if(!standalone()||!('caches' in window)||!window.crypto||!crypto.subtle||!window.indexedDB)return Promise.resolve({state:'unsupported'});
  if(started)return Promise.resolve({state:'busy'});
+ lsSet(CHECK_ATTEMPT_KEY,Date.now());
  return dbGet('meta',INSTALLED_KEY).catch(function(){return null}).then(function(record){
   migrationInProgress=!!(record&&record.files&&localStorage.getItem(MIGRATION_KEY)!=='1');
   return decide(true);
@@ -799,6 +801,7 @@ function manualRepair(){
  if(!standalone()||!('caches' in window)||!window.crypto||!crypto.subtle||!window.indexedDB)return Promise.resolve({state:'unsupported'});
  if(typeof navigator!=='undefined'&&navigator.onLine===false)return Promise.resolve({state:'offline'});
  if(started)return Promise.resolve({state:'busy'});
+ lsSet(CHECK_ATTEMPT_KEY,Date.now());
  migrationInProgress=false;
  return decide(true).then(function(res){
   if(!manifestFromNetwork)return {state:'offline'};
