@@ -615,7 +615,10 @@ test('Repair is user-initiated and refuses to run while offline', async () => {
 
   const onlineRepair = manualRepairHarness({ online: true });
   assert.equal((await onlineRepair.api.manualRepair()).state, 'repair');
-  assert.deepEqual(onlineRepair.events, ['decide', 'showPlanNeeded:restore', 'runPlan']);
+  assert.equal(onlineRepair.events[0][0], 'lsSet');
+  assert.equal(onlineRepair.events[0][1], 'shbace_pkg_check_attempt_v1');
+  assert.ok(Number(onlineRepair.events[0][2]) > 0, 'explicit repair records its network-check attempt');
+  assert.deepEqual(onlineRepair.events.slice(1), ['decide', 'showPlanNeeded:restore', 'runPlan']);
 });
 
 test('manual update sets migration flag only after the real verified runPlan commit and cleanup succeed', async () => {
