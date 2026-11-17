@@ -1,13 +1,14 @@
 {
   "app": "Shbace Medical",
   "platform": "PWA",
-  "version": "1.4.12",
-  "displayVersion": "1.4.12",
-  "releaseDate": "2026-11-17",
+  "version": "1.4.13",
+  "displayVersion": "1.4.13",
+  "releaseDate": "2026-11-18",
   "releaseNotes": [
-    "Aligns the iOS app with the complete To Me interface, question-bank screens, visual assets, and shared study features.",
-    "Replaces the separate iOS offline installer and silent update layer with the To Me verified offline package and seven-day/manual update workflow.",
-    "Adds a working Check for updates control in Settings; only changed offline files are downloaded.",
-    "Preserves the iOS onboarding screens and existing student progress, notes, bookmarks, settings, and backup data."
+    "Matches the To Me offline experience on iPhone and iPad: first installation and repairs run in the background after the app opens, with a small progress chip instead of a blocking full-screen setup screen.",
+    "Uses the To Me verified package engine: resumable downloads, per-file byte-size and SHA-256 checks, staged updates, and one safe restart after the verified package is committed.",
+    "Keeps the existing iOS cache namespace shbace-medical-offline-v2 and IndexedDB identity so saved app files and student data are retained.",
+    "Aligns the iOS Service Worker with To Me local-first delivery and bounded network fallback while preserving the iOS home-screen icon and onboarding screens.",
+    "Keeps the seven-day automatic update schedule and the manual Check for updates action in Settings."
   ]
 }

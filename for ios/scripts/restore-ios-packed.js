@@ -124,12 +124,47 @@ for (const icon of pwaManifest.icons || []) {
 const offlineSetup = fs.readFileSync(safePath('js/29-offline-setup.js'), 'utf8');
 const serviceWorker = fs.readFileSync(safePath('sw.js'), 'utf8');
 const featureRuntime = fs.readFileSync(safePath('js/09-app-features-v6.js'), 'utf8');
-if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
-    !offlineSetup.includes('window.shbaceCheckForUpdate=manualCheck') ||
-    !serviceWorker.includes("const CACHE_NAME = 'shbace-medical-offline-v2'") ||
+const installerRequirements = [
+  "var CACHE_NAME='shbace-medical-offline-v2'",
+  "var DB_NAME='shbace-medical-offline-state-v1'",
+  'var CONCURRENCY=3',
+  'function ensureChip()',
+  'function paintChip()',
+  'async function commitStaged(st)',
+  'window.shbaceCheckForUpdate=manualCheck'
+];
+const installerMissing = installerRequirements.filter(function (token) {
+  return !offlineSetup.includes(token);
+});
+const blockingInstallerRemnants = [
+  'function mount()',
+  'function removeSetupOverlay()',
+  'shbaceOfflineSetup',
+  'shb-offline-setup'
+].filter(function (token) {
+  return offlineSetup.includes(token);
+});
+const workerRequirements = [
+  "const CACHE_NAME = 'shbace-medical-offline-v2'",
+  "const DB_NAME = 'shbace-medical-offline-state-v1'",
+  'const APP_SHELL = [',
+  'async function localFirst(request)',
+  'async function networkThenCache(request)',
+  "self.addEventListener('fetch'"
+];
+const workerMissing = workerRequirements.filter(function (token) {
+  return !serviceWorker.includes(token);
+});
+if (installerMissing.length || blockingInstallerRemnants.length || workerMissing.length ||
+    !serviceWorker.includes("'./assets/img/fc0bef7cd7ca.png'") ||
     !featureRuntime.includes('onclick="shbaceSettingsCheckForUpdates(this)"') ||
     !featureRuntime.includes('window.shbaceCheckForUpdate()')) {
-  throw new Error('The shared To Me offline updater or its Settings button is missing.');
+  throw new Error(
+    'The To Me-matched background offline installer or iOS settings integration is invalid. ' +
+    'Installer missing: ' + installerMissing.join(', ') + '; ' +
+    'blocking UI remnants: ' + blockingInstallerRemnants.join(', ') + '; ' +
+    'worker missing: ' + workerMissing.join(', ')
+  );
 }
 const onboardingMain = fs.readFileSync(safePath('js/04-app-main.js'), 'utf8');
 if (!onboardingMain.includes('function gradeScreen()') || !onboardingMain.includes('function finishScreen()')) throw new Error('The final two onboarding screens are missing from the app core.');
@@ -157,7 +192,7 @@ manifest.generatedAt = new Date().toISOString();
 fs.writeFileSync(path.join(out, 'offline-assets-manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 
 console.log('Shbace Medical iOS PWA build successful');
-console.log('Shared To Me offline updater and Settings control verified.');
+console.log('To Me-matched background installer, iOS local-first Service Worker and Settings control verified.');
 console.log('Base question bank: '+baseBank.questions.length);
 console.log('Deferred runtime assets verified: '+deferredRefs.length);
 console.log('Offline inventory: '+manifest.fileCount+' files ('+(manifest.totalBytes/1024/1024).toFixed(2)+' MiB).');

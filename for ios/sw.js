@@ -1,182 +1,157 @@
 'use strict';
 
-/* Runtime data always comes from the verified package. Keep these identities stable. */
-const CACHE_NAME = 'shbace-medical-offline-v2';
-/* Preserve the shared database identity; this worker never opens or mutates it at startup. */
-const DB_NAME = 'shbace-medical-offline-state-v1';
-const INDEX_URL = new URL('index.html', self.registration.scope).href;
-const UPDATE_HEADER = 'X-Shbace-Update-Check';
-const NET_TIMEOUT = 8000; /* safety net for a file missing from the local package */
-const UPDATE_METADATA_PATHS = new Set([
-  new URL('offline-assets-manifest.json', self.registration.scope).pathname,
-  new URL('pwa-version.json', self.registration.scope).pathname
-]);
+/* Shbace Medical — Service Worker (Offline System v2)
 
-function missingOfflineResponse(url) {
-  const path = new URL(url).pathname;
+   Rules this worker follows:
+   1. The app ALWAYS boots from the local cache. It never waits for the network when a local copy exists.
+   2. Every network call has a hard timeout, so nothing can hang forever (online, offline or on a bad connection).
+   3. Install never fails because of one missing file (the old addAll() made the whole worker fail).
+   4. Updates are NOT done here. The page-side updater (js/29-offline-setup.js) downloads, verifies and swaps
+      files atomically. This worker only serves what is in the cache.
+
+   Keep this cache name identical to js/29-offline-setup.js. Never rotate it for a routine release:
+   doing so would discard the verified offline package already stored on students' devices. */
+const CACHE_NAME = 'shbace-medical-offline-v2';
+const SCOPE = self.registration.scope;
+const INDEX_URL = new URL('index.html', SCOPE).href;
+const NET_TIMEOUT = 8000;      /* runtime fetch of a file that is not cached yet */
+const VERSION_TIMEOUT = 10000; /* manifest / version checks */
+
+const APP_SHELL = [
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './pwa-version.json',
+  './assets/img/fc0bef7cd7ca.png',
+  './offline-assets-manifest.json',
+  './css/bundle-core.css',
+  './js/29-offline-setup.js'
+];
+const VERSION_FILES = ['/manifest.webmanifest', '/pwa-version.json', '/offline-assets-manifest.json'];
+
+function offlinePage(url) {
+  const path = new URL(url).pathname.replace(/[&<>"]/g, '');
   const body = '<!doctype html><html lang="en"><meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width,initial-scale=1">' +
     '<title>Offline file unavailable</title><body style="font:16px system-ui;padding:24px;background:#07131f;color:#eaf4ff">' +
-    '<h1>Shbace Medical</h1><p>A required local file is missing: <code>' + path.replace(/[&<>"]/g, '') +
-    '</code>.</p><p>Open Settings → App updates and choose Check for updates or Repair. Normal app startup never downloads missing files.</p></body></html>';
+    '<h1>Shbace Medical</h1><p>This part of the app is not saved on your device yet: <code>' + path + '</code></p>' +
+    '<p>Connect to the internet once and open the app. It will finish saving everything in the background.</p></body></html>';
   return new Response(body, {
     status: 503,
     headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
   });
 }
-
-function isTaggedUpdateRequest(request) {
-  return !!(request && request.headers && typeof request.headers.get === 'function' &&
-    request.headers.get(UPDATE_HEADER) === '1');
+function emptyResponse(status) {
+  return new Response('', { status: status, statusText: 'Offline', headers: { 'Cache-Control': 'no-store' } });
 }
 
-async function cachedResponse(request) {
-  const cache = await caches.open(CACHE_NAME);
-  const canonical = new URL(request.url);
-  canonical.searchParams.delete('__shbace_reload');
-  canonical.searchParams.delete('__shbace_integrity');
-
-  if (request.mode === 'navigate') {
-    return await cache.match(INDEX_URL) || await cache.match(request, { ignoreSearch: true }) || null;
-  }
-
-  return await cache.match(canonical.href, { ignoreSearch: true }) ||
-    await cache.match(request, { ignoreSearch: true }) || null;
-}
-
-/* Safety net: a file that is missing from the local package is served straight from the network (8 s limit)
-   and is NOT stored, so the app never freezes on the splash screen. The updater's Repair restores the file
-   properly (size + SHA-256). Offline, or if the network fails, the readable "missing file" page is returned. */
-async function networkSafetyNet(request) {
+/* fetch() with a hard timeout (covers the time until response headers arrive). */
+async function netFetch(request, ms, init) {
   const ctl = new AbortController();
-  const timer = setTimeout(() => ctl.abort(), NET_TIMEOUT);
+  const timer = setTimeout(() => ctl.abort(), ms);
   try {
-    return await fetch(request, { signal: ctl.signal });
-  } catch (_) {
-    return null;
+    return await fetch(request, Object.assign({}, init || {}, { signal: ctl.signal }));
   } finally {
     clearTimeout(timer);
   }
 }
 
-async function localOnly(request) {
-  try {
-    const hit = await cachedResponse(request);
-    if (hit) return hit;
-  } catch (_) {}
-  return (await networkSafetyNet(request)) || missingOfflineResponse(request.url);
-}
-
-/* The IndexedDB check is remembered for the life of this worker, so opening the app does not open the
-   database once per file. A "verified" answer is kept 60 s, a "not verified yet" answer only 3 s so the
-   first install switches to local-only quickly. Concurrent requests share one lookup. */
-const verifiedMemo = { value: false, at: 0, pending: null };
-function hasVerifiedInstall() {
-  const age = Date.now() - verifiedMemo.at;
-  if (verifiedMemo.at && age >= 0 && age < (verifiedMemo.value ? 60000 : 3000)) return Promise.resolve(verifiedMemo.value);
-  if (verifiedMemo.pending) return verifiedMemo.pending;
-  verifiedMemo.pending = readVerifiedInstall().then(value => {
-    verifiedMemo.value = value; verifiedMemo.at = Date.now(); verifiedMemo.pending = null; return value;
-  }, () => {
-    verifiedMemo.value = false; verifiedMemo.at = Date.now(); verifiedMemo.pending = null; return false;
-  });
-  return verifiedMemo.pending;
-}
-
-/* Only a matching verified IndexedDB pair enables strict local-only runtime. */
-async function readVerifiedInstall() {
-  if (!self.indexedDB) return false;
-  return new Promise(resolve => {
-    let done = false;
-    const finish = value => { if (!done) { done = true; resolve(value); } };
-    const timer = setTimeout(() => finish(false), 2500);
-    let req;
-    try { req = self.indexedDB.open(DB_NAME, 1); }
-    catch (_) { clearTimeout(timer); finish(false); return; }
-    req.onupgradeneeded = () => {
-      if (!req.result.objectStoreNames.contains('meta')) req.result.createObjectStore('meta');
-      if (!req.result.objectStoreNames.contains('verified')) req.result.createObjectStore('verified');
-    };
-    req.onerror = req.onblocked = () => { clearTimeout(timer); finish(false); };
-    req.onsuccess = () => {
-      const db = req.result;
-      try {
-        const tx = db.transaction('meta', 'readonly'), store = tx.objectStore('meta');
-        const a = store.get('installed'), b = store.get('ready');
-        tx.oncomplete = () => {
-          const x = a.result, y = b.result, file = x && x.files && x.files['index.html'];
-          const valid = !!(x && y && x.verified === true && y.verified === true &&
-            x.version && x.version === y.version && file &&
-            /^[a-f0-9]{64}$/.test(String(file.sha256 || '')) && Number(file.bytes) > 0 &&
-            Number(x.fileCount) > 0 && Number(y.fileCount) === Number(x.fileCount));
-          try { db.close(); } catch (_) {}
-          clearTimeout(timer); finish(valid);
-        };
-        tx.onerror = tx.onabort = () => { try { db.close(); } catch (_) {} clearTimeout(timer); finish(false); };
-      } catch (_) { try { db.close(); } catch (_) {} clearTimeout(timer); finish(false); }
-    };
-  });
-}
-
-async function updateMetadata(request) {
-  const cache = await caches.open(CACHE_NAME);
-  try {
-    const response = await fetch(request, { cache: 'no-store' });
-    if (response && response.ok) {
-      const canonical = new URL(request.url);
-      canonical.search = '';
-      await cache.put(canonical.href, response.clone());
-    }
-    return response;
-  } catch (_) {
-    const hit = await cache.match(request.url, { ignoreSearch: true });
-    return hit || missingOfflineResponse(request.url);
-  }
-}
-
 self.addEventListener('install', event => {
-  /* Never download shell files during startup or worker installation. */
-  event.waitUntil(self.skipWaiting());
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    /* Each shell file is fetched on its own; one failure never blocks installation. */
+    await Promise.all(APP_SHELL.map(async url => {
+      try {
+        if (await cache.match(url)) return;
+        const res = await netFetch(new Request(url, { cache: 'reload' }), 15000);
+        if (res && res.status === 200) await cache.put(url, res);
+      } catch (_) { /* the page-side updater will complete the package */ }
+    }));
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
+    await self.clients.claim();
     const names = await caches.keys();
     await Promise.all(names
-      .filter(name => name.startsWith('shbace-to-me-chrome-offline-') ||
-                      name.startsWith('shbace-medical-ios-shell-'))
+      .filter(name =>
+        (name.startsWith('shbace-chrome-offline-') && name !== CACHE_NAME) ||
+        name.startsWith('shbace-to-me-chrome-offline-') ||
+        name.startsWith('shbace-medical-ios-shell-')
+      )
       .map(name => caches.delete(name)));
-    await self.clients.claim();
   })());
 });
 
+/* Local-first: cache hit returns immediately. Only a genuinely missing file goes to the network (with timeout)
+   and is saved locally after a successful response. */
+async function localFirst(request) {
+  const cache = await caches.open(CACHE_NAME);
+  const isNav = request.mode === 'navigate';
+  const hit = isNav
+    ? (await cache.match(INDEX_URL)) || (await cache.match(request, { ignoreSearch: true }))
+    : await cache.match(request, { ignoreSearch: true });
+  if (hit) return hit;
+  try {
+    const fresh = await netFetch(request, NET_TIMEOUT);
+    if (fresh && fresh.status === 200) {
+      cache.put(isNav ? INDEX_URL : request, fresh.clone()).catch(() => {});
+    }
+    return fresh;
+  } catch (_) {
+    return isNav ? offlinePage(request.url) : emptyResponse(504);
+  }
+}
+
+/* Version / manifest checks marked cache:'no-store' by the updater: network first (timeout), local fallback. */
+async function networkThenCache(request) {
+  const cache = await caches.open(CACHE_NAME);
+  try {
+    const fresh = await netFetch(request, VERSION_TIMEOUT, { cache: 'no-store' });
+    if (fresh && fresh.status === 200) cache.put(request, fresh.clone()).catch(() => {});
+    return fresh;
+  } catch (_) {
+    const hit = await cache.match(request, { ignoreSearch: true });
+    return hit || emptyResponse(504);
+  }
+}
+
+/* Explicit boot retry: bypass a stale copy, refresh the canonical entry, fall back to the local copy. */
+async function reloadRoute(request) {
+  const cache = await caches.open(CACHE_NAME);
+  const canonical = new URL(request.url);
+  canonical.searchParams.delete('__shbace_reload');
+  try {
+    const fresh = await netFetch(request, NET_TIMEOUT, { cache: 'reload' });
+    if (fresh && fresh.status === 200) cache.put(canonical.href, fresh.clone()).catch(() => {});
+    return fresh;
+  } catch (_) {
+    const hit = await cache.match(canonical.href);
+    return hit || offlinePage(request.url);
+  }
+}
+
 self.addEventListener('fetch', event => {
   const request = event.request;
-  const url = new URL(request.url);
-  /* Other origins and non-GET requests are not part of the offline package: the worker does not touch them,
-     so they behave normally online and simply fail offline (they no longer break because of the worker). */
-  if (url.origin !== self.location.origin) return;
   if (request.method !== 'GET') return;
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
+  if (url.pathname.endsWith('/sw.js')) return;
 
-  const tagged = isTaggedUpdateRequest(request);
-  const integrityRequest = url.searchParams.has('__shbace_integrity');
-  const metadataRequest = UPDATE_METADATA_PATHS.has(url.pathname) &&
-    request.cache === 'no-store' && tagged;
+  /* Integrity downloads go straight to the network; hash verification belongs to the updater. */
+  if (url.searchParams.has('__shbace_integrity')) return;
 
-  if (integrityRequest && tagged) {
-    /* Used only after a manual/accepted update or repair action; bytes are SHA-256 verified by the updater. */
-    event.respondWith(fetch(request, { cache: 'reload' }));
+  if (url.searchParams.has('__shbace_reload')) {
+    event.respondWith(reloadRoute(request));
     return;
   }
 
-  if (metadataRequest) {
-    /* Only the manual or scheduled seven-day update checker tags these metadata requests. */
-    event.respondWith(updateMetadata(request));
+  if (request.cache === 'no-store' && VERSION_FILES.some(p => url.pathname.endsWith(p))) {
+    event.respondWith(networkThenCache(request));
     return;
   }
 
-  /* Bootstrap the first install from same-origin network; verified installs stay local-only. */
-  event.respondWith(hasVerifiedInstall().then(verified =>
-    verified ? localOnly(request) : fetch(request)
-  ).catch(() => fetch(request)));
+  event.respondWith(localFirst(request));
 });
