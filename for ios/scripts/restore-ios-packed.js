@@ -5,13 +5,11 @@ const path = require('path');
 const zlib = require('zlib');
 const crypto = require('crypto');
 const vm = require('vm');
+const sharp = require('sharp');
 
 const root = path.resolve(__dirname, '..');
 const out = path.join(root, 'dist');
 const manifest = { schema: 1, files: [] };
-
-const packed = {};
-const expected = {};
 
 function safePath(relative) {
   if (typeof relative !== 'string' || relative.startsWith('/') || relative.split(/[\\/]/).includes('..')) {
@@ -20,22 +18,6 @@ function safePath(relative) {
   return path.join(out, relative);
 }
 
-function readAsset(relative) {
-  if (packed[relative]) {
-    const base64 = packed[relative].map(function (name) {
-      return fs.readFileSync(path.join(root, 'packed', name), 'utf8').trim();
-    }).join('');
-    return zlib.gunzipSync(Buffer.from(base64, 'base64'));
-  }
-  return fs.readFileSync(path.join(root, relative));
-}
-
-function verify(relative, bytes, sha256) {
-  const expectedSource = expected[relative];
-  if (expectedSource && (bytes.length !== expectedSource.bytes || sha256 !== expectedSource.sha256)) {
-    throw new Error('Packed iOS bundle failed source integrity check: ' + relative);
-  }
-}
 function walkRuntimeDirectory(directory, output) {
   const fullDirectory = path.join(root, directory);
   if (!fs.existsSync(fullDirectory)) return;
@@ -50,122 +32,81 @@ function runtimeFiles() {
   for (const directory of ['assets', 'css', 'data', 'js', 'fonts', 'audio', 'media', 'videos', 'documents', 'img', 'img1', 'img2']) {
     walkRuntimeDirectory(directory, files);
   }
-  files.push(...Object.keys(packed));
-  return [...new Set(files)].filter(relative => relative !== 'offline-assets-manifest.json' && !['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/30-ios-v5.js','js/31-ios-v6.js'].includes(relative)).sort((a, b) => a.localeCompare(b));
+  return [...new Set(files)].filter(relative => relative !== 'offline-assets-manifest.json' && !['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/30-ios-v5.js','js/31-ios-v6.js','js/32-ios-study-tools.js','js/33-ios-exam-planner.js'].includes(relative)).sort((a, b) => a.localeCompare(b));
 }
 
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
 
-function patchPackedAsset(relative, originalBytes) {
-  if (!packed[relative]) return originalBytes;
-  let source = originalBytes.toString('utf8');
-  if (relative === 'js/30-ios-v5.js') {
-    const flag = 'updateBanner:true,';
-    if (!source.includes(flag)) throw new Error('Expected iOS update-banner flag was not found.');
-    source = source.replace(flag, 'updateBanner:false,' + String.fromCharCode(10) + ' autoUpdate:true,');
-    source = source.replace("lang:'ar',", "lang:'en',");
-    for (const name of ['landscape','haptics','badge','keyboard','speak','progressCard','swipe','shareQuestion','inputHints']) {
-      const pattern = new RegExp('('+name+':)true,');
-      if (!pattern.test(source)) throw new Error('Expected iOS feature flag was not found: '+name);
-      source = source.replace(pattern, '$1false,');
-    }
-    const offlineTimer = 'if(good)offT=setTimeout(hideBar,2200);';
-    if (!source.includes(offlineTimer)) throw new Error('Expected persistent offline notification timer was not found.');
-    source = source.replace(offlineTimer, 'offT=setTimeout(hideBar,2000);');
-    const startMarker = '/* ---------- 8. new version available ---------- */';
-    const endMarker = '/* ---------- 9. weekly backup reminder';
-    const start = source.indexOf(startMarker), end = source.indexOf(endMarker, start);
-    if (start < 0 || end < 0) throw new Error('Could not locate the legacy iOS update-banner block.');
-    const silentUpdates = `/* ---------- 8. silent automatic PWA updates during the startup Splash ---------- */
-var VER_KEY='shbace_v5_seen_version';
-function swReady(){return 'serviceWorker' in navigator}
-if(V5.autoUpdate&&swReady()){
- var lastCheck=0;
- function checkUpdates(force){
-  var now=Date.now();
-  if(!force&&now-lastCheck<30*60*1000)return;
-  lastCheck=now;
-  if(navigator.onLine===false)return;
-  navigator.serviceWorker.getRegistration('./').then(function(reg){if(reg)return reg.update().catch(function(){});}).catch(function(){});
-  fetch('pwa-version.json?shbcheck='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(v){if(v&&v.version)lsSet(VER_KEY,v.version)}).catch(function(){});
- }
- setTimeout(function(){checkUpdates(true)},400);
- setInterval(function(){checkUpdates(false)},30*60*1000);
- document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(function(){checkUpdates(true)},1200)});
- addEventListener('online',function(){setTimeout(function(){checkUpdates(true)},1200)});
-}`;
-    source = source.slice(0, start) + silentUpdates + source.slice(end);
-    const guideStart = source.indexOf('/* Extend the About > How to Use guide with every shipped iPhone/iPad addition (v5-v7). */');
-    const finalClose = source.lastIndexOf('})();');
-    if (guideStart < 0 || finalClose < guideStart) throw new Error('Could not locate legacy iOS guide section.');
-    source = source.slice(0, guideStart) + String.fromCharCode(10) + '})();' + String.fromCharCode(10);
+async function toInlineWebp(sourcePath, mode) {
+  if (!fs.existsSync(sourcePath) || !fs.statSync(sourcePath).isFile()) {
+    throw new Error('Required To Me Pediatrics image source is missing: ' + sourcePath);
   }
-  if (relative === 'js/31-ios-v6.js') {
-    source = source.replace("lang:'ar',", "lang:'en',");
-    for (const name of ['touchPolish','keyboardFix','titleToTop']) {
-      const pattern = new RegExp('('+name+':)true,');
-      if (!pattern.test(source)) throw new Error('Expected iOS feature flag was not found: '+name);
-      source = source.replace(pattern, '$1false,');
-    }
-    source = source.replace("oH:'iPhone / iPad options',oSub:'Turn on only what you need.'","oH:'Local storage & backups',oSub:'Storage protection, saved data, backup and repair.'");
-    const cardMarker = source.indexOf('v6-card');
-    const settingsStart = source.lastIndexOf('var d=', cardMarker);
-    const appendMarker = 'rs.appendChild(d);';
-    const settingsEnd = source.indexOf(appendMarker, cardMarker);
-    if (cardMarker < 0 || settingsStart < 0 || settingsEnd < 0) throw new Error('Could not locate iOS Settings insertion block. Card context: '+source.slice(Math.max(0, cardMarker-180), cardMarker+260));
-    const storageOnlyCard = `var d=document.createElement('div');d.className='card setcard v6-card';d.dir=DIR;
-  d.innerHTML='<h3>'+L.oH+'</h3><p class="meta">'+L.oSub+'</p>'+
-   '<div class="setrow"><b>'+L.storeH+'</b><small class="v6-store">…</small></div>'+
-   '<button type="button" class="btn block v6-sharebk" style="margin-top:10px">'+L.shareBk+'</button>'+
-   '<button type="button" class="btn danger block v6-repair" style="margin-top:10px">'+L.repair+'</button>';
-  rs.appendChild(d);`;
-    source = source.slice(0, settingsStart) + storageOnlyCard + source.slice(settingsEnd + appendMarker.length);
-    const themeStart = source.indexOf('/* ---------- 28. theme follows the device (off by default) ---------- */');
-    const repairStart = source.indexOf('/* ---------- 32. repair: clear saved app files and download them again (student data is not touched) ---------- */');
-    if (themeStart < 0 || repairStart < 0 || repairStart <= themeStart) throw new Error('Could not locate legacy iOS theme override.');
-    source = source.slice(0, themeStart) + source.slice(repairStart);
+  let pipeline = sharp(sourcePath).rotate();
+  if (mode === 'cover') {
+    pipeline = pipeline.resize(256, 256, { fit: 'cover', position: 'attention', withoutEnlargement: true });
+  } else {
+    pipeline = pipeline.resize(256, 256, {
+      fit: 'contain', withoutEnlargement: true,
+      background: { r: 5, g: 16, b: 35, alpha: 0 }
+    });
   }
-  return Buffer.from(source, 'utf8');
+  const buffer = await pipeline.webp({ quality: 82, effort: 5, alphaQuality: 85 }).toBuffer();
+  console.log('Pediatrics image embedded: ' + path.basename(sourcePath) + ' (' + buffer.byteLength + ' bytes).');
+  return 'data:image/webp;base64,' + buffer.toString('base64');
 }
 
-for (const relative of runtimeFiles()) {
-  const originalBytes = readAsset(relative);
-  const originalDigest = crypto.createHash('sha256').update(originalBytes).digest('hex');
-  verify(relative, originalBytes, originalDigest);
+async function buildPwa() {
+  const [ajPortraitData, facultyLogoData] = await Promise.all([
+    toInlineWebp(path.join(root, 'scripts/source-assets/pediatrics-dr-aljoaki-source.png'), 'cover'),
+    toInlineWebp(path.join(root, 'scripts/source-assets/faculty-of-medicine-tripoli-source.png'), 'contain')
+  ]);
 
-  const bytes = patchPackedAsset(relative, originalBytes);
-  const digest = crypto.createHash('sha256').update(bytes).digest('hex');
-  if (relative.endsWith('.js')) new vm.Script(bytes.toString('utf8'), { filename: relative });
+  for (const relative of runtimeFiles()) {
+    const originalBytes = fs.readFileSync(path.join(root, relative));
+    let bytes = originalBytes;
 
-  const destination = safePath(relative);
-  fs.mkdirSync(path.dirname(destination), { recursive: true });
-  fs.writeFileSync(destination, bytes);
-  const group = relative.startsWith('assets/img/') ? 'images' :
-    relative.startsWith('data/') ? 'data' :
-    (relative.startsWith('css/') || relative.startsWith('js/') ||
-     relative === 'index.html' || relative === 'manifest.webmanifest' || relative === 'sw.js') ? 'app' : 'other';
-  manifest.files.push({ path: relative, bytes: bytes.length, sha256: digest, group });
-}
+    if (relative === 'index.html') {
+      let html = bytes.toString('utf8');
+      const ajSlot = 'window.__SHBACE_AJ_PORTRAIT_DATA__="__SHBACE_AJ_PORTRAIT_DATA__";';
+      const facultySlot = 'window.__SHBACE_FACULTY_LOGO_DATA__="__SHBACE_FACULTY_LOGO_DATA__";';
+      if (!html.includes(ajSlot) || !html.includes(facultySlot)) {
+        throw new Error('The two To Me Pediatrics image slots are missing from index.html.');
+      }
+      html = html.replace(ajSlot, 'window.__SHBACE_AJ_PORTRAIT_DATA__=' + JSON.stringify(ajPortraitData) + ';');
+      html = html.replace(facultySlot, 'window.__SHBACE_FACULTY_LOGO_DATA__=' + JSON.stringify(facultyLogoData) + ';');
+      bytes = Buffer.from(html, 'utf8');
+    }
+
+    const digest = crypto.createHash('sha256').update(bytes).digest('hex');
+    if (relative.endsWith('.js')) new vm.Script(bytes.toString('utf8'), { filename: relative });
+
+    const destination = safePath(relative);
+    fs.mkdirSync(path.dirname(destination), { recursive: true });
+    fs.writeFileSync(destination, bytes);
+    const group = relative.startsWith('assets/img/') ? 'images' :
+      relative.startsWith('data/') ? 'data' :
+      (relative.startsWith('css/') || relative.startsWith('js/') ||
+       relative === 'index.html' || relative === 'manifest.webmanifest' ||
+       relative === 'sw.js') ? 'app' : 'other';
+    manifest.files.push({ path: relative, bytes: bytes.length, sha256: digest, group });
+  }
 
 for (const name of ['index.html', 'manifest.webmanifest', 'pwa-version.json', 'sw.js']) {
   if (!fs.existsSync(path.join(out, name))) throw new Error('Missing PWA shell output: ' + name);
 }
 
 const html = fs.readFileSync(path.join(out, 'index.html'), 'utf8');
+if (html.includes('__SHBACE_AJ_PORTRAIT_DATA__') || html.includes('__SHBACE_FACULTY_LOGO_DATA__') ||
+    !html.includes('data:image/webp;base64,')) {
+  throw new Error('The To Me bank portrait or University of Tripoli logo was not embedded into the iOS build.');
+}
 const deferredRefs = [...html.matchAll(/data-src=["']([^"']+)["']/g)].map(match => match[1].split('?')[0].replace(/^\.\//, ''));
 for (const relative of deferredRefs) {
   if (!fs.existsSync(safePath(relative))) throw new Error('Deferred runtime asset is missing: ' + relative);
 }
 if (/js\/30-android-enhancements|js\/31-android-v13|js\/32-chrome-android/.test(html)) throw new Error('Android-only runtime module leaked into the iOS build.');
-if (/js\/30-ios-v5|js\/31-ios-v6/.test(html)) throw new Error('The retired iOS-specific updater/storage layer is still referenced.');
-for (const relative of ['js/32-ios-study-tools.js','js/33-ios-exam-planner.js']) {
-  if (!fs.existsSync(safePath(relative)) || !deferredRefs.includes(relative)) throw new Error('The shared iOS design module is missing: ' + relative);
-}
-const iosStudyTools = fs.readFileSync(safePath('js/32-ios-study-tools.js'), 'utf8');
-const iosExamPlanner = fs.readFileSync(safePath('js/33-ios-exam-planner.js'), 'utf8');
-if (!iosStudyTools.includes('featureSettingsHTML') || !iosStudyTools.includes('decorateQuestionCards')) throw new Error('To Me Settings and question actions are missing.');
-if (!iosExamPlanner.includes('__shbaceV13') || !iosExamPlanner.includes('Exam goal planner') || /shbace_onboarding_v3_grade|function gradeScreen|function finishScreen/.test(iosExamPlanner)) throw new Error('To Me planner is incomplete or alters onboarding.');
+if (/js\\/30-ios-v5|js\\/31-ios-v6|js\\/32-ios-study-tools|js\\/33-ios-exam-planner/.test(html)) throw new Error('An iOS-only runtime layer is still referenced; To Me app core plus the preserved onboarding should be the only platform-specific exception.');
 for (const relative of ['css/bundle-core.css','css/bundle-late.css','js/44-islamic-reminders.js']) {
   if (!fs.existsSync(safePath(relative))) throw new Error('Required iOS runtime asset is missing: ' + relative);
 }
@@ -179,9 +120,9 @@ for (const icon of pwaManifest.icons || []) {
 const offlineSetup = fs.readFileSync(safePath('js/29-offline-setup.js'), 'utf8');
 const serviceWorker = fs.readFileSync(safePath('sw.js'), 'utf8');
 const featureRuntime = fs.readFileSync(safePath('js/09-app-features-v6.js'), 'utf8');
-if (!offlineSetup.includes("var CACHE_NAME='shbace-chrome-offline-v1.3.10.37'") ||
+if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !offlineSetup.includes('window.shbaceCheckForUpdate=manualCheck') ||
-    !serviceWorker.includes("const CACHE_NAME = 'shbace-chrome-offline-v1.3.10.37'") ||
+    !serviceWorker.includes("const CACHE_NAME = 'shbace-medical-offline-v2'") ||
     !featureRuntime.includes('onclick="shbaceSettingsCheckForUpdates(this)"') ||
     !featureRuntime.includes('window.shbaceCheckForUpdate()')) {
   throw new Error('The shared To Me offline updater or its Settings button is missing.');
@@ -216,3 +157,9 @@ console.log('Shared To Me offline updater and Settings control verified.');
 console.log('Base question bank: '+baseBank.questions.length);
 console.log('Deferred runtime assets verified: '+deferredRefs.length);
 console.log('Offline inventory: '+manifest.fileCount+' files ('+(manifest.totalBytes/1024/1024).toFixed(2)+' MiB).');
+}
+
+buildPwa().catch(function(error) {
+  console.error('Shbace Medical iOS PWA build failed:', error);
+  process.exitCode = 1;
+});
