@@ -3548,6 +3548,10 @@ settingsView=function(){let h=u11OriginalSettings();const extra=`<div class="u10
 /* PAGES stores function references, so refresh the routes after replacing their renderers. */
 PAGES.notifs=notifsView;PAGES.settings=settingsView;
 
+/* Explicit settings route bridge: header and drawer navigation can open the real Settings renderer directly. */
+window.__shbRenderSettings=function(){return settingsView()};
+window.__shbOpenSettings=function(){appPage='settings';renderAppDemo();return true};
+
 /* Push setup guidance is intentionally explicit: this HTML has no Firebase project,
    native Android folder, google-services.json or deployed backend endpoint to bind. */
 
