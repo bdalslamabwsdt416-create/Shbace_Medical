@@ -381,6 +381,7 @@ test('Home fallback is dismissible inline and offers explicit Repair without a m
   const declaration = offline.slice(start, end).replace(/;\s*$/, '');
   const markup = vm.runInNewContext(declaration + String.fromCharCode(10) + 'window.shbaceOfflineRepairHomeNotice()', {
     window: {},
+    REPAIR_PENDING_KEY: 'shbace_pkg_repair_pending_v1',
     lsNum: key => key === 'shbace_pkg_repair_pending_v1' ? 2 : 0,
     sessionStorage: { getItem: () => null }
   });
@@ -406,6 +407,7 @@ function runScheduledCheckHarness(options = {}) {
   const sandbox = {
     CHECK_OK_KEY: 'shbace_pkg_check_ok_v1',
     CHECK_EVERY: 7 * 24 * 60 * 60 * 1000,
+    INSTALLED_KEY: 'installed',
     CACHE_NAME: 'shbace-medical-offline-v2',
     MIGRATION_KEY: 'shbace_ios_migrated_1_4_14',
     migrationInProgress: false,
