@@ -165,6 +165,13 @@ for (const relative of deferredRefs) {
   if (!fs.existsSync(safePath(relative))) throw new Error('Deferred runtime asset is missing: ' + relative);
 }
 if (/js\/30-android-enhancements|js\/31-android-v13|js\/32-chrome-android/.test(html)) throw new Error('Android-only runtime module leaked into the iOS build.');
+for (const relative of ['js/32-ios-study-tools.js','js/33-ios-exam-planner.js']) {
+  if (!fs.existsSync(safePath(relative)) || !deferredRefs.includes(relative)) throw new Error('The shared iOS design module is missing: ' + relative);
+}
+const iosStudyTools = fs.readFileSync(safePath('js/32-ios-study-tools.js'), 'utf8');
+const iosExamPlanner = fs.readFileSync(safePath('js/33-ios-exam-planner.js'), 'utf8');
+if (!iosStudyTools.includes('featureSettingsHTML') || !iosStudyTools.includes('decorateQuestionCards')) throw new Error('To Me Settings and question actions are missing.');
+if (!iosExamPlanner.includes('__shbaceV13') || !iosExamPlanner.includes('Exam goal planner') || /shbace_onboarding_v3_grade|function gradeScreen|function finishScreen/.test(iosExamPlanner)) throw new Error('To Me planner is incomplete or alters onboarding.');
 for (const relative of ['css/bundle-core.css','css/bundle-late.css',
   'js/30-ios-v5.js','js/31-ios-v6.js','js/44-islamic-reminders.js']) {
   if (!fs.existsSync(safePath(relative))) throw new Error('Required iOS runtime asset is missing: ' + relative);
@@ -181,7 +188,7 @@ const serviceWorker = fs.readFileSync(safePath('sw.js'), 'utf8');
 if (!iosOfflineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !iosOfflineSetup.includes("var DB_NAME='shbace-medical-offline-state-v1'") ||
     !serviceWorker.includes("const CACHE_NAME = 'shbace-medical-offline-v2'") ||
-    !serviceWorker.includes("const SHELL_CACHE_NAME = 'shbace-medical-ios-shell-v150'")) {
+    !serviceWorker.includes("const SHELL_CACHE_NAME = 'shbace-medical-ios-shell-v151'")) {
   throw new Error('The iOS offline cache or saved-state database identifiers changed unexpectedly.');
 }
 const onboardingMain = fs.readFileSync(safePath('js/04-app-main.js'), 'utf8');
