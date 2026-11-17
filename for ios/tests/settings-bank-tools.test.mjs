@@ -319,10 +319,17 @@ test('shared Study experience controls, labels, order, defaults and legacy prefe
   assert.equal(questionDefaults.readingSpeed, toMeDefaults.readingSpeed);
   assert.ok(voice.includes('followSystemTheme:shared&&typeof shared.autoTheme===\'boolean\'?shared.autoTheme:true'));
   assert.ok(voice.includes('keepScreenAwake:shared&&typeof shared.keepScreenOn===\'boolean\'?shared.keepScreenOn:true'));
-  const toMeVoiceDescription = toMeVoice.match(/<p class=\"meta\">(Questions are read in English only\\.[^<]+)<\\/p>/);
-  const iosVoiceDescription = voice.match(/card.innerHTML='<h3>Question voice<\\/h3>'\+\s*'<p class=\"meta\">([^<]+)<\\/p>'/);
-  assert.ok(toMeVoiceDescription&&iosVoiceDescription,'Question voice helper text exists in both platform sources');
-  assert.equal(iosVoiceDescription[1],toMeVoiceDescription[1]);
+  function questionVoiceDescription(source) {
+    const cardStart=source.indexOf("card.innerHTML='<h3>Question voice</h3>'");
+    assert.notEqual(cardStart,-1,'Question voice card exists in source');
+    const paragraphStart=source.indexOf('<p class="meta">',cardStart);
+    assert.notEqual(paragraphStart,-1,'Question voice helper paragraph exists');
+    const textStart=paragraphStart+'<p class="meta">'.length;
+    const textEnd=source.indexOf('</p>',textStart);
+    assert.ok(textEnd>textStart,'Question voice helper paragraph closes');
+    return source.slice(textStart,textEnd);
+  }
+  assert.equal(questionVoiceDescription(voice),questionVoiceDescription(toMeVoice));
   assert.ok(voice.includes('saved&&typeof saved===\'object\'&&!Array.isArray(saved)?saved:{}'),
     'existing iOS preference backups override new-install defaults');
 
