@@ -97,8 +97,12 @@ for (const name of ['index.html', 'manifest.webmanifest', 'pwa-version.json', 's
 }
 
 const html = fs.readFileSync(path.join(out, 'index.html'), 'utf8');
-if (html.includes('__SHBACE_AJ_PORTRAIT_DATA__') || html.includes('__SHBACE_FACULTY_LOGO_DATA__') ||
-    !html.includes('data:image/webp;base64,')) {
+if (
+    html.includes('window.__SHBACE_AJ_PORTRAIT_DATA__="__SHBACE_AJ_PORTRAIT_DATA__";') ||
+    html.includes('window.__SHBACE_FACULTY_LOGO_DATA__="__SHBACE_FACULTY_LOGO_DATA__";') ||
+    !html.includes('window.__SHBACE_AJ_PORTRAIT_DATA__="data:image/webp;base64,') ||
+    !html.includes('window.__SHBACE_FACULTY_LOGO_DATA__="data:image/webp;base64,')
+) {
   throw new Error('The To Me bank portrait or University of Tripoli logo was not embedded into the iOS build.');
 }
 const deferredRefs = [...html.matchAll(/data-src=["']([^"']+)["']/g)].map(match => match[1].split('?')[0].replace(/^\.\//, ''));
