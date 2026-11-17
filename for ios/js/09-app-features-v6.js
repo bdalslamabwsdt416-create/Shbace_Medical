@@ -1907,19 +1907,21 @@ function settingsView(){
   <div class="setrow"><b>Last Onboarding Page</b><small>When ON, the final “Your journey starts here” page is shown at app start. Turn it OFF to skip it.</small><button type="button" class="drsw ${SET.obLast==='on'?'on':''}" role="switch" aria-checked="${SET.obLast==='on'}" aria-label="Last Onboarding Page" onclick="setSet('obLast','${SET.obLast==='on'?'off':'on'}')"><i></i><span>${SET.obLast==='on'?'ON':'OFF'}</span></button></div></div>
 
  <div class="card setcard" id="shbAppUpdates"><h3>App updates</h3>
-  <p class="meta">Automatic update checks run every seven days. ${shbaceSettingsUpdateMeta()}</p>
+  <p class="meta">Updates are checked only when you tap Check for updates. ${shbaceSettingsUpdateMeta()}</p>
   <button type="button" class="btn primary block" id="shbaceSettingsUpdateButton" onclick="shbaceSettingsCheckForUpdates(this)">Check for updates</button>
-  <p class="meta" id="shbaceSettingsUpdateStatus" role="status" aria-live="polite">Manual checks look for changed files. Your answers, notes and study progress remain saved.</p></div>
+  <p class="meta" id="shbaceSettingsUpdateStatus" role="status" aria-live="polite">Manual checks look for changed files. Your answers, notes and study progress remain saved.</p>
+  ${shbaceSettingsRepairMarkup()}</div>
  <input type="file" id="bkFile" accept=".json,application/json" hidden onchange="restoreBackup(this)">
  <div class="card setcard"><h3>Study progress</h3><p class="meta">${n} answered · ${ok} correct</p><p class="meta">Reset clears answers and progress only. Saved questions, notes, reports and Smart Review are kept.</p>
   ${resetScopeHTML()}
   <div class="setrow"><b>Reset everything</b><button type="button" class="btn danger block" style="margin-top:10px" ${n?'':'disabled'} onclick="resetAllAsk()">Reset all study progress${n?` (${n})`:''}</button></div></div></div>`}
 
 function shbaceSettingsUpdateMeta(){
- let last=0,pending=0,info=null;
+ let last=0,pending=0,repair=0,info=null;
  try{
   last=Number(window.shbaceLastUpdateCheck&&window.shbaceLastUpdateCheck())||0;
   pending=Math.max(0,Math.floor(Number(window.shbaceUpdatePending&&window.shbaceUpdatePending())||0));
+  repair=Math.max(0,Math.floor(Number(window.shbaceRepairPending&&window.shbaceRepairPending())||0));
   info=window.shbaceVersionInfo&&window.shbaceVersionInfo();
  }catch(e){}
  const installed=info&&info.installed,available=info&&info.available;
@@ -1930,10 +1932,38 @@ function shbaceSettingsUpdateMeta(){
  const checked=last>0
   ?'Last successful check: '+new Date(last).toLocaleString()
   :'No successful update check recorded yet';
- const pendingText=pending+' changed file'+(pending===1?'':'s')+' pending'+
-  (pending&&available&&available.displayVersion?' for '+available.displayVersion:'');
+ const pendingText=[
+  repair>0?'Some offline files are missing · '+repair+' to repair':'',
+  pending>0?pending+' update file'+(pending===1?'':'s')+' pending'+(available&&available.displayVersion?' for '+available.displayVersion:''):''
+ ].filter(Boolean).join(' · ')||'No update or repair is pending';
  return version+'. '+checked+'. '+pendingText+'.';
 }
+function shbaceSettingsRepairMarkup(){
+ let repair=0,pending=0;
+ try{repair=Number(window.shbaceRepairPending&&window.shbaceRepairPending())||0;pending=Number(window.shbaceUpdatePending&&window.shbaceUpdatePending())||0}catch(e){}
+ let markup='';
+ if(repair>0)markup+='<div class="shb-offline-repair-card" role="status"><p class="meta">Some offline files are missing - Repair</p><button type="button" class="btn block" id="shbaceSettingsRepairButton" onclick="shbaceSettingsRepairOffline(this)">Repair</button></div>';
+ if(pending>0)markup+='<p class="meta shb-update-pending" role="status"><span style="display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;border:1px solid rgba(54,166,130,.35);background:rgba(54,166,130,.12);color:var(--mint,#32b890);font-size:10px;font-weight:800;letter-spacing:.04em">UPDATE PENDING</span> · Check for updates to install it</p>';
+ return markup;
+}
+window.shbaceSettingsRepairOffline=async function(button){
+ const btn=button||document.getElementById('shbaceSettingsRepairButton');
+ const status=document.getElementById('shbaceSettingsUpdateStatus');
+ if(btn){btn.disabled=true;btn.textContent='Checking offline files…'}
+ try{
+  if(typeof window.shbaceRepairOffline!=='function')throw new Error('Repair is not ready. Reopen the app and try again.');
+  const result=await window.shbaceRepairOffline();
+  if(status){
+   status.textContent=result&&result.state==='offline'?'Connect to the internet, then tap Repair again.':
+    result&&result.state==='repair'?'Repair started. Keep the app open until verification finishes.':
+    result&&result.state==='latest'?'No offline files need repair.':
+    result&&result.state==='busy'?'Another update or repair is already running.':'Repair could not start. Please try again.';
+  }
+  if(result&&result.state==='latest')renderAppDemo();
+  return result;
+ }catch(error){if(status)status.textContent=error.message||'Repair could not start.';return false}
+ finally{if(btn&&document.body.contains(btn)){btn.disabled=false;btn.textContent='Repair'}}
+};
 window.shbaceSettingsCheckForUpdates=async function(button){
  const btn=button||document.getElementById('shbaceSettingsUpdateButton');
  const status=document.getElementById('shbaceSettingsUpdateStatus');
@@ -2899,6 +2929,7 @@ const home=function(){
   </article>`;
  })():'<p class="h7-empty">No verified daily medical fact is available for this time period.</p>';
  return `${appHeader('Home')}<div class="rs h7" data-grade="${GRADE_ID[obGradeNow()||5]}">
+ ${typeof window.shbaceOfflineRepairHomeNotice==='function'?window.shbaceOfflineRepairHomeNotice():''}
  <div class="h7-greet"><h1>${greet()} <span class="h7-wv" aria-hidden="true">👋</span></h1><p>Keep going towards your goal!</p></div>
  ${hasPed?`<section class="h7-card h7-cont" aria-label="Pediatrics study progress">
   <img class="h7-ph" alt="" src="${PEDIA_HERO_SRC}">
