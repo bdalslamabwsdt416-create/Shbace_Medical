@@ -166,22 +166,26 @@ function checkVersion(){
       the updater requests one reload only after its verified commit. */
   }).catch(function(){});
 }
-/* Single entry point for every trigger below. It does nothing unless a check is due. */
-function scheduledCheck(){
+/* The Service Worker script gets a lightweight update probe on app launch and reconnect.
+   The seven-day throttle applies to the version metadata check, not worker discovery.
+   Neither check downloads or replaces the offline package. */
+function scheduledCheck(forceWorker){
  if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;
+ if(forceWorker){
+  navigator.serviceWorker.getRegistration('./').then(function(reg){if(reg)return reg.update()}).catch(function(){});
+ }
  if(!checkDue())return;
  lsSet(VCHECK_TRY_KEY,Date.now());
- navigator.serviceWorker.getRegistration('./').then(function(reg){if(reg)return reg.update()}).catch(function(){});
  checkVersion();
 }
 if('serviceWorker' in navigator){
  /* controllerchange alone does not reload; the offline package transaction owns restart. */
- navigator.serviceWorker.ready.then(function(){scheduledCheck()}).catch(function(){});
- window.addEventListener('online',scheduledCheck);
- document.addEventListener('visibilitychange',function(){if(!document.hidden){scheduledCheck();applyPendingReload()}});
+ navigator.serviceWorker.ready.then(function(){scheduledCheck(true)}).catch(function(){});
+ window.addEventListener('online',function(){scheduledCheck(true)});
+ document.addEventListener('visibilitychange',function(){if(!document.hidden){scheduledCheck(false);applyPendingReload()}});
  setInterval(function(){
   if(document.hidden)return;
-  scheduledCheck();
+  scheduledCheck(false);
  },30*60*1000);
 }
 })();
