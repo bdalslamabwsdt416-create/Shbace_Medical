@@ -123,14 +123,16 @@ function createServiceWorkerHarness(options) {
       const response = await cache.match(new URL(relativePath, scope).href);
       return response ? response.text() : null;
     },
-    async request(relativePath, mode, destination) {
+    async request(relativePath, mode, destination, requestOptions = {}) {
       let responsePromise;
+      const suppliedHeaders = requestOptions.headers || {};
       const request = {
         url: new URL(relativePath, scope).href,
-        method: 'GET',
+        method: requestOptions.method || 'GET',
         mode: mode || 'same-origin',
         destination: destination || '',
-        cache: 'default'
+        cache: requestOptions.cache || 'default',
+        headers: { get(name) { return suppliedHeaders[name] || null; } }
       };
       const listener = listeners.get('fetch');
       assert.ok(listener, 'service worker fetch listener was registered');
@@ -199,7 +201,7 @@ function runOfflineStartup(installedRecord, options = {}) {
     },
     migrationPendingAtLaunch: false,
     cache: null,
-    runFullCheck() { calls.push('first-install-check'); networkCalls.push('first-install-check'); return Promise.resolve(); },
+    runFullCheck() { calls.push('first-install-check'); return Promise.resolve(); },
     scheduleCheckDue() {},
     Promise, Object, Number, Math
   };
@@ -257,6 +259,7 @@ function runVerifiedPlanHarness(options = {}) {
     localStorage, caches, navigator: { storage: null }, URL, Promise, Date, Object, Number, Math, Error,
     CACHE_NAME: 'shbace-medical-offline-v2', STAGING_NAME: 'shbace-staging-offline',
     MIGRATION_KEY: 'shbace_ios_migrated_1_4_14', CHECK_OK_KEY: 'shbace_pkg_check_ok_v1',
+    CHECK_ATTEMPT_KEY: 'shbace_pkg_check_attempt_v1',
     REPAIR_PENDING_KEY: 'shbace_pkg_repair_pending_v1', PENDING_KEY: 'shbace_pkg_update_pending_v1',
     READY_URL: new URL('./__shbace_offline_ready__', scope).href,
     urlFor(path) { return new URL(path, scope).href; },
@@ -319,6 +322,7 @@ function manualMigrationHarness(options = {}) {
     setPending(value) { events.push(['pending', value]); },
     rememberInstalled(info) { events.push(['installed', info && info.displayVersion]); },
     CHECK_OK_KEY: 'shbace_pkg_check_ok_v1',
+    CHECK_ATTEMPT_KEY: 'shbace_pkg_check_attempt_v1',
     PENDING_KEY: 'shbace_pkg_update_pending_v1',
     VER_AVAIL_KEY: 'shbace_pkg_version_available_v1',
     MIGRATION_KEY: 'shbace_ios_migrated_1_4_14',
@@ -343,6 +347,8 @@ function manualRepairHarness(options = {}) {
     navigator: { onLine: options.online !== false },
     started: false,
     migrationInProgress: false,
+    CHECK_ATTEMPT_KEY: 'shbace_pkg_check_attempt_v1',
+    lsSet(key, value) { events.push(['lsSet', key, value]); },
     manifestFromNetwork: options.online !== false,
     decide: () => { events.push('decide'); return Promise.resolve(options.result || { kind: 'setup', plan: { mode: 'restore' } }); },
     showPlanNeeded(plan) { events.push('showPlanNeeded:' + plan.mode); },
@@ -399,6 +405,7 @@ function runScheduledCheckHarness(options = {}) {
   const last = options.recent ? now - (7 * 24 * 60 * 60 * 1000) + 1000 :
     (options.lastCheck === undefined ? now - (7 * 24 * 60 * 60 * 1000) - 1000 : options.lastCheck);
   if (last !== null) store.shbace_pkg_check_ok_v1 = String(last);
+  if (options.lastAttempt !== undefined) store.shbace_pkg_check_attempt_v1 = String(options.lastAttempt);
   const localStorage = {
     getItem(key) { return Object.prototype.hasOwnProperty.call(store, key) ? store[key] : null; },
     setItem(key, value) { store[key] = String(value); writes.push([key, String(value)]); },
@@ -407,6 +414,7 @@ function runScheduledCheckHarness(options = {}) {
   const cache = {};
   const sandbox = {
     CHECK_OK_KEY: 'shbace_pkg_check_ok_v1',
+    CHECK_ATTEMPT_KEY: 'shbace_pkg_check_attempt_v1',
     CHECK_EVERY: 7 * 24 * 60 * 60 * 1000,
     INSTALLED_KEY: 'installed',
     CACHE_NAME: 'shbace-medical-offline-v2',
@@ -418,7 +426,8 @@ function runScheduledCheckHarness(options = {}) {
     localStorage, Date, Promise, Number, Math, Object, Array,
     lsNum(key) { return Number(localStorage.getItem(key)) || 0; },
     lsSet(key, value) { localStorage.setItem(key, value); },
-    loadManifest() {
+    loadManifest(allowNetwork) {
+      assert.equal(allowNetwork, true, 'the scheduled checker explicitly opts into network access');
       networkCalls.push('manifest');
       return options.fail ? Promise.reject(new Error('network failed')) :
         Promise.resolve({ version: '1.4.20', files: [{ path: 'index.html' }] });
@@ -443,14 +452,16 @@ function runScheduledCheckHarness(options = {}) {
     migrationInProgress: sandbox.migrationInProgress,
     scheduledCheckInProgress: sandbox.scheduledCheckInProgress,
     migrationFlag: store.shbace_ios_migrated_1_4_14 || null,
-    initialTimestamp: last
+    initialTimestamp: last,
+    initialAttemptTimestamp: Number(store.shbace_pkg_check_attempt_v1) || 0
   }));
 }
 
-test('silent seven-day check runs when the last successful check is older than seven days', async () => {
+test('silent seven-day check runs when the last attempt is older than seven days', async () => {
   const result = await runScheduledCheckHarness();
   assert.equal(result.state.state, 'current');
   assert.ok(result.networkCalls.includes('manifest'));
+  assert.ok(Number(result.store.shbace_pkg_check_attempt_v1) > result.initialTimestamp);
   assert.ok(Number(result.store.shbace_pkg_check_ok_v1) > result.initialTimestamp);
   assert.deepEqual(result.uiCalls, []);
   assert.equal(result.migrationFlag, null);
@@ -458,7 +469,7 @@ test('silent seven-day check runs when the last successful check is older than s
   assert.equal(result.scheduledCheckInProgress, false);
 });
 
-test('silent seven-day check is skipped when the last successful check is less than seven days old', async () => {
+test('silent seven-day check is skipped when the last attempt is less than seven days old', async () => {
   const result = await runScheduledCheckHarness({ recent: true });
   assert.equal(result.state.state, 'not-due');
   assert.deepEqual(result.networkCalls, []);
@@ -466,11 +477,19 @@ test('silent seven-day check is skipped when the last successful check is less t
   assert.deepEqual(result.uiCalls, []);
 });
 
-test('silent scheduled check stays silent and does not advance its timestamp offline or after failure', async () => {
-  for (const options of [{ online: false }, { fail: true }, { network: false }]) {
+test('silent scheduled check stays quiet and persists failed attempts for seven days', async () => {
+  const offline = await runScheduledCheckHarness({ online: false });
+  assert.equal(offline.state.state, 'offline');
+  assert.equal(Number(offline.store.shbace_pkg_check_attempt_v1) || 0, 0, 'offline does not count as a network attempt');
+  assert.deepEqual(offline.networkCalls, []);
+  assert.deepEqual(offline.uiCalls, []);
+  for (const options of [{ fail: true }, { network: false }]) {
     const result = await runScheduledCheckHarness(options);
-    assert.equal(result.state.state, 'offline', 'offline/failure result for ' + JSON.stringify(options));
-    assert.equal(result.store.shbace_pkg_check_ok_v1, String(result.initialTimestamp), 'failed check must preserve timestamp for ' + JSON.stringify(options));
+    assert.equal(result.state.state, 'offline', 'failed check result for ' + JSON.stringify(options));
+    assert.ok(Number(result.store.shbace_pkg_check_attempt_v1) > result.initialTimestamp,
+      'a failed online attempt is persisted to prevent network checks on every launch');
+    assert.equal(result.store.shbace_pkg_check_ok_v1, String(result.initialTimestamp),
+      'a failed attempt does not become a successful check');
     assert.deepEqual(result.uiCalls, []);
     assert.deepEqual(result.pending, []);
     assert.equal(result.migrationFlag, null);
@@ -487,6 +506,7 @@ test('silent scheduled update only marks pending and never opens UI, downloads o
   assert.equal(result.migrationFlag, null);
   assert.equal(result.migrationInProgress, false);
   assert.equal(result.scheduledCheckInProgress, false);
+  assert.ok(Number(result.store.shbace_pkg_check_attempt_v1) > result.initialTimestamp);
   assert.ok(Number(result.store.shbace_pkg_check_ok_v1) > result.initialTimestamp);
 });
 
@@ -630,10 +650,11 @@ test('offline manual update attempt leaves migration flag unset', async () => {
   assert.equal(result.api.isMigrationInProgress(), false);
 });
 
-test('first install still performs automatic package discovery', async () => {
+test('first install discovers cached package metadata without a startup network request', async () => {
   const result = await runOfflineStartup(null);
   assert.ok(result.calls.includes('first-install-check'));
   assert.ok(result.screens.includes('wait-for-splash'));
+  assert.deepEqual(result.networkCalls, [], 'first-install discovery uses only cached metadata');
   assert.equal(result.localStorage.getItem('shbace_ios_migrated_1_4_14'), null);
 });
 
@@ -654,33 +675,32 @@ test('only retired iOS shell caches are deleted; offline package and student dat
   assert.ok(!sw.includes('caches.delete(CACHE_NAME)'));
 });
 
-test('service worker compares IndexedDB releaseVersion with cached pwa-version and network-firsts stale navigation', () => {
+test('service worker is local-only except explicitly tagged update traffic', () => {
   for (const marker of [
-    'readInstalledReleaseVersion',
-    'indexedDB.open(DB_NAME)',
-    'readCachedPwaVersion',
-    'results[0] !== results[1]',
-    'await refreshCachedPwaVersion()',
-    "request.mode === 'navigate' ||",
-    "request.destination === 'script' ||",
-    "request.destination === 'style'",
-    'networkFirstOnPackageMismatch(request)',
-    'cache.match(INDEX_URL)'
-  ]) assert.ok(sw.includes(marker), 'missing service worker marker: ' + marker);
+    'function localOnly(request)',
+    'function isTaggedUpdateRequest(request)',
+    "request.headers.get(UPDATE_HEADER) === '1'",
+    "request.cache === 'no-store' && tagged",
+    'if (integrityRequest && tagged)',
+    'event.respondWith(localOnly(request))',
+    'cache.match(INDEX_URL)',
+    "if (request.method !== 'GET')"
+  ]) assert.ok(sw.includes(marker), 'missing local-only worker marker: ' + marker);
+  for (const removed of ['readInstalledReleaseVersion','readCachedPwaVersion','refreshCachedPwaVersion','networkFirstOnPackageMismatch','cache.addAll(']) {
+    assert.ok(!sw.includes(removed), 'obsolete startup network path remains: ' + removed);
+  }
 });
 
 
-test('behavior: old installed record without releaseVersion returns network js/04-app-main.js, not the stale cache copy', async () => {
+test('behavior: old install without releaseVersion serves the cached app script without network', async () => {
   const harness = createServiceWorkerHarness({
     source: sw,
     installedRecord: { version: '1.4.14', files: { 'js/04-app-main.js': { sha256: 'old' } } }
   });
   await harness.seed('js/04-app-main.js', 'OLD CACHED COPY');
   const response = await harness.request('js/04-app-main.js', 'same-origin', 'script');
-  assert.equal(await response.text(), 'NETWORK COPY');
-  assert.equal(harness.fetchCalls.length, 1);
-  assert.equal(harness.fetchCalls[0].cache, 'reload');
-  assert.equal(await harness.cachedText('js/04-app-main.js'), 'NETWORK COPY');
+  assert.equal(await response.text(), 'OLD CACHED COPY');
+  assert.equal(harness.fetchCalls.length, 0);
 });
 
 test('behavior: matching installed and cached releaseVersion keeps the cached js/04-app-main.js copy', async () => {
@@ -694,20 +714,21 @@ test('behavior: matching installed and cached releaseVersion keeps the cached js
   assert.equal(harness.fetchCalls.length, 0);
 });
 
-test('behavior: offline with a version mismatch falls back to the cached script instead of rejecting', async () => {
-  const harness = createServiceWorkerHarness({
-    source: sw,
-    installedRecord: { version: '1.4.14', files: {} },
-    offline: true
-  });
-  await harness.seed('js/04-app-main.js', 'OFFLINE CACHED COPY');
-  const response = await harness.request('js/04-app-main.js', 'same-origin', 'script');
-  assert.equal(await response.text(), 'OFFLINE CACHED COPY');
-  assert.equal(harness.fetchCalls.length, 1);
-  assert.equal(harness.fetchCalls[0].cache, 'reload');
+test('behavior: version mismatch never changes local-first runtime behavior', async () => {
+  for (const offline of [true, false]) {
+    const harness = createServiceWorkerHarness({
+      source: sw,
+      installedRecord: { version: '1.4.14', files: {} },
+      offline
+    });
+    await harness.seed('js/04-app-main.js', 'OFFLINE CACHED COPY');
+    const response = await harness.request('js/04-app-main.js', 'same-origin', 'script');
+    assert.equal(await response.text(), 'OFFLINE CACHED COPY');
+    assert.equal(harness.fetchCalls.length, 0);
+  }
 });
 
-test('behavior: mismatch applies network-first to every script, style and navigation request', async () => {
+test('behavior: scripts, styles and navigation remain local-first when newer server bytes exist', async () => {
   const cases = [
     { path: 'js/04-app-main.js', mode: 'same-origin', destination: 'script' },
     { path: 'css/bundle-core.css', mode: 'same-origin', destination: 'style' },
@@ -718,12 +739,39 @@ test('behavior: mismatch applies network-first to every script, style and naviga
       source: sw,
       installedRecord: { version: '1.4.14' }
     });
-    await harness.seed(item.path, 'OLD ' + item.destination.toUpperCase());
+    await harness.seed(item.path, 'LOCAL ' + item.destination.toUpperCase());
     const response = await harness.request(item.path, item.mode, item.destination);
-    assert.equal(await response.text(), 'NETWORK COPY', item.path + ' must return network bytes');
-    assert.equal(harness.fetchCalls.length, 1, item.path + ' must fetch network');
-    assert.equal(harness.fetchCalls[0].cache, 'reload', item.path + ' must bypass stale HTTP cache');
+    assert.equal(await response.text(), 'LOCAL ' + item.destination.toUpperCase());
+    assert.equal(harness.fetchCalls.length, 0);
   }
+});
+
+test('behavior: missing local assets return a visible failure without a network fallback', async () => {
+  const harness = createServiceWorkerHarness({ source: sw, installedRecord: { version: '1.4.20' } });
+  const response = await harness.request('js/missing-module.js', 'same-origin', 'script');
+  assert.equal(response.status, 503);
+  assert.equal(harness.fetchCalls.length, 0);
+});
+
+test('behavior: tagged no-store metadata requests are the only normal network checks', async () => {
+  const harness = createServiceWorkerHarness({ source: sw, installedRecord: { version: '1.4.20' } });
+  const response = await harness.request('offline-assets-manifest.json', 'same-origin', '', {
+    cache: 'no-store',
+    headers: { 'X-Shbace-Update-Check': '1' }
+  });
+  assert.equal(await response.text(), 'NETWORK COPY');
+  assert.equal(harness.fetchCalls.length, 1);
+  assert.equal(harness.fetchCalls[0].cache, 'no-store');
+  assert.equal(await harness.cachedText('offline-assets-manifest.json'), 'NETWORK COPY');
+});
+
+test('behavior: untagged metadata, non-GET, and external-origin requests never use network', async () => {
+  const harness = createServiceWorkerHarness({ source: sw, installedRecord: { version: '1.4.20' } });
+  const metadata = await harness.request('offline-assets-manifest.json', 'same-origin', '', { cache: 'no-store' });
+  assert.equal(metadata.status, 503);
+  await assert.rejects(harness.request('save-progress', 'same-origin', '', { method: 'POST' }));
+  await assert.rejects(harness.request('https://remote.example.test/api/data', 'cors', ''));
+  assert.equal(harness.fetchCalls.length, 0);
 });
 
 test('iOS copies the latest To Me drawer and settings while retaining the iOS manual update control', () => {
