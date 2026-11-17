@@ -88,7 +88,7 @@ function fetchVersionInfo(){
   }catch(e){fin(null)}
  });
 }
-function rememberInstalled(info){if(info)lsSetJson(VER_KEY,{displayVersion:info.displayVersion,releaseDate:info.releaseDate})}
+function rememberInstalled(info){if(info)lsSetJson(VER_KEY,{version:info.version,displayVersion:info.displayVersion,releaseDate:info.releaseDate})}
 function markInstalledNow(){
  var av=lsGetJson(VER_AVAIL_KEY);
  if(av){rememberInstalled(av);lsDel(VER_AVAIL_KEY)}else fetchVersionInfo().then(rememberInstalled);
@@ -771,11 +771,23 @@ function start(){
   /* First install: do not wait for updater metadata hydration; continue the existing
      post-Splash download path immediately. There is no previous local metadata yet. */
   if(!hasRecord)return runFullCheck(splashFinished);
-  /* Returning installs recover LocalStorage-first updater metadata before checkDue(). */
+  /* Returning installs recover LocalStorage-first updater metadata before checking release state. */
   return hydrateLocalMetadata().then(function(){
-   /* A check that is due: use the existing update path. */
-   if(checkDue())return runFullCheck(splashFinished);
-   /* Otherwise stay off the network. Only repair when files are really missing and the device is online. */
+   /* Lightweight release probe on every online launch. It fetches only pwa-version.json;
+      package files are still untouched until the student accepts Update now. A changed
+      release bypasses the seven-day timer once, so an installed copy can discover fixes
+      without waiting a full week. Offline launches remain strictly local. */
+   if(navigator.onLine!==false){
+    return fetchVersionInfo().then(function(remote){
+     var local=lsGetJson(VER_KEY);
+     var releaseChanged=!!(remote&&remote.version&&(!local||local.version!==remote.version));
+     if(releaseChanged)return runFullCheck(splashFinished);
+     if(checkDue())return runFullCheck(splashFinished);
+     return localRepairNeeded().then(function(needs){
+      if(needs&&navigator.onLine!==false)return runFullCheck(splashFinished);
+     });
+    });
+   }
    return localRepairNeeded().then(function(needs){
     if(needs&&navigator.onLine!==false)return runFullCheck(splashFinished);
    });
