@@ -320,7 +320,7 @@ test('shared Study experience controls, labels, order, defaults and legacy prefe
 
   const questionDefaultsMatch = voice.match(/var defaults=\{shareQuestion:true,copyQuestion:true,readAloud:true,readingSpeed:'normal'\}/);
   assert.ok(questionDefaultsMatch,'iOS question tool defaults are declared');
-  const questionDefaults = vm.runInNewContext('({' + questionDefaultsMatch[0].replace(/^var defaults=/,'') + '})');
+  const questionDefaults = vm.runInNewContext('(' + questionDefaultsMatch[0].replace(/^var defaults=/,'') + ')');
   assert.equal(questionDefaults.shareQuestion, toMeDefaults.shareQuestion);
   assert.equal(questionDefaults.copyQuestion, toMeDefaults.copyQuestion);
   assert.equal(questionDefaults.readAloud, toMeDefaults.readAloud);
@@ -391,6 +391,7 @@ function studyExperienceMountHarness() {
     {
       settingsRoot(){return activeRoot},
       document,
+      computerVoiceQuestionToolSetting(){return '<div></div>'},
       computerVoiceUpdateUi(){},
       computerVoiceUpdateQuestionToolsUI(){}
     }
