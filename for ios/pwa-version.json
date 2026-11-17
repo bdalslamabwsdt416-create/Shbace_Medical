@@ -1,14 +1,14 @@
 {
   "app": "Shbace Medical",
   "platform": "PWA",
-  "version": "1.4.13",
-  "displayVersion": "1.4.13",
+  "version": "1.4.14",
+  "displayVersion": "1.4.14",
   "releaseDate": "2026-11-18",
   "releaseNotes": [
-    "Matches the To Me offline experience on iPhone and iPad: first installation and repairs run in the background after the app opens, with a small progress chip instead of a blocking full-screen setup screen.",
-    "Uses the To Me verified package engine: resumable downloads, per-file byte-size and SHA-256 checks, staged updates, and one safe restart after the verified package is committed.",
-    "Keeps the existing iOS cache namespace shbace-medical-offline-v2 and IndexedDB identity so saved app files and student data are retained.",
-    "Aligns the iOS Service Worker with To Me local-first delivery and bounded network fallback while preserving the iOS home-screen icon and onboarding screens.",
-    "Keeps the seven-day automatic update schedule and the manual Check for updates action in Settings."
+    "Restores the full-screen Setup experience for the first offline installation only. The installer prepares its checklist and storage during the ECG splash, then the Setup screen appears immediately after the splash.",
+    "The first-install package is downloaded and verified before the onboarding scripts and question-bank data are loaded, preventing them from competing with the installer for network and startup resources.",
+    "After the first install, the app opens from its saved local package. Repairs and updates stay in the background with a compact progress chip; automatic update checks run every 48 hours and Settings can trigger a manual check.",
+    "Keeps the To Me verified updater with resumable downloads, per-file size and SHA-256 validation, staged updates, and one safe restart after verified changes are committed.",
+    "Preserves the existing iOS cache namespace shbace-medical-offline-v2, IndexedDB database shbace-medical-offline-state-v1, student data, iOS icon, and onboarding screens."
   ]
 }
