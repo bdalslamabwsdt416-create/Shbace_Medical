@@ -126,10 +126,15 @@ const serviceWorker = fs.readFileSync(safePath('sw.js'), 'utf8');
 const featureRuntime = fs.readFileSync(safePath('js/09-app-features-v6.js'), 'utf8');
 if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !offlineSetup.includes('window.shbaceCheckForUpdate=manualCheck') ||
+    !offlineSetup.includes('MANIFEST_FETCH_TIMEOUT=30000') ||
+    !offlineSetup.includes('MANIFEST_FETCH_ATTEMPTS=2') ||
+    !offlineSetup.includes('function waitForServiceWorkerReady') ||
+    offlineSetup.includes("},10000)") ||
     !serviceWorker.includes("const CACHE_NAME = 'shbace-medical-offline-v2'") ||
+    !serviceWorker.includes("url.searchParams.has('__shbace_integrity')") ||
     !featureRuntime.includes('onclick="shbaceSettingsCheckForUpdates(this)"') ||
     !featureRuntime.includes('window.shbaceCheckForUpdate()')) {
-  throw new Error('The shared To Me offline updater or its Settings button is missing.');
+  throw new Error('The shared To Me updater, retry-safe iOS bootstrap, integrity route, or Settings control is missing.');
 }
 const onboardingMain = fs.readFileSync(safePath('js/04-app-main.js'), 'utf8');
 if (!onboardingMain.includes('function gradeScreen()') || !onboardingMain.includes('function finishScreen()')) throw new Error('The final two onboarding screens are missing from the app core.');
