@@ -177,7 +177,12 @@ if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !offlineSetup.includes('window.shbaceCheckForUpdate=manualCheck') ||
     !offlineSetup.includes('MANIFEST_FETCH_TIMEOUT=30000') ||
     !offlineSetup.includes('MANIFEST_FETCH_ATTEMPTS=2') ||
-    !offlineSetup.includes('function waitForServiceWorkerReady') ||
+    !offlineSetup.includes('function waitForWorkerActivation(worker)') ||
+    !offlineSetup.includes('return reg.update().then(function(){') ||
+    !offlineSetup.includes('var candidate=reg.installing||reg.waiting') ||
+    !offlineSetup.includes('return candidate?waitForWorkerActivation(candidate)') ||
+    !offlineSetup.includes('return navigator.serviceWorker.ready') ||
+    offlineSetup.includes('WORKER_READY_TIMEOUT') ||
     offlineSetup.includes("},10000)") ||
     !serviceWorker.includes("const CACHE_NAME = 'shbace-medical-offline-v2'") ||
     !serviceWorker.includes("const DB_NAME = 'shbace-medical-offline-state-v1'") ||
