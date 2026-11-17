@@ -145,7 +145,7 @@ function createServiceWorkerHarness(options) {
 }
 
 function runOfflineStartup(installedRecord, options = {}) {
-  const calls = [], writes = [], screens = [], notifications = [], networkCalls = [];
+  const calls = [], writes = [], screens = [], notifications = [], networkCalls = [], pending = [], repairs = [];
   const store = Object.create(null);
   const migrationKey = 'shbace_ios_migrated_1_4_14';
   const pendingKey = 'shbace_pkg_update_pending_v1';
@@ -186,6 +186,8 @@ function runOfflineStartup(installedRecord, options = {}) {
     PENDING_KEY: pendingKey,
     REPAIR_PENDING_KEY: repairKey,
     NOTIF_ID: 'update-available',
+    setPending(value) { pending.push(value); if(value>0)store[pendingKey]=String(value);else delete store[pendingKey]; },
+    setRepairPending(value) { repairs.push(value); if(value>0)store[repairKey]=String(value);else delete store[repairKey]; },
     migrationPendingAtLaunch: false,
     cache: null,
     runFullCheck() { calls.push('first-install-check'); networkCalls.push('first-install-check'); return Promise.resolve(); },
@@ -204,7 +206,7 @@ function runOfflineStartup(installedRecord, options = {}) {
   ].join(String.fromCharCode(10));
   vm.runInNewContext(code, sandbox);
   return new Promise(resolve => setImmediate(() => resolve({
-    calls, writes, screens, notifications, networkCalls, store, localStorage
+    calls, writes, screens, notifications, networkCalls, pending, repairs, store, localStorage
   })));
 }
 function runVerifiedPlanHarness(options = {}) {
