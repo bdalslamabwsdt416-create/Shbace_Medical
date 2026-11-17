@@ -104,7 +104,7 @@ test('Settings places Question voice with Appearance and keeps the single Study 
 test('PWA build invariants match the single root-level Study experience card and dynamic manifest inventory', () => {
   assert.ok(restoreBuild.includes("root.appendChild(questionTools)"));
   assert.ok(restoreBuild.includes("root.lastElementChild!==questionTools"));
-  assert.ok(restoreBuild.includes("target('appearance').appendChild(questionTools)") === false);
+  assert.ok(restoreBuild.includes("includes(\"target('appearance').appendChild(questionTools)\")"), 'build script must reject obsolete Appearance placement');
   assert.ok(restoreBuild.includes('manifest.fileCount = manifest.files.length'));
 });
 
