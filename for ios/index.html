@@ -361,7 +361,7 @@
  var dataText=null,dataErr=null;
  /* v1.1: Original is the immutable college bank. Reviewed is assembled from the small verified patch plus review-log-only cautions. */
  var dataFetch=(function(){
-  if(!window.fetch)return Promise.reject(new Error('no fetch'));
+  if(!window.caches)return Promise.reject(new Error('Cache Storage is unavailable'));
   function markReady(){try{performance.mark('shb-qb-data-ready')}catch(e){}}
   /* Match the verified offline-package cache first. The package installer stores qbData here,
      not in the legacy data cache opened below. Never require a network round-trip for an installed package. */
@@ -384,14 +384,7 @@
     if(packaged!==null)return packaged;
     return cacheHit(cache,absolute,url+' data cache').then(function(cached){
      if(cached!==null)return cached;
-     return bounded(fetch(absolute,{cache:'no-cache'}),20000,url+' fetch').then(function(response){
-      if(!response.ok)throw new Error(url+' HTTP '+response.status);
-      var copy=response.clone();
-      return bounded(response.text(),25000,url+' response read').then(function(t){
-       if(cache)cache.put(absolute,copy).catch(function(){});
-       return t;
-      });
-     });
+     throw new Error(url+' is missing from the installed offline storage');
     });
    });
   }
@@ -428,7 +421,7 @@
    var baseURL='data/qbData.json';
    if(selectedQB!=='reviewed')return fetchText(baseURL,cache,packageCache).then(function(t){dataText=t;markReady();});
    return Promise.all([
-    fetchText(baseURL,cache),
+    fetchText(baseURL,cache,packageCache),
     fetchText('data/qbData_reviewed_patch.json',cache,packageCache),
     fetchText('data/qbData_review_log.json',cache,packageCache)
    ]).then(function(items){dataText=assembleReviewed(items[0],items[1],items[2]);});
@@ -473,7 +466,7 @@
   panel.id='shb-boot-failure';
   panel.setAttribute('role','alert');
   panel.style.cssText='position:fixed;z-index:2147483647;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px;background:#071321;color:#f4f8ff;font:16px system-ui;text-align:center';
-  panel.innerHTML='<h2 style="margin:0">Shbace Medical could not finish loading</h2><p style="max-width:520px;line-height:1.6">A required app component did not load. Your saved answers and progress have not been changed. Check your connection, then try again.</p><button type="button" style="border:0;border-radius:12px;padding:13px 24px;background:#1d9bf0;color:white;font-weight:700" onclick="location.reload()">Retry loading</button>';
+  panel.innerHTML='<h2 style="margin:0">Shbace Medical could not finish loading</h2><p style="max-width:520px;line-height:1.6">A required app file is missing from local storage. Your saved answers and progress have not been changed. Open Settings → App updates to check or repair the offline package.</p><button type="button" style="border:0;border-radius:12px;padding:13px 24px;background:#1d9bf0;color:white;font-weight:700" onclick="location.reload()">Retry loading</button>';
   document.body.appendChild(panel);
  }
  /* Fetch every deferred module in parallel, but keep execution ordered below.
@@ -539,7 +532,7 @@
     if(!panel){
      panel=document.createElement('section');panel.id='shb-boot-failure';panel.setAttribute('role','alert');
      panel.style.cssText='position:fixed;z-index:2147483647;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px;background:#071321;color:#f4f8ff;font:16px system-ui;text-align:center';
-     panel.innerHTML='<h2 style="margin:0">Shbace Medical could not load the question bank</h2><p style="max-width:520px;line-height:1.6">The installed offline package does not contain a readable copy of the required question-bank file. Your saved answers and progress have not been changed.</p><button type="button" style="border:0;border-radius:12px;padding:13px 24px;background:#1d9bf0;color:white;font-weight:700" onclick="location.reload()">Retry loading</button>';
+     panel.innerHTML='<h2 style="margin:0">Shbace Medical could not load the question bank</h2><p style="max-width:520px;line-height:1.6">The question-bank files are not readable in local storage. Your saved answers and progress have not been changed. Open Settings → App updates to check or repair the offline package.</p><button type="button" style="border:0;border-radius:12px;padding:13px 24px;background:#1d9bf0;color:white;font-weight:700" onclick="location.reload()">Retry loading</button>';
      document.body.appendChild(panel);
     }
     return;
