@@ -1,6 +1,6 @@
 {
   "name": "shbace-medical",
-  "version": "1.4.18",
+  "version": "1.4.19",
   "private": true,
   "description": "Shbace Medical iOS PWA — To Me sidebar and navigation with preserved iOS onboarding and offline setup.",
   "scripts": {
