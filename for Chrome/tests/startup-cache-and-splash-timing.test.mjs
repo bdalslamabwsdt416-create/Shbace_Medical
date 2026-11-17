@@ -13,7 +13,7 @@ test("Service Worker and offline updater retain one persistent package cache", (
   assert.ok(workerCache, "worker cache name exists");
   assert.ok(updaterCache, "updater cache name exists");
   assert.equal(workerCache[1], updaterCache[1]);
-  assert.equal(workerCache[1], "shbace-chrome-offline-v1.3.10.37");
+  assert.equal(workerCache[1], "shbace-chrome-offline-v1.3.4");
 });
 
 test("cached navigation, JavaScript and CSS are served locally before any network fallback", () => {
