@@ -1,10 +1,11 @@
 {
   "app": "Shbace Medical",
   "platform": "Chrome Android PWA",
-  "version": "1.3.4-chrome.6",
-  "displayVersion": "1.3.4 ? Chrome Android",
-  "releaseDate": "2026-11-15",
+  "version": "1.3.4-chrome.7",
+  "displayVersion": "1.3.4 · Chrome Android",
+  "releaseDate": "2026-11-17",
   "releaseNotes": [
+    "Expands AI Clinical Cases from 1,598 to 1,840 verified questions across 10 medical systems. Adds 242 supplementary questions and four topics; excludes the duplicate Proteus question. Existing questions, answers, explanations and student progress are preserved.",
     "Added Bank 07: Clinical Case, an independent case-based question bank with full medical-system and topic navigation.",
     "Clinical case history is shown once and followed by its linked questions; answer feedback reveals the Initial Explanation, while Read More opens Detailed Explanation, High-Yield Points and the course-sheet source page.",
     "Clinical Case answers are saved independently and do not modify the existing Pediatrics question-bank answers, Smart Review queue or quiz history.",
