@@ -167,12 +167,21 @@ for (const icon of pwaManifest.icons || []) {
 }
 const offlineSetup = fs.readFileSync(safePath('js/29-offline-setup.js'), 'utf8');
 const serviceWorker = fs.readFileSync(safePath('sw.js'), 'utf8');
+const questionVoice = fs.readFileSync(safePath('js/33-unified-voice.js'), 'utf8');
+if (!questionVoice.includes('toolbar.dataset.sig=signature') ||
+    !questionVoice.includes('scheduleQuestionDecoration()') ||
+    questionVoice.includes('new MutationObserver(function(){mountVoiceSettings();computerVoiceDecorateQuestions()}')) {
+  throw new Error('Question toolbar must be idempotent and MutationObserver decoration must be frame-coalesced.');
+}
 const featureRuntime = fs.readFileSync(safePath('js/09-app-features-v6.js'), 'utf8');
 if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !offlineSetup.includes("var DB_NAME='shbace-medical-offline-state-v1'") ||
     !offlineSetup.includes("var MIGRATION_KEY='shbace_ios_migrated_1_4_14'") ||
-    !offlineSetup.includes('migrationInProgress&&manifestFromNetwork&&res.plan') ||
     !offlineSetup.includes("lsSet(MIGRATION_KEY,'1')") ||
+    offlineSetup.includes('migrationInProgress') ||
+    offlineSetup.includes('function checkDue(') ||
+    offlineSetup.includes('function localRepairNeeded(') ||
+    !offlineSetup.includes('if(!hasRecord)return runFullCheck(splashFinished)') ||
     !offlineSetup.includes("name.indexOf('shbace-medical-ios-shell-')===0") ||
     !offlineSetup.includes('window.shbaceCheckForUpdate=manualCheck') ||
     !offlineSetup.includes('MANIFEST_FETCH_TIMEOUT=30000') ||
@@ -192,7 +201,7 @@ if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !serviceWorker.includes("url.searchParams.has('__shbace_integrity')") ||
     !featureRuntime.includes('onclick="shbaceSettingsCheckForUpdates(this)"') ||
     !featureRuntime.includes('window.shbaceCheckForUpdate()')) {
-  throw new Error('The shared To Me updater, one-time migration, cache cleanup, or version-aware service worker is missing.');
+  throw new Error('The manual-only iOS updater, first-install setup, cache cleanup, or version-aware service worker invariant failed.');
 }
 const onboardingMain = fs.readFileSync(safePath('js/04-app-main.js'), 'utf8');
 if (!onboardingMain.includes('function gradeScreen()') || !onboardingMain.includes('function finishScreen()')) throw new Error('The final two onboarding screens are missing from the app core.');
@@ -253,10 +262,10 @@ if (!onboardingMain.includes('Which grade are you in?') ||
 }
 const pwaVersion = JSON.parse(fs.readFileSync(safePath('pwa-version.json'), 'utf8'));
 const packageMetadata = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-if (packageMetadata.version !== '1.4.18' || pwaVersion.version !== '1.4.18' || pwaVersion.displayVersion !== '1.4.18' ||
+if (packageMetadata.version !== '1.4.19' || pwaVersion.version !== '1.4.19' || pwaVersion.displayVersion !== '1.4.19' ||
     !Array.isArray(pwaVersion.releaseNotes) ||
     !pwaVersion.releaseNotes.includes("Adds iOS Question Bank tools for Share, Copy and Read aloud, groups bank controls in Settings, and scopes progress resets to the active bank, system and topic.")) {
-  throw new Error('The iOS 1.4.18 release metadata is missing or inconsistent.');
+  throw new Error('The iOS 1.4.19 release metadata is missing or inconsistent.');
 }
 
 if (manifest.files.some(item => ['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/32-ios-v7.js'].includes(item.path))) throw new Error('A retired iOS visual layer is still included in the offline runtime inventory.');
