@@ -134,7 +134,7 @@ async function selectGrade(n){
  if(hint)hint.textContent=`You reached Grade ${n}. Your study space is ready.`;updateGradeSubjects();
  if(continueBtn)continueBtn.disabled=false;
  document.querySelectorAll('.grade-select').forEach(el=>el.disabled=false);
- stage.classList.remove('climbing');
+ if(stage)stage.classList.remove('climbing');
 }
 
 function enterAppDemo(){if(!onboardingDone()&&!(mode==='preview'&&slide===screenTitles.length-1))return; /* never mark complete before the last step */ markOnboardingDone();obReplay=false;try{if(selectedGrade)localStorage.setItem('shbace_onboarding_v3_grade',String(selectedGrade));}catch(e){} mode='app';appPage='subjects';setModeUI();renderAppDemo()}
