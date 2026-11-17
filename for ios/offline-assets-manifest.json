@@ -2025,14 +2025,14 @@
     },
     {
       "path": "sw.js",
-      "bytes": 10130,
-      "sha256": "19bb42f9958f7a9016de394fbffe3ef71f0a6c1bf780df65d2f44b4019ce6589",
+      "bytes": 10039,
+      "sha256": "bdb6dc5aa518589a035a69491aa9ec4a524e321b9232616efcf52d213cb758ee",
       "group": "app"
     }
   ],
   "fileCount": 338,
-  "totalBytes": 30025791,
+  "totalBytes": 30025700,
   "releaseVersion": "1.4.15",
-  "version": "4e3b2c36955e46fd5e67e5e4216291afe4b981c2a8f5dbb82dc7d208e6134e47",
+  "version": "4b10072c38f2bc72451cc2c784e733d832995164c98ff0b68d0ee489d5400dd5",
   "generatedAt": "2026-11-17T11:42:45.728Z"
 }
