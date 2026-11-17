@@ -308,10 +308,10 @@ test('retired iOS modules are absent and are not referenced by the live HTML', (
   }
 });
 
-test('release is 1.4.18 and records the iOS To Me navigation and update-details changes', () => {
-  assert.equal(pkg.version, '1.4.19');
-  assert.equal(pwa.version, '1.4.19');
-  assert.equal(pwa.displayVersion, '1.4.19');
+test('release is 1.4.20 and records the iOS Settings navigation correction', () => {
+  assert.equal(pkg.version, '1.4.20');
+  assert.equal(pwa.version, '1.4.20');
+  assert.equal(pwa.displayVersion, '1.4.20');
   assert.ok(pwa.releaseNotes.includes("Aligns the iOS sidebar with To Me, exposes Exam Goal Planner, removes Smart Review badges, and shows installed/update version details in Settings."));
   assert.equal(offlineManifest.fileCount, 338);
   assert.equal(offlineManifest.files.length, offlineManifest.fileCount);
