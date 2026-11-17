@@ -21,7 +21,7 @@ for (const relative of ['js/09-app-features-v6.js', 'js/20-drawer-order-v12.js',
 }
 console.log('Changed iOS JavaScript syntax checks passed.');
 
-const migrationTests = spawnSync(process.execPath, ['--test', 'tests/offline-migration.test.js', 'tests/exam-planner-linkage.test.mjs', 'tests/settings-bank-tools.test.mjs'], {
+const migrationTests = spawnSync(process.execPath, ['--test', 'tests/offline-migration.test.js', 'tests/exam-planner-linkage.test.mjs', 'tests/settings-bank-tools.test.mjs', 'tests/offline-runtime-network-isolation.test.mjs'], {
   cwd: root,
   stdio: 'inherit'
 });
@@ -221,6 +221,8 @@ if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !offlineSetup.includes('function scheduleCheckDue()') ||
     !offlineSetup.includes('var CHECK_OK_KEY=') ||
     !offlineSetup.includes('var CHECK_EVERY=7*24*60*60*1000') ||
+    !offlineSetup.includes("CHECK_ATTEMPT_KEY='shbace_pkg_check_attempt_v1'") ||
+    !offlineSetup.includes('function runFullCheck(splashFinished){\\n return decide(false)') ||
     !startupRuntime.includes('scheduleCheckDue()') ||
     scheduledRuntime.includes('MIGRATION_KEY') ||
     scheduledRuntime.includes('migrationInProgress') ||
@@ -243,6 +245,7 @@ if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !scheduleRuntime.includes('setTimeout(') ||
     !scheduleRuntime.includes('1200') ||
     !scheduleRuntime.includes('requestIdleCallback') ||
+    !scheduleRuntime.includes("document.addEventListener('shb-splash-complete'") ||
     !offlineSetup.includes('window.shbaceCheckForUpdate=manualCheck') ||
     !offlineSetup.includes('MANIFEST_FETCH_TIMEOUT=30000') ||
     !offlineSetup.includes('MANIFEST_FETCH_ATTEMPTS=2') ||
@@ -256,8 +259,12 @@ if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !serviceWorker.includes("const CACHE_NAME = 'shbace-medical-offline-v2'") ||
     !serviceWorker.includes("const DB_NAME = 'shbace-medical-offline-state-v1'") ||
     !serviceWorker.includes("name.startsWith('shbace-medical-ios-shell-')") ||
-    !serviceWorker.includes('readInstalledReleaseVersion') ||
-    !serviceWorker.includes('networkFirstOnPackageMismatch(request)') ||
+    serviceWorker.includes('readInstalledReleaseVersion') ||
+    serviceWorker.includes('networkFirstOnPackageMismatch(request)') ||
+    serviceWorker.includes('refreshCachedPwaVersion') ||
+    !serviceWorker.includes('function localOnly(request)') ||
+    !serviceWorker.includes("request.headers.get(UPDATE_HEADER) === '1'") ||
+    serviceWorker.includes('cache.addAll(') ||
     !serviceWorker.includes("url.searchParams.has('__shbace_integrity')") ||
     !featureRuntime.includes('onclick="shbaceSettingsCheckForUpdates(this)"') ||
     !featureRuntime.includes('window.shbaceCheckForUpdate()') ||
