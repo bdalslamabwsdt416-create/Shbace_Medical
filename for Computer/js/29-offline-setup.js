@@ -190,6 +190,23 @@ function mount(){
     }else location.reload();
     return}removeSetupOverlay();return}
   if(ui.button.dataset.retryCheck==='1'){location.reload();return}
+  if(ui.button.dataset.initialSetup==='1'){
+   ui.button.disabled=true;ui.button.textContent='Preparing download…';
+   loadManifest().then(function(data){
+    manifest=data;
+    return caches.open(CACHE_NAME);
+   }).then(function(c){
+    cache=c;plan=planOf('install',manifest.files,[]);
+    ui.button.dataset.initialSetup='0';
+    showPlanNeeded(plan);
+    runPlan();
+   }).catch(function(error){
+    showSetupError(error);
+    ui.button.dataset.initialSetup='1';
+    ui.button.dataset.retryCheck='0';
+   });
+   return;
+  }
   runPlan();
  });
  if(document.querySelector('.phone.light'))root.classList.add('is-light');
@@ -635,6 +652,15 @@ function runPlan(){
   ui.button.disabled=false;ui.button.textContent='Retry download';ui.button.dataset.done='0';
  }).finally(function(){started=false});
 }
+function showFirstInstallPrompt(){
+ plan=null;mount();setMode('install');resetCounters();
+ setStatus('No verified offline package was found on this device.');
+ setWarning('The first offline setup is ready. Connect to the internet, tap Start one-time download, and keep the app open until verification finishes.');
+ ui.button.disabled=false;ui.button.textContent=MODE_TEXT.install.button;
+ ui.button.dataset.initialSetup='1';ui.button.dataset.retryCheck='0';ui.button.dataset.done='0';
+ ui.count.textContent='0 / 0 files';ui.bytes.textContent='0 B / 0 B';
+ ui.percent.textContent='0%';ui.stage.textContent='Waiting for download';
+}
 function showPlanNeeded(p){
  plan=p;mount();setMode(p.mode);
  stageCounts=stageMarkup();resetCounters();
@@ -676,7 +702,8 @@ function waitForSplash(){
    finished=true;if(observer)observer.disconnect();resolve();
   }
   try{observer=new MutationObserver(done);observer.observe(document.body,{childList:true,subtree:true})}catch(e){}
-  setTimeout(function(){if(!finished){finished=true;if(observer)observer.disconnect();resolve()}},14000);
+  /* The visual splash is designed for a 7-second hold. Do not let startup storage/network work extend it. */
+  setTimeout(function(){if(!finished){finished=true;if(observer)observer.disconnect();resolve()}},7000);
  });
 }
 function showSetupUnavailable(){
@@ -768,9 +795,18 @@ function start(){
  }
  dbGet('meta',INSTALLED_KEY).catch(function(){return null}).then(function(rec){
   var hasRecord=!!(rec&&rec.files);
-  /* First install: do not wait for updater metadata hydration; continue the existing
-     post-Splash download path immediately. There is no previous local metadata yet. */
-  if(!hasRecord)return runFullCheck(splashFinished);
+  if(!hasRecord){
+   /* First boot is local-only during the 7-second splash. Never wait for a network
+      manifest before telling the student that the one-time offline setup is needed. */
+   return Promise.all([
+    dbGet('meta','ready').catch(function(){return null}),
+    caches.open(CACHE_NAME).then(function(c){return c.match(READY_URL)}).catch(function(){return null})
+   ]).then(function(local){
+    var legacyReady=!!(local[0]&&local[0].verified)||!!local[1];
+    if(legacyReady)return runFullCheck(splashFinished);
+    return splashFinished.then(showFirstInstallPrompt);
+   });
+  }
   /* Returning installs recover LocalStorage-first updater metadata before checkDue(). */
   return hydrateLocalMetadata().then(function(){
    /* A check that is due: use the existing update path. */
