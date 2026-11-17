@@ -1,9 +1,13 @@
 (function(){
 'use strict';
 
+/* Native Capacitor builds ship a complete local asset bundle inside the signed APK.
+   Do not run the browser/PWA Cache Storage installer or updater inside the APK. */
+if(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) return;
+
 /* Persistent offline-package cache. NEVER rotate this name for an app release: the manifest/hash planner updates only changed files inside it. */
 var CACHE_NAME='shbace-medical-offline-v2';
-var STAGING_NAME='shbace-medical-ios-staging-v1';
+var STAGING_NAME='shbace-staging-offline';
 var INSTALLED_KEY='installed';
 /* Update checks are throttled: one successful network check every 7 days; after a failed attempt (offline) retry no sooner than 2 hours. */
 var CHECK_OK_KEY='shbace_pkg_check_ok_v1',CHECK_TRY_KEY='shbace_pkg_check_try_v1';
@@ -14,12 +18,6 @@ var DB_NAME='shbace-medical-offline-state-v1';
 var MANIFEST_URL=new URL('./offline-assets-manifest.json',location.href).href;
 var READY_URL=new URL('./__shbace_offline_ready__',location.href).href;
 var manifest=null,cache=null,ui=null,started=false;
-/* Preserve the original iOS pre-splash gate and wait for its splash-complete event before presenting setup/update UI. */
-var splashComplete=window.__shbSplashComplete===true,splashWaiters=[];
-document.addEventListener('shb-splash-complete',function(){splashComplete=true;var pending=splashWaiters.slice();splashWaiters.length=0;pending.forEach(function(fn){try{fn()}catch(error){console.error('Offline setup presentation failed:',error)}})},{once:true});
-function afterSplash(fn){if(splashComplete||window.__shbSplashComplete===true){fn();return;}splashWaiters.push(fn)}
-function releaseStartupGate(){try{if(typeof window.__shbReleaseOfflineGate==='function')window.__shbReleaseOfflineGate();else document.documentElement.classList.remove('shb-offline-pending')}catch(e){}}
-
 var verifiedCount=0,verifiedBytes=0,donePaths=Object.create(null),errors=[];
 var STAGES=[
  {id:'app',label:'Application files'},
@@ -247,7 +245,7 @@ function cleanupPreviousCaches(){
  }).then(function(internalResults){
   return caches.keys().then(function(names){
    var stale=names.filter(function(name){
-    return (name.indexOf('shbace-chrome-offline-')===0&&name!==CACHE_NAME)||name.indexOf('shbace-to-me-chrome-offline-')===0;
+    return (name.indexOf('shbace-chrome-offline-')===0&&name!==CACHE_NAME)||name.indexOf('shbace-to-me-chrome-offline-')===0||name==='shbace-medical-ios-shell-v151';
    });
    return Promise.all(stale.map(function(name){
     return caches.delete(name).then(function(ok){return {name:name,ok:ok}}).catch(function(){return {name:name,ok:false}});
@@ -262,8 +260,7 @@ function loadManifest(){
   manifestFromNetwork=false;
   var ctl=null,timer=null;
   try{ctl=new AbortController();timer=setTimeout(function(){try{ctl.abort()}catch(e){}},10000)}catch(e){}
-  var freshManifestUrl=MANIFEST_URL+(MANIFEST_URL.indexOf('?')>=0?'&':'?')+'shbcheck='+Date.now();
-  return fetch(freshManifestUrl,{credentials:'same-origin',cache:'no-store',signal:ctl?ctl.signal:undefined}).then(function(r){
+  return fetch(MANIFEST_URL,{credentials:'same-origin',cache:'no-store',signal:ctl?ctl.signal:undefined}).then(function(r){
    if(timer)clearTimeout(timer);
    if(!r.ok)throw new Error('Offline asset manifest returned HTTP '+r.status+'.');
    var copy=r.clone();
@@ -627,9 +624,15 @@ function showUpdateSheet(p,info){
 }
 function waitForSplash(){
  return new Promise(function(resolve){
-  var done=false;function finish(){if(done)return;done=true;resolve()}
-  afterSplash(finish);
-  setTimeout(finish,14000);
+  var splash=document.getElementById('startupSplash');
+  if(!splash||!splash.isConnected){resolve();return}
+  var finished=false,observer=null;
+  function done(){
+   if(finished||splash.isConnected)return;
+   finished=true;if(observer)observer.disconnect();resolve();
+  }
+  try{observer=new MutationObserver(done);observer.observe(document.body,{childList:true,subtree:true})}catch(e){}
+  setTimeout(function(){if(!finished){finished=true;if(observer)observer.disconnect();resolve()}},14000);
  });
 }
 function showSetupUnavailable(){
@@ -659,7 +662,7 @@ function runFullCheck(splashFinished){
    lsSet(CHECK_OK_KEY,Date.now());setPending(res.plan.files.length);
    return fetchVersionInfo().then(function(info){
     if(info)lsSetJson(VER_AVAIL_KEY,info);
-    if(examSoon()&&typeof window.shbAddNotif==='function')return;   /* If a notification centre exists, keep its exam-week quiet rule. */
+    if(examSoon())return;   /* exam within a week: bell only, no window */
     return splashFinished.then(function(){showUpdateSheet(res.plan,info)});
    });
   }
@@ -708,20 +711,7 @@ window.shbaceLastUpdateCheck=function(){return lsNum(CHECK_OK_KEY)};
 window.shbaceUpdatePending=function(){return lsNum(PENDING_KEY)};
 window.shbaceVersionInfo=function(){return {installed:lsGetJson(VER_KEY),available:lsGetJson(VER_AVAIL_KEY)}};
 
-/* Apply an approved offline update only after the student leaves an active question-bank screen. */
-var reloadPending=false,reloadStarted=false;
-function questionBankOpen(){return !!document.querySelector('#phoneContent .rs.qb')}
-function safeToReload(){return document.hidden||(!window.__SHBACE_OFFLINE_UPDATE_ACTIVE__&&!questionBankOpen())}
-function applyPendingReload(){if(!reloadPending||reloadStarted||!safeToReload())return false;reloadStarted=true;setTimeout(function(){location.reload()},180);return true}
-window.shbaceRequestAppReload=function(){reloadPending=true;return applyPendingReload()}
-function retrySafeReload(){if(!document.hidden)applyPendingReload()}
-document.addEventListener('visibilitychange',retrySafeReload);
-window.addEventListener('pageshow',retrySafeReload);
-function bindSafeReloadObserver(){var host=document.getElementById('phoneContent');if(host&&window.MutationObserver)new MutationObserver(retrySafeReload).observe(host,{childList:true})}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bindSafeReloadObserver,{once:true});else bindSafeReloadObserver();
-
 function start(){
- releaseStartupGate();
  if(!standalone()){
   waitForSplash().then(showInstallHint);
   return;

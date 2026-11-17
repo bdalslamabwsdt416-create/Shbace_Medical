@@ -2634,37 +2634,3 @@ body.eb-bank-mode .qcard.nl-clean .qacts .qa{direction:ltr}
 .cc-question .qopts .qopt.incorrect{border-color:rgba(239,116,116,.6)!important;background:rgba(142,48,55,.17)!important}
 .cc-question .qopts .qopt.dim{opacity:.62}
 .cc-question .qopts .qopt:disabled{cursor:default;opacity:1}
-
-
-/* iOS continuity + local-storage UI, aligned with the shared to-me design. */
-.v5-offbar{position:fixed;z-index:2147481500;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));max-width:calc(100vw - 32px);padding:9px 15px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--text);font:600 12px/1.45 system-ui,-apple-system,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.22);opacity:0;transform:translate(-50%,12px);transition:opacity .22s ease,transform .22s ease;pointer-events:none;text-align:center}
-.v5-offbar.good{background:var(--panel2);border-color:var(--green)}
-.v5-offbar.show{opacity:1;transform:translate(-50%,0)}
-.v5-banner{position:fixed;z-index:2147481000;left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));bottom:calc(88px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--panel);color:var(--text);box-shadow:0 12px 35px rgba(0,0,0,.28);font:13px/1.45 system-ui,-apple-system,sans-serif;opacity:0;transform:translateY(14px);transition:opacity .3s,transform .3s}
-.v5-banner.show{opacity:1;transform:none}
-.v5-bt{display:grid;gap:2px;min-width:0;flex:1}
-.v5-bt span{color:var(--muted);font-size:12px}
-.v5-go{flex:none;min-height:38px;padding:0 14px;border:0;border-radius:11px;background:var(--mint2);color:#fff;font:700 13px system-ui,-apple-system,sans-serif}
-.v5-go:disabled{opacity:.6}
-.v5-x{flex:none;width:34px;height:34px;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--text);font-size:20px}
-.v5-inst{margin-top:12px;padding:14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);color:var(--text)}
-.v5-inst ol{margin:8px 0 6px;padding-inline-start:22px;display:grid;gap:8px;line-height:1.7}
-.v5-inst .v5-sub,.v5-inst .v5-note{margin:4px 0;color:var(--muted)}
-.v5-inst .v5-ic{display:inline-block;padding:0 6px;border:1px solid currentColor;border-radius:6px;font-size:.9em}
-.v5-toast{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);z-index:90;padding:9px 15px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);color:var(--text);font:600 13px system-ui,sans-serif;white-space:nowrap}
-.v6-status{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);color:var(--text)}
-.v6-status h4{margin:0 0 6px;font-size:14px}
-.v6-status ul{margin:0 0 10px;padding-inline-start:20px;display:grid;gap:4px;line-height:1.6;font-size:13.5px}
-.v6-card .meta{margin:2px 0 8px;color:var(--muted)}
-.v6-card .v6-store{display:block;line-height:1.7;color:var(--muted)}
-.v6-warn{margin:10px 0 0;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,190,90,.5);background:rgba(255,170,60,.1);display:grid;gap:8px;line-height:1.6}
-.v6-warn .btn{min-height:40px}
-
-/* Preserve only the original layout refinements for the final two onboarding screens. */
-#phoneContent[data-ob="5"]>.screen:has(#gradeStage){overflow:visible!important}
-#phoneContent[data-ob="5"]>.screen:has(#gradeStage) #gradeStage.gx{width:calc(100% + 40px)!important;max-width:none!important;margin-left:-20px!important;margin-right:-20px!important}
-#phoneContent[data-ob-final]>.screen.cp-screen{overflow:visible!important}
-#phoneContent[data-ob-final] .cp-art-frame{aspect-ratio:1/1.17!important}
-#phoneContent[data-ob-final] .cp-screen .cp-welcome{margin-top:-4px!important}
-#phoneContent[data-ob-final] .cp-screen .cp-welcome .hero-sub{display:none!important}
-#phoneContent[data-ob-final] .cp-screen .cp-grade-badge{display:none!important}

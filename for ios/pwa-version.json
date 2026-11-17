@@ -1,12 +1,13 @@
 {
   "app": "Shbace Medical",
   "platform": "PWA",
-  "version": "1.4.11",
-  "displayVersion": "1.4.11",
+  "version": "1.4.12",
+  "displayVersion": "1.4.12",
   "releaseDate": "2026-11-17",
   "releaseNotes": [
-    "Unify the iOS app interface, shared study systems, and question-bank collections with the current to me source.",
-    "Preserve the original iOS design of the final two onboarding screens and the iOS-specific offline installer, storage database, and Service Worker lifecycle.",
-    "Bring the current shared medical study tools, pediatric collections, AI bank adapter, and Islamic reminders to the iOS PWA."
+    "Aligns the iOS app with the complete To Me interface, question-bank screens, visual assets, and shared study features.",
+    "Replaces the separate iOS offline installer and silent update layer with the To Me verified offline package and seven-day/manual update workflow.",
+    "Adds a working Check for updates control in Settings; only changed offline files are downloaded.",
+    "Preserves the iOS onboarding screens and existing student progress, notes, bookmarks, settings, and backup data."
   ]
 }
