@@ -5,6 +5,7 @@ on:
     branches:
       - "ios/splash-offline-first-boot-1.4.20"
       - "ios/splash-core-ready-1.4.21"
+      - "ios/boot-nonblocking-question-bank-1.4.22"
     paths:
       - "for ios/**"
       - ".github/workflows/ios-offline-runtime-checks.yml"

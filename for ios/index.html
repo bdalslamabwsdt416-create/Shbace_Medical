@@ -361,7 +361,7 @@
  var dataText=null,dataErr=null;
  /* v1.1: Original is the immutable college bank. Reviewed is assembled from the small verified patch plus review-log-only cautions. */
  var dataFetch=(function(){
-  if(!window.caches)return Promise.reject(new Error('Cache Storage is unavailable'));
+  /* Cache Storage is optional on the web; the network path below remains available without it. */
   function markReady(){try{performance.mark('shb-qb-data-ready')}catch(e){}}
   /* Match the verified offline-package cache first. The package installer stores qbData here,
      not in the legacy data cache opened below. Never require a network round-trip for an installed package. */
@@ -374,8 +374,12 @@
   }
   function cacheHit(cache,url,label){
    if(!cache)return Promise.resolve(null);
-   return bounded(cache.match(url),10000,label+' cache lookup').then(function(hit){
-    return hit?bounded(hit.text(),20000,label+' cached read'):null;
+   /* Cache Storage is an optimization, never a prerequisite for opening the web app. */
+   return bounded(cache.match(url),2500,label+' cache lookup').then(function(hit){
+    return hit?bounded(hit.text(),5000,label+' cached read'):null;
+   }).catch(function(error){
+    console.warn('shb-boot: '+label+' cache unavailable; continuing with the next source',error);
+    return null;
    });
   }
   function hasVerifiedPackage(){
@@ -485,6 +489,8 @@
  }
  function fatalBoot(src){
   console.error('shb-boot: startup stopped because a required script could not be loaded: '+src);
+  window.__shbCoreReady=true;
+  try{document.dispatchEvent(new Event('shb-core-ready'))}catch(e){}
   window.__shbBooted=false;
   if(document.getElementById('shb-boot-failure'))return;
   var panel=document.createElement('section');
@@ -518,6 +524,31 @@
   function next(){
    if(i>=list.length){finish();return}
    var o=list[i++],big=o.getAttribute('data-big')==='1',src=o.getAttribute('data-src');
+   /* The question bank is the first data-dependent module. Load the shell, navigation and
+      onboarding modules before waiting for it, so a slow bank request cannot hold the Splash. */
+   if(src==='js/09-app-features-v6.js'){
+    window.__shbCoreReady=true;
+    try{document.dispatchEvent(new Event('shb-core-ready'))}catch(e){}
+    dataFetch.then(function(){
+     var q=document.getElementById('qbData');
+     if(!q||dataText==null){
+      console.error('shb-boot: required question bank is unavailable',dataErr);
+      var panel=document.getElementById('shb-boot-failure');
+      if(!panel){
+       panel=document.createElement('section');panel.id='shb-boot-failure';panel.setAttribute('role','alert');
+       panel.style.cssText='position:fixed;z-index:2147483647;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px;background:#071321;color:#f4f8ff;font:16px system-ui;text-align:center';
+       panel.innerHTML='<h2 style="margin:0">Shbace Medical is open, but the question bank could not be loaded</h2><p style="max-width:520px;line-height:1.6">Check your internet connection and retry. Your saved answers and progress have not been changed.</p><button type="button" style="border:0;border-radius:12px;padding:13px 24px;background:#1d9bf0;color:white;font-weight:700" onclick="location.reload()">Retry question bank</button>';
+       document.body.appendChild(panel);
+      }
+      finish();
+      return;
+     }
+     q.textContent=dataText;
+     dataText=null;
+     exec(0);
+    });
+    return;
+   }
    function exec(attempt){
     var n=document.createElement('script'),settled=false,timer=null;
     for(var k=0;k<o.attributes.length;k++){var a=o.attributes[k];if(a.name!=='type'&&a.name!=='data-src'&&a.name!=='data-big')n.setAttribute(a.name,a.value)}
@@ -547,25 +578,7 @@
   }
   next();
  }
- function go(){if(started||!domReady||!painted)return;started=true;clearTimeout(T);
-  dataFetch.then(function(){
-   var q=document.getElementById('qbData');
-   if(!q||dataText==null){
-    console.error('shb-boot: required question bank is unavailable',dataErr);
-    window.__shbBooted=false;
-    var panel=document.getElementById('shb-boot-failure');
-    if(!panel){
-     panel=document.createElement('section');panel.id='shb-boot-failure';panel.setAttribute('role','alert');
-     panel.style.cssText='position:fixed;z-index:2147483647;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px;background:#071321;color:#f4f8ff;font:16px system-ui;text-align:center';
-     panel.innerHTML='<h2 style="margin:0">Shbace Medical could not load the question bank</h2><p style="max-width:520px;line-height:1.6">The question-bank files are not readable in local storage. Your saved answers and progress have not been changed. Open Settings → App updates to check or repair the offline package.</p><button type="button" style="border:0;border-radius:12px;padding:13px 24px;background:#1d9bf0;color:white;font-weight:700" onclick="location.reload()">Retry loading</button>';
-     document.body.appendChild(panel);
-    }
-    return;
-   }
-   q.textContent=dataText;
-   dataText=null;run()
-  })
- }
+ function go(){if(started||!domReady||!painted)return;started=true;clearTimeout(T);run();}
  function markPainted(){
   if(painted)return;painted=true;
   try{performance.mark('shb-splash-ready')}catch(e){}
