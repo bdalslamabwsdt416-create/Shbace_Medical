@@ -10,6 +10,7 @@ const voice = read('../js/33-unified-voice.js');
 const settings = read('../js/36-exam-planner-settings-smartreview.js');
 const androidEnhancements = read('../../to me/js/30-android-enhancements.js');
 const toMeSettings = read('../../to me/js/36-exam-planner-settings-smartreview.js');
+const toMeVoice = read('../../to me/js/33-unified-voice.js');
 const index = read('../index.html');
 const drawer = read('../js/06-drawer-menu.js');
 const returning = read('../js/07-returning-student-migration.js');
@@ -268,7 +269,7 @@ test('behavior: repeated question observer callbacks cannot recreate their own t
 
 
 test('shared Study experience controls, labels, order, defaults and legacy preference keys match To Me', () => {
-  const defaultsMatch = androidEnhancements.match(/var DEFAULTS = \{([\\s\\S]*?)\\n  \};/);
+  const defaultsMatch = androidEnhancements.match(/var DEFAULTS = \{([\s\S]*?)\n  \};/);
   assert.ok(defaultsMatch, 'To Me DEFAULTS object is the reference source');
   const toMeDefaults = vm.runInNewContext('({' + defaultsMatch[1] + '})');
   const featureBlock = androidEnhancements.slice(
@@ -298,8 +299,13 @@ test('shared Study experience controls, labels, order, defaults and legacy prefe
   const toMeOrder = [...featureBlock.matchAll(/toggleMarkup\('([^']+)'/g)].map(match=>match[1]);
   assert.deepEqual(toMeOrder.filter(key=>['shareQuestion','copyQuestion','readAloud','keepScreenOn','autoTheme'].includes(key)),
     ['shareQuestion','copyQuestion','readAloud','keepScreenOn','autoTheme']);
+  const toolsStart=voice.indexOf('function computerVoiceMountSettings()');
+  const toolsEnd=voice.indexOf('function computerVoiceQuestionText',toolsStart);
+  const iosStudyStart=voice.indexOf('function iosStudyMountSettings()');
+  const iosStudyEnd=voice.indexOf('function iosStudyUpdateUI',iosStudyStart);
+  const studyMarkup=voice.slice(toolsStart,toolsEnd)+voice.slice(iosStudyStart,iosStudyEnd);
   const iosPositions = ['shareQuestion','copyQuestion','readAloud','Reading speed','keepScreenAwake','followSystemTheme','Copy app information']
-    .map(term=>voice.indexOf(term));
+    .map(term=>studyMarkup.indexOf(term));
   assert.ok(iosPositions.every(position=>position>=0),'all To Me card controls are present on iOS');
   assert.ok(iosPositions.every((position,index)=>index===0||position>iosPositions[index-1]),
     'Study experience controls retain the To Me order');
@@ -313,6 +319,10 @@ test('shared Study experience controls, labels, order, defaults and legacy prefe
   assert.equal(questionDefaults.readingSpeed, toMeDefaults.readingSpeed);
   assert.ok(voice.includes('followSystemTheme:shared&&typeof shared.autoTheme===\'boolean\'?shared.autoTheme:true'));
   assert.ok(voice.includes('keepScreenAwake:shared&&typeof shared.keepScreenOn===\'boolean\'?shared.keepScreenOn:true'));
+  const toMeVoiceDescription = toMeVoice.match(/<p class=\"meta\">(Questions are read in English only\\.[^<]+)<\\/p>/);
+  const iosVoiceDescription = voice.match(/card.innerHTML='<h3>Question voice<\\/h3>'\+\s*'<p class=\"meta\">([^<]+)<\\/p>'/);
+  assert.ok(toMeVoiceDescription&&iosVoiceDescription,'Question voice helper text exists in both platform sources');
+  assert.equal(iosVoiceDescription[1],toMeVoiceDescription[1]);
   assert.ok(voice.includes('saved&&typeof saved===\'object\'&&!Array.isArray(saved)?saved:{}'),
     'existing iOS preference backups override new-install defaults');
 
@@ -362,7 +372,7 @@ function studyExperienceMountHarness() {
   }
   const document={createElement(){return {id:'',className:'',innerHTML:'',parentElement:null}}};
   const api=vm.runInNewContext(
-    extractFunction(voice,'computerVoiceMountSettings')+'\\n({computerVoiceMountSettings})',
+    extractFunction(voice,'computerVoiceMountSettings')+String.fromCharCode(10)+'({computerVoiceMountSettings})',
     {
       settingsRoot(){return activeRoot},
       document,
@@ -463,6 +473,9 @@ test('behavior: Settings organizer is idempotent and never re-appends unchanged 
   const firstWrites=state.writes;
   assert.ok(firstWrites>0,'first organization creates zones and positions cards');
   assert.deepEqual(state.zones,['appearance','banks','notifications','updates','experience','data','progress']);
+  const toMeZones=[...toMeSettings.matchAll(/makeSettingZone\\(order,'([^']+)'/g)].map(match=>match[1]);
+  const iosCoreZones=state.zones.filter(zone=>toMeZones.includes(zone));
+  assert.deepEqual(iosCoreZones,toMeZones,'the shared Settings zones preserve To Me order');
   assert.equal(state.cards[6].parentElement.name,'items:appearance','Question voice is grouped with Appearance');
   assert.equal(state.cards[5].parentElement,state.root,'Study experience remains a sibling after the Settings zones');
   assert.equal(state.root.lastElementChild,state.cards[5],'Study experience is mounted once after the zones');
