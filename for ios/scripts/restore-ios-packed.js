@@ -14,7 +14,14 @@ const manifest = { schema: 1, files: [] };
 
 /* Always run the iOS offline migration regression tests, even when the hosting
    provider invokes this build file directly instead of npm run build:pwa. */
-const migrationTests = spawnSync(process.execPath, ['--test', 'tests/offline-migration.test.js'], {
+for (const relative of ['js/09-app-features-v6.js', 'js/20-drawer-order-v12.js', 'js/36-exam-planner-settings-smartreview.js']) {
+  const syntax = spawnSync(process.execPath, ['--check', relative], { cwd: root, stdio: 'inherit' });
+  if (syntax.error) throw syntax.error;
+  if (syntax.status !== 0) throw new Error('JavaScript syntax check failed: ' + relative);
+}
+console.log('Changed iOS JavaScript syntax checks passed.');
+
+const migrationTests = spawnSync(process.execPath, ['--test', 'tests/offline-migration.test.js', 'tests/exam-planner-linkage.test.mjs'], {
   cwd: root,
   stdio: 'inherit'
 });
@@ -194,18 +201,42 @@ for (const marker of ['dr-top2','dr2-flag','class="dr-body"','class="dr-foot"'])
 }
 if (!drawerMenuBase.includes("hdrTap('Notifications')") ||
     drawerOrder.includes("['Updates'") ||
-    !drawerOrder.includes("['App & support',['Settings','Contact & Feedback','Changelog','About','Rate this app'].map(pick).filter(Boolean)]")) {
+    !drawerOrder.includes("['APP & SUPPORT',['Settings','Contact & Feedback','Changelog','About','Rate this app'].map(pick).filter(Boolean)]")) {
   throw new Error('The iOS drawer must match the latest To Me App & support grouping, without a separate Updates section.');
 }
 if (!drawerFeatures.includes('id="shbAppUpdates"') ||
     !drawerFeatures.includes('onclick="shbaceSettingsCheckForUpdates(this)"') ||
-    !drawerFeatures.includes('window.shbaceCheckForUpdate()')) {
-  throw new Error('The iOS manual App updates card and update-check action must remain available.');
+    !drawerFeatures.includes('window.shbaceCheckForUpdate()') ||
+    !drawerFeatures.includes('function shbaceSettingsUpdateMeta()') ||
+    !drawerFeatures.includes('window.shbaceVersionInfo&&window.shbaceVersionInfo()') ||
+    !drawerFeatures.includes('window.shbaceLastUpdateCheck&&window.shbaceLastUpdateCheck()') ||
+    !drawerFeatures.includes('window.shbaceUpdatePending&&window.shbaceUpdatePending()')) {
+  throw new Error('The iOS App updates card or its version/check/pending-file metadata is incomplete.');
+}
+if (!drawerOrder.includes("['Exam goal planner','examplanner'") ||
+    !drawerOrder.includes("['YOUR PROGRESS'") || !drawerOrder.includes("['APP & SUPPORT'")) {
+  throw new Error('The iOS drawer is missing the Exam Planner or final To Me section order.');
+}
+if (drawerFeatures.includes('DR2[1][1][2][3]=') ||
+    drawerFeatures.includes("id==='review'&&dueList().length?")) {
+  throw new Error('A Smart Review count badge is still being written to the drawer or bottom navigation.');
 }
 if (!drawerFeatures.includes('id="shbAppUpdates"') ||
     !drawerFeatures.includes('onclick="shbaceSettingsCheckForUpdates(this)"') ||
-    !drawerFeatures.includes('window.shbaceCheckForUpdate()')) {
-  throw new Error('The iOS manual App updates card and update-check action must remain available.');
+    !drawerFeatures.includes('window.shbaceCheckForUpdate()') ||
+    !drawerFeatures.includes('function shbaceSettingsUpdateMeta()') ||
+    !drawerFeatures.includes('window.shbaceVersionInfo&&window.shbaceVersionInfo()') ||
+    !drawerFeatures.includes('window.shbaceLastUpdateCheck&&window.shbaceLastUpdateCheck()') ||
+    !drawerFeatures.includes('window.shbaceUpdatePending&&window.shbaceUpdatePending()')) {
+  throw new Error('The iOS App updates card or its version/check/pending-file metadata is incomplete.');
+}
+if (!drawerOrder.includes("['Exam goal planner','examplanner'") ||
+    !drawerOrder.includes("['YOUR PROGRESS'") || !drawerOrder.includes("['APP & SUPPORT'")) {
+  throw new Error('The iOS drawer is missing the Exam Planner or final To Me section order.');
+}
+if (drawerFeatures.includes('DR2[1][1][2][3]=') ||
+    drawerFeatures.includes("id==='review'&&dueList().length?")) {
+  throw new Error('A Smart Review count badge is still being written to the drawer or bottom navigation.');
 }
 for (const marker of ['PAGES.notifs=notifsView','PAGES.timer=timerView','PAGES.weak=weakView','window.__shbNavTap']) {
   if (!drawerFeatures.includes(marker)) throw new Error('An iOS side-menu destination or navigation handler is missing: ' + marker);
@@ -216,10 +247,11 @@ if (!onboardingMain.includes('Which grade are you in?') ||
   throw new Error('The original iOS final onboarding screens have changed unexpectedly.');
 }
 const pwaVersion = JSON.parse(fs.readFileSync(safePath('pwa-version.json'), 'utf8'));
-if (pwaVersion.version !== '1.4.15' || pwaVersion.displayVersion !== '1.4.15' ||
+const packageMetadata = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+if (packageMetadata.version !== '1.4.16' || pwaVersion.version !== '1.4.16' || pwaVersion.displayVersion !== '1.4.16' ||
     !Array.isArray(pwaVersion.releaseNotes) ||
-    !pwaVersion.releaseNotes.includes('Fixes mixed old/new files after updating from 1.4.10; cleans old caches')) {
-  throw new Error('The iOS 1.4.15 release metadata is missing or inconsistent.');
+    !pwaVersion.releaseNotes.includes("Aligns the iOS sidebar with To Me, exposes Exam Goal Planner, removes Smart Review badges, and shows installed/update version details in Settings.")) {
+  throw new Error('The iOS 1.4.16 release metadata is missing or inconsistent.');
 }
 
 if (manifest.files.some(item => ['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/32-ios-v7.js'].includes(item.path))) throw new Error('A retired iOS visual layer is still included in the offline runtime inventory.');
