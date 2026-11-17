@@ -180,28 +180,66 @@ for (const icon of pwaManifest.icons || []) {
 const offlineSetup = fs.readFileSync(safePath('js/29-offline-setup.js'), 'utf8');
 const serviceWorker = fs.readFileSync(safePath('sw.js'), 'utf8');
 const questionVoice = fs.readFileSync(safePath('js/33-unified-voice.js'), 'utf8');
-if (!questionVoice.includes("tools.innerHTML='<h3>Study experience</h3>'") ||
+const settingsOrganizer = fs.readFileSync(safePath('js/36-exam-planner-settings-smartreview.js'), 'utf8');
+const toMeEnhancements = fs.readFileSync(path.resolve(root, '../to me/js/30-android-enhancements.js'), 'utf8');
+const toMeDefaults = toMeEnhancements.match(/var DEFAULTS = \{[\s\S]*?\n  \};/);
+if (!toMeDefaults || !/shareQuestion: true/.test(toMeDefaults[0]) ||
+    !/copyQuestion: true/.test(toMeDefaults[0]) || !/readAloud: true/.test(toMeDefaults[0]) ||
+    !/keepScreenOn: true/.test(toMeDefaults[0]) || !/autoTheme: true/.test(toMeDefaults[0]) ||
+    !/readingSpeed: 'normal'/.test(toMeDefaults[0])) {
+  throw new Error('The To Me Study experience defaults changed; review and explicitly reconcile iOS parity.');
+}
+for (const [label, helper] of [
+  ['Share a question','Show the question-sharing action.'],
+  ['Copy question text','Show the copy action for notes or AI tools.'],
+  ['Read questions aloud','Show voice playback controls on questions.'],
+  ['Reading speed','Applies to spoken question text.'],
+  ['Keep screen awake','Prevent the display from sleeping while the Question Bank is open.'],
+  ['Follow device theme','Automatically match device light or dark appearance.'],
+  ['Copy app information','Send the copied details when reporting an app issue. No account or personal data is included.']
+]) {
+  if (!toMeEnhancements.includes(label) || !questionVoice.includes(label) || !toMeEnhancements.includes(helper) || !questionVoice.includes(helper)) {
+    throw new Error('Shared To Me/iOS Study experience setting is missing or has diverged: ' + label);
+  }
+}
+if (!questionVoice.includes("computerVoiceQuestionToolSetting('shareQuestion','Share a question','Show the question-sharing action.')") ||
+    !questionVoice.includes("computerVoiceQuestionToolSetting('copyQuestion','Copy question text','Show the copy action for notes or AI tools.')") ||
+    !questionVoice.includes("computerVoiceQuestionToolSetting('readAloud','Read questions aloud','Show voice playback controls on questions.')") ||
     !questionVoice.includes("iosStudyToggleMarkup('keepScreenAwake','Keep screen awake'") ||
     !questionVoice.includes("iosStudyToggleMarkup('followSystemTheme','Follow device theme'") ||
-    questionVoice.includes('shbIosStudyExperienceSettings') ||
-    !fs.readFileSync(safePath('js/36-exam-planner-settings-smartreview.js'), 'utf8').includes("target('appearance').appendChild(questionTools)")) {
-  throw new Error('iOS Study experience controls must stay consolidated in the To Me-aligned card.');
+    !questionVoice.includes("followSystemTheme:true,keepScreenAwake:true") ||
+    !questionVoice.includes('shbCopyAppInfo') ||
+    !questionVoice.includes("reminders.id='shbStudyRemindersSettings'") ||
+    !questionVoice.includes('Copy app information') ||
+    questionVoice.includes('Haptic feedback') || questionVoice.includes('examCountdown')) {
+  throw new Error('iOS Study experience controls/defaults do not match the shared To Me settings.');
 }
-
+if (!settingsOrganizer.includes("target('appearance').appendChild(questionTools)") ||
+    !settingsOrganizer.includes("target('notifications').appendChild(studyReminders)") ||
+    !settingsOrganizer.includes("observe(settingsHost,{childList:true})") ||
+    settingsOrganizer.includes('observe(document.documentElement') ||
+    !settingsOrganizer.includes('settingsObserver.takeRecords()')) {
+  throw new Error('Settings organization must be scoped, guarded, and idempotent.');
+}
 if (!questionVoice.includes('toolbar.dataset.sig=signature') ||
     !questionVoice.includes('scheduleQuestionDecoration()') ||
-    questionVoice.includes('new MutationObserver(function(){mountVoiceSettings();computerVoiceDecorateQuestions()}')) {
-  throw new Error('Question toolbar must be idempotent and MutationObserver decoration must be frame-coalesced.');
+    !questionVoice.includes("observe(questionHost,{childList:true})") ||
+    questionVoice.includes('observe(document.body,{childList:true,subtree:true}')) {
+  throw new Error('Question toolbar must be idempotent and observe only the app viewport.');
 }
 const featureRuntime = fs.readFileSync(safePath('js/09-app-features-v6.js'), 'utf8');
 if (!offlineSetup.includes("var CACHE_NAME='shbace-medical-offline-v2'") ||
     !offlineSetup.includes("var DB_NAME='shbace-medical-offline-state-v1'") ||
     !offlineSetup.includes("var MIGRATION_KEY='shbace_ios_migrated_1_4_14'") ||
-    !offlineSetup.includes("lsSet(MIGRATION_KEY,'1')") ||
-    offlineSetup.includes('migrationInProgress') ||
+    !offlineSetup.includes('function finalizeVerifiedPlanCommit()') ||
+    !offlineSetup.includes("if(migrationInProgress){lsSet(MIGRATION_KEY,'1')") ||
+    !offlineSetup.includes('function localRepairNeeded(installed)') ||
+    !offlineSetup.includes('function manualRepair()') ||
+    !offlineSetup.includes('window.shbaceRepairOffline=manualRepair') ||
+    !offlineSetup.includes('function start()') ||
+    offlineSetup.includes('CHECK_TRY_KEY') ||
     offlineSetup.includes('function checkDue(') ||
-    offlineSetup.includes('function localRepairNeeded(') ||
-    !offlineSetup.includes('if(!hasRecord)return runFullCheck(splashFinished)') ||
+    !offlineSetup.includes('if(!hasRecord){') ||
     !offlineSetup.includes("name.indexOf('shbace-medical-ios-shell-')===0") ||
     !offlineSetup.includes('window.shbaceCheckForUpdate=manualCheck') ||
     !offlineSetup.includes('MANIFEST_FETCH_TIMEOUT=30000') ||
@@ -284,7 +322,10 @@ const pwaVersion = JSON.parse(fs.readFileSync(safePath('pwa-version.json'), 'utf
 const packageMetadata = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 if (packageMetadata.version !== '1.4.20' || pwaVersion.version !== '1.4.20' || pwaVersion.displayVersion !== '1.4.20' ||
     !Array.isArray(pwaVersion.releaseNotes) ||
-    !pwaVersion.releaseNotes.includes("Adds iOS Question Bank tools for Share, Copy and Read aloud, groups bank controls in Settings, and scopes progress resets to the active bank, system and topic.")) {
+    !pwaVersion.releaseNotes.includes('Prevents existing installs from opening startup update UI or making network requests; migration completes only after a manually initiated verified commit.') ||
+    !pwaVersion.releaseNotes.includes('Detects missing offline files locally and offers user-initiated Repair from Settings.') ||
+    !pwaVersion.releaseNotes.includes('Scopes question and Settings observers to the app viewport and coalesces callbacks to prevent DOM mutation loops.') ||
+    !pwaVersion.releaseNotes.includes('Aligns shared iOS Study experience controls, labels, helper text and defaults with To Me.')) {
   throw new Error('The iOS 1.4.20 release metadata is missing or inconsistent.');
 }
 

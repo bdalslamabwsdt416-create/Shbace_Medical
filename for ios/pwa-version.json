@@ -5,6 +5,10 @@
   "displayVersion": "1.4.20",
   "releaseDate": "2026-11-17",
   "releaseNotes": [
+    "Prevents existing installs from opening startup update UI or making network requests; migration completes only after a manually initiated verified commit.",
+    "Detects missing offline files locally and offers user-initiated Repair from Settings, with a dismissible Home fallback notice.",
+    "Scopes question and Settings observers to the app viewport, coalesces callbacks and drains self-generated mutations to prevent DOM mutation loops.",
+    "Aligns shared iOS Study experience controls, labels, helper text and defaults with To Me while retaining iOS-only settings.",
     "Fixes Settings navigation from the header and drawer by routing directly to the Settings screen.",
     "Consolidates iPhone-supported study controls into the To Me-aligned Study experience card.",
     "Stops the question toolbar MutationObserver re-render loop that could freeze question screens.",
