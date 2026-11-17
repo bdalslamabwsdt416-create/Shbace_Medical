@@ -23,19 +23,58 @@ var STAGES=[
  {id:'verify',label:'Integrity verification'}
 ];
 
-function lsNum(key){try{return Number(localStorage.getItem(key))||0}catch(e){return 0}}
-function lsSet(key,value){try{localStorage.setItem(key,String(value))}catch(e){}}
+var VER_KEY='shbace_pkg_version_installed_v1',VER_AVAIL_KEY='shbace_pkg_version_available_v1',EXAM_KEY='shbace_exam_goal_planner_v1',SNOOZE_DAYS=2,EXAM_QUIET_DAYS=7;
+/* Metadata is LocalStorage-first. A missing key on first boot is normal; it must never
+   block the existing post-Splash package download. If LocalStorage is unavailable or
+   a write fails, mirror/read metadata through the existing IndexedDB meta store, then
+   keep a memory copy for the current session. Package files and READY state stay in
+   their existing Cache/IndexedDB locations and are not renamed or migrated. */
+var META_DB_PREFIX='local-meta:',metaMemory=Object.create(null);
+var META_KEYS=[CHECK_OK_KEY,CHECK_TRY_KEY,PENDING_KEY,VER_KEY,VER_AVAIL_KEY,EXAM_KEY];
+function metaRawGet(key){
+ var value=null;
+ try{value=localStorage.getItem(key)}catch(e){}
+ if(value!==null&&typeof value!=='undefined'){metaMemory[key]=value;return value}
+ return Object.prototype.hasOwnProperty.call(metaMemory,key)?metaMemory[key]:null;
+}
+function metaRawSet(key,value){
+ var raw=String(value);metaMemory[key]=raw;
+ try{localStorage.setItem(key,raw)}catch(e){}
+ /* Keep a small IndexedDB mirror so a later LocalStorage failure can recover it. */
+ try{dbPut('meta',META_DB_PREFIX+key,raw).catch(function(){})}catch(e){}
+}
+function metaRawDel(key){
+ delete metaMemory[key];
+ try{localStorage.removeItem(key)}catch(e){}
+ try{dbDel('meta',META_DB_PREFIX+key).catch(function(){})}catch(e){}
+}
+function hydrateLocalMetadata(){
+ return Promise.all(META_KEYS.map(function(key){
+  var local=null;
+  try{local=localStorage.getItem(key)}catch(e){}
+  if(local!==null&&typeof local!=='undefined'){
+   metaMemory[key]=local;
+   try{return dbPut('meta',META_DB_PREFIX+key,local).catch(function(){})}catch(e){return Promise.resolve()}
+  }
+  return dbGet('meta',META_DB_PREFIX+key).then(function(saved){
+   if(saved===null||typeof saved==='undefined')return;
+   var raw=String(saved);metaMemory[key]=raw;
+   try{localStorage.setItem(key,raw)}catch(e){}
+  }).catch(function(){});
+ })).then(function(){return true});
+}
+function lsNum(key){return Number(metaRawGet(key))||0}
+function lsSet(key,value){metaRawSet(key,value)}
 function setPending(n){
- if(n>0)lsSet(PENDING_KEY,n);else{try{localStorage.removeItem(PENDING_KEY)}catch(e){}}
+ if(n>0)lsSet(PENDING_KEY,n);else lsDel(PENDING_KEY);
  try{
   if(n>0){if(typeof window.shbAddNotif==='function')window.shbAddNotif(NOTIF_ID,'A new update is available',n+' file'+(n===1?'':'s')+' changed. Open Settings → App updates → Check for updates to install it. Your progress is kept.','settings')}
   else if(typeof window.shbRemoveNotif==='function')window.shbRemoveNotif(NOTIF_ID);
  }catch(e){}
 }
-var VER_KEY='shbace_pkg_version_installed_v1',VER_AVAIL_KEY='shbace_pkg_version_available_v1',EXAM_KEY='shbace_exam_goal_planner_v1',SNOOZE_DAYS=2,EXAM_QUIET_DAYS=7;
-function lsGetJson(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}}
-function lsSetJson(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
-function lsDel(k){try{localStorage.removeItem(k)}catch(e){}}
+function lsGetJson(k){try{return JSON.parse(metaRawGet(k)||'null')}catch(e){return null}}
+function lsSetJson(k,v){metaRawSet(k,JSON.stringify(v))}
+function lsDel(k){metaRawDel(k)}
 /* Version + short release summary from pwa-version.json (network first, 6 s limit). Uses "summary" when present, otherwise the 3 newest releaseNotes. */
 function fetchVersionInfo(){
  return new Promise(function(resolve){
@@ -206,6 +245,16 @@ function dbPut(store,key,value){
    req.onsuccess=function(){resolve(true)};
    req.onerror=function(){reject(req.error||new Error('Could not save installation progress.'))};
    tx.onabort=function(){reject(tx.error||new Error('Local write was interrupted.'))};
+  });
+ });
+}
+function dbDel(store,key){
+ return db().then(function(database){
+  return new Promise(function(resolve,reject){
+   var tx=database.transaction(store,'readwrite'),req=tx.objectStore(store).delete(key);
+   req.onsuccess=function(){resolve(true)};
+   req.onerror=function(){reject(req.error||new Error('Could not remove local metadata.'))};
+   tx.onabort=function(){reject(tx.error||new Error('Local delete was interrupted.'))};
   });
  });
 }
@@ -728,7 +777,7 @@ function start(){
   });
  });
 }
-function boot(){start();}
+function boot(){hydrateLocalMetadata().then(start,start);}
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
 else boot();
