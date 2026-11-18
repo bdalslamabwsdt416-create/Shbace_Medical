@@ -173,8 +173,12 @@ let clinicalCaseTotal = 0;
 
 function auditStudentFacingText(value, label) {
   const valueText = String(value || "");
-  if (/\b(?:lecture|sheet|textbook|source material)\b/i.test(valueText)) {
-    errors.push(label + ": contains a lecture/book/source reference");
+  const hasEducationalSourceReference =
+    /\b(?:lecture|sheet|textbook|source material|source PDF|source standard guidance|source clinical guidance)\b/i.test(valueText) ||
+    /\b(?:according to|in|from|as stated in|as described in|as listed in|as defined in|as noted in|as recommended in)\s+(?:the\s+)?source(?:\s+(?:table|notes|material|standard guidance|clinical guidance))?\b/i.test(valueText) ||
+    /\bthe source(?:'s)?\s+(?:notes?|describes?|states?|lists?|gives?|defines?|identifies?|classifies?|compares?|recommends?|outlines?|divides?|includes?|mentions?|explains?|specifies?|uses?|highlights?|emphasizes?|asks?|provides?|contains?|distinguishes?)\b/i.test(valueText);
+  if (hasEducationalSourceReference) {
+    errors.push(label + ": contains an educational source reference");
   }
   if (/\*\*/.test(valueText)) errors.push(label + ": contains raw Markdown bold markers");
   if (/case\s*focus/i.test(valueText)) errors.push(label + ": contains a Case focus label or attached text");
@@ -206,8 +210,7 @@ function auditMcqRecord(q, label) {
       .filter(option => option && option.label !== q.correctAnswer)
       .reduce((longest, option) => Math.max(longest, String(option.text || "").length), 0);
     const answerLengthGap = String(answer.text || "").length - longestDistractor;
-    if (answerLengthGap > 100) errors.push(label + ": correct answer is more than 100 characters longer than every distractor");
-    else if (answerLengthGap > 80) warnings.push(label + ": correct answer is over 80 characters longer than the longest distractor; review option balance");
+    if (answerLengthGap > 80) errors.push(label + ": correct answer is over 80 characters longer than the longest distractor");
   }
 
   for (const option of q.options) {
