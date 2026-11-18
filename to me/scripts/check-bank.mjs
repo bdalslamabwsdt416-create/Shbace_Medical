@@ -258,7 +258,8 @@ if (clinicalBank) {
       for (const clinicalCase of topic.cases || []) {
         clinicalCaseTotal++;
         auditStudentFacingText(clinicalCase.vignette, "Clinical Case " + (clinicalCase.id || "(missing case ID)") + " vignette");
-        if (/\b(?:suspects?|considers?|diagnosed with|confirms?)\b/i.test(String(clinicalCase.vignette || ""))) {
+        const vignetteText = String(clinicalCase.vignette || "");
+        if (/\b(?:suspects?|considers?|diagnosed with|confirms?)\b/i.test(vignetteText) || /\bechocardiography\s+shows\s+(?:an?\s+)?(?:ASD|VSD|PDA|AVSD|CoA|TOF|TGA|coarctation|pulmonary stenosis|patent ductus arteriosus)\b/i.test(vignetteText)) {
           errors.push("Clinical Case " + clinicalCase.id + ": diagnostic wording remains in the shared case vignette");
         }
         for (const q of clinicalCase.questions || []) {
