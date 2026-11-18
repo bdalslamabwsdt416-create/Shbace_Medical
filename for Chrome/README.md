@@ -31,7 +31,7 @@ The stable package cache lets the new installer adopt existing verified files an
 
 ## Release and build
 
-- Current release: `1.3.10-chrome.2` (`1.3.10.2 · Chrome Android`).
+- Current release: `1.3.10-chrome.4` (`1.3.10.4 · Chrome Android`).
 - `pwa-version.json` is the release source of truth; `package.json` must match it.
 - The Service Worker cache name must match `js/29-offline-setup.js` and remain stable.
 - Run the following commands from this folder:
