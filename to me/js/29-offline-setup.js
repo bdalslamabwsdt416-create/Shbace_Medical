@@ -83,6 +83,16 @@ function autoAllowed(){
  if(c){if(c.saveData)return false;if(/2g/.test(c.effectiveType||''))return false}
  return true;
 }
+/* Ask the browser to protect this origin's offline package from automatic storage eviction.
+   A denial is non-fatal: cached files are still recovered by their actual size and SHA-256. */
+async function requestPersistentStorage(){
+ try{
+  if(!navigator.storage)return false;
+  if(typeof navigator.storage.persisted==='function'&&await navigator.storage.persisted())return true;
+  if(typeof navigator.storage.persist==='function')return await navigator.storage.persist();
+ }catch(e){}
+ return false;
+}
 function checkDue(){
  var now=Date.now(),ok=lsNum(CHECK_OK_KEY),tried=lsNum(CHECK_TRY_KEY);
  if(ok&&ok<=now&&now-ok<CHECK_EVERY)return false;
@@ -496,9 +506,16 @@ function friendly(e){
  return e.message||String(e);
 }
 async function isVerified(f,tname,target){
- var v=await dbGet('verified',tname+'|'+f.path).catch(function(){return null});
- if(v!==f.sha256)return false;
- return !!(await target.match(urlFor(f.path)));
+ /* IndexedDB is an acceleration/index, not the source of truth for saved bytes.
+    Chrome may evict or lose its metadata while Cache Storage still contains the package.
+    Revalidate the actual cached response and rebuild the per-file record when it is intact. */
+ var response=await target.match(urlFor(f.path));
+ if(!response||!response.ok)return false;
+ var bytes=await response.arrayBuffer();
+ if(bytes.byteLength!==Number(f.bytes))return false;
+ if((await sha256(bytes))!==f.sha256)return false;
+ await markVerified(f,tname);
+ return true;
 }
 function markVerified(f,tname){return dbPut('verified',tname+'|'+f.path,f.sha256).catch(noop)}
 
@@ -541,7 +558,7 @@ async function runPlan(plan,mode){
   var target=await caches.open(tname);
   setState(mode==='update'?'updating':(mode==='repair'?'repairing':'installing'),{done:0,total:plan.files.length,bytes:0,totalBytes:plan.bytes,pct:0,msg:''});
   startWatchdog();
-  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(noop)}catch(e){}
+  /* Persistent-storage permission was requested once during boot; do not fire-and-forget here. */
   var files=plan.files.slice().sort(byPriority),cursor=0;
   var worker=async function(){
    while(!sig.aborted){
@@ -762,6 +779,9 @@ function registerSW(){
  }catch(e){}
 }
 async function boot(){
+ /* Request storage protection before trusting the local offline package.
+    If the browser declines, runPlan can still rebuild lost metadata from cached bytes. */
+ await requestPersistentStorage();
  var rec=await dbGet('meta',INSTALLED_KEY).catch(function(){return null});
  var hasRec=!!(rec&&rec.files);
  var legacy=await dbGet('meta','ready').catch(function(){return null});
