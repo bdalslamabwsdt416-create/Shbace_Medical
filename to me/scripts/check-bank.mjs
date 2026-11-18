@@ -261,7 +261,12 @@ if (clinicalBank) {
     for (const topic of system.topics || []) {
       for (const clinicalCase of topic.cases || []) {
         clinicalCaseTotal++;
+        auditStudentFacingText(clinicalCase.title, "Clinical Case " + (clinicalCase.id || "(missing case ID)") + " title");
         auditStudentFacingText(clinicalCase.vignette, "Clinical Case " + (clinicalCase.id || "(missing case ID)") + " vignette");
+        const caseTitleText = String(clinicalCase.title || "");
+        if (/\b(?:Down syndrome|cystic fibrosis|diabetes|diabetic|asthma|epilepsy|meningitis|encephalitis|hydrocephalus|myasthenia gravis|cerebral palsy|tuberous sclerosis|neurofibromatosis|Hirschsprung|coeliac|celiac|Kawasaki|rheumatic fever|endocarditis|cardiomyopathy|myocarditis|ASD|VSD|PDA|AVSD|TOF|TGA|coarctation|pulmonary stenosis|aortic stenosis|Turner syndrome|Klinefelter|Graves disease|Hashimoto|hypothyroidism|hyperthyroidism|congenital adrenal hyperplasia|CAH|nephrotic syndrome|nephritic syndrome|leukaemia|leukemia|thalassaemia|thalassemia|sickle cell|haemophilia|hemophilia|bronchiolitis|croup|laryngomalacia|epiglottitis|sepsis|meningococcal|varicella|rubella|toxoplasmosis|herpes simplex|HIV|tuberculosis|TB\\b|Giardia|hepatitis|anaphylaxis|eczema|psoriasis|scabies|impetigo|long-QT)\\b/i.test(caseTitleText)) {
+          errors.push("Clinical Case " + clinicalCase.id + ": diagnosis name remains in the shared case title");
+        }
         const vignetteText = String(clinicalCase.vignette || "");
         if (/\b(?:suspects?|considers?|diagnosed with|confirms?)\b/i.test(vignetteText) || /\bechocardiography\s+shows\s+(?:an?\s+)?(?:ASD|VSD|PDA|AVSD|CoA|TOF|TGA|coarctation|pulmonary stenosis|patent ductus arteriosus)\b/i.test(vignetteText)) {
           errors.push("Clinical Case " + clinicalCase.id + ": diagnostic wording remains in the shared case vignette");
