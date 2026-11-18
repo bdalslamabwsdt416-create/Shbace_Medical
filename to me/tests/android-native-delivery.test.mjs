@@ -12,10 +12,12 @@ const nativeEnhancements = readFileSync(resolve(root, "js/30-android-enhancement
 const androidGradle = readFileSync(resolve(root, "../android/app/build.gradle"), "utf8");
 
 test("Capacitor APK skips the browser Cache Storage installer and updater", () => {
-  const guard = offline.indexOf("if(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) return;");
+  const guard = offline.indexOf("if(window.Capacitor&&typeof window.Capacitor.isNativePlatform==='function'&&window.Capacitor.isNativePlatform()){releaseBootGate();return;}");
   const cacheSetup = offline.indexOf("var CACHE_NAME=");
   assert.ok(guard >= 0, "native Capacitor guard is present");
   assert.ok(cacheSetup < 0 || guard < cacheSetup, "native guard runs before the PWA cache setup");
+  assert.ok(offline.slice(guard, guard + 180).includes("releaseBootGate();return;"),
+    "native APK boot must release the shared startup gate without running the browser installer");
 });
 
 test("the PWA Service Worker is not registered inside Capacitor", () => {

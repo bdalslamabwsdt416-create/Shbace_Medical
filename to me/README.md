@@ -2,7 +2,7 @@
 
 This independent delivery lives in the `to me/` folder and is built as a single adaptive Chrome PWA for Android phones and desktop computers.
 
-See `docs/ARCHITECTURE.md` for a short map of the code (start-up order, the closed core script and its bridge, the question-bank flags, search).
+See `docs/ARCHITECTURE.md` for a short map of the code (the Setup-gated start-up order, the closed core script and its bridge, the question-bank flags, search).
 
 ## What is included
 
@@ -20,7 +20,7 @@ See `docs/ARCHITECTURE.md` for a short map of the code (start-up order, the clos
 - Bank readiness = correct answers (latest attempt on each question) divided by the whole bank; it appears after 20 answered questions.
 - Daily Medical Insight notifications run only in the Android app (Capacitor); the Chrome PWA shows the daily fact on Home.
 
-- Offline: the full package is downloaded once (Chrome installed app). Automatic update checks run every seven days; Settings → Check for updates can be used at any time. If files changed, an "Update available" sheet shows the changed-file count and size. After acceptance, only changed files are downloaded to a staging cache, checked by byte size and SHA-256, and committed. The app requests one safe restart after the verified commit. First Service Worker control does not reload the page. Without internet, the saved copy keeps working.
+- Offline: on the first installed-app launch, Setup appears immediately after Splash and downloads the complete package inventory (app code, styles, onboarding resources, question-bank data, images and other copied assets). Each file is checked by byte size and SHA-256 before the first onboarding screen is released. On later launches, a committed local install opens directly; no full-package scan or setup screen runs. The single updater checks the manifest every 48 hours or when Settings → Check for updates is tapped. It stages only changed files in the background, verifies them, and requests a safe restart after commit. Repair is limited to files found missing during a scheduled/manual manifest comparison; no recurring whole-package hash scan runs. Student answers, notes, bookmarks and progress retain the existing To Me storage.
 - Question Bank opens in the All view by default (30 cards at a time, "Show more"); the Tags and All Questions lists show only what exists in the current topic, with counts. Each question also has a type tag (Clinical Case, Diagnosis, Investigation, Management, Knowledge) derived from its wording.
 - Question voice: English only, prefers the clearest male voice the device offers.
 - Search: the search box and the bank chips stay on top; specialty, tag, source, topic, system and sort are in one collapsible "Filters" panel.

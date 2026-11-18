@@ -1,20 +1,30 @@
 /* Shbace Medical — Offline System v2
 
    Principles
-   - The app always starts from the local copy. Nothing here ever blocks the screen.
-   - First install, repairs and updates run in the background with a small progress chip (no full-screen setup page).
-   - Updates are downloaded into a staging cache, verified (size + SHA-256), then swapped in together. A half-finished
-     update can never leave the app in a mixed state, and an interrupted download resumes where it stopped.
-   - Every network step has a timeout and a stall watchdog. Failures retry by themselves with growing delays.
-   - Saved files are re-verified now and then and repaired silently.
+   - First install: show Setup immediately after the Splash finishes; download the complete package manifest and verify
+     every file before releasing the app boot gate or allowing onboarding / question-bank modules to start.
+   - Returning installs: trust the committed local ready record and open directly without a full-package hash scan.
+   - Updates: check one manifest at most every 48 hours (or through the Settings action), stage only changed files,
+     verify them and commit safely. Download progress is shown in the compact background chip.
+   - Repair is targeted to files found missing or changed by a manifest comparison; no recurring whole-package scan.
+   - Every network step has a timeout and a stall watchdog. Interrupted downloads keep verified files for retry.
 
    Compatible with the previous version: same cache name, same IndexedDB state, same public window.* functions. */
 (function(){
 'use strict';
 
+/* The page boot loader waits for this gate before loading question data or preloading app modules. */
+var bootGateResolve=null,bootGateReleased=false;
+window.__SHBACE_OFFLINE_BOOT_PROMISE__=new Promise(function(resolve){bootGateResolve=resolve;});
+function releaseBootGate(){
+ if(bootGateReleased)return;
+ bootGateReleased=true;
+ if(bootGateResolve){bootGateResolve(true);bootGateResolve=null;}
+}
+
 /* Native Capacitor builds ship the full asset bundle inside the APK. Nothing to do there. */
-if(window.Capacitor&&typeof window.Capacitor.isNativePlatform==='function'&&window.Capacitor.isNativePlatform())return;
-if(window.__SHBACE_OFFLINE_V2__)return;
+if(window.Capacitor&&typeof window.Capacitor.isNativePlatform==='function'&&window.Capacitor.isNativePlatform()){releaseBootGate();return;}
+if(window.__SHBACE_OFFLINE_V2__){releaseBootGate();return;}
 window.__SHBACE_OFFLINE_V2__=true;
 
 /* ---------- constants ---------- */
@@ -23,11 +33,12 @@ var CACHE_NAME='shbace-chrome-offline-v1.3.10.37';
 var STAGING_NAME='shbace-staging-offline';
 var DB_NAME='shbace-medical-offline-state-v1';
 var INSTALLED_KEY='installed',STAGED_KEY='staged';
-var CHECK_OK_KEY='shbace_pkg_check_ok_v1',CHECK_TRY_KEY='shbace_pkg_check_try_v1',HEAL_KEY='shbace_pkg_heal_ok_v1',REPAIR_KEY='shbace_pkg_repair_look_v1';
+var CHECK_OK_KEY='shbace_pkg_check_ok_v1',CHECK_TRY_KEY='shbace_pkg_check_try_v1';
 var PENDING_KEY='shbace_pkg_update_pending_v1',NOTIF_ID='update-available';
 var VER_KEY='shbace_pkg_version_installed_v1',VER_AVAIL_KEY='shbace_pkg_version_available_v1',EXAM_KEY='shbace_exam_goal_planner_v1';
 var DAY=86400000;
-var CHECK_EVERY=7*DAY,CHECK_RETRY=2*3600000,HEAL_EVERY=14*DAY,SNOOZE_DAYS=2,EXAM_QUIET_DAYS=7;
+/* A single lightweight manifest check every 48 hours; manual Settings checks use the same updater. */
+var CHECK_EVERY=48*3600000,CHECK_RETRY=2*3600000,SNOOZE_DAYS=2,EXAM_QUIET_DAYS=7;
 var MANIFEST_TIMEOUT=10000,STALL_MS=45000,CONCURRENCY=3,MAX_TRIES=3,RETRY_DELAYS=[15000,60000,300000];
 var MANIFEST_URL=new URL('./offline-assets-manifest.json',location.href).href;
 var READY_URL=new URL('./__shbace_offline_ready__',location.href).href;
@@ -72,7 +83,6 @@ function autoAllowed(){
  if(c){if(c.saveData)return false;if(/2g/.test(c.effectiveType||''))return false}
  return true;
 }
-function recentTry(){var t=lsNum(CHECK_TRY_KEY);return t>0&&t<=Date.now()&&Date.now()-t<CHECK_RETRY}
 function checkDue(){
  var now=Date.now(),ok=lsNum(CHECK_OK_KEY),tried=lsNum(CHECK_TRY_KEY);
  if(ok&&ok<=now&&now-ok<CHECK_EVERY)return false;
@@ -152,10 +162,91 @@ function dbPut(s,k,v){return dbOp(s,'readwrite',function(o){return o.put(v,k)})}
    needs-network / error are recoverable and retry on their own. */
 var state='boot',S={pct:0,done:0,total:0,bytes:0,totalBytes:0,msg:'',announce:false};
 var splashDone=false,splashP=null,chip=null,lastPaint='',announceTimer=null;
+var setupUi=null,setupPlan=null;
 function setState(s,extra){
  state=s;
  if(extra){for(var k in extra)if(Object.prototype.hasOwnProperty.call(extra,k))S[k]=extra[k]}
  paintChip();
+ paintSetupOverlay();
+}
+function mountSetupOverlay(){
+ if(setupUi&&setupUi.root&&setupUi.root.isConnected)return setupUi;
+ var root=document.createElement('div');
+ root.id='shbaceOfflineSetup';root.className='shb-offline-setup';
+ root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby','shbOfflineTitle');
+ root.innerHTML=
+  '<div class="shb-offline-card">'+
+   '<div class="shb-offline-brand"><span class="shb-offline-mark">S</span><span>SHBACE <b>MEDICAL</b></span><span class="shb-offline-pill">ONE-TIME SETUP</span></div>'+
+   '<div class="shb-offline-kicker">LOCAL INSTALLATION</div>'+
+   '<h1 id="shbOfflineTitle">Prepare Shbace for offline study</h1>'+
+   '<p class="shb-offline-intro">Download the complete app package once. Setup saves and verifies every required application file, including onboarding resources and all question banks.</p>'+
+   '<div class="shb-offline-status" id="shbOfflineStatus" aria-live="polite">Preparing the installation checklist…</div>'+
+   '<div class="shb-offline-progress-head"><b id="shbOfflinePercent">0%</b><span id="shbOfflineCount">0 / 0 files</span></div>'+
+   '<div class="shb-offline-track" id="shbOfflineTrack" role="progressbar" aria-label="Offline installation progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="shbOfflineBar"></i></div>'+
+   '<div class="shb-offline-bytes"><span id="shbOfflineBytes">0 B / 0 B</span><span id="shbOfflineStage">Preparing</span></div>'+
+   '<div class="shb-offline-stages" id="shbOfflineStages">'+
+    '<div class="shb-offline-stage"><span class="shb-offline-stage-dot"></span><span>Application and interface files</span><b>Included</b></div>'+
+    '<div class="shb-offline-stage"><span class="shb-offline-stage-dot"></span><span>Question banks and learning data</span><b>Included</b></div>'+
+    '<div class="shb-offline-stage"><span class="shb-offline-stage-dot"></span><span>Images, icons, fonts and resources</span><b>Included</b></div>'+
+    '<div class="shb-offline-stage" id="shbOfflineVerify"><span class="shb-offline-stage-dot"></span><span>File integrity verification</span><b>Pending</b></div>'+
+   '</div>'+
+   '<div class="shb-offline-warning" id="shbOfflineWarning">Keep the app open and connected to the internet until the complete package is verified.</div>'+
+   '<div class="shb-offline-errors" id="shbOfflineErrors" hidden></div>'+
+   '<button type="button" class="shb-offline-action" id="shbOfflineAction" disabled>Preparing…</button>'+
+   '<p class="shb-offline-footnote">Your existing answers, notes, bookmarks and study progress are kept in the current To Me storage.</p>'+
+  '</div>';
+ document.body.appendChild(root);
+ setupUi={
+  root:root,status:root.querySelector('#shbOfflineStatus'),percent:root.querySelector('#shbOfflinePercent'),
+  count:root.querySelector('#shbOfflineCount'),track:root.querySelector('#shbOfflineTrack'),bar:root.querySelector('#shbOfflineBar'),
+  bytes:root.querySelector('#shbOfflineBytes'),stage:root.querySelector('#shbOfflineStage'),verify:root.querySelector('#shbOfflineVerify'),
+  warning:root.querySelector('#shbOfflineWarning'),errors:root.querySelector('#shbOfflineErrors'),button:root.querySelector('#shbOfflineAction')
+ };
+ setupUi.button.addEventListener('click',function(){
+  var action=setupUi.button.getAttribute('data-action');
+  if(action==='open'||action==='continue'){
+   setupUi.root.remove();setupUi=null;releaseBootGate();return;
+  }
+  if(action==='retry'){
+   setupUi.button.disabled=true;setupUi.button.textContent='Retrying…';setupUi.button.removeAttribute('data-action');
+   retryN=0;runFullCheck({force:true,firstInstall:true});return;
+  }
+ });
+ if(document.querySelector('.phone.light'))root.classList.add('is-light');
+ paintSetupOverlay();
+ return setupUi;
+}
+function paintSetupOverlay(){
+ if(!setupUi||!setupUi.root||!setupUi.root.isConnected)return;
+ var total=S.total||(setupPlan&&setupPlan.files?setupPlan.files.length:0);
+ var done=S.done||0,pct=Math.max(0,Math.min(100,Number(S.pct)||0));
+ if(state==='setup-complete'){done=total;pct=100;}
+ setupUi.percent.textContent=pct+'%';
+ setupUi.count.textContent=done+' / '+total+' files';
+ setupUi.track.setAttribute('aria-valuenow',String(pct));
+ setupUi.bar.style.width=pct+'%';
+ setupUi.bytes.textContent=fmtBytes(S.bytes)+' / '+fmtBytes(S.totalBytes||(setupPlan&&setupPlan.bytes)||0);
+ setupUi.stage.textContent=state==='setup-complete'?'Verified and ready':(state==='installing'?'Downloading and verifying':(state==='error'||state==='needs-network'?'Action required':'Preparing'));
+ var message='Preparing the complete offline package…';
+ var warning='Setup downloads and verifies the full application package before onboarding starts.';
+ if(state==='installing'){message='Downloading the complete app package…';warning='Every file is checked by size and SHA-256 before it is accepted. Keep the app open until setup completes.';}
+ if(state==='needs-network'){message='An internet connection is required for the first setup.';warning='Connect to the internet, then retry. No student data has been changed.';}
+ if(state==='error'){message=S.msg||'The installation could not be completed.';warning='Verified files are kept. Reconnect if needed, then retry setup; incomplete files are not marked as installed.';}
+ if(state==='setup-complete'){message='Setup complete. All application files have been saved and verified.';warning='The first onboarding screen will open next. After this, the app opens from its local files.';}
+ if(state==='unsupported'){message=S.msg||'Verified offline setup is not supported in this browser.';warning='You may continue online, but offline installation cannot be verified on this device.';}
+ setupUi.status.textContent=message;setupUi.warning.textContent=warning;
+ setupUi.errors.hidden=state!=='error';setupUi.errors.textContent=state==='error'?(S.msg||'Setup failed.'):'';
+ var verify=setupUi.verify;
+ if(verify){verify.querySelector('b').textContent=state==='setup-complete'?'Complete':(state==='installing'?'Checking files':'Pending');verify.classList.toggle('is-done',state==='setup-complete');verify.classList.toggle('is-active',state==='installing');}
+ if(state==='setup-complete'){
+  setupUi.button.disabled=false;setupUi.button.textContent='Open Shbace Medical';setupUi.button.setAttribute('data-action','open');
+ }else if(state==='error'||state==='needs-network'){
+  setupUi.button.disabled=false;setupUi.button.textContent='Retry setup';setupUi.button.setAttribute('data-action','retry');
+ }else if(state==='unsupported'){
+  setupUi.button.disabled=false;setupUi.button.textContent='Continue online';setupUi.button.setAttribute('data-action','continue');
+ }else{
+  setupUi.button.disabled=true;setupUi.button.textContent=state==='installing'?'Installing…':'Preparing…';setupUi.button.removeAttribute('data-action');
+ }
 }
 function injectCss(){
  if(document.getElementById('shbOfflineCss'))return;
@@ -246,10 +337,29 @@ function waitForSplash(){
  return new Promise(function(resolve){
   var splash=document.getElementById('startupSplash');
   if(!splash||!splash.isConnected){resolve();return}
-  var finished=false,observer=null;
-  function done(){if(finished||splash.isConnected)return;finished=true;if(observer)observer.disconnect();resolve()}
-  try{observer=new MutationObserver(done);observer.observe(document.body,{childList:true,subtree:true})}catch(e){}
-  setTimeout(function(){if(!finished){finished=true;if(observer)observer.disconnect();resolve()}},14000);
+  var finished=false,timer=null,observer=null;
+  function done(){
+   if(finished)return;finished=true;
+   if(timer)clearTimeout(timer);
+   if(observer)observer.disconnect();
+   document.removeEventListener('spEcgDone',onEcgDone);
+   resolve();
+  }
+  function onEcgDone(){/* Let the existing ECG fade finish before Setup covers the Splash. */setTimeout(done,650)}
+  document.addEventListener('spEcgDone',onEcgDone,{once:true});
+  /* Reduced-motion mode completes the splash trace synchronously without dispatching spEcgDone. */
+  try{
+   if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    var ready=document.getElementById('startupSplash');
+    if(ready&&ready.classList.contains('sp-ready'))setTimeout(done,1200);
+    else{
+     observer=new MutationObserver(function(){if(ready&&ready.classList.contains('sp-ready')){observer.disconnect();setTimeout(done,1200)}});
+     observer.observe(ready,{attributes:true,attributeFilter:['class']});
+    }
+   }
+  }catch(e){}
+  /* Safety fallback for browsers where Worker / ECG completion events are unavailable. */
+  timer=setTimeout(done,10500);
  });
 }
 
@@ -286,14 +396,6 @@ async function loadManifest(){
  data.totalBytes=Number(data.totalBytes)||data.files.reduce(function(s,f){return s+(Number(f.bytes)||0)},0);
  return data;
 }
-async function cachedManifest(){
- try{
-  var c=await caches.open(CACHE_NAME),hit=await c.match(MANIFEST_URL);
-  if(!hit)return null;
-  var d=await hit.json();return validManifest(d)?d:null;
- }catch(e){return null}
-}
-
 /* Streaming download with a total timeout; reports bytes as they arrive (feeds the stall watchdog). */
 async function fetchBytes(url,ms,outer,onBytes){
  var ctl=new AbortController(),t=setTimeout(function(){ctl.abort()},ms),got=0;
@@ -330,6 +432,7 @@ function bump(n){
  S.pct=S.totalBytes?Math.min(99,Math.floor(S.bytes*100/S.totalBytes)):0;
  if(n>0)tick();
  paintChip();
+ paintSetupOverlay();
 }
 function scheduleRetry(){
  if(retryTimer||retryN>=RETRY_DELAYS.length)return;
@@ -397,7 +500,7 @@ async function runPlan(plan,mode){
     try{
      if(await isVerified(f,tname,target)){bump(Number(f.bytes)||0)}
      else{await target.delete(urlFor(f.path));await downloadFile(f,target,sig);await markVerified(f,tname)}
-     S.done++;tick();
+     S.done++;tick();paintSetupOverlay();
     }catch(e){
      if(sig.aborted)return;
      if(isQuota(e)){fatal=e;runCtl.abort();return}
@@ -422,7 +525,11 @@ async function runPlan(plan,mode){
    await saveInstalled(manifest);
    for(var j=0;j<plan.removed.length;j++)await (await caches.open(CACHE_NAME)).delete(urlFor(plan.removed[j]));
    lsSet(CHECK_OK_KEY,Date.now());retryN=0;setPending(0);markInstalledNow();
-   announceReady();
+   if(mode==='install'){
+    /* The verified package is now complete, so register the worker only after Setup has finished its downloads. */
+    registerSW();
+    setState('setup-complete',{pct:100,done:plan.files.length,total:plan.files.length,bytes:plan.bytes,totalBytes:plan.bytes});
+   }else announceReady();
   }
  }catch(e){
   setState('error',{msg:friendly(e)});
@@ -434,6 +541,7 @@ async function runPlan(plan,mode){
 }
 async function startPlan(plan,mode){
  if(busy)return;
+ if(mode==='install'){setupPlan=plan;mountSetupOverlay();}
  busy=true;
  try{await runPlan(plan,mode)}finally{busy=false}
 }
@@ -473,7 +581,7 @@ async function applyStagedNow(){
   await commitStaged(st);
   setPending(0);lsSet(CHECK_OK_KEY,Date.now());markInstalledNow();
   setState('ready');
-  requestReload();
+  if(!requestReload())releaseBootGate();
  }catch(e){
   setState('error',{msg:'Could not apply the update: '+friendly(e)});
  }finally{busy=false}
@@ -545,7 +653,7 @@ async function runFullCheck(opts){
   var rec=await dbGet('meta',INSTALLED_KEY).catch(function(){return null});
   var hasRec=!!(rec&&rec.files);
   if(!online()){
-   if(!hasRec)setState('needs-network');
+   if(!hasRec){setState('needs-network');scheduleRetry();}
    return out;
   }
   var res=await decide();
@@ -560,8 +668,9 @@ async function runFullCheck(opts){
    if(info)lsSetJson(VER_AVAIL_KEY,info);
    setState('ready');
    if(opts.manual){showSheetLater(res.plan,info)}
-   else if(autoAllowed()){next={plan:res.plan,mode:'update'}}
-   else if(!examSoon()){showSheetLater(res.plan,info)}
+   else if(autoAllowed()&&!examSoon()){next={plan:res.plan,mode:'update'}}
+   /* Automatic checks never interrupt the student with an update sheet. If auto-download is unsuitable
+      (Data Saver, slow connection, or exam quiet window), leave the package untouched until a later check/manual request. */
    return {state:'update'};
   }
   next={plan:res.plan,mode:res.kind};
@@ -578,34 +687,6 @@ async function runFullCheck(opts){
 }
 
 /* Re-verify saved files from time to time; anything damaged is deleted and re-downloaded by the normal check. */
-async function heal(){
- /* Background hashing of the whole package: never on Data Saver / slow networks, never in exam week. */
- if(busy||!online()||!autoAllowed()||examSoon())return;
- busy=true;var bad=[];
- try{
-  var m=await cachedManifest();
-  if(!m)return;
-  var r=await verifyCachedFiles(m.files,'',true);
-  bad=r.bad;
-  if(bad.length){
-   /* Never delete a damaged file unless the server is reachable right now to replace it. */
-   try{await loadManifest()}catch(e){}
-   if(!manifestFromNetwork){lsSet(HEAL_KEY,Date.now()-(HEAL_EVERY-DAY));bad=[];return}
-  }
-  var c=await caches.open(CACHE_NAME);
-  for(var i=0;i<bad.length;i++)await c.delete(urlFor(bad[i].path));
-  lsSet(HEAL_KEY,Date.now());
- }catch(e){}finally{busy=false}
- if(bad.length)runFullCheck({force:true});
-}
-async function localRepairNeeded(){
- try{
-  var m=await cachedManifest();if(!m)return false;
-  var have=await urlSetOf(await caches.open(CACHE_NAME));
-  return m.files.some(function(f){return !have[urlFor(f.path)]});
- }catch(e){return false}
-}
-
 /* Manual "Check for updates" (Settings). Ignores the schedule and reports what happened. */
 async function manualCheck(){
  if(!supported())return {state:'unsupported'};
@@ -621,31 +702,43 @@ window.shbaceVersionInfo=function(){return {installed:lsGetJson(VER_KEY),availab
 
 /* ---------- boot ---------- */
 function registerSW(){
+ /* Do not force a Service Worker version check on each launch. The 48-hour manifest check owns updates. */
  try{
-  navigator.serviceWorker.register('./sw.js',{scope:'./'}).then(function(reg){if(checkDue())reg.update().catch(noop)}).catch(noop);
+  navigator.serviceWorker.getRegistration('./').then(function(reg){
+   if(!reg)return navigator.serviceWorker.register('./sw.js',{scope:'./'});
+   return reg;
+  }).catch(noop);
  }catch(e){}
 }
 async function boot(){
  var rec=await dbGet('meta',INSTALLED_KEY).catch(function(){return null});
  var hasRec=!!(rec&&rec.files);
+ var legacy=await dbGet('meta','ready').catch(function(){return null});
+ var hasReadyMarker=!!(legacy&&legacy.verified);
  var st=await dbGet('meta',STAGED_KEY).catch(function(){return null});
  if(st&&st.ready){
-  if(hasRec&&rec.version!==st.version&&(await stagingIntact(st))){setState('ready');return applyStagedNow()}
+  if(hasRec&&rec.version!==st.version&&(await stagingIntact(st))){
+   setState('ready');
+   await applyStagedNow();
+   if(!bootGateReleased)releaseBootGate();
+   return;
+  }
   await dbPut('meta',STAGED_KEY,null).catch(noop);
   caches.delete(STAGING_NAME).catch(noop);
  }
- if(!hasRec)return runFullCheck();
- setState('ready');
- if(online()){
-  /* Opening the app never triggers a network check by itself: the scheduled check runs at most every CHECK_EVERY days. */
-  if(checkDue())return runFullCheck();
-  /* Local-only look for missing files: at most once a day, and it only goes to the network if something is really missing. */
-  if(Date.now()-lsNum(REPAIR_KEY)>DAY){
-   lsSet(REPAIR_KEY,Date.now());
-   if(!recentTry()&&(await localRepairNeeded()))return runFullCheck();
-  }
-  if(Date.now()-lsNum(HEAL_KEY)>HEAL_EVERY)setTimeout(function(){if(window.requestIdleCallback)requestIdleCallback(function(){heal()},{timeout:60000});else heal()},30000);
+ if(!hasRec&&!hasReadyMarker){
+  if(splashP)await splashP;
+  mountSetupOverlay();
+  setState('boot',{msg:'Preparing the complete installation…',done:0,total:0,bytes:0,totalBytes:0,pct:0});
+  await runFullCheck({force:true,firstInstall:true});
+  return;
  }
+ /* Existing install: trust the committed local ready record and never hash or scan the whole package on launch. */
+ setState('ready');
+ registerSW();
+ releaseBootGate();
+ /* One background manifest comparison at most every 48 hours; it never delays app startup. */
+ if(online()&&checkDue())runFullCheck({force:true}).catch(noop);
 }
 function kick(){
  if(!started||busy||!online())return;
@@ -653,15 +746,23 @@ function kick(){
  else if(checkDue())runFullCheck();
 }
 function start(){
- if(!document.body)return;
- if(!supported())return;
- /* Same rule as before: the offline package belongs to the installed app, not to a browser tab. */
- if(!standalone()){if(iosDevice())waitForSplash().then(showInstallHint);return}
- started=true;
- registerSW();
+ if(!document.body){releaseBootGate();return}
+ /* The offline package belongs to the installed app, not a normal browser tab. */
+ if(!standalone()){
+  releaseBootGate();
+  if(iosDevice())waitForSplash().then(showInstallHint);
+  return;
+ }
  splashP=waitForSplash();
+ if(!supported()){
+  splashP.then(function(){mountSetupOverlay();setState('unsupported',{msg:'This browser cannot verify the offline package. You can continue online.'});});
+  return;
+ }
+ started=true;
  splashP.then(function(){splashDone=true;paintChip()});
- boot().catch(function(){});
+ boot().catch(function(error){
+  splashP.then(function(){mountSetupOverlay();setState('error',{msg:friendly(error)});});
+ });
  window.addEventListener('online',function(){setTimeout(kick,1500)});
  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')kick()});
 }

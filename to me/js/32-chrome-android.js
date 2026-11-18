@@ -4,18 +4,6 @@
 if(!window.__SHBACE_CHROME_PWA__||!/Chrome\//i.test(navigator.userAgent||''))return;
 
 var deferredInstall=null,screenLock=null,lockBusy=false,reloadPending=false,reloadStarted=false;
-var VERSION_KEY='shbace_chrome_seen_version_v1';
-/* Update checks are throttled: one successful check every 7 days; after a failed attempt (offline) retry no sooner than 2 hours. */
-var VCHECK_OK_KEY='shbace_ver_check_ok_v1',VCHECK_TRY_KEY='shbace_ver_check_try_v1';
-var VCHECK_EVERY=7*24*60*60*1000,VCHECK_RETRY=2*60*60*1000;
-function lsNum(key){try{return Number(localStorage.getItem(key))||0}catch(_){return 0}}
-function lsSet(key,value){try{localStorage.setItem(key,String(value))}catch(_){}}
-function checkDue(){
- var now=Date.now(),ok=lsNum(VCHECK_OK_KEY),tried=lsNum(VCHECK_TRY_KEY);
- if(ok&&ok<=now&&now-ok<VCHECK_EVERY)return false;
- if(tried&&tried<=now&&now-tried<VCHECK_RETRY)return false;
- return true;
-}
 function installed(){
  try{return !!(window.matchMedia&&(
   window.matchMedia('(display-mode: fullscreen)').matches||
@@ -44,12 +32,12 @@ function mountSettings(){
  mountUpdateCard(root);
  refreshSettings();
 }
-/* Manual update check. The app also checks by itself, but never more than once every 7 days. */
+/* Manual update check. Automatic manifest polling is owned by the offline engine (48-hour cadence). */
 function updateNote(){
  var t=0,p=0,vi=null;try{t=Number(window.shbaceLastUpdateCheck&&window.shbaceLastUpdateCheck())||0;p=Number(window.shbaceUpdatePending&&window.shbaceUpdatePending())||0;vi=window.shbaceVersionInfo&&window.shbaceVersionInfo()}catch(_){}
  var inst=vi&&vi.installed,av=vi&&vi.available;
  var ver=inst&&inst.displayVersion?'Version '+inst.displayVersion+(inst.releaseDate?' · '+inst.releaseDate:'')+'. ':'';
- var base=ver+(t?'Last successful check: '+new Date(t).toLocaleString()+'. ':'')+'The app checks automatically every 7 days.';
+ var base=ver+(t?'Last successful check: '+new Date(t).toLocaleString()+'. ':'')+'The app checks automatically every 48 hours.';
  return p?'A new update'+(av&&av.displayVersion?' ('+av.displayVersion+')':'')+' is available ('+p+' changed file'+(p===1?'':'s')+'). Tap Check for updates, then Update now. '+base:base;
 }
 function mountUpdateCard(root){
@@ -59,7 +47,7 @@ function mountUpdateCard(root){
  var box=document.createElement('section');
  box.className='card setcard';box.id='shbUpdateSettings';
  box.innerHTML='<h3>App updates</h3>'+
-  '<p class="meta">Only changed files are downloaded, and only after you choose Update now. Your progress is never touched.</p>'+
+  '<p class="meta">Changed files download and verify in the background. Your answers and study progress are kept.</p>'+
   '<div class="shb-chrome-tools"><button type="button" id="shbUpdateCheck">Check for updates</button></div>'+
   '<p class="shb-chrome-meta" id="shbUpdateNote">'+updateNote()+'</p>';
  root.appendChild(box);
@@ -152,35 +140,5 @@ function applyPendingReload(){
 /* The offline updater calls this after a user-approved, verified package commit.
    When a question-bank session is active, its next screen change triggers the reload. */
 window.shbaceRequestAppReload=function(){reloadPending=true;return applyPendingReload();};
-function checkVersion(){
- if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;
- fetch('./pwa-version.json?shbcheck='+Date.now(),{cache:'no-store'})
-  .then(function(r){if(!r.ok)throw new Error('version unavailable');return r.json()})
-  .then(function(v){
-   if(!v||!v.version)return;
-   /* Only a successful check resets the 48-hour timer. */
-   lsSet(VCHECK_OK_KEY,Date.now());
-   try{localStorage.setItem(VERSION_KEY,String(v.version))}catch(_){}
-   /* Version metadata alone never forces a reload. The offline manifest prompts first;
-      the updater requests one reload only after its verified commit. */
-  }).catch(function(){});
-}
-/* Single entry point for every trigger below. It does nothing unless a check is due. */
-function scheduledCheck(){
- if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;
- if(!checkDue())return;
- lsSet(VCHECK_TRY_KEY,Date.now());
- navigator.serviceWorker.getRegistration('./').then(function(reg){if(reg)return reg.update()}).catch(function(){});
- checkVersion();
-}
-if('serviceWorker' in navigator){
- /* controllerchange alone does not reload; the offline package transaction owns restart. */
- navigator.serviceWorker.ready.then(function(){scheduledCheck()}).catch(function(){});
- window.addEventListener('online',scheduledCheck);
- document.addEventListener('visibilitychange',function(){if(!document.hidden){scheduledCheck();applyPendingReload()}});
- setInterval(function(){
-  if(document.hidden)return;
-  scheduledCheck();
- },30*60*1000);
-}
+
 })();
