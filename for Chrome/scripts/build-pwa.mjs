@@ -92,8 +92,7 @@ const requiredFiles = [
   "js/39-clinical-case-pediatrics.js",
   "js/40-egyptian-book-pediatrics.js",
   "js/41-collections-integration.js",
-  "js/43-ai-bank-engine-adapter.js",
-  "js/44-islamic-reminders.js"
+  "js/43-ai-bank-engine-adapter.js"
 ];
 const requiredDirs = ["css", "js", "data"];
 const imageDirs = ["img", "img1", "img2"];
@@ -195,7 +194,7 @@ if (reviewLog && Array.isArray(reviewLog.entries)) {
 const pwaVersion = JSON.parse(readFileSync(join(root, "pwa-version.json"), "utf8"));
 if (pwaVersion.platform !== "Chrome Android PWA" ||
     !/^\d+\.\d+\.\d+-chrome\.\d+$/.test(String(pwaVersion.version || ""))) {
-  fail("pwa-version.json must declare platform Chrome Android PWA and a version like 1.3.10-chrome.N");
+  fail("pwa-version.json must declare Chrome Android PWA and a version like 1.3.10-chrome.N");
 }
 const packageMeta = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 /* Stable package cache: the PWA release version must NOT be part of this name. */
@@ -349,7 +348,7 @@ if (missingAssets.size) {
   fail(`Missing referenced image assets: ${[...missingAssets].join(", ")}`);
 }
 
-const scriptRefs = [...html.matchAll(/data-src=["']([^"']+\.js)["']/g)].map(m => m[1]);
+const scriptRefs = [...html.matchAll(/(?:data-src|src)=["']([^"']+\.js)["']/g)].map(m => m[1]);
 for (const script of scriptRefs) {
   if (!existsSync(join(output, script))) fail(`Deferred application script is missing: ${script}`);
   try {
