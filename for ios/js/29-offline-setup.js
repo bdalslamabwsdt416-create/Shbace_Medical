@@ -31,6 +31,7 @@ var INSTALLED_KEY='installed',STAGED_KEY='staged';
 var CHECK_OK_KEY='shbace_pkg_check_ok_v1',CHECK_TRY_KEY='shbace_pkg_check_try_v1',HEAL_KEY='shbace_pkg_heal_ok_v1',REPAIR_KEY='shbace_pkg_repair_look_v1';
 var PENDING_KEY='shbace_pkg_update_pending_v1',NOTIF_ID='update-available';
 var VER_KEY='shbace_pkg_version_installed_v1',VER_AVAIL_KEY='shbace_pkg_version_available_v1',EXAM_KEY='shbace_exam_goal_planner_v1';
+var FALLBACK_INSTALLED_KEY='shbace_pkg_installed_fallback_v1',DIAG_KEY='shbace_storage_diagnostics_v1';
 var DAY=86400000;
 var CHECK_EVERY=2*DAY,CHECK_RETRY=2*3600000,HEAL_EVERY=14*DAY,SNOOZE_DAYS=2,EXAM_QUIET_DAYS=7;
 var MANIFEST_TIMEOUT=10000,STALL_MS=45000,CONCURRENCY=3,MAX_TRIES=3,RETRY_DELAYS=[15000,60000,300000];
@@ -46,6 +47,47 @@ function lsSet(k,v){try{localStorage.setItem(k,String(v))}catch(e){}}
 function lsDel(k){try{localStorage.removeItem(k)}catch(e){}}
 function lsGetJson(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}}
 function lsSetJson(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+var storageDiagnostics={
+ checkedAt:null,indexedDB:'unknown',installedRecord:'unknown',cacheExists:null,cacheInitiallyExists:null,
+ cacheFilesState:'unknown',cacheFilesGood:0,cacheFilesBad:0,cacheFilesMissing:0,manifestFiles:0,
+ persistentStorage:'unknown',persistentStorageGranted:null,persistentStoragePersisted:null,recovery:'not-checked',recoveryError:''
+};
+function storageDiagnosis(){
+ if(storageDiagnostics.indexedDB==='unavailable'&&storageDiagnostics.cacheInitiallyExists===false)return 'indexeddb_and_cache_unavailable';
+ if(storageDiagnostics.indexedDB==='unavailable'&&storageDiagnostics.cacheInitiallyExists===true)return 'indexeddb_unavailable_cache_present';
+ if(storageDiagnostics.cacheInitiallyExists===false&&storageDiagnostics.installedRecord==='present')return 'cache_missing_indexeddb_record_present';
+ if(storageDiagnostics.cacheInitiallyExists===false&&storageDiagnostics.installedRecord==='missing')return 'cache_and_indexeddb_install_record_missing';
+ if(storageDiagnostics.cacheInitiallyExists===true&&storageDiagnostics.installedRecord==='missing')return 'indexeddb_install_record_missing_cache_present';
+ if(storageDiagnostics.cacheInitiallyExists===true&&storageDiagnostics.installedRecord==='present')return 'indexeddb_and_cache_present';
+ return 'storage_state_not_fully_known';
+}
+function publishStorageDiagnostics(quiet){
+ storageDiagnostics.checkedAt=Date.now();
+ storageDiagnostics.diagnosis=storageDiagnosis();
+ var snap={};Object.keys(storageDiagnostics).forEach(function(k){snap[k]=storageDiagnostics[k]});
+ window.__SHBACE_STORAGE_DIAGNOSTICS__=snap;
+ window.shbaceStorageDiagnostics=function(){var out={};Object.keys(storageDiagnostics).forEach(function(k){out[k]=storageDiagnostics[k]});return out};
+ lsSetJson(DIAG_KEY,snap);
+ if(!quiet)try{console.info('[Shbace storage diagnostics]',snap)}catch(e){}
+}
+function updateStorageDiagnostics(patch,quiet){
+ Object.keys(patch||{}).forEach(function(k){storageDiagnostics[k]=patch[k]});
+ publishStorageDiagnostics(quiet);
+}
+async function requestPersistentStorage(){
+ var state='unsupported',granted=null,persisted=false;
+ try{
+  var api=navigator.storage;
+  if(api){
+   if(typeof api.persisted==='function')persisted=!!(await api.persisted());
+   if(!persisted&&typeof api.persist==='function')granted=!!(await api.persist());
+   if(typeof api.persisted==='function')persisted=!!(await api.persisted());
+   state=persisted?'granted':(typeof api.persist==='function'?'denied':'unsupported');
+  }
+ }catch(e){state='error'}
+ updateStorageDiagnostics({persistentStorage:state,persistentStorageGranted:granted,persistentStoragePersisted:persisted},true);
+ return {state:state,granted:granted,persisted:persisted};
+}
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function fmtBytes(n){
  if(!isFinite(n)||n<0)return 'Unknown';
@@ -125,29 +167,56 @@ function requestReload(){
 }
 
 /* ---------- IndexedDB (same database and stores as before) ---------- */
-var dbp=null;
+var dbp=null,dbConn=null;
+function resetDbConnection(connection){
+ var d=connection||dbConn;
+ if(connection&&dbConn&&connection!==dbConn)return;
+ if(dbConn===d)dbConn=null;
+ dbp=null;
+ try{if(d)d.close()}catch(e){}
+}
+function isClosingDbError(e){
+ return !!(e&&(e.name==='InvalidStateError'||e.name==='TransactionInactiveError'||/database connection (?:is )?closing|connection is closed|database is closed/i.test(e.message||'')));
+}
 function db(){
  if(!dbp){
-  dbp=new Promise(function(res,rej){
-   if(!window.indexedDB){rej(new Error('IndexedDB is not available.'));return}
+  var p=new Promise(function(res,rej){
+   if(!window.indexedDB){updateStorageDiagnostics({indexedDB:'unavailable'},true);rej(new Error('IndexedDB is not available.'));return}
    var q=indexedDB.open(DB_NAME,1);
    q.onupgradeneeded=function(){var d=q.result;
     if(!d.objectStoreNames.contains('meta'))d.createObjectStore('meta');
     if(!d.objectStoreNames.contains('verified'))d.createObjectStore('verified');};
-   q.onsuccess=function(){res(q.result)};
-   q.onerror=function(){rej(q.error||new Error('Could not open local storage.'))};
-   q.onblocked=function(){rej(new Error('Local storage is busy. Close other Shbace tabs.'))};
+   q.onsuccess=function(){
+    var d=q.result;dbConn=d;
+    d.onversionchange=function(){resetDbConnection(d)};
+    d.onclose=function(){if(dbConn===d){dbConn=null;dbp=null}};
+    updateStorageDiagnostics({indexedDB:'available'},true);
+    res(d);
+   };
+   q.onerror=function(){updateStorageDiagnostics({indexedDB:'unavailable',indexedDBError:(q.error&&q.error.message)||'open failed'},true);rej(q.error||new Error('Could not open local storage.'))};
+   q.onblocked=function(){updateStorageDiagnostics({indexedDB:'unavailable',indexedDBError:'open blocked'},true);rej(new Error('Local storage is busy. Close other Shbace tabs.'))};
   });
-  dbp.catch(function(){dbp=null});
+  dbp=p;
+  p.catch(function(){if(dbp===p)dbp=null});
  }
  return dbp;
 }
 function dbOp(store,mode,fn){
- return db().then(function(d){return new Promise(function(res,rej){
-  var tx=d.transaction(store,mode),req=fn(tx.objectStore(store));
-  tx.oncomplete=function(){res(req&&req.result)};
-  tx.onabort=tx.onerror=function(){rej(tx.error||new Error('Local storage transaction failed.'))};
- })});
+ function attempt(retry){
+  return db().then(function(d){return new Promise(function(res,rej){
+   var tx,req,settled=false;
+   function fail(e){if(settled)return;settled=true;rej(e||new Error('Local storage transaction failed.'))}
+   try{tx=d.transaction(store,mode);req=fn(tx.objectStore(store))}
+   catch(e){fail(e);return}
+   tx.oncomplete=function(){if(settled)return;settled=true;res(req&&req.result)};
+   tx.onabort=function(){fail(tx.error)};
+   tx.onerror=function(){fail(tx.error)};
+  })}).catch(function(e){
+   if(retry&&isClosingDbError(e)){resetDbConnection();return attempt(false)}
+   throw e;
+  });
+ }
+ return attempt(true);
 }
 function dbGet(s,k){return dbOp(s,'readonly',function(o){return o.get(k)})}
 function dbPut(s,k,v){return dbOp(s,'readwrite',function(o){return o.put(v,k)})}
@@ -364,7 +433,7 @@ function urlSetOf(cache){
 }
 function validManifest(d){return !!(d&&d.schema===1&&Array.isArray(d.files)&&d.files.length&&d.version)}
 
-var manifest=null,manifestFromNetwork=false;
+var manifest=null,manifestFromNetwork=false,recoveryScan=null;
 async function loadManifest(){
  var c=await caches.open(CACHE_NAME),data=null;
  manifestFromNetwork=false;
@@ -442,13 +511,21 @@ function friendly(e){
  if(e.name==='AbortError')return stalled?'Connection stalled. Retrying automatically.':'Interrupted. Retrying automatically.';
  return e.message||String(e);
 }
+async function cachedFileMatches(f,target){
+ try{
+  var r=await target.match(urlFor(f.path));
+  if(!r||!r.ok)return false;
+  var b=await r.arrayBuffer();
+  return b.byteLength===f.bytes&&(await sha256(b))===f.sha256;
+ }catch(e){return false}
+}
 async function isVerified(f,tname,target){
- var v=await dbGet('verified',tname+'|'+f.path).catch(function(){return null});
- if(v!==f.sha256)return false;
- return !!(await target.match(urlFor(f.path)));
+ /* The cache contents are the source of truth. Missing IDB metadata must never force a good file to be downloaded again. */
+ var ok=await cachedFileMatches(f,target);
+ if(ok)await markVerified(f,tname);
+ return ok;
 }
 function markVerified(f,tname){return dbPut('verified',tname+'|'+f.path,f.sha256).catch(noop)}
-
 async function downloadFile(f,target,sig){
  var url=urlFor(f.path);
  var fresh=url+(url.indexOf('?')>=0?'&':'?')+'__shbace_integrity='+encodeURIComponent(manifest.version+'-'+f.sha256.slice(0,16));
@@ -472,12 +549,24 @@ async function downloadFile(f,target,sig){
 
 async function saveInstalled(m){
  var total=m.files.reduce(function(s,f){return s+(Number(f.bytes)||0)},0),at=Date.now();
- await dbPut('meta',INSTALLED_KEY,{version:m.version,files:fileMap(m.files),verified:true,fileCount:m.files.length,totalBytes:total,completedAt:at});
- await dbPut('meta','ready',{version:m.version,verified:true,fileCount:m.files.length,totalBytes:total,completedAt:at});
- var c=await caches.open(CACHE_NAME);
- await c.put(READY_URL,new Response(JSON.stringify({version:m.version,verified:true,completedAt:at}),{status:200,headers:{'content-type':'application/json'}}));
+ var installed={version:m.version,files:fileMap(m.files),verified:true,fileCount:m.files.length,totalBytes:total,completedAt:at};
+ var marker={version:m.version,verified:true,fileCount:m.files.length,totalBytes:total,completedAt:at};
+ /* Small fallback hint; actual cached files are re-hashed before recovery is accepted. */
+ lsSetJson(FALLBACK_INSTALLED_KEY,marker);
+ try{
+  await dbPut('meta',INSTALLED_KEY,installed);
+  await dbPut('meta','ready',marker);
+  updateStorageDiagnostics({indexedDB:'available',installedRecord:'present'},true);
+ }catch(e){
+  updateStorageDiagnostics({indexedDB:'unavailable',indexedDBError:(e&&e.message)||'write failed'},true);
+  try{console.warn('[Shbace] Install metadata could not be written; the verified Cache package will be recovered on next launch.',e)}catch(_){}
+ }
+ try{
+  var c=await caches.open(CACHE_NAME);
+  await c.put(READY_URL,new Response(JSON.stringify(marker),{status:200,headers:{'content-type':'application/json'}}));
+  updateStorageDiagnostics({cacheExists:true},true);
+ }catch(e){try{console.warn('[Shbace] Could not persist the offline-ready marker.',e)}catch(_){}}
 }
-
 /* Download a plan. mode: install | repair (straight into the live cache) or update (into staging, swapped later). */
 async function runPlan(plan,mode){
  var staged=mode==='update',tname=staged?STAGING_NAME:CACHE_NAME;
@@ -496,7 +585,7 @@ async function runPlan(plan,mode){
     var f=files[i];
     try{
      if(await isVerified(f,tname,target)){bump(Number(f.bytes)||0)}
-     else{await target.delete(urlFor(f.path));await downloadFile(f,target,sig);await markVerified(f,tname)}
+     else{await downloadFile(f,target,sig);await markVerified(f,tname)}
      S.done++;tick();paintSetup();
     }catch(e){
      if(sig.aborted)return;
@@ -582,27 +671,37 @@ async function applyStagedNow(){
 
 /* ---------- decisions ---------- */
 async function verifyCachedFiles(files,label,quiet){
- var c=await caches.open(CACHE_NAME),good=[],bad=[];
+ var existed=await caches.has(CACHE_NAME).catch(function(){return false});
+ var c=await caches.open(CACHE_NAME),good=[],bad=[],missing=0,damaged=0;
  if(!quiet)setState('repairing',{msg:label,total:files.length,done:0,pct:0,bytes:0,totalBytes:0});
  for(var i=0;i<files.length;i++){
-  var f=files[i],ok=false;
+  var f=files[i],ok=false,hit=null;
   try{
-   var r=await c.match(urlFor(f.path));
-   if(r&&r.ok){var b=await r.arrayBuffer();ok=b.byteLength===f.bytes&&(await sha256(b))===f.sha256}
+   hit=await c.match(urlFor(f.path));
+   if(hit&&hit.ok){var b=await hit.arrayBuffer();ok=b.byteLength===f.bytes&&(await sha256(b))===f.sha256}
   }catch(e){}
-  (ok?good:bad).push(f);
+  if(ok)good.push(f);
+  else{bad.push(f);if(!hit)missing++;else damaged++}
   if(!quiet){S.done=i+1;S.pct=Math.floor((i+1)*100/files.length);paintChip()}
-  await wait(0); /* keep the UI responsive */
+  await wait(0);
  }
- return {good:good,bad:bad};
+ updateStorageDiagnostics({
+  cacheExists:existed||good.length>0||bad.length>0,
+  cacheFilesState:good.length===files.length?'complete':(good.length?'partial':(damaged?'damaged':'empty')),
+  cacheFilesGood:good.length,cacheFilesBad:damaged,cacheFilesMissing:missing,manifestFiles:files.length
+ },true);
+ return {good:good,bad:bad,missing:missing,damaged:damaged,cacheExisted:existed};
 }
 async function computePlan(installed){
- var have=await urlSetOf(await caches.open(CACHE_NAME)),files=[],changed=0,cur=Object.create(null);
- manifest.files.forEach(function(f){
-  cur[f.path]=1;
-  var old=installed.files&&installed.files[f.path],same=!!(old&&old.sha256===f.sha256);
-  if(!same||!have[urlFor(f.path)]){files.push(f);if(!same)changed++}
- });
+ var c=await caches.open(CACHE_NAME),have=await urlSetOf(c),files=[],changed=0,cur=Object.create(null);
+ for(var i=0;i<manifest.files.length;i++){
+  var f=manifest.files[i];cur[f.path]=1;
+  var old=installed.files&&installed.files[f.path],same=!!(old&&old.sha256===f.sha256),present=!!have[urlFor(f.path)];
+  if(same&&present)continue;
+  /* Missing/stale verification metadata is repaired from the real file before any download is planned. */
+  if(present&&await cachedFileMatches(f,c)){await markVerified(f,CACHE_NAME);continue}
+  files.push(f);if(!same)changed++;
+ }
  var removed=Object.keys(installed.files||{}).filter(function(p){return !cur[p]});
  return {files:files,changed:changed,removed:removed};
 }
@@ -612,13 +711,20 @@ async function decide(){
  var legacy=await dbGet('meta','ready').catch(function(){return null});
  if(!(installed&&installed.files)){
   if(!(legacy&&legacy.verified)){
-   if(!manifestFromNetwork)throw new Error('Could not reach the server. Retrying automatically.');
-   return {kind:'install',plan:planOf(manifest.files,[])};
+   /* Metadata may be gone while a complete package is still in Cache Storage. Re-hash before any download. */
+   var scan=recoveryScan&&recoveryScan.version===manifest.version?recoveryScan:await verifyCachedFiles(manifest.files,'Checking files saved on this device',true);
+   recoveryScan={version:manifest.version,good:scan.good,bad:scan.bad,missing:scan.missing||0,damaged:scan.damaged||0};
+   for(var g=0;g<scan.good.length;g++)await markVerified(scan.good[g],CACHE_NAME);
+   if(!scan.bad.length){await saveInstalled(manifest);updateStorageDiagnostics({installedRecord:'present',recovery:'restored-from-cache'},true);return {kind:'none'}}
+   updateStorageDiagnostics({recovery:'partial-cache-recovery'},true);
+   if(!manifestFromNetwork)throw new Error('Saved files were found, but some files are missing or damaged. Connect once to complete recovery.');
+   return {kind:'install',plan:planOf(scan.bad,[])};
   }
-  /* Older build left only a "ready" marker: verify the saved files once (in the background), then keep a per-file record. */
-  var r=await verifyCachedFiles(manifest.files,'Checking saved files');
+  /* Older build left only a ready marker: verify files and rebuild per-file metadata. */
+  var r=await verifyCachedFiles(manifest.files,'Checking saved files',true);
   installed={version:legacy.version||manifest.version,files:fileMap(r.good),verified:true,fileCount:r.good.length,completedAt:Date.now()};
-  await dbPut('meta',INSTALLED_KEY,installed);
+  for(var k=0;k<r.good.length;k++)await markVerified(r.good[k],CACHE_NAME);
+  await dbPut('meta',INSTALLED_KEY,installed).catch(noop);
  }
  var d=await computePlan(installed);
  if(!d.files.length&&!d.removed.length){
@@ -631,10 +737,9 @@ async function decide(){
   await saveInstalled(manifest);
   return {kind:'none'};
  }
- if(!manifestFromNetwork)return {kind:'none'}; /* cannot download anything without the live manifest */
+ if(!manifestFromNetwork)throw new Error('Some offline files need repair. Connect to the internet to replace only the missing or damaged files.');
  return {kind:d.changed?'update':'repair',plan:planOf(d.files,d.removed)};
 }
-
 /* One check cycle. Returns {state}: latest | offline | update | setup | busy (the Settings screen relies on these). */
 async function runFullCheck(opts){
  opts=opts||{};
@@ -732,16 +837,44 @@ function registerSW(){
  }catch(e){}
 }
 async function boot(){
- var rec=await dbGet('meta',INSTALLED_KEY).catch(function(){return null});
+ await requestPersistentStorage();
+ var cacheInitiallyExists=false;
+ try{cacheInitiallyExists=await caches.has(CACHE_NAME)}catch(e){}
+ var rec=null,legacy=null,st=null,idbReadable=true;
+ try{
+  rec=await dbGet('meta',INSTALLED_KEY);
+  legacy=await dbGet('meta','ready');
+  st=await dbGet('meta',STAGED_KEY);
+  updateStorageDiagnostics({indexedDB:'available',installedRecord:(rec&&rec.files)||(legacy&&legacy.verified)?'present':'missing',
+   cacheExists:cacheInitiallyExists,cacheInitiallyExists:cacheInitiallyExists},true);
+ }catch(e){
+  idbReadable=false;
+  updateStorageDiagnostics({indexedDB:'unavailable',installedRecord:'unavailable',indexedDBError:(e&&e.message)||'read failed',
+   cacheExists:cacheInitiallyExists,cacheInitiallyExists:cacheInitiallyExists},true);
+ }
  var hasRec=!!(rec&&rec.files);
- var legacy=await dbGet('meta','ready').catch(function(){return null});
  var hasLegacy=!!(legacy&&legacy.verified);
- var st=await dbGet('meta',STAGED_KEY).catch(function(){return null});
  if(st&&st.ready){
   if(hasRec&&rec.version!==st.version&&(await stagingIntact(st))){setState('ready');await applyStagedNow();releaseSetupGate();return}
-  await dbPut('meta',STAGED_KEY,null).catch(noop);caches.delete(STAGING_NAME).catch(noop);
+  if(idbReadable)await dbPut('meta',STAGED_KEY,null).catch(noop);
+  caches.delete(STAGING_NAME).catch(noop);
  }
  if(!hasRec&&!hasLegacy){
+  /* An absent IDB record does not prove that the saved package is gone. Check Cache first. */
+  try{
+   manifest=await loadManifest();
+   recoveryScan=await verifyCachedFiles(manifest.files,'',true);
+   recoveryScan.version=manifest.version;
+   for(var i=0;i<recoveryScan.good.length;i++)await markVerified(recoveryScan.good[i],CACHE_NAME);
+   if(!recoveryScan.bad.length){
+    await saveInstalled(manifest);
+    updateStorageDiagnostics({installedRecord:'present',recovery:'restored-from-cache',cacheExists:true},false);
+    setState('ready');releaseSetupGate();removeSetupOverlay();return;
+   }
+   updateStorageDiagnostics({recovery:'partial-cache-recovery'},false);
+  }catch(e){
+   updateStorageDiagnostics({recovery:'cache-could-not-be-verified',recoveryError:friendly(e)},false);
+  }
   initialSetupPending=true;mountInitialSetup();revealInitialSetup();
   if(!online()){setState('needs-network');return}
   return runFullCheck({firstInstall:true});
@@ -751,9 +884,7 @@ async function boot(){
  if(!hasRec)return runFullCheck();
  setState('ready');
  if(online()){
-  /* Opening the app never triggers a network check by itself: the scheduled check runs at most every CHECK_EVERY days. */
   if(checkDue())return runFullCheck();
-  /* Local-only look for missing files: at most once a day, and it only goes to the network if something is really missing. */
   if(Date.now()-lsNum(REPAIR_KEY)>DAY){
    lsSet(REPAIR_KEY,Date.now());
    if(!recentTry()&&(await localRepairNeeded()))return runFullCheck();
