@@ -773,11 +773,6 @@ window.__SHBACE_FACULTY_LOGO_DATA__="__SHBACE_FACULTY_LOGO_DATA__";
 (function(){
   if(window.Capacitor || !('serviceWorker' in navigator)) return;
   if(location.protocol!=='https:' && location.hostname!=='localhost') return;
-  /* Installed home-screen app: js/29-offline-setup.js registers the worker itself, after the first Setup is verified
-     (and on every later launch). Registering here too would start the worker in the middle of Setup. */
-  try{
-    if(navigator.standalone===true||(window.matchMedia&&(window.matchMedia('(display-mode: standalone)').matches||window.matchMedia('(display-mode: fullscreen)').matches))) return;
-  }catch(e){}
   /* Worker activation is not a page-reload trigger. The offline updater requests one reload after the accepted package is verified and committed. */
   window.addEventListener('load',function(){
     navigator.serviceWorker.getRegistration('./').then(function(reg){
