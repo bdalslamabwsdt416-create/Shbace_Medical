@@ -1,11 +1,23 @@
 'use strict';
 
-/* Keep this cache name identical to js/29-offline-setup.js. Never rotate it for a routine app release: doing so would discard the verified 28 MB package. */
+/* Shbace Medical — Service Worker (Offline System v2)
+
+   Rules this worker follows:
+   1. The app ALWAYS boots from the local cache. It never waits for the network when a local copy exists.
+   2. Every network call has a hard timeout, so nothing can hang forever (online, offline or on a bad connection).
+   3. Install never fails because of one missing file (the old addAll() made the whole worker fail).
+   4. Updates are NOT done here. The page-side updater (js/29-offline-setup.js) downloads, verifies and swaps
+      files atomically. This worker only serves what is in the cache.
+
+   Keep this cache name identical to js/29-offline-setup.js. Never rotate it for a routine release:
+   doing so would discard the verified offline package already stored on students' devices. */
 const CACHE_NAME = 'shbace-computer-offline-v1.3.4';
-const READY_URL = new URL('__shbace_offline_ready__', self.registration.scope).href;
-const INDEX_URL = new URL('index.html', self.registration.scope).href;
+const SCOPE = self.registration.scope;
+const INDEX_URL = new URL('index.html', SCOPE).href;
+const NET_TIMEOUT = 8000;      /* runtime fetch of a file that is not cached yet */
+const VERSION_TIMEOUT = 10000; /* manifest / version checks */
+
 const APP_SHELL = [
-  './',
   './index.html',
   './manifest.webmanifest',
   './pwa-version.json',
@@ -13,92 +25,102 @@ const APP_SHELL = [
   './assets/img/shbace-pwa-512.png',
   './offline-assets-manifest.json',
   './css/bundle-core.css',
-  './css/bundle-late.css',
-  './css/chrome-computer.css',
   './js/29-offline-setup.js'
 ];
+const VERSION_FILES = ['/manifest.webmanifest', '/pwa-version.json', '/offline-assets-manifest.json'];
 
-function missingOfflineResponse(url) {
-  const path = new URL(url).pathname;
+function offlinePage(url) {
+  const path = new URL(url).pathname.replace(/[&<>"]/g, '');
   const body = '<!doctype html><html lang="en"><meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width,initial-scale=1">' +
     '<title>Offline file unavailable</title><body style="font:16px system-ui;padding:24px;background:#07131f;color:#eaf4ff">' +
-    '<h1>Shbace Medical</h1><p>A required local file is missing: <code>' + path.replace(/[&<>"]/g, '') +
-    '</code>.</p><p>Reconnect to the internet, open Shbace Medical, and choose Restore on the offline setup screen.</p></body></html>';
+    '<h1>Shbace Medical</h1><p>This part of the app is not saved on your device yet: <code>' + path + '</code></p>' +
+    '<p>Connect to the internet once and open the app. It will finish saving everything in the background.</p></body></html>';
   return new Response(body, {
     status: 503,
     headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
   });
 }
+function emptyResponse(status) {
+  return new Response('', { status: status, statusText: 'Offline', headers: { 'Cache-Control': 'no-store' } });
+}
+
+/* fetch() with a hard timeout (covers the time until response headers arrive). */
+async function netFetch(request, ms, init) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), ms);
+  try {
+    return await fetch(request, Object.assign({}, init || {}, { signal: ctl.signal }));
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
-    /* Refresh the migration bootstrap from the network when this worker installs.
-       This replaces the old Computer HTML and installer in place, while keeping the
-       rest of the verified package for the staged SHA-256 updater to reconcile. */
-    const refreshOnInstall = new Set([
-      './index.html',
-      './manifest.webmanifest',
-      './pwa-version.json',
-      './offline-assets-manifest.json',
-      './css/bundle-core.css',
-      './css/bundle-late.css',
-      './css/chrome-computer.css',
-      './js/29-offline-setup.js'
-    ]);
-    const missing = [];
-    for (const url of APP_SHELL) {
-      if (refreshOnInstall.has(url)) {
-        try {
-          const fresh = await fetch(url, { cache: 'reload' });
-          if (!fresh || !fresh.ok) throw new Error('Could not refresh ' + url);
-          await cache.put(url, fresh);
-        } catch (error) {
-          /* Do not destroy the existing working app if installation happens offline. */
-          if (!(await cache.match(url))) throw error;
-        }
-      } else if (!(await cache.match(url))) {
-        missing.push(url);
-      }
-    }
-    if (missing.length) await cache.addAll(missing);
+    /* Each shell file is fetched on its own; one failure never blocks installation. */
+    await Promise.all(APP_SHELL.map(async url => {
+      try {
+        if (await cache.match(url)) return;
+        const res = await netFetch(new Request(url, { cache: 'reload' }), 15000);
+        if (res && res.status === 200) await cache.put(url, res);
+      } catch (_) { /* the page-side updater will complete the package */ }
+    }));
     await self.skipWaiting();
   })());
 });
 
 self.addEventListener('activate', event => {
-  /* The offline-package updater owns cleanup after the new manifest has been verified.
-     Keep all existing Computer caches until that transaction completes. */
+  /* Computer keeps its own stable cache; activation must not delete other platform caches. */
   event.waitUntil(self.clients.claim());
 });
 
-/* Before the first verified installation, bootstrap may use the network.
-   Once READY_URL exists, app-shell requests are strictly local: a missing file is
-   an installation/restore error, never an excuse to fetch unverified code at runtime. */
+/* Local-first: cache hit returns immediately. Only a genuinely missing file goes to the network (with timeout)
+   and is saved locally after a successful response. */
 async function localFirst(request) {
   const cache = await caches.open(CACHE_NAME);
-  const ready = await cache.match(READY_URL);
-  let hit = null;
-  if (request.mode === 'navigate') {
-    /* The updater stores the canonical index.html path. Do not serve an older cached './' entry first. */
-    hit = await cache.match(INDEX_URL) || await cache.match(request, { ignoreSearch: true });
-  } else {
-    hit = await cache.match(request, { ignoreSearch: true });
-  }
+  const isNav = request.mode === 'navigate';
+  const hit = isNav
+    ? (await cache.match(INDEX_URL)) || (await cache.match(request, { ignoreSearch: true }))
+    : await cache.match(request, { ignoreSearch: true });
   if (hit) return hit;
-  if (ready) return missingOfflineResponse(request.url);
   try {
-    const fresh = await fetch(request);
-    if (fresh && fresh.ok) {
-      try {
-        const cacheKey = request.mode === 'navigate' ? INDEX_URL : request;
-        await cache.put(cacheKey, fresh.clone());
-      } catch (_) {}
+    const fresh = await netFetch(request, NET_TIMEOUT);
+    if (fresh && fresh.status === 200) {
+      cache.put(isNav ? INDEX_URL : request, fresh.clone()).catch(() => {});
     }
     return fresh;
   } catch (_) {
-    return missingOfflineResponse(request.url);
+    return isNav ? offlinePage(request.url) : emptyResponse(504);
+  }
+}
+
+/* Version / manifest checks marked cache:'no-store' by the updater: network first (timeout), local fallback. */
+async function networkThenCache(request) {
+  const cache = await caches.open(CACHE_NAME);
+  try {
+    const fresh = await netFetch(request, VERSION_TIMEOUT, { cache: 'no-store' });
+    if (fresh && fresh.status === 200) cache.put(request, fresh.clone()).catch(() => {});
+    return fresh;
+  } catch (_) {
+    const hit = await cache.match(request, { ignoreSearch: true });
+    return hit || emptyResponse(504);
+  }
+}
+
+/* Explicit boot retry: bypass a stale copy, refresh the canonical entry, fall back to the local copy. */
+async function reloadRoute(request) {
+  const cache = await caches.open(CACHE_NAME);
+  const canonical = new URL(request.url);
+  canonical.searchParams.delete('__shbace_reload');
+  try {
+    const fresh = await netFetch(request, NET_TIMEOUT, { cache: 'reload' });
+    if (fresh && fresh.status === 200) cache.put(canonical.href, fresh.clone()).catch(() => {});
+    return fresh;
+  } catch (_) {
+    const hit = await cache.match(canonical.href);
+    return hit || offlinePage(request.url);
   }
 }
 
@@ -109,80 +131,18 @@ self.addEventListener('fetch', event => {
   if (url.origin !== self.location.origin) return;
   if (url.pathname.endsWith('/sw.js')) return;
 
-  /* Integrity downloads must reach the network; hash verification belongs to the updater. */
-  if (url.searchParams.has('__shbace_integrity')) {
-    event.respondWith(fetch(request, { cache: 'reload' }));
-    return;
-  }
+  /* Integrity downloads go straight to the network; hash verification belongs to the updater. */
+  if (url.searchParams.has('__shbace_integrity')) return;
 
-  /* Explicit boot retry bypasses a stale cached copy, then refreshes its canonical cache entry. */
   if (url.searchParams.has('__shbace_reload')) {
-    event.respondWith((async () => {
-      const cache = await caches.open(CACHE_NAME);
-      const canonical = new URL(request.url);
-      canonical.searchParams.delete('__shbace_reload');
-      try {
-        const fresh = await fetch(request, { cache: 'reload' });
-        if (fresh && fresh.ok) {
-          try { await cache.put(canonical.href, fresh.clone()); } catch (_) {}
-        }
-        return fresh;
-      } catch (_) {
-        const hit = await cache.match(canonical.href);
-        return hit || missingOfflineResponse(request.url);
-      }
-    })());
+    event.respondWith(reloadRoute(request));
     return;
   }
 
-  /* The updater marks version/manifest checks with cache:'no-store'. Only those checks go to the network. */
-  if (url.pathname.endsWith('/manifest.webmanifest') ||
-      url.pathname.endsWith('/pwa-version.json') ||
-      url.pathname.endsWith('/offline-assets-manifest.json')) {
-    if (request.cache !== 'no-store') {
-      event.respondWith(localFirst(request));
-      return;
-    }
-    event.respondWith((async () => {
-      const cache = await caches.open(CACHE_NAME);
-      try {
-        const fresh = await fetch(request, { cache: 'no-store' });
-        if (fresh && fresh.ok) {
-          try { await cache.put(request, fresh.clone()); } catch (_) {}
-        }
-        return fresh;
-      } catch (_) {
-        const hit = await cache.match(request, { ignoreSearch: true });
-        return hit || missingOfflineResponse(request.url);
-      }
-    })());
+  if (request.cache === 'no-store' && VERSION_FILES.some(p => url.pathname.endsWith(p))) {
+    event.respondWith(networkThenCache(request));
     return;
   }
 
-  /* HTML, JavaScript and CSS are local-first and therefore do not wait on network round-trips. */
-  if (request.mode === 'navigate' ||
-      request.destination === 'script' ||
-      request.destination === 'style') {
-    event.respondWith(localFirst(request));
-    return;
-  }
-
-  /* Other same-origin resources: prefer the verified package, then fetch/cache a missing resource. */
-  event.respondWith((async () => {
-    const cache = await caches.open(CACHE_NAME);
-    const ready = await cache.match(READY_URL);
-    let cached = await cache.match(request, { ignoreSearch: true });
-    if (!cached && request.mode === 'navigate') cached = await cache.match(INDEX_URL);
-    if (cached) return cached;
-    if (ready) return missingOfflineResponse(request.url);
-    try {
-      const response = await fetch(request);
-      if (response && response.ok) {
-        try { await cache.put(request, response.clone()); } catch (_) {}
-      }
-      return response;
-    } catch (_) {
-      return missingOfflineResponse(request.url);
-    }
-  })());
+  event.respondWith(localFirst(request));
 });

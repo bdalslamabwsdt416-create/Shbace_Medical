@@ -1,52 +1,59 @@
-# Architecture notes (to me/ PWA)
+# Architecture notes — Computer PWA
 
-Short map of how the app is put together, so the next change does not need a full read of the 420 KB core script.
+This folder is the dedicated desktop/laptop Chrome PWA delivery. Its shared application behavior is synchronized from `to me/`, while the install identity, wide-screen layout and browser preferences remain Computer-specific.
 
-## Start-up
-1. `index.html` paints the splash first (`#startupSplash`, ECG drawn by a Worker on an OffscreenCanvas).
-2. The boot loader (`shb-boot-v1`) fetches the question bank JSON in parallel, then runs every `<script type="text/shb-deferred">` **one after another in document order**.
-3. Order matters: bank data files (Nelson, All Once = Kasr Al-Ainy, Clinical Cases, Egyptian Book) → `js/09-app-features-v6.js` (core) → `10…34` features → `35…41` collections layer.
+## Startup and first installation
 
-## The closed core (`js/09-app-features-v6.js`)
-The file is one IIFE. State such as `QB`, `qs`, the search variables (`gq`, `gBank`, `gSpec`, `gTag`, `gSrc`, `gTopic`, `gSys`, `gSort`, `gLim`) and helpers such as `nz` live inside it and are **not visible** to other scripts. Scripts 13, 35 and 41 reach it only through `window.__SHB_BRIDGE` (`qs, SYS, QB, sysIcon, isPinned, answeredCount, TOPIC_ICON_ASSET, REC, SPEC_NAME, inTopic, topicIcon, topicCards`). To expose something new, add it to the bridge block.
+1. `index.html` paints the Splash first (`#startupSplash`, ECG drawn by a Worker on an OffscreenCanvas).
+2. The standalone `js/29-offline-setup.js` bootstrap creates `window.__SHBACE_OFFLINE_BOOT_PROMISE__`. On the first installed-app launch it waits for the Splash completion event, displays Setup, downloads the complete `offline-assets-manifest.json` package and verifies every file by byte size and SHA-256.
+3. The boot loader waits for that promise before loading/assembling question-bank data or preloading/executing deferred app modules. This prevents first-install downloads from competing with the question-bank fetch and app-module preloads.
+4. After the verified first install, the Setup flow releases the boot gate. Returning installations trust the committed local ready record and open without a blocking Setup screen or a full-package hash scan.
+5. The Service Worker is registered after the first complete package has been committed. It serves cached local files first and fetches/caches only genuinely missing resources. The installer owns manifest/version checks and update staging.
+6. Deferred app execution remains in document order: bank data and shared utilities → core app → feature scripts → Pediatrics/collections and integration scripts, including `js/44-islamic-reminders.js`.
 
-## Layering by wrapping
-Later scripts replace global view functions with a wrapper that calls the previous one (`const _old=fn; fn=function(){ … _old.apply(this,arguments) … }`):
-- `35-pediatrics-collections.js`: `subjectsView`, `specialtiesView`, `topicsView`, `openSpec`, `openTopic`, `openQ`, bridge `inTopic`, `topicIcon`, `topicCards`.
-- `41-collections-integration.js`: `navBack`, system display names, and `searchView` (folds the secondary filters into one "Filters" panel).
-When two scripts wrap the same function, the one loaded last runs outermost.
+The offline package installer applies to the installed Computer PWA. A normal browser tab is not treated as the installed offline app, and Capacitor continues to use its signed local assets.
 
-## Question banks
-Each question carries one flag that decides its bank (`bankOf` in the core, checked in this priority order):
+## Computer-specific browser identity
 
-| flag | bank |
-|------|------|
-| `nl` | Nelson Textbook |
-| `py` | Previous Questions |
-| `eb` | Egyptian Book |
-| `cc` | Clinical Cases |
-| `ao` | Kasr Al-Ainy (the data folder and ids still say "all-once") |
-| none | Dr. Al-Joaki |
+- `window.__SHBACE_CHROME_COMPUTER__` is enabled only for Chrome on a non-mobile browser and outside Capacitor.
+- `manifest.webmanifest` retains the Computer name, standalone display mode and desktop install identity.
+- `css/chrome-computer.css` remains loaded after the shared consolidated styles to preserve the wide-screen Computer layout.
+- `js/32-chrome-android.js` retains the shared Chrome install/fullscreen/settings bridge. For Computer, the Screen Wake Lock preference continues to use `shbace_computer_features_v1`; Android's preference key is not substituted.
 
-## Search
-One normaliser, `nz` (lower-case, strip Arabic diacritics/tatweel, unify أ/إ/آ→ا, ى→ي, ة→ه), is meant to be used by the global Search, Saved, Wrong, Notes, Pinned & Recent and Smart Review. `tests/search-normalize.test.mjs` checks it against the real source.
+## Offline storage and updates
 
-## Offline / releases
-- `pwa-version.json` is the release source of truth; `package.json` must match it. The Service Worker and installer share the stable Computer cache namespace `shbace-computer-offline-v1.3.4`; do not rotate it for routine releases.
-- `npm run build:pwa` creates `www/offline-assets-manifest.json` from every shipped file, recording exact byte length and SHA-256. The installer compares that manifest with the IndexedDB installed-file record and downloads only changed or missing files.
-- Installation uses a dedicated staging cache for updates. Files are fetched with an integrity-bypass query, checked for byte length and SHA-256, verified again from local Cache Storage, then committed before the READY marker is written. A failed update must not replace the last verified package.
-- IndexedDB (`shbace-medical-computer-offline-state-v1`) stores installation metadata and per-file verification records; Cache Storage stores the actual app package. Existing browser storage and student progress are not cleared.
-- Update metadata (last successful/failed check, installed/available version and pending update) is **LocalStorage-first**. On returning starts, missing values are recovered from a namespaced mirror in the existing IndexedDB `meta` store, writes are mirrored there, and an in-memory copy is the final session-only fallback. First install skips metadata hydration and immediately follows the existing post-Splash package download path. The installer keeps its existing IndexedDB installation record, READY marker and Cache Storage package; no cache/database names or student-data stores are changed.
-- **Runtime boundary:** before the first verified installation, missing app-shell files may bootstrap from the network. After the READY marker exists, navigation, JavaScript and CSS are local-only. If any required file is absent, the worker returns a clear 503 restore message instead of silently fetching unverified code. Images and other same-origin package assets follow the same ready-marker rule.
-- Network access remains available for explicit/scheduled release checks (`cache: 'no-store'`), SHA-256 integrity downloads during install/update, and the explicit reload/recovery path. These are maintenance operations, not normal app runtime.
-- The seven-day successful update-check interval and two-hour retry delay after a failed check are retained. Manual update/restore remains available.
-- `vercel.json` serves `sw.js`, the manifest and version files with `Cache-Control: no-cache` so release metadata and worker updates are discoverable.
+Keep these identifiers stable for routine releases:
 
-## Checks
-`npm run test:unit` (node:test), `npm run check:bank` (ids, answer keys, syntax of every script), `npm run build:pwa`. The `PWA checks` workflow runs all three on every push to a non-main branch and on pull requests.
+- Cache Storage: `shbace-computer-offline-v1.3.4`
+- Staging Cache: `shbace-computer-staging-offline`
+- IndexedDB: `shbace-medical-computer-offline-state-v1`
+- IndexedDB stores: existing `meta` and `verified`; the `installed`, `staged`, legacy `ready` and per-file verification records are maintained by the offline engine.
 
-## Additional independent Pediatrics banks
-- Bank 07, Clinical Case: data/clinicalCaseBank.json, **system → topic → questions** (a topic opens straight to its questions; every case's shared history is shown once before that case's questions).
-- Bank 08, AI Generated: the 16 JSON files in data/ai-generated/, system → topic → questions.
-- Both use separate local answer stores.
-- One design for every bank: Banks 07 and 08 render the **same markup and classes as the Dr. Al-Joaki bank** (`.card.sc.spc.ped-system-card` for systems, `.card.sc.tpc` for topics, Back button first, then kicker, title and sub-line). The large icons come from `window.__SHB_BANK_ICONS__.system(name)` / `.topic(systemName, topicName)`, defined in `js/42-pediatrics-collection-polish.js`; they return the same `sysIcon(...,'lg')` / `.tno.ti` markup the core uses, so the core CSS sizes them identically. Change icon size once in the core CSS and every bank follows.
+The existing Computer cache and database are adopted rather than cleared or renamed. This preserves locally stored app files and all student preferences, answers, bookmarks, notes, attempts and progress on the Computer origin.
+
+`js/29-offline-setup.js` is the single install/update engine. It uses three workers, timeouts, stall detection and bounded retries; interrupted verified files remain reusable. It stages changed files, checks their byte size and SHA-256, and commits the package safely. It checks the manifest every 48 hours or when the student manually requests an update from Settings. It does not run a full-package hash scan on every launch.
+
+`js/32-chrome-android.js` supplies the Settings UI, Computer install/fullscreen behavior and safe-reload bridge. It must not add another automatic version poller or periodic timer.
+
+## Application core and question banks
+
+The shared core (`js/09-app-features-v6.js`) is a closed IIFE. State such as `QB`, `qs`, search variables and internal helpers are not global. Extension scripts use `window.__SHB_BRIDGE` for the supported shared functions and state.
+
+The deferred execution order matters: bank data and base helpers → core app → feature scripts → collection/navigation integrations. Keep the order in `index.html`; do not bypass the startup boot gate.
+
+Question-bank identifiers remain independent: Nelson Textbook (`nl`), Previous Questions (`py`), Egyptian Book (`eb`), Clinical Cases (`cc`), Kasr Al-Ainy (`ao`), and the original Dr. Al-Joaki bank (no bank flag). The Pediatrics Clinical Case and AI Generated banks retain their separate source data and progress stores.
+
+## Build and validation
+
+Run from `for Computer/`:
+
+```bash
+npm ci
+npm run test:unit
+npm run check:bank
+npm run build:pwa
+```
+
+The build validates the dedicated Computer release identity and stable cache, checks the Computer stylesheet and manifest, syntax-checks parser-loaded and deferred scripts, and regenerates the full offline manifest with file sizes and SHA-256 hashes.
+
+Do not change the root Android project, `for Chrome/`, `for ios/` or `to me/` when maintaining this Computer delivery.

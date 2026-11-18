@@ -1,10 +1,15 @@
 {
   "app": "Shbace Medical",
   "platform": "Computer PWA",
-  "version": "1.3.10-computer.4",
-  "displayVersion": "1.3.10.4 · Computer",
-  "releaseDate": "2026-11-17",
+  "version": "1.3.10-computer.5",
+  "displayVersion": "1.3.10.5 · Computer",
+  "releaseDate": "2026-11-18",
   "releaseNotes": [
+    "First launch now shows the one-time Setup immediately after the Splash. Setup downloads the complete Computer PWA package and verifies each file by byte size and SHA-256 before question-bank loading or deferred app scripts can start.",
+    "Returning installations open immediately from the committed local package. The single updater checks the manifest every 48 hours or by manual request, downloads only changed files, and verifies staged updates before activation.",
+    "Downloads use three parallel workers with timeouts, stall detection and retries. Interrupted verified files are retained for retry; existing answers, bookmarks, notes, quiz history and study progress remain untouched.",
+    "Preserves the dedicated Computer PWA identity, standalone manifest, wide-screen stylesheet, stable Computer Cache Storage and existing Computer IndexedDB database.",
+    "Adds the in-app Islamic reminders feature while keeping update scheduling owned by the offline installer.",
     "Uses LocalStorage first for update metadata, restores missing values from IndexedDB and falls back to session memory when needed; the existing first post-Splash download flow is preserved.",
     "Startup recovery release: adds a defensive guard around onboarding stage cleanup and advances the package version so installed copies can detect and download the corrected application bundle.",
     "Enforces a strict local-only runtime after the offline package is fully verified: cached navigation, JavaScript and CSS never fall back to the network after installation; missing files show a restore error instead.",
@@ -101,9 +106,10 @@
     "A question opened from Search, Saved, Wrong answers or Smart Review now opens inside its own bank, so a Previous question no longer opens as an empty list."
   ],
   "summary": [
-    "Unified application source from to me with a dedicated wide-screen Computer layout.",
-    "Computer keeps its desktop install, fullscreen and wake-lock behavior.",
-    "Existing offline files are checked and reused; only missing or changed files are downloaded after verification.",
-    "Student progress stores and the Computer site origin remain unchanged."
+    "Dedicated desktop/laptop Chrome PWA with its own Computer manifest, standalone display mode and wide-screen chrome-computer.css layout.",
+    "First-run Setup downloads and verifies the complete offline package before the boot loader can load the question bank or application modules.",
+    "Returning installations open from local verified files. One updater checks every 48 hours or manually and downloads only changed assets.",
+    "The existing Computer Cache Storage and IndexedDB database are retained; student preferences, answers, bookmarks, notes and progress are preserved.",
+    "The in-app reminder feature is included without adding a second update scheduler."
   ]
 }

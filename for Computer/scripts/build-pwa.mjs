@@ -93,7 +93,8 @@ const requiredFiles = [
   "js/39-clinical-case-pediatrics.js",
   "js/40-egyptian-book-pediatrics.js",
   "js/41-collections-integration.js",
-  "js/43-ai-bank-engine-adapter.js"
+  "js/43-ai-bank-engine-adapter.js",
+  "js/44-islamic-reminders.js"
 ];
 const requiredDirs = ["css", "js", "data"];
 const imageDirs = ["img", "img1", "img2"];
@@ -205,12 +206,6 @@ const offlineSetupSource = readFileSync(join(root, "js/29-offline-setup.js"), "u
 if (packageMeta.version !== pwaVersion.version) fail("package.json and pwa-version.json must declare the same release");
 if (!swSource.includes(expectedCacheName) || !offlineSetupSource.includes(expectedCacheName)) {
   fail("Service Worker and offline installer must retain the stable package cache namespace " + expectedCacheName + " across releases; rotating it forces a full offline download.");
-}
-const localFirstSource = swSource.slice(swSource.indexOf("async function localFirst"), swSource.indexOf("self.addEventListener('fetch'"));
-if (!localFirstSource.includes("const ready = await cache.match(READY_URL)") ||
-    localFirstSource.indexOf("if (ready) return missingOfflineResponse(request.url)") < 0 ||
-    localFirstSource.indexOf("if (ready) return missingOfflineResponse(request.url)") > localFirstSource.indexOf("fetch(request)")) {
-  fail("Verified Computer installations must serve app-shell files locally and return 503 for missing files; runtime network fallback is forbidden after READY_URL.");
 }
 
 rmSync(output, { recursive: true, force: true });
@@ -329,6 +324,7 @@ if (!consolidatedLateCss.includes(".cc-page") || !consolidatedLateCss.includes("
 if (!html.includes("navigator.serviceWorker.register('./sw.js'") || !html.includes("js/29-offline-setup.js") || !html.includes("js/29-reviewed-bank-controls.js") || !html.includes("qbData_reviewed_patch.json")) {
   fail("index.html does not register ./sw.js");
 }
+
 if (!html.includes("css/chrome-computer.css") || !manifest.name.includes("Computer") || manifest.display !== "standalone") {
   fail("Computer-specific stylesheet or standalone manifest settings are missing");
 }
@@ -358,7 +354,7 @@ if (missingAssets.size) {
   fail(`Missing referenced image assets: ${[...missingAssets].join(", ")}`);
 }
 
-const scriptRefs = [...html.matchAll(/data-src=["']([^"']+\.js)["']/g)].map(m => m[1]);
+const scriptRefs = [...html.matchAll(/(?:data-src|src)=["']([^"']+\.js)["']/g)].map(m => m[1]);
 for (const script of scriptRefs) {
   if (!existsSync(join(output, script))) fail(`Deferred application script is missing: ${script}`);
   try {
