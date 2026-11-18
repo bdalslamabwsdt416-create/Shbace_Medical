@@ -1,15 +1,14 @@
 {
   "app": "Shbace Medical",
   "platform": "PWA",
-  "version": "1.4.15",
-  "displayVersion": "1.4.15",
-  "releaseDate": "2026-11-18",
+  "version": "1.4.16",
+  "displayVersion": "1.4.16",
+  "releaseDate": "2026-11-19",
   "releaseNotes": [
-    "Restores the original layout of the final two onboarding screens: the wider grade-selection panel, full-width overflow, final artwork proportions, welcome spacing, and hidden description and grade badge.",
-    "Restores the full-screen Setup experience for the first offline installation only. The installer prepares its checklist and storage during the ECG splash, then the Setup screen appears immediately after the splash.",
-    "The first-install package is downloaded and verified before the onboarding scripts and question-bank data are loaded, preventing them from competing with the installer for network and startup resources.",
-    "After the first install, the app opens from its saved local package. Repairs and updates stay in the background with a compact progress chip; automatic update checks run every 48 hours and Settings can trigger a manual check.",
-    "Keeps the To Me verified updater with resumable downloads, per-file size and SHA-256 validation, staged updates, and one safe restart after verified changes are committed.",
-    "Preserves the existing iOS cache namespace shbace-medical-offline-v2, IndexedDB database shbace-medical-offline-state-v1, student data, iOS icon, and onboarding screens."
+    "Recovers the offline package from Cache Storage when IndexedDB installation metadata is missing, after checking cached files by size and SHA-256.",
+    "Reuses verified cached files and downloads only missing or damaged files; valid cached files are not deleted because a verification record was lost.",
+    "Awaits the persistent-storage request and records its result; safely reopens IndexedDB connections after close or version change.",
+    "Adds diagnostics distinguishing IndexedDB metadata loss, Cache Storage loss, and loss of both.",
+    "Preserves the existing iOS Cache Storage namespace, IndexedDB database, student answers and progress, home-screen icon, and onboarding screens."
   ]
 }
