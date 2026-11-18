@@ -157,11 +157,9 @@ function dbPut(s,k,v){return dbOp(s,'readwrite',function(o){return o.put(v,k)})}
    needs-network / error are recoverable and retry on their own. */
 var state='boot',S={pct:0,done:0,total:0,bytes:0,totalBytes:0,msg:'',announce:false};
 var splashDone=false,splashP=null,chip=null,lastPaint='',announceTimer=null;
-var initialSetupPending=false,setupPackageReady=false,setupUI=null,setupFails=0,setupSkipped=false;
+var initialSetupPending=false,setupPackageReady=false,setupUI=null;
 function setState(s,extra){
  state=s;
- /* Counts failed first-install attempts; after 3 the Setup screen offers "Continue online". */
- if(s==='error'&&initialSetupPending)setupFails++;
  if(extra){for(var k in extra)if(Object.prototype.hasOwnProperty.call(extra,k))S[k]=extra[k]}
  paintChip();
  paintSetup();
@@ -244,7 +242,6 @@ function mountInitialSetup(){
    '<div class="shb-offline-warning" id="shbOfflineWarning">Keep the app open and connected to the internet until the first setup is complete.</div>'+
    '<div class="shb-offline-errors" id="shbOfflineErrors" hidden></div>'+
    '<button type="button" class="shb-offline-action" id="shbOfflineAction" disabled>Preparing…</button>'+
-   '<button type="button" class="shb-offline-action" id="shbOfflineSkip" style="display:none;margin-top:10px">Continue online</button>'+
    '<p class="shb-offline-footnote" id="shbOfflineFootnote">Your existing answers and study progress are kept in the app’s existing local storage.</p>'+
   '</div>';
  document.body.appendChild(root);
@@ -254,19 +251,12 @@ function mountInitialSetup(){
   bytes:root.querySelector('#shbOfflineBytes'),stage:root.querySelector('#shbOfflineStage'),stages:root.querySelector('#shbOfflineStages'),
   downloadState:root.querySelector('#shbOfflineDownloadState'),verifyState:root.querySelector('#shbOfflineVerifyState'),
   warning:root.querySelector('#shbOfflineWarning'),errors:root.querySelector('#shbOfflineErrors'),
-  button:root.querySelector('#shbOfflineAction'),skip:root.querySelector('#shbOfflineSkip'),foot:root.querySelector('#shbOfflineFootnote')
+  button:root.querySelector('#shbOfflineAction'),foot:root.querySelector('#shbOfflineFootnote')
  };
  setupUI.button.addEventListener('click',function(){
   if(setupUI.button.dataset.action!=='retry')return;
   setupUI.button.disabled=true;setupUI.button.dataset.action='';
   setupUI.button.textContent='Retrying…';retryN=0;runFullCheck({force:true});
- });
- setupUI.skip.addEventListener('click',function(){
-  /* Emergency exit: stop every pending Setup retry so the overlay cannot return over the running app.
-     Nothing is marked as installed, so the next launch runs Setup again. */
-  setupSkipped=true;clearTimeout(retryTimer);retryTimer=null;
-  initialSetupPending=false;removeSetupOverlay();
-  setState('ready');releaseSetupGate();
  });
  if(document.querySelector('.phone.light'))root.classList.add('is-light');
  revealInitialSetup();paintSetup();return setupUI;
@@ -278,7 +268,6 @@ function revealInitialSetup(){
 function paintSetup(){
  if(!setupUI||!initialSetupPending)return;
  revealInitialSetup();
- if(setupUI.skip)setupUI.skip.style.display=(state==='error'&&setupFails>=3&&!setupPackageReady)?'':'none';
  var pct=setupPackageReady?100:Math.max(0,Math.min(99,Number(S.pct)||0));
  setupUI.percent.textContent=pct+'%';setupUI.track.setAttribute('aria-valuenow',String(pct));setupUI.bar.style.width=pct+'%';
  setupUI.count.textContent=S.total?(S.done+' / '+S.total+' files'):'Preparing file list…';
@@ -315,7 +304,7 @@ function removeSetupOverlay(){if(setupUI&&setupUI.root&&setupUI.root.parentNode)
 function finishInitialSetupPackage(){
  setupPackageReady=true;S.pct=100;S.done=S.total;S.bytes=S.totalBytes;
  setState('ready',{pct:100,done:S.total,total:S.total,bytes:S.totalBytes,totalBytes:S.totalBytes,announce:false,msg:''});
- paintSetup();registerSW();releaseSetupGate();
+ paintSetup();releaseSetupGate();
 }
 
 function announceReady(){
@@ -443,7 +432,7 @@ function bump(n){
  paintChip();paintSetup();
 }
 function scheduleRetry(){
- if(setupSkipped||retryTimer||retryN>=RETRY_DELAYS.length)return;
+ if(retryTimer||retryN>=RETRY_DELAYS.length)return;
  var d=RETRY_DELAYS[retryN++];
  retryTimer=setTimeout(function(){retryTimer=null;if(!busy&&online())runFullCheck({force:true})},d);
 }
@@ -649,7 +638,6 @@ async function decide(){
 /* One check cycle. Returns {state}: latest | offline | update | setup | busy (the Settings screen relies on these). */
 async function runFullCheck(opts){
  opts=opts||{};
- if(setupSkipped)return {state:'offline'}; /* student chose "Continue online": no more Setup this session */
  if(busy)return {state:'busy'};
  busy=true;
  var next=null,out={state:'offline'};
@@ -750,7 +738,7 @@ async function boot(){
  var hasLegacy=!!(legacy&&legacy.verified);
  var st=await dbGet('meta',STAGED_KEY).catch(function(){return null});
  if(st&&st.ready){
-  if(hasRec&&rec.version!==st.version&&(await stagingIntact(st))){setState('ready');registerSW();await applyStagedNow();releaseSetupGate();return}
+  if(hasRec&&rec.version!==st.version&&(await stagingIntact(st))){setState('ready');await applyStagedNow();releaseSetupGate();return}
   await dbPut('meta',STAGED_KEY,null).catch(noop);caches.delete(STAGING_NAME).catch(noop);
  }
  if(!hasRec&&!hasLegacy){
@@ -759,7 +747,7 @@ async function boot(){
   return runFullCheck({firstInstall:true});
  }
  /* Existing installations open immediately; checks and small repairs continue in the background. */
- releaseSetupGate();removeSetupOverlay();registerSW();
+ releaseSetupGate();removeSetupOverlay();
  if(!hasRec)return runFullCheck();
  setState('ready');
  if(online()){
@@ -784,8 +772,7 @@ function start(){
  if(!supported()){releaseSetupGate();return}
  /* The package installer belongs to the installed home-screen app, not a Safari tab. */
  if(!standalone()){releaseSetupGate();if(iosDevice())waitForSplash().then(showInstallHint);return}
- /* The Service Worker is registered later: after the first Setup is verified (finishInitialSetupPackage) or on an existing install (boot). */
- started=true;splashP=waitForSplash();mountInitialSetup();
+ started=true;registerSW();splashP=waitForSplash();mountInitialSetup();
  splashP.then(function(){splashDone=true;revealInitialSetup();paintChip();paintSetup()});
  document.addEventListener('shb-scripts-ready',function(){if(!setupPackageReady)return;removeSetupOverlay();initialSetupPending=false;setupPackageReady=false});
  boot().catch(function(error){if(initialSetupPending)setState('error',{msg:friendly(error)});else releaseSetupGate()});
