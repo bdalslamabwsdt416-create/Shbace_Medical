@@ -1,10 +1,11 @@
 {
   "app": "Shbace Medical",
   "platform": "Chrome Android PWA",
-  "version": "1.3.10-chrome.2",
-  "displayVersion": "1.3.10.2 · Chrome Android",
+  "version": "1.3.10-chrome.3",
+  "displayVersion": "1.3.10.3 · Chrome Android",
   "releaseDate": "2026-11-18",
   "releaseNotes": [
+    "Fixes the IndexedDB connection-closing race at the end of updates. Stale connections are invalidated on version changes or unexpected closes, and one failed transaction is retried on a fresh connection. The existing platform database, cache identity and student data are preserved.",
     "Chrome Android is synchronized with the latest To Me application logic and study features, while its Android-only identity and existing local storage remain unchanged.",
     "First-install Setup now appears immediately after Splash. It downloads and verifies the complete offline package before question-bank loading, app-module preloads or onboarding can begin.",
     "Returning installs open from the verified local package without a blocking setup screen or full-package scan. One updater checks the manifest every 48 hours or manually, stages only changed files, verifies them and commits safely.",
