@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "version": "5d81cd5109fc19964cc583b00399f2a03fc5bc2812c3a28b8192a2841426314f",
-  "generatedAt": "2026-11-11T19:01:15.257Z",
-  "fileCount": 236,
-  "totalBytes": 18455202,
+  "version": "611db204d3e5b081271607631d2effe02292c8011a9fc1ff546c272d8c95a73f",
+  "generatedAt": "2026-11-19T00:00:00.000Z",
+  "fileCount": 300,
+  "totalBytes": 29118092,
   "files": [
     {
       "path": "assets/img/0011d30ae5fc.webp",
@@ -1122,6 +1122,18 @@
       "group": "images"
     },
     {
+      "path": "css/bundle-core.css",
+      "bytes": 188128,
+      "sha256": "b3faad23c0677689376a78b89dda8ca388fb1a8f8f8e1aa67462e8e029d42a20",
+      "group": "app"
+    },
+    {
+      "path": "css/bundle-late.css",
+      "bytes": 259350,
+      "sha256": "91168707f59cfa94f334c0a336b519630c192d7cd376920612858f1ec56b6419",
+      "group": "app"
+    },
+    {
       "path": "css/core.css",
       "bytes": 175884,
       "sha256": "661a293c1b40049dc38523d7c4aa0272d6cb377acc7c7f9ccfb084470fb5ee6b",
@@ -1129,8 +1141,8 @@
     },
     {
       "path": "css/ios-v5.css",
-      "bytes": 3186,
-      "sha256": "253beea882b5cfd2ed9855dd4d4865ffb34e9a8b8e3f615acfed3e7c0a6955fb",
+      "bytes": 3370,
+      "sha256": "0c86c15663b9028c7f6d722d8dc55d86c9afdd82b17bca6c23f0ed2a99665956",
       "group": "app"
     },
     {
@@ -1147,14 +1159,164 @@
     },
     {
       "path": "css/late.css",
-      "bytes": 193506,
-      "sha256": "49007a83997f4ef634df1568e1657662753a96514cb0634ede6873897cf1b55e",
+      "bytes": 193504,
+      "sha256": "941b24a781a9c3b8d97ecf6133ab20b32a0b2aa486ed147493139dda2b583f7f",
       "group": "app"
     },
     {
-      "path": "data/README.md",
-      "bytes": 593,
-      "sha256": "2496a6366cd6959331c89621403efffc3103816a54009db25e39f9570b9603c5",
+      "path": "data/ai-generated/01-cns.json",
+      "bytes": 181968,
+      "sha256": "a18ec8d7731ebb3c0664f50ce17da448046bd97951bb16c11232499e0fbc9c80",
+      "group": "data"
+    },
+    {
+      "path": "data/ai-generated/02-comprehensive-pediatrics.json",
+      "bytes": 373247,
+      "sha256": "608f797a8afb2ba4caee74c55cb177bb165702e81a588c81e60bc9db30a81fb6",
+      "group": "data"
+    },
+    {
+      "path": "data/ai-generated/03-cvs.json",
+      "bytes": 215513,
+      "sha256": "275f504dba81f263b3e0ae542c4b1dc5be4ecf9f2b0e102d650021a0f8d50fe1",
+      "group": "data"
+    },
+    {
+      "path": "data/ai-generated/04-developmental-assessment-and-milestones.json",
+      "bytes": 139855,
+      "sha256": "345eb380e0c41ae63cc5d5e89018eadbb07e63a38628b149f84679c82d20a14c",
+      "group": "data"
+    },
+    {
+      "path": "data/ai-generated/05-endocrine.json",
+      "bytes": 233735,
+      "sha256": "8b247338683267a6f39d229cebb7a9306ce4ed4779bd11135273a4336363afd8",
+      "group": "data"
+    },
+    {
+      "path": "data/ai-generated/06-git.json",
+      "bytes": 182721,
+      "sha256": "2652ee5845722f5420c06f3db67495949cb35ec97346766c0fba2b5db73eac96",
+      "group": "data"
+    },
+    {
+      "path": "data/ai-generated/07-growth-and-nutrition.json",
+      "bytes": 157755,
+      "sha256": "ebda758bcaf37311e557f962f65d143798e6ba05575520cdd940b40601e1243c",
+      "group": "data"
+    },
+    {
+      "path": "data/ai-generated/08-hematology.json",
+      "bytes": 210304,
+      "sha256": "92571525aa05aed678553d22374a8931d46177f52de55bb3356fda2ea29e45be",
+      "group": "data"
+    },
+    {
+      "path": "data/ai-generated/09-infectious.json",
+      "bytes": 132737,
+      "sha256": "de8fff8e728ebc6ebdab356c39c6b4d520881d5578410a26a10aff8b3cb167dd",
+      "group": "data"
+    },
+    {
+      "path": "data/ai-generated/10-neonatology.json",
+      "bytes": 234745,
+      "sha256": "866937cba8b92c80514dcbbe07d5c0641cad868e78511044361351df254f5cf6",
+      "group": "data"
+    },
+    {
+      "path": "data/ai-generated/11-nephrology.json",
+      "bytes": 161431,
+      "sha256": "514a9461a0c45c73a622512599963f1a9be882d33a9d50516bbd447202ae22fd",
+      "group": "data"
+    },
+    {
+      "path": "data/ai-generated/12-pediatric-dermatology-allergy-hepatology-tumors-child-abuse.json",
+      "bytes": 142538,
+      "sha256": "266b51ed6589dd3cb11c9977c43b958f052f8f20c4fd006dd218eee6b4b9b3a1",
+      "group": "data"
+    },
+    {
+      "path": "data/ai-generated/13-pediatric-genetics.json",
+      "bytes": 114539,
+      "sha256": "d1321ce16808f885bcb7becb80d46400e74a22ff82389b01611ae0cc1a9829b1",
+      "group": "data"
+    },
+    {
+      "path": "data/ai-generated/14-pediatric-vaccination.json",
+      "bytes": 92973,
+      "sha256": "7fc7a45acd879b3b6d31ffe4b29b19ff440c5aae67efb055d02411907795ea9d",
+      "group": "data"
+    },
+    {
+      "path": "data/ai-generated/15-respiratory.json",
+      "bytes": 306171,
+      "sha256": "da61920f5cfd2beee89ecddc2dad742142c7b12552a45254fbf2611e5f9f153c",
+      "group": "data"
+    },
+    {
+      "path": "data/ai-generated/16-rheumatology-metabolic-poisoning-immunology.json",
+      "bytes": 53612,
+      "sha256": "42a7330c638e710852adefbd0e3aacddaff198c522dccef97920fefa527888b7",
+      "group": "data"
+    },
+    {
+      "path": "data/all-once/all-once-bank-01.js",
+      "bytes": 200712,
+      "sha256": "17759fbeaf32400e1c2d1fd02b0615e957051b808dbab7fc57970a033ba3058f",
+      "group": "data"
+    },
+    {
+      "path": "data/all-once/all-once-bank-02.js",
+      "bytes": 186753,
+      "sha256": "4823e2ca64099dab29de464c1bec4e4cd4698225df93a2638a7802b730f93fb5",
+      "group": "data"
+    },
+    {
+      "path": "data/all-once/all-once-bank-03.js",
+      "bytes": 172973,
+      "sha256": "9a210d271ef0c079b7e785be5c1d8ed1c2ea3855157e5aec97419534494dcd5e",
+      "group": "data"
+    },
+    {
+      "path": "data/all-once/all-once-bank-04.js",
+      "bytes": 154184,
+      "sha256": "4a1740925851e4bf1372f868c4bf669c4ab41c93a0fa5f672d4f56ca7e9ab402",
+      "group": "data"
+    },
+    {
+      "path": "data/all-once/all-once-bank-05.js",
+      "bytes": 193699,
+      "sha256": "5cbf514a46d2bfdbd9a36feb1ce11a1912bf0bec4e9d15cb1d020e4b75f8acc5",
+      "group": "data"
+    },
+    {
+      "path": "data/all-once/all-once-bank-06.js",
+      "bytes": 190361,
+      "sha256": "5a3e76ffbba3f38a1d9211667071569f3c49eaf62338abb2e86d25189a620c90",
+      "group": "data"
+    },
+    {
+      "path": "data/all-once/all-once-bank-07.js",
+      "bytes": 176262,
+      "sha256": "d16770a3a9c375f47ba715e0328e8a66d0e8bd0ae62c94c0053bd6f512896be1",
+      "group": "data"
+    },
+    {
+      "path": "data/all-once/all-once-bank-08.js",
+      "bytes": 177291,
+      "sha256": "f17925fd8b734f47ac7d4b6b8ffe188f7f6d78a8c3cffd368d4cd4633ea2a51c",
+      "group": "data"
+    },
+    {
+      "path": "data/all-once/all-once-bank-09.js",
+      "bytes": 162815,
+      "sha256": "55975950d8798f6005b9f6b04b2967b8c43535d4a8f9d376e6237e3f6b1313e3",
+      "group": "data"
+    },
+    {
+      "path": "data/all-once/all-once-bank-10.js",
+      "bytes": 186954,
+      "sha256": "8821536074856e7973cb63bd9edc4d3cbd59b618b01cdfd3b6515a46b86b37c4",
       "group": "data"
     },
     {
@@ -1176,9 +1338,153 @@
       "group": "data"
     },
     {
-      "path": "data/qbData.json",
-      "bytes": 1415623,
-      "sha256": "20fcf3d600abce64d3250b24d0bdfc83c9f9121279646e657bfabd45ececde10",
+      "path": "data/clinical-case/clinical-case-bank-01.js",
+      "bytes": 233859,
+      "sha256": "827ea7349965decb3e5f50c5aebd68102080a413d4439021e7613062e38edbe2",
+      "group": "data"
+    },
+    {
+      "path": "data/clinicalCaseBank.json",
+      "bytes": 3413518,
+      "sha256": "24919a7fe7a2e79bbacfaca1eea1d9a188be7f8875c2f3a9f1e121a1ac1bedfc",
+      "group": "data"
+    },
+    {
+      "path": "data/egyptian-book/egyptian-book-bank-01.js",
+      "bytes": 69075,
+      "sha256": "d1e9ed0edd2eb48db9944946e07232e56348f2b6a2cd2399c387a7473dafa5e8",
+      "group": "data"
+    },
+    {
+      "path": "data/egyptian-book/egyptian-book-bank-02.js",
+      "bytes": 12017,
+      "sha256": "605bba16c38b8c24b4ea591967ebabf77a3b02c61b646580095806f819fdd111",
+      "group": "data"
+    },
+    {
+      "path": "data/egyptian-book/egyptian-book-bank-03.js",
+      "bytes": 54995,
+      "sha256": "4989fdb5acc49c979cb985e0b4dc44332157f4de7cb6972695915eaa44ace48c",
+      "group": "data"
+    },
+    {
+      "path": "data/egyptian-book/egyptian-book-bank-04.js",
+      "bytes": 1846,
+      "sha256": "6ea74f69585646d0b951f8d3147f9ca1f1d3a5574bbf7aa69151782853b96b28",
+      "group": "data"
+    },
+    {
+      "path": "data/egyptian-book/egyptian-book-bank-05.js",
+      "bytes": 77415,
+      "sha256": "1f7a833601226e23566205460d217783386481cb2858b3f0696ee24b80c0c9e5",
+      "group": "data"
+    },
+    {
+      "path": "data/egyptian-book/egyptian-book-bank-06.js",
+      "bytes": 57586,
+      "sha256": "14c3a4e08e914114569566656665d6fe98c22fee85edd8a0374e37cf7d27780c",
+      "group": "data"
+    },
+    {
+      "path": "data/egyptian-book/egyptian-book-bank-07.js",
+      "bytes": 47191,
+      "sha256": "1d2e2290608a6b8d13c638b9b2d09c9c354c35290d8ff2242619c759942cf226",
+      "group": "data"
+    },
+    {
+      "path": "data/egyptian-book/egyptian-book-bank-08.js",
+      "bytes": 86417,
+      "sha256": "a8fb0f692ee310d3facf103c6853b55936d567d021283afd99279900eb7ead6b",
+      "group": "data"
+    },
+    {
+      "path": "data/egyptian-book/egyptian-book-bank-09.js",
+      "bytes": 82586,
+      "sha256": "adb270cd1a0834f761b99a8a6b6762c6244d1f68681b6d99f05805b8bf95cb4a",
+      "group": "data"
+    },
+    {
+      "path": "data/egyptian-book/egyptian-book-bank-10.js",
+      "bytes": 40729,
+      "sha256": "52f052d99fbe70715b2c0df042d763a6e289f3fec30074c0cfa9318b98f14d73",
+      "group": "data"
+    },
+    {
+      "path": "data/egyptian-book/egyptian-book-bank-11.js",
+      "bytes": 49525,
+      "sha256": "1f64174c28cbe36dfd7843353e72e186253b3918597e5de92535373163f4ba65",
+      "group": "data"
+    },
+    {
+      "path": "data/egyptian-book/egyptian-book-bank-12.js",
+      "bytes": 73517,
+      "sha256": "08e4b810f6f9bcb7fc701f165c9da37aef1da95e41adb13faa61d4327cd5e48b",
+      "group": "data"
+    },
+    {
+      "path": "data/egyptian-book/egyptian-book-bank-13.js",
+      "bytes": 10643,
+      "sha256": "165d24425c2c0aad594a0bb0099d9594cf34988dd8109b4c7ceb2e3a0af8eaba",
+      "group": "data"
+    },
+    {
+      "path": "data/egyptian-book/egyptian-book-bank-14.js",
+      "bytes": 52539,
+      "sha256": "5961011ed17903f2b6244888273ef97bb118305f222dfb8ccf95342cef7a481e",
+      "group": "data"
+    },
+    {
+      "path": "data/egyptian-book/egyptian-book-bank-15.js",
+      "bytes": 2385,
+      "sha256": "04db0e47fc2175adbecd021185e0ddd382690e41d65549b763ff9b58df35e32b",
+      "group": "data"
+    },
+    {
+      "path": "data/egyptian-book/egyptian-book-bank-16.js",
+      "bytes": 8957,
+      "sha256": "87dca03385cb005e41232d15252b959a868c285e37dbc8b4ebf1b01befba8e2d",
+      "group": "data"
+    },
+    {
+      "path": "data/nelson/nelson-textbook-bank-01.js",
+      "bytes": 96877,
+      "sha256": "2a2ce1501411b6bd1a8f07daf1dbec19afeb09829ce27855ec51c60225d06933",
+      "group": "data"
+    },
+    {
+      "path": "data/nelson/nelson-textbook-bank-02.js",
+      "bytes": 99708,
+      "sha256": "867934a99203efea6ddb1d481a8158b3b338eb0d902fd9434a3fb42ceb6f437f",
+      "group": "data"
+    },
+    {
+      "path": "data/nelson/nelson-textbook-bank-03.js",
+      "bytes": 138914,
+      "sha256": "579037ac4bbb2afd583fce3d545477e33f64f4a317168465ecadd44d05339ac0",
+      "group": "data"
+    },
+    {
+      "path": "data/nelson/nelson-textbook-bank-04.js",
+      "bytes": 137933,
+      "sha256": "1ab3bc165cef061b03c94ee578068201a109dc914de592e7dc02cfec7401fd7e",
+      "group": "data"
+    },
+    {
+      "path": "data/nelson/nelson-textbook-bank-05.js",
+      "bytes": 125507,
+      "sha256": "6aef7c62185c4f97622589422b9d6a28c88a2c64710397b60cfa3b9f55f19791",
+      "group": "data"
+    },
+    {
+      "path": "data/nelson/nelson-textbook-bank-06.js",
+      "bytes": 129981,
+      "sha256": "c4f549a133768f665dcb2d96b36388651309a785098d372453bd6bef633ab704",
+      "group": "data"
+    },
+    {
+      "path": "data/nelson/nelson-textbook-bank-07.js",
+      "bytes": 149963,
+      "sha256": "3d47669f8a918e1232e163d46de857a7b712ce71c4b65a7f9619a22a52eaec5b",
       "group": "data"
     },
     {
@@ -1188,21 +1494,33 @@
       "group": "data"
     },
     {
-      "path": "data/qbData_reviewed.json",
-      "bytes": 1991183,
-      "sha256": "a7b93a9fd09b2c10485113220aa8b766c43bf33f5b0ccff937d07607a9449bd8",
-      "group": "data"
-    },
-    {
       "path": "data/qbData_reviewed_patch.json",
       "bytes": 57006,
       "sha256": "3e85928f1ec03f1455f53e1025ada817abe846a44213c7e2f9e8948ceb2e6722",
       "group": "data"
     },
     {
+      "path": "data/qbData_reviewed.json",
+      "bytes": 1991183,
+      "sha256": "a7b93a9fd09b2c10485113220aa8b766c43bf33f5b0ccff937d07607a9449bd8",
+      "group": "data"
+    },
+    {
+      "path": "data/qbData.json",
+      "bytes": 1423359,
+      "sha256": "534ae34f0a444e365caf15736dd9b1411b42fddd9066066d25ee7df46575bfcb",
+      "group": "data"
+    },
+    {
+      "path": "data/README.md",
+      "bytes": 593,
+      "sha256": "2496a6366cd6959331c89621403efffc3103816a54009db25e39f9570b9603c5",
+      "group": "data"
+    },
+    {
       "path": "index.html",
-      "bytes": 38183,
-      "sha256": "cc435b012393131b308a1506b0a3f3c033f33ea280cbb0dd73ee25a6c7fe7fd7",
+      "bytes": 46618,
+      "sha256": "f6a418899ef37d86338d0868cb630aaf8ed39713ab2ed859f29a082740f63b21",
       "group": "app"
     },
     {
@@ -1225,8 +1543,8 @@
     },
     {
       "path": "js/04-app-main.js",
-      "bytes": 101931,
-      "sha256": "aa20e2cb4a9a6073ec21edc5d305f11582b8328c127ebe0a29fdef1cf3757ad0",
+      "bytes": 67318,
+      "sha256": "b962847e8f4e0d9afc5bcabc152842c2688f23bb7acde1ccc422654859880eac",
       "group": "app"
     },
     {
@@ -1243,8 +1561,8 @@
     },
     {
       "path": "js/07-returning-student-migration.js",
-      "bytes": 4394,
-      "sha256": "15ec15164f14efbf9d39f53b2b1558839d30741dbdab84d82b3ac8fbda4835d7",
+      "bytes": 4301,
+      "sha256": "fa3359d2b33eec211c4e69c653f23f9fba0407228a7960aae8919b042c3daf05",
       "group": "app"
     },
     {
@@ -1255,14 +1573,14 @@
     },
     {
       "path": "js/09-app-features-v6.js",
-      "bytes": 433571,
-      "sha256": "9b5124e81313ad0aad79f13a8da42214dfd1545cc3407a2294e30c6ac32b013d",
+      "bytes": 435920,
+      "sha256": "4b05f522870a72dbe9efd04c3d47b6ad902627bf54044d5937854efa9329a228",
       "group": "app"
     },
     {
       "path": "js/10-history-sync.js",
-      "bytes": 674,
-      "sha256": "3b4e207d3197e3e92a5690fe2f9147b5f8a884f4d220561ec17e0074e683d803",
+      "bytes": 977,
+      "sha256": "0b72b44ea7ac9076a202affc159ebd4578ff23dd9860b4cbaaaadb7af848ac65",
       "group": "app"
     },
     {
@@ -1279,8 +1597,8 @@
     },
     {
       "path": "js/13-home-functional-actions-v1.js",
-      "bytes": 3604,
-      "sha256": "b3b8ac54466ebbf315f1d85f52d9bbd0a44fa12089f2f2c8bb83ed75ce7fb0fd",
+      "bytes": 3871,
+      "sha256": "8d68129ef6bee01a8991e1682b64d8e87a955b245cce2db00039eff92647ebe7",
       "group": "app"
     },
     {
@@ -1345,14 +1663,14 @@
     },
     {
       "path": "js/24-daily-notify-v18.js",
-      "bytes": 7887,
-      "sha256": "27621d06eccd8a3d24683edb3df43466245d1785fb5221bb35a714ca08a151e4",
+      "bytes": 8173,
+      "sha256": "944fd3f4f7bf82738c35b09e13196ce930dfe8a422fc8ecd4e5fb58808810121",
       "group": "app"
     },
     {
       "path": "js/25-shb-portal-js.js",
-      "bytes": 6481,
-      "sha256": "8eead029953616ceb92b8358a8605ab11b306977102b91edd8a9e84c7f9d6c82",
+      "bytes": 6478,
+      "sha256": "433fba65949ecb3a9488c5f33559293d146393188e87b6339bd1442faf00d24d",
       "group": "app"
     },
     {
@@ -1375,8 +1693,8 @@
     },
     {
       "path": "js/29-offline-setup.js",
-      "bytes": 21996,
-      "sha256": "09063ebb578f789f5355e20455c77dfcc1be4748a8258c0b2694bab2e8119b87",
+      "bytes": 50964,
+      "sha256": "8efb75bb18a71dcdba140b37d8f7d999e6a4dcb796ac2b8b19a4b6e8b40e111a",
       "group": "app"
     },
     {
@@ -1386,21 +1704,87 @@
       "group": "app"
     },
     {
-      "path": "js/30-ios-v5.js",
-      "bytes": 31301,
-      "sha256": "12f7876ebdcfa8f6dd6b1f1e2b87e82a1d00335d919b24704dac0c238ac56a87",
+      "path": "js/32-ios-study-tools.js",
+      "bytes": 63988,
+      "sha256": "4b675dcf2b43d54ffafc575039f961def841364ec952deb68ad62613a283f51a",
       "group": "app"
     },
     {
-      "path": "js/31-ios-v6.js",
-      "bytes": 14188,
-      "sha256": "1c0669c83d403b641a9fc300056201df230deca4918a5f1993c819c21ad865f5",
+      "path": "js/33-ios-exam-planner.js",
+      "bytes": 27026,
+      "sha256": "77b81ee45bb21f5a885615259a2f3daf1918313ad38db6cef482336f78d628c2",
       "group": "app"
     },
     {
-      "path": "js/32-ios-v7.js",
-      "bytes": 10780,
-      "sha256": "18bc123e3728234fa303a2293657e87baa74f37d509fed79d354fb58d9fd10ff",
+      "path": "js/33-unified-voice.js",
+      "bytes": 21033,
+      "sha256": "ebfb2bd74de4c0042e40250eb59c7182001eb580fc1828ecf91c6d261d03aaac",
+      "group": "app"
+    },
+    {
+      "path": "js/34-study-countdown.js",
+      "bytes": 8340,
+      "sha256": "ee4c0d3a6785e27fabaa957f673d22d0e22ba607c112f1da25906808d63a00ce",
+      "group": "app"
+    },
+    {
+      "path": "js/35-pediatrics-collections.js",
+      "bytes": 24391,
+      "sha256": "f392c4a0cad67dcf2ddf012ea5dde5dceb3420c53d6e2dd8171878ec3945d2d5",
+      "group": "app"
+    },
+    {
+      "path": "js/36-exam-planner-settings-smartreview.js",
+      "bytes": 19784,
+      "sha256": "776feae378475194f2d9c2ea863179b9577cfcbc961ed2512559623990585909",
+      "group": "app"
+    },
+    {
+      "path": "js/37-study-hub-linkage.js",
+      "bytes": 10803,
+      "sha256": "61b07f3299268a6a4572b79786b782381d6c04b4070d98f566023b35813a5df1",
+      "group": "app"
+    },
+    {
+      "path": "js/38-all-once-pediatrics.js",
+      "bytes": 5346,
+      "sha256": "85a160ecd1563e29636aef85d5c13ea9f09ec9bc6fb06bd5021b04b8d07dd43f",
+      "group": "app"
+    },
+    {
+      "path": "js/39-clinical-case-pediatrics.js",
+      "bytes": 5628,
+      "sha256": "f53de6a1a81dda406447b25524eb2196bd723c4df88a509f4d8ccf76d9870a7f",
+      "group": "app"
+    },
+    {
+      "path": "js/40-egyptian-book-pediatrics.js",
+      "bytes": 7181,
+      "sha256": "90bc5f353e200ac1ba043e00a744f6b56ca48be19a047e04df4ebdd275f26eed",
+      "group": "app"
+    },
+    {
+      "path": "js/41-collections-integration.js",
+      "bytes": 5551,
+      "sha256": "0a86293d155647874aaa76c98eca78f796774e0735097a1e12f17a28289180af",
+      "group": "app"
+    },
+    {
+      "path": "js/42-pediatrics-collection-polish.js",
+      "bytes": 26320,
+      "sha256": "08f538c6363e69f7250ce36dbb11c0ebfdb18a9ac3345da98f2d87e668b18c03",
+      "group": "app"
+    },
+    {
+      "path": "js/43-ai-bank-engine-adapter.js",
+      "bytes": 21033,
+      "sha256": "8465b19d4941a2bc44c1fe6e577be03b2dbf7654c5ed512be6434b9231dfc4cf",
+      "group": "app"
+    },
+    {
+      "path": "js/44-islamic-reminders.js",
+      "bytes": 16757,
+      "sha256": "608dd05cd964d53dbe1ccc0c231d5a920ef5ba8f71369b627b78643ffbea0c19",
       "group": "app"
     },
     {
@@ -1411,14 +1795,14 @@
     },
     {
       "path": "pwa-version.json",
-      "bytes": 476,
-      "sha256": "5f31a2d453fc08f46c0110507dc2810dfb36ccb1342fa1c08b503e71ad20ac1f",
+      "bytes": 858,
+      "sha256": "aee29cc855061455b95012441a7a5b436507ffc47a6e48c609594fc29bbe17b0",
       "group": "other"
     },
     {
       "path": "sw.js",
-      "bytes": 2804,
-      "sha256": "430e828e1690f6fbc3bdc828250d78a3c265fc6d492adba1b09e936421968750",
+      "bytes": 7574,
+      "sha256": "888f06fe442fac70e8e842df0f5b72e79741be4fbf5668810f1cf2e554b96e4b",
       "group": "app"
     }
   ]
