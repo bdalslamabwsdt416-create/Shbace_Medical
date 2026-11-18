@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { runInNewContext } from "node:vm";
 
 const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 const sw = read("../sw.js");
@@ -155,7 +156,7 @@ test("The build manifest covers the complete copied package and validates the bo
   assert.ok(build.includes("fileCount: offlineFiles.length"));
   assert.ok(build.includes("/(?:data-src|src)="), "parser-loaded Setup script must be syntax-checked by the build");
   assert.equal(pkg.version, pwa.version);
-  assert.equal(pwa.version, "1.3.10-computer.5");
+  assert.equal(pwa.version, "1.3.10-computer.6");
 });
 
 test("Splash portal transition remains short and app rendering waits for all scripts", () => {
@@ -168,4 +169,84 @@ test("Splash portal transition remains short and app rendering waits for all scr
   const complete = block(app, "function completeSplashOnce(overlay,instant){", "function syncSplashOnForeground()");
   assert.ok(complete.includes("window.__shbBooted!==true"));
   assert.ok(app.includes("if(window.__shbBooted!==true){"));
+});
+
+
+function makeIndexedDbHarness(options = {}) {
+  let openCount = 0;
+  let transactionCount = 0;
+  const connections = [];
+  const indexedDB = {
+    open() {
+      openCount++;
+      const connection = {
+        objectStoreNames: { contains: () => true },
+        close() { this.closed = true; },
+        transaction() {
+          transactionCount++;
+          if (options.failFirstTransaction && transactionCount === 1) {
+            const error = new Error("Failed to execute 'transaction' on 'IDBDatabase': The database connection is closing.");
+            error.name = "InvalidStateError";
+            throw error;
+          }
+          const tx = {
+            objectStore() {
+              return {
+                get() { return { result: "preserved-student-data" }; },
+                put() { return { result: "saved" }; }
+              };
+            }
+          };
+          Object.defineProperty(tx, "oncomplete", {
+            set(callback) { queueMicrotask(() => callback()); }
+          });
+          return tx;
+        }
+      };
+      connections.push(connection);
+      const request = {};
+      queueMicrotask(() => {
+        request.result = connection;
+        request.onupgradeneeded?.();
+        request.onsuccess?.();
+      });
+      return request;
+    }
+  };
+  const start = updater.indexOf("/* ---------- IndexedDB (same database and stores as before) ---------- */");
+  const end = updater.indexOf("/* ---------- state machine + UI ----------", start);
+  assert.notEqual(start, -1, "IndexedDB implementation exists");
+  assert.notEqual(end, -1, "IndexedDB implementation has an end marker");
+  const context = { window: { indexedDB }, indexedDB, DB_NAME: "test-offline-state-v1" };
+  runInNewContext(updater.slice(start, end), context);
+  return {
+    context,
+    connections,
+    get openCount() { return openCount; },
+    get transactionCount() { return transactionCount; }
+  };
+}
+
+test("IndexedDB updater reopens and retries once when a transaction uses a closing connection", async () => {
+  const h = makeIndexedDbHarness({ failFirstTransaction: true });
+  const result = await h.context.dbGet("meta", "installed");
+  assert.equal(result, "preserved-student-data");
+  assert.equal(h.openCount, 2, "a fresh database connection is opened for the retry");
+  assert.equal(h.transactionCount, 2, "only one retry is made");
+});
+
+test("IndexedDB updater discards connections on versionchange and unexpected close", async () => {
+  const h = makeIndexedDbHarness();
+  assert.equal(await h.context.dbGet("meta", "installed"), "preserved-student-data");
+  const first = h.connections[0];
+  assert.equal(typeof first.onversionchange, "function");
+  first.onversionchange();
+  assert.equal(first.closed, true, "old connection is closed after versionchange");
+  assert.equal(await h.context.dbGet("meta", "installed"), "preserved-student-data");
+  assert.equal(h.openCount, 2, "versionchange forces a fresh connection");
+
+  const second = h.connections[1];
+  second.onclose?.();
+  assert.equal(await h.context.dbGet("meta", "installed"), "preserved-student-data");
+  assert.equal(h.openCount, 3, "unexpected close also invalidates the cached connection");
 });
