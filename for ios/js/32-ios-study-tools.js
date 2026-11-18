@@ -42,6 +42,18 @@
     try { localStorage.setItem(PREF_KEY, JSON.stringify(prefs)); } catch (_) {}
   }
   function toast(s) { try { if (typeof window.toast === 'function') window.toast(s); } catch (_) {} }
+  function hapticsAvailable() {
+    try { return !!(window.ShbaceNative && typeof window.ShbaceNative.haptic === 'function') || typeof navigator.vibrate === 'function'; }
+    catch (_) { return false; }
+  }
+  function wakeLockAvailable() {
+    try { return !!(window.ShbaceNative && typeof window.ShbaceNative.keepScreenOn === 'function') || !!(navigator.wakeLock && typeof navigator.wakeLock.request === 'function'); }
+    catch (_) { return false; }
+  }
+  function speechAvailable() {
+    try { return !!(window.ShbaceNative && typeof window.ShbaceNative.speakText === 'function') || !!(window.speechSynthesis && window.SpeechSynthesisUtterance); }
+    catch (_) { return false; }
+  }
   var notificationPermissionNoticeShown = false;
   function notifyReminderPermissionRequired() {
     if (notificationPermissionNoticeShown) return;
@@ -118,10 +130,14 @@
     if (firstToday) cancelTodayReminder();
   }
   function haptic(kind) {
-    if (!prefs.haptics) return;
-    try { window.ShbaceNative.haptic(String(kind || 'light')); } catch (_) {
-      try { if (navigator.vibrate) navigator.vibrate(kind === 'wrong' ? [45, 55, 45] : kind === 'correct' ? [22, 35, 22] : 12); } catch (__) {}
-    }
+    if (!prefs.haptics || !hapticsAvailable()) return;
+    try {
+      if (window.ShbaceNative && typeof window.ShbaceNative.haptic === 'function') {
+        window.ShbaceNative.haptic(String(kind || 'light'));
+        return;
+      }
+      navigator.vibrate(kind === 'wrong' ? [45, 55, 45] : kind === 'correct' ? [22, 35, 22] : 12);
+    } catch (_) {}
   }
   function nativeTimerSync() {
     try {
@@ -178,20 +194,27 @@
       '" role="switch" aria-checked="' + (!!prefs[key]) + '" data-shb-pref="' + key +
       '"><i></i><span>' + (prefs[key] ? 'ON' : 'OFF') + '</span></button></div>';
   }
+  function unsupportedFeatureMarkup(title, desc) {
+    return '<div class="shb-af-row"><div class="shb-af-copy"><b>' + title + '</b><small>' + desc +
+      '</small></div><span class="shb-af-reminder-note">Not available on this device</span></div>';
+  }
+  function supportedToggleMarkup(key, title, desc, supported) {
+    return supported ? toggleMarkup(key, title, desc) : unsupportedFeatureMarkup(title, desc);
+  }
   function featureSettingsHTML() {
     return '<section class="card setcard shb-af-settings" id="shbAndroidSettings">' +
       '<h3>Study experience</h3><p class="meta">Controls for study sessions and question tools on this device.</p>' +
-      toggleMarkup('haptics', 'Haptic feedback', 'Uses device vibration where the browser supports it.') +
-      toggleMarkup('shareQuestion', 'Share a question', 'Show the question-sharing action.') +
+      supportedToggleMarkup('haptics', 'Haptic feedback', 'Uses device vibration where the browser or native app supports it.', hapticsAvailable()) +
+      toggleMarkup('shareQuestion', 'Share a question', 'Share the question with another app; copy is used as a fallback where sharing is unavailable.') +
       toggleMarkup('copyQuestion', 'Copy question text', 'Show the copy action for notes or AI tools.') +
-      toggleMarkup('readAloud', 'Read questions aloud', 'Show voice playback controls on questions.') +
-      '<div class="shb-af-row"><div class="shb-af-copy"><b>Reading speed</b><small>Applies to spoken question text.</small></div>' +
+      supportedToggleMarkup('readAloud', 'Read questions aloud', 'Show voice playback controls on questions.', speechAvailable()) +
+      (speechAvailable() ? '<div class="shb-af-row"><div class="shb-af-copy"><b>Reading speed</b><small>Applies to spoken question text.</small></div>' +
       '<div class="seg shb-af-speed" role="group" aria-label="Reading speed">' +
       ['slow', 'normal', 'fast'].map(function (v) {
         return '<button type="button" data-shb-speed="' + v + '" class="' + (prefs.readingSpeed === v ? 'on' : '') + '">' +
           (v === 'slow' ? 'Slow' : v === 'fast' ? 'Fast' : 'Normal') + '</button>';
-      }).join('') + '</div></div>' +
-      toggleMarkup('keepScreenOn', 'Keep screen awake', 'Keep the display awake while studying on devices that support this browser feature.') +
+      }).join('') + '</div></div>' : unsupportedFeatureMarkup('Reading speed', 'Voice speed controls require a supported speech engine.')) +
+      supportedToggleMarkup('keepScreenOn', 'Keep screen awake', 'Keep the display awake during Question Bank sessions when this browser supports screen wake lock.', wakeLockAvailable()) +
       toggleMarkup('autoTheme', 'Follow device theme', 'Automatically match device light or dark appearance.') +
       '</section>' +
       '<section class="card setcard shb-af-settings"><h3>Study reminders</h3>' +
@@ -206,7 +229,7 @@
     try { last=Number(window.shbaceLastUpdateCheck&&window.shbaceLastUpdateCheck())||0; pending=Number(window.shbaceUpdatePending&&window.shbaceUpdatePending())||0; info=window.shbaceVersionInfo&&window.shbaceVersionInfo(); } catch (_) {}
     var installed=info&&info.installed,available=info&&info.available;
     var version=installed&&installed.displayVersion?'Installed version '+installed.displayVersion+(installed.releaseDate?' · '+installed.releaseDate:'')+'. ':'';
-    var base=version+(last?'Last successful check: '+new Date(last).toLocaleString()+'. ':'')+'Automatic update checks run every 7 days. Only changed files are downloaded; your study progress and notes are kept.';
+    var base=version+(last?'Last successful check: '+new Date(last).toLocaleString()+'. ':'')+'Automatic update checks run every 48 hours. Only changed files are downloaded; your study progress and notes are kept.';
     return pending?'An update is available'+(available&&available.displayVersion?' ('+available.displayVersion+')':'')+': '+pending+' changed file'+(pending===1?'':'s')+'. Choose Check for updates to review it. '+base:base;
   }
   function mountUpdateSettings(root) {
@@ -216,7 +239,7 @@
       box=document.createElement('section');
       box.className='card setcard shb-af-settings';
       box.id='shbUpdateSettings';
-      box.innerHTML='<h3>App updates</h3><p class="meta">Check manually at any time, or let Shbace check automatically every 7 days. Only changed files are downloaded after you approve the update. Your answers, notes and saved progress are preserved.</p>'+
+      box.innerHTML='<h3>App updates</h3><p class="meta">Check manually at any time, or let Shbace check automatically every 48 hours. Only changed files are downloaded after you approve the update. Your answers, notes and saved progress are preserved.</p>'+
         '<button type="button" class="btn block" id="shbUpdateCheck">Check for updates</button>'+
         '<p class="meta" id="shbUpdateNote" aria-live="polite"></p>';
       root.appendChild(box);
