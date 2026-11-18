@@ -1,0 +1,64 @@
+name: Shbace Medical PWA 1.1
+
+on:
+  push:
+    branches:
+      - release/shbace-medical-1.1-complete-20261111
+    paths:
+      - 'index.html'
+      - 'css/**'
+      - 'js/**'
+      - 'data/**'
+      - 'assets/**'
+      - 'manifest.webmanifest'
+      - 'pwa-version.json'
+      - 'sw.js'
+      - 'package.json'
+      - 'scripts/**'
+      - '.github/workflows/pwa-bundle.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: shbace-pwa-v1.1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-pwa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout release branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Validate JavaScript syntax
+        run: |
+          for file in js/*.js; do
+            node --check "$file"
+          done
+
+      - name: Build and validate PWA package
+        run: npm run build:pwa
+
+      - name: Create distributable PWA ZIP
+        run: |
+          cd www
+          zip -qr ../Shbace-Medical-PWA-v1.1.zip .
+
+      - name: Upload PWA package
+        uses: actions/upload-artifact@v4
+        with:
+          name: Shbace-Medical-PWA-v1.1
+          path: Shbace-Medical-PWA-v1.1.zip
+          if-no-files-found: error
+          retention-days: 90

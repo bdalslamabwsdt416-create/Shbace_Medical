@@ -1,0 +1,91 @@
+apply plugin: 'com.android.application'
+
+// --- release signing: create android/keystore.properties (see keystore.properties.example) -------------------
+def keystorePropsFile = rootProject.file('keystore.properties')
+def keystoreProps = new Properties()
+if (keystorePropsFile.exists()) {
+    keystorePropsFile.withInputStream { keystoreProps.load(it) }
+}
+
+android {
+    namespace = "com.shbace.medical"
+    compileSdk = rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        applicationId "com.shbace.medical"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        // IMPORTANT: when updating an app that is already installed / published, versionCode MUST be higher than the old one.
+        versionCode 7
+        versionName "1.1"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    androidResources {
+        // Files and dirs to omit from the packaged assets dir (Capacitor template default, suits modern web apps).
+        ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+    }
+
+    signingConfigs {
+        release {
+            if (keystorePropsFile.exists()) {
+                storeFile file(keystoreProps['storeFile'])
+                storePassword keystoreProps['storePassword']
+                keyAlias keystoreProps['keyAlias']
+                keyPassword keystoreProps['keyPassword']
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            // Java code is only MainActivity + Capacitor (which relies on reflection): keep R8 off, like the Capacitor template.
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (keystorePropsFile.exists()) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+
+    bundle {
+        // The app handles its own languages (Arabic / English) in JS - never split Play delivery by language.
+        language { enableSplit = false }
+    }
+}
+
+repositories {
+    flatDir {
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+// ---------------------------------------------------------------------------------------------------------------
+// The web app lives in ../www (single source of truth). Every Gradle build copies it to src/main/assets/public,
+// exactly where `npx cap copy` puts it, so "Build > Build APK" can never package a stale or missing web app.
+// ---------------------------------------------------------------------------------------------------------------
+tasks.register('copyWebAssets', Copy) {
+    description = 'Copy ../www to src/main/assets/public (same target as `npx cap copy android`)'
+    from "${rootDir}/../www"
+    into "${projectDir}/src/main/assets/public"
+}
+tasks.register('copyCapacitorConfig', Copy) {
+    description = 'Copy ../capacitor.config.json to src/main/assets (same target as `npx cap copy android`)'
+    from "${rootDir}/../capacitor.config.json"
+    into "${projectDir}/src/main/assets"
+}
+preBuild.dependsOn copyWebAssets, copyCapacitorConfig

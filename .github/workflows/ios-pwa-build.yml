@@ -1,0 +1,55 @@
+name: Shbace Medical iOS PWA build
+
+on:
+  push:
+    paths:
+      - 'for ios/**'
+      - '.github/workflows/ios-pwa-build.yml'
+  pull_request:
+    paths:
+      - 'for ios/**'
+      - '.github/workflows/ios-pwa-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: shbace-ios-pwa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-ios-pwa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install iOS PWA build dependencies
+        working-directory: for ios
+        run: npm install --no-audit --no-fund
+
+      - name: Validate runtime JavaScript syntax
+        working-directory: for ios
+        run: |
+          node --check js/29-offline-setup.js
+          node --check sw.js
+          node --check scripts/restore-ios-packed.js
+
+      - name: Build and verify the iOS PWA package
+        working-directory: for ios
+        run: npm run build:pwa
+
+      - name: Upload verified iOS PWA output
+        uses: actions/upload-artifact@v4
+        with:
+          name: Shbace-Medical-iOS-PWA-1.4.14
+          path: for ios/dist/
+          if-no-files-found: error
+          retention-days: 30
