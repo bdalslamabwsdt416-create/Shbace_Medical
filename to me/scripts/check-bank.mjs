@@ -214,6 +214,7 @@ function auditMcqRecord(q, label) {
   }
 
   for (const option of q.options) {
+    auditStudentFacingText(option?.text, label + " option " + (option?.label || "(unknown)"));
     const optionText = String(option?.text || "").replace(/\bALL\b/g, "");
     if (/\b(?:only|always|never|every|all)\b|\bany age\b|\bin all cases\b/i.test(optionText)) {
       errors.push(label + ": option " + (option?.label || "(unknown)") + " contains a giveaway absolute word");
