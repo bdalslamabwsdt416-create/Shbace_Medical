@@ -2634,3 +2634,11 @@ body.eb-bank-mode .qcard.nl-clean .qacts .qa{direction:ltr}
 .cc-question .qopts .qopt.incorrect{border-color:rgba(239,116,116,.6)!important;background:rgba(142,48,55,.17)!important}
 .cc-question .qopts .qopt.dim{opacity:.62}
 .cc-question .qopts .qopt:disabled{cursor:default;opacity:1}
+/* Restore the original layout refinements for the final two iOS onboarding screens. */
+#phoneContent[data-ob="5"]>.screen:has(#gradeStage){overflow:visible!important}
+#phoneContent[data-ob="5"]>.screen:has(#gradeStage) #gradeStage.gx{width:calc(100% + 40px)!important;max-width:none!important;margin-left:-20px!important;margin-right:-20px!important}
+#phoneContent[data-ob-final]>.screen.cp-screen{overflow:visible!important}
+#phoneContent[data-ob-final] .cp-art-frame{aspect-ratio:1/1.17!important}
+#phoneContent[data-ob-final] .cp-screen .cp-welcome{margin-top:-4px!important}
+#phoneContent[data-ob-final] .cp-screen .cp-welcome .hero-sub{display:none!important}
+#phoneContent[data-ob-final] .cp-screen .cp-grade-badge{display:none!important}
