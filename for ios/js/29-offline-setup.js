@@ -48,7 +48,7 @@ function lsDel(k){try{localStorage.removeItem(k)}catch(e){}}
 function lsGetJson(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}}
 function lsSetJson(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 var storageDiagnostics={
- checkedAt:null,indexedDB:'unknown',installedRecord:'unknown',cacheExists:null,cacheInitiallyExists:null,
+ checkedAt:null,indexedDB:'unknown',installedRecord:'unknown',cacheExists:null,cacheInitiallyExists:null,initialDiagnosis:'unknown',
  cacheFilesState:'unknown',cacheFilesGood:0,cacheFilesBad:0,cacheFilesMissing:0,manifestFiles:0,
  persistentStorage:'unknown',persistentStorageGranted:null,persistentStoragePersisted:null,recovery:'not-checked',recoveryError:''
 };
@@ -847,6 +847,7 @@ async function boot(){
   st=await dbGet('meta',STAGED_KEY);
   updateStorageDiagnostics({indexedDB:'available',installedRecord:(rec&&rec.files)||(legacy&&legacy.verified)?'present':'missing',
    cacheExists:cacheInitiallyExists,cacheInitiallyExists:cacheInitiallyExists},true);
+  updateStorageDiagnostics({initialDiagnosis:storageDiagnosis()},true);
  }catch(e){
   idbReadable=false;
   updateStorageDiagnostics({indexedDB:'unavailable',installedRecord:'unavailable',indexedDBError:(e&&e.message)||'read failed',
