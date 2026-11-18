@@ -32,7 +32,7 @@ function runtimeFiles() {
   for (const directory of ['assets', 'css', 'data', 'js', 'fonts', 'audio', 'media', 'videos', 'documents', 'img', 'img1', 'img2']) {
     walkRuntimeDirectory(directory, files);
   }
-  return [...new Set(files)].filter(relative => relative !== 'offline-assets-manifest.json' && !['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/30-ios-v5.js','js/31-ios-v6.js','js/32-ios-study-tools.js','js/33-ios-exam-planner.js'].includes(relative)).sort((a, b) => a.localeCompare(b));
+  return [...new Set(files)].filter(relative => relative !== 'offline-assets-manifest.json' && !['css/ios-v5.css','css/ios-v6.css','css/ios-v7.css','js/30-ios-v5.js','js/31-ios-v6.js'].includes(relative)).sort((a, b) => a.localeCompare(b));
 }
 
 fs.rmSync(out, { recursive: true, force: true });
@@ -109,8 +109,18 @@ const deferredRefs = [...html.matchAll(/data-src=["']([^"']+)["']/g)].map(match 
 for (const relative of deferredRefs) {
   if (!fs.existsSync(safePath(relative))) throw new Error('Deferred runtime asset is missing: ' + relative);
 }
+const requiredIosTools = ['js/32-ios-study-tools.js','js/33-ios-exam-planner.js'];
+for (const relative of requiredIosTools) {
+  if (deferredRefs.filter(file => file === relative).length !== 1) throw new Error('Required iOS feature runtime must be loaded exactly once: ' + relative);
+}
+const runtimePosition = relative => deferredRefs.indexOf(relative);
+if (!(runtimePosition('js/09-app-features-v6.js') < runtimePosition('js/36-exam-planner-settings-smartreview.js') &&
+      runtimePosition('js/36-exam-planner-settings-smartreview.js') < runtimePosition('js/32-ios-study-tools.js') &&
+      runtimePosition('js/32-ios-study-tools.js') < runtimePosition('js/33-ios-exam-planner.js'))) {
+  throw new Error('iOS feature runtime order is invalid; app core and Smart Review must load before study tools, followed by the iOS Exam Planner navigation layer.');
+}
 if (/js\/30-android-enhancements|js\/31-android-v13|js\/32-chrome-android/.test(html)) throw new Error('Android-only runtime module leaked into the iOS build.');
-if (['js/30-ios-v5.js','js/31-ios-v6.js','js/32-ios-study-tools.js','js/33-ios-exam-planner.js'].some(function (file) { return html.indexOf(file) !== -1; })) throw new Error('An iOS-only runtime layer is still referenced; To Me app core plus the preserved onboarding should be the only platform-specific exception.');
+if (['js/30-ios-v5.js','js/31-ios-v6.js'].some(function (file) { return html.indexOf(file) !== -1; })) throw new Error('An iOS-only runtime layer is still referenced; To Me app core plus the preserved onboarding should be the only platform-specific exception.');
 for (const relative of ['css/bundle-core.css','css/bundle-late.css','js/44-islamic-reminders.js']) {
   if (!fs.existsSync(safePath(relative))) throw new Error('Required iOS runtime asset is missing: ' + relative);
 }
