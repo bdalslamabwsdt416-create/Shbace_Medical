@@ -1,10 +1,11 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.10-to-me.47",
-  "displayVersion": "1.3.10.47 · Chrome (Phone + Computer)",
+  "version": "1.3.10-to-me.48",
+  "displayVersion": "1.3.10.48 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-18",
   "releaseNotes": [
+    "Hardens the final update-commit stage against IndexedDB connections that are closing: tracks version changes and unexpected closes, discards stale handles, and retries one closing-connection transaction without resetting student data.",
     "First installation now opens the one-time Setup screen immediately after Splash. Setup downloads and verifies the complete offline package before question-bank loading, script preloads or onboarding can begin. Existing To Me storage and student progress remain unchanged.",
     "Installed copies open from the verified local package without a blocking setup screen. The single update engine checks the manifest every 48 hours or on manual request, downloads only changed files in the background, and no longer runs periodic full-package hashing on every install.",
     "Adds 242 verified supplementary AI Clinical Cases questions across the ten medical systems, with four new topics. Preserves each source case, question, option, key, explanation and provenance; the duplicate Proteus question is not imported.",

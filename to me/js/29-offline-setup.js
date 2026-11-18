@@ -131,27 +131,62 @@ function requestReload(){
 
 /* ---------- IndexedDB (same database and stores as before) ---------- */
 var dbp=null;
+function isClosingDbError(e){
+ var message=String(e&&e.message||e||'');
+ return !!e&&(e.name==='InvalidStateError'||/database connection is closing|connection is closing/i.test(message));
+}
 function db(){
  if(!dbp){
-  dbp=new Promise(function(res,rej){
+  var pending;
+  pending=new Promise(function(res,rej){
    if(!window.indexedDB){rej(new Error('IndexedDB is not available.'));return}
    var q=indexedDB.open(DB_NAME,1);
    q.onupgradeneeded=function(){var d=q.result;
     if(!d.objectStoreNames.contains('meta'))d.createObjectStore('meta');
     if(!d.objectStoreNames.contains('verified'))d.createObjectStore('verified');};
-   q.onsuccess=function(){res(q.result)};
+   q.onsuccess=function(){
+    var d=q.result;
+    /* A newer app/tab may request a schema change. Drop this cached handle before closing it,
+       so the next operation opens a fresh connection instead of reusing a closing database. */
+    d.onversionchange=function(){
+     if(dbp===pending)dbp=null;
+     try{d.close()}catch(e){}
+    };
+    /* Browsers can also close a connection unexpectedly (for example, storage pressure). */
+    d.onclose=function(){if(dbp===pending)dbp=null};
+    res(d);
+   };
    q.onerror=function(){rej(q.error||new Error('Could not open local storage.'))};
    q.onblocked=function(){rej(new Error('Local storage is busy. Close other Shbace tabs.'))};
   });
-  dbp.catch(function(){dbp=null});
+  dbp=pending;
+  pending.catch(function(){if(dbp===pending)dbp=null});
  }
  return dbp;
 }
-function dbOp(store,mode,fn){
- return db().then(function(d){return new Promise(function(res,rej){
-  var tx=d.transaction(store,mode),req=fn(tx.objectStore(store));
-  tx.oncomplete=function(){res(req&&req.result)};
-  tx.onabort=tx.onerror=function(){rej(tx.error||new Error('Local storage transaction failed.'))};
+function dbOp(store,mode,fn,attempt){
+ attempt=attempt||0;
+ var connectionPromise=db();
+ return connectionPromise.then(function(d){return new Promise(function(res,rej){
+  var tx,req,settled=false;
+  function fail(err){
+   if(settled)return;
+   settled=true;
+   /* Retry once only when the connection itself is closing. Ordinary storage errors
+      still surface to the existing recovery flow and are never hidden. */
+   if(isClosingDbError(err)&&attempt<1){
+    if(dbp===connectionPromise)dbp=null;
+    dbOp(store,mode,fn,attempt+1).then(res,rej);
+    return;
+   }
+   rej(err||new Error('Local storage transaction failed.'));
+  }
+  try{
+   tx=d.transaction(store,mode);
+   req=fn(tx.objectStore(store));
+  }catch(e){fail(e);return}
+  tx.oncomplete=function(){if(settled)return;settled=true;res(req&&req.result)};
+  tx.onabort=tx.onerror=function(){fail(tx.error||new Error('Local storage transaction failed.'))};
  })});
 }
 function dbGet(s,k){return dbOp(s,'readonly',function(o){return o.get(k)})}
