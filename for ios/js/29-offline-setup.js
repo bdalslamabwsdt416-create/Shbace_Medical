@@ -686,7 +686,7 @@ async function verifyCachedFiles(files,label,quiet){
   await wait(0);
  }
  updateStorageDiagnostics({
-  cacheExists:existed||good.length>0||bad.length>0,
+  cacheExists:existed,
   cacheFilesState:good.length===files.length?'complete':(good.length?'partial':(damaged?'damaged':'empty')),
   cacheFilesGood:good.length,cacheFilesBad:damaged,cacheFilesMissing:missing,manifestFiles:files.length
  },true);
@@ -697,7 +697,10 @@ async function computePlan(installed){
  for(var i=0;i<manifest.files.length;i++){
   var f=manifest.files[i];cur[f.path]=1;
   var old=installed.files&&installed.files[f.path],same=!!(old&&old.sha256===f.sha256),present=!!have[urlFor(f.path)];
-  if(same&&present)continue;
+  if(same&&present){
+   var verifiedRecord=await dbGet('verified',CACHE_NAME+'|'+f.path).catch(function(){return null});
+   if(verifiedRecord===f.sha256)continue;
+  }
   /* Missing/stale verification metadata is repaired from the real file before any download is planned. */
   if(present&&await cachedFileMatches(f,c)){await markVerified(f,CACHE_NAME);continue}
   files.push(f);if(!same)changed++;
