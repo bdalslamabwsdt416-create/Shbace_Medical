@@ -78,6 +78,11 @@ test("Installer gate blocks question-bank fetching and module preloads until Set
   assert.ok(loader.includes("function prefetchDeferredScripts(list)"));
   assert.ok(loader.includes("prefetchDeferredScripts(list);"));
   assert.ok(!loader.includes("var dataFetch=(function(){"), "question bank must not fetch eagerly");
+  const earlyScriptPreloads = [...index.matchAll(/<link\\b[^>]*>/gi)].filter(([tag]) => /\\brel=["']preload["']/i.test(tag) && /\\bas=["']script["']/i.test(tag));
+  assert.equal(earlyScriptPreloads.length, 0,
+    "deferred app scripts must not start downloading before the first-install Setup gate");
+  assert.ok(go.includes("bootGate.then(function(){return loadQuestionBank();})"));
+  assert.ok(index.includes("prefetchDeferredScripts(list);"), "deferred modules are prefetched only by the gated boot loader");
   assert.ok(index.includes("caches.open('shbace-chrome-offline-v1.3.10.37')"));
   assert.ok(index.includes("new URL(url,document.baseURI).href"));
 });
