@@ -138,7 +138,7 @@ test("The build manifest covers the complete copied package and validates the bo
   assert.ok(build.includes("fileCount: offlineFiles.length"));
   assert.ok(build.includes("/(?:data-src|src)="), "parser-loaded Setup script must be syntax-checked by the build");
   assert.equal(pkg.version, pwa.version);
-  assert.equal(pwa.version, "1.3.10-to-me.47");
+  assert.equal(pwa.version, "1.3.10-to-me.48");
 });
 
 test("Splash portal transition remains short and app rendering waits for all scripts", () => {
@@ -151,4 +151,15 @@ test("Splash portal transition remains short and app rendering waits for all scr
   const complete = block(app, "function completeSplashOnce(overlay,instant){", "function syncSplashOnForeground()");
   assert.ok(complete.includes("window.__shbBooted!==true"));
   assert.ok(app.includes("if(window.__shbBooted!==true){"));
+});
+
+
+test("Updater recovers from IndexedDB connections that are closing", () => {
+  assert.ok(updater.includes("function isClosingDbError(e)"));
+  assert.ok(updater.includes("d.onversionchange=function()"));
+  assert.ok(updater.includes("d.onclose=function()"));
+  assert.ok(updater.includes("if(dbp===connectionPromise)dbp=null;"));
+  assert.ok(updater.includes("dbOp(store,mode,fn,attempt+1).then(res,rej);"));
+  assert.ok(updater.includes("attempt<1"));
+  assert.ok(updater.includes("var DB_NAME='shbace-medical-offline-state-v1';"));
 });
