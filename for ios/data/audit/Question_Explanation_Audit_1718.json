@@ -1,0 +1,77 @@
+{
+  "schema": "shbace-question-explanation-audit-v1",
+  "generatedFor": "Unified Chrome PWA",
+  "questionCount": 1718,
+  "auditType": "non-destructive automated text audit",
+  "result": {
+    "missingExplanation": 0,
+    "explanationsUnder20Characters": 0,
+    "crossQuestionReferenceOnly": 0,
+    "placeholderOnly": 0,
+    "explanationsWithAnExplicitOptionLetterMention": 845,
+    "explanationsMatchingAnOptionByOptionTextPattern": 128,
+    "separateStructuredOptionExplanationFields": 0
+  },
+  "bySpecialty": [
+    {
+      "specialty": "Previous Years' Exam Questions",
+      "count": 399
+    },
+    {
+      "specialty": "Respiratory",
+      "count": 170
+    },
+    {
+      "specialty": "Central Nervous System",
+      "count": 162
+    },
+    {
+      "specialty": "Neonatology",
+      "count": 157
+    },
+    {
+      "specialty": "Cardiovascular System",
+      "count": 146
+    },
+    {
+      "specialty": "Nephrology",
+      "count": 137
+    },
+    {
+      "specialty": "Gastrointestinal Tract",
+      "count": 128
+    },
+    {
+      "specialty": "Haematology",
+      "count": 97
+    },
+    {
+      "specialty": "Endocrinology",
+      "count": 88
+    },
+    {
+      "specialty": "Infectious Diseases & Vaccines",
+      "count": 74
+    },
+    {
+      "specialty": "Rheumatology / Metabolic / Poisoning / Immunology",
+      "count": 66
+    },
+    {
+      "specialty": "Growth and Nutrition",
+      "count": 50
+    },
+    {
+      "specialty": "Genetics & Dermatology",
+      "count": 44
+    }
+  ],
+  "manualReviewQueue": [],
+  "limitations": [
+    "A text pattern is an audit signal only; it does not prove that an explanation fully discusses every distractor.",
+    "An explanation without A–E labels may still explain the clinical reasoning correctly.",
+    "This report does not validate medical accuracy, answer keys, or source authenticity.",
+    "This report records the current expanded explanations; original question stems, option labels, answer keys, and source references are preserved."
+  ],
+  "recommendation": "All 11 previously short or cross-reference-only explanations in the manual review queue have been expanded. Continue source-backed review in controlled batches and preserve original question IDs, wording, answer keys, and source references."
+}

@@ -1,0 +1,21 @@
+/* Shbace Medical — iOS pack v6 styles. Everything is scoped to html.v6-touch / classes created by js/31-ios-v6.js (iOS only). */
+
+/* 18. touch polish: no rubber-band that reveals the background, no double-tap zoom, no long-press callout on buttons */
+html.v6-touch,html.v6-touch body{overscroll-behavior:none}
+html.v6-touch button,html.v6-touch .qopt,html.v6-touch .qa,html.v6-touch .app-nav *{touch-action:manipulation;-webkit-touch-callout:none}
+
+/* copy-question button spans the full row under Listen / Share */
+.v5-acts .v5-copy{grid-column:1/-1;min-height:44px}
+
+/* About: status block */
+.v6-status{margin-top:14px;padding-top:12px;border-top:1px solid rgba(125,177,232,.25)}
+.v6-status h4{margin:0 0 6px;font-size:14px}
+.v6-status ul{margin:0 0 10px;padding-inline-start:20px;display:grid;gap:4px;line-height:1.6;font-size:13.5px}
+
+/* Settings: iOS options card */
+.v6-card .meta{margin:2px 0 8px}
+.v6-card .v6-store{display:block;line-height:1.7}
+
+/* reset dialog warning */
+.v6-warn{margin:10px 0 0;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,190,90,.5);background:rgba(255,170,60,.1);display:grid;gap:8px;line-height:1.6}
+.v6-warn .btn{min-height:40px}

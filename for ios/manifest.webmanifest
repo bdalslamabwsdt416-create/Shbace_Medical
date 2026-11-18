@@ -1,0 +1,21 @@
+{
+  "id": "./",
+  "name": "Shbace Medical",
+  "short_name": "Shbace",
+  "description": "Shbace Medical — an interactive medical question bank.",
+  "lang": "en",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#030B1F",
+  "theme_color": "#07131f",
+  "icons": [
+    {
+      "src": "./assets/img/fc0bef7cd7ca.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
