@@ -160,6 +160,121 @@ for (const file of jsFiles) {
 }
 console.log("Bank identity audit: " + bank.length + " base, " + nelsonRecords.length + " Nelson, " + kasrRecords.length + " Kasr Al-Ainy, " + clinical.length + " Clinical Case, and " + egyptianTotal + " Egyptian Book records.");
 console.log(`Clinical Case: ${clinical.filter(q => q.o.length).length} matched MCQ, ${clinical.filter(q => q.ccOpen).length} open-ended, ${ccAudit.exact_duplicate_records_removed} exact duplicates removed, ${ccAudit.accepted_sections_without_dedicated_question_block} unmatched Accepted sections excluded.`);
+
+/* Additional QA for the AI-generated and shared Clinical Case banks in this folder. */
+const generatedDir = join(root, "data/ai-generated");
+const generatedFiles = readdirSync(generatedDir).filter(name => name.endsWith(".json")).sort();
+if (generatedFiles.length !== 16) errors.push(`AI-generated bank expected 16 JSON files, found ${generatedFiles.length}`);
+
+const auditedQuestionIds = new Set();
+let generatedQuestionTotal = 0;
+let clinicalQuestionTotal = 0;
+let clinicalCaseTotal = 0;
+
+function auditStudentFacingText(value, label) {
+  const valueText = String(value || "");
+  if (/\b(?:lecture|sheet|textbook|source material)\b/i.test(valueText)) {
+    errors.push(label + ": contains a lecture/book/source reference");
+  }
+  if (/\*\*/.test(valueText)) errors.push(label + ": contains raw Markdown bold markers");
+  if (/case\s*focus/i.test(valueText)) errors.push(label + ": contains a Case focus label or attached text");
+}
+
+function auditMcqRecord(q, label) {
+  if (!q || !q.id) {
+    errors.push(label + ": missing question ID");
+    return;
+  }
+  if (auditedQuestionIds.has(q.id)) errors.push(label + ": duplicate question ID " + q.id);
+  auditedQuestionIds.add(q.id);
+
+  for (const field of ["stem", "initialExplanation", "detailedExplanation", "highYieldPoints"]) {
+    auditStudentFacingText(q[field], label + " " + field);
+  }
+
+  if (!Array.isArray(q.options) || q.options.length < 2) {
+    errors.push(label + ": missing MCQ options");
+    return;
+  }
+  const answer = q.options.find(option => option && option.label === q.correctAnswer);
+  if (!answer) errors.push(label + ": correctAnswer does not match an option label");
+  else {
+    if (String(q.correctAnswerText || "").trim() !== String(answer.text || "").trim()) {
+      errors.push(label + ": correctAnswerText does not exactly match the selected option");
+    }
+    const longestDistractor = q.options
+      .filter(option => option && option.label !== q.correctAnswer)
+      .reduce((longest, option) => Math.max(longest, String(option.text || "").length), 0);
+    const answerLengthGap = String(answer.text || "").length - longestDistractor;
+    if (answerLengthGap > 100) errors.push(label + ": correct answer is more than 100 characters longer than every distractor");
+    else if (answerLengthGap > 80) warnings.push(label + ": correct answer is over 80 characters longer than the longest distractor; review option balance");
+  }
+
+  for (const option of q.options) {
+    const optionText = String(option?.text || "").replace(/\bALL\b/g, "");
+    if (/\b(?:only|always|never|every|all)\b|\bany age\b|\bin all cases\b/i.test(optionText)) {
+      errors.push(label + ": option " + (option?.label || "(unknown)") + " contains a giveaway absolute word");
+    }
+  }
+}
+
+for (const name of generatedFiles) {
+  const source = readFileSync(join(generatedDir, name), "utf8");
+  let parsed;
+  try { parsed = JSON.parse(source); }
+  catch (error) {
+    errors.push("AI-generated " + name + ": invalid JSON - " + error.message);
+    continue;
+  }
+  if (parsed.schema !== "shbace-ai-generated-mcq-source-v1") errors.push("AI-generated " + name + ": unexpected schema");
+  let fileCount = 0;
+  for (const system of parsed.systems || []) {
+    for (const topic of system.topics || []) {
+      for (const q of topic.questions || []) {
+        fileCount++;
+        auditMcqRecord(q, "AI-generated " + name + " " + (q?.id || "(missing ID)"));
+      }
+    }
+  }
+  generatedQuestionTotal += fileCount;
+  if (Number.isInteger(parsed.totalQuestions) && parsed.totalQuestions !== fileCount) {
+    errors.push("AI-generated " + name + ": totalQuestions does not match the actual question count");
+  }
+}
+if (generatedQuestionTotal !== 1881) errors.push("AI-generated bank expected 1,881 questions, found " + generatedQuestionTotal);
+
+const clinicalBankPath = join(root, "data/clinicalCaseBank.json");
+let clinicalBank;
+try {
+  clinicalBank = JSON.parse(readFileSync(clinicalBankPath, "utf8"));
+} catch (error) {
+  errors.push("Clinical Case bank: invalid JSON - " + error.message);
+  clinicalBank = null;
+}
+if (clinicalBank) {
+  if (clinicalBank.schema !== "shbace-clinical-case-bank-v1") errors.push("Clinical Case bank: unexpected schema");
+  for (const system of clinicalBank.systems || []) {
+    for (const topic of system.topics || []) {
+      for (const clinicalCase of topic.cases || []) {
+        clinicalCaseTotal++;
+        auditStudentFacingText(clinicalCase.vignette, "Clinical Case " + (clinicalCase.id || "(missing case ID)") + " vignette");
+        if (/\b(?:suspects?|considers?|diagnosed with|confirms?)\b/i.test(String(clinicalCase.vignette || ""))) {
+          errors.push("Clinical Case " + clinicalCase.id + ": diagnostic wording remains in the shared case vignette");
+        }
+        for (const q of clinicalCase.questions || []) {
+          clinicalQuestionTotal++;
+          auditMcqRecord(q, "Clinical Case " + (q?.id || "(missing question ID)"));
+        }
+      }
+    }
+  }
+}
+if (clinicalCaseTotal !== 481) errors.push("Clinical Case expected 481 shared cases, found " + clinicalCaseTotal);
+if (clinicalQuestionTotal !== 1840) errors.push("Clinical Case expected 1,840 questions, found " + clinicalQuestionTotal);
+
+console.log("AI-generated: " + generatedFiles.length + " files, " + generatedQuestionTotal + " questions.");
+console.log("Clinical Case: " + clinicalCaseTotal + " shared cases, " + clinicalQuestionTotal + " questions.");
+
 warnings.forEach(w => console.log("WARN  " + w));
 errors.forEach(e => console.log("ERROR " + e));
 console.log(`${warnings.length} warning(s), ${errors.length} error(s).`);
