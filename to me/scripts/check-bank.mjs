@@ -289,3 +289,5 @@ warnings.forEach(w => console.log("WARN  " + w));
 errors.forEach(e => console.log("ERROR " + e));
 console.log(`${warnings.length} warning(s), ${errors.length} error(s).`);
 process.exit(errors.length ? 1 : 0);
+
+// CI validation trigger: validate neutral case titles and MCQ bank checks.
