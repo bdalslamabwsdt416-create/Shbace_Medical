@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "version": "611db204d3e5b081271607631d2effe02292c8011a9fc1ff546c272d8c95a73f",
+  "version": "bbc6e1ae430811989378dd43b5615a1d5241a985369aefc2c0fc2ea042c9ee9d",
   "generatedAt": "2026-11-19T00:00:00.000Z",
   "fileCount": 300,
-  "totalBytes": 29118092,
+  "totalBytes": 29118201,
   "files": [
     {
       "path": "assets/img/0011d30ae5fc.webp",
@@ -1693,8 +1693,8 @@
     },
     {
       "path": "js/29-offline-setup.js",
-      "bytes": 50964,
-      "sha256": "8efb75bb18a71dcdba140b37d8f7d999e6a4dcb796ac2b8b19a4b6e8b40e111a",
+      "bytes": 51073,
+      "sha256": "adb20ca95a75b1e329d41b362f413282d4b761e92bcb75e03a22ccccb5439e85",
       "group": "app"
     },
     {
