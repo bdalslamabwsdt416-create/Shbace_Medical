@@ -303,12 +303,24 @@ try{
  if(appPlugin&&typeof appPlugin.addListener==='function')appPlugin.addListener('backButton',function(){window.navBack()});
 }catch(_){}
 try{
- var t=localStorage.getItem('shbace_onboarding_v3_grade');
- if(!Number(t))localStorage.setItem('shbace_onboarding_v3_grade','5');
- if(!selectedGrade)selectedGrade=Number(localStorage.getItem('shbace_onboarding_v3_grade'))||5;
- /* Keep the original onboarding screens and routeAfterSplash() intact.
-    Truncating screenTitles made the hologram screen appear to be the final page,
-    which hid its shared background and removed the remaining navigation steps. */
+ var gradeKey='shbace_onboarding_v3_grade';
+ var gradeMigrationKey='shbace_onboarding_v3_grade_default_cleanup_v1';
+ var savedGrade=localStorage.getItem(gradeKey);
+ /* v1.3.5 fix: older builds wrote Grade 5 automatically on first launch.
+    Remove that stale default once for students who have not completed onboarding.
+    Keep completed students' grades and any non-default saved selection. */
+ if(localStorage.getItem(gradeMigrationKey)!=='1'){
+  var onboardingIsDone=false;
+  try{onboardingIsDone=typeof onboardingDone==='function'&&onboardingDone()}catch(_){}
+  if(!onboardingIsDone&&Number(savedGrade)===5)localStorage.removeItem(gradeKey);
+  localStorage.setItem(gradeMigrationKey,'1');
+  savedGrade=localStorage.getItem(gradeKey);
+ }
+ var savedGradeNumber=Number(savedGrade);
+ if(!selectedGrade&&Number.isInteger(savedGradeNumber)&&savedGradeNumber>=1&&savedGradeNumber<=5)
+  selectedGrade=savedGradeNumber;
+ /* No fallback grade: a fresh onboarding starts at the ground level until the student taps a grade.
+    Keep the original onboarding screens and routeAfterSplash() intact. */
 }catch(e){console.warn('v1.3 onboarding grade initialization failed',e)}
 function startup(){
  saveSnapshot();scheduleReminder();midnight();removeBadges();removeOldPlanner();settingsPatch();
