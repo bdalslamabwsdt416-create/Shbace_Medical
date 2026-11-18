@@ -139,7 +139,7 @@ test("The build manifest covers the complete copied package and validates the bo
   assert.ok(build.includes("fileCount: offlineFiles.length"));
   assert.ok(build.includes("/(?:data-src|src)="), "parser-loaded Setup script must be syntax-checked by the build");
   assert.equal(pkg.version, pwa.version);
-  assert.equal(pwa.version, "1.3.10-chrome.3");
+  assert.equal(pwa.version, "1.3.10-chrome.4");
 });
 
 test("Splash portal transition remains short and app rendering waits for all scripts", () => {
@@ -154,6 +154,25 @@ test("Splash portal transition remains short and app rendering waits for all scr
   assert.ok(app.includes("if(window.__shbBooted!==true){"));
 });
 
+
+test("Offline recovery reuses intact Cache Storage files when IndexedDB verification records are missing", () => {
+  const verification = block(updater, "async function isVerified(f,tname,target)", "async function downloadFile(");
+  assert.ok(verification.includes("await target.match(urlFor(f.path))"));
+  assert.ok(verification.includes("await response.arrayBuffer()"));
+  assert.ok(verification.includes("bytes.byteLength!==Number(f.bytes)"));
+  assert.ok(verification.includes("await sha256(bytes)"));
+  assert.ok(verification.includes("await markVerified(f,tname)"));
+  assert.ok(!verification.includes("dbGet('verified'"),
+    "the cached response, not the possibly-evicted IndexedDB marker, is the source of truth");
+});
+
+test("Installer requests persistent origin storage before reading install state", () => {
+  assert.ok(updater.includes("async function requestPersistentStorage()"));
+  assert.ok(updater.includes("await navigator.storage.persisted()"));
+  assert.ok(updater.includes("return await navigator.storage.persist()"));
+  const boot = block(updater, "async function boot()", "function kick()");
+  assert.ok(boot.indexOf("await requestPersistentStorage();") < boot.indexOf("var rec="));
+});
 
 function makeIndexedDbHarness(options = {}) {
   let openCount = 0;
