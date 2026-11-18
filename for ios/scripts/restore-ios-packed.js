@@ -114,6 +114,22 @@ if (['js/30-ios-v5.js','js/31-ios-v6.js','js/32-ios-study-tools.js','js/33-ios-e
 for (const relative of ['css/bundle-core.css','css/bundle-late.css','js/44-islamic-reminders.js']) {
   if (!fs.existsSync(safePath(relative))) throw new Error('Required iOS runtime asset is missing: ' + relative);
 }
+const onboardingCss = fs.readFileSync(safePath('css/bundle-late.css'), 'utf8');
+const onboardingStyleRequirements = [
+  '#phoneContent[data-ob="5"]>.screen:has(#gradeStage){overflow:visible!important}',
+  '#phoneContent[data-ob="5"]>.screen:has(#gradeStage) #gradeStage.gx{width:calc(100% + 40px)!important;max-width:none!important;margin-left:-20px!important;margin-right:-20px!important}',
+  '#phoneContent[data-ob-final]>.screen.cp-screen{overflow:visible!important}',
+  '#phoneContent[data-ob-final] .cp-art-frame{aspect-ratio:1/1.17!important}',
+  '#phoneContent[data-ob-final] .cp-screen .cp-welcome{margin-top:-4px!important}',
+  '#phoneContent[data-ob-final] .cp-screen .cp-welcome .hero-sub{display:none!important}',
+  '#phoneContent[data-ob-final] .cp-screen .cp-grade-badge{display:none!important}'
+];
+const missingOnboardingStyles = onboardingStyleRequirements.filter(function (rule) {
+  return !onboardingCss.includes(rule);
+});
+if (missingOnboardingStyles.length) {
+  throw new Error('The original final two onboarding screen layouts are missing: ' + missingOnboardingStyles.join('; '));
+}
 const baseBank = JSON.parse(fs.readFileSync(safePath('data/qbData.json'), 'utf8'));
 if (!Array.isArray(baseBank.questions) || baseBank.questions.length !== 1718) throw new Error('The base question bank must remain at 1,718 questions.');
 const pwaManifest = JSON.parse(fs.readFileSync(safePath('manifest.webmanifest'), 'utf8'));
