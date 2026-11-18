@@ -26,6 +26,14 @@ This branch is a reorganized working copy based on `main`. The original `version
 4. Do not rename runtime assets without updating every reference in HTML, CSS, and JavaScript.
 5. Remove an asset only after confirming it is identical to another file and that the canonical copy remains at its expected path.
 
+## Offline storage integrity and recovery
+
+- Cache Storage is verified against the current offline asset manifest by byte count and SHA-256. The verification record in IndexedDB is metadata, not proof that a cached file is bad when that record is missing.
+- If installation metadata is missing, the installer rechecks saved Cache Storage files and rebuilds its installation records from valid local files before downloading anything.
+- Repairs fetch only files that are actually missing or fail integrity verification. A valid cached response is not deleted merely because an IndexedDB verification record was lost.
+- The installer requests persistent browser storage, waits for the result, and exposes the current storage diagnosis through `window.shbaceStorageDiagnostics()` and `window.__SHBACE_STORAGE_DIAGNOSTICS__`.
+- Regression scenarios are documented in `tests/offline-package-recovery.md`.
+
 ## iPhone and iPad PWA experience
 
 - Install Shbace Medical from Safari with Share → Add to Home Screen, then open the home-screen app.
