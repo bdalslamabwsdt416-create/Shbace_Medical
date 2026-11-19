@@ -93,7 +93,7 @@ Supported remote changes include:
 - Add or dismiss in-app announcements, add content blocks to the Home/Subjects screen, and adjust the accent colors through approved color values.
 - Link a page or button to an existing remote bank, resource, or flashcard deck.
 
-The app does **not** download or execute JavaScript, HTML, CSS, or arbitrary code from the feed. The remote package supplies JSON data and verified media only. A new kind of interaction or a completely new native feature still needs a one-time APK code update.
+The app does **not** download or execute JavaScript, HTML, CSS, or arbitrary code from the feed. The remote package supplies JSON data and verified media only. Android Page Builder v2 supports bounded nested sections/grids, tabs, accordions, fixed safe conditions and reusable page templates with named slots; these are validated JSON component trees, not downloaded markup or scripts. A new kind of interaction or a completely new native feature still needs a one-time APK code update.
 
 ### Example remote UI configuration
 
