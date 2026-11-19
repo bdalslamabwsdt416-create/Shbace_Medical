@@ -141,6 +141,159 @@
     return result;
   }
 
+  function applyContentOverrides(data) {
+    var files = Array.isArray(data.overrideFiles) ? data.overrideFiles : [];
+    var expected = Object.create(null);
+    var bankImageChanges = [];
+
+    if (files.length > 80) throw new Error('Too many remote override files.');
+    function updateSystem(item) {
+      if (!item || !String(item.id || '').trim()) throw new Error('Invalid system override.');
+      var id = String(item.id);
+      var system = B.REAL && B.REAL.spec && B.REAL.spec[id];
+      if (!system) throw new Error('Remote override targets an unknown system: ' + id);
+      if (item.name != null && String(item.name).trim()) {
+        B.SPEC_NAME[id] = String(item.name).trim();
+        system.label = String(item.name).trim();
+        (B.SYS || []).forEach(function (row) {
+          if (row && row[0] === id) row[1] = String(item.name).trim();
+        });
+      }
+      if (item.icon) {
+        var row = (B.SYS || []).find(function (entry) { return entry && entry[0] === id; });
+        if (row && row[2] && typeof IMG !== 'undefined') {
+          var icon = assetData(String(item.icon));
+          if (icon) IMG[row[2]] = icon;
+        }
+      }
+    }
+    function updateTopic(item) {
+      if (!item || !String(item.systemId || '').trim() || !Number.isInteger(Number(item.topicId))) {
+        throw new Error('Invalid topic override.');
+      }
+      var spec = String(item.systemId), id = Number(item.topicId);
+      var system = B.REAL && B.REAL.spec && B.REAL.spec[spec];
+      var topic = system && Array.isArray(system.topics) &&
+        system.topics.find(function (entry) { return entry && Number(entry[0]) === id; });
+      if (!topic) throw new Error('Remote override targets an unknown topic: ' + spec + '/' + id);
+      var oldName = String(topic[1] || '');
+      if (item.name != null && String(item.name).trim()) {
+        topic[1] = String(item.name).trim();
+        B.TOPIC_NAME[id] = String(item.name).trim();
+      }
+      if (item.icon) {
+        var icon = assetData(String(item.icon));
+        if (icon) {
+          B.TOPIC_ICON_ASSET[spec + '|' + String(topic[1])] = icon;
+          if (oldName && oldName !== topic[1]) B.TOPIC_ICON_ASSET[spec + '|' + oldName] = icon;
+        }
+      }
+    }
+    function updateQuestion(item) {
+      if (!item || !String(item.id || '').trim() || !item.fields || typeof item.fields !== 'object') {
+        throw new Error('Invalid existing-question override.');
+      }
+      var id = String(item.id);
+      if (expected[id]) throw new Error('Duplicate question override: ' + id);
+      expected[id] = true;
+      var question = B.QB.find(function (entry) { return entry && String(entry.id) === id; });
+      if (!question) throw new Error('Remote override targets a missing question ID: ' + id);
+      var fields = item.fields;
+      var allowed = {
+        stem: 'q', explanation: 'ex', extendedExplanation: 'more',
+        tag: 'tag', kind: 'kind', source: 'src'
+      };
+      Object.keys(allowed).forEach(function (key) {
+        if (fields[key] != null) question[allowed[key]] = String(fields[key]);
+      });
+      if (fields.options != null) {
+        if (!Array.isArray(fields.options) || fields.options.length < 2 ||
+            fields.options.some(function (option) { return typeof option !== 'string'; })) {
+          throw new Error('Invalid replacement options for question ' + id);
+        }
+        question.o = fields.options.slice();
+        if (question.ol) question.ol = fields.options.map(function (_, index) { return String.fromCharCode(65 + index); });
+      }
+      if (fields.correctIndex != null) {
+        var answer = Number(fields.correctIndex);
+        if (!Number.isInteger(answer) || answer < 0 || answer >= question.o.length) {
+          throw new Error('Invalid replacement answer index for question ' + id);
+        }
+        question.k = answer;
+        question.kx = false;
+      }
+      if (fields.caseText != null) question.aiCaseVignette = String(fields.caseText);
+      if (fields.image != null) question.remoteImage = String(fields.image);
+      if (fields.reference != null) question.remoteReference = String(fields.reference);
+      if (fields.needsReview != null) question.f = !!fields.needsReview;
+    }
+    function updateCollection(item) {
+      if (!item || !/^(aj|previous|nelson|kasr|clinical|egyptian)$/.test(String(item.id || ''))) {
+        throw new Error('Invalid existing collection override.');
+      }
+      bankImageChanges.push(item);
+    }
+
+    files.forEach(function (path) {
+      if (typeof path !== 'string' || expected[path]) throw new Error('Invalid or duplicate override file path.');
+      expected[path] = true;
+      var source = safeJson(localText(path));
+      if (!source || source.schema !== 'shbace-remote-overrides-v1') {
+        throw new Error('Remote overrides file is invalid: ' + path);
+      }
+      ['systems', 'topics', 'questionPatches', 'collections'].forEach(function (key) {
+        if (source[key] != null && !Array.isArray(source[key])) throw new Error('Invalid override list: ' + key);
+      });
+      (source.systems || []).forEach(updateSystem);
+      (source.topics || []).forEach(updateTopic);
+      (source.questionPatches || []).forEach(updateQuestion);
+      (source.collections || []).forEach(updateCollection);
+    });
+    window.__SHB_REMOTE_COLLECTION_OVERRIDES__ = bankImageChanges;
+  }
+
+  function injectCollectionOverrides() {
+    var overrides = window.__SHB_REMOTE_COLLECTION_OVERRIDES__ || [];
+    var root = document.querySelector('.ped-collections-grid');
+    if (!root) return;
+    var selectors = {
+      aj: '.ped-collection-aj',
+      previous: '.ped-collection-previous',
+      nelson: '.ped-collection-nelson',
+      kasr: '.ped-collection-allonce:not(.ped-collection-clinicalcase):not(.ped-collection-bank08)',
+      clinical: '.ped-collection-clinicalcase:not(.ped-collection-bank07)',
+      egyptian: '.ped-collection-egyptian'
+    };
+    overrides.forEach(function (item) {
+      var card = root.querySelector(selectors[item.id] || '');
+      if (!card) return;
+      if (item.title) {
+        var title = card.querySelector('.ped-collection-copy b');
+        if (title) title.textContent = String(item.title);
+      }
+      if (item.description) {
+        var description = card.querySelector('.ped-collection-copy small');
+        if (description) description.textContent = String(item.description);
+      }
+      if (item.eyebrow) {
+        var eyebrow = card.querySelector('.ped-collection-copy .eyebrow');
+        if (eyebrow) eyebrow.textContent = String(item.eyebrow);
+      }
+      if (item.cover) {
+        var avatar = card.querySelector('.ped-collection-avatar');
+        var source = assetData(String(item.cover));
+        if (avatar && source) {
+          avatar.innerHTML = '';
+          var image = document.createElement('img');
+          image.src = source;
+          image.alt = '';
+          image.loading = 'lazy';
+          avatar.appendChild(image);
+        }
+      }
+    });
+  }
+
   function buildRemoteBanks(data) {
     if (!data || data.schema !== 'shbace-remote-content-catalog-v1' ||
         !Array.isArray(data.systems) || !Array.isArray(data.banks)) {
@@ -705,6 +858,7 @@
     if (!raw) return;
     catalog = safeJson(raw);
     if (!catalog) throw new Error('The installed remote catalog is not valid JSON.');
+    applyContentOverrides(catalog);
     resources = buildResources(catalog);
     flashcardDecks = buildFlashcardDecks(catalog);
     banks = buildRemoteBanks(catalog);
@@ -755,6 +909,7 @@
     if (appPage !== 'shbRemoteFlashcards' && currentDeckId) currentDeckId = '';
     var result = coreRender.apply(this, arguments);
     try {
+      injectCollectionOverrides();
       injectBankCards();
       injectResourceCards();
       injectFlashcardDeckCards();
