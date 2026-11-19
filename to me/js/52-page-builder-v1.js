@@ -49,11 +49,11 @@
           ';--shb-pb-gap:' + gridGap + 'px">' + children(block.children, depth + 1) + '</div>';
       }
       if (type === 'tabs') {
-        var tabs = Array.isArray(block.tabs) ? block.tabs.slice(0, 6) : [];
+        var tabs = Array.isArray(block.tabs) ? block.tabs.filter(function (tab) { return tab && tab.id; }).slice(0, 6) : [];
         if (tabs.length < 2) return '';
         var group = prefix + '-tabs-' + (++groupSequence);
-        var first = String(block.defaultTab || tabs[0].id || '');
-        if (!tabs.some(function (tab) { return tab && String(tab.id) === first; })) first = String(tabs[0].id || '');
+        var first = String(block.defaultTab || (tabs[0] && tabs[0].id) || '');
+        if (!tabs.some(function (tab) { return String(tab.id) === first; })) first = String((tabs[0] && tabs[0].id) || '');
         var buttons = tabs.map(function (tab) {
           if (!tab || !tab.id) return '';
           var id = String(tab.id);
