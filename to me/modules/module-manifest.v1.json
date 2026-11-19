@@ -41,13 +41,14 @@
       "name": "Navigation Engine",
       "status": "partial",
       "scope": "android",
-      "source": "js/04-app-main.js;js/06-drawer-menu.js;js/10-history-sync.js;js/46-android-remote-ui.js;js/47-android-remote-control.js;js/51-navigation-contract-v1.js",
-      "note": "Legacy routes remain in place; v1 provides an observational catalog and safe adapter. Physical device route/back/scroll acceptance is still pending.",
+      "source": "js/04-app-main.js;js/06-drawer-menu.js;js/10-history-sync.js;js/46-android-remote-ui.js;js/47-android-remote-control.js;js/51-navigation-contract-v1.js;js/06-drawer-menu.js",
+      "note": "Built-in drawer and remote UI destinations use the shared route adapter; legacy renderers/history remain in place. Physical device route/back/scroll acceptance is still pending.",
       "capabilities": [
         "route-catalog",
         "route-observer",
         "safe-route-adapter",
-        "versioned-remote-target-allowlists"
+        "versioned-remote-target-allowlists",
+        "shared-drawer-route-dispatch"
       ]
     },
     {
@@ -63,8 +64,16 @@
       "name": "Page Builder",
       "status": "partial",
       "scope": "android",
-      "source": "js/46-android-remote-ui.js;js/47-android-remote-control.js",
-      "note": "Safe blocks only; nested layout editor, templates and preview/publish flow remain."
+      "source": "js/46-android-remote-ui.js;js/47-android-remote-control.js;js/52-page-builder-v1.js",
+      "note": "Local declarative renderer now supports bounded nested layouts, tabs and accordion sections. Visual authoring, reusable templates, conditional rules and preview/publish workflow remain.",
+      "capabilities": [
+        "safe-leaf-blocks",
+        "nested-stack-and-grid-layouts",
+        "interactive-tabs",
+        "native-accordion-sections",
+        "bounded-recursive-rendering",
+        "android-only-service-registration"
+      ]
     },
     {
       "id": "workflow",
