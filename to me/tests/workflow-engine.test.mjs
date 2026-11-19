@@ -120,7 +120,7 @@ test("invalid rules, triggers, fields and actions are rejected at runtime", () =
     { id: "bad-route", trigger: "navigation:route-changed",
       actions: [{ type: "navigate", target: "unknown" }] }
   ]);
-  assert.deepEqual(runtime.api.list(), []);
+  assert.equal(runtime.api.list().length, 0);
   runtime.events.emit("navigation:route-changed", { to: "topics" });
   assert.deepEqual(runtime.navigated, []);
   assert.equal(runtime.root.children.length, 0);
