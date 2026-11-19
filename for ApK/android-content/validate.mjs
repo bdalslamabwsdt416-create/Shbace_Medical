@@ -38,6 +38,11 @@ function assetRef(value, listed, label) {
 
 assert(manifest && manifest.schema === 'shbace-android-content-v1', 'Unsupported manifest schema.');
 assert(typeof manifest.version === 'string' && /^[A-Za-z0-9._-]{1,64}$/.test(manifest.version), 'Invalid manifest version.');
+assert(Number.isInteger(manifest.contentVersionCode) && manifest.contentVersionCode >= 1,
+  'contentVersionCode must be a positive integer and increase for each content release.');
+assert(Number.isInteger(manifest.minAppVersionCode) && manifest.minAppVersionCode >= 0,
+  'minAppVersionCode must be a non-negative integer.');
+assert(['stable', 'beta', 'development'].includes(manifest.channel), 'Invalid content release channel.');
 assert(catalog && catalog.schema === 'shbace-remote-content-catalog-v1', 'Unsupported catalog schema.');
 assert(catalog.version === manifest.version, 'Catalog version must match manifest version.');
 assert(Array.isArray(manifest.files) && manifest.files.length <= 500, 'Manifest must contain at most 500 files.');
