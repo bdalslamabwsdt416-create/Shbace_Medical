@@ -556,7 +556,7 @@ questionBankView=function(){
    SUBJECTS / SPECIALTIES / TOPICS / SEARCH
    ============================================================ */
 const specProg=id=>{const l=QB.filter(q=>q.spec===id);return pct(answeredCount(l),l.length)};
-window.openSpec=function(id){qs.spec=id;qs.topic=0;appPage='topics';renderAppDemo()};
+window.openSpec=function(id){qs.spec=id;qs.topic=0;qbnNavigateRoute('topics')};
 window.openTopic=function(spec,id){qs.spec=spec;qs.topic=id;qs.filter='all';qs.tag='all';qs.idx=0;appPage='questions';renderAppDemo()};
 /* Pediatrics hero image. Override with window.SHBACE_PEDIA_HERO = 'path/or/url.webp' before this script to swap the asset. */
 const PEDIA_HERO_SRC=window.SHBACE_PEDIA_HERO||'/assets/img/9fbea08e77d0.webp';
