@@ -16,9 +16,9 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         // IMPORTANT: when updating an app that is already installed / published, versionCode MUST be higher than the old one.
-        // Reminder permissions and reboot-rescheduling update; same original applicationId and release key.
-        versionCode 15
-        versionName "1.3.6"
+        // Android remote-content updater release. Keep applicationId and the established release key unchanged.
+        versionCode 16
+        versionName "1.3.7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
