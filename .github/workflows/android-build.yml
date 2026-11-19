@@ -97,7 +97,7 @@ jobs:
           retention-days: 90
 
       - name: Prepare Release signing key
-        if: success() && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111' || github.ref == 'refs/heads/work/android-qtools-persistence-20261112' || github.ref == 'refs/heads/android/unified-to-me-20261117' || github.ref == 'refs/heads/android/rebuild-v1.3.6-from-to-me50-20261119' || github.ref == 'refs/heads/android/rebuild-v1.3.6-from-to-me50-20261119')
+        if: success() && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111' || github.ref == 'refs/heads/work/android-qtools-persistence-20261112' || github.ref == 'refs/heads/android/unified-to-me-20261117' || github.ref == 'refs/heads/android/rebuild-v1.3.6-from-to-me50-20261119')
         id: release-signing
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -148,7 +148,7 @@ jobs:
           grep -Fq "certificate SHA-256 digest: 8412e14418309829ca3d2432643672508ff5d6e9f00b727a3ce9654745a53337" <<< "$SIGNATURE_INFO" || { echo "Release signing certificate changed; refusing to publish an incompatible update"; exit 1; }
 
       - name: Upload signed Release APK candidate
-        if: success() && steps.release-signing.outputs.ready == 'true' && github.ref == 'refs/heads/android/unified-to-me-20261117'
+        if: success() && steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/android/unified-to-me-20261117' || github.ref == 'refs/heads/android/rebuild-v1.3.6-from-to-me50-20261119')
         uses: actions/upload-artifact@v4
         with:
           name: SHBACE-Medical-Android-v1.3.6-release-candidate
