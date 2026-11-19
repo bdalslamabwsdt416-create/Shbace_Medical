@@ -2941,9 +2941,13 @@ window.__SHB_BRIDGE={
   if(!key||!Array.isArray(groups))throw new Error('Invalid external question bank registration.');
   if(!BANK_KEYS.has(key)){BANK_KEYS.add(key);BANK_OPTS.push([key,label||key]);}
   var known=new Set(QB.map(function(q){return q&&q.id}).filter(Boolean));
-  var base=key==='clinical-ai'?8200000:8400000,added=0;
+  var base=key==='clinical-ai'?8200000:8400000,added=0,usedTopicIds=new Set(SRT.map(function(row){return Number(row&&row.id)}).filter(function(id){return Number.isInteger(id)&&id>0;}));
   groups.forEach(function(g,index){
-   var spec=String(g.spec||'rheum'),topicId=base+index,topicName=String(g.topicName||'Other / Mixed Questions'),questions=Array.isArray(g.questions)?g.questions:[];
+   var spec=String(g.spec||'rheum'),topicName=String(g.topicName||'Other / Mixed Questions'),questions=Array.isArray(g.questions)?g.questions:[];
+   var requestedTopicId=Number(g.stableTopicId);
+   var topicId=Number.isInteger(requestedTopicId)&&requestedTopicId>0&&!usedTopicIds.has(requestedTopicId)?requestedTopicId:base+index;
+   while(usedTopicIds.has(topicId))topicId++;
+   usedTopicIds.add(topicId);
    if(!REAL.spec[spec])REAL.spec[spec]={q:0,topics:[],label:String(g.systemLabel||SPEC_NAME[spec]||spec)};
    if(!Array.isArray(REAL.spec[spec].topics))REAL.spec[spec].topics=[];
    if(!SPEC_NAME[spec])SPEC_NAME[spec]=String(g.systemLabel||spec);
