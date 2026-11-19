@@ -1,6 +1,38 @@
 
 const DR=[['Learning',[['Subjects','subjects'],['Question Bank','questions'],['Quiz Mode','quiz'],['Global Search']]],['Review',[['Saved Questions'],['Wrong Answers'],['Smart Review','review'],['Reported Questions']]],['Analytics',[['Study Statistics','stats'],['Pinned & Recent Topics']]],['Account & help',[['Changelog'],['About'],['Contact & Feedback'],['Rate This Website'],['Settings']]]];
-function toggleDrawer(f){const ph=document.querySelector('.phone');let d=document.getElementById('drawer');if(!d){ph.insertAdjacentHTML('beforeend',`<div id="drawerBk" class="drawer-bk" onclick="toggleDrawer(false)"></div><aside id="drawer" class="drawer"><div class="brand-small" style="margin:0 6px 8px"><b style="font-size:17px">Shbace <span style="color:var(--mint)">Medical</span></b></div>${DR.map(([g,a])=>`<div class="dl">${g}</div>${a.map(([n,p])=>`<button class="di" onclick="${p?`appPage='${p}';renderAppDemo();`:''}toggleDrawer(false)">${n}</button>`).join('')}`).join('')}</aside>`);d=document.getElementById('drawer')}
+
+function drawerGroups(){
+  var groups=DR.map(function(g){return [g[0],g[1].map(function(it){return [it[0],it[1],it[2]||''];})];});
+  var cfg=window.__SHBACE_REMOTE_DRAWER_CONFIG__;
+  if(!cfg||typeof cfg!=='object')return groups;
+  var hidden=Array.isArray(cfg.hiddenItems)?cfg.hiddenItems.map(String):[];
+  var renames=cfg.renames&&typeof cfg.renames==='object'?cfg.renames:{};
+  var groupRenames=cfg.groupRenames&&typeof cfg.groupRenames==='object'?cfg.groupRenames:{};
+  groups=groups.map(function(g){
+    var title=String(groupRenames[g[0]]||g[0]);
+    var items=g[1].filter(function(it){return hidden.indexOf(String(it[0]))<0&&hidden.indexOf(String(it[1]||''))<0;})
+      .map(function(it){return [String(renames[it[0]]||renames[it[1]]||it[0]),it[1],it[2]||''];});
+    return [title,items];
+  }).filter(function(g){return g[1].length>0;});
+  if(Array.isArray(cfg.groups))cfg.groups.forEach(function(g){
+    if(g&&typeof g[0]==='string'&&Array.isArray(g[1])&&g[1].length)groups.push(g);
+  });
+  if(Array.isArray(cfg.groupOrder)){
+    var order=cfg.groupOrder.map(String);
+    groups.sort(function(a,b){
+      var ai=order.indexOf(a[0]),bi=order.indexOf(b[0]);
+      if(ai<0)ai=9999;if(bi<0)bi=9999;
+      return ai-bi;
+    });
+  }
+  return groups;
+}
+function drawerIcon(value){
+  if(!value)return '';
+  return '<span class="di-icon">'+String(value).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})+'</span>';
+}
+
+function toggleDrawer(f){const ph=document.querySelector('.phone');let d=document.getElementById('drawer');if(!d){ph.insertAdjacentHTML('beforeend',`<div id="drawerBk" class="drawer-bk" onclick="toggleDrawer(false)"></div><aside id="drawer" class="drawer"><div class="brand-small" style="margin:0 6px 8px"><b style="font-size:17px">Shbace <span style="color:var(--mint)">Medical</span></b></div>${drawerGroups().map(([g,a])=>`<div class="dl">${g}</div>${a.map(([n,p,ic])=>`<button class="di" onclick="${p?`appPage='${p}';renderAppDemo();`:''}toggleDrawer(false)">${drawerIcon(ic)}${String(n).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}</button>`).join('')}`).join('')}</aside>`);d=document.getElementById('drawer')}
 const o=f===undefined?!d.classList.contains('open'):f;d.classList.toggle('open',o);document.getElementById('drawerBk').classList.toggle('show',o)}
 function appHeader(label){const lt=!!(document.querySelector('.phone')&&document.querySelector('.phone').classList.contains('light'));return `<div class="phone-appbar hdr2">
 <button class="menu-btn" aria-label="Open menu" onclick="toggleDrawer()">☰</button>
