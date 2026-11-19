@@ -58,4 +58,7 @@ test("Theme tokens have one runtime owner and support bounded design controls", 
   assert.match(remote, /removeAttribute\('data-shb-remote-density'\)/);
   assert.match(remote, /shb-remote-line-height/);
   assert.match(remote, /shb-remote-spacing-scale/);
+  assert.match(remote, /shb-remote-background/);
+  assert.match(remote, /shb-remote-surface-alt/);
+  assert.match(remote, /shb-remote-warning/);
 });
