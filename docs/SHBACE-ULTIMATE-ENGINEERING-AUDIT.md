@@ -220,7 +220,6 @@ The following are examples of real persisted keys identified in the core and sel
 | `shbace_recent_v1` | Recent study/navigation entries. |
 | `shbace_notif_v1` | In-app notification records. |
 | `shbace_note_meta_v2` | Note metadata used by the note experience. |
-| `shbace_remote_flashcards_v1` | Per-card remote flashcard progress. |
 | `shbace_exam_goal_planner_v1`, `shbace_exam_goal_v1`, `shbace_exam_goals_v2` | Exam planner/goals settings and data versions. |
 | `shbace_studytime_v1`, `shbace_study_activity_days_v1` | Study time and activity summaries. |
 | `shbace_settings_v1`, `shbace_theme` | App preferences and theme. |
