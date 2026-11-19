@@ -19,6 +19,44 @@ const drawer = readFileSync(resolve(root, "js/06-drawer-menu.js"), "utf8");
 const index = readFileSync(resolve(root, "index.html"), "utf8");
 const gradle = readFileSync(resolve(root, "../android/app/build.gradle"), "utf8");
 
+const navTapStart = feature.indexOf("window.__shbNavTap=function(id){");
+const navTapEnd = feature.indexOf("\nappNav=", navTapStart);
+const bottomNavHandler = navTapStart >= 0 && navTapEnd > navTapStart ?
+  feature.slice(navTapStart, navTapEnd).trim() : "";
+
+function exerciseBottomNavigation({ route, useNavigation = true, validRoute = true, activeReviewSession = false }) {
+  const calls = { validated:[], navigated:[], paused:[], saves:0, renders:0 };
+  const window = {};
+  const context = vm.createContext({
+    window,
+    appPage:"subjects",
+    mode:"app",
+    srRun:activeReviewSession,
+    SR3:{sess:activeReviewSession ? {id:"active"} : null},
+    SU:{qid:"question-1"},
+    srTab:"dashboard",
+    SRSUM:{id:"previous-summary"},
+    SRX:{open:{id:"expanded-topic"}},
+    srTPause(value){calls.paused.push(value);},
+    srSave(){calls.saves += 1;},
+    renderAppDemo(){calls.renders += 1;}
+  });
+  if (useNavigation) {
+    window.SHBACENavigation = {
+      validate(id){calls.validated.push(id);return {ok:validRoute};},
+      navigate(id){
+        calls.navigated.push(id);
+        context.appPage = id;
+        context.renderAppDemo();
+        return {ok:true,route:id};
+      }
+    };
+  }
+  vm.runInContext(bottomNavHandler, context, {filename:"bottom-navigation-adapter.js"});
+  context.window.__shbNavTap(route);
+  return {context,calls};
+}
+
 function createRuntime(platform = "android") {
   const listeners = new Map();
   const services = new Map();
@@ -149,6 +187,37 @@ test("built-in remote UI and drawer navigation use the shared route adapter",()=
   assert.match(drawer,/key\.slice\(14\)/);
   assert.match(drawer,/appPage=key;renderAppDemo\(\)/);
   assert.doesNotMatch(drawer,/onclick="appPage='/);
+});
+
+test("bottom navigation uses the shared route adapter and preserves its legacy and Smart Review behaviour",()=>{
+  assert.ok(bottomNavHandler.includes("window.__shbNavTap=function(id){"));
+  assert.ok(feature.includes("onclick=\"__shbNavTap('${id}')\""),
+    "the rendered bottom navigation buttons must keep calling the adapter");
+  const routed=exerciseBottomNavigation({route:"quiz"});
+  assert.deepEqual(routed.calls.validated,["quiz"]);
+  assert.deepEqual(routed.calls.navigated,["quiz"]);
+  assert.equal(routed.context.appPage,"quiz");
+  assert.equal(routed.calls.renders,1,"the shared adapter performs exactly one render");
+
+  const fallback=exerciseBottomNavigation({route:"search",useNavigation:false});
+  assert.equal(fallback.context.appPage,"search");
+  assert.equal(fallback.calls.renders,1,"legacy direct navigation remains available without the adapter");
+
+  const rejected=exerciseBottomNavigation({route:"quiz",validRoute:false});
+  assert.deepEqual(rejected.calls.validated,["quiz"]);
+  assert.deepEqual(rejected.calls.navigated,[]);
+  assert.equal(rejected.context.appPage,"quiz");
+  assert.equal(rejected.calls.renders,1,"legacy fallback remains available if the adapter rejects a route");
+
+  const review=exerciseBottomNavigation({route:"review",activeReviewSession:true});
+  assert.deepEqual(review.calls.paused,[true]);
+  assert.equal(review.calls.saves,1);
+  assert.equal(review.context.srRun,false);
+  assert.equal(review.context.SU.qid,null);
+  assert.equal(review.context.srTab,"topics");
+  assert.equal(review.context.SRSUM,null);
+  assert.equal(review.context.SRX.open,null);
+  assert.deepEqual(review.calls.navigated,["review"]);
 });
 
 test("Back adapter delegates to the existing navBack function for routes with a shared Back target",()=>{

@@ -1358,6 +1358,15 @@ window.__shbNavTap=function(id){
   if(srRun&&SR3.sess){srTPause(true);srRun=false;SU={qid:null};srSave()}
   srTab='topics';SRSUM=null;SRX.open=null;
  }
+ const navigation=window.SHBACENavigation;
+ if(navigation&&typeof navigation.validate==='function'&&typeof navigation.navigate==='function'){
+  const validation=navigation.validate(id);
+  if(validation&&validation.ok){
+   const result=navigation.navigate(id);
+   if(result&&result.ok)return;
+  }
+ }
+ /* Preserve the original route assignment when the shared adapter is unavailable or rejects the route. */
  appPage=id;renderAppDemo();
 };
 appNav=function(){const it=[['subjects','Home'],['search','Search'],['quiz','Quiz'],['review','Review']];const grp={subjects:['subjects','pedcollections','specialties','topics','questions','menu','saved','wrong'],quiz:['quiz','quizrun','quizresult','quizhistory']};
