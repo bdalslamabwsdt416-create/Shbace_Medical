@@ -1,13 +1,16 @@
 {
   "schema": "shbace-android-content-v1",
-  "version": "1.0.2",
-  "generatedAt": "2026-11-19T13:05:00.000Z",
+  "version": "1.0.3",
+  "contentVersionCode": 3,
+  "minAppVersionCode": 18,
+  "channel": "stable",
+  "generatedAt": "2026-11-19T20:00:00.000Z",
   "catalogPath": "catalog.json",
   "files": [
     {
       "path": "catalog.json",
       "bytes": 203,
-      "sha256": "1bc1e3f2e073f4c094426f8dc598cfdc02116c5b9dcf4f9d7d9a739025940040",
+      "sha256": "ad8513a7d3b6a63220289ff0470e50a34cfc0f8b394e657bde5c4eb614ae646d",
       "mime": "application/json",
       "kind": "catalog"
     },
