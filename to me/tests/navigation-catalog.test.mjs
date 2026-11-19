@@ -93,7 +93,7 @@ test("manifest back targets match the existing BACKP map and registerPage except
   }
   for(const id of ["examplanner","shbRemoteFlashcards"]){
     const page=manifest.routes.find(route=>route.id===id);
-    assert.match(id==="examplanner"?examPlanner:remoteContent,new RegExp("__shbRegisterPage\\\\('"+id+"'"));
+    assert.ok((id==="examplanner"?examPlanner:remoteContent).includes("__shbRegisterPage('"+id+"',"));
     assert.equal(page.backTarget,"subjects");
   }
   assert.match(later,/BACKP\.notes='subjects'/);
