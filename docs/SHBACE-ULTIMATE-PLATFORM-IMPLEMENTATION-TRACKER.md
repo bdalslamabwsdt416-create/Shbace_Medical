@@ -39,7 +39,8 @@
 - Core Runtime v1: event bus, service registry and bounded diagnostics.
 - Module Registry v1: dependency validation, ordered initialization and reverse-order cleanup.
 - Page Builder v1: Android-only bounded recursive renderer for stack/grid layouts, tabs and accordion sections; existing leaf blocks remain supported.
-- Workflow Engine v1 uses an explicit event-field presence/type gate; negative comparisons cannot pass when the event payload field is absent or invalid.\n- Module manifest for all 25 major subsystems.
+- Workflow Engine v1 uses an explicit event-field presence/type gate; negative comparisons cannot pass when the event payload field is absent or invalid.
+- Module manifest for all 25 major subsystems.
 - Page Builder v2: shared local Android renderer for bounded nested section/grid/row layouts, tabs, accordions, template slots and fixed content-presence conditions. Unknown or unavailable condition data now fails closed even for negated conditions; known-empty lists retain valid negative matching. No remote executable code.
 - Theme Engine v1: centralized remote appearance ownership in Android Remote Control; bounded palette, font scale, line height, spacing, radius and density tokens with validator coverage and local theme-mode preservation.
 - Theme Engine v1.1: semantic dark/light design-token aliases added to the original CSS source and packaged runtime bundle; shared light-mode card surfaces now consume those tokens without changing their existing palette values. Regression tests protect source/bundle parity and the student's locally stored theme preference.
