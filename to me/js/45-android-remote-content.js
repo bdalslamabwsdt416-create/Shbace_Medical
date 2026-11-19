@@ -247,7 +247,7 @@
     currentSystemId = '';
     B.setActiveBank(BANK_KEY, allTopicIds(item));
     window.__SHB_REMOTE_CONTENT_ACTIVE__ = true;
-    window.appPage = 'specialties';
+    appPage = 'specialties';
     window.renderAppDemo();
   }
   function openRemoteSystem(id) {
@@ -262,7 +262,7 @@
     B.qs.tag = 'all';
     B.qs.view = 'all';
     B.qs.idx = 0;
-    window.appPage = 'topics';
+    appPage = 'topics';
     window.renderAppDemo();
   }
   window.shbRemoteOpenBank = openRemoteBank;
@@ -330,7 +330,7 @@
   }
 
   function injectSettingsCard() {
-    if (window.appPage !== 'settings') return;
+    if (appPage !== 'settings') return;
     var root = document.querySelector('.rs');
     if (!root || root.querySelector('.shb-remote-settings')) return;
     var state = safeJson(N.getRemoteContentState()) || {};
@@ -383,7 +383,7 @@
     if (!result.ok) {
       try { localStorage.setItem(CHECK_KEY, String(Date.now() - CHECK_EVERY + CHECK_RETRY)); } catch (e) {}
       updateSettingsStatus('Update check failed: ' + String(result.error || 'Unknown error'));
-      if (window.appPage === 'settings') renderSettingsStatus();
+      if (appPage === 'settings') renderSettingsStatus();
       return;
     }
     try { localStorage.setItem(CHECK_KEY, String(Date.now())); } catch (e) {}
@@ -394,7 +394,7 @@
       setTimeout(function () { location.reload(); }, 500);
       return;
     }
-    if (window.appPage === 'settings') renderSettingsStatus();
+    if (appPage === 'settings') renderSettingsStatus();
     if (result.status === 'up-to-date') toast('Your learning content is up to date.');
     else if (Number(result.updated || 0) > 0) toast('New learning content has been installed.');
   };
@@ -437,19 +437,19 @@
     return typeof coreTopicsView === 'function' ? coreTopicsView.apply(this, arguments) : '';
   };
   window.navBack = function () {
-    if (currentBankId && window.appPage === 'topics') {
+    if (currentBankId && appPage === 'topics') {
       currentSystemId = '';
       B.setActiveBank(BANK_KEY, allTopicIds(activeBank()));
-      window.appPage = 'specialties';
+      appPage = 'specialties';
       window.renderAppDemo();
       return;
     }
-    if (currentBankId && window.appPage === 'specialties') {
+    if (currentBankId && appPage === 'specialties') {
       currentBankId = '';
       currentSystemId = '';
       B.setActiveBank('all');
       window.__SHB_REMOTE_CONTENT_ACTIVE__ = false;
-      window.appPage = 'subjects';
+      appPage = 'subjects';
       window.renderAppDemo();
       return;
     }
