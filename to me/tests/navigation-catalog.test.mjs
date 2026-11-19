@@ -62,7 +62,7 @@ const headerTapEnd = feature.indexOf("\nconst __ah=appHeader", headerTapStart);
 const headerTapHandler = headerTapStart >= 0 && headerTapEnd > headerTapStart ?
   feature.slice(headerTapStart, headerTapEnd).trim() : "";
 
-function exerciseHeaderNavigation({ action, useNavigation = true, validRoute = true }) {
+function exerciseHeaderNavigation({ action, useNavigation = true, validRoute = true, throwValidation = false }) {
   const calls = { validated:[], navigated:[], renders:0, fallback:[] };
   const window = {};
   const context = vm.createContext({
@@ -73,7 +73,7 @@ function exerciseHeaderNavigation({ action, useNavigation = true, validRoute = t
   });
   if (useNavigation) {
     window.SHBACENavigation = {
-      validate(route){calls.validated.push(route);return {ok:validRoute};},
+      validate(route){calls.validated.push(route);if(throwValidation)throw new Error("adapter unavailable");return {ok:validRoute};},
       navigate(route){
         calls.navigated.push(route);
         context.appPage = route;
@@ -275,6 +275,12 @@ test("header Notifications and Settings actions use the shared route adapter",()
   assert.deepEqual(rejected.calls.navigated,[]);
   assert.equal(rejected.context.appPage,"notifs");
   assert.equal(rejected.calls.renders,1);
+
+  const adapterError=exerciseHeaderNavigation({action:"Settings",throwValidation:true});
+  assert.deepEqual(adapterError.calls.validated,["settings"]);
+  assert.deepEqual(adapterError.calls.navigated,[]);
+  assert.equal(adapterError.context.appPage,"settings");
+  assert.equal(adapterError.calls.renders,1);
 
   const unknown=exerciseHeaderNavigation({action:"Other"});
   assert.deepEqual(unknown.calls.fallback,["Other"]);
