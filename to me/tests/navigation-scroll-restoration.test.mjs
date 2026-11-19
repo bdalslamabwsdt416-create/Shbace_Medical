@@ -93,6 +93,21 @@ test("topic list position is restored after opening a topic and returning", () =
   assert.equal(currentScroller.back.classList.contains("is-scroll-up"), true,
     "a slight upward movement immediately makes Back fully visible");
   assert.equal(currentScroller.back.classList.contains("is-scroll-down"), false);
+
+  /* The systems list is the same route even after qs.spec changes to the selected system. */
+  context.appPage = "specialties";
+  window.__SHB_PED_COLLECTION__ = "aj";
+  qs.spec = "endocrinology";
+  window.renderAppDemo();
+  currentScroller.scrollTop = 238;
+  window.renderAppDemo();
+  context.appPage = "topics";
+  qs.spec = "respiratory";
+  window.renderAppDemo();
+  context.appPage = "specialties";
+  window.renderAppDemo();
+  assert.equal(currentScroller.scrollTop, 238,
+    "Back restores the system-list position even though qs.spec now names the selected system");
 });
 
 test("Previous Questions route key can distinguish its selected medical system", () => {
