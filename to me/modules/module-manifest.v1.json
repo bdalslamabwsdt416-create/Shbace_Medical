@@ -104,7 +104,7 @@
       "status": "partial",
       "scope": "android",
       "source": "js/47-android-remote-control.js",
-      "note": "Selected appearance tokens are remote configurable; complete design-token coverage remains."
+      "note": "Single-owner bounded appearance token contract v1: palette, typography scale, line height, spacing, radius and density; preserves local light/dark preference."
     },
     {
       "id": "quiz",
