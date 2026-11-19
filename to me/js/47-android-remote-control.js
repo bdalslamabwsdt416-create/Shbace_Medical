@@ -318,7 +318,8 @@
   }
   function addBlocks(parent, blocks, before, marker) {
     if (!parent || !Array.isArray(blocks) || !blocks.length) return;
-    var html = renderBlocks(blocks);
+    var html = window.SHBACEPageBuilder ?
+      window.SHBACEPageBuilder.render(blocks, renderBlock, marker) : renderBlocks(blocks);
     if (!html) return;
     var section = document.createElement('section');
     section.className = 'shb-rc3-page-slot ' + marker;

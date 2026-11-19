@@ -53,14 +53,54 @@
   API.getBanks().forEach(function (item) { bankById[item.id] = item; });
   API.getFlashcardDecks().forEach(function (item) { deckById[item.id] = item; });
 
-  function validateBlock(block) {
-    if (!block || typeof block !== 'object') return false;
+  function validateBlock(block, depth, budget) {
+    depth = Number.isInteger(depth) ? depth : 0;
+    budget = budget || { count:0 };
+    if (!block || typeof block !== 'object' || depth > 4 || ++budget.count > 120) return false;
     var type = String(block.type || '');
+    if (type === 'stack' || type === 'grid') {
+      if (!Array.isArray(block.children) || block.children.length > 30) return false;
+      if (type === 'grid' && (!Number.isInteger(block.columns) || block.columns < 1 || block.columns > 3)) return false;
+      if (block.gap != null && (!Number.isInteger(block.gap) || block.gap < 0 || block.gap > 32)) return false;
+      return block.children.every(function (child) { return validateBlock(child, depth + 1, budget); });
+    }
+    if (type === 'tabs') {
+      if (!Array.isArray(block.tabs) || block.tabs.length < 2 || block.tabs.length > 6) return false;
+      var ids = Object.create(null);
+      var valid = block.tabs.every(function (tab) {
+        if (!tab || !validId(tab.id) || ids[tab.id] || typeof tab.label !== 'string' ||
+            !tab.label.trim() || tab.label.length > 48 || !Array.isArray(tab.blocks) || tab.blocks.length > 30) return false;
+        ids[tab.id] = true;
+        return tab.blocks.every(function (child) { return validateBlock(child, depth + 1, budget); });
+      });
+      return valid && (block.defaultTab == null || !!ids[String(block.defaultTab)]);
+    }
+    if (type === 'accordion') {
+      if (!Array.isArray(block.items) || block.items.length < 1 || block.items.length > 10) return false;
+      var itemIds = Object.create(null);
+      return block.items.every(function (item) {
+        if (!item || typeof item.title !== 'string' || !item.title.trim() || item.title.length > 80 ||
+            !Array.isArray(item.blocks) || item.blocks.length > 30) return false;
+        if (item.id != null) {
+          if (!validId(item.id) || itemIds[item.id]) return false;
+          itemIds[item.id] = true;
+        }
+        if (item.open != null && typeof item.open !== 'boolean') return false;
+        return item.blocks.every(function (child) { return validateBlock(child, depth + 1, budget); });
+      });
+    }
     if (['heading', 'text', 'notice', 'divider', 'image', 'resourceList',
-         'bankList', 'flashcardDeckList', 'link', 'button'].indexOf(type) < 0) return false;
+         'bankList', 'flashcardDeckList', 'link', 'button', 'card', 'list', 'metric', 'spacer'].indexOf(type) < 0) return false;
     if (type === 'heading' || type === 'text') return typeof block.text === 'string';
     if (type === 'notice') return typeof block.text === 'string';
     if (type === 'image') return typeof block.file === 'string';
+    if (type === 'card') return (block.title == null || typeof block.title === 'string') &&
+      (block.text == null || typeof block.text === 'string');
+    if (type === 'list') return Array.isArray(block.items) && block.items.length <= 30 &&
+      block.items.every(function (item) { return typeof item === 'string'; });
+    if (type === 'metric') return (typeof block.label === 'string' || typeof block.label === 'number') &&
+      (typeof block.value === 'string' || typeof block.value === 'number');
+    if (type === 'spacer') return Number.isInteger(block.size) && block.size >= 4 && block.size <= 64;
     if (type === 'link') return typeof block.label === 'string' && !!safeUrl(block.url);
     if (type === 'button') {
       return typeof block.label === 'string' &&
@@ -73,10 +113,15 @@
     return true;
   }
 
+  function validateBlocks(blocks) {
+    if (!Array.isArray(blocks) || blocks.length > 60) return false;
+    var budget = { count:0 };
+    return blocks.every(function (block) { return validateBlock(block, 0, budget); });
+  }
+
   pages.forEach(function (page) {
     if (!page || !validId(page.id) || typeof page.title !== 'string' ||
-        !page.title.trim() || pageById[page.id] || !Array.isArray(page.blocks) ||
-        page.blocks.length > 60 || !page.blocks.every(validateBlock)) return;
+        !page.title.trim() || pageById[page.id] || !validateBlocks(page.blocks)) return;
     pageById[page.id] = page;
   });
 
@@ -127,6 +172,16 @@
         '<div>' + esc(block.text) + '</div></div>';
     }
     if (type === 'divider') return '<hr class="shb-remote-ui-divider">';
+    if (type === 'card') return '<section class="card shb-remote-ui-card-block">' +
+      (block.icon ? '<div aria-hidden="true">' + esc(block.icon) + '</div>' : '') +
+      (block.title ? '<h3>' + esc(block.title) + '</h3>' : '') +
+      (block.text ? '<p>' + esc(block.text) + '</p>' : '') + '</section>';
+    if (type === 'list') return '<ul class="shb-remote-ui-list-block">' +
+      toArray(block.items).slice(0,30).map(function (item) { return '<li>' + esc(item) + '</li>'; }).join('') + '</ul>';
+    if (type === 'metric') return '<div class="shb-remote-ui-metric"><b>' + esc(block.value) +
+      '</b><small>' + esc(block.label) + '</small></div>';
+    if (type === 'spacer') return '<span class="shb-remote-ui-spacer" aria-hidden="true" style="height:' +
+      Math.max(4,Math.min(64,Number(block.size)||12)) + 'px"></span>';
     if (type === 'image') {
       var src = API.assetData(String(block.file || ''));
       return src ? '<img class="shb-remote-ui-image" src="' + src + '" alt="' +
@@ -173,7 +228,9 @@
   }
 
   function renderPage(page) {
-    var blocks = toArray(page.blocks).map(renderBlock).join('');
+    var pageBuilder = window.SHBACEPageBuilder;
+    var blocks = pageBuilder ? pageBuilder.render(page.blocks, renderBlock, page.id) :
+      toArray(page.blocks).map(renderBlock).join('');
     return '<div class="app-head"><div class="app-head-title">' + esc(page.title) +
       '</div></div><div class="rs shb-remote-ui-page">' +
       '<div class="ped-collection-kicker">SHBACE MEDICAL · REMOTE SECTION</div>' +
@@ -275,10 +332,11 @@
     var root = document.querySelector('.rs');
     if (!root || root.querySelector('.shb-remote-home-blocks')) return;
     var blocks = toArray(ui.homeBlocks);
-    if (!blocks.length || !blocks.every(validateBlock)) return;
+    if (!blocks.length || !validateBlocks(blocks)) return;
     var wrapper = document.createElement('section');
     wrapper.className = 'shb-remote-home-blocks';
-    wrapper.innerHTML = blocks.map(renderBlock).join('');
+    wrapper.innerHTML = window.SHBACEPageBuilder ?
+      window.SHBACEPageBuilder.render(blocks, renderBlock, 'home') : blocks.map(renderBlock).join('');
     root.appendChild(wrapper);
   }
 

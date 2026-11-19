@@ -242,51 +242,100 @@ if (ui != null) {
   const knownDecks = new Set(deckIds);
 
   function validateUiBlocks(blocks, label) {
-    assert(Array.isArray(blocks) && blocks.length <= 60, label + ' must contain at most 60 blocks.');
-    for (const block of blocks) {
-      assert(block && typeof block === 'object' && !Array.isArray(block), 'Invalid UI block in ' + label);
+    let total = 0;
+    function validateBlock(block, pathLabel, depth) {
+      assert(depth <= 4, 'UI layout nesting exceeds four levels in ' + pathLabel);
+      assert(block && typeof block === 'object' && !Array.isArray(block), 'Invalid UI block in ' + pathLabel);
+      assert(++total <= 120, 'UI block tree exceeds 120 blocks in ' + label);
       const type = String(block.type || '');
+      if (type === 'stack' || type === 'grid') {
+        assert(Array.isArray(block.children) && block.children.length <= 30,
+          'UI ' + type + ' needs at most 30 child blocks in ' + pathLabel);
+        if (type === 'grid') {
+          assert(Number.isInteger(block.columns) && block.columns >= 1 && block.columns <= 3,
+            'UI grid columns must be 1 to 3 in ' + pathLabel);
+        }
+        if (block.gap != null) assert(Number.isInteger(block.gap) && block.gap >= 0 && block.gap <= 32,
+          'UI layout gap must be 0 to 32 in ' + pathLabel);
+        block.children.forEach((child, index) => validateBlock(child, pathLabel + '.children[' + index + ']', depth + 1));
+        return;
+      }
+      if (type === 'tabs') {
+        assert(Array.isArray(block.tabs) && block.tabs.length >= 2 && block.tabs.length <= 6,
+          'UI tabs must contain 2 to 6 tabs in ' + pathLabel);
+        const ids = new Set();
+        for (const [index, tab] of block.tabs.entries()) {
+          assert(tab && validId(tab.id) && !ids.has(tab.id) &&
+            typeof tab.label === 'string' && tab.label.trim() && tab.label.length <= 48 &&
+            Array.isArray(tab.blocks) && tab.blocks.length <= 30,
+            'Invalid or duplicate tab in ' + pathLabel);
+          ids.add(tab.id);
+          tab.blocks.forEach((child, childIndex) =>
+            validateBlock(child, pathLabel + '.tabs[' + index + '].blocks[' + childIndex + ']', depth + 1));
+        }
+        if (block.defaultTab != null) assert(ids.has(String(block.defaultTab)),
+          'UI tabs defaultTab must reference an existing tab in ' + pathLabel);
+        return;
+      }
+      if (type === 'accordion') {
+        assert(Array.isArray(block.items) && block.items.length >= 1 && block.items.length <= 10,
+          'UI accordion must contain 1 to 10 items in ' + pathLabel);
+        const ids = new Set();
+        for (const [index, item] of block.items.entries()) {
+          assert(item && typeof item.title === 'string' && item.title.trim() &&
+            item.title.length <= 80 && Array.isArray(item.blocks) && item.blocks.length <= 30,
+            'Invalid accordion item in ' + pathLabel);
+          if (item.id != null) {
+            assert(validId(item.id) && !ids.has(item.id), 'Invalid or duplicate accordion item ID in ' + pathLabel);
+            ids.add(item.id);
+          }
+          if (item.open != null) assert(typeof item.open === 'boolean', 'Accordion open must be boolean in ' + pathLabel);
+          item.blocks.forEach((child, childIndex) =>
+            validateBlock(child, pathLabel + '.items[' + index + '].blocks[' + childIndex + ']', depth + 1));
+        }
+        return;
+      }
       assert(['heading', 'text', 'notice', 'divider', 'image', 'resourceList',
         'bankList', 'flashcardDeckList', 'link', 'button', 'card', 'list', 'metric', 'spacer'].includes(type),
-        'Unsupported UI block type in ' + label + ': ' + type);
+        'Unsupported UI block type in ' + pathLabel + ': ' + type);
       if (type === 'heading' || type === 'text' || type === 'notice') {
-        assert(typeof block.text === 'string', 'UI ' + type + ' block needs text in ' + label);
+        assert(typeof block.text === 'string', 'UI ' + type + ' block needs text in ' + pathLabel);
       }
       if (type === 'image') {
-        assert(typeof block.file === 'string', 'UI image block needs a file path in ' + label);
-        assetRef(block.file, listedPaths, 'Remote UI image ' + label);
+        assert(typeof block.file === 'string', 'UI image block needs a file path in ' + pathLabel);
+        assetRef(block.file, listedPaths, 'Remote UI image ' + pathLabel);
       }
       if (type === 'card') {
         assert((block.title == null || typeof block.title === 'string') &&
-          (block.text == null || typeof block.text === 'string'), 'Invalid UI card block in ' + label);
+          (block.text == null || typeof block.text === 'string'), 'Invalid UI card block in ' + pathLabel);
       }
       if (type === 'list') {
         assert(Array.isArray(block.items) && block.items.length <= 30 &&
-          block.items.every(item => typeof item === 'string'), 'Invalid UI list block in ' + label);
+          block.items.every(item => typeof item === 'string'), 'Invalid UI list block in ' + pathLabel);
       }
       if (type === 'metric') {
         assert((typeof block.label === 'string' || typeof block.label === 'number') &&
-          (typeof block.value === 'string' || typeof block.value === 'number'), 'Invalid UI metric block in ' + label);
+          (typeof block.value === 'string' || typeof block.value === 'number'), 'Invalid UI metric block in ' + pathLabel);
       }
       if (type === 'spacer') {
-        assert(Number.isInteger(block.size) && block.size >= 4 && block.size <= 64, 'Invalid UI spacer size in ' + label);
+        assert(Number.isInteger(block.size) && block.size >= 4 && block.size <= 64, 'Invalid UI spacer size in ' + pathLabel);
       }
       if (type === 'link') {
         assert(typeof block.label === 'string' && block.label.trim() &&
           typeof block.url === 'string' && /^https:\/\//i.test(block.url),
-          'UI link must have a label and HTTPS URL in ' + label);
+          'UI link must have a label and HTTPS URL in ' + pathLabel);
       }
       if (type === 'resourceList' || type === 'bankList' || type === 'flashcardDeckList') {
         assert(Array.isArray(block.ids) && block.ids.length <= 120,
-          'UI list block needs an ID array in ' + label);
+          'UI list block needs an ID array in ' + pathLabel);
         const allowed = type === 'resourceList' ? knownResources :
           (type === 'bankList' ? knownBanks : knownDecks);
         for (const id of block.ids) assert(allowed.has(String(id)),
-          'Unknown item "' + id + '" in ' + type + ' block in ' + label);
+          'Unknown item "' + id + '" in ' + type + ' block in ' + pathLabel);
       }
       if (type === 'button') {
         assert(typeof block.label === 'string' && block.label.trim() && validId(block.target),
-          'Invalid UI button in ' + label);
+          'Invalid UI button in ' + pathLabel);
         const action = String(block.action || '');
         const builtinPages = new Set(['subjects', 'specialties', 'topics', 'questions', 'quiz',
           'quizrun', 'quizresult', 'quizhistory', 'review', 'stats', 'search', 'settings',
@@ -297,9 +346,11 @@ if (ui != null) {
           (action === 'resource' ? knownResources :
           (action === 'bank' ? knownBanks : (action === 'deck' ? knownDecks : null))));
         assert(allowed && allowed.has(String(block.target)),
-          'UI button has an unknown action or target in ' + label);
+          'UI button has an unknown action or target in ' + pathLabel);
       }
     }
+    assert(Array.isArray(blocks) && blocks.length <= 60, label + ' must contain at most 60 blocks.');
+    blocks.forEach((block, index) => validateBlock(block, label + '[' + index + ']', 0));
   }
 
   for (const page of pages) {
