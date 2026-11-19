@@ -10,6 +10,10 @@
   try{for(const spec of Object.keys(REAL.spec||{})){const row=(REAL.spec[spec].topics||[])[0];if(row&&validTopic(spec,row[0]))return {spec,topic:Number(row[0])}}}catch(e){}
   return null;
  };
+ function navigateHomeRoute(route){
+  try{if(typeof window.__shbNavTap==='function'){window.__shbNavTap(route);return true}}catch(e){}
+  try{appPage=route;renderAppDemo();return true}catch(e){return false}
+ }
  function saveProgress(spec,topic,questionId){
   try{
    const state=window.__qs||{};spec=spec||state.spec;topic=topic==null?state.topic:topic;
@@ -38,7 +42,7 @@
    let recent=null;try{const rec=(window.__SHB_BRIDGE&&window.__SHB_BRIDGE.REC)||[];recent=rec.find(e=>e&&e.k==='topic'&&validTopic(e.spec,e.topic))}catch(e){}
    p=recent?{spec:recent.spec,topic:Number(recent.topic),idx:0}:null;
   }
-  if(!p){appPage='specialties';renderAppDemo();return}
+  if(!p){navigateHomeRoute('specialties');return}
   if(typeof window.openTopic==='function')window.openTopic(p.spec,Number(p.topic));
   const state=window.__qs;
   if(state){
@@ -49,7 +53,7 @@
    if(typeof p.tag==='string')state.tag=p.tag;
    if(typeof p.view==='string'&&p.view)state.view=p.view;
   }
-  appPage='questions';renderAppDemo();
+  navigateHomeRoute('questions');
   saveProgress(p.spec,p.topic,p.questionId||null);
  };
  window.h7StartPediatrics=function(){
@@ -59,7 +63,6 @@
    window.openPediatricCollections();
    return;
   }
-  appPage='specialties';
-  renderAppDemo();
+  navigateHomeRoute('specialties');
  };
 })();
