@@ -1,0 +1,219 @@
+{
+  "manifestVersion": 1,
+  "title": "SHBACE Medical Ultimate Platform module inventory",
+  "target": "android-apk",
+  "frozenAndroidRelease": {
+    "applicationId": "com.shbace.medical",
+    "versionName": "1.3.9",
+    "versionCode": 18
+  },
+  "lifecycle": "inventory-only; executable modules are registered by local code and are never remote-loaded",
+  "modules": [
+    {
+      "id": "core",
+      "name": "Core Engine",
+      "status": "implemented",
+      "scope": "android",
+      "source": "js/49-app-core-v1.js",
+      "capabilities": [
+        "event-bus",
+        "service-registry",
+        "bounded-diagnostics"
+      ]
+    },
+    {
+      "id": "module-registry",
+      "name": "Module Registry",
+      "status": "implemented",
+      "scope": "android",
+      "source": "js/50-module-registry-v1.js",
+      "capabilities": [
+        "dependency-validation",
+        "ordered-initialization",
+        "reverse-disposal"
+      ],
+      "dependencies": [
+        "core"
+      ]
+    },
+    {
+      "id": "navigation",
+      "name": "Navigation Engine",
+      "status": "partial",
+      "scope": "android",
+      "source": "js/04-app-main.js;js/06-drawer-menu.js;js/46-android-remote-ui.js;js/47-android-remote-control.js",
+      "note": "Legacy route and remote navigation exist; full graph adapter and lifecycle integration remain."
+    },
+    {
+      "id": "ui",
+      "name": "UI Engine",
+      "status": "partial",
+      "scope": "android",
+      "source": "js/04-app-main.js;js/47-android-remote-control.js",
+      "note": "Existing renderers and remote blocks exist; the complete component contract is not extracted."
+    },
+    {
+      "id": "page-builder",
+      "name": "Page Builder",
+      "status": "partial",
+      "scope": "android",
+      "source": "js/46-android-remote-ui.js;js/47-android-remote-control.js",
+      "note": "Safe blocks only; nested layout editor, templates and preview/publish flow remain."
+    },
+    {
+      "id": "workflow",
+      "name": "Workflow Engine",
+      "status": "planned",
+      "scope": "android",
+      "note": "General trigger-condition-action rules engine is not implemented."
+    },
+    {
+      "id": "theme",
+      "name": "Theme Engine",
+      "status": "partial",
+      "scope": "android",
+      "source": "js/47-android-remote-control.js",
+      "note": "Selected appearance tokens are remote configurable; complete design-token coverage remains."
+    },
+    {
+      "id": "quiz",
+      "name": "Quiz Engine",
+      "status": "partial",
+      "scope": "android",
+      "source": "js/09-app-features-v6.js;js/47-android-remote-control.js",
+      "note": "Existing MCQ flows are preserved; additional interaction types and module adapter remain."
+    },
+    {
+      "id": "smart-review",
+      "name": "Smart Review Engine",
+      "status": "partial",
+      "scope": "android",
+      "source": "js/09-app-features-v6.js;js/36-exam-planner-settings-smartreview.js",
+      "note": "Local scheduler exists; public scheduler contract and FSRS/SM-2 integration remain."
+    },
+    {
+      "id": "flashcards",
+      "name": "Flashcards Engine",
+      "status": "partial",
+      "scope": "android",
+      "source": "js/45-android-remote-content.js",
+      "note": "Remote viewer and Again/Known state exist; authoring and spaced repetition remain."
+    },
+    {
+      "id": "medical-bank",
+      "name": "Medical Bank Engine",
+      "status": "partial",
+      "scope": "android",
+      "source": "js/09-app-features-v6.js;js/43-ai-bank-engine-adapter.js",
+      "note": "Substantial banks exist; normalized contracts and content governance adapter remain."
+    },
+    {
+      "id": "statistics",
+      "name": "Statistics Engine",
+      "status": "partial",
+      "scope": "android",
+      "source": "js/09-app-features-v6.js",
+      "note": "Local statistics exist; shared analytics contracts and configurable reports remain."
+    },
+    {
+      "id": "media",
+      "name": "Media Engine",
+      "status": "partial",
+      "scope": "android",
+      "source": "js/45-android-remote-content.js",
+      "note": "Remote resources exist; complete asset catalog and lifecycle manager remain."
+    },
+    {
+      "id": "search",
+      "name": "Search Engine",
+      "status": "partial",
+      "scope": "android",
+      "source": "js/04-app-main.js;js/09-app-features-v6.js",
+      "note": "Question/topic search exists; no unified cross-content index."
+    },
+    {
+      "id": "data",
+      "name": "Data Engine",
+      "status": "partial",
+      "scope": "android",
+      "source": "js/09-app-features-v6.js;js/29-offline-setup.js",
+      "note": "Local stores and backups exist; normalized storage abstraction and migrations remain."
+    },
+    {
+      "id": "sync",
+      "name": "Sync Engine",
+      "status": "planned",
+      "scope": "android",
+      "note": "Cross-device sync needs backend, authentication and conflict policy."
+    },
+    {
+      "id": "offline",
+      "name": "Offline Engine",
+      "status": "partial",
+      "scope": "android",
+      "source": "js/29-offline-setup.js;js/45-android-remote-content.js",
+      "note": "Offline shell and local content packages exist; unified policy remains."
+    },
+    {
+      "id": "notifications",
+      "name": "Notification Engine",
+      "status": "partial",
+      "scope": "android",
+      "source": "js/09-app-features-v6.js;js/24-daily-notify-v18.js;android/app/src/main/java/com/shbace/medical",
+      "note": "Local notifications exist; cloud sender is not verified."
+    },
+    {
+      "id": "ai",
+      "name": "AI Engine",
+      "status": "partial",
+      "scope": "android",
+      "source": "js/43-ai-bank-engine-adapter.js;js/33-unified-voice.js",
+      "note": "Prepared AI content and device voice exist; live model service is not connected."
+    },
+    {
+      "id": "security",
+      "name": "Security Engine",
+      "status": "partial",
+      "scope": "android",
+      "source": "for ApK/native;for ApK/android-content",
+      "note": "Allow-list, checksums and validation exist; signed manifest and threat model remain."
+    },
+    {
+      "id": "updates",
+      "name": "Update Engine",
+      "status": "partial",
+      "scope": "android",
+      "source": "js/45-android-remote-content.js;js/48-android-settings-layout.js;android/app/src/main/java/com/shbace/medical",
+      "note": "APK release check and content update exist; signed catalog and staged rollout remain."
+    },
+    {
+      "id": "analytics",
+      "name": "Analytics Engine",
+      "status": "planned",
+      "scope": "android",
+      "note": "Consolidated analytics pipeline is not implemented."
+    },
+    {
+      "id": "admin-console",
+      "name": "Admin Console",
+      "status": "planned",
+      "scope": "android",
+      "note": "GitHub-backed visual editor and permission gateway are not implemented."
+    },
+    {
+      "id": "accounts",
+      "name": "User Accounts & Multi-User",
+      "status": "planned",
+      "scope": "android",
+      "note": "Requires auth provider, backend, privacy and data-access controls."
+    },
+    {
+      "id": "gamification",
+      "name": "Gamification Engine",
+      "status": "partial",
+      "scope": "android",
+      "source": "js/09-app-features-v6.js;js/36-exam-planner-settings-smartreview.js",
+      "note": "Goals/streaks exist; unified achievement engine remains."
+    }
+  ]
+}
