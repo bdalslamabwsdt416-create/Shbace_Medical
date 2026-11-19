@@ -48,7 +48,7 @@ function createHomeRuntime(savedProgress = null) {
   const window = {
     __qs:state,
     openTopic(spec, topic, options) {
-      calls.openedTopics.push({spec,topic,options:options||null});
+      calls.openedTopics.push({spec,topic,options:options?{deferNavigation:options.deferNavigation===true}:null});
       state.spec = spec;
       state.topic = topic;
       if (!(options && options.deferNavigation === true)) {
