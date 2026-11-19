@@ -147,6 +147,24 @@ test("Home Continue Studying uses the saved topic and dispatches the final Quest
   assert.equal(saved.questionId, "q-101");
 });
 
+test("Home Continue Studying still routes centrally when the topic opener is unavailable", () => {
+  const runtime = createHomeRuntime({
+    spec:"respiratory", topic:101, idx:2, filter:"incorrect", tag:"all", view:"list", questionId:"q-101"
+  });
+  runtime.window.openTopic = undefined;
+  runtime.window.h7ResumePediatrics();
+
+  assert.deepEqual(runtime.calls.routes, ["questions"]);
+  assert.equal(runtime.context.appPage, "questions");
+  assert.equal(runtime.state.spec, "respiratory");
+  assert.equal(runtime.state.topic, 101);
+  assert.equal(runtime.state.idx, 2);
+  assert.equal(runtime.state.filter, "incorrect");
+  assert.equal(runtime.state.view, "list");
+  assert.equal(runtime.calls.renders, 1);
+  assert.deepEqual(runtime.calls.renderStates, [{spec:"respiratory",topic:101,idx:2,filter:"incorrect",tag:"all",view:"list"}]);
+});
+
 test("Home falls back to the specialties route when no saved Pediatrics topic is available", () => {
   const runtime = createHomeRuntime(null);
   runtime.window.h7ResumePediatrics();
