@@ -60,6 +60,7 @@ test("renders bounded stack, grid, tabs and accordion layouts with safe labels",
   assert.match(html,/shb-pb-stack/);
   assert.match(html,/shb-pb-grid/);
   assert.match(html,/--shb-pb-columns:2/);
+  assert.match(source,/grid-template-columns:repeat\(var\(--shb-pb-columns/);
   assert.match(html,/role="tablist"/);
   assert.match(html,/data-shb-pb-tab="first"/);
   assert.match(html,/First &lt;tab&gt;/);
@@ -83,7 +84,7 @@ test("registers a local renderer service and is loaded after navigation",()=>{
   assert.equal(result.services.get("page-builder.renderer"),result.window.SHBACEPageBuilder);
   assert.ok(index.indexOf('data-src="js/52-page-builder-v1.js"') >
     index.indexOf('data-src="js/51-navigation-contract-v1.js"'));
-  assert.match(remoteUi,/pageBuilder\.render\(page\.blocks/);
+  assert.match(remoteUi,/pageBuilder\.render\(prepared/);
   assert.match(remoteUi,/SHBACEPageBuilder\.render\(blocks/);
   assert.match(remoteControl,/SHBACEPageBuilder\.render\(blocks/);
 });

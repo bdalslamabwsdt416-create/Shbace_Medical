@@ -39,32 +39,65 @@
       var type = String(block.type || '');
       if (type === 'stack') {
         var stackGap = bounded(block.gap, 0, 32, 12);
+        var stackBlocks = Array.isArray(block.children) ? block.children : block.blocks;
         return '<div class="shb-pb-stack" style="--shb-pb-gap:' + stackGap + 'px">' +
-          children(block.children, depth + 1) + '</div>';
+          children(stackBlocks, depth + 1) + '</div>';
+      }
+      if (type === 'when') {
+        var api = window.__SHBACE_REMOTE_CONTENT_API__;
+        function hasItems(method) {
+          try {
+            var items = api && typeof api[method] === 'function' ? api[method]() : [];
+            return Array.isArray(items) && items.length > 0;
+          } catch (error) { return false; }
+        }
+        var condition = String(block.condition || '');
+        var visible = condition === 'always' ||
+          (condition === 'hasBanks' && hasItems('getBanks')) ||
+          (condition === 'hasResources' && hasItems('getResources')) ||
+          (condition === 'hasFlashcardDecks' && hasItems('getFlashcardDecks')) ||
+          (condition === 'hasLearningContent' &&
+            (hasItems('getBanks') || hasItems('getResources') || hasItems('getFlashcardDecks')));
+        if (block.not === true) visible = !visible;
+        return visible ? children(block.blocks, depth + 1) : '';
+      }
+      if (type === 'section') {
+        var layout = ['stack', 'row', 'grid'].indexOf(String(block.layout || 'stack')) >= 0 ?
+          String(block.layout || 'stack') : 'stack';
+        var sectionGap = bounded(block.gap, 0, 32, 12);
+        var sectionBlocks = Array.isArray(block.blocks) ? block.blocks : block.children;
+        if (layout === 'grid') {
+          var sectionColumns = bounded(block.columns, 1, 3, 2);
+          return '<div class="shb-pb-section-grid" style="--shb-pb-columns:' + sectionColumns +
+            ';--shb-pb-gap:' + sectionGap + 'px">' + children(sectionBlocks, depth + 1) + '</div>';
+        }
+        return '<div class="shb-pb-section-' + layout + '" style="--shb-pb-gap:' + sectionGap +
+          'px">' + children(sectionBlocks, depth + 1) + '</div>';
       }
       if (type === 'grid') {
         var columns = bounded(block.columns, 1, 3, 2);
         var gridGap = bounded(block.gap, 0, 32, 12);
+        var gridBlocks = Array.isArray(block.children) ? block.children : block.blocks;
         return '<div class="shb-pb-grid" style="--shb-pb-columns:' + columns +
-          ';--shb-pb-gap:' + gridGap + 'px">' + children(block.children, depth + 1) + '</div>';
+          ';--shb-pb-gap:' + gridGap + 'px">' + children(gridBlocks, depth + 1) + '</div>';
       }
       if (type === 'tabs') {
-        var tabs = Array.isArray(block.tabs) ? block.tabs.filter(function (tab) { return tab && tab.id; }).slice(0, 6) : [];
+        var tabs = Array.isArray(block.tabs) ? block.tabs :
+          (Array.isArray(block.items) ? block.items : []);
+        tabs = tabs.filter(function (tab) { return tab && tab.id; }).slice(0, 6);
         if (tabs.length < 2) return '';
         var group = prefix + '-tabs-' + (++groupSequence);
         var first = String(block.defaultTab || (tabs[0] && tabs[0].id) || '');
         if (!tabs.some(function (tab) { return String(tab.id) === first; })) first = String((tabs[0] && tabs[0].id) || '');
         var buttons = tabs.map(function (tab) {
-          if (!tab || !tab.id) return '';
           var id = String(tab.id);
           var active = id === first;
           return '<button type="button" class="shb-pb-tab' + (active ? ' is-active' : '') +
             '" role="tab" aria-selected="' + (active ? 'true' : 'false') +
             '" data-shb-pb-tab="' + esc(id) + '" data-shb-pb-group="' + esc(group) + '">' +
-            esc(tab.label || id) + '</button>';
+            esc(tab.label || tab.title || id) + '</button>';
         }).join('');
         var panels = tabs.map(function (tab) {
-          if (!tab || !tab.id) return '';
           var id = String(tab.id), active = id === first;
           return '<section class="shb-pb-panel" role="tabpanel" data-shb-pb-panel="' +
             esc(id) + '" data-shb-pb-group="' + esc(group) + '"' +
@@ -74,11 +107,13 @@
           buttons + '</div>' + panels + '</div>';
       }
       if (type === 'accordion') {
-        var items = Array.isArray(block.items) ? block.items.slice(0, 10) : [];
+        var items = Array.isArray(block.items) ? block.items.slice(0, 12) : [];
         return '<div class="shb-pb-accordion">' + items.map(function (item, index) {
-          if (!item || typeof item.title !== 'string') return '';
-          return '<details class="shb-pb-accordion-item"' + (item.open === true && index === 0 ? ' open' : '') +
-            '><summary>' + esc(item.title) + '</summary><div class="shb-pb-accordion-content">' +
+          if (!item || (typeof item.title !== 'string' && typeof item.label !== 'string')) return '';
+          var title = typeof item.title === 'string' ? item.title : item.label;
+          var isOpen = item.open === true || (index === 0 && block.firstOpen === true);
+          return '<details class="shb-pb-accordion-item"' + (isOpen ? ' open' : '') +
+            '><summary>' + esc(title) + '</summary><div class="shb-pb-accordion-content">' +
             children(item.blocks, depth + 1) + '</div></details>';
         }).join('') + '</div>';
       }
@@ -100,7 +135,11 @@
     style.textContent =
       '.shb-pb-stack{display:flex;flex-direction:column;gap:var(--shb-pb-gap,12px);min-width:0}' +
       '.shb-pb-grid{display:grid;grid-template-columns:repeat(var(--shb-pb-columns,2),minmax(0,1fr));gap:var(--shb-pb-gap,12px);min-width:0}' +
-      '.shb-pb-grid>*{min-width:0}.shb-pb-tabs{margin:14px 0}.shb-pb-tablist{display:flex;gap:7px;overflow-x:auto;padding:2px 1px 8px;scrollbar-width:thin}' +
+      '.shb-pb-grid>*{min-width:0}.shb-pb-section-stack{display:flex;flex-direction:column;gap:var(--shb-pb-gap,12px);min-width:0}' +
+      '.shb-pb-section-row{display:flex;flex-wrap:wrap;gap:var(--shb-pb-gap,12px);min-width:0}' +
+      '.shb-pb-section-row>*{flex:1 1 0;min-width:min(100%,220px)}' +
+      '.shb-pb-section-grid{display:grid;grid-template-columns:repeat(var(--shb-pb-columns,2),minmax(0,1fr));gap:var(--shb-pb-gap,12px);min-width:0}' +
+      '.shb-pb-section-grid>*{min-width:0}.shb-pb-card-children{display:grid;gap:10px;min-width:0}.shb-pb-tabs{margin:14px 0}.shb-pb-tablist{display:flex;gap:7px;overflow-x:auto;padding:2px 1px 8px;scrollbar-width:thin}' +
       '.shb-pb-tab{flex:0 0 auto;border:1px solid var(--line,rgba(130,170,210,.2));border-radius:999px;padding:8px 13px;background:transparent;color:inherit;font:inherit;cursor:pointer}' +
       '.shb-pb-tab.is-active{background:var(--mint-soft,rgba(80,210,170,.16));border-color:var(--mint,#70d7b4);color:var(--mint,#70d7b4)}' +
       '.shb-pb-panel[hidden]{display:none!important}.shb-pb-panel{min-width:0;padding-block:5px}' +
