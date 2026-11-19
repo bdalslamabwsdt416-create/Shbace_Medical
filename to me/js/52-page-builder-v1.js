@@ -39,8 +39,27 @@
       var type = String(block.type || '');
       if (type === 'stack') {
         var stackGap = bounded(block.gap, 0, 32, 12);
+        var stackBlocks = Array.isArray(block.children) ? block.children : block.blocks;
         return '<div class="shb-pb-stack" style="--shb-pb-gap:' + stackGap + 'px">' +
-          children(block.children, depth + 1) + '</div>';
+          children(stackBlocks, depth + 1) + '</div>';
+      }
+      if (type === 'when') {
+        var api = window.__SHBACE_REMOTE_CONTENT_API__;
+        function hasItems(method) {
+          try {
+            var items = api && typeof api[method] === 'function' ? api[method]() : [];
+            return Array.isArray(items) && items.length > 0;
+          } catch (error) { return false; }
+        }
+        var condition = String(block.condition || '');
+        var visible = condition === 'always' ||
+          (condition === 'hasBanks' && hasItems('getBanks')) ||
+          (condition === 'hasResources' && hasItems('getResources')) ||
+          (condition === 'hasFlashcardDecks' && hasItems('getFlashcardDecks')) ||
+          (condition === 'hasLearningContent' &&
+            (hasItems('getBanks') || hasItems('getResources') || hasItems('getFlashcardDecks')));
+        if (block.not === true) visible = !visible;
+        return visible ? children(block.blocks, depth + 1) : '';
       }
       if (type === 'section') {
         var layout = ['stack', 'row', 'grid'].indexOf(String(block.layout || 'stack')) >= 0 ?
