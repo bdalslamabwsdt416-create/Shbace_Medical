@@ -43,7 +43,7 @@
    p=recent?{spec:recent.spec,topic:Number(recent.topic),idx:0}:null;
   }
   if(!p){navigateHomeRoute('specialties');return}
-  if(typeof window.openTopic==='function')window.openTopic(p.spec,Number(p.topic));
+  if(typeof window.openTopic==='function')window.openTopic(p.spec,Number(p.topic),{deferNavigation:true});
   const state=window.__qs;
   if(state){
    const row=(REAL.spec[p.spec].topics||[]).find(t=>Number(t[0])===Number(p.topic));
