@@ -172,8 +172,10 @@ final class RemoteContentManager {
             else changedCount++;
         }
 
-        if (previous != null && version.equals(previous.optString("version"))
-                && changedCount == 0 && newByPath.size() == oldByPath.size()) {
+        if (previous != null && version.equals(previous.optString("version"))) {
+            if (changedCount != 0 || newByPath.size() != oldByPath.size()) {
+                throw new IllegalArgumentException("The content manifest changed without a version increase.");
+            }
             activity.getSharedPreferences("shbace_remote_content", 0).edit()
                     .putLong("last_sync", System.currentTimeMillis()).apply();
             return successJson(version, 0, 0, 0L, unchangedCount, "up-to-date");
@@ -347,6 +349,7 @@ final class RemoteContentManager {
         connection.setReadTimeout(READ_TIMEOUT_MS);
         connection.setInstanceFollowRedirects(false);
         connection.setRequestProperty("Accept", "application/json, application/octet-stream");
+        connection.setRequestProperty("Cache-Control", "no-cache");
         connection.setRequestProperty("User-Agent", "SHBACE-Medical-Android-Content-Updater");
         return connection;
     }
@@ -426,14 +429,19 @@ final class RemoteContentManager {
             output.write(bytes);
             output.flush();
         }
-        if (destination.exists() && !destination.delete()) {
+        File backup = new File(destination.getParentFile(), destination.getName() + ".previous");
+        if (backup.exists()) backup.delete();
+        boolean hadPrevious = destination.exists();
+        if (hadPrevious && !destination.renameTo(backup)) {
             temporary.delete();
-            throw new IllegalStateException("Could not replace the installed content manifest.");
+            throw new IllegalStateException("Could not stage the previous content manifest.");
         }
         if (!temporary.renameTo(destination)) {
             temporary.delete();
+            if (hadPrevious) backup.renameTo(destination);
             throw new IllegalStateException("Could not finalize the installed content manifest.");
         }
+        if (backup.exists()) backup.delete();
     }
 
     private static File safeChild(File parent, String relativePath) throws Exception {
