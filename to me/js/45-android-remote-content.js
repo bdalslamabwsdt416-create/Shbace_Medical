@@ -780,8 +780,9 @@
     panel.innerHTML = '<div class="eyebrow">ANDROID CONTENT UPDATES</div><h3>Learning content</h3>' +
       '<p class="meta" data-shb-remote-status>Installed version: ' + esc(state.version || 'Not installed') +
       ' · ' + Number(state.fileCount || 0) + ' files</p>' +
-      '<button type="button" class="btn primary block" data-shb-remote-check>Check for content updates</button>' +
-      '<p class="meta">Only changed content files are downloaded. Your answers and study progress remain on this device.</p>';
+      '<p class="meta" data-shb-remote-feedback role="status" aria-live="polite"></p>' +
+      '<button type="button" class="btn primary block" data-shb-remote-check>Check for update</button>' +
+      '<p class="meta">Checks the remote learning-content package only. It does not install a new APK. Your answers and study progress remain on this device.</p>';
     var button = panel.querySelector('[data-shb-remote-check]');
     button.addEventListener('click', function () { startSync(true); });
     root.insertBefore(panel, root.firstChild);
@@ -794,25 +795,40 @@
     } catch (e) { return true; }
   }
   function updateSettingsStatus(message) {
-    var node = document.querySelector('[data-shb-remote-status]');
+    var node = document.querySelector('[data-shb-remote-feedback]');
     if (node) node.textContent = message;
+  }
+  function updateSyncButton(busy) {
+    var button = document.querySelector('.shb-remote-settings [data-shb-remote-check]');
+    if (!button) return;
+    button.disabled = !!busy;
+    button.textContent = busy ? 'Checking…' : 'Check for update';
   }
   function toast(message) {
     try { if (typeof window.toast === 'function') window.toast(message); } catch (e) {}
     try { if (typeof window.shbToast === 'function') window.shbToast(message); } catch (e) {}
   }
   function startSync(manual) {
-    if (syncStarted || !navigator.onLine) {
-      if (manual && !navigator.onLine) toast('Connect to the internet to check for new content.');
+    if (syncStarted) {
+      if (manual) updateSettingsStatus('A content update check is already running.');
+      return false;
+    }
+    if (!navigator.onLine) {
+      if (manual) {
+        updateSettingsStatus('Connect to the internet to check for new learning content.');
+        toast('Connect to the internet to check for new content.');
+      }
       return false;
     }
     syncStarted = true;
-    updateSettingsStatus('Checking the remote content package…');
+    updateSettingsStatus('Checking the remote learning-content package…');
+    updateSyncButton(true);
     var accepted = false;
     try { accepted = N.startRemoteContentSync(MANIFEST_URL) === true; } catch (e) {}
     if (!accepted) {
       syncStarted = false;
-      updateSettingsStatus('A content check is already running or could not be started.');
+      updateSettingsStatus('The content update check could not be started. Try again.');
+      updateSyncButton(false);
       if (manual) toast('Could not start the content update check.');
     }
     return accepted;
@@ -824,6 +840,7 @@
     if (!result.ok) {
       try { localStorage.setItem(CHECK_KEY, String(Date.now() - CHECK_EVERY + CHECK_RETRY)); } catch (e) {}
       updateSettingsStatus('Update check failed: ' + String(result.error || 'Unknown error'));
+      updateSyncButton(false);
       if (appPage === 'settings') renderSettingsStatus();
       return;
     }
@@ -835,9 +852,17 @@
       setTimeout(function () { location.reload(); }, 500);
       return;
     }
+    updateSyncButton(false);
+    if (result.status === 'up-to-date') {
+      updateSettingsStatus('No new learning content is available. You are up to date.');
+      toast('Your learning content is up to date.');
+    } else if (Number(result.updated || 0) > 0) {
+      updateSettingsStatus('New learning content has been installed successfully.');
+      toast('New learning content has been installed.');
+    } else {
+      updateSettingsStatus('The update check completed. No files needed to be downloaded.');
+    }
     if (appPage === 'settings') renderSettingsStatus();
-    if (result.status === 'up-to-date') toast('Your learning content is up to date.');
-    else if (Number(result.updated || 0) > 0) toast('New learning content has been installed.');
   };
 
   function renderSettingsStatus() {
