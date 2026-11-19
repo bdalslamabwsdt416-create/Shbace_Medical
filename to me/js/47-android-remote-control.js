@@ -316,10 +316,26 @@
     var id = routeId(route);
     return screens[route] || screens[id] || null;
   }
+  function pageBuilderContext(marker) {
+    var hasBanks = Object.keys(banks).length > 0;
+    var hasResources = Object.keys(resources).length > 0;
+    var hasDecks = Object.keys(decks).length > 0;
+    return {
+      id:marker,
+      slots:{},
+      conditions:{
+        always:true,
+        hasBanks:hasBanks,
+        hasResources:hasResources,
+        hasFlashcardDecks:hasDecks,
+        hasLearningContent:hasBanks || hasResources || hasDecks
+      }
+    };
+  }
   function addBlocks(parent, blocks, before, marker) {
     if (!parent || !Array.isArray(blocks) || !blocks.length) return;
     var html = window.SHBACEPageBuilder ?
-      window.SHBACEPageBuilder.render(blocks, renderBlock, marker) : renderBlocks(blocks);
+      window.SHBACEPageBuilder.render(blocks, renderBlock, pageBuilderContext(marker)) : renderBlocks(blocks);
     if (!html) return;
     var section = document.createElement('section');
     section.className = 'shb-rc3-page-slot ' + marker;
