@@ -89,10 +89,17 @@
       });
     }
     if (['heading', 'text', 'notice', 'divider', 'image', 'resourceList',
-         'bankList', 'flashcardDeckList', 'link', 'button'].indexOf(type) < 0) return false;
+         'bankList', 'flashcardDeckList', 'link', 'button', 'card', 'list', 'metric', 'spacer'].indexOf(type) < 0) return false;
     if (type === 'heading' || type === 'text') return typeof block.text === 'string';
     if (type === 'notice') return typeof block.text === 'string';
     if (type === 'image') return typeof block.file === 'string';
+    if (type === 'card') return (block.title == null || typeof block.title === 'string') &&
+      (block.text == null || typeof block.text === 'string');
+    if (type === 'list') return Array.isArray(block.items) && block.items.length <= 30 &&
+      block.items.every(function (item) { return typeof item === 'string'; });
+    if (type === 'metric') return (typeof block.label === 'string' || typeof block.label === 'number') &&
+      (typeof block.value === 'string' || typeof block.value === 'number');
+    if (type === 'spacer') return Number.isInteger(block.size) && block.size >= 4 && block.size <= 64;
     if (type === 'link') return typeof block.label === 'string' && !!safeUrl(block.url);
     if (type === 'button') {
       return typeof block.label === 'string' &&
@@ -159,6 +166,16 @@
         '<div>' + esc(block.text) + '</div></div>';
     }
     if (type === 'divider') return '<hr class="shb-remote-ui-divider">';
+    if (type === 'card') return '<section class="card shb-remote-ui-card-block">' +
+      (block.icon ? '<div aria-hidden="true">' + esc(block.icon) + '</div>' : '') +
+      (block.title ? '<h3>' + esc(block.title) + '</h3>' : '') +
+      (block.text ? '<p>' + esc(block.text) + '</p>' : '') + '</section>';
+    if (type === 'list') return '<ul class="shb-remote-ui-list-block">' +
+      toArray(block.items).slice(0,30).map(function (item) { return '<li>' + esc(item) + '</li>'; }).join('') + '</ul>';
+    if (type === 'metric') return '<div class="shb-remote-ui-metric"><b>' + esc(block.value) +
+      '</b><small>' + esc(block.label) + '</small></div>';
+    if (type === 'spacer') return '<span class="shb-remote-ui-spacer" aria-hidden="true" style="height:' +
+      Math.max(4,Math.min(64,Number(block.size)||12)) + 'px"></span>';
     if (type === 'image') {
       var src = API.assetData(String(block.file || ''));
       return src ? '<img class="shb-remote-ui-image" src="' + src + '" alt="' +
