@@ -69,5 +69,5 @@ test("main Android release pipeline publishes a signed APK and checksum", () => 
   assert.match(workflow, /github\.ref == 'refs\/heads\/main'/);
   assert.match(workflow, /gh release upload/);
   assert.match(workflow, /sha256sum/);
-  assert.match(workflow, /make_latest=true/);
+  assert.match(workflow, /-f make_latest=true/);
 });

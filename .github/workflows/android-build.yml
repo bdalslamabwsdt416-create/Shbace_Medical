@@ -15,6 +15,7 @@ on:
       - android/universal-remote-control-1.3.7
       - android/settings-layout-1.3.8
       - android/apk-update-checker-1.3.9
+      - android/fix-release-make-latest-string
       - integrate/for-apk-main-20261119
       - main
     paths:
@@ -189,7 +190,7 @@ jobs:
               -f body="Signed Android APK release for SHBACE Medical v${VERSION_NAME}. Install this as an update over the existing app; keep the same package ID and signing certificate." \
               -F draft=false \
               -F prerelease=false \
-              -F make_latest=true)"
+              -f make_latest=true)"
             RELEASE_ID="$(printf '%s' "$RELEASE_JSON" | jq -r '.id')"
           fi
           test -n "$RELEASE_ID"
@@ -197,7 +198,7 @@ jobs:
           sha256sum "$APK" > "$APK.sha256"
           gh release upload "$TAG" "$APK#app-release.apk" "$APK.sha256#app-release.apk.sha256" --clobber
           gh api --method PATCH "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" \
-            -F draft=false -F prerelease=false -F make_latest=true >/dev/null
+            -F draft=false -F prerelease=false -f make_latest=true >/dev/null
           echo "Published ${TAG} with a signed APK and SHA-256 checksum."
 
       - name: Remove temporary signing material
