@@ -157,18 +157,29 @@
           !String(system.name || '').trim() || !Array.isArray(system.topics)) {
         throw new Error('Invalid system entry in remote content catalog.');
       }
+      if (systemById[system.id]) throw new Error('Duplicate remote system ID: ' + system.id);
+      var topicIds = Object.create(null);
+      system.topics.forEach(function (topic) {
+        if (!topic || !/^[a-zA-Z0-9_-]{1,48}$/.test(String(topic.id || '')) ||
+            !String(topic.name || '').trim() || topicIds[topic.id]) {
+          throw new Error('Invalid or duplicate topic in system ' + system.id);
+        }
+        topicIds[topic.id] = true;
+      });
       systemById[system.id] = system;
     });
 
     var allGroups = [];
     var registry = Object.create(null);
     var usedQuestionIds = Object.create(null);
+    var seenBanks = Object.create(null);
 
     data.banks.forEach(function (bank) {
       if (!bank || !/^[a-zA-Z0-9_-]{1,48}$/.test(String(bank.id || '')) ||
-          !String(bank.label || '').trim() || !String(bank.contentFile || '').trim()) {
+          !String(bank.label || '').trim() || !String(bank.contentFile || '').trim() || seenBanks[bank.id]) {
         throw new Error('Invalid remote bank entry in catalog.');
       }
+      seenBanks[bank.id] = true;
       var source = safeJson(localText(bank.contentFile));
       if (!source || !Array.isArray(source.questions) ||
           (source.schema !== 'shbace-remote-questions-v1' &&
@@ -182,6 +193,7 @@
       var allowedSystems = Array.isArray(bank.systemIds) && bank.systemIds.length
         ? bank.systemIds.map(String) : Object.keys(systemById);
       var groupsForBank = [];
+      var coveredQuestions = 0;
       allowedSystems.forEach(function (systemId) {
         var system = systemById[systemId];
         if (!system) throw new Error('Unknown system "' + systemId + '" in bank ' + bank.id);
@@ -229,6 +241,7 @@
             topicIcon: topic.icon || ''
           };
           groupsForBank.push(group);
+          coveredQuestions += normalized.length;
           allGroups.push(group);
           systemRecord.groups.push(group);
           systemRecord.topics.push(topic);
@@ -241,9 +254,14 @@
           registry[bank.id].systems.push(systemRecord);
         }
       });
+      if (coveredQuestions !== source.questions.length) {
+        throw new Error('Some questions are not mapped to a catalog system/topic in bank ' + bank.id + '.');
+      }
       if (registry[bank.id]) {
         registry[bank.id].groups = groupsForBank;
-        registry[bank.id].count = groupsForBank.reduce(function (n, g) { return n + g.questions.length; }, 0);
+        registry[bank.id].count = coveredQuestions;
+      } else if (source.questions.length) {
+        throw new Error('No visible system/topic groups were created for bank ' + bank.id + '.');
       }
     });
 
@@ -299,7 +317,7 @@
       seenDecks[deck.id] = true;
       var source = safeJson(localText(deck.contentFile));
       if (!source || source.schema !== 'shbace-remote-flashcards-v1' ||
-          !Array.isArray(source.cards) || source.cards.length > 5000) {
+          !Array.isArray(source.cards) || source.cards.length === 0 || source.cards.length > 5000) {
         throw new Error('Flashcard data is missing or invalid: ' + deck.contentFile);
       }
       var cardIds = Object.create(null);
@@ -685,9 +703,9 @@
     if (!raw) return;
     catalog = safeJson(raw);
     if (!catalog) throw new Error('The installed remote catalog is not valid JSON.');
-    banks = buildRemoteBanks(catalog);
     resources = buildResources(catalog);
     flashcardDecks = buildFlashcardDecks(catalog);
+    banks = buildRemoteBanks(catalog);
   }
 
   try {
