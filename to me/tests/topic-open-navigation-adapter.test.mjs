@@ -32,7 +32,7 @@ assert.ok(routeHelper, "shared Question Bank route helper must exist");
 
 function createTopicRuntime(adapterMode = "ok") {
   const calls = { routes:[], recent:[], saved:[], renders:[] };
-  const window = { __SHB_PED_COLLECTION:"aj" };
+  const window = { __SHB_PED_COLLECTION__:"aj" };
   let context;
   context = vm.createContext({
     window,
