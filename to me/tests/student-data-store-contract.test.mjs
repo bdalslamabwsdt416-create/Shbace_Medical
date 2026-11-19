@@ -12,7 +12,6 @@ const jsFiles = readdirSync(jsDir)
   .sort()
   .map((name) => ({ name, content: readFileSync(resolve(jsDir, name), "utf8") }));
 const sourceByName = new Map(jsFiles.map((file) => [file.name, file.content]));
-const allSource = jsFiles.map((file) => file.content).join("\n");
 const routes = JSON.parse(readFileSync(resolve(root, "modules/routes.v1.json"), "utf8"));
 const feature = sourceByName.get("09-app-features-v6.js") || "";
 const coreFiles = [
