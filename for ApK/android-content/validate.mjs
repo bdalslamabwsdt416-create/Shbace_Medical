@@ -241,38 +241,73 @@ if (ui != null) {
   const knownBanks = new Set(bankIds);
   const knownDecks = new Set(deckIds);
 
-  function validateUiBlocks(blocks, label) {
+  const templates = Array.isArray(ui.templates) ? ui.templates : [];
+  assert(templates.length <= 20, 'Remote UI may define at most 20 reusable templates.');
+  const templateIds = new Set();
+  for (const template of templates) {
+    assert(template && validId(template.id) && !templateIds.has(template.id) &&
+      Array.isArray(template.blocks), 'Invalid or duplicate remote UI template.');
+    templateIds.add(template.id);
+  }
+
+  function validateUiBlocks(blocks, label, options = {}) {
+    const depth = options.depth || 0;
+    const budget = options.budget || { count: 0 };
+    const allowSlots = options.allowSlots === true;
+    assert(depth <= 4, label + ' exceeds the maximum nested layout depth of four.');
     assert(Array.isArray(blocks) && blocks.length <= 60, label + ' must contain at most 60 blocks.');
     for (const block of blocks) {
+      budget.count += 1;
+      assert(budget.count <= 300, label + ' exceeds the maximum total component count of 300.');
       assert(block && typeof block === 'object' && !Array.isArray(block), 'Invalid UI block in ' + label);
       const type = String(block.type || '');
       assert(['heading', 'text', 'notice', 'divider', 'image', 'resourceList',
-        'bankList', 'flashcardDeckList', 'link', 'button', 'card', 'list', 'metric', 'spacer'].includes(type),
+        'bankList', 'flashcardDeckList', 'link', 'button', 'card', 'list', 'metric',
+        'spacer', 'section', 'grid', 'tabs', 'accordion', 'when', 'slot'].includes(type),
         'Unsupported UI block type in ' + label + ': ' + type);
+
+      const nested = (children, childLabel) => validateUiBlocks(children, childLabel, {
+        depth: depth + 1, budget, allowSlots
+      });
+
       if (type === 'heading' || type === 'text' || type === 'notice') {
-        assert(typeof block.text === 'string', 'UI ' + type + ' block needs text in ' + label);
+        assert(typeof block.text === 'string' && block.text.length <= 3000,
+          'UI ' + type + ' block needs text up to 3000 characters in ' + label);
+      }
+      if (type === 'notice') {
+        assert(['info', 'success', 'warning', 'neutral'].includes(String(block.tone || 'info')),
+          'Unsupported UI notice tone in ' + label);
+        if (block.title != null) assert(typeof block.title === 'string' && block.title.length <= 160,
+          'UI notice title must be text up to 160 characters in ' + label);
       }
       if (type === 'image') {
         assert(typeof block.file === 'string', 'UI image block needs a file path in ' + label);
         assetRef(block.file, listedPaths, 'Remote UI image ' + label);
+        if (block.alt != null) assert(typeof block.alt === 'string' && block.alt.length <= 240,
+          'UI image alt must be text up to 240 characters in ' + label);
       }
       if (type === 'card') {
-        assert((block.title == null || typeof block.title === 'string') &&
-          (block.text == null || typeof block.text === 'string'), 'Invalid UI card block in ' + label);
+        assert((block.title == null || (typeof block.title === 'string' && block.title.length <= 160)) &&
+          (block.text == null || (typeof block.text === 'string' && block.text.length <= 3000)),
+          'Invalid UI card block in ' + label);
+        if (block.blocks != null) nested(block.blocks, label + '.card.blocks');
       }
       if (type === 'list') {
         assert(Array.isArray(block.items) && block.items.length <= 30 &&
-          block.items.every(item => typeof item === 'string'), 'Invalid UI list block in ' + label);
+          block.items.every(item => typeof item === 'string' && item.length <= 300),
+          'Invalid UI list block in ' + label);
       }
       if (type === 'metric') {
         assert((typeof block.label === 'string' || typeof block.label === 'number') &&
-          (typeof block.value === 'string' || typeof block.value === 'number'), 'Invalid UI metric block in ' + label);
+          (typeof block.value === 'string' || typeof block.value === 'number'),
+          'Invalid UI metric block in ' + label);
       }
       if (type === 'spacer') {
-        assert(Number.isInteger(block.size) && block.size >= 4 && block.size <= 64, 'Invalid UI spacer size in ' + label);
+        assert(Number.isInteger(block.size) && block.size >= 4 && block.size <= 64,
+          'Invalid UI spacer size in ' + label);
       }
       if (type === 'link') {
-        assert(typeof block.label === 'string' && block.label.trim() &&
+        assert(typeof block.label === 'string' && block.label.trim() && block.label.length <= 120 &&
           typeof block.url === 'string' && /^https:\/\//i.test(block.url),
           'UI link must have a label and HTTPS URL in ' + label);
       }
@@ -285,7 +320,8 @@ if (ui != null) {
           'Unknown item "' + id + '" in ' + type + ' block in ' + label);
       }
       if (type === 'button') {
-        assert(typeof block.label === 'string' && block.label.trim() && validId(block.target),
+        assert(typeof block.label === 'string' && block.label.trim() &&
+          block.label.length <= 120 && validId(block.target),
           'Invalid UI button in ' + label);
         const action = String(block.action || '');
         const builtinPages = new Set(['subjects', 'specialties', 'topics', 'questions', 'quiz',
@@ -299,16 +335,88 @@ if (ui != null) {
         assert(allowed && allowed.has(String(block.target)),
           'UI button has an unknown action or target in ' + label);
       }
+      if (type === 'section') {
+        assert(['stack', 'row', 'grid'].includes(String(block.layout || 'stack')),
+          'Invalid UI section layout in ' + label);
+        nested(block.blocks, label + '.section.blocks');
+      }
+      if (type === 'grid') {
+        assert(Number.isInteger(block.columns) && block.columns >= 1 && block.columns <= 3,
+          'UI grid columns must be from 1 to 3 in ' + label);
+        nested(block.blocks, label + '.grid.blocks');
+      }
+      if (type === 'tabs' || type === 'accordion') {
+        const minItems = type === 'tabs' ? 2 : 1;
+        const maxItems = type === 'tabs' ? 6 : 12;
+        assert(Array.isArray(block.items) && block.items.length >= minItems &&
+          block.items.length <= maxItems, 'Invalid UI ' + type + ' item count in ' + label);
+        const itemIds = new Set();
+        for (const item of block.items) {
+          assert(item && typeof item === 'object' && !Array.isArray(item) &&
+            typeof item.label === 'string' && item.label.trim() && item.label.length <= 80,
+            'Invalid UI ' + type + ' item in ' + label);
+          if (type === 'tabs') {
+            assert(validId(item.id) && !itemIds.has(item.id), 'Invalid or duplicate tab ID in ' + label);
+            itemIds.add(item.id);
+          }
+          nested(item.blocks, label + '.' + type + '.blocks');
+        }
+        if (type === 'accordion' && block.firstOpen != null) {
+          assert(typeof block.firstOpen === 'boolean', 'Accordion firstOpen must be boolean in ' + label);
+        }
+      }
+      if (type === 'when') {
+        assert(['always', 'hasBanks', 'hasResources', 'hasFlashcardDecks', 'hasLearningContent']
+          .includes(String(block.condition || '')), 'Unsupported UI condition in ' + label);
+        if (block.not != null) assert(typeof block.not === 'boolean', 'UI condition not must be boolean in ' + label);
+        nested(block.blocks, label + '.when.blocks');
+      }
+      if (type === 'slot') {
+        assert(allowSlots && /^[a-z][a-z0-9_-]{0,31}$/.test(String(block.name || '')),
+          'UI slot is permitted only in a reusable template and needs a valid name in ' + label);
+      }
     }
+    return true;
+  }
+
+  const slotsByTemplate = new Map();
+  function collectTemplateSlots(blocks, output) {
+    for (const block of blocks || []) {
+      if (!block || typeof block !== 'object') continue;
+      if (block.type === 'slot') output.add(String(block.name));
+      if (Array.isArray(block.blocks)) collectTemplateSlots(block.blocks, output);
+      for (const item of (block.items || [])) {
+        if (item && Array.isArray(item.blocks)) collectTemplateSlots(item.blocks, output);
+      }
+    }
+  }
+  for (const template of templates) {
+    validateUiBlocks(template.blocks, 'template ' + template.id, {
+      allowSlots: true, budget: { count: 0 }
+    });
+    const slots = new Set();
+    collectTemplateSlots(template.blocks, slots);
+    slotsByTemplate.set(template.id, slots);
   }
 
   for (const page of pages) {
-    assert(page && validId(page.id) && typeof page.title === 'string' && page.title.trim(),
-      'Invalid remote UI page.');
-    assert(!pageIds.has(page.id), 'Duplicate remote UI page ID: ' + page.id);
-    pageIds.add(page.id);
+    if (page.templateId != null) {
+      assert(typeof page.templateId === 'string' && templateIds.has(page.templateId),
+        'Page references an unknown reusable template: ' + page.id);
+      assert(page.slots && typeof page.slots === 'object' && !Array.isArray(page.slots),
+        'Templated page must provide a slots object: ' + page.id);
+      const slots = slotsByTemplate.get(page.templateId);
+      const slotKeys = Object.keys(page.slots);
+      for (const name of slotKeys) {
+        assert(slots.has(name), 'Page provides an unknown template slot "' + name + '": ' + page.id);
+        validateUiBlocks(page.slots[name], 'page ' + page.id + '.slots.' + name, { budget: { count: 0 } });
+      }
+    } else {
+      validateUiBlocks(page.blocks, 'page ' + page.id);
+    }
+    if (page.subtitle != null) assert(typeof page.subtitle === 'string' && page.subtitle.length <= 240,
+      'Page subtitle must be text up to 240 characters: ' + page.id);
   }
-  for (const page of pages) validateUiBlocks(page.blocks, 'page ' + page.id);
   if (ui.homeBlocks != null) validateUiBlocks(ui.homeBlocks, 'homeBlocks');
 
   if (ui.sidebar != null) {
