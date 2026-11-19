@@ -1,0 +1,15 @@
+{
+  "schema": "shbace-android-content-v1",
+  "version": "1.0.0",
+  "generatedAt": "2026-11-19T00:00:00.000Z",
+  "catalogPath": "catalog.json",
+  "files": [
+    {
+      "path": "catalog.json",
+      "bytes": 105,
+      "sha256": "81a5d1ca0351eb440653682250a3373a4ef5f20e869be789d35a6903e007835a",
+      "mime": "application/json",
+      "kind": "catalog"
+    }
+  ]
+}
