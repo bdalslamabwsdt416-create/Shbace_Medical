@@ -98,13 +98,7 @@
             children(item.blocks, depth + 1) + '</div></details>';
         }).join('') + '</div>';
       }
-      try {
-        if (type === 'card' && Array.isArray(block.blocks) && block.blocks.length) {
-          return '<div class="shb-pb-card-children">' + String(renderLeaf(block) || '') +
-            children(block.blocks, depth + 1) + '</div>';
-        }
-        return String(renderLeaf(block) || '');
-      }
+      try { return String(renderLeaf(block) || ''); }
       catch (error) {
         var core = window.SHBACECore;
         if (core && core.diagnostics) core.diagnostics.record('warn', 'PAGE_BUILDER_LEAF_FAILED',
