@@ -10,6 +10,7 @@ on:
       - work/android-qtools-persistence-20261112
       - android/unified-to-me-20261117
       - android/rebuild-v1.3.6-from-to-me50-20261119
+      - android/remote-content-engine-v1-20261119
     paths:
       - 'android/**'
       - 'to me/**'
