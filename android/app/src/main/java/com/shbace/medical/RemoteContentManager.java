@@ -40,9 +40,9 @@ import java.util.concurrent.Executors;
 final class RemoteContentManager {
     private static final String TAG = "ShbaceRemoteContent";
     static final String MANIFEST_URL =
-            "https://raw.githubusercontent.com/bdalslamabwsdt416-create/Shbace_Medical/main/android-content/manifest.json";
+            "https://raw.githubusercontent.com/bdalslamabwsdt416-create/Shbace_Medical/shbace-android-content/android-content/manifest.json";
     private static final String CONTENT_BASE =
-            "https://raw.githubusercontent.com/bdalslamabwsdt416-create/Shbace_Medical/main/android-content/";
+            "https://raw.githubusercontent.com/bdalslamabwsdt416-create/Shbace_Medical/shbace-android-content/android-content/";
     private static final String SCHEMA = "shbace-android-content-v1";
     private static final int CONNECT_TIMEOUT_MS = 15000;
     private static final int READ_TIMEOUT_MS = 30000;
