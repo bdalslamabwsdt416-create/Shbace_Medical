@@ -119,6 +119,38 @@ test("safe when conditions work in shared home/screen block rendering", () => {
   assert.doesNotMatch(html, /Should be hidden/);
 });
 
+test("negated when conditions fail closed when condition data is unknown or unavailable", () => {
+  const absentApi = runtime().window.SHBACEPageBuilder;
+  const absentHtml = absentApi.render([
+    { type: "when", condition: "hasBanks", not: true, blocks: [{ type: "text", text: "Missing API must stay hidden" }] },
+    { type: "when", condition: "hasLearningContent", not: true, blocks: [{ type: "text", text: "Missing content API must stay hidden" }] },
+    { type: "when", condition: "unknownCondition", not: true, blocks: [{ type: "text", text: "Unknown condition must stay hidden" }] }
+  ], block => "<span>" + block.text + "</span>", "missing-api-test");
+  assert.doesNotMatch(absentHtml, /must stay hidden/);
+
+  const throwingApi = runtime("android", {
+    getBanks: () => { throw new Error("content API unavailable"); }
+  }).window.SHBACEPageBuilder;
+  const throwingHtml = throwingApi.render([
+    { type: "when", condition: "hasBanks", not: true, blocks: [{ type: "text", text: "Failed condition must stay hidden" }] }
+  ], block => "<span>" + block.text + "</span>", "throwing-api-test");
+  assert.doesNotMatch(throwingHtml, /Failed condition must stay hidden/);
+});
+
+test("negated when conditions remain valid when every required content list is known empty", () => {
+  const api = runtime("android", {
+    getBanks: () => [],
+    getResources: () => [],
+    getFlashcardDecks: () => []
+  }).window.SHBACEPageBuilder;
+  const html = api.render([
+    { type: "when", condition: "hasBanks", not: true, blocks: [{ type: "text", text: "No banks installed" }] },
+    { type: "when", condition: "hasLearningContent", not: true, blocks: [{ type: "text", text: "No learning content installed" }] }
+  ], block => "<span>" + block.text + "</span>", "known-empty-test");
+  assert.match(html, /No banks installed/);
+  assert.match(html, /No learning content installed/);
+});
+
 test("renderer enforces its 120-block budget", () => {
   const api = runtime().window.SHBACEPageBuilder;
   const blocks = Array.from({ length: 121 }, (_, index) => ({ type: "text", text: String(index) }));
