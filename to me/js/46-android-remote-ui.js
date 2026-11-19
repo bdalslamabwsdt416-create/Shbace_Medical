@@ -22,8 +22,19 @@
   var catalog = API.getCatalog();
   var ui = catalog && catalog.ui && typeof catalog.ui === 'object' ? catalog.ui : {};
   var sidebar = ui.sidebar && typeof ui.sidebar === 'object' ? ui.sidebar : {};
-  var pages = Array.isArray(ui.pages) ? ui.pages : [];
+  var pages = Array.isArray(ui.pages) ? ui.pages.slice(0, 40) : [];
+  var templates = Array.isArray(ui.templates) ? ui.templates.slice(0, 20) : [];
   var pageById = Object.create(null);
+  var declaredPageIds = Object.create(null);
+  var templateById = Object.create(null);
+  var BUILTIN_CONDITIONS = {
+    always: true, hasBanks: true, hasResources: true,
+    hasFlashcardDecks: true, hasLearningContent: true
+  };
+  pages.forEach(function (page) {
+    if (page && validId(page.id) && typeof page.title === 'string' &&
+        page.title.trim() && !declaredPageIds[page.id]) declaredPageIds[page.id] = true;
+  });
   var resourceById = Object.create(null);
   var bankById = Object.create(null);
   var deckById = Object.create(null);
@@ -53,77 +64,227 @@
   API.getBanks().forEach(function (item) { bankById[item.id] = item; });
   API.getFlashcardDecks().forEach(function (item) { deckById[item.id] = item; });
 
-  function validateBlock(block, depth, budget) {
+  function validateBlocks(blocks, allowSlots, depth, budget) {
     depth = Number.isInteger(depth) ? depth : 0;
     budget = budget || { count:0 };
-    if (!block || typeof block !== 'object' || depth > 4 || ++budget.count > 120) return false;
+    if (!Array.isArray(blocks) || blocks.length > 60 || depth > 4) return false;
+    return blocks.every(function (block) {
+      return validateBlock(block, allowSlots, depth, budget);
+    });
+  }
+
+  function validateBlock(block, allowSlots, depth, budget) {
+    if (!block || typeof block !== 'object' || Array.isArray(block) ||
+        depth > 4 || ++budget.count > 120) return false;
     var type = String(block.type || '');
+    var nested = function (items) { return validateBlocks(items, allowSlots, depth + 1, budget); };
     if (type === 'stack' || type === 'grid') {
-      if (!Array.isArray(block.children) || block.children.length > 30) return false;
+      var stackChildren = Array.isArray(block.children) ? block.children : block.blocks;
+      if (!Array.isArray(stackChildren) || stackChildren.length > 30) return false;
       if (type === 'grid' && (!Number.isInteger(block.columns) || block.columns < 1 || block.columns > 3)) return false;
       if (block.gap != null && (!Number.isInteger(block.gap) || block.gap < 0 || block.gap > 32)) return false;
-      return block.children.every(function (child) { return validateBlock(child, depth + 1, budget); });
+      return nested(stackChildren);
+    }
+    if (type === 'section') {
+      var layout = String(block.layout || 'stack');
+      if (['stack', 'row', 'grid'].indexOf(layout) < 0 ||
+          (block.gap != null && (!Number.isInteger(block.gap) || block.gap < 0 || block.gap > 32)) ||
+          (layout === 'grid' && block.columns != null &&
+            (!Number.isInteger(block.columns) || block.columns < 1 || block.columns > 3))) return false;
+      return nested(block.blocks);
     }
     if (type === 'tabs') {
-      if (!Array.isArray(block.tabs) || block.tabs.length < 2 || block.tabs.length > 6) return false;
+      var tabs = Array.isArray(block.tabs) ? block.tabs : block.items;
+      if (!Array.isArray(tabs) || tabs.length < 2 || tabs.length > 6) return false;
       var ids = Object.create(null);
-      var valid = block.tabs.every(function (tab) {
-        if (!tab || !validId(tab.id) || ids[tab.id] || typeof tab.label !== 'string' ||
-            !tab.label.trim() || tab.label.length > 48 || !Array.isArray(tab.blocks) || tab.blocks.length > 30) return false;
+      var validTabs = tabs.every(function (tab) {
+        var tabLabel = tab && (typeof tab.label === 'string' ? tab.label : tab.title);
+        if (!tab || !validId(tab.id) || ids[tab.id] || typeof tabLabel !== 'string' ||
+            !tabLabel.trim() || tabLabel.length > 48 || !Array.isArray(tab.blocks) || tab.blocks.length > 30) return false;
         ids[tab.id] = true;
-        return tab.blocks.every(function (child) { return validateBlock(child, depth + 1, budget); });
+        return nested(tab.blocks);
       });
-      return valid && (block.defaultTab == null || !!ids[String(block.defaultTab)]);
+      return validTabs && (block.defaultTab == null || !!ids[String(block.defaultTab)]);
     }
     if (type === 'accordion') {
-      if (!Array.isArray(block.items) || block.items.length < 1 || block.items.length > 10) return false;
+      if (!Array.isArray(block.items) || block.items.length < 1 || block.items.length > 12) return false;
       var itemIds = Object.create(null);
       return block.items.every(function (item) {
-        if (!item || typeof item.title !== 'string' || !item.title.trim() || item.title.length > 80 ||
+        var title = item && (typeof item.title === 'string' ? item.title : item.label);
+        if (!item || typeof title !== 'string' || !title.trim() || title.length > 80 ||
             !Array.isArray(item.blocks) || item.blocks.length > 30) return false;
         if (item.id != null) {
           if (!validId(item.id) || itemIds[item.id]) return false;
           itemIds[item.id] = true;
         }
         if (item.open != null && typeof item.open !== 'boolean') return false;
-        return item.blocks.every(function (child) { return validateBlock(child, depth + 1, budget); });
+        return nested(item.blocks);
       });
+    }
+    if (type === 'when') {
+      return !!BUILTIN_CONDITIONS[String(block.condition || '')] &&
+        (block.not == null || typeof block.not === 'boolean') && nested(block.blocks);
+    }
+    if (type === 'slot') {
+      return allowSlots === true && /^[a-z][a-z0-9_-]{0,31}$/.test(String(block.name || ''));
     }
     if (['heading', 'text', 'notice', 'divider', 'image', 'resourceList',
          'bankList', 'flashcardDeckList', 'link', 'button', 'card', 'list', 'metric', 'spacer'].indexOf(type) < 0) return false;
-    if (type === 'heading' || type === 'text') return typeof block.text === 'string';
-    if (type === 'notice') return typeof block.text === 'string';
-    if (type === 'image') return typeof block.file === 'string';
-    if (type === 'card') return (block.title == null || typeof block.title === 'string') &&
-      (block.text == null || typeof block.text === 'string');
+    if (type === 'heading' || type === 'text') return typeof block.text === 'string' && block.text.length <= 3000;
+    if (type === 'notice') return typeof block.text === 'string' && block.text.length <= 3000 &&
+      ['info', 'success', 'warning', 'neutral'].indexOf(String(block.tone || 'info')) >= 0 &&
+      (block.title == null || (typeof block.title === 'string' && block.title.length <= 160));
+    if (type === 'image') return typeof block.file === 'string' && block.file.length <= 240;
+    if (type === 'card') return (block.title == null || (typeof block.title === 'string' && block.title.length <= 160)) &&
+      (block.text == null || (typeof block.text === 'string' && block.text.length <= 3000)) &&
+      (block.blocks == null || nested(block.blocks));
     if (type === 'list') return Array.isArray(block.items) && block.items.length <= 30 &&
-      block.items.every(function (item) { return typeof item === 'string'; });
+      block.items.every(function (item) { return typeof item === 'string' && item.length <= 300; });
     if (type === 'metric') return (typeof block.label === 'string' || typeof block.label === 'number') &&
       (typeof block.value === 'string' || typeof block.value === 'number');
     if (type === 'spacer') return Number.isInteger(block.size) && block.size >= 4 && block.size <= 64;
-    if (type === 'link') return typeof block.label === 'string' && !!safeUrl(block.url);
+    if (type === 'link') return typeof block.label === 'string' && block.label.trim() &&
+      block.label.length <= 120 && !!safeUrl(block.url);
     if (type === 'button') {
-      return typeof block.label === 'string' &&
-        ['page', 'builtin', 'resource', 'bank', 'deck'].indexOf(String(block.action || '')) >= 0 &&
-        validId(block.target);
+      var action = String(block.action || ''), target = String(block.target || '');
+      if (typeof block.label !== 'string' || !block.label.trim() || block.label.length > 120 || !validId(target)) return false;
+      if (action === 'page') return !!declaredPageIds[target];
+      if (action === 'builtin') return !!BUILTIN_PAGES[target];
+      if (action === 'resource') return !!resourceById[target];
+      if (action === 'bank') return !!bankById[target];
+      if (action === 'deck') return !!deckById[target];
+      return false;
     }
     if (type === 'resourceList' || type === 'bankList' || type === 'flashcardDeckList') {
-      return Array.isArray(block.ids) && block.ids.length <= 120;
+      if (!Array.isArray(block.ids) || block.ids.length > 120) return false;
+      var source = type === 'resourceList' ? resourceById :
+        (type === 'bankList' ? bankById : deckById);
+      return block.ids.every(function (id) { return !!source[String(id)]; });
     }
-    return true;
+    return type === 'divider';
   }
 
-  function validateBlocks(blocks) {
-    if (!Array.isArray(blocks) || blocks.length > 60) return false;
+  function collectTemplateSlots(blocks, found, depth) {
+    if (!Array.isArray(blocks) || depth > 4) return;
+    blocks.forEach(function (block) {
+      if (!block || typeof block !== 'object') return;
+      if (block.type === 'slot') found[String(block.name)] = true;
+      if (Array.isArray(block.blocks)) collectTemplateSlots(block.blocks, found, depth + 1);
+      if (Array.isArray(block.children)) collectTemplateSlots(block.children, found, depth + 1);
+      var tabs = Array.isArray(block.tabs) ? block.tabs :
+        (block.type === 'tabs' && Array.isArray(block.items) ? block.items : []);
+      tabs.forEach(function (item) {
+        if (item && Array.isArray(item.blocks)) collectTemplateSlots(item.blocks, found, depth + 1);
+      });
+      if (block.type === 'accordion' && Array.isArray(block.items)) block.items.forEach(function (item) {
+        if (item && Array.isArray(item.blocks)) collectTemplateSlots(item.blocks, found, depth + 1);
+      });
+    });
+  }
+
+  templates.forEach(function (template) {
+    if (!template || !validId(template.id) || templateById[template.id] ||
+        !Array.isArray(template.blocks)) return;
     var budget = { count:0 };
-    return blocks.every(function (block) { return validateBlock(block, 0, budget); });
+    if (!validateBlocks(template.blocks, true, 0, budget)) return;
+    var slots = Object.create(null);
+    collectTemplateSlots(template.blocks, slots, 0);
+    templateById[template.id] = { source:template, slots:slots };
+  });
+
+  function validateTemplatePage(page) {
+    if (page.templateId == null) {
+      return page.blocks != null && validateBlocks(page.blocks, false, 0, { count:0 });
+    }
+    var template = templateById[String(page.templateId)];
+    if (!template || !page.slots || typeof page.slots !== 'object' || Array.isArray(page.slots)) return false;
+    var names = Object.keys(page.slots);
+    var budget = { count:0 };
+    return names.every(function (name) {
+      return !!template.slots[name] && validateBlocks(page.slots[name], false, 0, budget);
+    });
   }
 
   pages.forEach(function (page) {
     if (!page || !validId(page.id) || typeof page.title !== 'string' ||
-        !page.title.trim() || pageById[page.id] || !validateBlocks(page.blocks)) return;
+        !page.title.trim() || page.title.length > 120 || pageById[page.id] ||
+        (page.subtitle != null && (typeof page.subtitle !== 'string' || page.subtitle.length > 160)) ||
+        !validateTemplatePage(page)) return;
     pageById[page.id] = page;
   });
+
+  function conditionMatches(condition) {
+    if (condition === 'always') return true;
+    if (condition === 'hasBanks') return Object.keys(bankById).length > 0;
+    if (condition === 'hasResources') return Object.keys(resourceById).length > 0;
+    if (condition === 'hasFlashcardDecks') return Object.keys(deckById).length > 0;
+    if (condition === 'hasLearningContent') {
+      return Object.keys(bankById).length + Object.keys(resourceById).length +
+        Object.keys(deckById).length > 0;
+    }
+    return false;
+  }
+
+  function prepareBlocks(blocks, slots, depth, budget) {
+    if (!Array.isArray(blocks) || depth > 4) return null;
+    var output = [];
+    for (var index = 0; index < blocks.length; index++) {
+      var block = blocks[index];
+      if (!block || typeof block !== 'object' || Array.isArray(block) || ++budget.count > 120) return null;
+      var type = String(block.type || '');
+      if (type === 'when') {
+        var visible = conditionMatches(String(block.condition || ''));
+        if (block.not === true) visible = !visible;
+        if (visible) {
+          var conditionalBlocks = prepareBlocks(block.blocks, slots, depth + 1, budget);
+          if (!conditionalBlocks) return null;
+          output = output.concat(conditionalBlocks);
+        }
+        continue;
+      }
+      if (type === 'slot') {
+        var slotBlocks = slots && Array.isArray(slots[block.name]) ? slots[block.name] : [];
+        var expandedSlot = prepareBlocks(slotBlocks, null, depth + 1, budget);
+        if (!expandedSlot) return null;
+        output = output.concat(expandedSlot);
+        continue;
+      }
+      var copy = Object.assign({}, block);
+      if (Array.isArray(block.blocks)) {
+        copy.blocks = prepareBlocks(block.blocks, slots, depth + 1, budget);
+        if (!copy.blocks) return null;
+      }
+      if (Array.isArray(block.children)) {
+        copy.children = prepareBlocks(block.children, slots, depth + 1, budget);
+        if (!copy.children) return null;
+      }
+      if (Array.isArray(block.tabs)) {
+        copy.tabs = block.tabs.map(function (item) {
+          var next = Object.assign({}, item);
+          next.blocks = prepareBlocks(item.blocks, slots, depth + 1, budget);
+          return next.blocks ? next : null;
+        });
+        if (copy.tabs.some(function (item) { return !item; })) return null;
+      } else if (type === 'tabs' && Array.isArray(block.items)) {
+        copy.items = block.items.map(function (item) {
+          var next = Object.assign({}, item);
+          next.blocks = prepareBlocks(item.blocks, slots, depth + 1, budget);
+          return next.blocks ? next : null;
+        });
+        if (copy.items.some(function (item) { return !item; })) return null;
+      }
+      if (type === 'accordion' && Array.isArray(block.items)) {
+        copy.items = block.items.map(function (item) {
+          var next = Object.assign({}, item);
+          next.blocks = prepareBlocks(item.blocks, slots, depth + 1, budget);
+          return next.blocks ? next : null;
+        });
+        if (copy.items.some(function (item) { return !item; })) return null;
+      }
+      output.push(copy);
+    }
+    return output;
+  }
 
   function openTarget(action, target) {
     var key = String(target || '');
@@ -157,7 +318,7 @@
       '</span></span><span class="chev">›</span></button>';
   }
 
-  function renderBlock(block) {
+  function renderBlock(block, page) {
     var type = String(block.type || '');
     if (type === 'heading') {
       var level = Number(block.level) === 3 ? 3 : 2;
@@ -172,10 +333,15 @@
         '<div>' + esc(block.text) + '</div></div>';
     }
     if (type === 'divider') return '<hr class="shb-remote-ui-divider">';
-    if (type === 'card') return '<section class="card shb-remote-ui-card-block">' +
-      (block.icon ? '<div aria-hidden="true">' + esc(block.icon) + '</div>' : '') +
-      (block.title ? '<h3>' + esc(block.title) + '</h3>' : '') +
-      (block.text ? '<p>' + esc(block.text) + '</p>' : '') + '</section>';
+    if (type === 'card') {
+      var nestedCard = block.blocks && window.SHBACEPageBuilder ?
+        window.SHBACEPageBuilder.render(block.blocks, function (child) { return renderBlock(child, page); },
+          (page && page.id ? page.id : 'page') + '-card') : '';
+      return '<section class="card shb-remote-ui-card-block">' +
+        (block.icon ? '<div aria-hidden="true">' + esc(block.icon) + '</div>' : '') +
+        (block.title ? '<h3>' + esc(block.title) + '</h3>' : '') +
+        (block.text ? '<p>' + esc(block.text) + '</p>' : '') + nestedCard + '</section>';
+    }
     if (type === 'list') return '<ul class="shb-remote-ui-list-block">' +
       toArray(block.items).slice(0,30).map(function (item) { return '<li>' + esc(item) + '</li>'; }).join('') + '</ul>';
     if (type === 'metric') return '<div class="shb-remote-ui-metric"><b>' + esc(block.value) +
@@ -229,8 +395,20 @@
 
   function renderPage(page) {
     var pageBuilder = window.SHBACEPageBuilder;
-    var blocks = pageBuilder ? pageBuilder.render(page.blocks, renderBlock, page.id) :
-      toArray(page.blocks).map(renderBlock).join('');
+    var template = page.templateId != null ? templateById[String(page.templateId)] : null;
+    var sourceBlocks = template ? template.source.blocks : page.blocks;
+    var prepared = prepareBlocks(sourceBlocks, template ? page.slots : null, 0, { count:0 });
+    var blocks = '';
+    if (prepared && pageBuilder) {
+      blocks = pageBuilder.render(prepared, function (block) { return renderBlock(block, page); }, page.id);
+    } else if (prepared) {
+      blocks = prepared.map(function (block) { return renderBlock(block, page); }).join('');
+    } else {
+      var core = window.SHBACECore;
+      if (core && core.diagnostics) core.diagnostics.record('warn', 'REMOTE_PAGE_RENDER_LIMIT',
+        'A remote page exceeded the safe expanded component budget.', { pageId:page.id });
+      blocks = '<div class="card shb-remote-ui-notice shb-tone-warning">This page is too complex to display safely.</div>';
+    }
     return '<div class="app-head"><div class="app-head-title">' + esc(page.title) +
       '</div></div><div class="rs shb-remote-ui-page">' +
       '<div class="ped-collection-kicker">SHBACE MEDICAL · REMOTE SECTION</div>' +
