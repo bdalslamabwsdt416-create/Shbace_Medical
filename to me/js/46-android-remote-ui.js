@@ -71,7 +71,7 @@
         if (!tab || !validId(tab.id) || ids[tab.id] || typeof tab.label !== 'string' ||
             !tab.label.trim() || tab.label.length > 48 || !Array.isArray(tab.blocks) || tab.blocks.length > 30) return false;
         ids[tab.id] = true;
-        return tab.blocks.every(function (child) { return validateBlock(child, depth + 1); });
+        return tab.blocks.every(function (child) { return validateBlock(child, depth + 1, budget); });
       });
       return valid && (block.defaultTab == null || !!ids[String(block.defaultTab)]);
     }
