@@ -11,14 +11,21 @@ android {
     namespace = "com.shbace.medical"
     compileSdk = rootProject.ext.compileSdkVersion
 
+    // APK-only native content manager; keep the Capacitor project at its conventional root path.
+    sourceSets {
+        main {
+            java.srcDir "${rootDir}/../for ApK/native"
+        }
+    }
+
     defaultConfig {
         applicationId "com.shbace.medical"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         // IMPORTANT: when updating an app that is already installed / published, versionCode MUST be higher than the old one.
         // Reminder permissions and reboot-rescheduling update; same original applicationId and release key.
-        versionCode 14
-        versionName "1.3.5"
+        versionCode 16
+        versionName "1.3.7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

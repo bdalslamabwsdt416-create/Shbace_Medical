@@ -101,7 +101,7 @@ public class MainActivity extends BridgeActivity {
         web.setBackgroundColor(APP_BG);
         web.setOverScrollMode(View.OVER_SCROLL_NEVER); // no stretch/glow at scroll ends
         web.addJavascriptInterface(new InsetsBridge(), "ShbaceInsets");
-        nativeBridge = new ShbaceNative(this);
+        nativeBridge = new ShbaceNative(this, web);
         web.addJavascriptInterface(nativeBridge, "ShbaceNative"); // file, print, haptics, TTS, timer service and sharing bridge
 
         final View content = findViewById(android.R.id.content);
