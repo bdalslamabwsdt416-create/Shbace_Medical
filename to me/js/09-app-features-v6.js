@@ -2327,6 +2327,10 @@ window.qcApplyDraft=function(){
  QC=qzClone(QCD);qcSave();QCD=qzClone(QC);QCD_DIRTY=false;const countInput=document.getElementById('qzCount');if(countInput)countInput.value=QCD.count;qcdUpdateUI();
  const st=document.getElementById('qcd-status');if(st)st.textContent='✓ Settings applied and saved. Your quiz is ready.';
 };
+function qzNavigate(route){
+ try{if(typeof window.__shbNavTap==='function'){window.__shbNavTap(route);return true}}catch(e){}
+ try{appPage=route;renderAppDemo();return true}catch(e){return false}
+}
 const qcdSeg=(key,items,wrap)=>`<div class="seg wide"${wrap?' style="flex-wrap:wrap"':''}>${items.map(([v,l])=>`<button type="button" data-qcd-key="${key}" data-qcd-value="${v}" class="${QCD[key]===v?'on':''}" onclick="qcDraftSet('${key}','${v}')">${l}</button>`).join('')}</div>`;
 quizView=function(){
  QCD=qzClone(QC);QCD_DIRTY=false;
@@ -2337,7 +2341,7 @@ const QG=gradeHasPediatrics()?quizGroups():[],QBK=cfgBanks(QCD),gOn=g=>g.ids.som
  const bankChips=[['all','All banks']].concat(BANK_OPTS.filter(o=>o[0]!=='all')).map(([k,l])=>`<button type="button" class="chip qcd-bank${(k==='all'?!QBK.length:QBK.includes(k))?' on':''}" data-qcd-bank="${k}" aria-pressed="${k==='all'?!QBK.length:QBK.includes(k)}" onclick="qcDraftToggle('banks','${k}')">${bankIcon(k)}<span>${esc(l)}</span></button>`).join('');
  const specButtons=QG.map(g=>`<button type="button" class="chip qcd-spec${gOn(g)?' on':''}" data-qcd-group="${esc(g.key)}"${groupHas(g,QBK)?'':' style="display:none"'} onclick="qcDraftToggle('group','${esc(g.key)}')">${esc(g.name)}</button>`).join('');
  const topicPanels=QG.map(g=>{const topics=groupTopicsFor(g,QBK);if(!topics.length)return '';return `<details class="qzd qcd-topics" data-qcd-topic-panel="${esc(g.key)}" ${gOn(g)&&groupHas(g,QBK)?'':'hidden'}><summary>${esc(g.name)} topics <small data-qcd-topic-count="${esc(g.key)}">${topics.filter(t=>QCD.topics.includes(t[0])).length||'all'}${topics.some(t=>QCD.topics.includes(t[0]))?' selected':''}</small></summary>${topics.map(t=>`<label class="qzt"><input type="checkbox" data-qcd-topic="${t[0]}" ${QCD.topics.includes(t[0])?'checked':''} onchange="qcDraftToggle('topics',${t[0]})"><span>${esc(t[1])}</span></label>`).join('')}<p class="meta">No topic selected means the whole system. Banks without topic labels are matched by the topic name inside the question.</p></details>`;}).join('');
- return `${appHeader('Quiz')}<div class="rs quiz-premium"><h1>Quiz mode</h1><p class="sub">Choose everything first. Your selections are saved together only when you confirm.</p>${resume}${QZ.attempts.length?`<button type="button" class="btn block qz-history" style="margin-bottom:10px" onclick="appPage='quizhistory';renderAppDemo()">Quiz history · ${QZ.attempts.length}</button>`:''}
+ return `${appHeader('Quiz')}<div class="rs quiz-premium"><h1>Quiz mode</h1><p class="sub">Choose everything first. Your selections are saved together only when you confirm.</p>${resume}${QZ.attempts.length?`<button type="button" class="btn block qz-history" style="margin-bottom:10px" onclick="qzNavigate('quizhistory')">Quiz history · ${QZ.attempts.length}</button>`:''}
  <section class="card setcard qz-config"><div class="qz-section-head"><span class="qz-step">01</span><div><h3>Question source</h3><small>Choose where your questions come from</small></div></div>
   <div class="setrow qz-bank-row"><b>Question banks</b><small>Pick one or more banks, or keep All banks.</small><div class="chips qcd-banks">${bankChips}</div></div>
   ${qcdSeg('scope',[['all','All questions'],['sel','By System'],['custom','My study list']])}
@@ -2361,9 +2365,9 @@ window.qzStart=function(){
  const go=()=>{const n=qzEff(pool.length,QC);const ids=(QC.order==='random'?shuffle(pool).slice(0,n):pool.slice(0,n)).map(q=>q.id);
   const now=Date.now(),mins=QC.mins||n;
   QZ.active={id:'A'+now.toString(36),start:now,scope:QC.scope,mode:QC.mode,fb:QC.fb,order:QC.order,ids,ans:{},mark:{},idx:0,limit:QC.mode==='timed'?mins*60000:0,deadline:QC.mode==='timed'?now+mins*60000:0,spent:0,kind:'new',cfg:{scope:QC.scope,banks:QC.banks.slice(),specs:QC.scope==='sel'?QC.specs.slice():[],topics:QC.scope==='sel'?QC.topics.slice():[],filt:QC.scope==='custom'?QC.filt:null}};
-  qcSave();qzSave();qzPal=false;appPage='quizrun';renderAppDemo()};
+  qcSave();qzSave();qzPal=false;qzNavigate('quizrun')};
  if(QZ.active)confirmBox({title:'Replace the quiz in progress?',text:'Starting a new quiz discards the unfinished one. It will not be counted in your statistics.',ok:'Start new',danger:true},go);else go();};
-window.qzResume=function(){if(QZ.active){appPage='quizrun';renderAppDemo()}};
+window.qzResume=function(){if(QZ.active)qzNavigate('quizrun')};
 window.qzDiscard=function(){confirmBox({title:'Discard this quiz?',text:'The unfinished quiz will be deleted and will not be counted in your statistics.',ok:'Discard',danger:true},()=>{QZ.active=null;qzSave();renderAppDemo()})};
 /* ---- engine ---- */
 const fmtT=ms=>{ms=Math.max(0,ms);const s=Math.ceil(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60);return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(s%60).padStart(2,'0')};
@@ -2380,7 +2384,7 @@ quizRunView=function(){const A=QZ.active;if(!A)return quizView();
  <article class="qcard${anim?' qzin':''}"><div class="qtop"><span class="qid">${q.id}</span><button type="button" class="qa ${A.mark[q.id]?'on':''}" onclick="qzMark()"><span>⚑</span>${A.mark[q.id]?'Marked for review':'Mark for review'}</button></div><div class="qtopic">${esc(TOPIC_NAME[q.topic])}</div>${qUnsure(q)?'<div class="qwarn" role="note"><b>\u26a0 Needs Review / Verification</b><span>This question or its answer key is not confirmed.</span></div>':''}<h3 class="qstem">Q${A.idx+1}. ${esc(QSTEM(q))}</h3><div class="qopts">${opts}</div>${fb}${sel!==undefined&&!shown?'<button type="button" class="btn" style="margin-top:4px" onclick="qzPick(-1)">Clear answer</button>':''}</article>
  <div class="qnav"><button type="button" class="btn" onclick="qzGo(-1)" ${A.idx===0?'disabled':''}>← Previous</button><button type="button" class="btn" onclick="qzTogglePal()">${qzPal?'Hide':'Questions'}</button><button type="button" class="btn primary" onclick="qzGo(1)" ${A.idx>=total-1?'disabled':''}>Next →</button></div>
  ${qzPal?`<div class="qpal">${A.ids.map((id,i)=>`<button type="button" class="${st(i).trim()}" onclick="qzJump(${i})">${i+1}</button>`).join('')}</div><p class="meta"><span class="lg ans"></span>Answered <span class="lg mk"></span>Marked <span class="lg"></span>Unanswered</p>`:''}
- <button type="button" class="btn block" style="margin-top:14px" onclick="appPage='quiz';renderAppDemo()">Pause &amp; exit \u2014 progress is saved</button><button type="button" class="btn danger block" style="margin-top:10px" onclick="qzSubmitAsk()">Submit quiz</button></div>`};
+ <button type="button" class="btn block" style="margin-top:14px" onclick="qzNavigate('quiz')">Pause &amp; exit \u2014 progress is saved</button><button type="button" class="btn danger block" style="margin-top:10px" onclick="qzSubmitAsk()">Submit quiz</button></div>`};
 const qzRe=()=>{if(appPage==='quizrun')renderAppDemo()};
 window.qzPick=function(i){const A=QZ.active;if(!A)return;const id=A.ids[A.idx];
  if(i<0||A.ans[id]===i){if(A.fb==='instant'&&A.ans[id]!==undefined)return;delete A.ans[id]}else{if(A.fb==='instant'&&A.ans[id]!==undefined)return;A.ans[id]=i}qzSave();qzRe()};
@@ -2400,10 +2404,10 @@ function qzFinish(reason){const A=QZ.active;if(!A)return;
  if(!QZ.attempts.some(a=>a.id===at.id))QZ.attempts.unshift(at);QZ.attempts=QZ.attempts.slice(0,200);QZ.active=null;qzSave();
  qzViewId=at.id;qzRevF='all';qzBack=null;const p=Math.round(correct*100/items.length);
  addNotif('quiz-'+at.id,reason==='expired'?'Timed quiz ended — time expired':'Quiz completed',`${correct} / ${items.length} correct (${p}%)${at.unanswered?' · '+at.unanswered+' unanswered':''}`,'quizresult',at.id);
- appPage='quizresult';renderAppDemo()}
+ qzNavigate('quizresult')}
 /* M-07: questions removed from the bank must not block finishing a saved quiz */
 {const _qf=qzFinish;qzFinish=function(reason){const A=QZ.active;if(A&&Array.isArray(A.ids)){try{const miss=A.ids.filter(id=>!QBY.get(id));if(miss.length){A.ids=A.ids.filter(id=>QBY.get(id));miss.forEach(id=>{if(A.ans)delete A.ans[id];if(A.mark)delete A.mark[id]});
- if(!A.ids.length){QZ.active=null;qzSave();try{toast('This quiz used questions that are no longer in the bank, so it was closed.')}catch(e){}appPage='quiz';renderAppDemo();return}}}catch(e){}}return _qf(reason)}}
+ if(!A.ids.length){QZ.active=null;qzSave();try{toast('This quiz used questions that are no longer in the bank, so it was closed.')}catch(e){}qzNavigate('quiz');return}}}catch(e){}}return _qf(reason)}}
 let qzLast=Date.now(),qzTick=0;
 setInterval(()=>{const now=Date.now(),d=now-qzLast;qzLast=now;const A=QZ.active;if(!A)return;
  if(appPage==='quizrun'&&!document.hidden&&d>0&&d<5000){A.spent=(A.spent||0)+d;if(++qzTick%20===0)qzSave();const x=$('#qzElapsed');if(x)x.textContent=fmtDur(A.spent)}
@@ -2411,7 +2415,7 @@ setInterval(()=>{const now=Date.now(),d=now-qzLast;qzLast=now;const A=QZ.active;
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&QZ.active)qzSave()});addEventListener('pagehide',()=>{if(QZ.active)qzSave()});
 /* ---- results ---- */
 window.qzRevSet=function(f){qzRevF=f;renderAppDemo()};
-window.qzOpen=function(id){if(!QZ.attempts.some(a=>a.id===id))return;qzViewId=id;appPage='quizresult';renderAppDemo()};
+window.qzOpen=function(id){if(!QZ.attempts.some(a=>a.id===id))return;qzViewId=id;qzNavigate('quizresult')};
 /* ===== Unit 3: Quiz results, actions, history (Quiz data only: QKEY store; never mixes Question Bank answers or Smart Review) ===== */
 const fmtDur=ms=>{const s=Math.max(0,Math.round(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return h?`${h}:${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}`:`${m}:${String(x).padStart(2,'0')}`};
 const qzDur=a=>(a.mode==='timed'||a.spent==null)?Math.max(0,a.end-a.start):a.spent;
@@ -2429,16 +2433,16 @@ const qzTypeTxt=a=>`${a.mode==='timed'?'Timed':'Practice'} · ${a.fb==='end'?'fe
 function qzBegin(ids,base,kind){const go=()=>{const now=Date.now(),timed=base.mode==='timed';
   const mins=timed?(base.limit?Math.max(1,Math.round(base.limit/60000*ids.length/Math.max(1,base.items?base.items.length:ids.length))):ids.length):0;
   QZ.active={id:'A'+now.toString(36),start:now,scope:base.scope||'all',mode:base.mode,fb:base.fb,order:base.order,ids,ans:{},mark:{},idx:0,limit:timed?mins*60000:0,deadline:timed?now+mins*60000:0,cfg:base.cfg||null,from:base.id||null,kind,spent:0};
-  qzSave();qzPal=false;qzAnim=false;appPage='quizrun';renderAppDemo()};
+  qzSave();qzPal=false;qzAnim=false;qzNavigate('quizrun')};
  if(QZ.active)confirmBox({title:'Replace the quiz in progress?',text:'Starting this quiz discards the unfinished one. It will not be counted in your statistics.',ok:'Start new',danger:true},go);else go()}
 window.qzRetake=function(id){const a=QZ.attempts.find(x=>x.id===id);if(!a)return;const ids=a.items.map(i=>i.id).filter(i=>QBY.has(i));if(!ids.length)return;qzBegin(a.order==='random'?shuffle(ids):ids,a,'retake')};
 window.qzRetryWrong=function(id){const a=QZ.attempts.find(x=>x.id===id);if(!a)return;const ids=a.items.filter(i=>i.sel>=0&&!i.ok&&QBY.has(i.id)).map(i=>i.id);if(!ids.length)return;qzBegin(a.order==='random'?shuffle(ids):ids,a,'retry')};
 window.qzRevMarked=function(){qzRevF='mk';renderAppDemo();setTimeout(()=>{const e=$('#qzRevTop');e&&e.scrollIntoView({block:'start'})},60)};
-window.qzTopicQuiz=function(spec,topic){QC.scope='sel';QC.bank='all';QC.banks=[];QC.specs=[spec];QC.topics=[topic];qcSave();appPage='quiz';renderAppDemo()};
-window.qzWeakQuiz=function(id){const a=QZ.attempts.find(x=>x.id===id);if(!a)return;const g=qzAgg(a.items),w=Object.values(g.tp).filter(o=>qzTier(o)==='weak');if(!w.length)return;QC.scope='sel';QC.bank='all';QC.banks=[];QC.specs=[...new Set(w.map(o=>o.spec))];QC.topics=w.map(o=>o.id);qcSave();appPage='quiz';renderAppDemo()};
-window.qzOpen=function(id,from){if(!QZ.attempts.some(a=>a.id===id))return;qzViewId=id;qzRevF='all';qzBack=from||null;appPage='quizresult';renderAppDemo()};
+window.qzTopicQuiz=function(spec,topic){QC.scope='sel';QC.bank='all';QC.banks=[];QC.specs=[spec];QC.topics=[topic];qcSave();qzNavigate('quiz')};
+window.qzWeakQuiz=function(id){const a=QZ.attempts.find(x=>x.id===id);if(!a)return;const g=qzAgg(a.items),w=Object.values(g.tp).filter(o=>qzTier(o)==='weak');if(!w.length)return;QC.scope='sel';QC.bank='all';QC.banks=[];QC.specs=[...new Set(w.map(o=>o.spec))];QC.topics=w.map(o=>o.id);qcSave();qzNavigate('quiz')};
+window.qzOpen=function(id,from){if(!QZ.attempts.some(a=>a.id===id))return;qzViewId=id;qzRevF='all';qzBack=from||null;qzNavigate('quizresult')};
 const qzRowHTML=(name,o,extra)=>{const p=pct(o.c,o.n),t=qzTier(o);return `<div class="strow"><div><b>${esc(name)}</b><small>${o.c}/${o.n} correct${o.w?` · ${o.w} incorrect`:''}${o.u?` · ${o.u} unanswered`:''}${extra||''}</small></div><span>${p}%</span><div class="bar"><span style="width:${p}%"></span></div>${t==='few'?'':`<small class="qtier ${t}">${QZ_TIER_LBL[t]}</small>`}</div>`};
-quizResultView=function(){const at=QZ.attempts.find(a=>a.id===qzViewId)||QZ.attempts[0];if(!at)return `${appHeader('Quiz result')}<div class="rs"><h1>Quiz result</h1><div class="card setcard"><p class="meta">No completed quiz yet.</p><button type="button" class="btn primary block" onclick="appPage='quiz';renderAppDemo()">Build a quiz</button></div></div>`;
+quizResultView=function(){const at=QZ.attempts.find(a=>a.id===qzViewId)||QZ.attempts[0];if(!at)return `${appHeader('Quiz result')}<div class="rs"><h1>Quiz result</h1><div class="card setcard"><p class="meta">No completed quiz yet.</p><button type="button" class="btn primary block" onclick="qzNavigate('quiz')">Build a quiz</button></div></div>`;
  const n=at.items.length,p=pct(at.correct,n),dur=qzDur(at),answered=at.correct+at.incorrect,g=qzAgg(at.items);
  const flt=i=>qzRevF==='all'||(qzRevF==='wrong'&&i.sel>=0&&!i.ok)||(qzRevF==='un'&&i.sel<0)||(qzRevF==='mk'&&i.mk);
  const list=at.items.map((it,ix)=>[it,ix]).filter(([it])=>flt(it));
@@ -2464,7 +2468,7 @@ quizResultView=function(){const at=QZ.attempts.find(a=>a.id===qzViewId)||QZ.atte
  <h3 id="qzRevTop" style="margin:16px 0 8px">Review all questions</h3>
  <div class="seg wide" style="margin-bottom:12px;flex-wrap:wrap">${[['all','All'],['wrong','Incorrect'],['un','Unanswered'],['mk','Marked']].map(([v,l])=>`<button type="button" class="${qzRevF===v?'on':''}" onclick="qzRevSet('${v}')">${l}</button>`).join('')}</div>
  ${list.length?list.map(([it,ix])=>{const q=QBY.get(it.id);if(!q)return `<div class="card qzr un"><b>Q${ix+1}</b> -- this question is no longer in the bank</div>`;return `<details class="card qzr ${it.sel<0?'un':it.ok?'ok':'no'}"><summary><b>Q${ix+1}</b> · ${it.sel<0?'Unanswered':it.ok?'Correct':'Incorrect'}${it.mk?' · ⚑ marked':''}<span>${esc(QSTEM(q))}</span></summary><div class="qopts">${q.o.map((t,i)=>`<div class="qopt ${i===q.k?'correct':i===it.sel?'incorrect':'dim'}"><i>${QLT(q,i)}</i><span>${esc(t)}${i===it.sel?' <em>(your answer)</em>':''}</span></div>`).join('')}</div><div class="qfb ${it.ok?'ok':'no'}"><b>Correct answer: ${QLT(q,q.k)}. ${esc(q.o[q.k])}${qUnsure(q)?' <em class="qunsure">(unconfirmed key)</em>':''}</b><p>Explanation: ${esc(q.ex||'No explanation available for this question.')}</p></div></details>`}).join(''):'<div class="card setcard"><p class="meta">Nothing in this filter.</p></div>'}
- <div class="setbtns"><button type="button" class="btn primary" onclick="appPage='quiz';renderAppDemo()">New quiz</button><button type="button" class="btn" onclick="appPage='quizhistory';renderAppDemo()">Quiz history</button></div></div>`};
+ <div class="setbtns"><button type="button" class="btn primary" onclick="qzNavigate('quiz')">New quiz</button><button type="button" class="btn" onclick="qzNavigate('quizhistory')">Quiz history</button></div></div>`};
 /* ---- Quiz history ---- */
 let qzHistF='all';
 window.qzHistSet=function(f){qzHistF=f;renderAppDemo()};
@@ -2472,7 +2476,7 @@ function qzMarkedAll(){const m=new Map();QZ.attempts.slice().reverse().forEach(a
 function qzHistoryView(){const A=QZ.attempts.filter(a=>qzHistF==='all'||a.mode===qzHistF),mk=qzMarkedAll();
  return `${appHeader('Quiz history')}<div class="rs"><h1>Quiz history</h1><p class="sub">${QZ.attempts.length} completed quiz${QZ.attempts.length===1?'':'zes'} · stored separately from Question Bank answers and Smart Review</p>
  <div class="seg wide" style="margin-bottom:10px">${[['all','All'],['practice','Practice'],['timed','Timed']].map(([v,l])=>`<button type="button" class="${qzHistF===v?'on':''}" onclick="qzHistSet('${v}')">${l}</button>`).join('')}</div>
- ${A.length?A.map(a=>{const n=a.items.length,p=pct(a.correct,n);return `<div class="card sc qzh" role="button" tabindex="0" onclick="qzOpen('${a.id}','history')" onkeydown="if(event.key==='Enter'){qzOpen('${a.id}','history')}"><div class="tpc-tx"><div class="eyebrow">${fmtDT(a.end)}</div><h3>${esc(qzSelText(a))}</h3><div class="meta">${qzTypeTxt(a)}${a.reason==='expired'?' · time expired':''}</div><div class="meta">${a.correct}/${n} correct · ${a.incorrect} incorrect · ${a.unanswered} unanswered${a.marked?' · ⚑ '+a.marked:''} · ${fmtDur(qzDur(a))}</div></div><b class="qzhp ${p>=80?'hi':p<60?'lo':''}">${p}%</b></div>`}).join(''):`<div class="card setcard"><p class="meta">${QZ.attempts.length?'No quizzes of this type yet.':'No completed quizzes yet. Finish a quiz and it will appear here with its date, type, selection, score and duration.'}</p><button type="button" class="btn primary block" onclick="appPage='quiz';renderAppDemo()">Build a quiz</button></div>`}
+ ${A.length?A.map(a=>{const n=a.items.length,p=pct(a.correct,n);return `<div class="card sc qzh" role="button" tabindex="0" onclick="qzOpen('${a.id}','history')" onkeydown="if(event.key==='Enter'){qzOpen('${a.id}','history')}"><div class="tpc-tx"><div class="eyebrow">${fmtDT(a.end)}</div><h3>${esc(qzSelText(a))}</h3><div class="meta">${qzTypeTxt(a)}${a.reason==='expired'?' · time expired':''}</div><div class="meta">${a.correct}/${n} correct · ${a.incorrect} incorrect · ${a.unanswered} unanswered${a.marked?' · ⚑ '+a.marked:''} · ${fmtDur(qzDur(a))}</div></div><b class="qzhp ${p>=80?'hi':p<60?'lo':''}">${p}%</b></div>`}).join(''):`<div class="card setcard"><p class="meta">${QZ.attempts.length?'No quizzes of this type yet.':'No completed quizzes yet. Finish a quiz and it will appear here with its date, type, selection, score and duration.'}</p><button type="button" class="btn primary block" onclick="qzNavigate('quiz')">Build a quiz</button></div>`}
  ${mk.length?`<details class="card setcard"><summary style="font-weight:800;font-size:16px;cursor:pointer">Marked for review in quizzes (${mk.length})</summary><p class="meta">Questions you flagged during quizzes. This list is separate from Saved and Smart Review.</p>${mk.map(id=>{const q=QBY.get(id);return `<div class="strow hist" onclick="openQ('${id}')"><div><b>${esc(q.id)}</b><small>${esc(QSTEM(q).slice(0,110))}</small></div></div>`}).join('')}</details>`:''}
  ${QZ.attempts.length?`<button type="button" class="btn danger block" style="margin-top:12px" onclick="qzClearAsk()">Delete quiz history</button>`:''}</div>`}
 /* ---- stats from completed attempts ---- */
@@ -2493,7 +2497,7 @@ function stSpark(A){const L=A.slice(0,20).reverse();if(L.length<2)return '';cons
  const pts=L.map((a,i)=>`${px(i).toFixed(1)},${py(pct(a.correct,a.items.length)).toFixed(1)}`).join(' ');
  return `<svg class="spark" viewBox="0 0 ${W} ${H}" role="img" aria-label="Quiz scores over time, oldest to newest: ${L.map(a=>pct(a.correct,a.items.length)+'%').join(', ')}"><g stroke="rgba(138,160,184,.25)" stroke-width="1"><line x1="18" x2="${W-6}" y1="${py(0)}" y2="${py(0)}"/><line x1="18" x2="${W-6}" y1="${py(50)}" y2="${py(50)}"/><line x1="18" x2="${W-6}" y1="${py(100)}" y2="${py(100)}"/></g><g fill="#8aa0b8" font-size="9"><text x="0" y="${py(100)+3}">100</text><text x="2" y="${py(50)+3}">50</text><text x="6" y="${py(0)+3}">0</text></g><polyline fill="none" stroke="#55b4ff" stroke-width="2.2" stroke-linejoin="round" points="${pts}"/>${L.map((a,i)=>`<circle cx="${px(i).toFixed(1)}" cy="${py(pct(a.correct,a.items.length)).toFixed(1)}" r="3.2" fill="#55b4ff"/>`).join('')}</svg>`}
 function stQuizHTML(){const A=QZ.attempts;
- if(!A.length)return `${stSrc('Source: completed quizzes only')}<div class="card setcard"><h3>No quiz results yet</h3><p class="meta">Quiz Statistics are calculated from quizzes you submit in Quiz mode. Question Bank answers and Smart Review are tracked in their own tabs.</p><button type="button" class="btn primary block" onclick="appPage='quiz';renderAppDemo()">Build a quiz</button></div>`;
+ if(!A.length)return `${stSrc('Source: completed quizzes only')}<div class="card setcard"><h3>No quiz results yet</h3><p class="meta">Quiz Statistics are calculated from quizzes you submit in Quiz mode. Question Bank answers and Smart Review are tracked in their own tabs.</p><button type="button" class="btn primary block" onclick="qzNavigate('quiz')">Build a quiz</button></div>`;
  let pres=0,cor=0,inc=0,un=0;const all=[];A.forEach(a=>{pres+=a.items.length;cor+=a.correct;inc+=a.incorrect;un+=a.unanswered;all.push(...a.items)});
  const sc=A.map(a=>pct(a.correct,a.items.length)),avg=Math.round(sc.reduce((x,y)=>x+y,0)/sc.length),best=Math.max(...sc),g=qzAgg(all);
  const sp=Object.values(g.sp).sort((a,b)=>pct(a.c,a.n)-pct(b.c,b.n)).map(o=>qzRowHTML(SPEC_NAME[o.id]||o.id,o)).join('');
@@ -2507,7 +2511,7 @@ function stQuizHTML(){const A=QZ.attempts;
  ${A.length>1?`<div class="card setcard"><h3>Performance over time</h3>${stSpark(A)}<p class="meta">Score of each quiz, oldest to newest (last ${Math.min(A.length,20)}).</p></div>`:'<div class="card setcard"><h3>Performance over time</h3><p class="meta">Complete at least two quizzes to see your trend.</p></div>'}
  <div class="card setcard"><h3>By medical system</h3>${sp}</div>
  <details class="card setcard"><summary style="font-weight:800;font-size:17px;cursor:pointer">By topic (${tpAll.length}) — weakest first</summary>${tp}</details>
- <div class="card setcard"><h3>Recent quizzes</h3>${recent}<button type="button" class="btn block" style="margin-top:12px" onclick="appPage='quizhistory';renderAppDemo()">Open full quiz history (${A.length})</button></div>`}
+ <div class="card setcard"><h3>Recent quizzes</h3>${recent}<button type="button" class="btn block" style="margin-top:12px" onclick="qzNavigate('quizhistory')">Open full quiz history (${A.length})</button></div>`}
 function stBankHTML(){const ans=Object.keys(S.ans).filter(id=>QBY.has(id)),tot=QB.length;let c=0;ans.forEach(id=>{if(S.ans[id].ok)c++});const w=ans.length-c;
  const spRows=(gradeHasPediatrics()?Object.keys(REAL.spec):[]).map(k=>{const l=QB.filter(q=>q.spec===k),a=l.filter(q=>S.ans[q.id]),ok=a.filter(q=>S.ans[q.id].ok).length;return `<div class="strow"><div><b>${esc(SPEC_NAME[k]||REAL.spec[k].label||k)}</b><small>${a.length}/${l.length} questions answered${a.length?` · ${pct(ok,a.length)}% accurate`:''}</small></div><span>${pct(a.length,l.length)}%</span><div class="bar"><span style="width:${pct(a.length,l.length)}%"></span></div></div>`}).join('');
  const T=[];(gradeHasPediatrics()?Object.entries(REAL.spec):[]).forEach(([k,sp])=>sp.topics.forEach(([id,nm,c0,sy])=>{const l=QB.filter(q=>q.topic===id),a=l.filter(q=>S.ans[q.id]),ok=a.filter(q=>S.ans[q.id].ok).length;if(l.length)T.push({id,spec:k,nm,sy,n:l.length,a:a.length,ok,st:a.length===0?'new':a.length>=l.length?'done':'prog'})}));
@@ -2688,13 +2692,13 @@ PAGES.notifs=notifsView;PAGES.quizhistory=qzHistoryView;PAGES.timer=timerView;
 window.wkPractice=function(){const tp=stTopicPerf();if(!tp.length)return;
  let pick=tp.filter(t=>t.acc<75);if(!pick.length)pick=tp.slice(0,3);pick=pick.slice(0,5);
  const specs=[...new Set(pick.map(t=>(QB.find(q=>q.topic===t.id)||{}).spec).filter(Boolean))];
- QC.scope='sel';QC.bank='all';QC.banks=[];QC.specs=specs;QC.topics=pick.map(t=>t.id);qcSave();appPage='quiz';renderAppDemo()};
+ QC.scope='sel';QC.bank='all';QC.banks=[];QC.specs=specs;QC.topics=pick.map(t=>t.id);qcSave();qzNavigate('quiz')};
 window.wkTopic=function(id){const q=QB.find(x=>x.topic===id);if(q)qzTopicQuiz(q.spec,id)};
 function weakView(){const tp=stTopicPerf(),n=tp.length,wk=tp.filter(t=>t.acc<50).length,mid=tp.filter(t=>t.acc>=50&&t.acc<75).length,ok=n-wk-mid;
  const tier=a=>a<50?['Weak','#ff8c8c']:a<75?['Needs work','#ffb454']:['Strong','#5fe0cf'];
  const rows=tp.map(t=>{const [lb,col]=tier(t.acc);return `<button type="button" class="card setcard wk-row" onclick="wkTopic('${t.id}')" aria-label="Practice ${esc(t.name)}"><div class="wk-top"><b>${esc(t.name)}</b><span class="wk-tag" style="color:${col};border-color:${col}55">${lb}</span></div><div class="bar" style="margin:8px 0 6px"><span style="width:${t.acc}%;${t.acc<50?'background:linear-gradient(90deg,#ff8c8c,#ffb454)':''}"></span></div><small class="meta">${t.acc}% · ${t.c} correct · ${t.a-t.c} wrong · ${t.a} of ${t.tot} answered</small></button>`}).join('');
  const hero=n?`<div class="card ov-sr"><div class="ov-srh"><div><b class="ov-srn">${wk}</b><span> weak topic${wk===1?'':'s'}</span></div></div><div class="ov-chips"><span class="ov-chip hard">Weak · ${wk}</span><span class="ov-chip medium">Needs work · ${mid}</span><span class="ov-chip easy">Strong · ${ok}</span></div><button type="button" class="btn primary block" style="margin-top:12px" onclick="wkPractice()">Practice weakest topics</button></div>`
-  :`<div class="card setcard"><h3>No data yet</h3><p class="meta">Answer some questions and your weakest topics will appear here, ranked from weakest to strongest.</p><button type="button" class="btn primary block" onclick="appPage='quiz';renderAppDemo()">Start a quiz</button></div>`;
+  :`<div class="card setcard"><h3>No data yet</h3><p class="meta">Answer some questions and your weakest topics will appear here, ranked from weakest to strongest.</p><button type="button" class="btn primary block" onclick="qzNavigate('quiz')">Start a quiz</button></div>`;
  return `${appHeader('Weak areas')}<div class="rs"><h1>Weak areas</h1><p class="sub">Topics ranked weakest first, from your own answers.</p>${hero}${n?`<h3 class="ov-h">All topics you started</h3>${rows}<p class="meta" style="text-align:center;margin:8px 4px 12px">Tap a topic to practise it. Weak &lt; 50% · Needs work 50–74% · Strong 75%+</p>`:''}</div>`}
 PAGES.weak=weakView;
 
