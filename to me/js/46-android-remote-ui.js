@@ -458,19 +458,7 @@
     groups: makeSidebarGroups()
   };
 
-  function applyAppearance() {
-    var appearance = ui.appearance && typeof ui.appearance === 'object' ? ui.appearance : {};
-    var root = document.documentElement;
-    var colorPattern = /^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$/;
-    if (colorPattern.test(String(appearance.accentColor || ''))) {
-      root.style.setProperty('--mint', String(appearance.accentColor));
-      root.style.setProperty('--accent', String(appearance.accentColor));
-    }
-    if (colorPattern.test(String(appearance.accentSoft || ''))) {
-      root.style.setProperty('--mint-soft', String(appearance.accentSoft));
-    }
-  }
-  applyAppearance();
+  // Appearance tokens are owned by the V3 Theme Engine in the remote-control runtime.
 
   function injectAnnouncements() {
     var root = document.querySelector('.rs');
