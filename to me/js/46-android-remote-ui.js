@@ -86,7 +86,7 @@
           itemIds[item.id] = true;
         }
         if (item.open != null && typeof item.open !== 'boolean') return false;
-        return item.blocks.every(function (child) { return validateBlock(child, depth + 1); });
+        return item.blocks.every(function (child) { return validateBlock(child, depth + 1, budget); });
       });
     }
     if (['heading', 'text', 'notice', 'divider', 'image', 'resourceList',
