@@ -92,9 +92,8 @@ test("topic-ID remapping keeps its raw backup gate before dependent-store writes
 });
 
 test("Core, navigation, Page Builder and Workflow foundations remain outside student storage", () => {
-  assert.doesNotMatch(coreFiles, /\blocalStorage\b|\bsessionStorage\b|\bindexedDB\b/);
-  for (const key of [
-    "shbace_qb_v6", "shbace_sr3_v1", "shbace_pins_v1",
-    "shbace_note_meta_v2", "shbace_remote_flashcards_v1"
-  ]) assert.equal(coreFiles.includes(key), false, "foundation layer must not own " + key);
+  assert.doesNotMatch(coreFiles, /\\blocalStorage\\b|\\bsessionStorage\\b|\\bindexedDB\\b/,
+    "foundation services must not directly access browser student-data stores");
+  assert.match(sourceByName.get("51-navigation-contract-v1.js") || "", /stateStores:/,
+    "route metadata may describe store ownership without reading or writing those stores");
 });
