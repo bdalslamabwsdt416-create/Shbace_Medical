@@ -155,8 +155,11 @@
   }
 
   function conditionsMatch(rule, payload) {
+    var values = payload && typeof payload === 'object' && !Array.isArray(payload) ? payload : {};
     return rule.conditions.every(function (condition) {
-      var actual = payload && payload[condition.field];
+      if (!Object.prototype.hasOwnProperty.call(values, condition.field)) return false;
+      var actual = values[condition.field];
+      if (!scalarString(actual)) return false;
       if (condition.op === 'equals') return actual === condition.value;
       if (condition.op === 'notEquals') return actual !== condition.value;
       if (condition.op === 'oneOf') return condition.value.indexOf(actual) >= 0;

@@ -16,7 +16,7 @@
 | 3 | Remote Configuration Engine | **Core content policy v1 + verified last-known-good rollback implemented; signed manifest pending key provisioning** | Declarative schemas, monotonic content versions, APK compatibility, rollback integrity tests, feature policies and later signed-config verification. |
 | 4 | UI and Navigation Engine | **Partial; shared route dispatch integrated for Android bottom navigation, drawer and remote UI; device matrix pending** | Built-in route adapter, all supported nav surfaces and back/scroll invariants covered by parity tests. |
 | 5 | Page Builder | **Partial; shared bounded renderer v2 with templates, slots and fail-closed safe visibility conditions** | Visual editor, template gallery, preview/publish workflow, authoring permissions and real-device visual acceptance. |
-| 6 | Workflow Engine | **Partial; local v1 with navigation triggers, bounded scalar conditions and allow-listed actions** | Broader app event coverage, rule editor, simulation/trace UI and additional reviewed action contracts. |
+| 6 | Workflow Engine | **Partial; local v1 with navigation triggers, bounded scalar conditions that reject missing/invalid event fields, and allow-listed actions** | Broader app event coverage, rule editor, simulation/trace UI and additional reviewed action contracts. |
 | 7 | Theme Engine | **Partial; single-owner appearance contract v1 + semantic token bridge v1.1; shared light-mode card surfaces migrated** | Remaining built-in component migration, full preference/accessibility matrix, live preview/editor, and real-device visual acceptance. |
 | 8 | Modular Architecture | **Module Registry v1 implemented; legacy extraction pending** | Existing engines extracted one at a time behind adapters and parity tests. |
 | 9 | Quiz, Smart Review and Flashcards | **Existing features partial against target** | New question types, scheduler strategy contract, authoring and learning-history preservation. |
@@ -39,6 +39,7 @@
 - Core Runtime v1: event bus, service registry and bounded diagnostics.
 - Module Registry v1: dependency validation, ordered initialization and reverse-order cleanup.
 - Page Builder v1: Android-only bounded recursive renderer for stack/grid layouts, tabs and accordion sections; existing leaf blocks remain supported.
+- Workflow Engine v1 uses an explicit event-field presence/type gate; negative comparisons cannot pass when the event payload field is absent or invalid.
 - Module manifest for all 25 major subsystems.
 - Page Builder v2: shared local Android renderer for bounded nested section/grid/row layouts, tabs, accordions, template slots and fixed content-presence conditions. Unknown or unavailable condition data now fails closed even for negated conditions; known-empty lists retain valid negative matching. No remote executable code.
 - Theme Engine v1: centralized remote appearance ownership in Android Remote Control; bounded palette, font scale, line height, spacing, radius and density tokens with validator coverage and local theme-mode preservation.
