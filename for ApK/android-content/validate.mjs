@@ -235,6 +235,8 @@ if (ui != null) {
     'dedication', 'changelog', 'feedback', 'rate', 'pinned', 'saved', 'wrong', 'reported',
     'notifs', 'timer', 'weak', 'menu']);
   const builtinBanks = new Set(['all', 'aj', 'previous', 'nelson', 'kasr', 'clinical', 'egyptian']);
+  assert(ui.pages == null || Array.isArray(ui.pages), 'catalog.ui.pages must be an array.');
+  assert(ui.templates == null || Array.isArray(ui.templates), 'catalog.ui.templates must be an array.');
   const pages = Array.isArray(ui.pages) ? ui.pages : [];
   assert(pages.length <= 40, 'Remote UI may define at most 40 pages.');
   const knownResources = new Set(resourceIds);
@@ -385,8 +387,10 @@ if (ui != null) {
       if (!block || typeof block !== 'object') continue;
       if (block.type === 'slot') output.add(String(block.name));
       if (Array.isArray(block.blocks)) collectTemplateSlots(block.blocks, output);
-      for (const item of (block.items || [])) {
-        if (item && Array.isArray(item.blocks)) collectTemplateSlots(item.blocks, output);
+      if (Array.isArray(block.items)) {
+        for (const item of block.items) {
+          if (item && Array.isArray(item.blocks)) collectTemplateSlots(item.blocks, output);
+        }
       }
     }
   }
@@ -407,9 +411,11 @@ if (ui != null) {
         'Templated page must provide a slots object: ' + page.id);
       const slots = slotsByTemplate.get(page.templateId);
       const slotKeys = Object.keys(page.slots);
+      const pageSlotBudget = { count: 0 };
       for (const name of slotKeys) {
         assert(slots.has(name), 'Page provides an unknown template slot "' + name + '": ' + page.id);
-        validateUiBlocks(page.slots[name], 'page ' + page.id + '.slots.' + name, { budget: { count: 0 } });
+        validateUiBlocks(page.slots[name], 'page ' + page.id + '.slots.' + name,
+          { budget: pageSlotBudget });
       }
     } else {
       validateUiBlocks(page.blocks, 'page ' + page.id);
