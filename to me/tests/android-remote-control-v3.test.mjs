@@ -36,7 +36,7 @@ test("Drawer retains base groups while supporting remote order and movement", ()
 test("Quiz and Smart Review expose explicit safe settings bridges", () => {
   assert.match(features, /__shbApplyRemoteQuizOptions/);
   assert.match(features, /__shbApplyRemoteSmartReviewOptions/);
-  assert.match(features, /policy==='enforce'/);
+  assert.match(features, /config\.policy!=='enforce'/);
 });
 
 test("Remote content validator includes V3 screen, navigation and feature schemas", () => {
