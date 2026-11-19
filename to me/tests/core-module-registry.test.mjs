@@ -174,3 +174,31 @@ test("module manifest covers the blueprint without overstating unfinished engine
 test("new architecture modules do not rewrite student stores or execute remote code", () => {
   assert.doesNotMatch(coreSource + registrySource, /localStorage\.|indexedDB\.|eval\s*\(|new Function\s*\(/);
 });
+
+
+test("module manifest has unique IDs, supported states and complete dependency references", () => {
+  const allowed = new Set(["implemented", "partial", "planned"]);
+  const ids = manifest.modules.map((module) => module.id);
+  assert.equal(new Set(ids).size, ids.length, "module IDs must be unique");
+  for (const module of manifest.modules) {
+    assert.match(module.id, /^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$/);
+    assert.ok(allowed.has(module.status), "unknown status for " + module.id);
+    for (const dependency of module.dependencies || []) {
+      assert.ok(ids.includes(dependency), "missing manifest dependency " + dependency);
+    }
+  }
+  const registryModule = manifest.modules.find((module) => module.id === "module-registry");
+  assert.deepEqual(registryModule.dependencies, ["core"]);
+});
+
+test("Module Registry binds returned dispose methods to their owning object", async () => {
+  const registry = createRuntime().window.SHBACEModuleRegistry;
+  const calls = [];
+  registry.register({
+    id: "module.bound-cleanup", version: "1.0.0",
+    initialize: () => ({ name: "owner", dispose: function () { calls.push(this.name); } })
+  });
+  assert.equal((await registry.initializeAll()).ok, true);
+  assert.equal((await registry.disposeAll()).ok, true);
+  assert.deepEqual(calls, ["owner"]);
+});
