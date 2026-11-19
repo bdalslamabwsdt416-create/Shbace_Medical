@@ -8,6 +8,7 @@ const scrollSource = read("../js/22-shb-scroll-keep-v17.js");
 const core = read("../js/09-app-features-v6.js");
 const css = read("../css/bundle-core.css");
 const collections = read("../js/35-pediatrics-collections.js");
+const iosPlanner = read("../js/33-ios-exam-planner.js");
 
 test("Back is created as a titled control and styled sticky", () => {
   assert.ok(core.includes("className='backb'"));
@@ -116,3 +117,11 @@ test("Previous Questions route key can distinguish its selected medical system",
   assert.ok(scrollSource.includes("String(q.spec||''),String(window.__SHB_PED_COLLECTION_SYSTEM__||'')"));
 });
 
+test("iOS Exam Planner navigation does not override route-aware app scroll restoration", () => {
+  assert.ok(iosPlanner.includes("var stack=[],lastPage=typeof appPage==='string'?appPage:'subjects',backing=false,popping=false;"),
+    "the iOS page-history stack remains active");
+  assert.ok(!iosPlanner.includes("scrollMemo"),
+    "the legacy page-only scroll memo must not restore phoneContent to zero");
+  assert.ok(scrollSource.includes("#phoneContent .app-shell>.app-scroll:not(.pg-ghost)"),
+    "the shared route-aware layer owns the actual app scroller");
+});
