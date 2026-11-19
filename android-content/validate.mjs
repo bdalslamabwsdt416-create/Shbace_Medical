@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { readFile, stat } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 
@@ -82,9 +82,9 @@ for (const system of catalog.systems) {
       'Invalid topic in system ' + system.id);
     assert(!topics.has(topic.id), 'Duplicate topic ID in ' + system.id + ': ' + topic.id);
     topics.set(topic.id, topic);
-    assetRef(topic.icon, new Set(listed.keys()), 'Topic icon ' + system.id + '/' + topic.id);
+    assetRef(topic.icon, listedPaths, 'Topic icon ' + system.id + '/' + topic.id);
   }
-  assetRef(system.icon, new Set(listed.keys()), 'System icon ' + system.id);
+  assetRef(system.icon, listedPaths, 'System icon ' + system.id);
   systems.set(system.id, { ...system, topicMap: topics });
 }
 
@@ -97,7 +97,7 @@ for (const bank of catalog.banks) {
   bankIds.add(bank.id);
   assert(validPath(bank.contentFile) && listed.has(bank.contentFile),
     'Bank file not listed in manifest: ' + bank.contentFile);
-  assetRef(bank.cover, new Set(listed.keys()), 'Bank cover ' + bank.id);
+  assetRef(bank.cover, listedPaths, 'Bank cover ' + bank.id);
   const source = await readJson(path.join(root, bank.contentFile));
   assert(source && ['shbace-remote-questions-v1', 'shbace-remote-mcq-bank-v1'].includes(source.schema),
     'Invalid question file schema: ' + bank.contentFile);
@@ -122,7 +122,7 @@ for (const bank of catalog.banks) {
     assert(Array.isArray(q.options) && q.options.length >= 2, 'Invalid options: ' + q.id);
     assert(Number.isInteger(q.correctIndex) && q.correctIndex >= 0 && q.correctIndex < q.options.length,
       'Invalid answer index: ' + q.id);
-    assetRef(q.image, new Set(listed.keys()), 'Question image ' + q.id);
+    assetRef(q.image, listedPaths, 'Question image ' + q.id);
   }
   totalQuestions += source.questions.length;
 }
@@ -136,7 +136,7 @@ for (const resource of (catalog.resources || [])) {
   assert(['pdf', 'audio', 'video', 'file', 'image'].includes(String(resource.type || '').toLowerCase()),
     'Unsupported resource type: ' + resource.id);
   assert(validPath(resource.file) && listed.has(resource.file), 'Resource file not listed in manifest: ' + resource.id);
-  assetRef(resource.cover, new Set(listed.keys()), 'Resource cover ' + resource.id);
+  assetRef(resource.cover, listedPaths, 'Resource cover ' + resource.id);
 }
 
 const deckIds = new Set();
@@ -148,7 +148,7 @@ for (const deck of (catalog.flashcardDecks || [])) {
   deckIds.add(deck.id);
   assert(validPath(deck.contentFile) && listed.has(deck.contentFile),
     'Flashcard file not listed in manifest: ' + deck.contentFile);
-  assetRef(deck.cover, new Set(listed.keys()), 'Flashcard cover ' + deck.id);
+  assetRef(deck.cover, listedPaths, 'Flashcard cover ' + deck.id);
   const source = await readJson(path.join(root, deck.contentFile));
   assert(source && source.schema === 'shbace-remote-flashcards-v1' &&
     Array.isArray(source.cards) && source.cards.length > 0 && source.cards.length <= 5000,
@@ -160,8 +160,8 @@ for (const deck of (catalog.flashcardDecks || [])) {
     cardIds.add(card.id);
     assert(typeof card.front === 'string' && card.front.trim(), 'Flashcard front is empty: ' + card.id);
     assert(typeof card.back === 'string' && card.back.trim(), 'Flashcard back is empty: ' + card.id);
-    assetRef(card.frontImage, new Set(listed.keys()), 'Flashcard front image ' + card.id);
-    assetRef(card.backImage, new Set(listed.keys()), 'Flashcard back image ' + card.id);
+    assetRef(card.frontImage, listedPaths, 'Flashcard front image ' + card.id);
+    assetRef(card.backImage, listedPaths, 'Flashcard back image ' + card.id);
   }
   totalFlashcards += source.cards.length;
 }
