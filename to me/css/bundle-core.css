@@ -874,6 +874,36 @@ body.sw-dragging .phone-content{overflow-x:clip}
 .sst-bar button.go{background:linear-gradient(180deg,#2f8bff,#1c5fd1);color:#DCE8F2}
 .sst-bar.running .sst-lab{color:#8ff0d2}.sst-bar.paused .sst-lab{color:#ffd27a}
 
+/* SHBACE semantic theme tokens v1.1 — shared roles for gradual component migration. */
+.phone{
+  --shb-theme-background:var(--bg);
+  --shb-theme-background-alt:var(--bg2);
+  --shb-theme-surface:var(--panel);
+  --shb-theme-surface-alt:var(--panel2);
+  --shb-theme-surface-muted:var(--panel2);
+  --shb-theme-text:var(--text);
+  --shb-theme-text-strong:var(--text);
+  --shb-theme-muted:var(--muted);
+  --shb-theme-soft:var(--muted);
+  --shb-theme-border:var(--line);
+  --shb-theme-border-strong:var(--line);
+  --shb-theme-accent:var(--mint);
+  --shb-theme-accent-strong:var(--mint2);
+  --shb-theme-accent-soft:rgba(94,182,255,.12);
+  --shb-theme-accent-wash:rgba(94,182,255,.08);
+  --shb-theme-success:var(--green);
+  --shb-theme-danger:var(--red);
+  --shb-theme-warning:var(--gold);
+  --shb-theme-shadow:var(--shadow);
+  --shb-theme-shadow-raised:var(--shadow);
+  --shb-theme-card-background:linear-gradient(155deg,#112a3d,#0c1a28);
+  --shb-theme-card-border:#284659;
+  --shb-theme-card-text:var(--text);
+  --shb-theme-card-muted:#a7bac6;
+  --shb-theme-card-shadow:none;
+  --shb-theme-card-radius:16px;
+}
+
 /* ===== shbace-premium-theme-system-v1 ===== */
 /* ================================================================
    SHBACE MEDICAL — PREMIUM THEME SYSTEM
@@ -902,6 +932,32 @@ body.sw-dragging .phone-content{overflow-x:clip}
   --shb-light-success:#16845d;
   --shb-light-danger:#c44d5a;
   --shb-light-gold:#a86b12;
+  --shb-theme-background:var(--shb-light-bg);
+  --shb-theme-background-alt:var(--shb-light-bg-2);
+  --shb-theme-surface:var(--shb-light-surface);
+  --shb-theme-surface-alt:var(--shb-light-surface-2);
+  --shb-theme-surface-muted:var(--shb-light-surface-3);
+  --shb-theme-text:var(--shb-light-text);
+  --shb-theme-text-strong:var(--shb-light-text-2);
+  --shb-theme-muted:var(--shb-light-muted);
+  --shb-theme-soft:var(--shb-light-soft);
+  --shb-theme-border:var(--shb-light-line);
+  --shb-theme-border-strong:var(--shb-light-line-strong);
+  --shb-theme-accent:var(--shb-light-blue);
+  --shb-theme-accent-strong:var(--shb-light-blue-2);
+  --shb-theme-accent-soft:var(--shb-light-blue-soft);
+  --shb-theme-accent-wash:var(--shb-light-blue-wash);
+  --shb-theme-success:var(--shb-light-success);
+  --shb-theme-danger:var(--shb-light-danger);
+  --shb-theme-warning:var(--shb-light-gold);
+  --shb-theme-shadow:var(--shb-light-shadow);
+  --shb-theme-shadow-raised:var(--shb-light-shadow-raised);
+  --shb-theme-card-background:linear-gradient(155deg,#fff 0%,#f7f9fc 100%);
+  --shb-theme-card-border:#dce5ee;
+  --shb-theme-card-text:#203750;
+  --shb-theme-card-muted:#536a82;
+  --shb-theme-card-shadow:var(--shb-light-shadow);
+  --shb-theme-card-radius:16px;
   color:var(--shb-light-text)!important;
   background-color:var(--shb-light-bg)!important;
   border-color:#dce5ee!important;
@@ -1061,10 +1117,10 @@ body.app-mode:has(.phone.light) .guide-content p{color:#5d7188!important}
 .phone.light .rs .decision>div,
 .phone.light .rs .menu-item,
 .phone.light .rs .setcard{
-  color:#203750!important;
-  background:linear-gradient(155deg,#fff 0%,#f7f9fc 100%)!important;
-  border:1px solid #dce5ee!important;
-  box-shadow:var(--shb-light-shadow)!important;
+  color:var(--shb-theme-card-text)!important;
+  background:var(--shb-theme-card-background)!important;
+  border:1px solid var(--shb-theme-card-border)!important;
+  box-shadow:var(--shb-theme-card-shadow)!important;
 }
 .phone.light .rs .card p,
 .phone.light .rs .app-card p,
@@ -1073,7 +1129,7 @@ body.app-mode:has(.phone.light) .guide-content p{color:#5d7188!important}
 .phone.light .rs .doc-section li,
 .phone.light .rs .feature-showcase p,
 .phone.light .rs .daily-mentor p,
-.phone.light .rs .daily-challenge p{color:#536a82!important}
+.phone.light .rs .daily-challenge p{color:var(--shb-theme-card-muted)!important}
 .phone.light .rs .app-stat small,
 .phone.light .rs .tool-card small{color:#647a91!important}
 .phone.light .rs .sic,
