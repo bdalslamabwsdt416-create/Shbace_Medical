@@ -677,7 +677,11 @@ window.gMore=function(){gLim+=40;const e=$('#gResults');e&&(e.innerHTML=searchRe
 window.gClear=function(){gq='';gBank='all';gSpec='all';gTag='all';gSrc='all';gTopic='all';gSys='all';gLim=40;renderAppDemo();const i=$('#gSearch');i&&i.focus()};
 window.gSet=function(k,v){if(k==='spec'){gSpec=v;gTopic='all'}else if(k==='bank'){gBank=bankValid(v);if(gSpec!=='all'&&!bankHas(gSpec,gBank))gSpec='all';gTopic='all';gSrc='all';gSys='all'}else if(k==='tag')gTag=v;else if(k==='src')gSrc=v;else if(k==='topic')gTopic=v;else if(k==='sys')gSys=v;else gSort=v;gLim=40;renderAppDemo()};
 runSearch=function(v){gq=v;gLim=40;const c=$('#gX');if(c)c.hidden=!v;clearTimeout(gTmr);gTmr=setTimeout(()=>{const e=$('#gResults');if(e)e.innerHTML=searchResults();const k=$('#gClr');if(k)k.hidden=!gAnyOn()},v?120:0)};
-window.openQ=function(id){const q=QB.find(x=>x.id===id);if(!q)return;if(typeof recordRecent==='function')recordRecent('topic',q.spec,q.topic);qs.spec=q.spec;qs.topic=q.topic;qs.filter='all';qs.tag='all';qs.idx=Math.max(0,filtered().findIndex(x=>x.id===id));nNavigateRoute('questions');
+function qbnNavigateRoute(route){
+ try{if(typeof window.__shbNavTap==='function'){window.__shbNavTap(route);return true}}catch(e){}
+ try{appPage=route;renderAppDemo();return true}catch(e){return false}
+}
+window.openQ=function(id){const q=QB.find(x=>x.id===id);if(!q)return;if(typeof recordRecent==='function')recordRecent('topic',q.spec,q.topic);qs.spec=q.spec;qs.topic=q.topic;qs.filter='all';qs.tag='all';qs.idx=Math.max(0,filtered().findIndex(x=>x.id===id));qbnNavigateRoute('questions');
  if(qs.view!=='single')setTimeout(()=>{const el=document.getElementById('qc-'+id);if(el){el.scrollIntoView({block:'start'});el.classList.add('flash')}},80)};
 searchView=function(){const chip=(k,v,l,cur)=>`<button type="button" class="chip${cur===v?' on':''}" onclick="gSet('${k}','${v}')">${esc(l)}</button>`;
  const sel=(k,cur,all,opts,lab)=>`<label class="gsel"><span>${lab}</span><select class="field" onchange="gSet('${k}',this.value)" aria-label="${lab}"><option value="all"${cur==='all'?' selected':''}>${all}</option>${opts.map(([v,t])=>`<option value="${esc(v)}"${String(cur)===String(v)?' selected':''}>${esc(t)}</option>`).join('')}</select></label>`;
