@@ -38,6 +38,10 @@
   var loadedVersion = '';
   var banks = Object.create(null);
   var resources = [];
+  var flashcardDecks = [];
+  var currentDeckId = '';
+  var currentCardIndex = 0;
+  var currentCardFlipped = false;
   var currentBankId = '';
   var currentSystemId = '';
   var syncStarted = false;
@@ -277,6 +281,159 @@
         topicId: String(item.topicId || ''),
         source: String(item.source || '')
       };
+    });
+  }
+
+  var FLASHCARD_STATE_KEY = 'shbace_remote_flashcards_v1';
+
+  function buildFlashcardDecks(data) {
+    var items = Array.isArray(data.flashcardDecks) ? data.flashcardDecks : [];
+    if (items.length > 80) throw new Error('Remote catalog contains too many flashcard decks.');
+    var seenDecks = Object.create(null);
+    return items.map(function (deck) {
+      if (!deck || !/^[a-zA-Z0-9_-]{1,48}$/.test(String(deck.id || '')) ||
+          seenDecks[deck.id] || !String(deck.title || '').trim() ||
+          !String(deck.contentFile || '').trim()) {
+        throw new Error('Invalid remote flashcard deck metadata.');
+      }
+      seenDecks[deck.id] = true;
+      var source = safeJson(localText(deck.contentFile));
+      if (!source || source.schema !== 'shbace-remote-flashcards-v1' ||
+          !Array.isArray(source.cards) || source.cards.length > 5000) {
+        throw new Error('Flashcard data is missing or invalid: ' + deck.contentFile);
+      }
+      var cardIds = Object.create(null);
+      var cards = source.cards.map(function (card) {
+        if (!card || !String(card.id || '').trim() || cardIds[card.id] ||
+            !String(card.front || '').trim() || !String(card.back || '').trim()) {
+          throw new Error('Invalid or duplicate flashcard in deck ' + deck.id);
+        }
+        cardIds[card.id] = true;
+        return {
+          id: String(card.id),
+          front: String(card.front),
+          back: String(card.back),
+          frontImage: String(card.frontImage || ''),
+          backImage: String(card.backImage || ''),
+          topic: String(card.topic || '')
+        };
+      });
+      return {
+        id: String(deck.id),
+        title: String(deck.title),
+        description: String(deck.description || ''),
+        cover: String(deck.cover || ''),
+        cards: cards,
+        count: cards.length
+      };
+    });
+  }
+
+  function flashcardProgress() {
+    var value = safeJson(localStorage.getItem(FLASHCARD_STATE_KEY)) || {};
+    return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  }
+  function flashcardKey(deckId, cardId) { return String(deckId) + '|' + String(cardId); }
+  function flashcardKnownCount(deck) {
+    var progress = flashcardProgress(), total = 0;
+    deck.cards.forEach(function (card) {
+      if (progress[flashcardKey(deck.id, card.id)] &&
+          progress[flashcardKey(deck.id, card.id)].status === 'known') total++;
+    });
+    return total;
+  }
+  function openFlashcardDeck(id) {
+    var deck = flashcardDecks.find(function (item) { return item.id === id; });
+    if (!deck) return;
+    currentDeckId = id;
+    currentCardIndex = 0;
+    currentCardFlipped = false;
+    appPage = 'shbRemoteFlashcards';
+    renderAppDemo();
+  }
+  window.shbRemoteOpenFlashcardDeck = openFlashcardDeck;
+  window.shbRemoteFlipFlashcard = function () {
+    currentCardFlipped = !currentCardFlipped;
+    renderAppDemo();
+  };
+  window.shbRemoteStepFlashcard = function (delta) {
+    var deck = flashcardDecks.find(function (item) { return item.id === currentDeckId; });
+    if (!deck) return;
+    currentCardIndex = Math.max(0, Math.min(deck.cards.length - 1, currentCardIndex + Number(delta || 0)));
+    currentCardFlipped = false;
+    renderAppDemo();
+  };
+  window.shbRemoteRateFlashcard = function (status) {
+    var deck = flashcardDecks.find(function (item) { return item.id === currentDeckId; });
+    var card = deck && deck.cards[currentCardIndex];
+    if (!card || (status !== 'known' && status !== 'again')) return;
+    var progress = flashcardProgress();
+    progress[flashcardKey(deck.id, card.id)] = { status: status, updatedAt: Date.now() };
+    try { localStorage.setItem(FLASHCARD_STATE_KEY, JSON.stringify(progress)); } catch (e) {}
+    window.shbRemoteStepFlashcard(1);
+  };
+
+  function flashcardDeckView() {
+    var deck = flashcardDecks.find(function (item) { return item.id === currentDeckId; });
+    if (!deck) {
+      currentDeckId = '';
+      appPage = 'subjects';
+      return '';
+    }
+    var card = deck.cards[currentCardIndex];
+    var progress = flashcardProgress();
+    var saved = progress[flashcardKey(deck.id, card.id)] || {};
+    var totalKnown = flashcardKnownCount(deck);
+    var visibleText = currentCardFlipped ? card.back : card.front;
+    var visibleImage = currentCardFlipped ? card.backImage : card.frontImage;
+    var image = visibleImage ? assetData(visibleImage) : '';
+    var allDone = totalKnown === deck.count;
+    return '<div class="app-head"><div class="app-head-title">Flashcards</div></div>' +
+      '<div class="rs shb-remote-flashcards"><button type="button" class="btn sm" onclick="navBack()">← All collections</button>' +
+      '<div class="ped-collection-kicker">OFFLINE FLASHCARD DECK</div><h1>' + esc(deck.title) + '</h1>' +
+      '<p class="sub">' + esc(deck.description) + '</p>' +
+      '<div class="qprog"><span>' + totalKnown + ' / ' + deck.count + ' mastered</span><b>' +
+      Math.round(totalKnown * 100 / Math.max(1, deck.count)) + '%</b></div>' +
+      '<div class="qbar"><i style="width:' + (totalKnown * 100 / Math.max(1, deck.count)) + '%"></i></div>' +
+      '<article class="card shb-remote-flashcard"><div class="eyebrow">CARD ' + (currentCardIndex + 1) + ' OF ' +
+      deck.count + (currentCardFlipped ? ' · ANSWER' : ' · QUESTION') + '</div>' +
+      (image ? '<img src="' + image + '" alt="" style="display:block;max-width:100%;max-height:300px;object-fit:contain;margin:10px auto;border-radius:12px">' : '') +
+      '<div class="shb-remote-flashcard-text" style="white-space:pre-wrap;font-size:1.15rem;line-height:1.65;padding:24px 8px;text-align:center">' +
+      esc(visibleText) + '</div>' +
+      (saved.status === 'known' ? '<span class="badge">Previously marked as known</span>' : '') +
+      '<button type="button" class="btn primary block" onclick="shbRemoteFlipFlashcard()">' +
+      (currentCardFlipped ? 'Show question' : 'Reveal answer') + '</button></article>' +
+      '<div style="display:flex;gap:8px"><button type="button" class="btn" style="flex:1" onclick="shbRemoteStepFlashcard(-1)" ' +
+      (currentCardIndex === 0 ? 'disabled' : '') + '>← Previous</button><button type="button" class="btn" style="flex:1" onclick="shbRemoteStepFlashcard(1)" ' +
+      (currentCardIndex >= deck.count - 1 ? 'disabled' : '') + '>Next →</button></div>' +
+      (currentCardFlipped ? '<div style="display:flex;gap:8px;margin-top:10px"><button type="button" class="btn" style="flex:1" onclick="shbRemoteRateFlashcard(\'again\')">Review again</button>' +
+      '<button type="button" class="btn primary" style="flex:1" onclick="shbRemoteRateFlashcard(\'known\')">I know this</button></div>' : '') +
+      (allDone ? '<p class="sub">You have marked every card in this deck as known. You can still review them again.</p>' : '') +
+      '</div>';
+  }
+
+  if (typeof window.__shbRegisterPage === 'function') {
+    window.__shbRegisterPage('shbRemoteFlashcards', flashcardDeckView, 'subjects');
+  }
+
+  function injectFlashcardDeckCards() {
+    var grid = document.querySelector('.ped-collections-grid');
+    if (!grid || !flashcardDecks.length) return;
+    flashcardDecks.forEach(function (deck) {
+      if (grid.querySelector('[data-shb-remote-deck="' + deck.id + '"]')) return;
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'ped-collection-card ped-collection-remote-flashcards';
+      button.setAttribute('data-shb-remote-deck', deck.id);
+      button.innerHTML = '<span class="ped-collection-avatar ped-avatar-icon">' +
+        (deck.cover ? assetMarkup(deck.cover, '▤', 'shb-remote-cover') :
+          '<span class="shb-remote-resource-type">▤</span>') +
+        '</span><span class="ped-collection-copy"><span class="eyebrow">FLASHCARD DECK</span><b>' +
+        esc(deck.title) + '</b><small>' + esc(deck.description || 'Review and remember key medical concepts.') +
+        '</small><span class="ped-collection-count">' + deck.count + ' cards · ' +
+        flashcardKnownCount(deck).toLocaleString() + ' mastered</span></span><span class="ped-collection-arrow">›</span>';
+      button.addEventListener('click', function () { openFlashcardDeck(deck.id); });
+      grid.appendChild(button);
     });
   }
 
@@ -530,6 +687,7 @@
     if (!catalog) throw new Error('The installed remote catalog is not valid JSON.');
     banks = buildRemoteBanks(catalog);
     resources = buildResources(catalog);
+    flashcardDecks = buildFlashcardDecks(catalog);
   }
 
   try {
@@ -549,6 +707,12 @@
     return typeof coreTopicsView === 'function' ? coreTopicsView.apply(this, arguments) : '';
   };
   window.navBack = function () {
+    if (currentDeckId && appPage === 'shbRemoteFlashcards') {
+      currentDeckId = '';
+      appPage = 'subjects';
+      window.renderAppDemo();
+      return;
+    }
     if (currentBankId && appPage === 'topics') {
       currentSystemId = '';
       B.setActiveBank(BANK_KEY, allTopicIds(activeBank()));
@@ -568,10 +732,12 @@
     if (typeof coreBack === 'function') return coreBack.apply(this, arguments);
   };
   window.renderAppDemo = function () {
+    if (appPage !== 'shbRemoteFlashcards' && currentDeckId) currentDeckId = '';
     var result = coreRender.apply(this, arguments);
     try {
       injectBankCards();
       injectResourceCards();
+      injectFlashcardDeckCards();
       injectQuestionMedia();
       injectSettingsCard();
     } catch (e) { console.warn('Remote content UI injection failed', e); }
