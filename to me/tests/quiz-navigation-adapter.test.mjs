@@ -105,6 +105,7 @@ test("result, history and notification entry points dispatch the exact existing 
   const resultOpen = sliceBetween(feature, "window.qzOpen=function(id,from)", "const qzRowHTML");
   const notificationOpen = sliceBetween(feature, "window.nOpen=function(id)", "const NI=");
   const quizView = sliceBetween(feature, "quizView=function(){", "const shuffle=");
+  const quizRunView = sliceBetween(feature, "quizRunView=function(){", "const qzRe=");
   const resultView = sliceBetween(feature, "quizResultView=function(){", "/* ---- Quiz history ---- */");
   const historyView = sliceBetween(feature, "function qzHistoryView(){", "/* ---- stats from completed attempts ---- */");
   const statsView = sliceBetween(feature, "function stQuizHTML(){", "function stBankHTML(){");
@@ -112,12 +113,12 @@ test("result, history and notification entry points dispatch the exact existing 
   assert.match(resultOpen, /qzNavigate\('quizresult'\)/);
   assert.match(notificationOpen, /qzViewId=ref;qzNavigate\('quizresult'\)/);
   assert.match(quizView, /qzNavigate\('quizhistory'\)/);
-  assert.match(quizView, /onclick="qzNavigate\('quiz'\)">Pause &amp; exit/);
+  assert.match(quizRunView, /onclick="qzNavigate\('quiz'\)">Pause &amp; exit/);
   assert.match(resultView, /qzNavigate\('quiz'\)/);
   assert.match(resultView, /qzNavigate\('quizhistory'\)/);
   assert.match(historyView, /qzNavigate\('quiz'\)/);
   assert.match(statsView, /qzNavigate\('quizhistory'\)/);
-  for (const block of [resultOpen,notificationOpen,quizView,resultView,historyView,statsView]) {
+  for (const block of [resultOpen,notificationOpen,quizView,quizRunView,resultView,historyView,statsView]) {
     assert.doesNotMatch(block, /appPage\s*=\s*'(?:quiz|quizrun|quizresult|quizhistory)'/);
   }
 });
