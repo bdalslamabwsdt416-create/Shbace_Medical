@@ -3252,13 +3252,22 @@ window.nSetPref=function(kind,value){if(!(kind in U10_PREFS))return;U10_PREFS[ki
 window.nPrefToggle=function(btn){const c=btn.closest('.np');if(!c)return;const o=!c.classList.contains('open');c.classList.toggle('open',o);btn.setAttribute('aria-expanded',o);u10State.prefsOpen=o};
 window.nSetFilter=function(v){u10State.filter=v;renderAppDemo()};
 window.nSetSort=function(v){u10State.sort=v;renderAppDemo()};
+function nNavigateRoute(route){
+ try{
+  if(typeof window.__shbNavTap==='function'){
+   window.__shbNavTap(route);
+   return true;
+  }
+ }catch(e){}
+ try{appPage=route;renderAppDemo();return true}catch(e){return false}
+}
 window.nOpen=function(id){
  const n=NOTIF.find(x=>x.id===id);if(!n)return;n.read=true;n.readAt=Date.now();LS.set(NKEY,NOTIF);
  const page=n.page||n.route,ref=n.ref||'';
  if(page==='quizresult'&&ref&&QZ.attempts.some(a=>a.id===ref)){qzViewId=ref;qzNavigate('quizresult');return}
  if((page==='questions'||page==='question')&&ref&&u7Q(ref)){renderAppDemo();openQ(ref);return}
- if(page==='review'||page==='settings'||page==='notifs'||page==='saved'||page==='wrong'||page==='notes'||page==='pinned'||page==='stats'){appPage=page;renderAppDemo();return}
- if(page&&PAGES2[page]!==0){appPage=page;renderAppDemo();return}
+ if(page==='review'||page==='settings'||page==='notifs'||page==='saved'||page==='wrong'||page==='notes'||page==='pinned'||page==='stats'){nNavigateRoute(page);return}
+ if(page&&PAGES2[page]!==0){nNavigateRoute(page);return}
  renderAppDemo();
 };
 const NI={gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
