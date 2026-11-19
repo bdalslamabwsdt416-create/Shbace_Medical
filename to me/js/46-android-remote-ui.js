@@ -87,6 +87,11 @@
       return true;
     }
     if (action === 'builtin' && BUILTIN_PAGES[key]) {
+      var navigation = window.SHBACENavigation;
+      if (navigation && typeof navigation.navigate === 'function') {
+        var result = navigation.navigate(key);
+        return !!(result && result.ok);
+      }
       appPage = key;
       window.renderAppDemo();
       return true;

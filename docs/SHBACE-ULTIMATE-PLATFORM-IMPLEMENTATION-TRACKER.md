@@ -14,7 +14,7 @@
 | 1 | Screen, route and feature inventory | **Route contract v1 and static tests implemented; device matrix pending** | Every route has a verified runtime renderer, back/scroll target, store ownership and offline/device result. |
 | 2 | Core Architecture | **Core Runtime v1 implemented** | Existing navigation, data and feature engines use stable service contracts without behaviour regression. |
 | 3 | Remote Configuration Engine | **Core content policy v1 + verified last-known-good rollback implemented; signed manifest pending key provisioning** | Declarative schemas, monotonic content versions, APK compatibility, rollback integrity tests, feature policies and later signed-config verification. |
-| 4 | UI and Navigation Engine | **Partial; read-only route adapter added** | Built-in route adapter, all supported nav surfaces and back/scroll invariants covered by parity tests. |
+| 4 | UI and Navigation Engine | **Partial; shared route dispatch integrated for Android drawer and remote UI; device matrix pending** | Built-in route adapter, all supported nav surfaces and back/scroll invariants covered by parity tests. |
 | 5 | Page Builder | **Starter renderer only** | Validated component tree, reusable templates, nested layout, conditions, tabs and preview workflow. |
 | 6 | Workflow Engine | **Planned** | Local trigger/condition/allow-listed-action engine with rule validation, traces and limits. |
 | 7 | Theme Engine | **Partial** | Unified token schema and complete theme application/reset/validation coverage. |
@@ -39,7 +39,7 @@
 - Core Runtime v1: event bus, service registry and bounded diagnostics.
 - Module Registry v1: dependency validation, ordered initialization and reverse-order cleanup.
 - Module manifest for all 25 major subsystems.
-- Navigation Route Contract v1: 29 route entries, V2/V3 remote allow-lists, registered local pages and an observational adapter around the legacy renderer.
+- Navigation Route Contract v1: 29 route entries, V2/V3 remote allow-lists, registered local pages, shared built-in route dispatch for drawer/remote UI, and an observational adapter around the legacy renderer.
 
 ## Frozen version and release protection
 
