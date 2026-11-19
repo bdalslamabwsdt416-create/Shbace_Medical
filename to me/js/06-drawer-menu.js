@@ -62,7 +62,7 @@ function drawerIcon(value){
 
 function drawerNavigate(route){
  const key=String(route||'');if(!key)return false;
- if(/^shbRemotePage_[A-Za-z0-9_-]{1,48}$/.test(key)&&typeof window.shbRemoteOpenPage==='function')return !!window.shbRemoteOpenPage(key.slice(15));
+ if(/^shbRemotePage_[A-Za-z0-9_-]{1,48}$/.test(key)&&typeof window.shbRemoteOpenPage==='function')return !!window.shbRemoteOpenPage(key.slice(14));
  const navigation=window.SHBACENavigation;
  if(navigation&&typeof navigation.validate==='function'&&navigation.validate(key).ok)return !!navigation.navigate(key).ok;
  try{appPage=key;renderAppDemo();return true}catch(e){console.warn('Drawer navigation failed:',e);return false}
