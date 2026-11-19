@@ -1,6 +1,12 @@
 name: SHBACE Android Remote Content Validation
 
 on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'for ApK/android-content/**'
+      - '.github/workflows/android-content-validate.yml'
   push:
     branches:
       - main
