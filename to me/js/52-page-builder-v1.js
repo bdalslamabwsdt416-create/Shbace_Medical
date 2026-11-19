@@ -47,18 +47,31 @@
         var api = window.__SHBACE_REMOTE_CONTENT_API__;
         function hasItems(method) {
           try {
-            var items = api && typeof api[method] === 'function' ? api[method]() : [];
-            return Array.isArray(items) && items.length > 0;
-          } catch (error) { return false; }
+            if (!api || typeof api[method] !== 'function') return null;
+            var items = api[method]();
+            return Array.isArray(items) ? items.length > 0 : null;
+          } catch (error) { return null; }
+        }
+        function hasAnyItems(methods) {
+          var unknown = false;
+          for (var i = 0; i < methods.length; i++) {
+            var result = hasItems(methods[i]);
+            if (result === true) return true;
+            if (result === null) unknown = true;
+          }
+          return unknown ? null : false;
         }
         var condition = String(block.condition || '');
-        var visible = condition === 'always' ||
-          (condition === 'hasBanks' && hasItems('getBanks')) ||
-          (condition === 'hasResources' && hasItems('getResources')) ||
-          (condition === 'hasFlashcardDecks' && hasItems('getFlashcardDecks')) ||
-          (condition === 'hasLearningContent' &&
-            (hasItems('getBanks') || hasItems('getResources') || hasItems('getFlashcardDecks')));
-        if (block.not === true) visible = !visible;
+        var matched = null;
+        if (condition === 'always') matched = true;
+        else if (condition === 'hasBanks') matched = hasItems('getBanks');
+        else if (condition === 'hasResources') matched = hasItems('getResources');
+        else if (condition === 'hasFlashcardDecks') matched = hasItems('getFlashcardDecks');
+        else if (condition === 'hasLearningContent') {
+          matched = hasAnyItems(['getBanks', 'getResources', 'getFlashcardDecks']);
+        }
+        // Unknown or unavailable condition data stays hidden, including when negated.
+        var visible = matched === null ? false : (block.not === true ? !matched : matched);
         return visible ? children(block.blocks, depth + 1) : '';
       }
       if (type === 'section') {
