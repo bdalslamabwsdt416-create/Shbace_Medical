@@ -69,6 +69,8 @@ assert(catalog.resources == null || (Array.isArray(catalog.resources) && catalog
   'Invalid resources list.');
 assert(catalog.flashcardDecks == null || (Array.isArray(catalog.flashcardDecks) && catalog.flashcardDecks.length <= 80),
   'Invalid flashcard decks list.');
+assert(catalog.overrideFiles == null || (Array.isArray(catalog.overrideFiles) && catalog.overrideFiles.length <= 80),
+  'Invalid content override file list.');
 
 const systems = new Map();
 for (const system of catalog.systems) {
@@ -165,6 +167,57 @@ for (const deck of (catalog.flashcardDecks || [])) {
   }
   totalFlashcards += source.cards.length;
 }
+const overridePaths = new Set();
+for (const overridePath of (catalog.overrideFiles || [])) {
+  assert(validPath(overridePath) && listed.has(overridePath), 'Override file not listed in manifest: ' + overridePath);
+  assert(!overridePaths.has(overridePath), 'Duplicate override file path: ' + overridePath);
+  overridePaths.add(overridePath);
+  const source = await readJson(path.join(root, overridePath));
+  assert(source && source.schema === 'shbace-remote-overrides-v1', 'Invalid override file schema: ' + overridePath);
+  for (const key of ['systems', 'topics', 'questionPatches', 'collections']) {
+    assert(source[key] == null || Array.isArray(source[key]), 'Invalid override array ' + key + ' in ' + overridePath);
+  }
+  const seenQuestionIds = new Set();
+  for (const patch of (source.questionPatches || [])) {
+    assert(patch && typeof patch.id === 'string' && patch.id.trim() && patch.id.length <= 160 &&
+      patch.fields && typeof patch.fields === 'object' && !Array.isArray(patch.fields),
+      'Invalid existing-question patch in ' + overridePath);
+    assert(!seenQuestionIds.has(patch.id), 'Duplicate question patch ID: ' + patch.id);
+    seenQuestionIds.add(patch.id);
+    const fields = patch.fields;
+    if (fields.stem != null) assert(typeof fields.stem === 'string' && fields.stem.trim(), 'Empty replacement stem: ' + patch.id);
+    if (fields.options != null) assert(Array.isArray(fields.options) && fields.options.length >= 2 &&
+      fields.options.every(option => typeof option === 'string'), 'Invalid replacement options: ' + patch.id);
+    if (fields.correctIndex != null) assert(Number.isInteger(fields.correctIndex) && fields.correctIndex >= 0 &&
+      Array.isArray(fields.options) && fields.correctIndex < fields.options.length, 'Invalid replacement answer index: ' + patch.id);
+    if (fields.image != null) assetRef(fields.image, listedPaths, 'Question override image ' + patch.id);
+  }
+  const seenSystems = new Set();
+  for (const system of (source.systems || [])) {
+    assert(system && typeof system.id === 'string' && system.id.trim(), 'Invalid system metadata override.');
+    assert(!seenSystems.has(system.id), 'Duplicate system metadata override: ' + system.id);
+    seenSystems.add(system.id);
+    assetRef(system.icon, listedPaths, 'System override icon ' + system.id);
+  }
+  const seenTopics = new Set();
+  for (const topic of (source.topics || [])) {
+    assert(topic && typeof topic.systemId === 'string' && topic.systemId.trim() &&
+      Number.isInteger(Number(topic.topicId)), 'Invalid topic metadata override.');
+    const key = topic.systemId + '|' + topic.topicId;
+    assert(!seenTopics.has(key), 'Duplicate topic metadata override: ' + key);
+    seenTopics.add(key);
+    assetRef(topic.icon, listedPaths, 'Topic override icon ' + key);
+  }
+  const seenCollections = new Set();
+  for (const collection of (source.collections || [])) {
+    assert(collection && ['aj', 'previous', 'nelson', 'kasr', 'clinical', 'egyptian'].includes(collection.id),
+      'Invalid existing collection metadata override.');
+    assert(!seenCollections.has(collection.id), 'Duplicate collection override: ' + collection.id);
+    seenCollections.add(collection.id);
+    assetRef(collection.cover, listedPaths, 'Collection cover ' + collection.id);
+  }
+}
+
 console.log('Android remote content validation passed.');
 console.log('Manifest version: ' + manifest.version);
 console.log('Verified files: ' + listed.size + ' (' + totalBytes + ' bytes)');
