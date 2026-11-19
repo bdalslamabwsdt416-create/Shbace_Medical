@@ -58,7 +58,7 @@
   API.getBanks().forEach(function (item) { bankById[item.id] = item; });
   API.getFlashcardDecks().forEach(function (item) { deckById[item.id] = item; });
 
-  var templates = Array.isArray(ui.templates) ? ui.templates : [];
+  var templates = Array.isArray(ui.templates) ? ui.templates.slice(0, 20) : [];
   var templateById = Object.create(null);
   var BUILTIN_CONDITIONS = {
     always: true, hasBanks: true, hasResources: true,
@@ -131,14 +131,19 @@
     if (type === 'tabs' || type === 'accordion') {
       if (!Array.isArray(block.items) || block.items.length < (type === 'tabs' ? 2 : 1) ||
           block.items.length > (type === 'tabs' ? 6 : 12)) return false;
+      var seenTabs = Object.create(null);
       return block.items.every(function (item) {
-        return item && typeof item.label === 'string' && item.label.trim() &&
-          (type !== 'tabs' || validId(item.id)) &&
-          validateBlocks(item.blocks, allowSlots, depth + 1, budget);
+        if (!item || typeof item.label !== 'string' || !item.label.trim()) return false;
+        if (type === 'tabs') {
+          if (!validId(item.id) || seenTabs[item.id]) return false;
+          seenTabs[item.id] = true;
+        }
+        return validateBlocks(item.blocks, allowSlots, depth + 1, budget);
       });
     }
     if (type === 'when') {
       return !!BUILTIN_CONDITIONS[String(block.condition || '')] &&
+        (block.not == null || typeof block.not === 'boolean') &&
         validateBlocks(block.blocks, allowSlots, depth + 1, budget);
     }
     if (type === 'slot') {
@@ -152,7 +157,7 @@
       if (!block || typeof block !== 'object') return;
       if (block.type === 'slot') found[String(block.name)] = true;
       if (Array.isArray(block.blocks)) collectTemplateSlots(block.blocks, found);
-      (block.items || []).forEach(function (item) {
+      if (Array.isArray(block.items)) block.items.forEach(function (item) {
         if (item && Array.isArray(item.blocks)) collectTemplateSlots(item.blocks, found);
       });
     });
