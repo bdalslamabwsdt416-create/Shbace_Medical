@@ -13,7 +13,7 @@
 | 0 | Repository and runtime audit | **Source audit complete; device acceptance pending** | All Android routes exercised on a real device/emulator, with back targets, stores, bridge calls and offline result recorded. |
 | 1 | Screen, route and feature inventory | **Route contract v1 and static tests implemented; device matrix pending** | Every route has a verified runtime renderer, back/scroll target, store ownership and offline/device result. |
 | 2 | Core Architecture | **Core Runtime v1 implemented** | Existing navigation, data and feature engines use stable service contracts without behaviour regression. |
-| 3 | Remote Configuration Engine | **Remote content safety v2 implemented in PR; signature provisioning pending** | Content monotonic versioning, minimum APK compatibility, CI validation, verified last-known-good rollback and signed-manifest provisioning are covered by tests. |
+| 3 | Remote Configuration Engine | **Remote content safety v2 implemented in PR; signature provisioning pending** | Content monotonic versioning, minimum APK compatibility, CI validation and verified last-known-good rollback are implemented; signed-manifest provisioning and device rollback tests remain pending. |
 | 4 | UI and Navigation Engine | **Partial; read-only route adapter added** | Built-in route adapter, all supported nav surfaces and back/scroll invariants covered by parity tests. |
 | 5 | Page Builder | **Starter renderer only** | Validated component tree, reusable templates, nested layout, conditions, tabs and preview workflow. |
 | 6 | Workflow Engine | **Planned** | Local trigger/condition/allow-listed-action engine with rule validation, traces and limits. |
