@@ -16,7 +16,7 @@
 | 3 | Remote Configuration Engine | **Core content policy v1 + verified last-known-good rollback implemented; signed manifest pending key provisioning** | Declarative schemas, monotonic content versions, APK compatibility, rollback integrity tests, feature policies and later signed-config verification. |
 | 4 | UI and Navigation Engine | **Partial; shared route dispatch integrated for Android drawer and remote UI; device matrix pending** | Built-in route adapter, all supported nav surfaces and back/scroll invariants covered by parity tests. |
 | 5 | Page Builder | **Partial; shared bounded renderer v2 with templates, slots and safe visibility conditions** | Visual editor, template gallery, preview/publish workflow, authoring permissions and real-device visual acceptance. |
-| 6 | Workflow Engine | **Planned** | Local trigger/condition/allow-listed-action engine with rule validation, traces and limits. |
+| 6 | Workflow Engine | **Partial; local v1 with navigation triggers, bounded scalar conditions and allow-listed actions** | Broader app event coverage, rule editor, simulation/trace UI and additional reviewed action contracts. |
 | 7 | Theme Engine | **Partial** | Unified token schema and complete theme application/reset/validation coverage. |
 | 8 | Modular Architecture | **Module Registry v1 implemented; legacy extraction pending** | Existing engines extracted one at a time behind adapters and parity tests. |
 | 9 | Quiz, Smart Review and Flashcards | **Existing features partial against target** | New question types, scheduler strategy contract, authoring and learning-history preservation. |
@@ -56,7 +56,9 @@
 1. Complete real-device route/back/scroll/offline acceptance.
 2. Add characterization tests around the current page renderers and student stores.
 3. Add controlled adapters for bottom navigation and drawer navigation without removing legacy handlers.
-4. Complete Page Builder templates/slots and runtime validation, then build Workflow Engine on top of the validated route, Core and component contracts.
+4. Page Builder v2 templates/slots and safe condition rendering.
+5. Workflow Engine v1: fixed navigation triggers, bounded conditions and allow-listed actions.
+6. Expand app feature events only after each producer has explicit contracts and tests.
 5. Extract legacy engines one at a time behind tested adapters.
 
 ## Platform and data rules

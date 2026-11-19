@@ -473,6 +473,73 @@ if (ui != null) {
   }
   if (ui.homeBlocks != null) validateUiBlocks(ui.homeBlocks, 'homeBlocks');
 
+  if (ui.workflows != null) {
+    assert(Array.isArray(ui.workflows) && ui.workflows.length <= 30,
+      'catalog.ui.workflows must contain at most 30 rules.');
+    const workflowIds = new Set();
+    const workflowTriggers = {
+      'navigation:route-changed': new Set(['from', 'to', 'mode']),
+      'navigation:rendered': new Set(['route', 'mode'])
+    };
+    const workflowNavigateRoutes = new Set([
+      'subjects', 'grade', 'specialties', 'topics', 'questions', 'quiz', 'quizrun',
+      'quizresult', 'quizhistory', 'review', 'weak', 'stats', 'search', 'settings',
+      'notifs', 'saved', 'wrong', 'pinned', 'reported', 'timer', 'about', 'dedication',
+      'changelog', 'feedback', 'rate', 'menu'
+    ]);
+    for (const rule of ui.workflows) {
+      assert(rule && validId(rule.id) && !workflowIds.has(rule.id),
+        'Invalid or duplicate workflow rule ID.');
+      workflowIds.add(rule.id);
+      assert(Object.prototype.hasOwnProperty.call(workflowTriggers, String(rule.trigger || '')),
+        'Unsupported workflow trigger in rule ' + rule.id);
+      if (rule.enabled != null) assert(typeof rule.enabled === 'boolean',
+        'Workflow enabled flag must be boolean in rule ' + rule.id);
+      if (rule.priority != null) assert(Number.isInteger(rule.priority) && rule.priority >= -100 && rule.priority <= 100,
+        'Workflow priority must be an integer from -100 to 100 in rule ' + rule.id);
+      if (rule.cooldownMs != null) assert(Number.isInteger(rule.cooldownMs) &&
+        rule.cooldownMs >= 0 && rule.cooldownMs <= 60000,
+        'Workflow cooldown must be from 0 to 60000 ms in rule ' + rule.id);
+      const conditions = rule.conditions == null ? [] : rule.conditions;
+      assert(Array.isArray(conditions) && conditions.length <= 5,
+        'Workflow rules may contain at most five conditions in rule ' + rule.id);
+      for (const condition of conditions) {
+        assert(condition && workflowTriggers[rule.trigger].has(String(condition.field || '')),
+          'Unsupported workflow condition field in rule ' + rule.id);
+        assert(['equals', 'notEquals', 'oneOf'].includes(String(condition.op || '')),
+          'Unsupported workflow condition operator in rule ' + rule.id);
+        if (condition.op === 'oneOf') {
+          assert(Array.isArray(condition.value) && condition.value.length >= 1 && condition.value.length <= 8 &&
+            condition.value.every(value => typeof value === 'string' && value.length <= 120),
+            'Workflow oneOf values must contain 1 to 8 short strings in rule ' + rule.id);
+        } else {
+          assert(typeof condition.value === 'string' && condition.value.length <= 120,
+            'Workflow condition value must be a string up to 120 characters in rule ' + rule.id);
+        }
+      }
+      assert(Array.isArray(rule.actions) && rule.actions.length >= 1 && rule.actions.length <= 3,
+        'Workflow rule must contain 1 to 3 actions in rule ' + rule.id);
+      for (const action of rule.actions) {
+        assert(action && typeof action === 'object' && !Array.isArray(action),
+          'Invalid workflow action in rule ' + rule.id);
+        const type = String(action.type || '');
+        if (type === 'navigate') {
+          assert(validId(action.target) && workflowNavigateRoutes.has(String(action.target)),
+            'Workflow navigate action has a route outside the Navigation V3 allow-list in rule ' + rule.id);
+        } else if (type === 'openPage') {
+          assert(validId(action.target) && pageIds.has(String(action.target)),
+            'Workflow openPage action has an unknown remote page in rule ' + rule.id);
+        } else if (type === 'showMessage') {
+          assert(typeof action.message === 'string' && action.message.trim() && action.message.length <= 220,
+            'Workflow showMessage action must contain up to 220 characters in rule ' + rule.id);
+        } else {
+          assert(false, 'Unsupported workflow action in rule ' + rule.id + ': ' + type);
+        }
+      }
+    }
+  }
+
+
   if (ui.sidebar != null) {
     const sidebar = ui.sidebar;
     assert(sidebar && typeof sidebar === 'object' && !Array.isArray(sidebar),

@@ -85,9 +85,18 @@
     {
       "id": "workflow",
       "name": "Workflow Engine",
-      "status": "planned",
+      "status": "partial",
       "scope": "android",
-      "note": "General trigger-condition-action rules engine is not implemented."
+      "note": "Android v1 supports navigation route-change/render triggers, bounded scalar conditions and an allow-list of navigate/openPage/showMessage actions. Broader app events, rule editor and student-data mutation actions are not implemented.",
+      "source": "js/49-app-core-v1.js;js/51-navigation-contract-v1.js;js/53-workflow-engine-v1.js",
+      "capabilities": [
+        "allow-listed-navigation-triggers",
+        "bounded-scalar-conditions",
+        "allow-listed-navigation-actions",
+        "registered-remote-page-actions",
+        "accessible-message-action",
+        "cooldown-and-reentrancy-guards"
+      ]
     },
     {
       "id": "theme",
