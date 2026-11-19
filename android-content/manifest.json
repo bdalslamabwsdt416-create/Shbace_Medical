@@ -1,15 +1,22 @@
 {
   "schema": "shbace-android-content-v1",
-  "version": "1.0.1",
-  "generatedAt": "2026-11-19T12:30:00.000Z",
+  "version": "1.0.2",
+  "generatedAt": "2026-11-19T13:05:00.000Z",
   "catalogPath": "catalog.json",
   "files": [
     {
       "path": "catalog.json",
-      "bytes": 148,
-      "sha256": "18d671e08cdb6c0a6acd2ee82f3af12c4f374f3d1513d311aed786f0c5cfbeb2",
+      "bytes": 203,
+      "sha256": "1bc1e3f2e073f4c094426f8dc598cfdc02116c5b9dcf4f9d7d9a739025940040",
       "mime": "application/json",
       "kind": "catalog"
+    },
+    {
+      "path": "overrides/patches.json",
+      "bytes": 124,
+      "sha256": "72bf75ec8ef652f69eee94984c59a479b9b3b974a133802347d414c749eb33c0",
+      "mime": "application/json",
+      "kind": "overrides"
     }
   ]
 }
