@@ -934,4 +934,18 @@
       questions: Object.keys(banks).reduce(function (n, id) { return n + banks[id].count; }, 0)
     };
   };
+
+  // Read-only bridge for the APK-only declarative remote UI layer. No remote code is executed.
+  window.__SHBACE_REMOTE_CONTENT_API__ = {
+    getCatalog: function () { return catalog; },
+    getBanks: function () { return Object.keys(banks).map(function (id) {
+      return { id: id, bank: banks[id].bank, count: banks[id].count };
+    }); },
+    getResources: function () { return resources.slice(); },
+    getFlashcardDecks: function () { return flashcardDecks.slice(); },
+    openBank: openRemoteBank,
+    openResource: openRemoteResource,
+    openDeck: openFlashcardDeck,
+    assetData: assetData
+  };
 })();

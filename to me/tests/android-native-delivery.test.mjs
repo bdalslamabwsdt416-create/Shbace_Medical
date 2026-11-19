@@ -10,6 +10,8 @@ const offline = readFileSync(resolve(root, "js/29-offline-setup.js"), "utf8");
 const index = readFileSync(resolve(root, "index.html"), "utf8");
 const nativeEnhancements = readFileSync(resolve(root, "js/30-android-enhancements.js"), "utf8");
 const androidGradle = readFileSync(resolve(root, "../android/app/build.gradle"), "utf8");
+const remoteManager = readFileSync(resolve(root, "../for ApK/native/com/shbace/medical/RemoteContentManager.java"), "utf8");
+const remoteContentUi = readFileSync(resolve(root, "js/46-android-remote-ui.js"), "utf8");
 
 test("Capacitor APK skips the browser Cache Storage installer and updater", () => {
   const guard = offline.indexOf("if(window.Capacitor&&typeof window.Capacitor.isNativePlatform==='function'&&window.Capacitor.isNativePlatform()){releaseBootGate();return;}");
@@ -27,6 +29,20 @@ test("the PWA Service Worker is not registered inside Capacitor", () => {
 test("Android-only enhancements require the real native Capacitor bridge", () => {
   assert.match(nativeEnhancements, /c\.isNativePlatform/);
   assert.match(nativeEnhancements, /window\.ShbaceNative/);
+});
+
+
+test("Android remote content reads the production main/for ApK feed", () => {
+  assert.match(remoteManager, /main\/for%20ApK\/android-content\/manifest\.json/);
+  assert.match(remoteManager, /main\/for%20ApK\/android-content\//);
+  assert.doesNotMatch(remoteManager, /shbace-android-content\/android-content/);
+});
+
+test("remote navigation and pages are declarative and Android-only", () => {
+  assert.match(remoteContentUi, /getPlatform\(\) === 'android'/);
+  assert.match(remoteContentUi, /__shbRegisterPage/);
+  assert.match(remoteContentUi, /__SHBACE_REMOTE_DRAWER_CONFIG__/);
+  assert.doesNotMatch(remoteContentUi, /eval\s*\(|new Function\s*\(/);
 });
 
 test("Gradle packages the generated to-me web build, not the legacy root web app", () => {

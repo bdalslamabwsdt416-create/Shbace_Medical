@@ -218,6 +218,140 @@ for (const overridePath of (catalog.overrideFiles || [])) {
   }
 }
 
+
+const ui = catalog.ui;
+if (ui != null) {
+  assert(ui && typeof ui === 'object' && !Array.isArray(ui), 'catalog.ui must be an object.');
+  const pageIds = new Set();
+  const pages = Array.isArray(ui.pages) ? ui.pages : [];
+  assert(pages.length <= 40, 'Remote UI may define at most 40 pages.');
+  const knownResources = new Set(resourceIds);
+  const knownBanks = new Set(bankIds);
+  const knownDecks = new Set(deckIds);
+
+  function validateUiBlocks(blocks, label) {
+    assert(Array.isArray(blocks) && blocks.length <= 60, label + ' must contain at most 60 blocks.');
+    for (const block of blocks) {
+      assert(block && typeof block === 'object' && !Array.isArray(block), 'Invalid UI block in ' + label);
+      const type = String(block.type || '');
+      assert(['heading', 'text', 'notice', 'divider', 'image', 'resourceList',
+        'bankList', 'flashcardDeckList', 'link', 'button'].includes(type),
+        'Unsupported UI block type in ' + label + ': ' + type);
+      if (type === 'heading' || type === 'text' || type === 'notice') {
+        assert(typeof block.text === 'string', 'UI ' + type + ' block needs text in ' + label);
+      }
+      if (type === 'image') {
+        assert(typeof block.file === 'string', 'UI image block needs a file path in ' + label);
+        assetRef(block.file, listedPaths, 'Remote UI image ' + label);
+      }
+      if (type === 'link') {
+        assert(typeof block.label === 'string' && block.label.trim() &&
+          typeof block.url === 'string' && /^https:\/\//i.test(block.url),
+          'UI link must have a label and HTTPS URL in ' + label);
+      }
+      if (type === 'resourceList' || type === 'bankList' || type === 'flashcardDeckList') {
+        assert(Array.isArray(block.ids) && block.ids.length <= 120,
+          'UI list block needs an ID array in ' + label);
+        const allowed = type === 'resourceList' ? knownResources :
+          (type === 'bankList' ? knownBanks : knownDecks);
+        for (const id of block.ids) assert(allowed.has(String(id)),
+          'Unknown item "' + id + '" in ' + type + ' block in ' + label);
+      }
+      if (type === 'button') {
+        assert(typeof block.label === 'string' && block.label.trim() && validId(block.target),
+          'Invalid UI button in ' + label);
+        const action = String(block.action || '');
+        const builtinPages = new Set(['subjects', 'specialties', 'topics', 'questions', 'quiz',
+          'quizrun', 'quizresult', 'quizhistory', 'review', 'stats', 'search', 'settings',
+          'about', 'changelog', 'feedback', 'rate', 'pinned', 'saved', 'wrong', 'reported',
+          'notifs', 'timer']);
+        const allowed = action === 'page' ? pageIds :
+          (action === 'builtin' ? builtinPages :
+          (action === 'resource' ? knownResources :
+          (action === 'bank' ? knownBanks : (action === 'deck' ? knownDecks : null))));
+        assert(allowed && allowed.has(String(block.target)),
+          'UI button has an unknown action or target in ' + label);
+      }
+    }
+  }
+
+  for (const page of pages) {
+    assert(page && validId(page.id) && typeof page.title === 'string' && page.title.trim(),
+      'Invalid remote UI page.');
+    assert(!pageIds.has(page.id), 'Duplicate remote UI page ID: ' + page.id);
+    pageIds.add(page.id);
+  }
+  for (const page of pages) validateUiBlocks(page.blocks, 'page ' + page.id);
+  if (ui.homeBlocks != null) validateUiBlocks(ui.homeBlocks, 'homeBlocks');
+
+  if (ui.sidebar != null) {
+    const sidebar = ui.sidebar;
+    assert(sidebar && typeof sidebar === 'object' && !Array.isArray(sidebar),
+      'catalog.ui.sidebar must be an object.');
+    assert(sidebar.groups == null || (Array.isArray(sidebar.groups) && sidebar.groups.length <= 20),
+      'Remote sidebar may contain at most 20 groups.');
+    const itemIds = new Set();
+    for (const group of (sidebar.groups || [])) {
+      assert(group && typeof group.title === 'string' && group.title.trim() &&
+        Array.isArray(group.items) && group.items.length <= 30, 'Invalid remote sidebar group.');
+      for (const item of group.items) {
+        const remotePage = item && validId(item.pageId) && pageIds.has(item.pageId);
+        const builtinPages = new Set(['subjects', 'specialties', 'topics', 'questions', 'quiz',
+          'quizrun', 'quizresult', 'quizhistory', 'review', 'stats', 'search', 'settings',
+          'about', 'changelog', 'feedback', 'rate', 'pinned', 'saved', 'wrong', 'reported',
+          'notifs', 'timer']);
+        const builtinPage = item && validId(item.targetPage) && builtinPages.has(item.targetPage);
+        assert(item && validId(item.id) && !itemIds.has(item.id) &&
+          (remotePage || builtinPage) && typeof item.label === 'string' && item.label.trim(),
+          'Invalid or duplicate remote sidebar item.');
+        itemIds.add(item.id);
+        if (item.icon != null) assert(typeof item.icon === 'string' && item.icon.length <= 16,
+          'Remote sidebar icon must be a short text or emoji.');
+        if (item.enabled != null) assert(typeof item.enabled === 'boolean',
+          'Remote sidebar enabled must be boolean.');
+        if (item.order != null) assert(Number.isFinite(Number(item.order)),
+          'Remote sidebar order must be numeric.');
+      }
+    }
+    for (const key of ['hiddenItems', 'groupOrder']) {
+      if (sidebar[key] != null) assert(Array.isArray(sidebar[key]) &&
+        sidebar[key].every(value => typeof value === 'string'), 'Invalid sidebar ' + key + '.');
+    }
+    for (const key of ['renames', 'groupRenames']) {
+      if (sidebar[key] != null) {
+        assert(sidebar[key] && typeof sidebar[key] === 'object' && !Array.isArray(sidebar[key]),
+          'Sidebar ' + key + ' must be an object.');
+        for (const value of Object.values(sidebar[key])) assert(typeof value === 'string' && value.trim(),
+          'Sidebar ' + key + ' values must be non-empty text.');
+      }
+    }
+  }
+
+  if (ui.announcements != null) {
+    assert(Array.isArray(ui.announcements) && ui.announcements.length <= 10,
+      'Remote UI may contain at most 10 announcements.');
+    const announcementIds = new Set();
+    for (const item of ui.announcements) {
+      assert(item && validId(item.id) && !announcementIds.has(item.id) &&
+        typeof item.title === 'string' && item.title.trim() &&
+        typeof item.text === 'string' && item.text.trim(),
+        'Invalid or duplicate remote announcement.');
+      announcementIds.add(item.id);
+      if (item.dismissible != null) assert(typeof item.dismissible === 'boolean',
+        'Announcement dismissible must be boolean.');
+    }
+  }
+  if (ui.appearance != null) {
+    assert(ui.appearance && typeof ui.appearance === 'object' && !Array.isArray(ui.appearance),
+      'Remote UI appearance must be an object.');
+    const hex = /^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$/;
+    for (const key of ['accentColor', 'accentSoft']) {
+      if (ui.appearance[key] != null) assert(typeof ui.appearance[key] === 'string' && hex.test(ui.appearance[key]),
+        'Invalid remote UI color: ' + key);
+    }
+  }
+}
+
 console.log('Android remote content validation passed.');
 console.log('Manifest version: ' + manifest.version);
 console.log('Verified files: ' + listed.size + ' (' + totalBytes + ' bytes)');
