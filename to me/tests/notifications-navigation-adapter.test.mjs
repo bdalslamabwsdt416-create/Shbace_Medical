@@ -13,7 +13,7 @@ function extract(source, start, end, fromEnd = false) {
   const from = fromEnd ? source.lastIndexOf(start) : source.indexOf(start);
   const to = source.indexOf(end, from);
   assert.ok(from >= 0 && to > from, "missing source block: " + start);
-  return source.slice(from, to + 2);
+  return source.slice(from, to);
 }
 
 const routeHelper = (feature.match(/function nNavigateRoute\(route\)\{[\s\S]*?\n\}/) || [])[0];
