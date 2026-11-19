@@ -830,17 +830,6 @@ async function boot(){
  if(hasRec&&rec.verified===false)recoveryNeedsRepair=true;
  var legacy=await dbGet('meta','ready').catch(function(){return null});
  var hasReadyMarker=!!(legacy&&legacy.verified);
- var st=await dbGet('meta',STAGED_KEY).catch(function(){return null});
- if(st&&st.ready){
-  if(hasRec&&rec.version!==st.version&&(await stagingIntact(st))){
-   setState('ready');
-   await applyStagedNow();
-   if(!bootGateReleased)releaseBootGate();
-   return;
-  }
-  await dbPut('meta',STAGED_KEY,null).catch(noop);
-  caches.delete(STAGING_NAME).catch(noop);
- }
  var recoveredFromCache=false;
  if(!hasRec&&!hasReadyMarker){
   var recovery=await recoverInstalledFromCache();
@@ -851,6 +840,17 @@ async function boot(){
    hasReadyMarker=!!recovery.complete;
    recoveryNeedsRepair=!recovery.complete;
   }
+ }
+ var st=await dbGet('meta',STAGED_KEY).catch(function(){return null});
+ if(st&&st.ready){
+  if(hasRec&&rec.version!==st.version&&(await stagingIntact(st))){
+   setState('ready');
+   await applyStagedNow();
+   if(!bootGateReleased)releaseBootGate();
+   return;
+  }
+  await dbPut('meta',STAGED_KEY,null).catch(noop);
+  caches.delete(STAGING_NAME).catch(noop);
  }
  if(!hasRec&&!hasReadyMarker&&!recoveredFromCache){
   if(splashP)await splashP;
