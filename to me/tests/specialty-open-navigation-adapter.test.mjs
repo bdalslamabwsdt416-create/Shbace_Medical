@@ -11,7 +11,7 @@ const feature = readFileSync(resolve(root, "js/09-app-features-v6.js"), "utf8");
 
 const helper = (feature.match(/function qbnNavigateRoute\(route\)\{[\s\S]*?\n\}/) || [])[0];
 const start = feature.indexOf("window.openSpec=function(id){");
-const end = feature.indexOf(";", start);
+const end = feature.indexOf("\n", start);
 assert.ok(helper, "shared Question Bank route helper must exist");
 assert.ok(start >= 0 && end > start, "specialty open handler must exist");
 const openSpecialty = feature.slice(start, end + 1);
