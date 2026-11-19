@@ -145,7 +145,7 @@ Add an optional `ui` property to `catalog.json`. Every page destination used in 
 }
 ```
 
-The IDs in `resourceList`, `bankList`, and `flashcardDeckList` must match records already declared in the catalog. A page button can use `action` equal to `page`, `resource`, `bank`, or `deck`, and its `target` must be the matching item ID. Links must use HTTPS. Sidebar item `pageId` must refer to a page in the same `ui.pages` array.
+The IDs in `resourceList`, `bankList`, and `flashcardDeckList` must match records already declared in the catalog. A page button can use `action` equal to `page`, `builtin`, `resource`, `bank`, or `deck`, and its `target` must be the matching ID. The `builtin` action is limited to existing app screens such as `quiz`, `review`, `stats`, `search`, and `settings`. Links must use HTTPS. Sidebar item `pageId` must refer to a page in the same `ui.pages` array; alternatively, use `targetPage` to open an allow-listed existing screen without creating a new page.
 
 To publish a remote interface change, update `catalog.json`, increment both catalog and manifest versions together, regenerate the manifest byte counts and SHA-256 entries, run the validator, then merge into `main/for ApK/android-content/`. The existing installed APK will receive the interface change during its next content sync; no new APK is needed for changes that fit these supported blocks and actions.
 
