@@ -35,10 +35,17 @@ jobs:
         working-directory: for ios
         run: npm install --no-audit --no-fund
 
+      - name: Run iOS PWA regression tests
+        working-directory: for ios
+        run: npm run test:unit
+
       - name: Validate runtime JavaScript syntax
         working-directory: for ios
         run: |
+          node --check js/09-app-features-v6.js
+          node --check js/22-shb-scroll-keep-v17.js
           node --check js/29-offline-setup.js
+          node --check js/35-pediatrics-collections.js
           node --check sw.js
           node --check scripts/restore-ios-packed.js
 
@@ -49,7 +56,7 @@ jobs:
       - name: Upload verified iOS PWA output
         uses: actions/upload-artifact@v4
         with:
-          name: Shbace-Medical-iOS-PWA-1.4.15
+          name: Shbace-Medical-iOS-PWA-1.4.16
           path: for ios/dist/
           if-no-files-found: error
           retention-days: 30

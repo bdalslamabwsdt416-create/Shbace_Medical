@@ -212,7 +212,7 @@ try{
   var extra=a&&a.notification&&a.notification.extra||{};if(extra.shbaceExamGoal){appPage='examgoal';renderAppDemo()}
  });
 }catch(_){}
-var stack=[],lastPage=typeof appPage==='string'?appPage:'subjects',backing=false,popping=false,scrollMemo={};
+var stack=[],lastPage=typeof appPage==='string'?appPage:'subjects',backing=false,popping=false;
 function closeOverlay(){
  var d=document.getElementById('drawer');if(d&&d.classList.contains('open')){toggleDrawer(false);return true}
  var cf=document.getElementById('cfwrap');if(cf){if(typeof window.cfClose==='function')window.cfClose();else cf.remove();return true}
@@ -235,9 +235,8 @@ window.addEventListener('popstate',function(e){
 },true);
 var originalRender=window.renderAppDemo;
 if(typeof originalRender==='function')window.renderAppDemo=function(){
- var to=appPage;if(mode==='app'&&to!==lastPage&&!backing&&!popping){stack.push(lastPage);if(stack.length>40)stack.shift();var cur=document.getElementById('phoneContent');if(cur)scrollMemo[lastPage]=cur.scrollTop}
+ var to=appPage;if(mode==='app'&&to!==lastPage&&!backing&&!popping){stack.push(lastPage);if(stack.length>40)stack.shift()}
  var result=originalRender.apply(this,arguments);lastPage=to;
- var sc=document.getElementById('phoneContent');if(sc&&Number.isFinite(scrollMemo[to]))requestAnimationFrame(function(){var p=document.getElementById('phoneContent');if(p)p.scrollTop=scrollMemo[to]});
  removeBadges();removeOldPlanner();return result
 };
 function removeBadges(){try{document.querySelectorAll('#drawer .nb,.drawer .nb,.app-nav .nbadge').forEach(function(x){x.remove()})}catch(_){}}
