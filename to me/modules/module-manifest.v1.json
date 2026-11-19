@@ -41,8 +41,14 @@
       "name": "Navigation Engine",
       "status": "partial",
       "scope": "android",
-      "source": "js/04-app-main.js;js/06-drawer-menu.js;js/46-android-remote-ui.js;js/47-android-remote-control.js",
-      "note": "Legacy route and remote navigation exist; full graph adapter and lifecycle integration remain."
+      "source": "js/04-app-main.js;js/06-drawer-menu.js;js/10-history-sync.js;js/46-android-remote-ui.js;js/47-android-remote-control.js;js/51-navigation-contract-v1.js",
+      "note": "Legacy routes remain in place; v1 provides an observational catalog and safe adapter. Physical device route/back/scroll acceptance is still pending.",
+      "capabilities": [
+        "route-catalog",
+        "route-observer",
+        "safe-route-adapter",
+        "versioned-remote-target-allowlists"
+      ]
     },
     {
       "id": "ui",
