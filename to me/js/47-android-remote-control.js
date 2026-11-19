@@ -112,11 +112,14 @@
       '.phone .shb-rc3-list{padding-inline-start:22px;line-height:var(--shb-remote-line-height,1.75)}.phone .shb-rc3-metric{display:flex;flex-direction:column;gap:4px;padding:calc(14px * var(--shb-remote-spacing-scale,1));border-radius:var(--shb-remote-card-radius,14px);background:var(--shb-remote-surface,rgba(20,38,62,.5));border:1px solid var(--shb-remote-border,rgba(130,170,210,.18));color:var(--shb-remote-text,inherit)}' +
       '.phone .shb-rc3-metric b{font-size:1.35rem}.phone .shb-rc3-metric small{color:var(--shb-remote-muted,inherit)}.phone .shb-rc3-spacer{display:block;width:100%;pointer-events:none}' +
       '.phone .shb-remote-top-nav{margin:8px 0 14px!important}' +
+      '.phone .shb-remote-ui-page{background:var(--shb-remote-background,transparent)}' +
+      '.phone .shb-remote-ui-list{background:var(--shb-remote-surface-alt,transparent);border-radius:var(--shb-remote-card-radius,14px)}' +
       '.phone .shb-remote-ui-card,.phone .shb-remote-announcement{border-color:var(--shb-remote-border,inherit);border-radius:var(--shb-remote-card-radius,14px);background:var(--shb-remote-card,inherit);color:var(--shb-remote-text,inherit)}' +
       '.phone .shb-remote-ui-notice{border-color:var(--shb-remote-border,inherit);border-radius:var(--shb-remote-card-radius,14px);background:var(--shb-remote-surface,inherit);color:var(--shb-remote-text,inherit)}' +
+      '.phone .shb-remote-ui-notice.shb-tone-warning{border-inline-start:3px solid var(--shb-remote-warning,var(--gold,#e4bb62))}' +
       '.phone .shb-remote-announcement p,.phone .shb-remote-ui-text{line-height:var(--shb-remote-line-height,1.75)}' +
       '.phone .shb-remote-ui-heading{color:var(--shb-remote-text,inherit)}.phone .shb-remote-ui-card small,.phone .shb-remote-announcement small{color:var(--shb-remote-muted,inherit)}' +
-      '.phone .shb-rc3-card .success,.phone .shb-remote-ui-success{color:var(--shb-remote-success,inherit)}.phone .shb-rc3-card .danger,.phone .shb-remote-ui-danger{color:var(--shb-remote-danger,inherit)}';
+      '.phone .shb-rc3-card .success,.phone .shb-remote-ui-success{color:var(--shb-remote-success,inherit)}.phone .shb-rc3-card .danger,.phone .shb-remote-ui-danger{color:var(--shb-remote-danger,inherit)}.phone .shb-rc3-card .warning,.phone .shb-remote-ui-warning{color:var(--shb-remote-warning,inherit)}';
     document.head.appendChild(s);
   }
   function applyAppearance() {
