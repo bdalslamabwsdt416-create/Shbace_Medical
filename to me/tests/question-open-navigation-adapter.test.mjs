@@ -40,7 +40,7 @@ function exerciseOpenQuestion(id, mode = "ok") {
       context.renderAppDemo();
     };
   }
-  vm.runInContext(routeHelper + "\n" + openQuestion + "\nopenQ(" + JSON.stringify(id) + ");", context,
+  vm.runInContext(routeHelper + "\n" + openQuestion + "\nwindow.openQ(" + JSON.stringify(id) + ");", context,
     { filename:"question-open-navigation-adapter.js" });
   return {context,calls};
 }
