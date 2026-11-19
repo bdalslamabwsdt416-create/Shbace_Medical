@@ -105,6 +105,64 @@ Media files (WebP/PNG/JPEG/SVG, PDF, MP4, MP3/M4A, and other binary files) can b
 
 The first engine release currently renders declarative MCQ banks through the existing SHBACE question, answer, review, quiz, and statistics engine. PDFs, audio/video lessons, and flashcard decks can be distributed and cached by the content store, but their dedicated viewing/study screens require their corresponding in-app renderer to be added in a later APK update. Do not label those formats as active UI features until their renderer is implemented.
 
+
+
+## Offline resources
+
+Add a `resources` array to the catalog for files that should appear as separate learning-resource cards:
+
+```json
+{
+  "id": "cah-guideline-pdf",
+  "title": "Congenital Adrenal Hyperplasia — Study Guide",
+  "description": "A downloadable reference document.",
+  "type": "pdf",
+  "file": "resources/cah-study-guide.pdf",
+  "cover": "media/covers/cah-guide.webp",
+  "systemId": "endocrinology",
+  "topicId": "adrenal-disorders",
+  "source": "SHBACE Medical"
+}
+```
+
+Supported resource types are `pdf`, `audio`, `video`, `image`, and `file`. Files are downloaded and verified with the package, kept offline in app-private storage, and opened through Android's installed file/media apps. This does not require the learner to remain online; an appropriate viewer/player must be installed on the phone.
+
+## Offline flashcard decks
+
+Add a `flashcardDecks` array to the catalog. Each deck points to its own JSON file:
+
+```json
+{
+  "id": "pediatric-cardiology-basics",
+  "title": "Pediatric Cardiology Basics",
+  "description": "Core facts for quick recall.",
+  "cover": "media/covers/pediatric-cardiology.webp",
+  "contentFile": "flashcards/pediatric-cardiology.json"
+}
+```
+
+The deck file uses schema `shbace-remote-flashcards-v1`:
+
+```json
+{
+  "schema": "shbace-remote-flashcards-v1",
+  "cards": [
+    {
+      "id": "card-001",
+      "front": "What is the most common congenital heart disease?",
+      "back": "Ventricular septal defect (VSD).",
+      "frontImage": "media/flashcards/vsd-front.webp",
+      "backImage": "media/flashcards/vsd-diagram.webp",
+      "topic": "Congenital Heart Disease"
+    }
+  ]
+}
+```
+
+The Android app has a dedicated flip-card screen with previous/next navigation and "I know this" / "Review again" ratings. Card progress is stored locally using the deck and card IDs, so updating a card's text or adding cards does not reset the student's other study data. Keep both IDs stable for existing cards.
+
+Question records may also include an `image` path. Small verified images are shown inside the question; larger images can be opened through Android's file viewer.
+
 ## Publishing checklist
 
 1. Put the catalog and bank JSON files under this directory.
