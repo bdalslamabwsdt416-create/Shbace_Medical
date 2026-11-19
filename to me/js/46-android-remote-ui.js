@@ -27,6 +27,12 @@
   var resourceById = Object.create(null);
   var bankById = Object.create(null);
   var deckById = Object.create(null);
+  var BUILTIN_PAGES = {
+    subjects:1, specialties:1, topics:1, questions:1, quiz:1, quizrun:1,
+    quizresult:1, quizhistory:1, review:1, stats:1, search:1, settings:1,
+    about:1, changelog:1, feedback:1, rate:1, pinned:1, saved:1, wrong:1,
+    reported:1, notifs:1, timer:1
+  };
 
   function esc(value) {
     return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
@@ -58,7 +64,7 @@
     if (type === 'link') return typeof block.label === 'string' && !!safeUrl(block.url);
     if (type === 'button') {
       return typeof block.label === 'string' &&
-        ['page', 'resource', 'bank', 'deck'].indexOf(String(block.action || '')) >= 0 &&
+        ['page', 'builtin', 'resource', 'bank', 'deck'].indexOf(String(block.action || '')) >= 0 &&
         validId(block.target);
     }
     if (type === 'resourceList' || type === 'bankList' || type === 'flashcardDeckList') {
@@ -78,6 +84,11 @@
     var key = String(target || '');
     if (action === 'page' && pageById[key]) {
       window.shbRemoteOpenPage(key);
+      return true;
+    }
+    if (action === 'builtin' && BUILTIN_PAGES[key]) {
+      appPage = key;
+      window.renderAppDemo();
       return true;
     }
     if (action === 'resource' && resourceById[key]) return API.openResource(key);
@@ -184,11 +195,15 @@
       if (!group || typeof group.title !== 'string' || !group.title.trim() ||
           !Array.isArray(group.items)) return;
       var items = group.items.filter(function (item) {
-        return item && item.enabled !== false && validId(item.id) && validId(item.pageId) &&
-          pageById[item.pageId] && typeof item.label === 'string' && item.label.trim();
+        var hasRemotePage = item && validId(item.pageId) && !!pageById[item.pageId];
+        var hasBuiltinPage = item && validId(item.targetPage) && !!BUILTIN_PAGES[item.targetPage];
+        return item && item.enabled !== false && validId(item.id) &&
+          (hasRemotePage || hasBuiltinPage) &&
+          typeof item.label === 'string' && item.label.trim();
       }).sort(function (a, b) { return Number(a.order || 0) - Number(b.order || 0); })
         .map(function (item) {
-          return [String(item.label), pageKey(item.pageId), String(item.icon || '')];
+          var targetPage = pageById[item.pageId] ? pageKey(item.pageId) : String(item.targetPage);
+          return [String(item.label), targetPage, String(item.icon || '')];
         });
       if (items.length) groups.push([String(group.title), items]);
     });
