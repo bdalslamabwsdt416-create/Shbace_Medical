@@ -11,7 +11,7 @@
 | Phase | Scope | Current status | Exit condition |
 |---:|---|---|---|
 | 0 | Repository and runtime audit | **Source audit complete; device acceptance pending** | All Android routes exercised on a real device/emulator, with back targets, stores, bridge calls and offline result recorded. |
-| 1 | Screen, route and feature inventory | **Route contract v1 and static tests implemented; device matrix pending** | Every route has a verified runtime renderer, back/scroll target, store ownership and offline/device result. |
+| 1 | Screen, route and feature inventory | **Route contract v1 + student-store ownership characterization tests implemented; device matrix pending** | Every route has a verified runtime renderer, back/scroll target, store ownership and offline/device result. |
 | 2 | Core Architecture | **Core Runtime v1 implemented** | Existing navigation, data and feature engines use stable service contracts without behaviour regression. |
 | 3 | Remote Configuration Engine | **Core content policy v1 + verified last-known-good rollback implemented; signed manifest pending key provisioning** | Declarative schemas, monotonic content versions, APK compatibility, rollback integrity tests, feature policies and later signed-config verification. |
 | 4 | UI and Navigation Engine | **Partial; shared route dispatch integrated for Android drawer and remote UI; device matrix pending** | Built-in route adapter, all supported nav surfaces and back/scroll invariants covered by parity tests. |
@@ -43,7 +43,7 @@
 - Page Builder v2: shared local Android renderer for bounded nested section/grid/row layouts, tabs, accordions, template slots and fixed content-presence conditions; no remote executable code.
 - Theme Engine v1: centralized remote appearance ownership in Android Remote Control; bounded palette, font scale, line height, spacing, radius and density tokens with validator coverage and local theme-mode preservation.
 - Theme Engine v1.1: semantic dark/light design-token aliases added to the original CSS source and packaged runtime bundle; shared light-mode card surfaces now consume those tokens without changing their existing palette values. Regression tests protect source/bundle parity and the student's locally stored theme preference.
-- Navigation Route Contract v1: 29 route entries, V2/V3 remote allow-lists, registered local pages, shared built-in route dispatch for drawer/remote UI, and an observational adapter around the legacy renderer.
+- Navigation Route Contract v1: 29 route entries, V2/V3 remote allow-lists, registered local pages, shared built-in route dispatch for drawer/remote UI, and an observational adapter around the legacy renderer.\n- Student Data Store Contract v1: regression tests bind every route-declared store to a source reference, protect critical legacy learning keys and QBank progress fields, verify backup-before-topic-remap ordering, and keep new architecture foundations away from student storage.
 
 ## Frozen version and release protection
 
