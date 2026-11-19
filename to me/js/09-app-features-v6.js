@@ -1090,6 +1090,20 @@ function srSuspend(id,fromSession){const r=SR3.q[id];if(!r)return;r.sus=true;srL
 window.srSuspend=function(id){confirmBox({title:'Stop showing this question?',text:'It leaves Smart Review. The question stays in the Question Bank untouched.',detail:'Its history is kept — restore it any time from Schedule.',ok:'Stop showing',danger:true},()=>srSuspend(id,false))};
 window.srRestore=function(id){const r=SR3.q[id];if(!r)return;r.sus=false;r.due=Math.max(r.due,Date.now());srLog(r,{type:'restore'});SRX.open=null;srSave();srNotify();updateBadges();renderAppDemo();toast('Back in Smart Review')};
 window.srGoal=function(v){v=Math.round(Number(v));if(!Number.isFinite(v))return;SR3.goal=Math.min(200,Math.max(1,v));srSave();renderAppDemo()};
+/* Remote Control V3: daily goal/default bank only; scheduler and review history are untouched. */
+window.__shbApplyRemoteSmartReviewOptions=function(config){
+ if(!config||typeof config!=='object'||Array.isArray(config))return false;
+ let hasSaved=false;try{hasSaved=localStorage.getItem(SR3KEY)!==null}catch(e){}
+ if(hasSaved&&config.policy!=='enforce')return false;
+ let changed=false;
+ if(Number.isInteger(config.dailyGoal)&&config.dailyGoal>=1&&config.dailyGoal<=200){
+  SR3.goal=config.dailyGoal;changed=true;
+ }
+ if(typeof config.defaultBank==='string'&&(config.defaultBank==='all'||BANK_KEYS.has(config.defaultBank))){
+  SRBANK=config.defaultBank;changed=true;
+ }
+ return changed?srSave():false;
+};
 
 /* ---------- notifications (one per day, updated after every change; no background push is claimed) ---------- */
 function srNotify(){try{const now=Date.now(),dn=dueList().length,id='sr-'+dkey(now);
@@ -2201,6 +2215,22 @@ let QC=Object.assign({scope:'all',bank:'all',banks:[],specs:[],topics:[],filt:'a
  QC.specs=Array.isArray(QC.specs)?QC.specs.filter(s=>typeof s==='string'&&s):[];QC.topics=Array.isArray(QC.topics)?QC.topics.filter(t=>TOPIC_NAME[t]):[];
  QC.count=Number.isInteger(QC.count)&&QC.count>0?QC.count:20;QC.mins=Number.isInteger(QC.mins)&&QC.mins>0?QC.mins:0})();
 const qcSave=()=>LS.set(QCKEY,QC);
+/* Remote Control V3: only existing Quiz preferences are configurable. No attempt or answer data is changed. */
+window.__shbApplyRemoteQuizOptions=function(config){
+ if(!config||typeof config!=='object'||Array.isArray(config))return false;
+ let hasSaved=false;try{hasSaved=localStorage.getItem(QCKEY)!==null}catch(e){}
+ if(hasSaved&&config.policy!=='enforce')return false;
+ const d=config.defaults&&typeof config.defaults==='object'&&!Array.isArray(config.defaults)?config.defaults:config;
+ const enums={scope:['all','sel','custom'],filt:['any','new','wrong','saved'],mode:['practice','timed'],fb:['instant','end'],order:['random','bank']};
+ Object.keys(enums).forEach(k=>{if(enums[k].includes(d[k]))QC[k]=d[k]});
+ if(Number.isInteger(d.count)&&d.count>=1&&d.count<=500)QC.count=d.count;
+ if(Number.isInteger(d.mins)&&d.mins>=0&&d.mins<=600)QC.mins=d.mins;
+ if(Array.isArray(d.banks))QC.banks=[...new Set(d.banks.filter(b=>BANK_KEYS.has(String(b))&&String(b)!=='all'))];
+ if(Array.isArray(d.specs))QC.specs=[...new Set(d.specs.filter(s=>typeof s==='string'&&REAL.spec[s]))];
+ if(Array.isArray(d.topics))QC.topics=[...new Set(d.topics.map(String).filter(t=>Object.prototype.hasOwnProperty.call(TOPIC_NAME,t)))];
+ QC.bank=QC.banks.length===1?QC.banks[0]:'all';
+ return qcSave();
+};
 let qzViewId=null,qzPal=false,qzRevF='all',qzAnim=false,qzBack=null;
 /* ---- Quiz scope helpers: several banks, systems and topics can be combined ---- */
 const SYS_CANON=[['cardio','Cardiovascular System',/cardio/i],['respiratory','Respiratory System',/respir/i],['endocrine','Endocrinology',/endocr/i],['git','Gastrointestinal Tract',/gastro|(^|-)git$/i],['hepatology','Hepatology',/hepat/i],['heme','Haematology',/ha?emat/i],['neonatology','Neonatology',/neonat/i],['nephrology','Nephrology',/nephro/i],['neuro','Neurology / CNS',/neuro|^cns$/i],['genetics','Genetics',/genet/i],['dermatology','Dermatology & Child Protection',/dermat|skin/i],['growth','Growth & Development',/growth/i],['nutrition','Nutrition',/nutrit/i],['infectious','Infectious Diseases',/infect/i],['rheum','Rheumatology',/rheum/i],['immunology','Immunology & Allergy',/immun|allerg/i],['emergency','Emergency & Toxicology',/emerg|toxic/i],['general','General Pediatrics',/general/i],['integrated','Integrated Exam Practice',/integrated|exam practice/i]];

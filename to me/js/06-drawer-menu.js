@@ -17,6 +17,31 @@ function drawerGroups(){
   if(Array.isArray(cfg.groups))cfg.groups.forEach(function(g){
     if(g&&typeof g[0]==='string'&&Array.isArray(g[1])&&g[1].length)groups.push(g);
   });
+  /* V3: reorder existing entries and relocate them between named drawer groups. */
+  if(Array.isArray(cfg.itemOrder)){
+    var ranks=Object.create(null);cfg.itemOrder.forEach(function(id,index){ranks[String(id)]=index;});
+    groups.forEach(function(g){g[1].sort(function(a,b){
+      var ai=Object.prototype.hasOwnProperty.call(ranks,String(a[1]||''))?ranks[String(a[1]||'')]:9999;
+      var bi=Object.prototype.hasOwnProperty.call(ranks,String(b[1]||''))?ranks[String(b[1]||'')]:9999;
+      return ai-bi;
+    });});
+  }
+  if(cfg.itemGroups&&typeof cfg.itemGroups==='object'){
+    Object.keys(cfg.itemGroups).forEach(function(route){
+      var destination=String(cfg.itemGroups[route]||'').trim(),entry=null;
+      if(!destination)return;
+      groups.forEach(function(g){
+        var at=g[1].findIndex(function(it){return String(it[1]||'')===route;});
+        if(at>=0)entry=g[1].splice(at,1)[0];
+      });
+      if(entry){
+        var target=groups.find(function(g){return g[0]===destination;});
+        if(!target){target=[destination,[]];groups.push(target);}
+        target[1].push(entry);
+      }
+    });
+    groups=groups.filter(function(g){return g[1].length>0;});
+  }
   if(Array.isArray(cfg.groupOrder)){
     var order=cfg.groupOrder.map(String);
     groups.sort(function(a,b){

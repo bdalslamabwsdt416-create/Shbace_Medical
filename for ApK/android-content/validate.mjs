@@ -223,6 +223,11 @@ const ui = catalog.ui;
 if (ui != null) {
   assert(ui && typeof ui === 'object' && !Array.isArray(ui), 'catalog.ui must be an object.');
   const pageIds = new Set();
+  const builtinPageIds = new Set(['subjects', 'grade', 'specialties', 'topics', 'questions', 'quiz',
+    'quizrun', 'quizresult', 'quizhistory', 'review', 'stats', 'search', 'settings', 'about',
+    'dedication', 'changelog', 'feedback', 'rate', 'pinned', 'saved', 'wrong', 'reported',
+    'notifs', 'timer', 'weak', 'menu']);
+  const builtinBanks = new Set(['all', 'aj', 'previous', 'nelson', 'kasr', 'clinical', 'egyptian']);
   const pages = Array.isArray(ui.pages) ? ui.pages : [];
   assert(pages.length <= 40, 'Remote UI may define at most 40 pages.');
   const knownResources = new Set(resourceIds);
@@ -235,7 +240,7 @@ if (ui != null) {
       assert(block && typeof block === 'object' && !Array.isArray(block), 'Invalid UI block in ' + label);
       const type = String(block.type || '');
       assert(['heading', 'text', 'notice', 'divider', 'image', 'resourceList',
-        'bankList', 'flashcardDeckList', 'link', 'button'].includes(type),
+        'bankList', 'flashcardDeckList', 'link', 'button', 'card', 'list', 'metric', 'spacer'].includes(type),
         'Unsupported UI block type in ' + label + ': ' + type);
       if (type === 'heading' || type === 'text' || type === 'notice') {
         assert(typeof block.text === 'string', 'UI ' + type + ' block needs text in ' + label);
@@ -243,6 +248,21 @@ if (ui != null) {
       if (type === 'image') {
         assert(typeof block.file === 'string', 'UI image block needs a file path in ' + label);
         assetRef(block.file, listedPaths, 'Remote UI image ' + label);
+      }
+      if (type === 'card') {
+        assert((block.title == null || typeof block.title === 'string') &&
+          (block.text == null || typeof block.text === 'string'), 'Invalid UI card block in ' + label);
+      }
+      if (type === 'list') {
+        assert(Array.isArray(block.items) && block.items.length <= 30 &&
+          block.items.every(item => typeof item === 'string'), 'Invalid UI list block in ' + label);
+      }
+      if (type === 'metric') {
+        assert((typeof block.label === 'string' || typeof block.label === 'number') &&
+          (typeof block.value === 'string' || typeof block.value === 'number'), 'Invalid UI metric block in ' + label);
+      }
+      if (type === 'spacer') {
+        assert(Number.isInteger(block.size) && block.size >= 4 && block.size <= 64, 'Invalid UI spacer size in ' + label);
       }
       if (type === 'link') {
         assert(typeof block.label === 'string' && block.label.trim() &&
@@ -317,6 +337,14 @@ if (ui != null) {
       if (sidebar[key] != null) assert(Array.isArray(sidebar[key]) &&
         sidebar[key].every(value => typeof value === 'string'), 'Invalid sidebar ' + key + '.');
     }
+    if (sidebar.itemGroups != null) {
+      assert(sidebar.itemGroups && typeof sidebar.itemGroups === 'object' && !Array.isArray(sidebar.itemGroups),
+        'Sidebar itemGroups must be an object.');
+      for (const [route, group] of Object.entries(sidebar.itemGroups)) {
+        assert((builtinPageIds.has(route) || pageIds.has(route)) && typeof group === 'string' && group.trim() && group.length <= 64,
+          'Invalid sidebar itemGroups entry: ' + route);
+      }
+    }
     for (const key of ['renames', 'groupRenames']) {
       if (sidebar[key] != null) {
         assert(sidebar[key] && typeof sidebar[key] === 'object' && !Array.isArray(sidebar[key]),
@@ -345,9 +373,132 @@ if (ui != null) {
     assert(ui.appearance && typeof ui.appearance === 'object' && !Array.isArray(ui.appearance),
       'Remote UI appearance must be an object.');
     const hex = /^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$/;
-    for (const key of ['accentColor', 'accentSoft']) {
+    for (const key of ['accentColor', 'accentSoft', 'backgroundColor', 'surfaceColor',
+      'cardColor', 'textColor', 'mutedColor', 'borderColor']) {
       if (ui.appearance[key] != null) assert(typeof ui.appearance[key] === 'string' && hex.test(ui.appearance[key]),
         'Invalid remote UI color: ' + key);
+    }
+    if (ui.appearance.fontScale != null) assert(Number.isFinite(Number(ui.appearance.fontScale)) &&
+      Number(ui.appearance.fontScale) >= 0.85 && Number(ui.appearance.fontScale) <= 1.2,
+      'appearance.fontScale must be from 0.85 to 1.2.');
+    if (ui.appearance.cardRadius != null) assert(Number.isInteger(ui.appearance.cardRadius) &&
+      ui.appearance.cardRadius >= 6 && ui.appearance.cardRadius <= 32,
+      'appearance.cardRadius must be an integer from 6 to 32.');
+    if (ui.appearance.density != null) assert(['compact', 'comfortable'].includes(ui.appearance.density),
+      'appearance.density must be compact or comfortable.');
+  }
+
+  function validUiAction(action, target, label) {
+    const accepted = action === 'page' ? pageIds :
+      (action === 'builtin' ? builtinPageIds :
+      (action === 'resource' ? knownResources :
+      (action === 'bank' ? knownBanks : (action === 'deck' ? knownDecks : null))));
+    assert(accepted && accepted.has(String(target)), 'Unknown action target in ' + label);
+  }
+  if (ui.header != null) {
+    const header = ui.header;
+    assert(header && typeof header === 'object' && !Array.isArray(header), 'catalog.ui.header must be an object.');
+    for (const key of ['enabled', 'showMenu', 'showThemeToggle', 'showNotifications', 'showSettings']) {
+      if (header[key] != null) assert(typeof header[key] === 'boolean', 'header.' + key + ' must be boolean.');
+    }
+    for (const key of ['brand', 'subtitle', 'icon']) {
+      if (header[key] != null) assert(typeof header[key] === 'string' && header[key].length <= 80,
+        'header.' + key + ' must be text up to 80 characters.');
+    }
+    if (header.logoFile != null) assetRef(header.logoFile, listedPaths, 'header.logoFile');
+    if (header.actions != null) {
+      assert(Array.isArray(header.actions) && header.actions.length <= 5, 'header.actions may contain at most five items.');
+      for (const item of header.actions) {
+        assert(item && typeof item === 'object' && typeof item.label === 'string' && item.label.trim(),
+          'Invalid header action.');
+        const action = String(item.action || '');
+        if (action === 'theme' || action === 'drawer') continue;
+        assert(['page', 'builtin', 'resource', 'bank', 'deck'].includes(action),
+          'Unsupported header action: ' + action);
+        validUiAction(action, item.target, 'header action');
+        if (item.icon != null) assert(typeof item.icon === 'string' && item.icon.length <= 16,
+          'Header action icon must be short text or emoji.');
+      }
+    }
+  }
+  if (ui.bottomNavigation != null) {
+    const nav = ui.bottomNavigation;
+    assert(nav && typeof nav === 'object' && !Array.isArray(nav), 'catalog.ui.bottomNavigation must be an object.');
+    if (nav.enabled != null) assert(typeof nav.enabled === 'boolean', 'bottomNavigation.enabled must be boolean.');
+    if (nav.position != null) assert(['bottom', 'top', 'hidden'].includes(nav.position),
+      'bottomNavigation.position must be bottom, top or hidden.');
+    assert(Array.isArray(nav.items) && nav.items.length <= 6, 'bottomNavigation.items must contain at most six entries.');
+    const navIds = new Set();
+    for (const item of nav.items) {
+      assert(item && validId(item.id) && !navIds.has(item.id) &&
+        typeof item.label === 'string' && item.label.trim() && item.label.length <= 32,
+        'Invalid or duplicate bottom navigation item.');
+      navIds.add(item.id);
+      if (item.icon != null) assert(typeof item.icon === 'string' && item.icon.length <= 16,
+        'Bottom navigation icon must be short text or emoji.');
+      if (item.order != null) assert(Number.isFinite(Number(item.order)), 'Bottom navigation order must be numeric.');
+      if (item.enabled != null) assert(typeof item.enabled === 'boolean', 'Bottom navigation item enabled must be boolean.');
+      if (item.targetPage != null) validUiAction('builtin', item.targetPage, 'bottom navigation item ' + item.id);
+      else if (item.pageId != null) validUiAction('page', item.pageId, 'bottom navigation item ' + item.id);
+      else validUiAction(String(item.action || ''), item.target, 'bottom navigation item ' + item.id);
+    }
+  }
+  if (ui.screens != null) {
+    assert(ui.screens && typeof ui.screens === 'object' && !Array.isArray(ui.screens),
+      'catalog.ui.screens must be an object keyed by page ID.');
+    for (const [route, screen] of Object.entries(ui.screens)) {
+      assert(builtinPageIds.has(route) || pageIds.has(route), 'Unknown screen in catalog.ui.screens: ' + route);
+      assert(screen && typeof screen === 'object' && !Array.isArray(screen), 'Invalid screen config: ' + route);
+      if (screen.visible != null) assert(typeof screen.visible === 'boolean', 'screens.' + route + '.visible must be boolean.');
+      for (const key of ['title', 'subtitle']) {
+        if (screen[key] != null) assert(typeof screen[key] === 'string' && screen[key].length <= 120,
+          'screens.' + route + '.' + key + ' must be text up to 120 characters.');
+      }
+      if (screen.backgroundColor != null) assert(typeof screen.backgroundColor === 'string' && hex.test(screen.backgroundColor),
+        'Invalid screen background color: ' + route);
+      if (screen.prepend != null) validateUiBlocks(screen.prepend, 'screens.' + route + '.prepend');
+      if (screen.append != null) validateUiBlocks(screen.append, 'screens.' + route + '.append');
+    }
+  }
+  if (ui.globalBlocks != null) {
+    assert(ui.globalBlocks && typeof ui.globalBlocks === 'object' && !Array.isArray(ui.globalBlocks),
+      'catalog.ui.globalBlocks must be an object.');
+    if (ui.globalBlocks.before != null) validateUiBlocks(ui.globalBlocks.before, 'globalBlocks.before');
+    if (ui.globalBlocks.after != null) validateUiBlocks(ui.globalBlocks.after, 'globalBlocks.after');
+  }
+  if (ui.features != null) {
+    assert(ui.features && typeof ui.features === 'object' && !Array.isArray(ui.features),
+      'catalog.ui.features must be an object.');
+    const allowedFeatures = new Set(['quiz', 'smartReview', 'statistics', 'questionBank', 'flashcards', 'resources']);
+    for (const [name, config] of Object.entries(ui.features)) {
+      assert(allowedFeatures.has(name) && config && typeof config === 'object' && !Array.isArray(config),
+        'Unsupported or invalid remote feature config: ' + name);
+      if (config.visible != null) assert(typeof config.visible === 'boolean', name + '.visible must be boolean.');
+      if (config.policy != null) assert(['defaults', 'enforce'].includes(config.policy), name + '.policy must be defaults or enforce.');
+      if (name === 'quiz') {
+        const d = config.defaults == null ? config : config.defaults;
+        assert(d && typeof d === 'object' && !Array.isArray(d), 'Quiz defaults must be an object.');
+        const enums = { scope:['all','sel','custom'], filt:['any','new','wrong','saved'],
+          mode:['practice','timed'], fb:['instant','end'], order:['random','bank'] };
+        for (const [key, values] of Object.entries(enums)) if (d[key] != null) {
+          assert(values.includes(d[key]), 'Invalid Quiz default ' + key + '.');
+        }
+        if (d.count != null) assert(Number.isInteger(d.count) && d.count >= 1 && d.count <= 500, 'Quiz default count must be from 1 to 500.');
+        if (d.mins != null) assert(Number.isInteger(d.mins) && d.mins >= 0 && d.mins <= 600, 'Quiz default mins must be from 0 to 600.');
+        if (d.banks != null) assert(Array.isArray(d.banks) && d.banks.length <= 7 &&
+          d.banks.every(bank => builtinBanks.has(String(bank)) && bank !== 'all'), 'Quiz default banks contains an unsupported bank.');
+        for (const key of ['specs', 'topics']) if (d[key] != null) {
+          assert(Array.isArray(d[key]) && d[key].length <= 200 &&
+            d[key].every(value => typeof value === 'string' || typeof value === 'number'),
+            'Quiz default ' + key + ' must be a short array.');
+        }
+      }
+      if (name === 'smartReview') {
+        if (config.dailyGoal != null) assert(Number.isInteger(config.dailyGoal) &&
+          config.dailyGoal >= 1 && config.dailyGoal <= 200, 'Smart Review dailyGoal must be from 1 to 200.');
+        if (config.defaultBank != null) assert(typeof config.defaultBank === 'string' &&
+          builtinBanks.has(config.defaultBank), 'Smart Review defaultBank is unsupported.');
+      }
     }
   }
 }
