@@ -67,7 +67,7 @@
     var key = String(id || readRoute());
     var route = byId[key];
     if (!route || route.backTarget == null) return null;
-    if (route.backTarget === '*' && typeof window.__shbGetBackTarget === 'function') {
+    if ((route.backTarget === '*' || key === 'quizresult') && typeof window.__shbGetBackTarget === 'function') {
       try { return String(window.__shbGetBackTarget(key) || 'subjects'); }
       catch (e) { return null; }
     }
