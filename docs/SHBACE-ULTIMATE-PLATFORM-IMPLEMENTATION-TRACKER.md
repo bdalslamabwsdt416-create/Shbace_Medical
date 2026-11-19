@@ -13,7 +13,7 @@
 | 0 | Repository and runtime audit | **Source audit complete; device acceptance pending** | All Android routes exercised on a real device/emulator, with back targets, stores, bridge calls and offline result recorded. |
 | 1 | Screen, route and feature inventory | **Route contract v1 and static tests implemented; device matrix pending** | Every route has a verified runtime renderer, back/scroll target, store ownership and offline/device result. |
 | 2 | Core Architecture | **Core Runtime v1 implemented** | Existing navigation, data and feature engines use stable service contracts without behaviour regression. |
-| 3 | Remote Configuration Engine | **Partial; V2/V3 baseline exists** | Schemas, version policy, feature flags, validation, last-known-good and signed configuration are covered by tests. |
+| 3 | Remote Configuration Engine | **Core content policy v1 + verified last-known-good rollback implemented; signed manifest pending key provisioning** | Declarative schemas, monotonic content versions, APK compatibility, rollback integrity tests, feature policies and later signed-config verification. |
 | 4 | UI and Navigation Engine | **Partial; read-only route adapter added** | Built-in route adapter, all supported nav surfaces and back/scroll invariants covered by parity tests. |
 | 5 | Page Builder | **Starter renderer only** | Validated component tree, reusable templates, nested layout, conditions, tabs and preview workflow. |
 | 6 | Workflow Engine | **Planned** | Local trigger/condition/allow-listed-action engine with rule validation, traces and limits. |
@@ -34,6 +34,7 @@
 
 - Phase 0 audit, static route/store inventory and native permission/bridge map.
 - Android Remote Control Engine V3 with declarative configuration.
+- Remote-content policy v1: monotonic package version code, minimum APK version enforcement, stored last-known-good manifest, verified rollback bridge, and unit/static tests. The manifest itself is not yet cryptographically signed.
 - Android Settings grouping, APK release check and learning-content update check.
 - Core Runtime v1: event bus, service registry and bounded diagnostics.
 - Module Registry v1: dependency validation, ordered initialization and reverse-order cleanup.
