@@ -37,6 +37,7 @@
   var installedManifest = null;
   var loadedVersion = '';
   var banks = Object.create(null);
+  var resources = [];
   var currentBankId = '';
   var currentSystemId = '';
   var syncStarted = false;
@@ -141,6 +142,9 @@
     }
     if (data.banks.length > 40 || data.systems.length > 120) {
       throw new Error('Remote content catalog contains too many entries.');
+    }
+    if (Array.isArray(data.resources) && data.resources.length > 120) {
+      throw new Error('Remote content catalog contains too many learning resources.');
     }
 
     var systemById = Object.create(null);
@@ -249,6 +253,98 @@
       });
     }
     return registry;
+  }
+
+  function buildResources(data) {
+    var items = Array.isArray(data.resources) ? data.resources : [];
+    var seen = Object.create(null);
+    return items.map(function (item) {
+      if (!item || !/^[a-zA-Z0-9_-]{1,48}$/.test(String(item.id || '')) ||
+          seen[item.id] || !String(item.title || '').trim() ||
+          !/^(pdf|audio|video|file|image)$/i.test(String(item.type || '')) ||
+          !String(item.file || '').trim()) {
+        throw new Error('Invalid resource record in remote content catalog.');
+      }
+      seen[item.id] = true;
+      return {
+        id: String(item.id),
+        title: String(item.title),
+        description: String(item.description || ''),
+        type: String(item.type).toLowerCase(),
+        file: String(item.file),
+        cover: String(item.cover || ''),
+        systemId: String(item.systemId || ''),
+        topicId: String(item.topicId || ''),
+        source: String(item.source || '')
+      };
+    });
+  }
+
+  function openRemoteResource(id) {
+    var item = resources.find(function (resource) { return resource.id === id; });
+    if (!item) return false;
+    try {
+      var opened = N.openRemoteContentFile(item.file) === true;
+      if (!opened) toast('This resource is not installed yet. Check for content updates.');
+      return opened;
+    } catch (e) {
+      toast('Could not open this learning resource.');
+      return false;
+    }
+  }
+  window.shbRemoteOpenResource = openRemoteResource;
+
+  function injectResourceCards() {
+    var grid = document.querySelector('.ped-collections-grid');
+    if (!grid || !resources.length) return;
+    var symbols = { pdf: 'PDF', audio: '♫', video: '▶', file: 'FILE', image: 'IMG' };
+    resources.forEach(function (resource) {
+      if (grid.querySelector('[data-shb-remote-resource="' + resource.id + '"]')) return;
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'ped-collection-card ped-collection-remote-resource';
+      button.setAttribute('data-shb-remote-resource', resource.id);
+      button.innerHTML = '<span class="ped-collection-avatar ped-avatar-icon">' +
+        (resource.cover ? assetMarkup(resource.cover, symbols[resource.type] || 'FILE', 'shb-remote-cover') :
+          '<span class="shb-remote-resource-type">' + esc(symbols[resource.type] || 'FILE') + '</span>') +
+        '</span><span class="ped-collection-copy"><span class="eyebrow">OFFLINE LEARNING RESOURCE · ' +
+        esc(resource.type.toUpperCase()) + '</span><b>' + esc(resource.title) + '</b><small>' +
+        esc(resource.description || resource.source || 'Saved on this device for offline access.') +
+        '</small></span><span class="ped-collection-arrow">↗</span>';
+      button.addEventListener('click', function () { openRemoteResource(resource.id); });
+      grid.appendChild(button);
+    });
+  }
+
+  function injectQuestionMedia() {
+    var cards = document.querySelectorAll('.qcard[data-id]');
+    Array.prototype.forEach.call(cards, function (card) {
+      var id = card.getAttribute('data-id');
+      var question = B.QB.find(function (item) { return item && item.id === id; });
+      if (!question || !question.remoteImage || card.querySelector('.shb-remote-question-image')) return;
+      var path = String(question.remoteImage);
+      var source = assetData(path);
+      var stem = card.querySelector('.qstem');
+      if (!stem) return;
+      if (source) {
+        var image = document.createElement('img');
+        image.className = 'shb-remote-question-image';
+        image.src = source;
+        image.alt = 'Question illustration';
+        image.loading = 'lazy';
+        image.style.cssText = 'display:block;width:100%;max-width:560px;max-height:420px;object-fit:contain;margin:10px auto 14px;border-radius:14px';
+        card.insertBefore(image, stem);
+      } else {
+        var open = document.createElement('button');
+        open.type = 'button';
+        open.className = 'btn block shb-remote-question-file';
+        open.textContent = 'Open attached question image';
+        open.addEventListener('click', function () {
+          if (!N.openRemoteContentFile(path)) toast('Question image is not installed.');
+        });
+        card.insertBefore(open, stem);
+      }
+    });
   }
 
   function allTopicIds(bank) {
@@ -433,6 +529,7 @@
     catalog = safeJson(raw);
     if (!catalog) throw new Error('The installed remote catalog is not valid JSON.');
     banks = buildRemoteBanks(catalog);
+    resources = buildResources(catalog);
   }
 
   try {
@@ -474,6 +571,8 @@
     var result = coreRender.apply(this, arguments);
     try {
       injectBankCards();
+      injectResourceCards();
+      injectQuestionMedia();
       injectSettingsCard();
     } catch (e) { console.warn('Remote content UI injection failed', e); }
     return result;
