@@ -66,7 +66,8 @@ test("nested section, row and grid layouts render through one shared renderer", 
   assert.match(html, /shb-pb-stack/);
   assert.match(html, /shb-pb-section-row/);
   assert.match(html, /shb-pb-section-grid/);
-  assert.match(html, /grid-template-columns:repeat\(var\(--shb-pb-columns/);
+  assert.match(html, /--shb-pb-columns:2/);
+  assert.match(rendererSource, /grid-template-columns:repeat\(var\(--shb-pb-columns/);
   assert.match(html, /Three columns/);
 });
 
