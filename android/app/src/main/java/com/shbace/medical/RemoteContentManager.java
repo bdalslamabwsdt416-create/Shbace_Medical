@@ -147,6 +147,16 @@ final class RemoteContentManager {
         }
     }
 
+    File getVerifiedFile(String relativePath) {
+        try {
+            File file = resolveCurrentFile(relativePath);
+            return file != null && file.isFile() ? file : null;
+        } catch (Throwable error) {
+            Log.w(TAG, "Could not resolve verified remote content file: " + relativePath, error);
+            return null;
+        }
+    }
+
     private String syncNow() throws Exception {
         byte[] manifestBytes = downloadBytes(new URL(MANIFEST_URL), MAX_MANIFEST_BYTES);
         JSONObject manifest = new JSONObject(new String(manifestBytes, java.nio.charset.StandardCharsets.UTF_8));
