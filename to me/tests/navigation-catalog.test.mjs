@@ -20,7 +20,7 @@ const index = readFileSync(resolve(root, "index.html"), "utf8");
 const gradle = readFileSync(resolve(root, "../android/app/build.gradle"), "utf8");
 
 const navTapStart = feature.indexOf("window.__shbNavTap=function(id){");
-const navTapEnd = feature.indexOf("\\nappNav=", navTapStart);
+const navTapEnd = feature.indexOf("};", navTapStart) + 2;
 const bottomNavHandler = navTapStart >= 0 && navTapEnd > navTapStart ?
   feature.slice(navTapStart, navTapEnd).trim() : "";
 
