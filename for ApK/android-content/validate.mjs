@@ -261,9 +261,14 @@ if (ui != null) {
         assert(typeof block.label === 'string' && block.label.trim() && validId(block.target),
           'Invalid UI button in ' + label);
         const action = String(block.action || '');
+        const builtinPages = new Set(['subjects', 'specialties', 'topics', 'questions', 'quiz',
+          'quizrun', 'quizresult', 'quizhistory', 'review', 'stats', 'search', 'settings',
+          'about', 'changelog', 'feedback', 'rate', 'pinned', 'saved', 'wrong', 'reported',
+          'notifs', 'timer']);
         const allowed = action === 'page' ? pageIds :
+          (action === 'builtin' ? builtinPages :
           (action === 'resource' ? knownResources :
-          (action === 'bank' ? knownBanks : (action === 'deck' ? knownDecks : null)));
+          (action === 'bank' ? knownBanks : (action === 'deck' ? knownDecks : null))));
         assert(allowed && allowed.has(String(block.target)),
           'UI button has an unknown action or target in ' + label);
       }
@@ -290,8 +295,14 @@ if (ui != null) {
       assert(group && typeof group.title === 'string' && group.title.trim() &&
         Array.isArray(group.items) && group.items.length <= 30, 'Invalid remote sidebar group.');
       for (const item of group.items) {
-        assert(item && validId(item.id) && !itemIds.has(item.id) && validId(item.pageId) &&
-          pageIds.has(item.pageId) && typeof item.label === 'string' && item.label.trim(),
+        const remotePage = item && validId(item.pageId) && pageIds.has(item.pageId);
+        const builtinPages = new Set(['subjects', 'specialties', 'topics', 'questions', 'quiz',
+          'quizrun', 'quizresult', 'quizhistory', 'review', 'stats', 'search', 'settings',
+          'about', 'changelog', 'feedback', 'rate', 'pinned', 'saved', 'wrong', 'reported',
+          'notifs', 'timer']);
+        const builtinPage = item && validId(item.targetPage) && builtinPages.has(item.targetPage);
+        assert(item && validId(item.id) && !itemIds.has(item.id) &&
+          (remotePage || builtinPage) && typeof item.label === 'string' && item.label.trim(),
           'Invalid or duplicate remote sidebar item.');
         itemIds.add(item.id);
         if (item.icon != null) assert(typeof item.icon === 'string' && item.icon.length <= 16,
