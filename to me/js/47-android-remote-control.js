@@ -107,48 +107,60 @@
     var s = document.createElement('style');
     s.id = 'shb-remote-control-v3-styles';
     s.textContent =
-      '.phone .shb-rc3-card{box-sizing:border-box;padding:14px;margin:12px 0;border:1px solid var(--shb-remote-border,rgba(130,170,210,.18));border-radius:16px;background:var(--shb-remote-card,rgba(20,38,62,.55))}' +
-      '.phone .shb-rc3-card h3{margin:0 0 7px;font-size:1rem}.phone .shb-rc3-card p{margin:0;line-height:1.65;white-space:pre-wrap}' +
-      '.phone .shb-rc3-list{padding-inline-start:22px;line-height:1.75}.phone .shb-rc3-metric{display:flex;flex-direction:column;gap:4px;padding:14px;border-radius:14px;background:var(--shb-remote-surface,rgba(20,38,62,.5));border:1px solid var(--shb-remote-border,rgba(130,170,210,.18))}' +
-      '.phone .shb-rc3-metric b{font-size:1.35rem}.phone .shb-rc3-metric small{opacity:.75}.phone .shb-rc3-spacer{display:block;width:100%;pointer-events:none}' +
-      '.phone .shb-remote-top-nav{margin:8px 0 14px!important}';
+      '.phone .shb-rc3-card{box-sizing:border-box;padding:calc(14px * var(--shb-remote-spacing-scale,1));margin:calc(12px * var(--shb-remote-spacing-scale,1)) 0;border:1px solid var(--shb-remote-border,rgba(130,170,210,.18));border-radius:var(--shb-remote-card-radius,16px);background:var(--shb-remote-card,rgba(20,38,62,.55));color:var(--shb-remote-text,inherit)}' +
+      '.phone .shb-rc3-card h3{margin:0 0 7px;font-size:1rem}.phone .shb-rc3-card p{margin:0;line-height:var(--shb-remote-line-height,1.65);white-space:pre-wrap}' +
+      '.phone .shb-rc3-list{padding-inline-start:22px;line-height:var(--shb-remote-line-height,1.75)}.phone .shb-rc3-metric{display:flex;flex-direction:column;gap:4px;padding:calc(14px * var(--shb-remote-spacing-scale,1));border-radius:var(--shb-remote-card-radius,14px);background:var(--shb-remote-surface,rgba(20,38,62,.5));border:1px solid var(--shb-remote-border,rgba(130,170,210,.18));color:var(--shb-remote-text,inherit)}' +
+      '.phone .shb-rc3-metric b{font-size:1.35rem}.phone .shb-rc3-metric small{color:var(--shb-remote-muted,inherit)}.phone .shb-rc3-spacer{display:block;width:100%;pointer-events:none}' +
+      '.phone .shb-remote-top-nav{margin:8px 0 14px!important}' +
+      '.phone .shb-remote-ui-card,.phone .shb-remote-announcement{border-color:var(--shb-remote-border,inherit);border-radius:var(--shb-remote-card-radius,14px);background:var(--shb-remote-card,inherit);color:var(--shb-remote-text,inherit)}' +
+      '.phone .shb-remote-ui-notice{border-color:var(--shb-remote-border,inherit);border-radius:var(--shb-remote-card-radius,14px);background:var(--shb-remote-surface,inherit);color:var(--shb-remote-text,inherit)}' +
+      '.phone .shb-remote-announcement p,.phone .shb-remote-ui-text{line-height:var(--shb-remote-line-height,1.75)}' +
+      '.phone .shb-remote-ui-heading{color:var(--shb-remote-text,inherit)}.phone .shb-remote-ui-card small,.phone .shb-remote-announcement small{color:var(--shb-remote-muted,inherit)}' +
+      '.phone .shb-rc3-card .success,.phone .shb-remote-ui-success{color:var(--shb-remote-success,inherit)}.phone .shb-rc3-card .danger,.phone .shb-remote-ui-danger{color:var(--shb-remote-danger,inherit)}';
     document.head.appendChild(s);
   }
   function applyAppearance() {
     var a = ui.appearance && typeof ui.appearance === 'object' ? ui.appearance : {};
     var root = document.documentElement;
-    var map = {
-      accentColor:['--mint','--accent'], accentSoft:['--mint-soft'],
-      backgroundColor:['--shb-remote-background'], surfaceColor:['--shb-remote-surface'],
-      cardColor:['--shb-remote-card'], textColor:['--shb-remote-text'],
-      mutedColor:['--shb-remote-muted'], borderColor:['--shb-remote-border']
+    var colorMap = {
+      accentColor:['--mint','--accent'],
+      accentSoft:['--mint-soft'],
+      backgroundColor:['--shb-remote-background'],
+      surfaceColor:['--shb-remote-surface'],
+      surfaceAltColor:['--shb-remote-surface-alt'],
+      cardColor:['--shb-remote-card'],
+      textColor:['--shb-remote-text'],
+      mutedColor:['--shb-remote-muted'],
+      borderColor:['--shb-remote-border'],
+      successColor:['--shb-remote-success'],
+      dangerColor:['--shb-remote-danger'],
+      warningColor:['--shb-remote-warning']
     };
-    Object.keys(map).forEach(function (key) {
-      if (hex(a[key])) map[key].forEach(function (token) { root.style.setProperty(token, a[key]); });
+    Object.keys(colorMap).forEach(function (key) {
+      colorMap[key].forEach(function (token) { root.style.removeProperty(token); });
+      if (hex(a[key])) colorMap[key].forEach(function (token) { root.style.setProperty(token, a[key]); });
     });
-    if (Number.isFinite(Number(a.fontScale)) && Number(a.fontScale) >= .85 && Number(a.fontScale) <= 1.2) {
-      root.style.setProperty('--shb-remote-font-scale', String(Number(a.fontScale)));
+    ['--shb-remote-font-scale','--shb-remote-card-radius','--shb-remote-line-height','--shb-remote-spacing-scale']
+      .forEach(function (token) { root.style.removeProperty(token); });
+    var fontScale = Number(a.fontScale);
+    if (Number.isFinite(fontScale) && fontScale >= .85 && fontScale <= 1.2) {
+      root.style.setProperty('--shb-remote-font-scale', String(fontScale));
     }
     if (Number.isInteger(a.cardRadius) && a.cardRadius >= 6 && a.cardRadius <= 32) {
       root.style.setProperty('--shb-remote-card-radius', a.cardRadius + 'px');
-      if (!document.getElementById('shb-remote-control-v3-radius')) {
-        var rs = document.createElement('style');
-        rs.id = 'shb-remote-control-v3-radius';
-        rs.textContent = '.phone .card,.phone .app-card,.phone .app-nav{border-radius:var(--shb-remote-card-radius)!important}';
-        document.head.appendChild(rs);
-      }
     }
-    if (a.density === 'compact' || a.density === 'comfortable') root.setAttribute('data-shb-remote-density', a.density);
-    if (!document.getElementById('shb-remote-control-v3-appearance')) {
-      var as = document.createElement('style');
-      as.id = 'shb-remote-control-v3-appearance';
-      as.textContent =
-        '.phone .screen{font-size:calc(1em * var(--shb-remote-font-scale,1));color:var(--shb-remote-text,inherit)}' +
-        '.phone .rs .meta,.phone .rs .sub{color:var(--shb-remote-muted,inherit)}' +
-        '.phone .card,.phone .app-card{border-color:var(--shb-remote-border,inherit)}' +
-        'html[data-shb-remote-density="compact"] .phone .rs>.card,html[data-shb-remote-density="compact"] .phone .rs>.app-card{margin-block:7px}' +
-        'html[data-shb-remote-density="comfortable"] .phone .rs>.card,html[data-shb-remote-density="comfortable"] .phone .rs>.app-card{margin-block:15px}';
-      document.head.appendChild(as);
+    var lineHeight = Number(a.lineHeight);
+    if (Number.isFinite(lineHeight) && lineHeight >= 1.2 && lineHeight <= 1.9) {
+      root.style.setProperty('--shb-remote-line-height', String(lineHeight));
+    }
+    var spacingScale = Number(a.spacingScale);
+    if (Number.isFinite(spacingScale) && spacingScale >= .8 && spacingScale <= 1.2) {
+      root.style.setProperty('--shb-remote-spacing-scale', String(spacingScale));
+    }
+    if (a.density === 'compact' || a.density === 'comfortable') {
+      root.setAttribute('data-shb-remote-density', a.density);
+    } else {
+      root.removeAttribute('data-shb-remote-density');
     }
   }
 
