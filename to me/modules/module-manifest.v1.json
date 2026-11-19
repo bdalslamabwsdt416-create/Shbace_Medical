@@ -56,8 +56,13 @@
       "name": "UI Engine",
       "status": "partial",
       "scope": "android",
-      "source": "js/04-app-main.js;js/47-android-remote-control.js",
-      "note": "Existing renderers and remote blocks exist; the complete component contract is not extracted."
+      "source": "js/04-app-main.js;js/46-android-remote-ui.js;js/47-android-remote-control.js;js/52-page-builder-v1.js",
+      "note": "Existing renderers remain authoritative; safe nested layouts are now provided by the Page Builder service. The full UI component contract is not yet extracted.",
+      "capabilities": [
+        "legacy-renderer-adapters",
+        "declarative-remote-blocks",
+        "bounded-layout-renderer"
+      ]
     },
     {
       "id": "page-builder",
