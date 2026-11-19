@@ -7,6 +7,7 @@
    - Updates: check one manifest at most every 48 hours (or through the Settings action), stage only changed files,
      verify them and commit safely. Download progress is shown in the compact background chip.
    - Repair is targeted to files found missing or changed by a manifest comparison; no recurring whole-package scan.
+   - If IndexedDB install markers are lost, recover from the Cache Storage ready marker and verify saved files before restoring metadata.
    - Every network step has a timeout and a stall watchdog. Interrupted downloads keep verified files for retry.
 
    Compatible with the previous version: same cache name, same IndexedDB state, same public window.* functions. */
@@ -479,6 +480,7 @@ async function fetchBytes(url,ms,outer,onBytes){
 
 /* ---------- run engine ---------- */
 var busy=false,runCtl=null,watchdog=null,lastProgress=0,stalled=false,retryN=0,retryTimer=null,started=false;
+var recoveryNeedsRepair=false,recoveryCheckAt=0;
 function tick(){lastProgress=Date.now()}
 function startWatchdog(){
  stopWatchdog();tick();stalled=false;
@@ -542,10 +544,13 @@ async function downloadFile(f,target,sig){
 
 async function saveInstalled(m){
  var total=m.files.reduce(function(s,f){return s+(Number(f.bytes)||0)},0),at=Date.now();
+ var c=await caches.open(CACHE_NAME);
+ /* Persist the manifest first; READY_URL is the final commit marker for cache-based recovery. */
+ await c.put(MANIFEST_URL,new Response(JSON.stringify(m),{status:200,headers:{'content-type':'application/json'}}));
  await dbPut('meta',INSTALLED_KEY,{version:m.version,files:fileMap(m.files),verified:true,fileCount:m.files.length,totalBytes:total,completedAt:at});
  await dbPut('meta','ready',{version:m.version,verified:true,fileCount:m.files.length,totalBytes:total,completedAt:at});
- var c=await caches.open(CACHE_NAME);
  await c.put(READY_URL,new Response(JSON.stringify({version:m.version,verified:true,completedAt:at}),{status:200,headers:{'content-type':'application/json'}}));
+ recoveryNeedsRepair=false;
 }
 
 /* Download a plan. mode: install | repair (straight into the live cache) or update (into staging, swapped later). */
@@ -669,6 +674,39 @@ async function verifyCachedFiles(files,label,quiet){
   await wait(0); /* keep the UI responsive */
  }
  return {good:good,bad:bad};
+}
+/* Recover only when IndexedDB metadata is missing. The cache ready marker is written after a
+   complete install; every manifest file is still checked by size and SHA-256 before trust. */
+async function recoverInstalledFromCache(){
+ try{
+  var c=await caches.open(CACHE_NAME);
+  var readyResponse=await c.match(READY_URL);
+  if(!readyResponse||!readyResponse.ok)return {recovered:false};
+  var marker;
+  try{marker=await readyResponse.json()}catch(e){return {recovered:false}}
+  if(!marker||marker.verified!==true||!marker.version)return {recovered:false};
+  var manifestResponse=await c.match(MANIFEST_URL);
+  if(!manifestResponse||!manifestResponse.ok)return {recovered:false};
+  var cachedManifest;
+  try{cachedManifest=await manifestResponse.json()}catch(e){return {recovered:false}}
+  if(!validManifest(cachedManifest)||String(cachedManifest.version)!==String(marker.version))return {recovered:false};
+
+  /* This is a one-time recovery scan, not a routine launch scan. Keep every intact file;
+     the normal updater will repair only the missing or damaged entries. */
+  var checked=await verifyCachedFiles(cachedManifest.files,'Restoring saved offline files',true);
+  if(!checked.good.length)return {recovered:false};
+  var complete=checked.bad.length===0;
+  var total=checked.good.reduce(function(s,f){return s+(Number(f.bytes)||0)},0);
+  var at=Number(marker.completedAt)||Date.now();
+  var record={version:cachedManifest.version,files:fileMap(checked.good),verified:complete,fileCount:checked.good.length,totalBytes:total,completedAt:at,recoveredAt:Date.now()};
+  await dbPut('meta',INSTALLED_KEY,record).catch(noop);
+  if(complete){
+   await dbPut('meta','ready',{version:cachedManifest.version,verified:true,fileCount:cachedManifest.files.length,totalBytes:cachedManifest.totalBytes||total,completedAt:at}).catch(noop);
+  }else{
+   await dbPut('meta','ready',null).catch(noop);
+  }
+  return {recovered:true,complete:complete,missing:checked.bad.length,installed:record};
+ }catch(e){return {recovered:false,error:e}}
 }
 async function computePlan(installed){
  var have=await urlSetOf(await caches.open(CACHE_NAME)),files=[],changed=0,cur=Object.create(null);
@@ -797,7 +835,18 @@ async function boot(){
   await dbPut('meta',STAGED_KEY,null).catch(noop);
   caches.delete(STAGING_NAME).catch(noop);
  }
+ var recoveredFromCache=false;
  if(!hasRec&&!hasReadyMarker){
+  var recovery=await recoverInstalledFromCache();
+  if(recovery.recovered){
+   recoveredFromCache=true;
+   rec=recovery.installed;
+   hasRec=!!(rec&&rec.files);
+   hasReadyMarker=!!recovery.complete;
+   recoveryNeedsRepair=!recovery.complete;
+  }
+ }
+ if(!hasRec&&!hasReadyMarker&&!recoveredFromCache){
   if(splashP)await splashP;
   mountSetupOverlay();
   setState('boot',{msg:'Preparing the complete installation…',done:0,total:0,bytes:0,totalBytes:0,pct:0});
@@ -808,11 +857,21 @@ async function boot(){
  setState('ready');
  registerSW();
  releaseBootGate();
- /* One background manifest comparison at most every 48 hours; it never delays app startup. */
- if(online()&&checkDue())runFullCheck({force:true}).catch(noop);
+ /* A recovered but incomplete cache gets an immediate targeted repair check; normal updates
+    retain the existing 48-hour schedule and never delay app startup. */
+ if(recoveryNeedsRepair&&online()){
+  recoveryCheckAt=Date.now();
+  runFullCheck({force:true}).catch(noop);
+ }else if(online()&&checkDue())runFullCheck({force:true}).catch(noop);
 }
 function kick(){
  if(!started||busy||!online())return;
+ if(recoveryNeedsRepair){
+  if(Date.now()-recoveryCheckAt<CHECK_RETRY)return;
+  recoveryCheckAt=Date.now();
+  runFullCheck({force:true}).catch(noop);
+  return;
+ }
  if(state==='needs-network'||state==='error'){if(Date.now()-lsNum(CHECK_TRY_KEY)<5*60000)return;retryN=0;runFullCheck({force:true})}
  else if(checkDue())runFullCheck();
 }
