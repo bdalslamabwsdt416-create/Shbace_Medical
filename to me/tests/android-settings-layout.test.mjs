@@ -53,6 +53,7 @@ test("APK release checker compares the installed APK to the public latest releas
   assert.match(layout, /safeReleaseAssetUrl/);
   assert.match(layout, /openExternalUrl/);
   assert.match(layout, /data-shb-apk-check/);
+  assert.match(layout, /shb-apk-update-card/);
 });
 
 test("native external-browser bridge only permits HTTPS GitHub URLs", () => {
