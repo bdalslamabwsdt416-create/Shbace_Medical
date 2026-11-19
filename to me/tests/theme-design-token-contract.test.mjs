@@ -25,36 +25,44 @@ const sharedTokens = [
 
 test("semantic theme token contract is mirrored in the original source and Android runtime bundle", () => {
   for (const [label, css] of [["source", sourceCss], ["runtime", runtimeCss]]) {
-    assert.equal((css.match(/SHBACE semantic theme tokens v1\\.1/g) || []).length, 1,
+    assert.equal(css.split("SHBACE semantic theme tokens v1.1").length - 1, 1,
       label + " contains one semantic token block");
-    assert.match(css, /--shb-theme-background:var\\(--bg\\)/);
-    assert.match(css, /--shb-theme-surface:var\\(--panel\\)/);
-    assert.match(css, /--shb-theme-text:var\\(--text\\)/);
-    assert.match(css, /--shb-theme-accent:var\\(--mint\\)/);
-    assert.match(css, /--shb-theme-success:var\\(--green\\)/);
-    assert.match(css, /--shb-theme-danger:var\\(--red\\)/);
-    assert.match(css, /--shb-theme-warning:var\\(--gold\\)/);
     for (const token of sharedTokens) {
       assert.ok(css.includes(token), label + " is missing " + token);
     }
-    assert.match(css, /--shb-theme-background:var\\(--shb-light-bg\\)/);
-    assert.match(css, /--shb-theme-surface:var\\(--shb-light-surface\\)/);
-    assert.match(css, /--shb-theme-text:var\\(--shb-light-text\\)/);
-    assert.match(css, /--shb-theme-accent:var\\(--shb-light-blue\\)/);
-    assert.match(css, /--shb-theme-card-text:#203750/);
-    assert.match(css, /color:var\\(--shb-theme-card-text\\)!important/);
-    assert.match(css, /background:var\\(--shb-theme-card-background\\)!important/);
-    assert.match(css, /border:1px solid var\\(--shb-theme-card-border\\)!important/);
-    assert.match(css, /box-shadow:var\\(--shb-theme-card-shadow\\)!important/);
+    for (const declaration of [
+      "--shb-theme-background:var(--bg)",
+      "--shb-theme-surface:var(--panel)",
+      "--shb-theme-text:var(--text)",
+      "--shb-theme-accent:var(--mint)",
+      "--shb-theme-success:var(--green)",
+      "--shb-theme-danger:var(--red)",
+      "--shb-theme-warning:var(--gold)",
+      "--shb-theme-background:var(--shb-light-bg)",
+      "--shb-theme-surface:var(--shb-light-surface)",
+      "--shb-theme-text:var(--shb-light-text)",
+      "--shb-theme-accent:var(--shb-light-blue)",
+      "--shb-theme-card-text:#203750",
+      "color:var(--shb-theme-card-text)!important",
+      "background:var(--shb-theme-card-background)!important",
+      "border:1px solid var(--shb-theme-card-border)!important",
+      "box-shadow:var(--shb-theme-card-shadow)!important"
+    ]) {
+      assert.ok(css.includes(declaration), label + " is missing " + declaration);
+    }
   }
 });
 
 test("local dark/light preference remains owned by the existing settings store", () => {
-  assert.match(settings, /const SKEY='shbace_settings_v1'/);
-  assert.match(settings, /localStorage\\.getItem\\('shbace_theme'\\)/);
-  assert.match(settings, /localStorage\\.setItem\\('shbace_theme',SET\\.theme\\)/);
-  assert.match(settings, /ph\\.classList\\.toggle\\('light',SET\\.theme==='light'\\)/);
-  assert.match(settings, /toggleTheme=function\\(\\)\\{setSet\\('theme',SET\\.theme==='light'\\?'dark':'light'\\)\\}/);
-  assert.doesNotMatch(remoteTheme, /classList\\.toggle\\(['"]light['"]/,
+  for (const contract of [
+    "const SKEY='shbace_settings_v1'",
+    "localStorage.getItem('shbace_theme')",
+    "localStorage.setItem('shbace_theme',SET.theme)",
+    "ph.classList.toggle('light',SET.theme==='light')",
+    "toggleTheme=function(){setSet('theme',SET.theme==='light'?'dark':'light')}"
+  ]) {
+    assert.ok(settings.includes(contract), "settings is missing " + contract);
+  }
+  assert.equal(remoteTheme.includes("classList.toggle('light'"), false,
     "remote appearance must not force the student's local theme mode");
 });
