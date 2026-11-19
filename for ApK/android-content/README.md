@@ -72,6 +72,83 @@ The Android app currently limits a package to 500 files, 80 MiB per file, and 51
 }
 ```
 
+
+## Remote interface and navigation (Android APK)
+
+The Android remote-content package can also control a **declarative interface layer**. This is separate from the web/PWA interface and is activated only inside the native Android APK.
+
+Supported remote changes include:
+
+- Add sidebar groups and new entries, with a label, emoji/icon, order, enabled/hidden state, and a destination page.
+- Hide existing sidebar entries or rename them; rename built-in groups and set their displayed order.
+- Create new in-app pages from safe content blocks: headings, text, notices, dividers, verified images, resource lists, question-bank lists, flashcard-deck lists, HTTPS links, and action buttons.
+- Add or dismiss in-app announcements, add content blocks to the Home/Subjects screen, and adjust the accent colors through approved color values.
+- Link a page or button to an existing remote bank, resource, or flashcard deck.
+
+The app does **not** download or execute JavaScript, HTML, CSS, or arbitrary code from the feed. The remote package supplies JSON data and verified media only. A new kind of interaction or a completely new native feature still needs a one-time APK code update.
+
+### Example remote UI configuration
+
+Add an optional `ui` property to `catalog.json`. Every page destination used in the sidebar must exist in `ui.pages`:
+
+```json
+{
+  "ui": {
+    "sidebar": {
+      "hiddenItems": ["Rate This Website"],
+      "renames": { "Settings": "App Settings" },
+      "groupRenames": { "Learning": "Study" },
+      "groupOrder": ["Study", "Review", "Analytics", "Account & help"],
+      "groups": [
+        {
+          "title": "Clinical Learning",
+          "items": [
+            {
+              "id": "osce-library",
+              "label": "OSCE Library",
+              "icon": "🩺",
+              "pageId": "osce-library",
+              "order": 10,
+              "enabled": true
+            }
+          ]
+        }
+      ]
+    },
+    "pages": [
+      {
+        "id": "osce-library",
+        "title": "OSCE Library",
+        "subtitle": "Practical stations and revision resources.",
+        "blocks": [
+          { "type": "heading", "text": "Study resources" },
+          { "type": "text", "text": "Choose a resource or open a flashcard deck." },
+          { "type": "resourceList", "ids": ["osce-checklist-pdf"] },
+          { "type": "flashcardDeckList", "ids": ["osce-viva-cards"] },
+          { "type": "notice", "tone": "info", "title": "Offline access", "text": "Download the package once to study offline." }
+        ]
+      }
+    ],
+    "announcements": [
+      {
+        "id": "new-osce-content",
+        "title": "New OSCE material",
+        "text": "The OSCE library has been updated.",
+        "dismissible": true
+      }
+    ],
+    "appearance": {
+      "accentColor": "#64d9b4",
+      "accentSoft": "#173b3a"
+    }
+  }
+}
+```
+
+The IDs in `resourceList`, `bankList`, and `flashcardDeckList` must match records already declared in the catalog. A page button can use `action` equal to `page`, `resource`, `bank`, or `deck`, and its `target` must be the matching item ID. Links must use HTTPS. Sidebar item `pageId` must refer to a page in the same `ui.pages` array.
+
+To publish a remote interface change, update `catalog.json`, increment both catalog and manifest versions together, regenerate the manifest byte counts and SHA-256 entries, run the validator, then merge into `main/for ApK/android-content/`. The existing installed APK will receive the interface change during its next content sync; no new APK is needed for changes that fit these supported blocks and actions.
+
 ## Question file schema
 
 Each `contentFile` is a JSON file with schema `shbace-remote-questions-v1`:
