@@ -167,7 +167,10 @@ test("module manifest covers the blueprint without overstating unfinished engine
     "search", "data", "sync", "offline", "notifications", "ai", "security", "updates",
     "analytics", "admin-console", "accounts", "gamification"
   ]) assert.ok(ids.has(id), "Missing module inventory entry: " + id);
-  assert.equal(manifest.modules.find((module) => module.id === "workflow").status, "planned");
+  const workflow = manifest.modules.find((module) => module.id === "workflow");
+  assert.equal(workflow.status, "partial");
+  assert.ok(workflow.capabilities.includes("allow-listed-navigation-triggers"));
+  assert.ok(workflow.capabilities.includes("allow-listed-navigation-actions"));
   assert.equal(manifest.modules.find((module) => module.id === "admin-console").status, "planned");
 });
 
