@@ -1,0 +1,117 @@
+# SHBACE Medical — Android remote content package
+
+This directory is the content origin used by the **Android APK remote-content engine**.
+It is intentionally separate from the PWA/Chrome and iOS release flows.
+
+## Safety and publishing rules
+
+- Publish declarative JSON and media files only. The app does **not** download or execute remote JavaScript.
+- Every file (including the catalog and images) must be listed in `manifest.json` with its exact byte length and SHA-256 digest.
+- Increase `manifest.version` whenever any content, metadata, or file inventory changes. A version is immutable once published.
+- Keep every content path relative to this directory. Do not use absolute paths, query strings, or parent-directory segments.
+- The app downloads changed files to a staging directory, verifies size and SHA-256, then switches the installed manifest. An interrupted update leaves the previous content version active.
+- Unchanged files are copied forward from the previous local version, so only changed/new files need network transfer.
+- The previous installed content version is retained for rollback/recovery. Student answers, bookmarks, notes, and study progress stay in the existing local app stores.
+
+## Manifest schema
+
+`manifest.json`:
+
+```json
+{
+  "schema": "shbace-android-content-v1",
+  "version": "1.0.0",
+  "generatedAt": "2026-11-19T00:00:00.000Z",
+  "catalogPath": "catalog.json",
+  "files": [
+    {
+      "path": "catalog.json",
+      "bytes": 105,
+      "sha256": "lowercase-sha256-hex"
+    }
+  ]
+}
+```
+
+The Android app currently limits a package to 500 files, 80 MiB per file, and 512 MiB total. Paths are case-sensitive and should use ASCII letters, digits, dot, underscore, hyphen, and slash.
+
+## Catalog schema — remote MCQ banks
+
+`catalog.json`:
+
+```json
+{
+  "schema": "shbace-remote-content-catalog-v1",
+  "version": "1.0.0",
+  "systems": [
+    {
+      "id": "cardiovascular",
+      "name": "Cardiovascular System",
+      "icon": "media/icons/cardio.webp",
+      "topics": [
+        {
+          "id": "congenital-heart-disease",
+          "name": "Congenital Heart Disease",
+          "icon": "media/topics/congenital-heart.webp"
+        }
+      ]
+    }
+  ],
+  "banks": [
+    {
+      "id": "new-pediatrics-bank",
+      "label": "New Pediatrics Bank",
+      "description": "Additional questions for revision.",
+      "cover": "media/covers/new-pediatrics.webp",
+      "icon": "✚",
+      "contentFile": "banks/new-pediatrics.json",
+      "systemIds": ["cardiovascular"],
+      "totalQuestions": 1
+    }
+  ]
+}
+```
+
+## Question file schema
+
+Each `contentFile` is a JSON file with schema `shbace-remote-questions-v1`:
+
+```json
+{
+  "schema": "shbace-remote-questions-v1",
+  "questions": [
+    {
+      "id": "cv-0001",
+      "systemId": "cardiovascular",
+      "topicId": "congenital-heart-disease",
+      "stem": "A child presents with ... What is the most likely diagnosis?",
+      "caseText": "Optional shared clinical vignette.",
+      "options": ["Option A", "Option B", "Option C", "Option D", "Option E"],
+      "correctIndex": 2,
+      "explanation": "A short explanation.",
+      "extendedExplanation": "Optional detailed explanation.",
+      "tag": "Clinical Case",
+      "source": "Reference or exam source"
+    }
+  ]
+}
+```
+
+The question ID must remain stable when correcting the question. The engine derives a local question key from the bank ID and question ID, allowing existing local answers to remain attached after content refreshes. Do not reuse an ID for a different question.
+
+## Media and other content
+
+Media files (WebP/PNG/JPEG/SVG, PDF, MP4, MP3/M4A, and other binary files) can be included in `files` and referenced by relative path in the catalog. Cover art and system/topic icons can be displayed by the current Android remote-bank screens. The native content store can also read verified text files and small image/icon assets for additional Android renderers.
+
+The first engine release currently renders declarative MCQ banks through the existing SHBACE question, answer, review, quiz, and statistics engine. PDFs, audio/video lessons, and flashcard decks can be distributed and cached by the content store, but their dedicated viewing/study screens require their corresponding in-app renderer to be added in a later APK update. Do not label those formats as active UI features until their renderer is implemented.
+
+## Publishing checklist
+
+1. Put the catalog and bank JSON files under this directory.
+2. Add any media assets and ensure paths match the catalog.
+3. Recalculate every file's byte count and SHA-256 over the exact UTF-8/binary bytes.
+4. Increase the manifest version and update the complete file inventory.
+5. Run the Android build and test the update on a device: clean install, offline relaunch, delta update, failed download, and progress retention.
+6. Merge/publish the content manifest to the configured `main` branch only after validation.
+
+This package is independent from the APK binary: content changes can be published without issuing a new APK once a compatible renderer exists.
