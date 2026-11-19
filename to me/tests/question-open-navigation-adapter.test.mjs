@@ -13,7 +13,7 @@ const openStart = feature.indexOf("window.openQ=function(id){");
 const openEnd = feature.indexOf("\nsearchView=", openStart);
 assert.ok(openStart >= 0 && openEnd > openStart, "Question Bank openQ handler must exist");
 const openQuestion = feature.slice(openStart, openEnd);
-const routeHelper = (feature.match(/function nNavigateRoute\(route\)\{[\s\S]*?\n\}/) || [])[0];
+const routeHelper = (feature.match(/function qbnNavigateRoute\(route\)\{[\s\S]*?\n\}/) || [])[0];
 assert.ok(routeHelper, "shared notification route helper must remain available to question navigation");
 
 function exerciseOpenQuestion(id, mode = "ok") {
@@ -58,7 +58,7 @@ test("opening a known question preserves its specialty, topic and filtered index
   assert.equal(result.context.appPage,"questions");
   assert.equal(result.calls.timers.length,1);
   assert.equal(result.calls.timers[0].delay,80);
-  assert.match(openQuestion,/nNavigateRoute\('questions'\)/);
+  assert.match(openQuestion,/qbnNavigateRoute\('questions'\)/);
   assert.doesNotMatch(openQuestion,/appPage\s*=/);
 });
 
