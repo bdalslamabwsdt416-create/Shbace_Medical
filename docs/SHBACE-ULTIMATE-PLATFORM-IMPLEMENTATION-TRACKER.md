@@ -17,7 +17,7 @@
 | 4 | UI and Navigation Engine | **Partial; shared route dispatch integrated for Android drawer and remote UI; device matrix pending** | Built-in route adapter, all supported nav surfaces and back/scroll invariants covered by parity tests. |
 | 5 | Page Builder | **Partial; shared bounded renderer v2 with templates, slots and safe visibility conditions** | Visual editor, template gallery, preview/publish workflow, authoring permissions and real-device visual acceptance. |
 | 6 | Workflow Engine | **Partial; local v1 with navigation triggers, bounded scalar conditions and allow-listed actions** | Broader app event coverage, rule editor, simulation/trace UI and additional reviewed action contracts. |
-| 7 | Theme Engine | **Partial** | Unified token schema and complete theme application/reset/validation coverage. |
+| 7 | Theme Engine | **Partial; single-owner bounded appearance token contract v1 implemented** | Full app-wide design-token migration, user theme preference matrix, live preview/editor, and real-device visual acceptance. |
 | 8 | Modular Architecture | **Module Registry v1 implemented; legacy extraction pending** | Existing engines extracted one at a time behind adapters and parity tests. |
 | 9 | Quiz, Smart Review and Flashcards | **Existing features partial against target** | New question types, scheduler strategy contract, authoring and learning-history preservation. |
 | 10 | Medical Bank Engine | **Substantial legacy base; standardisation pending** | Stable IDs, provenance, repeat tracking, revisions and schema validation across all banks/cases. |
@@ -41,6 +41,7 @@
 - Page Builder v1: Android-only bounded recursive renderer for stack/grid layouts, tabs and accordion sections; existing leaf blocks remain supported.
 - Module manifest for all 25 major subsystems.
 - Page Builder v2: shared local Android renderer for bounded nested section/grid/row layouts, tabs, accordions, template slots and fixed content-presence conditions; no remote executable code.
+- Theme Engine v1: centralized remote appearance ownership in Android Remote Control; bounded palette, font scale, line height, spacing, radius and density tokens with validator coverage and local theme-mode preservation.
 - Navigation Route Contract v1: 29 route entries, V2/V3 remote allow-lists, registered local pages, shared built-in route dispatch for drawer/remote UI, and an observational adapter around the legacy renderer.
 
 ## Frozen version and release protection
@@ -59,7 +60,8 @@
 4. Page Builder v2 templates/slots and safe condition rendering.
 5. Workflow Engine v1: fixed navigation triggers, bounded conditions and allow-listed actions.
 6. Expand app feature events only after each producer has explicit contracts and tests.
-5. Extract legacy engines one at a time behind tested adapters.
+7. Theme Engine: migrate remaining built-in components to shared tokens after characterization tests and device review.
+8. Extract legacy engines one at a time behind tested adapters.
 
 ## Platform and data rules
 
