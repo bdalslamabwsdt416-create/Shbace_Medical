@@ -481,6 +481,12 @@ if (ui != null) {
       'navigation:route-changed': new Set(['from', 'to', 'mode']),
       'navigation:rendered': new Set(['route', 'mode'])
     };
+    const workflowNavigateRoutes = new Set([
+      'subjects', 'grade', 'specialties', 'topics', 'questions', 'quiz', 'quizrun',
+      'quizresult', 'quizhistory', 'review', 'weak', 'stats', 'search', 'settings',
+      'notifs', 'saved', 'wrong', 'pinned', 'reported', 'timer', 'about', 'dedication',
+      'changelog', 'feedback', 'rate', 'menu'
+    ]);
     for (const rule of ui.workflows) {
       assert(rule && validId(rule.id) && !workflowIds.has(rule.id),
         'Invalid or duplicate workflow rule ID.');
@@ -518,8 +524,8 @@ if (ui != null) {
           'Invalid workflow action in rule ' + rule.id);
         const type = String(action.type || '');
         if (type === 'navigate') {
-          assert(validId(action.target) && builtinPageIds.has(String(action.target)),
-            'Workflow navigate action has an unsupported built-in route in rule ' + rule.id);
+          assert(validId(action.target) && workflowNavigateRoutes.has(String(action.target)),
+            'Workflow navigate action has a route outside the Navigation V3 allow-list in rule ' + rule.id);
         } else if (type === 'openPage') {
           assert(validId(action.target) && pageIds.has(String(action.target)),
             'Workflow openPage action has an unknown remote page in rule ' + rule.id);
