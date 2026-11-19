@@ -38,6 +38,29 @@ test("the update checker is the final settings section and invokes the native co
   assert.match(remote, /does not install a new APK/i);
 });
 
+test("remote content uses monotonic version policy and verified last-known-good rollback", () => {
+  const manager = readFileSync(resolve(root, "../for ApK/native/com/shbace/medical/RemoteContentManager.java"), "utf8");
+  const policy = readFileSync(resolve(root, "../for ApK/native/com/shbace/medical/RemoteContentPolicy.java"), "utf8");
+  const native = readFileSync(resolve(root, "../android/app/src/main/java/com/shbace/medical/ShbaceNative.java"), "utf8");
+  const manifest = JSON.parse(readFileSync(resolve(root, "../for ApK/android-content/manifest.json"), "utf8"));
+  const catalog = JSON.parse(readFileSync(resolve(root, "../for ApK/android-content/catalog.json"), "utf8"));
+
+  assert.equal(manifest.contentVersionCode, 3);
+  assert.equal(manifest.minAppVersionCode, 18);
+  assert.equal(manifest.channel, "stable");
+  assert.equal(catalog.version, manifest.version);
+  assert.match(policy, /candidateContentVersionCode < installedContentVersionCode/);
+  assert.match(policy, /installedAppVersionCode < minimumAppVersionCode/);
+  assert.match(manager, /previous-manifest\.json/);
+  assert.match(manager, /packageFilesPresent\(target, true\)/);
+  assert.match(manager, /RemoteContentPolicy\.validateCandidate/);
+  assert.match(manager, /cleanupOldVersions\(version, previous == null \? "" : installedContentVersion\)/);
+  assert.match(native, /startRemoteContentRollback\(\)/);
+  assert.match(remote, /data-shb-remote-rollback/);
+  assert.match(remote, /result\.status === 'rolled-back'/);
+  assert.match(remote, /The manifest itself is not cryptographically signed/);
+});
+
 test("the Android settings layout loads after the existing Android remote engines", () => {
   const content = index.indexOf('data-src="js/45-android-remote-content.js"');
   const ui = index.indexOf('data-src="js/47-android-remote-control.js"');
