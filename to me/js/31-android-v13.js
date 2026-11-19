@@ -226,7 +226,13 @@ window.navBack=function(){
  if(!to){try{to=window.__shbGetBackTarget(appPage)}catch(_){}}
  if(to==='*'){try{to=window.__qs&&window.__qs.spec&&window.__qs.spec!=='all'?'topics':'subjects'}catch(_){to='subjects'}}
  if(!to)to='subjects';if(to===appPage)return;
- backing=true;appPage=to;renderAppDemo();backing=false
+ backing=true;
+ try{
+  if(typeof window.__shbNavTap==='function')window.__shbNavTap(to);
+  else{appPage=to;renderAppDemo()}
+ }catch(_){
+  try{appPage=to;renderAppDemo()}catch(__){}
+ }finally{backing=false}
 };
 window.addEventListener('popstate',function(e){
  popping=true;var target=e&&e.state&&e.state.p;
