@@ -19,6 +19,8 @@
   function isNativeAndroid() {
     try {
       return !!(window.Capacitor &&
+        typeof window.Capacitor.getPlatform === 'function' &&
+        window.Capacitor.getPlatform() === 'android' &&
         typeof window.Capacitor.isNativePlatform === 'function' &&
         window.Capacitor.isNativePlatform() && N &&
         typeof N.getRemoteContentManifest === 'function' &&
