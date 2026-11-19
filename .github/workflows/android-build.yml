@@ -76,6 +76,8 @@ jobs:
           npm --prefix "to me" run test:unit
           npm --prefix "to me" run check:bank
           npm --prefix "to me" run build:pwa
+          node --check android-content/validate.mjs
+          node android-content/validate.mjs
 
       - name: Run Android unit tests
         working-directory: android
