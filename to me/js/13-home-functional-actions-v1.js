@@ -46,6 +46,8 @@
   if(typeof window.openTopic==='function')window.openTopic(p.spec,Number(p.topic),{deferNavigation:true});
   const state=window.__qs;
   if(state){
+   state.spec=p.spec;
+   state.topic=Number(p.topic);
    const row=(REAL.spec[p.spec].topics||[]).find(t=>Number(t[0])===Number(p.topic));
    const max=Math.max(0,Number(row&&row[2]||1)-1);
    state.idx=Math.max(0,Math.min(max,Number(p.idx)||0));
