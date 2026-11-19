@@ -92,6 +92,33 @@ final class RemoteContentManager {
         return true;
     }
 
+    synchronized boolean startRollback() {
+        if (syncing || executor.isShutdown()) return false;
+        JSONObject current = parseCurrentManifest();
+        JSONObject previous = parsePreviousManifest();
+        if (current == null || previous == null ||
+                current.optString("version").equals(previous.optString("version"))) {
+            postResult(errorJson("No previous verified content version is available to restore."));
+            return false;
+        }
+        syncing = true;
+        executor.execute(new Runnable() {
+            @Override public void run() {
+                String result;
+                try {
+                    result = rollbackNow();
+                } catch (Throwable error) {
+                    Log.e(TAG, "Remote content rollback failed", error);
+                    result = errorJson(error.getMessage() == null ? "Content rollback failed." : error.getMessage());
+                } finally {
+                    syncing = false;
+                }
+                postResult(result);
+            }
+        });
+        return true;
+    }
+
     String getManifest() {
         try {
             File file = new File(root, "current-manifest.json");
@@ -116,7 +143,17 @@ final class RemoteContentManager {
                 JSONArray files = manifest.optJSONArray("files");
                 state.put("fileCount", files == null ? 0 : files.length());
                 state.put("totalBytes", manifest.optLong("totalBytes", 0L));
+                state.put("contentVersionCode", manifest.optLong("contentVersionCode", 0L));
+                state.put("minAppVersionCode", manifest.optLong("minAppVersionCode", 1L));
             }
+            JSONObject previous = parsePreviousManifest();
+            String currentVersion = manifest == null ? "" : manifest.optString("version", "");
+            String previousVersion = previous == null ? "" : previous.optString("version", "");
+            state.put("lastKnownGoodVersion", previousVersion);
+            state.put("lastKnownGoodContentVersionCode",
+                    previous == null ? 0L : previous.optLong("contentVersionCode", 0L));
+            state.put("canRollback", previous != null && !previousVersion.equals(currentVersion)
+                    && packageFilesPresent(previous, false));
             File[] dirs = versionsDir.listFiles();
             state.put("retainedVersions", dirs == null ? 0 : dirs.length);
         } catch (Throwable error) {
@@ -164,6 +201,13 @@ final class RemoteContentManager {
 
         JSONObject previous = parseCurrentManifest();
         String version = manifest.getString("version");
+        long contentVersionCode = manifest.optLong("contentVersionCode", 0L);
+        long installedContentVersionCode = previous == null ? 0L :
+                previous.optLong("contentVersionCode", 0L);
+        String installedContentVersion = previous == null ? "" : previous.optString("version", "");
+        RemoteContentPolicy.validateCandidate(contentVersionCode, version,
+                manifest.optLong("minAppVersionCode", 1L), getInstalledAppVersionCode(),
+                installedContentVersionCode, installedContentVersion);
         JSONArray newFiles = manifest.getJSONArray("files");
         Map<String, JSONObject> oldByPath = indexFiles(previous == null ? null : previous.optJSONArray("files"));
         Map<String, JSONObject> newByPath = indexFiles(newFiles);
@@ -182,7 +226,8 @@ final class RemoteContentManager {
             else changedCount++;
         }
 
-        if (previous != null && version.equals(previous.optString("version"))) {
+        if (previous != null && RemoteContentPolicy.isSameInstalledVersion(
+                contentVersionCode, version, installedContentVersionCode, installedContentVersion)) {
             if (changedCount != 0 || newByPath.size() != oldByPath.size()) {
                 throw new IllegalArgumentException("The content manifest changed without a version increase.");
             }
@@ -227,10 +272,14 @@ final class RemoteContentManager {
             }
 
             File manifestFile = new File(root, "current-manifest.json");
+            if (previous != null) {
+                writeAtomic(new File(root, "previous-manifest.json"),
+                        previous.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            }
             writeAtomic(manifestFile, manifest.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
             activity.getSharedPreferences("shbace_remote_content", 0).edit()
                     .putLong("last_sync", System.currentTimeMillis()).apply();
-            cleanupOldVersions(version);
+            cleanupOldVersions(version, previous == null ? "" : installedContentVersion);
             committed = true;
 
             int removed = Math.max(0, oldByPath.size() - newByPath.size());
@@ -240,6 +289,40 @@ final class RemoteContentManager {
         }
     }
 
+    private String rollbackNow() throws Exception {
+        JSONObject current = parseCurrentManifest();
+        JSONObject target = parsePreviousManifest();
+        if (current == null || target == null) {
+            throw new IllegalStateException("No previous content manifest is available.");
+        }
+        String currentVersion = current.optString("version", "");
+        String targetVersion = target.optString("version", "");
+        if (currentVersion.isEmpty() || targetVersion.isEmpty() || currentVersion.equals(targetVersion)) {
+            throw new IllegalStateException("There is no different previous content version to restore.");
+        }
+        validateManifest(target);
+        if (!packageFilesPresent(target, true)) {
+            throw new IllegalStateException("The previous content package failed its integrity check. The active package was not changed.");
+        }
+
+        File currentFile = new File(root, "current-manifest.json");
+        File previousFile = new File(root, "previous-manifest.json");
+        byte[] currentBytes = current.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] targetBytes = target.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        writeAtomic(currentFile, targetBytes);
+        try {
+            writeAtomic(previousFile, currentBytes);
+        } catch (Exception error) {
+            // Do not leave a half-rotated pair of manifest pointers if the LKG pointer cannot be updated.
+            try { writeAtomic(currentFile, currentBytes); } catch (Throwable ignored) {}
+            throw error;
+        }
+        activity.getSharedPreferences("shbace_remote_content", 0).edit()
+                .putLong("last_sync", System.currentTimeMillis()).apply();
+        cleanupOldVersions(targetVersion, currentVersion);
+        return successJson(targetVersion, 0, 0, 0L, 0, "rolled-back");
+    }
+
     private void validateManifest(JSONObject manifest) throws Exception {
         if (!SCHEMA.equals(manifest.optString("schema"))) {
             throw new IllegalArgumentException("Unsupported remote content manifest schema.");
@@ -247,6 +330,24 @@ final class RemoteContentManager {
         String version = manifest.optString("version", "");
         if (!version.matches("[A-Za-z0-9._-]{1,64}")) {
             throw new IllegalArgumentException("Invalid remote content version.");
+        }
+        long minimumAppVersionCode = manifest.optLong("minAppVersionCode", 1L);
+        if (minimumAppVersionCode < 1L) {
+            throw new IllegalArgumentException("Invalid minimum Android app version code.");
+        }
+        if (getInstalledAppVersionCode() < minimumAppVersionCode) {
+            throw new IllegalArgumentException("This content package requires Android app versionCode "
+                    + minimumAppVersionCode + " or newer.");
+        }
+        if (manifest.has("contentVersionCode") && manifest.optLong("contentVersionCode", 0L) < 1L) {
+            throw new IllegalArgumentException("Invalid contentVersionCode.");
+        }
+        String channel = manifest.optString("channel", "stable");
+        if (!("stable".equals(channel) || "beta".equals(channel) || "internal".equals(channel))) {
+            throw new IllegalArgumentException("Unsupported remote content channel.");
+        }
+        if (manifest.optString("releaseNotes", "").length() > 500) {
+            throw new IllegalArgumentException("Remote content release notes are too long.");
         }
         String catalogPath = manifest.optString("catalogPath", "");
         if (catalogPath.length() > 0 && !validPath(catalogPath)) {
@@ -305,12 +406,59 @@ final class RemoteContentManager {
     }
 
     private JSONObject parseCurrentManifest() {
+        return parseStoredManifest("current-manifest.json");
+    }
+
+    private JSONObject parsePreviousManifest() {
+        return parseStoredManifest("previous-manifest.json");
+    }
+
+    private JSONObject parseStoredManifest(String name) {
         try {
-            File file = new File(root, "current-manifest.json");
+            File file = new File(root, name);
             if (!file.isFile() || file.length() > MAX_MANIFEST_BYTES) return null;
             return new JSONObject(new String(readFile(file, MAX_MANIFEST_BYTES),
                     java.nio.charset.StandardCharsets.UTF_8));
         } catch (Throwable ignored) { return null; }
+    }
+
+    private long getInstalledAppVersionCode() throws Exception {
+        android.content.pm.PackageInfo info =
+                activity.getPackageManager().getPackageInfo(activity.getPackageName(), 0);
+        return android.os.Build.VERSION.SDK_INT >= 28 ? info.getLongVersionCode() : info.versionCode;
+    }
+
+    private boolean packageFilesPresent(JSONObject manifest, boolean verifyHashes) throws Exception {
+        if (manifest == null) return false;
+        String version = manifest.optString("version", "");
+        JSONArray files = manifest.optJSONArray("files");
+        if (!version.matches("[A-Za-z0-9._-]{1,64}") || files == null || files.length() > MAX_FILES) return false;
+        long total = 0L;
+        for (int i = 0; i < files.length(); i++) {
+            JSONObject item = files.optJSONObject(i);
+            if (item == null) return false;
+            String path = item.optString("path", "");
+            String expectedHash = item.optString("sha256", "");
+            long expectedBytes = item.optLong("bytes", -1L);
+            if (!validPath(path) || !expectedHash.matches("(?i)[a-f0-9]{64}")
+                    || expectedBytes < 0L || expectedBytes > MAX_FILE_BYTES) return false;
+            total += expectedBytes;
+            if (total > MAX_TOTAL_BYTES) return false;
+            File stored = fileInVersion(version, path);
+            if (stored == null || !stored.isFile() || stored.length() != expectedBytes) return false;
+            if (verifyHashes && !sha256File(stored).equalsIgnoreCase(expectedHash)) return false;
+        }
+        return true;
+    }
+
+    private static String sha256File(File file) throws Exception {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        try (InputStream input = new FileInputStream(file)) {
+            byte[] buffer = new byte[32768];
+            int read;
+            while ((read = input.read(buffer)) != -1) digest.update(buffer, 0, read);
+        }
+        return toHex(digest.digest());
     }
 
     private static boolean validPath(String path) {
@@ -462,17 +610,13 @@ final class RemoteContentManager {
         return child;
     }
 
-    private void cleanupOldVersions(String currentVersion) {
+    private void cleanupOldVersions(String currentVersion, String previousVersion) {
         File[] dirs = versionsDir.listFiles();
-        if (dirs == null || dirs.length <= 2) return;
-        List<File> list = new ArrayList<>(Arrays.asList(dirs));
-        Collections.sort(list, new Comparator<File>() {
-            @Override public int compare(File a, File b) { return Long.compare(b.lastModified(), a.lastModified()); }
-        });
-        int keptPrevious = 0;
-        for (File dir : list) {
-            if (dir.getName().equals(currentVersion)) continue;
-            if (keptPrevious++ >= 1) deleteRecursively(dir);
+        if (dirs == null) return;
+        for (File dir : dirs) {
+            String name = dir.getName();
+            if (name.equals(currentVersion) || (!previousVersion.isEmpty() && name.equals(previousVersion))) continue;
+            deleteRecursively(dir);
         }
     }
 
