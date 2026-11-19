@@ -15,7 +15,7 @@
 | 2 | Core Architecture | **Core Runtime v1 implemented** | Existing navigation, data and feature engines use stable service contracts without behaviour regression. |
 | 3 | Remote Configuration Engine | **Core content policy v1 + verified last-known-good rollback implemented; signed manifest pending key provisioning** | Declarative schemas, monotonic content versions, APK compatibility, rollback integrity tests, feature policies and later signed-config verification. |
 | 4 | UI and Navigation Engine | **Partial; read-only route adapter added** | Built-in route adapter, all supported nav surfaces and back/scroll invariants covered by parity tests. |
-| 5 | Page Builder | **Starter renderer only** | Validated component tree, reusable templates, nested layout, conditions, tabs and preview workflow. |
+| 5 | Page Builder | **Nested component renderer v2 + reusable templates implemented; editor/preview workflow pending** | Stable component catalog, reusable templates, nested layout, safe conditions, tabs, and an in-app authoring/preview workflow. |
 | 6 | Workflow Engine | **Planned** | Local trigger/condition/allow-listed-action engine with rule validation, traces and limits. |
 | 7 | Theme Engine | **Partial** | Unified token schema and complete theme application/reset/validation coverage. |
 | 8 | Modular Architecture | **Module Registry v1 implemented; legacy extraction pending** | Existing engines extracted one at a time behind adapters and parity tests. |
@@ -39,6 +39,7 @@
 - Core Runtime v1: event bus, service registry and bounded diagnostics.
 - Module Registry v1: dependency validation, ordered initialization and reverse-order cleanup.
 - Module manifest for all 25 major subsystems.
+- Android Page Builder v2: bounded nested component trees, responsive sections/grids, working local tabs, accordions, safe content predicates, reusable named-slot templates, and synchronized validator/runtime contracts. A visual editor/preview workflow remains pending.
 - Navigation Route Contract v1: 29 route entries, V2/V3 remote allow-lists, registered local pages and an observational adapter around the legacy renderer.
 
 ## Frozen version and release protection
