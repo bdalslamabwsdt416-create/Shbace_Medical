@@ -100,7 +100,7 @@
     try {
       var result = await entry.initialize(contextFor(entry));
       if (typeof result === 'function') entry.cleanup = result;
-      else if (result && typeof result.dispose === 'function') entry.cleanup = result.dispose;
+      else if (result && typeof result.dispose === 'function') entry.cleanup = function () { return result.dispose.call(result); };
       else if (entry.dispose) entry.cleanup = function () { return entry.dispose(contextFor(entry)); };
       entry.state = 'ready';
       entry.initializedAt = new Date().toISOString();
