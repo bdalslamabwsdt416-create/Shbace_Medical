@@ -3255,7 +3255,7 @@ window.nSetSort=function(v){u10State.sort=v;renderAppDemo()};
 window.nOpen=function(id){
  const n=NOTIF.find(x=>x.id===id);if(!n)return;n.read=true;n.readAt=Date.now();LS.set(NKEY,NOTIF);
  const page=n.page||n.route,ref=n.ref||'';
- if(page==='quizresult'&&ref&&QZ.attempts.some(a=>a.id===ref)){qzViewId=ref;appPage='quizresult';renderAppDemo();return}
+ if(page==='quizresult'&&ref&&QZ.attempts.some(a=>a.id===ref)){qzViewId=ref;qzNavigate('quizresult');return}
  if((page==='questions'||page==='question')&&ref&&u7Q(ref)){renderAppDemo();openQ(ref);return}
  if(page==='review'||page==='settings'||page==='notifs'||page==='saved'||page==='wrong'||page==='notes'||page==='pinned'||page==='stats'){appPage=page;renderAppDemo();return}
  if(page&&PAGES2[page]!==0){appPage=page;renderAppDemo();return}
