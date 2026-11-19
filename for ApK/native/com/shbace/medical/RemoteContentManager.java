@@ -113,6 +113,9 @@ final class RemoteContentManager {
             state.put("lastSync", lastSync);
             if (manifest != null) {
                 state.put("version", manifest.optString("version", ""));
+                JSONObject lastKnownGood = readManifestFile("previous-manifest.json");
+                state.put("lastKnownGoodVersion", lastKnownGood == null ? "" : lastKnownGood.optString("version", ""));
+                state.put("canRollback", lastKnownGood != null && verifyInstalledVersion(lastKnownGood));
                 JSONArray files = manifest.optJSONArray("files");
                 state.put("fileCount", files == null ? 0 : files.length());
                 state.put("totalBytes", manifest.optLong("totalBytes", 0L));
@@ -163,6 +166,17 @@ final class RemoteContentManager {
         validateManifest(manifest);
 
         JSONObject previous = parseCurrentManifest();
+        int candidateContentCode = manifest.getInt("contentVersionCode");
+        if (previous != null) {
+            int installedContentCode = previous.optInt("contentVersionCode", 0);
+            if (candidateContentCode < installedContentCode) {
+                throw new IllegalArgumentException("A content downgrade was blocked.");
+            }
+            if (candidateContentCode == installedContentCode &&
+                    !manifest.getString("version").equals(previous.optString("version"))) {
+                throw new IllegalArgumentException("Content version code must increase for every new package.");
+            }
+        }
         String version = manifest.getString("version");
         JSONArray newFiles = manifest.getJSONArray("files");
         Map<String, JSONObject> oldByPath = indexFiles(previous == null ? null : previous.optJSONArray("files"));
@@ -227,6 +241,10 @@ final class RemoteContentManager {
             }
 
             File manifestFile = new File(root, "current-manifest.json");
+            if (previous != null) {
+                writeAtomic(new File(root, "previous-manifest.json"),
+                        previous.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            }
             writeAtomic(manifestFile, manifest.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
             activity.getSharedPreferences("shbace_remote_content", 0).edit()
                     .putLong("last_sync", System.currentTimeMillis()).apply();
@@ -247,6 +265,21 @@ final class RemoteContentManager {
         String version = manifest.optString("version", "");
         if (!version.matches("[A-Za-z0-9._-]{1,64}")) {
             throw new IllegalArgumentException("Invalid remote content version.");
+        }
+        int contentVersionCode = manifest.optInt("contentVersionCode", -1);
+        if (contentVersionCode < 1) throw new IllegalArgumentException("Missing or invalid contentVersionCode.");
+        int minAppVersionCode = manifest.optInt("minAppVersionCode", 0);
+        if (minAppVersionCode < 0) throw new IllegalArgumentException("Invalid minAppVersionCode.");
+        try {
+            android.content.pm.PackageInfo packageInfo = activity.getPackageManager()
+                    .getPackageInfo(activity.getPackageName(), 0);
+            long installedAppCode = android.os.Build.VERSION.SDK_INT >= 28
+                    ? packageInfo.getLongVersionCode() : packageInfo.versionCode;
+            if (installedAppCode < minAppVersionCode) {
+                throw new IllegalArgumentException("This content package requires a newer SHBACE Medical app.");
+            }
+        } catch (android.content.pm.PackageManager.NameNotFoundException error) {
+            throw new IllegalStateException("Could not verify the installed app version.", error);
         }
         String catalogPath = manifest.optString("catalogPath", "");
         if (catalogPath.length() > 0 && !validPath(catalogPath)) {
@@ -305,12 +338,59 @@ final class RemoteContentManager {
     }
 
     private JSONObject parseCurrentManifest() {
+        return readManifestFile("current-manifest.json");
+    }
+
+    private JSONObject readManifestFile(String name) {
         try {
-            File file = new File(root, "current-manifest.json");
+            File file = new File(root, name);
             if (!file.isFile() || file.length() > MAX_MANIFEST_BYTES) return null;
             return new JSONObject(new String(readFile(file, MAX_MANIFEST_BYTES),
                     java.nio.charset.StandardCharsets.UTF_8));
         } catch (Throwable ignored) { return null; }
+    }
+
+    boolean restorePreviousContent() {
+        if (syncing) return false;
+        try {
+            JSONObject previous = readManifestFile("previous-manifest.json");
+            JSONObject current = parseCurrentManifest();
+            if (previous == null || !verifyInstalledVersion(previous)) return false;
+            if (current != null) {
+                writeAtomic(new File(root, "previous-manifest.json"),
+                        current.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            }
+            writeAtomic(new File(root, "current-manifest.json"),
+                    previous.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            return true;
+        } catch (Throwable error) {
+            Log.e(TAG, "Could not restore last-known-good content", error);
+            return false;
+        }
+    }
+
+    private boolean verifyInstalledVersion(JSONObject manifest) {
+        try {
+            JSONArray files = manifest.optJSONArray("files");
+            if (files == null || files.length() > MAX_FILES) return false;
+            String version = manifest.optString("version", "");
+            for (int i = 0; i < files.length(); i++) {
+                JSONObject item = files.getJSONObject(i);
+                File file = fileInVersion(version, item.getString("path"));
+                if (file == null || !file.isFile() || file.length() != item.getLong("bytes")) return false;
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                try (InputStream input = new FileInputStream(file)) {
+                    byte[] buffer = new byte[32768];
+                    int read;
+                    while ((read = input.read(buffer)) != -1) digest.update(buffer, 0, read);
+                }
+                if (!toHex(digest.digest()).equalsIgnoreCase(item.getString("sha256"))) return false;
+            }
+            return true;
+        } catch (Throwable error) {
+            Log.w(TAG, "Last-known-good content failed integrity verification", error);
+            return false;
+        }
     }
 
     private static boolean validPath(String path) {
