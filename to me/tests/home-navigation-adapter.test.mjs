@@ -40,19 +40,21 @@ function exerciseRouteHelper(helper, functionName, route, adapterMode = "ok") {
 }
 
 function createHomeRuntime(savedProgress = null) {
-  const calls = { routes:[], openedTopics:[], collections:[], renders:0 };
+  const calls = { routes:[], openedTopics:[], collections:[], renders:0, renderStates:[] };
   const storage = new Map();
   if (savedProgress) storage.set("shbace_home_pediatrics_resume_v1", JSON.stringify(savedProgress));
   const state = { spec:"all", topic:0, idx:0, filter:"all", tag:"all", view:"all" };
   let context;
   const window = {
     __qs:state,
-    openTopic(spec, topic) {
-      calls.openedTopics.push({spec,topic});
+    openTopic(spec, topic, options) {
+      calls.openedTopics.push({spec,topic,options:options||null});
       state.spec = spec;
       state.topic = topic;
-      context.appPage = "questions";
-      context.renderAppDemo();
+      if (!(options && options.deferNavigation === true)) {
+        context.appPage = "questions";
+        context.renderAppDemo();
+      }
     },
     __shbNavTap(route) {
       calls.routes.push(route);
@@ -64,7 +66,10 @@ function createHomeRuntime(savedProgress = null) {
     window,
     REAL:{spec:{respiratory:{topics:[[101,"Respiratory topic",6]]}}},
     appPage:"subjects",
-    renderAppDemo(){calls.renders += 1;},
+    renderAppDemo(){
+      calls.renders += 1;
+      calls.renderStates.push({spec:state.spec,topic:state.topic,idx:state.idx,filter:state.filter,tag:state.tag,view:state.view});
+    },
     localStorage:{
       getItem(key){return storage.has(key)?storage.get(key):null;},
       setItem(key,value){storage.set(key,String(value));},
@@ -125,7 +130,7 @@ test("Home Continue Studying uses the saved topic and dispatches the final Quest
   });
   runtime.window.h7ResumePediatrics();
 
-  assert.deepEqual(runtime.calls.openedTopics, [{spec:"respiratory",topic:101}]);
+  assert.deepEqual(runtime.calls.openedTopics, [{spec:"respiratory",topic:101,options:{deferNavigation:true}}]);
   assert.deepEqual(runtime.calls.routes, ["questions"]);
   assert.equal(runtime.context.appPage, "questions");
   assert.equal(runtime.state.spec, "respiratory");
@@ -133,6 +138,8 @@ test("Home Continue Studying uses the saved topic and dispatches the final Quest
   assert.equal(runtime.state.idx, 3);
   assert.equal(runtime.state.filter, "incorrect");
   assert.equal(runtime.state.view, "list");
+  assert.equal(runtime.calls.renders, 1, "resume should render only after the saved question state is restored");
+  assert.deepEqual(runtime.calls.renderStates, [{spec:"respiratory",topic:101,idx:3,filter:"incorrect",tag:"all",view:"list"}]);
   const saved = JSON.parse(runtime.storage.get("shbace_home_pediatrics_resume_v1"));
   assert.equal(saved.spec, "respiratory");
   assert.equal(saved.topic, 101);
