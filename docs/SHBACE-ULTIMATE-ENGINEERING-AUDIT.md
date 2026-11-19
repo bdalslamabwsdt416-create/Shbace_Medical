@@ -243,3 +243,43 @@ Additional state is kept outside WebView localStorage: the remote content manage
 ### Remaining Phase 0 verification
 
 The static source map is not yet a full runtime acceptance matrix. Still required: exercise every route on the Android APK, capture its navigation entry/back target, list its read/write stores and native bridge calls, and record whether it works offline. The result becomes the acceptance baseline for Page Builder, module extraction and future migrations.
+
+## 11. Native Android capability and permission map
+
+### Native bridge methods identified
+
+`MainActivity` attaches `window.ShbaceNative` to the Android WebView. The current bridge provides native operations including:
+
+- `saveFile`: export a generated file/backup through Android storage APIs.
+- `printHtml`: send static HTML to the Android print framework.
+- `keepScreenOn` and `haptic`: screen wake and vibration feedback.
+- `speakText` / `stopSpeaking`: Android text-to-speech.
+- `updateStudyTimer` / `stopStudyTimer`: communicate with the foreground Study Timer service.
+- `copyText`, `shareText`, `shareImage`: native clipboard and sharing.
+- `getDeviceInfo`: return limited application/device build information.
+- `getRemoteContentManifest`, `getRemoteContentState`, `readRemoteContentText`, `readRemoteContentBase64`, `openRemoteContentFile`, `startRemoteContentSync`: Android-only remote-content storage and file access.
+
+The bridge methods are APK capabilities, not remote JSON actions. Future Workflow Engine actions must call an explicitly approved wrapper and must never expose unrestricted native method invocation to catalog data.
+
+### Manifest permissions and native components
+
+The current Android manifest declares:
+
+- `INTERNET` — remote package updates and normal network access.
+- `POST_NOTIFICATIONS` — notifications on supported Android versions.
+- `RECEIVE_BOOT_COMPLETED` — rescheduling supported notifications after reboot.
+- `VIBRATE` — haptic feedback.
+- `FOREGROUND_SERVICE` and `FOREGROUND_SERVICE_SPECIAL_USE` — foreground study timer service.
+- `SCHEDULE_EXACT_ALARM` — user-controlled exact reminder scheduling.
+
+The manifest also declares a non-exported StudyTimerService and a non-exported FileProvider with URI grant permissions. The current implementation uses MediaStore/app-private storage rather than requesting broad legacy storage permissions.
+
+### Native security and compatibility checks to add
+
+1. Maintain an explicit inventory of every `@JavascriptInterface` method and its caller; add contract tests so new bridges cannot appear without a documented capability and validation.
+2. Review the JavaScript bridge's exposure alongside WebView navigation/origin rules and content injection risks. All remote content stays data-only and all text must be escaped.
+3. Audit the current `android:allowBackup="true"` setting and Android backup/data-extraction policy. Decide exactly which student stores may be backed up by Android system backup versus the app's own encrypted export; do not change the setting until compatibility and restore behaviour are tested.
+4. Add upgrade tests for notification permission changes, exact-alarm restrictions, foreground-service behaviour, FileProvider sharing and reboot recovery across supported Android API levels.
+5. Require any new native permission to include a user-facing reason, denial fallback, test case and a versioned APK release. Remote configuration cannot grant a new Android permission.
+
+This map is source-derived. It does not replace physical-device permission and lifecycle testing on supported Android versions.
