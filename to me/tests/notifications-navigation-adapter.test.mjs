@@ -50,7 +50,7 @@ function runNotification(page, options = {}) {
       context.renderAppDemo();
     },
     u7Q(id) { return id === "question-1"; },
-    openQ(id) { calls.openedQuestions.push(id); },
+    openQ(id) { calls.openedQuestions.push(id); window.__shbNavTap("questions"); },
     PAGES2: { examplanner: 1, shbRemoteFlashcards: 1 },
     appPage: "subjects",
     renderAppDemo() { calls.renders.push(context.appPage); },
@@ -67,7 +67,7 @@ function runNotification(page, options = {}) {
   window.SHBACENavigation = {
     validate(route) {
       calls.validated.push(route);
-      return { ok: ["review", "settings", "notifs", "saved", "wrong", "notes", "pinned", "stats"].includes(route) };
+      return { ok: ["review", "settings", "notifs", "saved", "wrong", "notes", "pinned", "stats", "questions"].includes(route) };
     },
     navigate(route) {
       calls.adapterNavigations.push(route);
@@ -134,9 +134,10 @@ test("missing or throwing shared navigation keeps the legacy notification route 
 test("question and completed-quiz notification targets keep their specialized open flows", () => {
   const question = runNotification("questions", { ref: "question-1" });
   assert.deepEqual(question.calls.openedQuestions, ["question-1"]);
-  assert.deepEqual(question.calls.validated, []);
-  assert.deepEqual(question.calls.adapterNavigations, []);
-  assert.deepEqual(question.calls.renders, ["subjects"]);
+  assert.deepEqual(question.calls.validated, ["questions"]);
+  assert.deepEqual(question.calls.adapterNavigations, ["questions"]);
+  assert.deepEqual(question.calls.renders, ["questions"]);
+  assert.equal(question.context.appPage, "questions");
 
   const quiz = runNotification("quizresult", { ref: "attempt-1", validQuizResult: true });
   assert.deepEqual(quiz.calls.quizRoutes, ["quizresult"]);
