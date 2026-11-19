@@ -18,6 +18,7 @@ on:
       - android/fix-release-make-latest-string
       - android/core-module-registry-v1
       - android/freeze-existing-release-assets
+      - android/navigation-route-contract-v1
       - integrate/for-apk-main-20261119
       - main
     paths:
