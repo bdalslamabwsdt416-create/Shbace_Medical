@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -44,6 +45,28 @@ final class ShbaceNative {
     ShbaceNative(Activity activity, WebView webView) {
         this.activity = activity;
         this.remoteContent = new RemoteContentManager(activity, webView);
+    }
+
+    /** Open only official GitHub HTTPS pages/assets in the user's external browser. */
+    @JavascriptInterface
+    public boolean openExternalUrl(String rawUrl) {
+        try {
+            if (rawUrl == null || rawUrl.length() == 0) return false;
+            Uri uri = Uri.parse(rawUrl);
+            String scheme = uri.getScheme();
+            String host = uri.getHost();
+            if (!"https".equalsIgnoreCase(scheme) || host == null ||
+                    !("github.com".equalsIgnoreCase(host) || "www.github.com".equalsIgnoreCase(host))) {
+                return false;
+            }
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            intent.addCategory(Intent.CATEGORY_BROWSABLE);
+            activity.startActivity(intent);
+            return true;
+        } catch (Throwable t) {
+            Log.e(TAG, "openExternalUrl failed", t);
+            return false;
+        }
     }
 
     @JavascriptInterface
