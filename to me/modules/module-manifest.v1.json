@@ -70,14 +70,16 @@
       "status": "partial",
       "scope": "android",
       "source": "js/46-android-remote-ui.js;js/47-android-remote-control.js;js/52-page-builder-v1.js",
-      "note": "Local declarative renderer now supports bounded nested layouts, tabs and accordion sections. Visual authoring, reusable templates, conditional rules and preview/publish workflow remain.",
+      "note": "Android shared renderer supports bounded nested layouts, accessible tabs and accordions, reusable declarative page templates, named slots and fixed allow-listed content-presence conditions. Visual authoring, preview/publish, and real-device acceptance remain future work.",
       "capabilities": [
-        "safe-leaf-blocks",
-        "nested-stack-and-grid-layouts",
-        "interactive-tabs",
-        "native-accordion-sections",
-        "bounded-recursive-rendering",
-        "android-only-service-registration"
+        "declarative-component-tree",
+        "bounded-nested-layouts",
+        "responsive-stack-row-grid",
+        "accessible-tabs-accordion",
+        "reusable-page-templates",
+        "named-template-slots",
+        "allow-listed-visibility-conditions",
+        "shared-remote-screen-renderer"
       ]
     },
     {
