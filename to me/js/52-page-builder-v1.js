@@ -103,17 +103,19 @@
         var first = String(block.defaultTab || (tabs[0] && tabs[0].id) || '');
         if (!tabs.some(function (tab) { return String(tab.id) === first; })) first = String((tabs[0] && tabs[0].id) || '');
         var buttons = tabs.map(function (tab) {
-          var id = String(tab.id);
-          var active = id === first;
-          return '<button type="button" class="shb-pb-tab' + (active ? ' is-active' : '') +
+          var id = String(tab.id), active = id === first;
+          var tabId = group + '-tab-' + id, panelId = group + '-panel-' + id;
+          return '<button type="button" id="' + esc(tabId) + '" class="shb-pb-tab' + (active ? ' is-active' : '') +
             '" role="tab" aria-selected="' + (active ? 'true' : 'false') +
+            '" aria-controls="' + esc(panelId) + '" tabindex="' + (active ? '0' : '-1') +
             '" data-shb-pb-tab="' + esc(id) + '" data-shb-pb-group="' + esc(group) + '">' +
             esc(tab.label || tab.title || id) + '</button>';
         }).join('');
         var panels = tabs.map(function (tab) {
           var id = String(tab.id), active = id === first;
-          return '<section class="shb-pb-panel" role="tabpanel" data-shb-pb-panel="' +
-            esc(id) + '" data-shb-pb-group="' + esc(group) + '"' +
+          var tabId = group + '-tab-' + id, panelId = group + '-panel-' + id;
+          return '<section class="shb-pb-panel" id="' + esc(panelId) + '" role="tabpanel" aria-labelledby="' +
+            esc(tabId) + '" data-shb-pb-panel="' + esc(id) + '" data-shb-pb-group="' + esc(group) + '"' +
             (active ? '' : ' hidden') + '>' + children(tab.blocks, depth + 1) + '</section>';
         }).join('');
         return '<div class="shb-pb-tabs"><div class="shb-pb-tablist" role="tablist">' +
@@ -161,21 +163,55 @@
     document.head.appendChild(style);
   }
 
-  document.addEventListener('click', function (event) {
-    var button = event.target && event.target.closest ? event.target.closest('[data-shb-pb-tab][data-shb-pb-group]') : null;
-    if (!button) return;
+  function activateTab(root, button, moveFocus) {
     var group = button.getAttribute('data-shb-pb-group');
     var selected = button.getAttribute('data-shb-pb-tab');
-    var root = button.closest('.shb-pb-tabs');
-    if (!root) return;
     root.querySelectorAll('[data-shb-pb-tab][data-shb-pb-group="' + group + '"]').forEach(function (item) {
       var active = item === button;
       item.classList.toggle('is-active', active);
       item.setAttribute('aria-selected', active ? 'true' : 'false');
+      item.setAttribute('tabindex', active ? '0' : '-1');
     });
     root.querySelectorAll('[data-shb-pb-panel][data-shb-pb-group="' + group + '"]').forEach(function (panel) {
       panel.hidden = panel.getAttribute('data-shb-pb-panel') !== selected;
     });
+    if (moveFocus && typeof button.focus === 'function') button.focus();
+  }
+
+  document.addEventListener('click', function (event) {
+    var button = event.target && event.target.closest ? event.target.closest('[data-shb-pb-tab][data-shb-pb-group]') : null;
+    if (!button) return;
+    var root = button.closest('.shb-pb-tabs');
+    if (!root) return;
+    activateTab(root, button, false);
+    event.preventDefault();
+  });
+
+  document.addEventListener('keydown', function (event) {
+    var button = event.target && event.target.closest ? event.target.closest('[data-shb-pb-tab][data-shb-pb-group]') : null;
+    if (!button) return;
+    var root = button.closest('.shb-pb-tabs');
+    if (!root) return;
+    var group = button.getAttribute('data-shb-pb-group');
+    var tabs = Array.prototype.slice.call(
+      root.querySelectorAll('[data-shb-pb-tab][data-shb-pb-group="' + group + '"]')
+    );
+    var index = tabs.indexOf(button);
+    if (index < 0 || !tabs.length) return;
+
+    var nextIndex = index, rtl = false;
+    if (event.key === 'Home') nextIndex = 0;
+    else if (event.key === 'End') nextIndex = tabs.length - 1;
+    else if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+      try {
+        rtl = !!(window.getComputedStyle && window.getComputedStyle(root).direction === 'rtl');
+      } catch (error) {}
+      var forward = event.key === 'ArrowRight';
+      var step = forward !== rtl ? 1 : -1;
+      nextIndex = (index + step + tabs.length) % tabs.length;
+    } else return;
+
+    activateTab(root, tabs[nextIndex], true);
     event.preventDefault();
   });
 
