@@ -13,8 +13,8 @@ const feature = readFileSync(resolve(root, "js/09-app-features-v6.js"), "utf8");
 
 function extractFunction(source, name) {
   const match = name === "routeThroughNavigation"
-    ? source.match(/function routeThroughNavigation\(route\)\{[\s\S]*?\n\}/)
-    : source.match(/function navigateHomeRoute\(route\)\{[\s\S]*?\n\}/);
+    ? source.match(/function routeThroughNavigation\(route\)\{[\s\S]*?\n\s*\}/)
+    : source.match(/function navigateHomeRoute\(route\)\{[\s\S]*?\n\s*\}/);
   assert.ok(match, "missing route helper " + name);
   return match[0];
 }
