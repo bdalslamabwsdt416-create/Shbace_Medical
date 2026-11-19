@@ -66,7 +66,7 @@ function createTopicRuntime(adapterMode = "ok") {
   vm.runInContext(recentWrapper, context, {filename:"recent-topic-wrapper.js"});
   vm.runInContext(homeWrapper, context, {filename:"home-topic-wrapper.js"});
   vm.runInContext(collectionWrapper, context, {filename:"pediatrics-topic-wrapper.js"});
-  return {context,calls};
+  return {context,calls,window};
 }
 
 test("ordinary topic opens preserve the collection/recent/home wrappers and dispatch one shared route", () => {
