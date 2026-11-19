@@ -1,0 +1,480 @@
+/* SHBACE Medical · Android Remote Content Engine v1
+ *
+ * Android APK only. The native bridge downloads signed-by-transport (HTTPS) content packages,
+ * checks each file against the manifest SHA-256, and keeps versioned copies in private storage.
+ * This module registers declarative JSON MCQ banks with the existing question engine. It never
+ * executes JavaScript downloaded from the content server.
+ */
+(function () {
+  'use strict';
+
+  var MANIFEST_URL = 'https://raw.githubusercontent.com/bdalslamabwsdt416-create/Shbace_Medical/main/android-content/manifest.json';
+  var CHECK_KEY = 'shbace_android_content_check_at_v1';
+  var CHECK_EVERY = 48 * 60 * 60 * 1000;
+  var BANK_KEY = 'remote-content';
+  var B = window.__SHB_BRIDGE;
+  var N = window.ShbaceNative;
+
+  function isNativeAndroid() {
+    try {
+      return !!(window.Capacitor &&
+        typeof window.Capacitor.isNativePlatform === 'function' &&
+        window.Capacitor.isNativePlatform() && N &&
+        typeof N.getRemoteContentManifest === 'function' &&
+        typeof N.startRemoteContentSync === 'function');
+    } catch (e) { return false; }
+  }
+  if (!isNativeAndroid()) return;
+  if (window.__SHBACE_ANDROID_REMOTE_CONTENT_V1__) return;
+  window.__SHBACE_ANDROID_REMOTE_CONTENT_V1__ = true;
+  if (!B || !B.registerExternalBank || !Array.isArray(B.QB)) {
+    console.warn('SHBACE remote content: question engine is not ready.');
+    return;
+  }
+
+  var catalog = null;
+  var installedManifest = null;
+  var loadedVersion = '';
+  var banks = Object.create(null);
+  var currentBankId = '';
+  var currentSystemId = '';
+  var syncStarted = false;
+  var assetCache = Object.create(null);
+  var coreSpecialtiesView = window.specialtiesView;
+  var coreTopicsView = window.topicsView;
+  var coreRender = window.renderAppDemo;
+  var coreBack = window.navBack;
+
+  function safeJson(value) {
+    try { return JSON.parse(value); } catch (e) { return null; }
+  }
+  function esc(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function slug(value) {
+    var s = String(value || '').toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '');
+    return s.slice(0, 48) || 'item';
+  }
+  function localText(path) {
+    try { return N.readRemoteContentText(String(path || '')) || ''; } catch (e) { return ''; }
+  }
+  function mimeFor(path) {
+    var p = String(path || '').toLowerCase();
+    if (/\.png$/.test(p)) return 'image/png';
+    if (/\.jpe?g$/.test(p)) return 'image/jpeg';
+    if (/\.gif$/.test(p)) return 'image/gif';
+    if (/\.svg$/.test(p)) return 'image/svg+xml';
+    if (/\.webp$/.test(p)) return 'image/webp';
+    if (/\.pdf$/.test(p)) return 'application/pdf';
+    if (/\.mp3$/.test(p)) return 'audio/mpeg';
+    if (/\.m4a$/.test(p)) return 'audio/mp4';
+    if (/\.mp4$/.test(p)) return 'video/mp4';
+    return 'application/octet-stream';
+  }
+  function assetData(path) {
+    if (!path || typeof path !== 'string') return '';
+    if (assetCache[path] !== undefined) return assetCache[path];
+    var base64 = '';
+    try { base64 = N.readRemoteContentBase64(path) || ''; } catch (e) {}
+    assetCache[path] = base64 ? 'data:' + mimeFor(path) + ';base64,' + base64 : '';
+    return assetCache[path];
+  }
+  function assetMarkup(path, fallback, cls) {
+    var src = assetData(path);
+    if (src) return '<img class="' + (cls || 'shb-remote-img') + '" src="' + src + '" alt="" loading="lazy">';
+    return '<span class="' + (cls || 'shb-remote-fallback') + '">' + esc(fallback || '✚') + '</span>';
+  }
+
+  function normalizeQuestion(raw, bank, system, topic) {
+    var options = Array.isArray(raw.options) ? raw.options.map(function (option) {
+      return typeof option === 'string' ? option : String(option && option.text || '');
+    }) : [];
+    var answer = Number(raw.correctIndex);
+    if (!raw || options.length < 2 || !Number.isInteger(answer) || answer < 0 || answer >= options.length) {
+      throw new Error('Invalid remote question or answer key: ' + String(raw && raw.id || 'unknown'));
+    }
+    var questionId = 'rc-' + slug(bank.id) + '-' + slug(raw.id);
+    var result = {
+      id: questionId,
+      spec: system.spec,
+      topic: 0,
+      q: String(raw.stem || raw.question || '').trim(),
+      o: options,
+      k: answer,
+      kx: false,
+      tag: String(raw.tag || raw.type || 'Knowledge'),
+      kind: String(raw.kind || raw.type || ''),
+      ex: String(raw.explanation || raw.ex || ''),
+      more: String(raw.extendedExplanation || raw.more || ''),
+      src: String(raw.source || raw.src || bank.label || 'SHBACE Remote Content'),
+      py: false, nl: false, ao: false, cc: false, eb: false, rq: [], rc: [],
+      remoteBankId: bank.id
+    };
+    if (!result.q) throw new Error('Remote question has an empty stem: ' + questionId);
+    if (raw.caseText) result.aiCaseVignette = String(raw.caseText);
+    if (raw.image) result.remoteImage = String(raw.image);
+    if (raw.reference) result.remoteReference = String(raw.reference);
+    return result;
+  }
+
+  function buildRemoteBanks(data) {
+    if (!data || data.schema !== 'shbace-remote-content-catalog-v1' ||
+        !Array.isArray(data.systems) || !Array.isArray(data.banks)) {
+      throw new Error('Remote content catalog schema is invalid.');
+    }
+    if (data.banks.length > 40 || data.systems.length > 120) {
+      throw new Error('Remote content catalog contains too many entries.');
+    }
+
+    var systemById = Object.create(null);
+    data.systems.forEach(function (system) {
+      if (!system || !/^[a-zA-Z0-9_-]{1,48}$/.test(String(system.id || '')) ||
+          !String(system.name || '').trim() || !Array.isArray(system.topics)) {
+        throw new Error('Invalid system entry in remote content catalog.');
+      }
+      systemById[system.id] = system;
+    });
+
+    var allGroups = [];
+    var registry = Object.create(null);
+    var usedQuestionIds = Object.create(null);
+
+    data.banks.forEach(function (bank) {
+      if (!bank || !/^[a-zA-Z0-9_-]{1,48}$/.test(String(bank.id || '')) ||
+          !String(bank.label || '').trim() || !String(bank.contentFile || '').trim()) {
+        throw new Error('Invalid remote bank entry in catalog.');
+      }
+      var source = safeJson(localText(bank.contentFile));
+      if (!source || !Array.isArray(source.questions) ||
+          (source.schema !== 'shbace-remote-questions-v1' &&
+           source.schema !== 'shbace-remote-mcq-bank-v1')) {
+        throw new Error('Could not load remote question file: ' + bank.contentFile);
+      }
+      if (bank.totalQuestions != null && Number(bank.totalQuestions) !== source.questions.length) {
+        throw new Error('Question count mismatch in remote bank: ' + bank.id);
+      }
+
+      var allowedSystems = Array.isArray(bank.systemIds) && bank.systemIds.length
+        ? bank.systemIds.map(String) : Object.keys(systemById);
+      var groupsForBank = [];
+      allowedSystems.forEach(function (systemId) {
+        var system = systemById[systemId];
+        if (!system) throw new Error('Unknown system "' + systemId + '" in bank ' + bank.id);
+        var systemQuestions = source.questions.filter(function (q) { return String(q.systemId || '') === systemId; });
+        if (!systemQuestions.length) return;
+
+        var spec = 'remote_' + slug(bank.id) + '_' + slug(system.id);
+        if (!B.SYS.some(function (row) { return row && row[0] === spec; })) {
+          B.SYS.push([spec, String(system.name), null, 1]);
+        }
+        var systemRecord = {
+          id: system.id,
+          name: String(system.name),
+          spec: spec,
+          icon: system.icon || '',
+          topics: [],
+          groups: [],
+          count: 0
+        };
+
+        (system.topics || []).forEach(function (topic) {
+          if (!topic || !/^[a-zA-Z0-9_-]{1,48}$/.test(String(topic.id || '')) ||
+              !String(topic.name || '').trim()) return;
+          var topicQuestions = systemQuestions.filter(function (q) {
+            return String(q.topicId || '') === String(topic.id);
+          });
+          if (!topicQuestions.length) return;
+          var normalized = topicQuestions.map(function (q) {
+            var item = normalizeQuestion(q, bank, systemRecord, topic);
+            if (usedQuestionIds[item.id]) throw new Error('Duplicate remote question ID: ' + item.id);
+            usedQuestionIds[item.id] = true;
+            return item;
+          });
+          var group = {
+            spec: spec,
+            systemName: String(system.name),
+            systemLabel: String(system.name),
+            topicName: String(topic.name),
+            bankLabel: String(bank.label),
+            questions: normalized,
+            remoteBankId: bank.id,
+            remoteSystemId: system.id,
+            remoteTopicId: topic.id,
+            topicIcon: topic.icon || ''
+          };
+          groupsForBank.push(group);
+          allGroups.push(group);
+          systemRecord.groups.push(group);
+          systemRecord.topics.push(topic);
+          systemRecord.count += normalized.length;
+          systemRecord.questions = (systemRecord.questions || []).concat(normalized);
+        });
+        if (systemRecord.groups.length) {
+          systemRecord.count = systemRecord.questions.length;
+          registry[bank.id] = registry[bank.id] || { bank: bank, systems: [] };
+          registry[bank.id].systems.push(systemRecord);
+        }
+      });
+      if (registry[bank.id]) {
+        registry[bank.id].groups = groupsForBank;
+        registry[bank.id].count = groupsForBank.reduce(function (n, g) { return n + g.questions.length; }, 0);
+      }
+    });
+
+    if (allGroups.length) {
+      var registration = B.registerExternalBank(BANK_KEY, 'Remote Content', allGroups);
+      Object.keys(registry).forEach(function (id) {
+        registry[id].groups.forEach(function (group) {
+          group.topicId = Number(group.topicId);
+        });
+        registry[id].validation = { passed: true, registeredQuestions: registration.added };
+      });
+    }
+    return registry;
+  }
+
+  function allTopicIds(bank) {
+    return (bank && bank.groups || []).map(function (group) { return group.topicId; });
+  }
+  function activeBank() { return currentBankId && banks[currentBankId] ? banks[currentBankId] : null; }
+  function openRemoteBank(id) {
+    var item = banks[id];
+    if (!item) return;
+    currentBankId = id;
+    currentSystemId = '';
+    B.setActiveBank(BANK_KEY, allTopicIds(item));
+    window.__SHB_REMOTE_CONTENT_ACTIVE__ = true;
+    window.appPage = 'specialties';
+    window.renderAppDemo();
+  }
+  function openRemoteSystem(id) {
+    var item = activeBank();
+    var system = item && item.systems.find(function (s) { return s.id === id; });
+    if (!system) return;
+    currentSystemId = id;
+    B.setActiveBank(BANK_KEY, system.groups.map(function (g) { return g.topicId; }));
+    B.qs.spec = system.spec;
+    B.qs.topic = 0;
+    B.qs.filter = 'all';
+    B.qs.tag = 'all';
+    B.qs.view = 'all';
+    B.qs.idx = 0;
+    window.appPage = 'topics';
+    window.renderAppDemo();
+  }
+  window.shbRemoteOpenBank = openRemoteBank;
+  window.shbRemoteOpenSystem = openRemoteSystem;
+
+  function remoteBankView() {
+    var item = activeBank();
+    if (!item) return typeof coreSpecialtiesView === 'function' ? coreSpecialtiesView() : '';
+    var systems = item.systems.map(function (system) {
+      return '<button type="button" class="card sc spc ped-system-card shb-remote-system" onclick="shbRemoteOpenSystem(\'' +
+        esc(system.id) + '\')">' + assetMarkup(system.icon, '✚') +
+        '<span class="spc-tx"><h3>' + esc(system.name) + '</h3><span class="meta">' +
+        system.count.toLocaleString() + ' questions · ' + system.groups.length + ' topics</span></span><span class="chev">›</span></button>';
+    }).join('');
+    var total = item.count.toLocaleString();
+    var back = '<button type="button" class="btn sm" onclick="navBack()">← Back to collections</button>';
+    return '<div class="app-head"><div class="app-head-title">' + esc(item.bank.label) + '</div></div>' +
+      '<div class="rs ped-systems-page shb-remote-page">' + back +
+      '<div class="ped-collection-kicker">SHBACE MEDICAL · REMOTE CONTENT</div><h1>' + esc(item.bank.label) +
+      '</h1><p class="sub">' + item.systems.length + ' systems · ' + total + ' questions</p>' +
+      (item.bank.description ? '<p class="sub">' + esc(item.bank.description) + '</p>' : '') +
+      '<div class="ped-systems-grid">' + systems + '</div></div>';
+  }
+
+  function remoteTopicsView() {
+    var item = activeBank();
+    var system = item && item.systems.find(function (s) { return s.id === currentSystemId; });
+    if (!system) return remoteBankView();
+    var tiles = system.groups.map(function (group) {
+      var done = B.answeredCount(group.questions);
+      var pct = group.questions.length ? Math.round(done * 100 / group.questions.length) : 0;
+      return '<button type="button" class="card sc tpc shb-remote-topic" onclick="openTopic(\'' +
+        esc(group.spec) + '\',' + Number(group.topicId) + ')">' +
+        assetMarkup(group.topicIcon, '✚', 'tno ti') + '<span class="tpc-tx"><h3>' +
+        esc(group.topicName) + '</h3><span class="meta">' + group.questions.length +
+        ' questions · ' + done + ' answered</span><span class="bar"><span style="width:' + pct +
+        '%"></span></span></span><span class="chev">›</span></button>';
+    }).join('');
+    return '<div class="app-head"><div class="app-head-title">' + esc(item.bank.label) + '</div></div>' +
+      '<div class="rs ped-bank-topics shb-remote-page"><button type="button" class="btn sm" onclick="navBack()">← Systems</button>' +
+      '<div class="ped-collection-kicker">' + esc(system.name.toUpperCase()) + '</div><h1>' + esc(system.name) +
+      '</h1><p class="sub">' + system.groups.length + ' topics · ' + system.count.toLocaleString() +
+      ' questions</p><div class="ped-systems-grid">' + tiles + '</div></div>';
+  }
+
+  function injectBankCards() {
+    var grid = document.querySelector('.ped-collections-grid');
+    if (!grid || !catalog) return;
+    Object.keys(banks).forEach(function (id) {
+      if (grid.querySelector('[data-shb-remote-bank="' + id + '"]')) return;
+      var item = banks[id], bank = item.bank;
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'ped-collection-card ped-collection-remote';
+      button.setAttribute('data-shb-remote-bank', id);
+      button.innerHTML = '<span class="ped-collection-avatar ped-avatar-icon">' +
+        assetMarkup(bank.cover, bank.icon || '✚', 'shb-remote-cover') +
+        '</span><span class="ped-collection-copy"><span class="eyebrow">REMOTE QUESTION BANK</span><b>' +
+        esc(bank.label) + '</b><small>' + esc(bank.description || 'Additional medical learning content.') +
+        '</small><span class="ped-collection-count">' + item.count.toLocaleString() + ' questions</span></span>' +
+        '<span class="ped-collection-arrow">›</span>';
+      button.addEventListener('click', function () { openRemoteBank(id); });
+      grid.appendChild(button);
+    });
+  }
+
+  function injectSettingsCard() {
+    if (window.appPage !== 'settings') return;
+    var root = document.querySelector('.rs');
+    if (!root || root.querySelector('.shb-remote-settings')) return;
+    var state = safeJson(N.getRemoteContentState()) || {};
+    var panel = document.createElement('section');
+    panel.className = 'card setcard shb-remote-settings';
+    panel.innerHTML = '<div class="eyebrow">ANDROID CONTENT UPDATES</div><h3>Learning content</h3>' +
+      '<p class="meta" data-shb-remote-status>Installed version: ' + esc(state.version || 'Not installed') +
+      ' · ' + Number(state.fileCount || 0) + ' files</p>' +
+      '<button type="button" class="btn primary block" data-shb-remote-check>Check for content updates</button>' +
+      '<p class="meta">Only changed content files are downloaded. Your answers and study progress remain on this device.</p>';
+    var button = panel.querySelector('[data-shb-remote-check]');
+    button.addEventListener('click', function () { startSync(true); });
+    root.insertBefore(panel, root.firstChild);
+  }
+
+  function syncDue() {
+    try {
+      var last = Number(localStorage.getItem(CHECK_KEY)) || 0;
+      return !last || Date.now() - last >= CHECK_EVERY;
+    } catch (e) { return true; }
+  }
+  function updateSettingsStatus(message) {
+    var node = document.querySelector('[data-shb-remote-status]');
+    if (node) node.textContent = message;
+  }
+  function toast(message) {
+    try { if (typeof window.toast === 'function') window.toast(message); } catch (e) {}
+    try { if (typeof window.shbToast === 'function') window.shbToast(message); } catch (e) {}
+  }
+  function startSync(manual) {
+    if (syncStarted || !navigator.onLine) {
+      if (manual && !navigator.onLine) toast('Connect to the internet to check for new content.');
+      return false;
+    }
+    syncStarted = true;
+    updateSettingsStatus('Checking the remote content package…');
+    var accepted = false;
+    try { accepted = N.startRemoteContentSync(MANIFEST_URL) === true; } catch (e) {}
+    if (!accepted) {
+      syncStarted = false;
+      updateSettingsStatus('A content check is already running or could not be started.');
+      if (manual) toast('Could not start the content update check.');
+    }
+    return accepted;
+  }
+
+  window.__shbRemoteContentSyncComplete = function (raw) {
+    syncStarted = false;
+    var result = safeJson(raw) || { ok: false, error: 'Invalid update response.' };
+    if (!result.ok) {
+      updateSettingsStatus('Update check failed: ' + String(result.error || 'Unknown error'));
+      if (window.appPage === 'settings') renderSettingsStatus();
+      return;
+    }
+    try { localStorage.setItem(CHECK_KEY, String(Date.now())); } catch (e) {}
+    updateSettingsStatus('Content version: ' + String(result.version || 'unknown') +
+      ' · ' + Number(result.updated || 0) + ' files changed');
+    if (result.status === 'updated' && result.version && result.version !== loadedVersion) {
+      updateSettingsStatus('New content verified. Reopening with the updated material…');
+      setTimeout(function () { location.reload(); }, 500);
+      return;
+    }
+    if (window.appPage === 'settings') renderSettingsStatus();
+    if (result.status === 'up-to-date') toast('Your learning content is up to date.');
+    else if (Number(result.updated || 0) > 0) toast('New learning content has been installed.');
+  };
+
+  function renderSettingsStatus() {
+    var panel = document.querySelector('.shb-remote-settings');
+    if (!panel) return;
+    var state = safeJson(N.getRemoteContentState()) || {};
+    var node = panel.querySelector('[data-shb-remote-status]');
+    if (node) node.textContent = 'Installed version: ' + String(state.version || 'Not installed') +
+      ' · ' + Number(state.fileCount || 0) + ' files';
+  }
+
+  function loadInstalledCatalog() {
+    installedManifest = safeJson(N.getRemoteContentManifest());
+    if (!installedManifest || !installedManifest.version) return;
+    loadedVersion = String(installedManifest.version);
+    var catalogPath = String(installedManifest.catalogPath || 'catalog.json');
+    var raw = localText(catalogPath);
+    if (!raw) return;
+    catalog = safeJson(raw);
+    if (!catalog) throw new Error('The installed remote catalog is not valid JSON.');
+    banks = buildRemoteBanks(catalog);
+  }
+
+  try {
+    loadInstalledCatalog();
+  } catch (error) {
+    console.error('SHBACE remote content could not be loaded:', error);
+    catalog = null;
+    banks = Object.create(null);
+  }
+
+  window.specialtiesView = function () {
+    if (currentBankId) return remoteBankView();
+    return typeof coreSpecialtiesView === 'function' ? coreSpecialtiesView.apply(this, arguments) : '';
+  };
+  window.topicsView = function () {
+    if (currentBankId) return remoteTopicsView();
+    return typeof coreTopicsView === 'function' ? coreTopicsView.apply(this, arguments) : '';
+  };
+  window.navBack = function () {
+    if (currentBankId && window.appPage === 'topics') {
+      currentSystemId = '';
+      B.setActiveBank(BANK_KEY, allTopicIds(activeBank()));
+      window.appPage = 'specialties';
+      window.renderAppDemo();
+      return;
+    }
+    if (currentBankId && window.appPage === 'specialties') {
+      currentBankId = '';
+      currentSystemId = '';
+      B.setActiveBank('all');
+      window.__SHB_REMOTE_CONTENT_ACTIVE__ = false;
+      window.appPage = 'subjects';
+      window.renderAppDemo();
+      return;
+    }
+    if (typeof coreBack === 'function') return coreBack.apply(this, arguments);
+  };
+  window.renderAppDemo = function () {
+    var result = coreRender.apply(this, arguments);
+    try {
+      injectBankCards();
+      injectSettingsCard();
+    } catch (e) { console.warn('Remote content UI injection failed', e); }
+    return result;
+  };
+
+  // The app remains fully usable offline. A due check runs after the installed catalog was loaded.
+  if (syncDue()) {
+    setTimeout(function () { startSync(false); }, 2500);
+  }
+  window.addEventListener('online', function () {
+    if (syncDue()) setTimeout(function () { startSync(false); }, 1500);
+  });
+  window.shbaceCheckRemoteContent = function () { return startSync(true); };
+  window.__shbRemoteContentInfo = function () {
+    return {
+      version: loadedVersion,
+      banks: Object.keys(banks).length,
+      questions: Object.keys(banks).reduce(function (n, id) { return n + banks[id].count; }, 0)
+    };
+  };
+})();
