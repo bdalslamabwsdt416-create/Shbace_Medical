@@ -397,7 +397,6 @@ if (ui != null) {
     return budget;
   }
 
-  const pageIds = new Set();
   for (const page of pages) {
     assert(page && validId(page.id) && typeof page.title === 'string' && page.title.trim() &&
       page.title.length <= 120, 'Invalid remote UI page.');
