@@ -13,6 +13,10 @@ const BANK_ICON_PATHS={
 };
 window.__shbBankIcon=function(key){const d=BANK_ICON_PATHS[key];return d?'<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'+d+'</svg>':''};
 const qs=B.qs,SYS=B.SYS,QB=B.QB,sysIcon=B.sysIcon,isPinned=B.isPinned,answeredCount=B.answeredCount,TOPIC_ICON_ASSET=B.TOPIC_ICON_ASSET;
+function routeThroughNavigation(route){
+ try{if(typeof window.__shbNavTap==='function'){window.__shbNavTap(route);return true}}catch(e){}
+ try{appPage=route;renderAppDemo();return true}catch(e){return false}
+}
 const incomingNelson=Array.isArray(window.__SHB_NELSON_QUESTIONS__)?window.__SHB_NELSON_QUESTIONS__:[];
 const knownQuestionIds=new Set(QB.map(q=>q&&q.id).filter(Boolean));
 incomingNelson.forEach(q=>{if(q&&B.bankOf(q)==="nelson"){q.bank='nelson';if(q.id&&!knownQuestionIds.has(q.id)){QB.push(q);knownQuestionIds.add(q.id)}}});
@@ -56,17 +60,17 @@ ${appHeader('Pediatrics')}<div class="rs ped-collection-page"><div class="ped-co
 <button type="button" class="ped-collection-card ped-collection-previous" onclick="selectPediatricCollection('previous')">${imageCircle(facultyData,'ped-avatar-faculty','FM','Faculty of Medicine, University of Tripoli')}<span class="ped-collection-copy"><span class="eyebrow">FACULTY QUESTION ARCHIVE</span><b>Previous Questions</b><small>Browse the 399 previous exam questions, arranged by medical system and topic.</small><span class="ped-collection-count">${previousCount.toLocaleString()} questions</span></span><span class="ped-collection-arrow">›</span></button>
 <button type="button" class="ped-collection-card ped-collection-nelson" onclick="selectPediatricCollection('nelson')"><div class="ped-collection-avatar ped-avatar-nelson ped-avatar-icon" role="img" aria-label="Nelson Textbook of Pediatrics">${window.__shbBankIcon('nelson')}</div><span class="ped-collection-copy"><span class="eyebrow">TEXTBOOK QUESTION BANK</span><b>Nelson Textbook</b><small>Curated questions from Nelson, arranged by medical system.</small><span class="ped-collection-count">${nelsonCount.toLocaleString()} questions</span></span><span class="ped-collection-arrow">›</span></button>
 </div><div class="ped-collection-footnote">Each collection keeps its own question content, answer keys and student progress.</div></div>`;
-}window.openPediatricCollections=function(ev){if(ev&&ev.stopPropagation)ev.stopPropagation();activeCollection='';activePreviousSystem='';appPage='specialties';renderAppDemo()};
+}window.openPediatricCollections=function(ev){if(ev&&ev.stopPropagation)ev.stopPropagation();activeCollection='';activePreviousSystem='';routeThroughNavigation('specialties')};
 window.selectPediatricCollection=function(which){
  activeCollection=which==='previous'?'previous':which==='nelson'?'nelson':'aj';activePreviousSystem='';window.__SHB_PED_COLLECTION__=activeCollection;
- qs.spec=activeCollection==='previous'?'exams':activeCollection==='nelson'?'all':'endocrinology';qs.topic=0;qs.filter='all';qs.tag='all';qs.idx=0;qs.view='all';appPage='specialties';renderAppDemo();
+ qs.spec=activeCollection==='previous'?'exams':activeCollection==='nelson'?'all':'endocrinology';qs.topic=0;qs.filter='all';qs.tag='all';qs.idx=0;qs.view='all';routeThroughNavigation('specialties');
 };
 window.openNelsonSystem=function(spec){
  activeCollection='nelson';activePreviousSystem='';window.__SHB_PED_COLLECTION__='nelson';
- qs.spec=String(spec||'all');qs.topic=0;qs.filter='all';qs.tag='all';qs.idx=0;qs.lim=30;qs.view='all';appPage='questions';renderAppDemo();
+ qs.spec=String(spec||'all');qs.topic=0;qs.filter='all';qs.tag='all';qs.idx=0;qs.lim=30;qs.view='all';routeThroughNavigation('questions');
 };window.openPreviousSystem=function(name){
  activeCollection='previous';activePreviousSystem=String(name||'Other / Mixed Questions');window.__SHB_PED_COLLECTION__='previous';
- qs.spec='exams';qs.topic=0;qs.filter='all';qs.tag='all';qs.idx=0;qs.view='all';appPage='topics';renderAppDemo();
+ qs.spec='exams';qs.topic=0;qs.filter='all';qs.tag='all';qs.idx=0;qs.view='all';routeThroughNavigation('topics');
 };
 window.openPreviousSystemFromCard=function(el){if(el)window.openPreviousSystem(el.getAttribute('data-ped-system')||'Other / Mixed Questions')};
 function doctorSystemsView(){
