@@ -24,6 +24,11 @@
   var sidebar = ui.sidebar && typeof ui.sidebar === 'object' ? ui.sidebar : {};
   var pages = Array.isArray(ui.pages) ? ui.pages : [];
   var pageById = Object.create(null);
+  var declaredPageIds = Object.create(null);
+  pages.forEach(function (page) {
+    if (page && validId(page.id) && typeof page.title === 'string' &&
+        page.title.trim() && !declaredPageIds[page.id]) declaredPageIds[page.id] = true;
+  });
   var resourceById = Object.create(null);
   var bankById = Object.create(null);
   var deckById = Object.create(null);
@@ -88,7 +93,7 @@
     if (type === 'button') {
       var action = String(block.action || ''), target = String(block.target || '');
       if (typeof block.label !== 'string' || !validId(target)) return false;
-      if (action === 'page') return !!pageById[target];
+      if (action === 'page') return !!declaredPageIds[target];
       if (action === 'builtin') return !!BUILTIN_PAGES[target];
       if (action === 'resource') return !!resourceById[target];
       if (action === 'bank') return !!bankById[target];
