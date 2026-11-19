@@ -36,7 +36,6 @@ function sorted(values) {
 
 function scanJavaScriptCalls(sources, interfaceName) {
   const calls = new Set();
-  const aliases = new Set();
   const direct = new RegExp(
     "(?:window\\s*\\.\\s*)?" + interfaceName + "\\s*\\.\\s*([A-Za-z_$][\\w$]*)", "g"
   );
@@ -47,14 +46,13 @@ function scanJavaScriptCalls(sources, interfaceName) {
 
   for (const source of sources) {
     for (const match of source.content.matchAll(direct)) calls.add(match[1]);
-    for (const match of source.content.matchAll(aliasDeclaration)) aliases.add(match[1]);
-  }
 
-  for (const alias of aliases) {
-    const aliasCalls = new RegExp(
-      "\\b" + alias + "\\s*\\.\\s*([A-Za-z_$][\\w$]*)", "g"
-    );
-    for (const source of sources) {
+    // Resolve aliases only in the source file where they are declared.
+    for (const declaration of source.content.matchAll(aliasDeclaration)) {
+      const alias = declaration[1];
+      const aliasCalls = new RegExp(
+        "\\b" + alias + "\\s*\\.\\s*([A-Za-z_$][\\w$]*)", "g"
+      );
       for (const match of source.content.matchAll(aliasCalls)) calls.add(match[1]);
     }
   }
@@ -73,6 +71,9 @@ const jsSources = [
 ];
 
 test("Android JavaScript bridge contract has unique interface and method identifiers", () => {
+  assert.equal(contract.contractVersion, 1);
+  assert.equal(contract.target, "android-apk");
+
   const interfaceNames = contract.interfaces.map((entry) => entry.name);
   assert.ok(interfaceNames.length > 0);
   assert.equal(new Set(interfaceNames).size, interfaceNames.length);
@@ -115,6 +116,7 @@ test("all @JavascriptInterface methods are declared in the reviewed Android brid
 test("MainActivity registers only the two declared WebView interfaces", () => {
   const activityPath = resolve(repositoryRoot, "android/app/src/main/java/com/shbace/medical/MainActivity.java");
   const activity = readFileSync(activityPath, "utf8");
+  assert.equal([...activity.matchAll(/addJavascriptInterface\s*\(/g)].length, 2);
   assert.match(activity, /nativeBridge\s*=\s*new\s+ShbaceNative\(this,\s*web\)/);
   assert.match(activity, /web\.addJavascriptInterface\(nativeBridge,\s*"ShbaceNative"\)/);
   assert.match(activity, /web\.addJavascriptInterface\(new\s+InsetsBridge\(\),\s*"ShbaceInsets"\)/);
