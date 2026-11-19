@@ -67,7 +67,7 @@ function runNotification(page, options = {}) {
   window.SHBACENavigation = {
     validate(route) {
       calls.validated.push(route);
-      return { ok: ["review", "settings", "notifs", "saved", "wrong", "notes", "pinned", "stats"].includes(route) };
+      return { ok: ["review", "settings", "notifs", "saved", "wrong", "notes", "pinned", "stats", "questions"].includes(route) };
     },
     navigate(route) {
       calls.adapterNavigations.push(route);
