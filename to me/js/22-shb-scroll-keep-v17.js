@@ -12,8 +12,7 @@
   var page=String(typeof appPage==='string'?appPage:'');
   var collection=String(window.__SHB_PED_COLLECTION__||'');
   var key=[page,collection];
-  if(page==='specialties')key.push(collection?String(q.spec||''):'');
-  else if(page==='topics')key.push(String(q.spec||''),String(window.__SHB_PED_COLLECTION_SYSTEM__||''));
+  if(page==='topics')key.push(String(q.spec||''),String(window.__SHB_PED_COLLECTION_SYSTEM__||''));
   else if(page==='questions')key.push(String(q.spec||''),String(q.topic||0),String(q.view||'all'));
   return JSON.stringify(key);
  }
