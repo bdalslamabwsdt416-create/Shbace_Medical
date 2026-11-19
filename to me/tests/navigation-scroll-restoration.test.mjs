@@ -30,6 +30,7 @@ test("topic list position is restored after opening a topic and returning", () =
     const back = { classList: makeClassList() };
     return {
       scrollTop: initial,
+      classList: { contains(name) { return name === "app-scroll"; } },
       scrollHeight: 2000,
       clientHeight: 600,
       back,
