@@ -43,6 +43,7 @@ var CHECK_EVERY=48*3600000,CHECK_RETRY=2*3600000,SNOOZE_DAYS=2,EXAM_QUIET_DAYS=7
 var MANIFEST_TIMEOUT=10000,STALL_MS=45000,CONCURRENCY=3,MAX_TRIES=3,RETRY_DELAYS=[15000,60000,300000];
 var MANIFEST_URL=new URL('./offline-assets-manifest.json',location.href).href;
 var READY_URL=new URL('./__shbace_offline_ready__',location.href).href;
+function manifestSnapshotUrl(version){return MANIFEST_URL+(MANIFEST_URL.indexOf('?')>=0?'&':'?')+'__shbace_offline_snapshot='+encodeURIComponent(String(version));}
 
 /* ---------- small helpers ---------- */
 function noop(){}
@@ -547,6 +548,7 @@ async function saveInstalled(m){
  var c=await caches.open(CACHE_NAME);
  /* Persist the manifest first; READY_URL is the final commit marker for cache-based recovery. */
  await c.put(MANIFEST_URL,new Response(JSON.stringify(m),{status:200,headers:{'content-type':'application/json'}}));
+ await c.put(manifestSnapshotUrl(m.version),new Response(JSON.stringify(m),{status:200,headers:{'content-type':'application/json'}}));
  await dbPut('meta',INSTALLED_KEY,{version:m.version,files:fileMap(m.files),verified:true,fileCount:m.files.length,totalBytes:total,completedAt:at});
  await dbPut('meta','ready',{version:m.version,verified:true,fileCount:m.files.length,totalBytes:total,completedAt:at});
  await c.put(READY_URL,new Response(JSON.stringify({version:m.version,verified:true,completedAt:at}),{status:200,headers:{'content-type':'application/json'}}));
@@ -685,7 +687,10 @@ async function recoverInstalledFromCache(){
   var marker;
   try{marker=await readyResponse.json()}catch(e){return {recovered:false}}
   if(!marker||marker.verified!==true||!marker.version)return {recovered:false};
-  var manifestResponse=await c.match(MANIFEST_URL);
+  /* Versioned snapshots keep the previous READY marker recoverable if a new update is
+     interrupted between writing its manifest and publishing the next READY marker. */
+  var manifestResponse=await c.match(manifestSnapshotUrl(marker.version));
+  if(!manifestResponse)manifestResponse=await c.match(MANIFEST_URL); /* older installs */
   if(!manifestResponse||!manifestResponse.ok)return {recovered:false};
   var cachedManifest;
   try{cachedManifest=await manifestResponse.json()}catch(e){return {recovered:false}}
@@ -822,6 +827,7 @@ async function boot(){
  await requestPersistentStorage();
  var rec=await dbGet('meta',INSTALLED_KEY).catch(function(){return null});
  var hasRec=!!(rec&&rec.files);
+ if(hasRec&&rec.verified===false)recoveryNeedsRepair=true;
  var legacy=await dbGet('meta','ready').catch(function(){return null});
  var hasReadyMarker=!!(legacy&&legacy.verified);
  var st=await dbGet('meta',STAGED_KEY).catch(function(){return null});
