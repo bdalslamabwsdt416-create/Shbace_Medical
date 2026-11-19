@@ -31,7 +31,7 @@ jobs:
           node-version: '22'
 
       - name: Check validator syntax
-        run: node --check for ApK/android-content/validate.mjs
+        run: node --check "for ApK/android-content/validate.mjs"
 
       - name: Verify content manifest, catalog, banks, media and flashcards
-        run: node for ApK/android-content/validate.mjs
+        run: node "for ApK/android-content/validate.mjs"
