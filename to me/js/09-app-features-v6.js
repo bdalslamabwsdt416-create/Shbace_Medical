@@ -2212,14 +2212,16 @@ const __hdr=hdrTap;hdrTap=function(n){
  const routes={Notifications:'notifs',Settings:'settings'};
  const route=routes[String(n||'')];
  if(!route)return __hdr(n);
- const navigation=window.SHBACENavigation;
- if(navigation&&typeof navigation.validate==='function'&&typeof navigation.navigate==='function'){
-  const validation=navigation.validate(route);
-  if(validation&&validation.ok){
-   const result=navigation.navigate(route);
-   if(result&&result.ok)return;
+ try{
+  const navigation=window.SHBACENavigation;
+  if(navigation&&typeof navigation.validate==='function'&&typeof navigation.navigate==='function'){
+   const validation=navigation.validate(route);
+   if(validation&&validation.ok){
+    const result=navigation.navigate(route);
+    if(result&&result.ok)return;
+   }
   }
- }
+ }catch(e){}
  /* Keep the header controls functional if the shared adapter is not ready. */
  try{appPage=route;renderAppDemo();return true}catch(e){return __hdr(n)}
 };
