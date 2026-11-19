@@ -57,6 +57,36 @@ function exerciseBottomNavigation({ route, useNavigation = true, validRoute = tr
   return {context,calls};
 }
 
+const headerTapStart = feature.indexOf("const __hdr=hdrTap;hdrTap=function(n){");
+const headerTapEnd = feature.indexOf("\nconst __ah=appHeader", headerTapStart);
+const headerTapHandler = headerTapStart >= 0 && headerTapEnd > headerTapStart ?
+  feature.slice(headerTapStart, headerTapEnd).trim() : "";
+
+function exerciseHeaderNavigation({ action, useNavigation = true, validRoute = true }) {
+  const calls = { validated:[], navigated:[], renders:0, fallback:[] };
+  const window = {};
+  const context = vm.createContext({
+    window,
+    appPage:"subjects",
+    renderAppDemo(){calls.renders += 1;},
+    hdrTap(name){calls.fallback.push(name);}
+  });
+  if (useNavigation) {
+    window.SHBACENavigation = {
+      validate(route){calls.validated.push(route);return {ok:validRoute};},
+      navigate(route){
+        calls.navigated.push(route);
+        context.appPage = route;
+        context.renderAppDemo();
+        return {ok:true,route};
+      }
+    };
+  }
+  vm.runInContext(headerTapHandler, context, {filename:"header-navigation-adapter.js"});
+  context.hdrTap(action);
+  return {context,calls};
+}
+
 function createRuntime(platform = "android") {
   const listeners = new Map();
   const services = new Map();
@@ -218,6 +248,37 @@ test("bottom navigation uses the shared route adapter and preserves its legacy a
   assert.equal(review.context.SRSUM,null);
   assert.equal(review.context.SRX.open,null);
   assert.deepEqual(review.calls.navigated,["review"]);
+});
+
+test("header Notifications and Settings actions use the shared route adapter",()=>{
+  assert.ok(headerTapHandler.includes("const routes={Notifications:'notifs',Settings:'settings'};"));
+  assert.match(drawer,/onclick="hdrTap\('Notifications'\)"/);
+  assert.match(drawer,/onclick="hdrTap\('Settings'\)"/);
+
+  const notifications=exerciseHeaderNavigation({action:"Notifications"});
+  assert.deepEqual(notifications.calls.validated,["notifs"]);
+  assert.deepEqual(notifications.calls.navigated,["notifs"]);
+  assert.equal(notifications.context.appPage,"notifs");
+  assert.equal(notifications.calls.renders,1);
+
+  const settings=exerciseHeaderNavigation({action:"Settings"});
+  assert.deepEqual(settings.calls.validated,["settings"]);
+  assert.deepEqual(settings.calls.navigated,["settings"]);
+  assert.equal(settings.context.appPage,"settings");
+  assert.equal(settings.calls.renders,1);
+
+  const noAdapter=exerciseHeaderNavigation({action:"Settings",useNavigation:false});
+  assert.equal(noAdapter.context.appPage,"settings");
+  assert.equal(noAdapter.calls.renders,1);
+
+  const rejected=exerciseHeaderNavigation({action:"Notifications",validRoute:false});
+  assert.deepEqual(rejected.calls.navigated,[]);
+  assert.equal(rejected.context.appPage,"notifs");
+  assert.equal(rejected.calls.renders,1);
+
+  const unknown=exerciseHeaderNavigation({action:"Other"});
+  assert.deepEqual(unknown.calls.fallback,["Other"]);
+  assert.equal(unknown.calls.renders,0);
 });
 
 test("Back adapter delegates to the existing navBack function for routes with a shared Back target",()=>{
