@@ -177,3 +177,69 @@ A phase can contain multiple small PRs. No phase is complete until its completio
 5. Expand the Android-only Page Builder and Workflow Engine in small increments; preserve adapters for the current UI until parity is proven.
 
 **Audit status:** the repository baseline is identified and a source-level inventory has begun. The complete screen/store/permission dependency map and physical-device acceptance matrix are still Phase 0 work. No claim is made that the entire ultimate blueprint is already implemented.
+
+## 10. Phase 0 extracted route and state inventory
+
+This is a source-derived route/store map. Some entries are internal views or tabs within one route rather than separately addressable Android activities. The inventory must be confirmed against runtime navigation tests before any route is renamed or removed.
+
+### Student-facing routes and view families found
+
+| Route / family | Current role | Notes for future modularisation |
+|---|---|---|
+| `subjects` | Main learning/home area | Primary entry and home content insertion point. |
+| `grade` | Grade selector/progress context | Registered from the core feature module. |
+| `specialties` | System/specialty selection | Existing navigation and collection overlays. |
+| `topics` | Topic list | Includes bank/collection selection context and return-position behaviour. |
+| `questions` | Question bank / question detail | Core answer, save, note, report and explanation flows. |
+| `quiz`, `quizrun`, `quizresult`, `quizhistory` | Quiz setup, active session, result and attempt history | Separate attempt store and preferences store; keep attempt IDs stable. |
+| `review` | Smart Review | Contains topic/build, overview, schedule, weak-question, active-session and summary views/tabs. |
+| `stats` | Statistics | Derived from local answer, quiz, review and study-activity records. |
+| `search` | Question/content search | Current shared question search; full-resource indexing is future work. |
+| `settings` | Settings and app tools | Contains update, backups, notifications, voice and other settings panels. |
+| `notes`, `saved`, `wrong`, `pinned`, `reported` | Personal study collections | Some are overlays/list pages, not necessarily independent services yet. |
+| `notifs` | In-app notifications | Local device event list; do not equate this with server push delivery. |
+| `timer` | Study timer | Web timer plus Android foreground timer service bridge. |
+| `examplanner` | Exam planning | Registered by the planner module and backed by local settings data. |
+| `about`, `dedication`, `changelog`, `feedback`, `rate` | Information and feedback views | Currently page/view registrations around the core. |
+| `reviewAudit` | Question-bank review/audit view | Related to the original/reviewed bank selection and audit log. |
+| `shbRemoteFlashcards` | Remote flashcard deck view | Android remote deck viewer with per-card local status. |
+| Remote bank/resource routes | Remote content | Dynamically added by the Android remote-content engine when a catalog package provides records. |
+| Remote custom pages | Remote UI pages | Dynamically registered from `catalog.ui.pages`; restricted to supported blocks/actions. |
+
+### Existing student-state stores identified in source
+
+The following are examples of real persisted keys identified in the core and selected feature/Android scripts. They are a map to protect, not a proposal to rename them. Keep keys stable until a migration plan and backup/restore tests exist.
+
+| Store / key | Current purpose |
+|---|---|
+| `shbace_qb_v6` | Main question-bank answers and related saved/note/report/review-v2 fields. |
+| `shbace_quiz_v1` | Quiz attempts and active quiz session. |
+| `shbace_quizcfg_v1` | Quiz settings/preferences. |
+| `shbace_sr3_v1` | Smart Review v3 schedule, per-question records, sessions, history, daily goal and statistics. |
+| `shbace_pins_v1` | Pinned questions/topics. |
+| `shbace_recent_v1` | Recent study/navigation entries. |
+| `shbace_notif_v1` | In-app notification records. |
+| `shbace_note_meta_v2` | Note metadata used by the note experience. |
+| `shbace_exam_goal_planner_v1`, `shbace_exam_goal_v1`, `shbace_exam_goals_v2` | Exam planner/goals settings and data versions. |
+| `shbace_studytime_v1`, `shbace_study_activity_days_v1` | Study time and activity summaries. |
+| `shbace_settings_v1`, `shbace_theme` | App preferences and theme. |
+| `shbace_question_bank_version` | Original/reviewed question-bank selector. |
+| `shbace_topicmap_v1`, `shbace_topicmap_backup_v1` | Topic ID mapping and migration backup. |
+| `shbace_onboarding_v3_complete`, `shbace_onboarding_v3_grade` | Onboarding completion and selected grade. |
+| `shbace_fcm_token_v1`, `shbace_push_auth_v1` | Push-token/auth-related local state; a working server sender was not verified. |
+| `shbace_pkg_*` | Offline package installed/available/pending update state. |
+| `shbace_remote_flashcards_v1` | Remote flashcard Known/Again state. |
+
+Additional state is kept outside WebView localStorage: the remote content manager uses Android private app files plus SharedPreferences for installed package metadata, and the native study timer uses Android SharedPreferences. The offline package installer uses IndexedDB/CacheStorage for downloaded web assets. These stores must be included in the data ownership and backup analysis before designing a unified data layer.
+
+### Phase 0 risks from the route/store map
+
+1. Several features are view families inside the core IIFE, not standalone modules. Moving a screen means tracing its private state, event handlers, bridge methods, back target and persistence.
+2. Some modules replace or wrap global view functions. Script execution order is therefore part of the current runtime contract and must be recorded in dependency tests.
+3. Question IDs, topic IDs and bank IDs are linked to student records. Any bank restructuring must preserve permanent IDs or ship an explicit, backed-up migration.
+4. The remote flashcard deck progress key is separate from the Smart Review scheduler; do not silently merge the two learning-history models.
+5. Browser history state and cloud account synchronisation are different systems. The former is present; the latter remains an external-service project.
+
+### Remaining Phase 0 verification
+
+The static source map is not yet a full runtime acceptance matrix. Still required: exercise every route on the Android APK, capture its navigation entry/back target, list its read/write stores and native bridge calls, and record whether it works offline. The result becomes the acceptance baseline for Page Builder, module extraction and future migrations.
