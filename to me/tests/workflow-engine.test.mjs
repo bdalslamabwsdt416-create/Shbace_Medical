@@ -110,6 +110,39 @@ test("route-change conditions execute only allow-listed actions", () => {
   assert.deepEqual(runtime.opened, ["osce-practice"]);
 });
 
+test("notEquals workflow conditions fail closed when event fields are absent or invalid", () => {
+  const runtime = createRuntime([{
+    id: "only-known-origin",
+    enabled: true,
+    trigger: "navigation:route-changed",
+    conditions: [{ field: "from", op: "notEquals", value: "subjects" }],
+    actions: [{ type: "showMessage", message: "Route changed from a known non-home screen" }],
+    cooldownMs: 0
+  }]);
+
+  const missing = runtime.api.dispatch("navigation:route-changed", {
+    to: "quizresult", mode: "app"
+  });
+  assert.equal(missing.matched, 0);
+  assert.equal(missing.executed, 0);
+  assert.equal(runtime.root.children.length, 0);
+
+  const invalid = runtime.api.dispatch("navigation:route-changed", {
+    from: null, to: "quizresult", mode: "app"
+  });
+  assert.equal(invalid.matched, 0);
+  assert.equal(invalid.executed, 0);
+  assert.equal(runtime.root.children.length, 0);
+
+  const valid = runtime.api.dispatch("navigation:route-changed", {
+    from: "quizrun", to: "quizresult", mode: "app"
+  });
+  assert.equal(valid.matched, 1);
+  assert.equal(valid.executed, 1);
+  assert.equal(runtime.root.children.length, 1);
+  assert.equal(runtime.root.children[0].textContent, "Route changed from a known non-home screen");
+});
+
 test("invalid rules, triggers, fields and actions are rejected at runtime", () => {
   const runtime = createRuntime([
     { id: "bad-trigger", trigger: "exec", actions: [{ type: "navigate", target: "topics" }] },
