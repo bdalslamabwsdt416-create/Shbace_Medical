@@ -40,6 +40,7 @@ on:
 
 permissions:
   contents: write
+  actions: read
 
 concurrency:
   group: shbace-android-release-${{ github.ref }}
@@ -214,3 +215,37 @@ jobs:
           rm -f android/keystore.properties "$RUNNER_TEMP/shbace-release.jks"
 
 # Release build trigger: user confirmed Actions signing secrets are configured.
+
+
+  restore-frozen-v139-release:
+    if: github.ref == 'refs/heads/android/freeze-existing-release-assets'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Restore the verified pre-Core v1.3.9 release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          RESTORE_DIR="$RUNNER_TEMP/shbace-v139-restore"
+          mkdir -p "$RESTORE_DIR"
+          gh run download 44568741657 \
+            --repo "$GITHUB_REPOSITORY" \
+            --name "SHBACE-Medical-Android-v1.3.9-release-candidate" \
+            --dir "$RESTORE_DIR"
+          APK="$(find "$RESTORE_DIR" -type f -name app-release.apk -print -quit)"
+          test -n "$APK"
+          ACTUAL_SHA="$(sha256sum "$APK" | awk '{print $1}')"
+          EXPECTED_SHA="7b87de09aa441302d39801bd54c42474d46f6e7a9664fc3a922c8478404f17a8"
+          test "$ACTUAL_SHA" = "$EXPECTED_SHA"
+          sha256sum "$APK" > "$APK.sha256"
+          gh release upload android-v1.3.9 \
+            "$APK#app-release.apk" \
+            "$APK.sha256#app-release.apk.sha256" \
+            --repo "$GITHUB_REPOSITORY" \
+            --clobber
+          RELEASE_SHA="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/android-v1.3.9" \
+            --jq '.assets[] | select(.name == "app-release.apk") | .digest')"
+          test "$RELEASE_SHA" = "sha256:$EXPECTED_SHA"
+          echo "Restored the previously published Android v1.3.9 APK without changing its version code or signing identity."
