@@ -54,7 +54,7 @@ test("opening a known question preserves its specialty, topic and filtered index
   assert.equal(result.context.qs.tag,"all");
   assert.equal(result.context.qs.idx,1);
   assert.deepEqual(result.calls.routes,["questions"]);
-  assert.deepEqual(result.calls.renders,[1].map(()=>undefined).filter(()=>false));
+  assert.equal(result.calls.renders,1);
   assert.equal(result.context.appPage,"questions");
   assert.equal(result.calls.timers.length,1);
   assert.equal(result.calls.timers[0].delay,80);
