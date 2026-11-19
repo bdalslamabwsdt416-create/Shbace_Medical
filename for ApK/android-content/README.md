@@ -11,7 +11,11 @@ Publish content-only updates by committing to `main` under `for ApK/android-cont
 - Keep every content path relative to this directory. Do not use absolute paths, query strings, or parent-directory segments.
 - The app downloads changed files to a staging directory, verifies size and SHA-256, then switches the installed manifest. An interrupted update leaves the previous content version active.
 - Unchanged files are copied forward from the previous local version, so only changed/new files need network transfer.
-- The previous installed content version is retained for rollback/recovery. Student answers, bookmarks, notes, and study progress stay in the existing local app stores.
+- The updater rejects content version-code downgrades and checks `minAppVersionCode` against the installed APK. Increment `contentVersionCode` and `manifest.version` for every new immutable package.
+- The native updater stores the previous manifest and keeps both current and previous content folders. A rollback request rechecks every previous file's length and SHA-256 before switching the manifest.
+- The manifest is currently delivered over HTTPS and the package files are hash-verified, but the manifest itself is **not yet cryptographically signed**. Do not describe it as signed; see `docs/architecture/REMOTE-CONTENT-TRUST-AND-ROLLBACK-v1.md`.
+- Rollback UI and anti-downgrade enforcement require an APK build containing the new native source. The published `1.3.9 / 18` binary remains unchanged in this work.
+- Student answers, bookmarks, notes, and study progress stay in the existing local app stores.
 
 ## Manifest schema
 
@@ -23,6 +27,10 @@ Publish content-only updates by committing to `main` under `for ApK/android-cont
   "version": "1.0.0",
   "generatedAt": "2026-11-19T00:00:00.000Z",
   "catalogPath": "catalog.json",
+  "contentVersionCode": 1,
+  "minAppVersionCode": 18,
+  "channel": "stable",
+  "releaseNotes": "Human-readable summary of this content package",
   "files": [
     {
       "path": "catalog.json",

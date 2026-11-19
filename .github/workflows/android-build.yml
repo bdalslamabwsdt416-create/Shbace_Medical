@@ -37,6 +37,25 @@ on:
       - 'capacitor.config.json'
       - 'scripts/**'
       - '.github/workflows/android-build.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'android/**'
+      - 'for ApK/native/**'
+      - 'to me/**'
+      - 'index.html'
+      - 'css/**'
+      - 'js/**'
+      - 'data/**'
+      - 'assets/**'
+      - 'manifest.webmanifest'
+      - 'pwa-version.json'
+      - 'sw.js'
+      - 'package.json'
+      - 'capacitor.config.json'
+      - 'scripts/**'
+      - '.github/workflows/android-build.yml'
   workflow_dispatch:
 
 permissions:

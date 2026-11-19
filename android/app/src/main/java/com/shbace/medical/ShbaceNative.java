@@ -379,6 +379,9 @@ final class ShbaceNative {
     @JavascriptInterface
     public boolean startRemoteContentSync(String manifestUrl) { return remoteContent.startSync(manifestUrl); }
 
+    @JavascriptInterface
+    public boolean startRemoteContentRollback() { return remoteContent.startRollback(); }
+
     void shutdown() {
         try { remoteContent.shutdown(); } catch (Throwable ignored) {}
         try { if (tts != null) { tts.stop(); tts.shutdown(); tts = null; ttsReady = false; } }

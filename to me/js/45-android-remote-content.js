@@ -1,7 +1,8 @@
 /* SHBACE Medical · Android Remote Content Engine v1
  *
- * Android APK only. The native bridge downloads signed-by-transport (HTTPS) content packages,
+ * Android APK only. The native bridge downloads content packages over HTTPS,
  * checks each file against the manifest SHA-256, and keeps versioned copies in private storage.
+ * The manifest itself is not cryptographically signed in this release.
  * This module registers declarative JSON MCQ banks with the existing question engine. It never
  * executes JavaScript downloaded from the content server.
  */
@@ -782,9 +783,13 @@
       ' · ' + Number(state.fileCount || 0) + ' files</p>' +
       '<p class="meta" data-shb-remote-feedback role="status" aria-live="polite"></p>' +
       '<button type="button" class="btn primary block" data-shb-remote-check>Check for update</button>' +
-      '<p class="meta">Checks the remote learning-content package only. It does not install a new APK. Your answers and study progress remain on this device.</p>';
+      (state.canRollback === true && typeof N.startRemoteContentRollback === 'function' ?
+        '<button type="button" class="btn block" data-shb-remote-rollback>Restore previous verified content</button>' : '') +
+      '<p class="meta">Checks or restores the remote learning-content package only. It does not install a new APK. Your answers and study progress remain on this device.</p>';
     var button = panel.querySelector('[data-shb-remote-check]');
     button.addEventListener('click', function () { startSync(true); });
+    var rollbackButton = panel.querySelector('[data-shb-remote-rollback]');
+    if (rollbackButton) rollbackButton.addEventListener('click', function () { startRollback(); });
     root.insertBefore(panel, root.firstChild);
   }
 
@@ -834,6 +839,28 @@
     return accepted;
   }
 
+  function startRollback() {
+    if (syncStarted) {
+      updateSettingsStatus('A content operation is already running.');
+      return false;
+    }
+    if (typeof N.startRemoteContentRollback !== 'function') {
+      updateSettingsStatus('Rollback requires a newer Android app build.');
+      return false;
+    }
+    syncStarted = true;
+    updateSettingsStatus('Verifying and restoring the previous content package…');
+    updateSyncButton(true);
+    var accepted = false;
+    try { accepted = N.startRemoteContentRollback() === true; } catch (e) {}
+    if (!accepted) {
+      syncStarted = false;
+      updateSettingsStatus('The previous content package could not be restored.');
+      updateSyncButton(false);
+    }
+    return accepted;
+  }
+
   window.__shbRemoteContentSyncComplete = function (raw) {
     syncStarted = false;
     var result = safeJson(raw) || { ok: false, error: 'Invalid update response.' };
@@ -847,8 +874,11 @@
     try { localStorage.setItem(CHECK_KEY, String(Date.now())); } catch (e) {}
     updateSettingsStatus('Content version: ' + String(result.version || 'unknown') +
       ' · ' + Number(result.updated || 0) + ' files changed');
-    if (result.status === 'updated' && result.version && result.version !== loadedVersion) {
-      updateSettingsStatus('New content verified. Reopening with the updated material…');
+    if ((result.status === 'updated' || result.status === 'rolled-back') &&
+        result.version && result.version !== loadedVersion) {
+      updateSettingsStatus(result.status === 'rolled-back' ?
+        'Previous verified content restored. Reopening the app…' :
+        'New content verified. Reopening with the updated material…');
       setTimeout(function () { location.reload(); }, 500);
       return;
     }
@@ -871,7 +901,9 @@
     var state = safeJson(N.getRemoteContentState()) || {};
     var node = panel.querySelector('[data-shb-remote-status]');
     if (node) node.textContent = 'Installed version: ' + String(state.version || 'Not installed') +
-      ' · ' + Number(state.fileCount || 0) + ' files';
+      ' · ' + Number(state.fileCount || 0) + ' files' +
+      (state.canRollback && state.lastKnownGoodVersion ?
+        ' · Previous verified version: ' + String(state.lastKnownGoodVersion) : '');
   }
 
   function loadInstalledCatalog() {
