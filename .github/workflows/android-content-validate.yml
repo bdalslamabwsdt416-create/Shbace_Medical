@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - android/remote-content-engine-v1-20261119
+      - shbace-android-content
     paths:
       - 'android-content/**'
       - '.github/workflows/android-content-validate.yml'
