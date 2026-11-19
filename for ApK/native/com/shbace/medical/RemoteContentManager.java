@@ -266,9 +266,19 @@ final class RemoteContentManager {
             }
 
             File finalVersionDir = new File(versionsDir, version);
-            deleteRecursively(finalVersionDir);
-            if (!staging.renameTo(finalVersionDir)) {
-                throw new IllegalStateException("Could not activate the verified content package.");
+            boolean existingVersionIsVerified = false;
+            if (finalVersionDir.isDirectory()) {
+                try { existingVersionIsVerified = packageFilesPresent(manifest, true); }
+                catch (Throwable ignored) { existingVersionIsVerified = false; }
+            }
+            if (existingVersionIsVerified) {
+                // A prior rollback may already have this immutable version cached. Keep it intact.
+                deleteRecursively(staging);
+            } else {
+                deleteRecursively(finalVersionDir);
+                if (!staging.renameTo(finalVersionDir)) {
+                    throw new IllegalStateException("Could not activate the verified content package.");
+                }
             }
 
             File manifestFile = new File(root, "current-manifest.json");
