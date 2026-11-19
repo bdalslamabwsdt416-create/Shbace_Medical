@@ -8,7 +8,7 @@
 (function () {
   'use strict';
 
-  var MANIFEST_URL = 'https://raw.githubusercontent.com/bdalslamabwsdt416-create/Shbace_Medical/main/android-content/manifest.json';
+  var MANIFEST_URL = 'https://raw.githubusercontent.com/bdalslamabwsdt416-create/Shbace_Medical/shbace-android-content/android-content/manifest.json';
   var CHECK_KEY = 'shbace_android_content_check_at_v1';
   var CHECK_EVERY = 48 * 60 * 60 * 1000;
   var CHECK_RETRY = 2 * 60 * 60 * 1000;
