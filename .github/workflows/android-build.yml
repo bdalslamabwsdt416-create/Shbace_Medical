@@ -14,6 +14,7 @@ on:
       - android/remote-content-v2-1.3.7
       - android/universal-remote-control-1.3.7
       - android/settings-layout-1.3.8
+      - android/apk-update-checker-1.3.9
       - integrate/for-apk-main-20261119
       - main
     paths:
@@ -100,13 +101,13 @@ jobs:
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: SHBACE-Medical-Android-v1.3.8-debug
+          name: SHBACE-Medical-Android-v1.3.9-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 90
 
       - name: Prepare Release signing key
-        if: success() && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111' || github.ref == 'refs/heads/work/android-qtools-persistence-20261112' || github.ref == 'refs/heads/android/unified-to-me-20261117' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integrate/for-apk-main-20261119' || github.ref == 'refs/heads/android/universal-remote-control-1.3.7' || github.ref == 'refs/heads/android/settings-layout-1.3.8')
+        if: success() && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111' || github.ref == 'refs/heads/work/android-qtools-persistence-20261112' || github.ref == 'refs/heads/android/unified-to-me-20261117' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integrate/for-apk-main-20261119' || github.ref == 'refs/heads/android/universal-remote-control-1.3.7' || github.ref == 'refs/heads/android/settings-layout-1.3.8' || github.ref == 'refs/heads/android/apk-update-checker-1.3.9')
         id: release-signing
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -135,7 +136,7 @@ jobs:
           echo "ready=true" >> "$GITHUB_OUTPUT"
 
       - name: Build signed Release APK
-        if: success() && steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111' || github.ref == 'refs/heads/work/android-qtools-persistence-20261112' || github.ref == 'refs/heads/android/unified-to-me-20261117' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integrate/for-apk-main-20261119' || github.ref == 'refs/heads/android/universal-remote-control-1.3.7' || github.ref == 'refs/heads/android/settings-layout-1.3.8')
+        if: success() && steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111' || github.ref == 'refs/heads/work/android-qtools-persistence-20261112' || github.ref == 'refs/heads/android/unified-to-me-20261117' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integrate/for-apk-main-20261119' || github.ref == 'refs/heads/android/universal-remote-control-1.3.7' || github.ref == 'refs/heads/android/settings-layout-1.3.8' || github.ref == 'refs/heads/android/apk-update-checker-1.3.9')
         working-directory: android
         run: |
           chmod +x gradlew
@@ -151,19 +152,53 @@ jobs:
           "$AAPT" dump xmltree "$APK" AndroidManifest.xml | grep -Fq LocalNotificationRestoreReceiver
           BADGING=$("$AAPT" dump badging "$APK")
           grep -Fq "name='com.shbace.medical'" <<< "$BADGING" || { echo "Unexpected Android application ID"; exit 1; }
-          grep -Fq "versionCode='17' versionName='1.3.8'" <<< "$BADGING" || { echo "Unexpected Android version metadata"; exit 1; }
+          grep -Fq "versionCode='18' versionName='1.3.9'" <<< "$BADGING" || { echo "Unexpected Android version metadata"; exit 1; }
           SIGNATURE_INFO=$("$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$APK")
           printf '%s\\n' "$SIGNATURE_INFO"
           grep -Fq "certificate SHA-256 digest: 8412e14418309829ca3d2432643672508ff5d6e9f00b727a3ce9654745a53337" <<< "$SIGNATURE_INFO" || { echo "Release signing certificate changed; refusing to publish an incompatible update"; exit 1; }
 
       - name: Upload signed Release APK candidate
-        if: success() && steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/android/unified-to-me-20261117' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integrate/for-apk-main-20261119' || github.ref == 'refs/heads/android/universal-remote-control-1.3.7' || github.ref == 'refs/heads/android/settings-layout-1.3.8')
+        if: success() && steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/android/unified-to-me-20261117' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integrate/for-apk-main-20261119' || github.ref == 'refs/heads/android/universal-remote-control-1.3.7' || github.ref == 'refs/heads/android/settings-layout-1.3.8' || github.ref == 'refs/heads/android/apk-update-checker-1.3.9')
         uses: actions/upload-artifact@v4
         with:
-          name: SHBACE-Medical-Android-v1.3.8-release-candidate
+          name: SHBACE-Medical-Android-v1.3.9-release-candidate
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 30
+
+
+      - name: Publish signed Android APK release
+        if: success() && steps.release-signing.outputs.ready == 'true' && github.ref == 'refs/heads/main'
+        working-directory: android
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION_NAME="$(sed -n 's/^[[:space:]]*versionName[[:space:]]*"\([^"]*\)".*/\1/p' app/build.gradle | head -n 1)"
+          TAG="android-v${VERSION_NAME}"
+          APK="app/build/outputs/apk/release/app-release.apk"
+          test -s "$APK"
+          if RELEASE_JSON="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}" 2>/dev/null)"; then
+            RELEASE_ID="$(printf '%s' "$RELEASE_JSON" | jq -r '.id')"
+          else
+            RELEASE_JSON="$(gh api --method POST "repos/${GITHUB_REPOSITORY}/releases" \
+              -f tag_name="$TAG" \
+              -f target_commitish="$GITHUB_SHA" \
+              -f name="SHBACE Medical Android v${VERSION_NAME}" \
+              -f body="Signed Android APK release for SHBACE Medical v${VERSION_NAME}. Install this as an update over the existing app; keep the same package ID and signing certificate." \
+              -F draft=false \
+              -F prerelease=false \
+              -F make_latest=true)"
+            RELEASE_ID="$(printf '%s' "$RELEASE_JSON" | jq -r '.id')"
+          fi
+          test -n "$RELEASE_ID"
+          test "$RELEASE_ID" != "null"
+          sha256sum "$APK" > "$APK.sha256"
+          gh release upload "$TAG" "$APK#app-release.apk" "$APK.sha256#app-release.apk.sha256" --clobber
+          gh api --method PATCH "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" \
+            -F draft=false -F prerelease=false -F make_latest=true >/dev/null
+          echo "Published ${TAG} with a signed APK and SHA-256 checksum."
 
       - name: Remove temporary signing material
         if: always()
