@@ -574,7 +574,13 @@ textarea.field{width:100%;resize:vertical;font:inherit}
 .btn.primary{box-shadow:0 6px 18px rgba(47,107,255,.32)}
 .app-nav{border-top:1px solid transparent;border-image:linear-gradient(90deg,transparent,rgba(90,190,255,.45),transparent) 1;background:linear-gradient(180deg,rgba(17,31,49,.96),#0e1a2b)}
 .rs button:focus-visible,.rs input:focus-visible,.rs textarea:focus-visible,.rs summary:focus-visible,.rs [role=button]:focus-visible,.app-nav button:focus-visible,.hdr-btn:focus-visible{outline:2px solid #39d4ff;outline-offset:2px}
-.backb{border:0;background:transparent;color:#8fc6ff;font-size:14px;font-weight:700;padding:4px 0 8px;margin:0 0 2px;cursor:pointer;display:block}
+.backb{position:sticky;top:0;z-index:30;display:inline-flex;align-items:center;gap:7px;box-sizing:border-box;max-width:100%;min-height:36px;padding:6px 11px;margin:0 0 10px;border:1px solid rgba(98,171,245,.32);border-radius:12px;background:rgba(7,27,66,.92);color:#9ed5ff;font-size:14px;font-weight:750;line-height:1.2;cursor:pointer;box-shadow:0 6px 17px rgba(0,8,28,.24),inset 0 1px 0 rgba(180,220,255,.12);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:opacity .16s ease,background-color .16s ease,border-color .16s ease,box-shadow .16s ease,transform .16s ease}
+.backb .back-arrow{font-size:22px;line-height:1;font-weight:500}
+.backb .back-label{white-space:nowrap}
+.backb .back-context{max-width:min(52vw,280px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-inline-start:5px;padding-inline-start:9px;border-inline-start:1px solid rgba(150,198,245,.25);font-size:11px;font-weight:650;opacity:.76}
+.backb.is-scroll-down{opacity:.52;background:rgba(5,18,46,.28);border-color:rgba(110,170,230,.12);box-shadow:none;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);transform:translateY(-1px) scale(.98)}
+.backb.is-scroll-down .back-context{max-width:0;margin-inline-start:0;padding-inline-start:0;border-inline-start:0;opacity:0}
+.backb.is-scroll-up,.backb.is-scroll-top{opacity:1;background:rgba(7,27,66,.96);border-color:rgba(98,171,245,.48);box-shadow:0 6px 17px rgba(0,8,28,.30),inset 0 1px 0 rgba(180,220,255,.15);transform:none}
 /* pediatrics hero card */
 .rs .hero-ped{position:relative;padding:0;overflow:hidden;cursor:pointer;display:block;border-radius:20px;border-color:rgba(90,190,255,.4);box-shadow:0 0 0 1px rgba(57,212,255,.08),0 18px 40px rgba(2,10,24,.55),0 0 26px rgba(47,140,255,.18)}
 .hero-ped .hp-img{display:block;width:100%;height:auto;aspect-ratio:1100/516;background:#0b1830}
@@ -1454,6 +1460,9 @@ body.app-mode:has(.phone.light) .guide-content p{color:#5d7188!important}
 .phone.light .rs h1::before{background:linear-gradient(180deg,#6baddc,#327cbd)!important;box-shadow:0 0 5px rgba(55,124,186,.20)!important}
 .phone.light .rs .notice{background:#f0f5fa!important;color:#536b83!important;border-color:#dbe5ef!important}
 .phone.light .rs .backb,.phone.light .rs .back-btn{color:#315b80!important}
+.phone.light .rs .backb{background:rgba(242,248,253,.95);border-color:rgba(86,139,184,.30);box-shadow:0 5px 15px rgba(42,77,110,.10),inset 0 1px 0 rgba(255,255,255,.95);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.phone.light .rs .backb.is-scroll-down{background:rgba(238,245,251,.36);border-color:rgba(86,139,184,.12);box-shadow:none;opacity:.55}
+.phone.light .rs .backb.is-scroll-up,.phone.light .rs .backb.is-scroll-top{background:rgba(242,248,253,.97);border-color:rgba(86,139,184,.34);opacity:1}
 .phone.light .rs .soon-h::after{background:linear-gradient(90deg,rgba(79,139,192,.25),transparent)!important}
 .phone.light .rs .qwarn{background:#fff8e9!important;border-color:#ead6a8!important;color:#8f641b!important}
 .phone.light .rs .qwarn span{color:#806b43!important}
