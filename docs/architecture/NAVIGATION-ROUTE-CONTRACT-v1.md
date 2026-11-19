@@ -48,3 +48,10 @@ The manifest lists stores where the source clearly identifies route usage. Quest
 \`to me/tests/navigation-catalog.test.mjs\` checks route IDs, Back targets, V2/V3 allow-list parity, renderer/registration evidence, history-state scope, the route observer and adapter, and frozen version metadata.
 
 Static route verification does not replace the Phase 0 physical Android acceptance matrix. Each route still needs a real-device pass for open, back, preserved scroll, data reads/writes, offline behaviour and native bridge calls before the navigation layer can be marked fully implemented.
+
+
+## Shared route dispatch adapter (v1.1)
+
+The Android navigation contract is now the preferred dispatch path for built-in routes opened from remote UI blocks and drawer items. Both surfaces ask `SHBACENavigation.validate()` before calling `navigate()`; the legacy `appPage = route; renderAppDemo()` path remains as a compatibility fallback when the Android contract is unavailable (including browser/PWA builds). Remote registered pages continue to use the existing `shbRemoteOpenPage()` registration flow and are not misclassified as built-in routes.
+
+This adapter does not replace the legacy renderer, browser History API, back handlers, or local stores. Existing render wrappers continue to own history snapshots and route-change observation. The change only centralizes the route decision for supported built-in drawer and remote-UI navigation actions.
