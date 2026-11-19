@@ -18,6 +18,7 @@ const knownQuestionIds=new Set(QB.map(q=>q&&q.id).filter(Boolean));
 incomingNelson.forEach(q=>{if(q&&B.bankOf(q)==="nelson"){q.bank='nelson';if(q.id&&!knownQuestionIds.has(q.id)){QB.push(q);knownQuestionIds.add(q.id)}}});
 if(window.__bank){window.__bank.total=QB.length;window.__bank.nelson=incomingNelson.length}
 let activeCollection='';let activePreviousSystem='';const previousSystemByTopic=new Map();
+Object.defineProperty(window,'__SHB_PED_COLLECTION_SYSTEM__',{configurable:true,get:function(){return activePreviousSystem}});
 window.__shbSetPedCollection=function(which){activeCollection=String(which||'');activePreviousSystem='';window.__SHB_PED_COLLECTION__=activeCollection;return activeCollection};
 const norm=v=>String(v==null?'':v).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
 const bankOf=B.bankOf;const isPreviousQuestion=q=>!!q&&bankOf(q)==="previous";const isNelsonQuestion=q=>!!q&&bankOf(q)==="nelson";const isAllOnceQuestion=q=>!!q&&bankOf(q)==="kasr";const isDoctorQuestion=q=>!!q&&bankOf(q)==="aj";
