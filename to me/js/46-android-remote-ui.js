@@ -22,7 +22,7 @@
   var catalog = API.getCatalog();
   var ui = catalog && catalog.ui && typeof catalog.ui === 'object' ? catalog.ui : {};
   var sidebar = ui.sidebar && typeof ui.sidebar === 'object' ? ui.sidebar : {};
-  var pages = Array.isArray(ui.pages) ? ui.pages : [];
+  var pages = Array.isArray(ui.pages) ? ui.pages.slice(0, 40) : [];
   var pageById = Object.create(null);
   var declaredPageIds = Object.create(null);
   pages.forEach(function (page) {
@@ -458,7 +458,7 @@
     var root = document.querySelector('.rs');
     if (!root || root.querySelector('.shb-remote-home-blocks')) return;
     var blocks = toArray(ui.homeBlocks);
-    if (!blocks.length || !blocks.every(validateBlock)) return;
+    if (!blocks.length || !validateBlocks(blocks, false, 0, { count: 0 })) return;
     var wrapper = document.createElement('section');
     wrapper.className = 'shb-remote-home-blocks';
     wrapper.innerHTML = blocks.map(renderBlock).join('');
