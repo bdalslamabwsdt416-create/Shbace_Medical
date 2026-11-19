@@ -169,7 +169,7 @@ Question records may also include an `image` path. Small verified images are sho
 2. Add any media assets and ensure paths match the catalog.
 3. Recalculate every file's byte count and SHA-256 over the exact UTF-8/binary bytes.
 4. Increase the manifest version and update the complete file inventory.
-5. Run the Android build and test the update on a device: clean install, offline relaunch, delta update, failed download, and progress retention.
+5. Run `node android-content/validate.mjs`, then run the Android build and test the update on a device: clean install, offline relaunch, delta update, failed download, and progress retention.
 6. Merge/publish the content manifest to the configured `main` branch only after validation.
 
 This package is independent from the APK binary: content changes can be published without issuing a new APK once a compatible renderer exists.
