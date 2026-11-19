@@ -28,7 +28,11 @@
   function render(blocks, renderLeaf, context) {
     if (!Array.isArray(blocks) || typeof renderLeaf !== 'function') return '';
     var budget = { count:0 };
-    var prefix = String(context || 'page').replace(/[^A-Za-z0-9_-]/g, '_').slice(0,48) || 'page';
+    var config = context && typeof context === 'object' ? context : {};
+    var prefixValue = typeof context === 'string' ? context : config.id;
+    var prefix = String(prefixValue || 'page').replace(/[^A-Za-z0-9_-]/g, '_').slice(0,48) || 'page';
+    var conditions = config.conditions && typeof config.conditions === 'object' ? config.conditions : {};
+    var slots = config.slots && typeof config.slots === 'object' ? config.slots : {};
     function children(items, depth) {
       if (!Array.isArray(items) || depth > MAX_DEPTH) return '';
       return items.map(function (block) { return node(block, depth); }).join('');
@@ -41,6 +45,33 @@
         var stackGap = bounded(block.gap, 0, 32, 12);
         return '<div class="shb-pb-stack" style="--shb-pb-gap:' + stackGap + 'px">' +
           children(block.children, depth + 1) + '</div>';
+      }
+      if (type === 'section') {
+        var layout = ['stack', 'row', 'grid'].indexOf(String(block.layout || 'stack')) >= 0 ?
+          String(block.layout || 'stack') : 'stack';
+        var sectionGap = bounded(block.gap, 0, 32, 12);
+        if (layout === 'stack') {
+          return '<section class="shb-pb-stack shb-pb-section" style="--shb-pb-gap:' +
+            sectionGap + 'px">' + children(block.blocks, depth + 1) + '</section>';
+        }
+        if (layout === 'row') {
+          return '<section class="shb-pb-section shb-pb-row" style="--shb-pb-gap:' +
+            sectionGap + 'px">' + children(block.blocks, depth + 1) + '</section>';
+        }
+        var sectionColumns = bounded(block.columns, 1, 3, 2);
+        return '<section class="shb-pb-grid shb-pb-section" style="--shb-pb-columns:' +
+          sectionColumns + ';--shb-pb-gap:' + sectionGap + 'px">' +
+          children(block.blocks, depth + 1) + '</section>';
+      }
+      if (type === 'when') {
+        var condition = String(block.condition || 'always');
+        var visible = condition === 'always' || conditions[condition] === true;
+        if (block.not === true) visible = !visible;
+        return visible ? '<div class="shb-pb-conditional">' +
+          children(block.blocks, depth + 1) + '</div>' : '';
+      }
+      if (type === 'slot') {
+        return Array.isArray(slots[block.name]) ? children(slots[block.name], depth + 1) : '';
       }
       if (type === 'grid') {
         var columns = bounded(block.columns, 1, 3, 2);
@@ -82,6 +113,12 @@
             children(item.blocks, depth + 1) + '</div></details>';
         }).join('') + '</div>';
       }
+      if (type === 'card' && Array.isArray(block.blocks)) {
+        var cardLeaf = '';
+        try { cardLeaf = String(renderLeaf(block) || ''); } catch (e) {}
+        return '<div class="shb-pb-card-container">' + cardLeaf +
+          children(block.blocks, depth + 1) + '</div>';
+      }
       try { return String(renderLeaf(block) || ''); }
       catch (error) {
         var core = window.SHBACECore;
@@ -99,6 +136,10 @@
     style.id = 'shb-page-builder-v1-styles';
     style.textContent =
       '.shb-pb-stack{display:flex;flex-direction:column;gap:var(--shb-pb-gap,12px);min-width:0}' +
+      '.shb-pb-section{min-width:0}.shb-pb-row{display:flex;flex-direction:row;flex-wrap:wrap;align-items:stretch;gap:var(--shb-pb-gap,12px)}' +
+      '.shb-pb-row>*{flex:1 1 220px;min-width:0}.shb-pb-card-container{min-width:0}' +
+      '.shb-pb-conditional{min-width:0}' +
+      '@media(max-width:520px){.shb-pb-row{flex-direction:column}.shb-pb-row>*{flex-basis:auto}}' +
       '.shb-pb-grid{display:grid;grid-template-columns:repeat(var(--shb-pb-columns,2),minmax(0,1fr));gap:var(--shb-pb-gap,12px);min-width:0}' +
       '.shb-pb-grid>*{min-width:0}.shb-pb-tabs{margin:14px 0}.shb-pb-tablist{display:flex;gap:7px;overflow-x:auto;padding:2px 1px 8px;scrollbar-width:thin}' +
       '.shb-pb-tab{flex:0 0 auto;border:1px solid var(--line,rgba(130,170,210,.2));border-radius:999px;padding:8px 13px;background:transparent;color:inherit;font:inherit;cursor:pointer}' +
@@ -128,7 +169,7 @@
   });
 
   var api = Object.freeze({
-    version:'1.0.0',
+    version:'2.0.0',
     platform:'android',
     maxDepth:MAX_DEPTH,
     maxBlocks:MAX_BLOCKS,
