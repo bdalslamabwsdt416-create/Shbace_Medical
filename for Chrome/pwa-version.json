@@ -1,10 +1,12 @@
 {
   "app": "Shbace Medical",
   "platform": "Chrome Android PWA",
-  "version": "1.3.10-chrome.4",
-  "displayVersion": "1.3.10.4 · Chrome Android",
+  "version": "1.3.10-chrome.5",
+  "displayVersion": "1.3.10.5 · Chrome Android",
   "releaseDate": "2026-11-19",
   "releaseNotes": [
+    "Synchronizes the Clinical Case bank with To Me: 481 shared cases and 1,840 questions, preserving case and question IDs while aligning vignettes, stems, options, correct-answer text, explanations and validation metadata.",
+    "Adds the direction-aware sticky Back control and route-aware scroll restoration from To Me, returning to the exact previous bank, system or topic-list position without resetting student progress.",
     "Prevents repeated offline-package downloads if Chrome loses IndexedDB installation or per-file verification metadata: existing Cache Storage files are rechecked by byte size and SHA-256, and valid files rebuild their IndexedDB verification records instead of being downloaded again. Requests persistent origin storage at startup and preserves the existing Chrome cache namespace, IndexedDB identity and student progress.",
     "Fixes the IndexedDB connection-closing race at the end of updates. Stale connections are invalidated on version changes or unexpected closes, and one failed transaction is retried on a fresh connection. The existing platform database, cache identity and student data are preserved.",
     "Chrome Android is synchronized with the latest To Me application logic and study features, while its Android-only identity and existing local storage remain unchanged.",
@@ -98,6 +100,8 @@
     "A question opened from Search, Saved, Wrong answers or Smart Review now opens inside its own bank, so a Previous question no longer opens as an empty list."
   ],
   "summary": [
+    "Clinical Case bank synchronized with To Me: 481 shared cases and 1,840 questions, with all case and question IDs preserved.",
+    "Back stays accessible while scrolling and restores the previous bank, system and topic-list position on return.",
     "First-install Setup appears immediately after Splash, before question-bank data, app modules or onboarding load; every required package file is verified by byte size and SHA-256.",
     "Returning installs start from the saved local package. One updater checks every 48 hours or manually, downloads only changed files, and safely stages and applies them after verification.",
     "The existing Chrome Android Cache Storage name, IndexedDB database, answers, bookmarks, notes and study progress are preserved."
