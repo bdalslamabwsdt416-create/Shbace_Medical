@@ -146,4 +146,6 @@ test("Workflow Engine and remote rules never evaluate or access student stores",
   assert.match(validator, /Unsupported workflow trigger/);
   assert.match(validator, /Unsupported workflow action/);
   assert.match(validator, /Workflow openPage action has an unknown remote page/);
+  assert.match(validator, /workflowNavigateRoutes/);
+  assert.match(validator, /'weak'.*'stats'/);
 });
