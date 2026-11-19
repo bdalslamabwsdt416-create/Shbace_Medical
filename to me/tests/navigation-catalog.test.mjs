@@ -140,8 +140,9 @@ test("route observer emits a route change after the real renderer is called",()=
   assert.equal(changes[0].to,"stats");
 });
 
-test("Back adapter delegates to the existing navBack function",()=>{
+test("Back adapter delegates to the existing navBack function for routes with a shared Back target",()=>{
   const runtime=createRuntime("android");
+  assert.equal(runtime.window.SHBACENavigation.navigate("stats").ok,true);
   const result=runtime.window.SHBACENavigation.back();
   assert.equal(result.ok,true);
   assert.equal(runtime.backCount(),1);
