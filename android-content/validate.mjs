@@ -62,6 +62,7 @@ for (const item of manifest.files) {
   assert(totalBytes <= 512 * 1024 * 1024, 'Content package exceeds 512 MiB.');
 }
 assert(manifest.catalogPath && listed.has(manifest.catalogPath), 'Catalog path is not listed in manifest.');
+const listedPaths = new Set(listed.keys());
 assert(Array.isArray(catalog.systems) && catalog.systems.length <= 120, 'Invalid systems list.');
 assert(Array.isArray(catalog.banks) && catalog.banks.length <= 40, 'Invalid banks list.');
 assert(catalog.resources == null || (Array.isArray(catalog.resources) && catalog.resources.length <= 120),
@@ -103,6 +104,11 @@ for (const bank of catalog.banks) {
   assert(Array.isArray(source.questions), 'Question file has no questions array: ' + bank.contentFile);
   if (bank.totalQuestions != null) assert(bank.totalQuestions === source.questions.length,
     'Declared question count differs for bank ' + bank.id);
+  assert(source.questions.length > 0, 'Question bank is empty: ' + bank.id);
+  if (bank.systemIds != null) {
+    assert(Array.isArray(bank.systemIds), 'Bank systemIds must be an array: ' + bank.id);
+    for (const id of bank.systemIds) assert(systems.has(String(id)), 'Unknown system in bank ' + bank.id + ': ' + id);
+  }
   const usedIds = new Set();
   for (const q of source.questions) {
     assert(q && typeof q.id === 'string' && q.id.trim() && q.id.length <= 160,
@@ -121,9 +127,12 @@ for (const bank of catalog.banks) {
   totalQuestions += source.questions.length;
 }
 
+const resourceIds = new Set();
 for (const resource of (catalog.resources || [])) {
   assert(resource && validId(resource.id) && typeof resource.title === 'string' && resource.title.trim(),
     'Invalid learning resource.');
+  assert(!resourceIds.has(resource.id), 'Duplicate resource ID: ' + resource.id);
+  resourceIds.add(resource.id);
   assert(['pdf', 'audio', 'video', 'file', 'image'].includes(String(resource.type || '').toLowerCase()),
     'Unsupported resource type: ' + resource.id);
   assert(validPath(resource.file) && listed.has(resource.file), 'Resource file not listed in manifest: ' + resource.id);
