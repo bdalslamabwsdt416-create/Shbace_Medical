@@ -53,15 +53,16 @@
   API.getBanks().forEach(function (item) { bankById[item.id] = item; });
   API.getFlashcardDecks().forEach(function (item) { deckById[item.id] = item; });
 
-  function validateBlock(block, depth) {
+  function validateBlock(block, depth, budget) {
     depth = Number.isInteger(depth) ? depth : 0;
-    if (!block || typeof block !== 'object' || depth > 4) return false;
+    budget = budget || { count:0 };
+    if (!block || typeof block !== 'object' || depth > 4 || ++budget.count > 120) return false;
     var type = String(block.type || '');
     if (type === 'stack' || type === 'grid') {
       if (!Array.isArray(block.children) || block.children.length > 30) return false;
       if (type === 'grid' && (!Number.isInteger(block.columns) || block.columns < 1 || block.columns > 3)) return false;
       if (block.gap != null && (!Number.isInteger(block.gap) || block.gap < 0 || block.gap > 32)) return false;
-      return block.children.every(function (child) { return validateBlock(child, depth + 1); });
+      return block.children.every(function (child) { return validateBlock(child, depth + 1, budget); });
     }
     if (type === 'tabs') {
       if (!Array.isArray(block.tabs) || block.tabs.length < 2 || block.tabs.length > 6) return false;
@@ -112,10 +113,15 @@
     return true;
   }
 
+  function validateBlocks(blocks) {
+    if (!Array.isArray(blocks) || blocks.length > 60) return false;
+    var budget = { count:0 };
+    return blocks.every(function (block) { return validateBlock(block, 0, budget); });
+  }
+
   pages.forEach(function (page) {
     if (!page || !validId(page.id) || typeof page.title !== 'string' ||
-        !page.title.trim() || pageById[page.id] || !Array.isArray(page.blocks) ||
-        page.blocks.length > 60 || !page.blocks.every(function (block) { return validateBlock(block, 0); })) return;
+        !page.title.trim() || pageById[page.id] || !validateBlocks(page.blocks)) return;
     pageById[page.id] = page;
   });
 
@@ -326,7 +332,7 @@
     var root = document.querySelector('.rs');
     if (!root || root.querySelector('.shb-remote-home-blocks')) return;
     var blocks = toArray(ui.homeBlocks);
-    if (!blocks.length || !blocks.every(function (block) { return validateBlock(block, 0); })) return;
+    if (!blocks.length || !validateBlocks(blocks)) return;
     var wrapper = document.createElement('section');
     wrapper.className = 'shb-remote-home-blocks';
     wrapper.innerHTML = window.SHBACEPageBuilder ?
