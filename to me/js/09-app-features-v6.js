@@ -557,7 +557,7 @@ questionBankView=function(){
    ============================================================ */
 const specProg=id=>{const l=QB.filter(q=>q.spec===id);return pct(answeredCount(l),l.length)};
 window.openSpec=function(id){qs.spec=id;qs.topic=0;qbnNavigateRoute('topics')};
-window.openTopic=function(spec,id){qs.spec=spec;qs.topic=id;qs.filter='all';qs.tag='all';qs.idx=0;appPage='questions';renderAppDemo()};
+window.openTopic=function(spec,id,options){qs.spec=spec;qs.topic=id;qs.filter='all';qs.tag='all';qs.idx=0;if(!(options&&options.deferNavigation===true))qbnNavigateRoute('questions')};
 /* Pediatrics hero image. Override with window.SHBACE_PEDIA_HERO = 'path/or/url.webp' before this script to swap the asset. */
 const PEDIA_HERO_SRC=window.SHBACE_PEDIA_HERO||'/assets/img/9fbea08e77d0.webp';
 window.startPractice=function(ev){ev&&ev.stopPropagation();const un=QB.some(q=>!S.ans[q.id]);qs.spec='all';qs.topic=0;qs.tag='all';qs.filter=un?'unanswered':'all';qs.idx=0;appPage='questions';renderAppDemo()};
@@ -2112,7 +2112,7 @@ const loadList=k=>{const v=LS.get(k,[]);return Array.isArray(v)?v.filter(okEntry
 let PINS=loadList(PKEY),REC=loadList(RKEY);
 const isPinned=(k,s,t)=>PINS.some(e=>pkey(e)===k+':'+s+':'+t);
 function recordRecent(k,spec,topic){if(!REAL.spec[spec])return;const e={k,spec,topic,t:Date.now()};if(!okEntry(e))return;REC=[e,...REC.filter(x=>pkey(x)!==pkey(e))].slice(0,12);LS.set(RKEY,REC)}
-const __ot=window.openTopic;window.openTopic=function(s,t){recordRecent('topic',s,t);__ot(s,t)};
+const __ot=window.openTopic;window.openTopic=function(s,t){recordRecent('topic',s,t);return __ot.apply(this,arguments)};
 const __os=window.openSpec;window.openSpec=function(s){recordRecent('spec',s,0);__os(s)};
 window.togglePin=function(btn,k,s,t,ev){ev&&ev.stopPropagation();const key=k+':'+s+':'+t;
  if(PINS.some(e=>pkey(e)===key)){PINS=PINS.filter(e=>pkey(e)!==key);toast('Unpinned')}else{const e={k,spec:s,topic:t,t:Date.now()};if(!okEntry(e))return;PINS.unshift(e);toast('Pinned')}

@@ -125,7 +125,7 @@ const _oldSpecialtiesView=specialtiesView;
 specialtiesView=function(){if(activeCollection==='previous')return previousSystemsView();if(activeCollection==='nelson')return nelsonSystemsView();if(activeCollection==='aj')return doctorSystemsView();return collectionView()};const _oldOpenSpec=window.openSpec;
 if(typeof _oldOpenSpec==='function')window.openSpec=function(id){const chosen=String(window.__SHB_PED_COLLECTION__||'');if(chosen==='clinical-ai'||chosen==='generated-ai'){activeCollection=chosen;activePreviousSystem='';}else{activeCollection='aj';activePreviousSystem='';window.__SHB_PED_COLLECTION__='aj'}return _oldOpenSpec(id)};
 const _oldOpenTopic=window.openTopic;
-if(typeof _oldOpenTopic==='function')window.openTopic=function(spec,id){const chosen=String(window.__SHB_PED_COLLECTION__||'');if(chosen==='clinical-ai'||chosen==='generated-ai'){activeCollection=chosen;}else if(spec==='exams'){activeCollection='previous';window.__SHB_PED_COLLECTION__='previous'}else if(activeCollection!=='previous')activeCollection='aj';return _oldOpenTopic(spec,id)};
+if(typeof _oldOpenTopic==='function')window.openTopic=function(spec,id){const chosen=String(window.__SHB_PED_COLLECTION__||'');if(chosen==='clinical-ai'||chosen==='generated-ai'){activeCollection=chosen;}else if(spec==='exams'){activeCollection='previous';window.__SHB_PED_COLLECTION__='previous'}else if(activeCollection!=='previous')activeCollection='aj';return _oldOpenTopic.apply(this,arguments)};
 /* A question opened from Search, Saved, Wrong answers or Smart Review must open inside its own bank,
    otherwise the collection filter below hides it (a Previous question would open as an empty list). */
 const _oldOpenQ=window.openQ;
