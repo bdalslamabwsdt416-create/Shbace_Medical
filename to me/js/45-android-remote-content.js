@@ -88,7 +88,18 @@
     return '<span class="' + (cls || 'shb-remote-fallback') + '">' + esc(fallback || '✚') + '</span>';
   }
 
+  function stableHash(value) {
+    var text = String(value == null ? '' : value), hash = 2166136261;
+    for (var i = 0; i < text.length; i++) { hash ^= text.charCodeAt(i); hash = Math.imul(hash, 16777619); }
+    return hash >>> 0;
+  }
+  function stableTopicId(bankId, systemId, topicId) {
+    var key = String(bankId) + '|' + String(systemId) + '|' + String(topicId);
+    return 1000000000 + (stableHash(key) % 900000000);
+  }
+
   function normalizeQuestion(raw, bank, system, topic) {
+    if (!raw || typeof raw !== 'object') throw new Error('Remote question record is not an object.');
     var options = Array.isArray(raw.options) ? raw.options.map(function (option) {
       return typeof option === 'string' ? option : String(option && option.text || '');
     }) : [];
@@ -96,7 +107,10 @@
     if (!raw || options.length < 2 || !Number.isInteger(answer) || answer < 0 || answer >= options.length) {
       throw new Error('Invalid remote question or answer key: ' + String(raw && raw.id || 'unknown'));
     }
-    var questionId = 'rc-' + slug(bank.id) + '-' + slug(raw.id);
+    var rawId = String(raw.id || '').trim();
+    if (!rawId || rawId.length > 160) throw new Error('Remote question has a missing or oversized ID.');
+    var questionId = 'rc-' + slug(bank.id).slice(0, 18) + '-' + stableHash(bank.id).toString(36) + '-' +
+      slug(rawId).slice(0, 20) + '-' + stableHash(rawId).toString(36);
     var result = {
       id: questionId,
       spec: system.spec,
@@ -203,6 +217,7 @@
             remoteBankId: bank.id,
             remoteSystemId: system.id,
             remoteTopicId: topic.id,
+            stableTopicId: stableTopicId(bank.id, system.id, topic.id),
             topicIcon: topic.icon || ''
           };
           groupsForBank.push(group);
