@@ -44,8 +44,10 @@ test("recovery verifies cached file bytes and SHA-256 before rebuilding metadata
 test("boot attempts cache recovery before showing first-install setup", () => {
   const boot = blockBetween("async function boot()", "function kick()");
   const recoveryCall = boot.indexOf("recoverInstalledFromCache()");
+  const stagedUpdate = boot.indexOf("if(st&&st.ready)");
   const setupGate = boot.indexOf("if(!hasRec&&!hasReadyMarker&&!recoveredFromCache)");
   assert.ok(recoveryCall >= 0);
+  assert.ok(stagedUpdate > recoveryCall, "recover the installed cache before handling a staged update");
   assert.ok(setupGate > recoveryCall);
   assert.match(boot, /recoveryNeedsRepair&&online\(\)/);
 });
