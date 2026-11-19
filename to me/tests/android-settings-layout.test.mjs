@@ -71,3 +71,15 @@ test("main Android release pipeline publishes a signed APK and checksum", () => 
   assert.match(workflow, /sha256sum/);
   assert.match(workflow, /-f make_latest=true/);
 });
+
+
+test("Android release automation never replaces assets on an existing frozen version tag", () => {
+  const workflow = readFileSync(resolve(root, "../.github/workflows/android-build.yml"), "utf8");
+  const start = workflow.indexOf("- name: Publish signed Android APK release");
+  const end = workflow.indexOf("- name: Remove temporary signing material", start);
+  const step = workflow.slice(start, end);
+  assert.match(step, /releases\/tags\/\$\{TAG\}/);
+  assert.match(step, /Stable release \$\{TAG\} already exists/);
+  assert.ok(step.indexOf("already exists") < step.indexOf("gh release upload"));
+  assert.doesNotMatch(step, /--clobber/);
+});
