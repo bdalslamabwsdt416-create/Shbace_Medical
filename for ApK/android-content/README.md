@@ -203,13 +203,16 @@ Allowed existing collection IDs are `aj`, `previous`, `nelson`, `kasr`, `clinica
 
 The override package can also change system/Topic names and illustrations, or replace a collection cover. Image paths must be present in the same manifest and are verified before they are displayed.
 
-## Publishing checklist
+## Publishing checklist — current main branch workflow
 
-1. Put the catalog and bank JSON files under this directory.
-2. Add any media assets and ensure paths match the catalog.
-3. Recalculate every file's byte count and SHA-256 over the exact UTF-8/binary bytes.
-4. Increase the manifest version and update the complete file inventory.
-5. Run `node android-content/validate.mjs`, then run the Android build and test the update on a device: clean install, offline relaunch, delta update, failed download, and progress retention.
-6. Commit the new catalog, data, media and manifest to `shbace-android-content`; the content-only validation workflow checks the package automatically.
+1. Add the bank JSON file under `for ApK/android-content/banks/` and add any cover, system icon, topic icon, or question images under `for ApK/android-content/media/`.
+2. Add the matching system, topics, and bank record to `for ApK/android-content/catalog.json`.
+3. Add every new or changed file to `for ApK/android-content/manifest.json`, with its exact byte count and SHA-256. The manifest must include the catalog and all referenced JSON/media files.
+4. Increase the version in both `manifest.json` and `catalog.json` to the same new value.
+5. From the repository root, run `node "for ApK/android-content/validate.mjs"` (or open a pull request and check the content validation result).
+6. Commit or merge the content files into `main` under `for ApK/android-content/`. The content validation workflow runs automatically. Content-only changes in this folder do not trigger an APK build.
+7. In the Android app, open Settings and press **Check for content updates** to test immediately. Otherwise the APK checks periodically when it has an internet connection.
 
-This package is independent from the APK binary: content changes can be published without issuing a new APK once a compatible renderer exists.
+Do not publish new content to the old `shbace-android-content` branch: it is a historical staging copy. The installed APK reads the feed from `main/for ApK/android-content/manifest.json`.
+
+This package is independent from the APK binary. A compatible APK can receive new banks, questions, metadata, images, resources, and flashcard decks without a new APK release. Changes to the app's UI or the remote-content engine still require an APK build.
