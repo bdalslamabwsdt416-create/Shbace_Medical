@@ -2208,7 +2208,23 @@ function notifsView(){
 const __toast=toast;
 const TOAST_N=[['Backup file created','Backup exported','A JSON backup file was created.'],['Backup restored','Backup restored','Your backup was validated and restored.'],['Topic progress reset','Topic progress reset','Answers for one topic were cleared. Saved questions, notes, reports and Smart Review were kept.'],['All study progress reset','All progress reset','All answers were cleared. Saved questions, notes, reports and Smart Review were kept.'],['Rating saved','Rating saved','Your rating was saved on this device.'],['Saved on this device','Feedback saved','Your feedback was saved on this device.']];
 toast=function(msg){const h=TOAST_N.find(x=>String(msg).startsWith(x[0]));if(h)addNotif('e'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),h[1],h[2]);return __toast.apply(this,arguments)};
-const __hdr=hdrTap;hdrTap=function(n){if(n==='Notifications'){appPage='notifs';renderAppDemo();return}__hdr(n)};
+const __hdr=hdrTap;hdrTap=function(n){
+ const routes={Notifications:'notifs',Settings:'settings'};
+ const route=routes[String(n||'')];
+ if(!route)return __hdr(n);
+ try{
+  const navigation=window.SHBACENavigation;
+  if(navigation&&typeof navigation.validate==='function'&&typeof navigation.navigate==='function'){
+   const validation=navigation.validate(route);
+   if(validation&&validation.ok){
+    const result=navigation.navigate(route);
+    if(result&&result.ok)return;
+   }
+  }
+ }catch(e){}
+ /* Keep the header controls functional if the shared adapter is not ready. */
+ try{appPage=route;renderAppDemo();return true}catch(e){return __hdr(n)}
+};
 const __ah=appHeader;appHeader=function(l){const h=__ah(l),u=unreadN();return u?h.replace(/(onclick="hdrTap\('Notifications'\)"[^>]*>)/,`$1<i class="bdot"></i>`):h};
 
 /* ---- quiz data ---- */
