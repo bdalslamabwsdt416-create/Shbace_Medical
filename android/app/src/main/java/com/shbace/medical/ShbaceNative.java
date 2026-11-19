@@ -38,10 +38,12 @@ final class ShbaceNative {
     private static final String TAG = "ShbaceNative";
 
     private final Activity activity;
+    private final RemoteContentManager remoteContent;
     private WebView printView;            // kept alive until the print job has been handed to the PrintManager
 
-    ShbaceNative(Activity activity) {
+    ShbaceNative(Activity activity, WebView webView) {
         this.activity = activity;
+        this.remoteContent = new RemoteContentManager(activity, webView);
     }
 
     @JavascriptInterface
@@ -307,7 +309,24 @@ final class ShbaceNative {
         } catch (Throwable t) { return "Package: " + activity.getPackageName() + "\nAndroid API: " + Build.VERSION.SDK_INT; }
     }
 
+    // Android-only remote learning-content bridge. All files remain in private app storage.
+    @JavascriptInterface
+    public String getRemoteContentManifest() { return remoteContent.getManifest(); }
+
+    @JavascriptInterface
+    public String getRemoteContentState() { return remoteContent.getState(); }
+
+    @JavascriptInterface
+    public String readRemoteContentText(String relativePath) { return remoteContent.readText(relativePath); }
+
+    @JavascriptInterface
+    public String readRemoteContentBase64(String relativePath) { return remoteContent.readBase64(relativePath); }
+
+    @JavascriptInterface
+    public boolean startRemoteContentSync(String manifestUrl) { return remoteContent.startSync(manifestUrl); }
+
     void shutdown() {
+        try { remoteContent.shutdown(); } catch (Throwable ignored) {}
         try { if (tts != null) { tts.stop(); tts.shutdown(); tts = null; ttsReady = false; } }
         catch (Throwable ignored) {}
         try { activity.getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); }
