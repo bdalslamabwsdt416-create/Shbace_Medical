@@ -466,7 +466,7 @@
     if (!blocks.length || !validateBlocks(blocks, false, 0, { count: 0 })) return;
     var wrapper = document.createElement('section');
     wrapper.className = 'shb-remote-home-blocks';
-    wrapper.innerHTML = blocks.map(renderBlock).join('');
+    wrapper.innerHTML = blocks.map(function (block) { return renderBlock(block, null); }).join('');
     root.appendChild(wrapper);
   }
 
