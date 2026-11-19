@@ -163,6 +163,46 @@ The Android app has a dedicated flip-card screen with previous/next navigation a
 
 Question records may also include an `image` path. Small verified images are shown inside the question; larger images can be opened through Android's file viewer.
 
+
+
+## Updating content that already exists in the APK
+
+The `overrideFiles` property can point to one or more JSON files using schema `shbace-remote-overrides-v1`. This allows content corrections and artwork changes in existing banks without changing the question IDs:
+
+```json
+{
+  "schema": "shbace-remote-overrides-v1",
+  "systems": [
+    { "id": "cardio", "name": "Cardiovascular System", "icon": "media/systems/cardio.webp" }
+  ],
+  "topics": [
+    { "systemId": "cardio", "topicId": 42, "name": "Congenital Heart Disease", "icon": "media/topics/chd.webp" }
+  ],
+  "questionPatches": [
+    {
+      "id": "EXISTING-QUESTION-ID",
+      "fields": {
+        "stem": "Corrected question stem",
+        "options": ["Option A", "Option B", "Option C", "Option D", "Option E"],
+        "correctIndex": 2,
+        "explanation": "Corrected explanation",
+        "extendedExplanation": "Additional detail",
+        "caseText": "Optional clinical vignette",
+        "image": "media/questions/example.webp",
+        "source": "Updated source"
+      }
+    }
+  ],
+  "collections": [
+    { "id": "nelson", "title": "Nelson Textbook", "description": "Updated description", "cover": "media/covers/nelson.webp" }
+  ]
+}
+```
+
+Allowed existing collection IDs are `aj`, `previous`, `nelson`, `kasr`, `clinical`, and `egyptian`. Existing question IDs must be copied exactly from the current question bank. The app changes only the listed fields; its original question IDs and local answer/bookmark/note records remain in place. When replacing an answer or option order, check the existing answer meaning carefully, because stored answer selections are attached to the question ID.
+
+The override package can also change system/Topic names and illustrations, or replace a collection cover. Image paths must be present in the same manifest and are verified before they are displayed.
+
 ## Publishing checklist
 
 1. Put the catalog and bank JSON files under this directory.
