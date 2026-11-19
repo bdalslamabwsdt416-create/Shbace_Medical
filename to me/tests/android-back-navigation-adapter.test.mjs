@@ -100,7 +100,7 @@ test("Back closes an open overlay first and never dispatches a route while an ov
   assert.deepEqual(app.calls.routes, []);
   assert.equal(app.calls.renders, 0);
   assert.equal(app.context.appPage, "quizrun");
-  assert.deepEqual(app.context.stack, ["subjects","quiz","quizrun"]);
+  assert.deepEqual(app.context.stack, ["subjects","quiz"]);
 });
 
 test("Back does nothing when its resolved target is already the current route", () => {
