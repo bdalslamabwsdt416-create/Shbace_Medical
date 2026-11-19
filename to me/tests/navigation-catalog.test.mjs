@@ -191,7 +191,7 @@ test("built-in remote UI and drawer navigation use the shared route adapter",()=
 
 test("bottom navigation uses the shared route adapter and preserves its legacy and Smart Review behaviour",()=>{
   assert.ok(bottomNavHandler.includes("window.__shbNavTap=function(id){"));
-  assert.ok(feature.includes('onclick="__shbNavTap(\\'${id}\\')"'),
+  assert.ok(feature.includes("onclick=\\\"__shbNavTap('${id')\\\""),
     "the rendered bottom navigation buttons must keep calling the adapter");
   const routed=exerciseBottomNavigation({route:"quiz"});
   assert.deepEqual(routed.calls.validated,["quiz"]);
