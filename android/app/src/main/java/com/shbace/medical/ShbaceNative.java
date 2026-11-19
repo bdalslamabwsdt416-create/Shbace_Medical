@@ -38,10 +38,12 @@ final class ShbaceNative {
     private static final String TAG = "ShbaceNative";
 
     private final Activity activity;
+    private final RemoteContentManager remoteContent;
     private WebView printView;            // kept alive until the print job has been handed to the PrintManager
 
-    ShbaceNative(Activity activity) {
+    ShbaceNative(Activity activity, WebView webView) {
         this.activity = activity;
+        this.remoteContent = new RemoteContentManager(activity, webView);
     }
 
     @JavascriptInterface
@@ -307,7 +309,55 @@ final class ShbaceNative {
         } catch (Throwable t) { return "Package: " + activity.getPackageName() + "\nAndroid API: " + Build.VERSION.SDK_INT; }
     }
 
+    // Android-only remote learning-content bridge. All files remain in private app storage.
+    @JavascriptInterface
+    public String getRemoteContentManifest() { return remoteContent.getManifest(); }
+
+    @JavascriptInterface
+    public String getRemoteContentState() { return remoteContent.getState(); }
+
+    @JavascriptInterface
+    public String readRemoteContentText(String relativePath) { return remoteContent.readText(relativePath); }
+
+    @JavascriptInterface
+    public String readRemoteContentBase64(String relativePath) { return remoteContent.readBase64(relativePath); }
+
+    @JavascriptInterface
+    public boolean openRemoteContentFile(final String relativePath) {
+        final File file = remoteContent.getVerifiedFile(relativePath);
+        if (file == null) return false;
+        activity.runOnUiThread(new Runnable() {
+            @Override public void run() {
+                try {
+                    Uri uri = androidx.core.content.FileProvider.getUriForFile(activity,
+                            activity.getPackageName() + ".fileprovider", file);
+                    String mime = android.webkit.MimeTypeMap.getSingleton()
+                            .getMimeTypeFromExtension(android.webkit.MimeTypeMap.getFileExtensionFromUrl(file.getName()));
+                    if (mime == null || mime.length() == 0) {
+                        mime = java.net.URLConnection.guessContentTypeFromName(file.getName());
+                    }
+                    if (mime == null || mime.length() == 0) mime = "application/octet-stream";
+                    android.content.Intent view = new android.content.Intent(android.content.Intent.ACTION_VIEW);
+                    view.setDataAndType(uri, mime);
+                    view.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    activity.startActivity(android.content.Intent.createChooser(view, "Open SHBACE learning resource"));
+                } catch (android.content.ActivityNotFoundException error) {
+                    toast("No app is available to open this file");
+                    Log.w(TAG, "No app can open remote content file", error);
+                } catch (Throwable error) {
+                    toast("Could not open this learning resource");
+                    Log.e(TAG, "Could not open remote content file", error);
+                }
+            }
+        });
+        return true;
+    }
+
+    @JavascriptInterface
+    public boolean startRemoteContentSync(String manifestUrl) { return remoteContent.startSync(manifestUrl); }
+
     void shutdown() {
+        try { remoteContent.shutdown(); } catch (Throwable ignored) {}
         try { if (tts != null) { tts.stop(); tts.shutdown(); tts = null; ttsReady = false; } }
         catch (Throwable ignored) {}
         try { activity.getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); }

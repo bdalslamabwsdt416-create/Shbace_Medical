@@ -1,0 +1,37 @@
+name: SHBACE Android Remote Content Validation
+
+on:
+  push:
+    branches:
+      - main
+      - integrate/for-apk-main-20261119
+    paths:
+      - 'for ApK/android-content/**'
+      - '.github/workflows/android-content-validate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: shbace-android-content-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-content-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout content package
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check validator syntax
+        run: node --check "for ApK/android-content/validate.mjs"
+
+      - name: Verify content manifest, catalog, banks, media and flashcards
+        run: node "for ApK/android-content/validate.mjs"

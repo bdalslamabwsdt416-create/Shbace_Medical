@@ -1,0 +1,11 @@
+{
+  "schema": "shbace-remote-content-catalog-v1",
+  "version": "1.0.2",
+  "systems": [],
+  "banks": [],
+  "resources": [],
+  "flashcardDecks": [],
+  "overrideFiles": [
+    "overrides/patches.json"
+  ]
+}
