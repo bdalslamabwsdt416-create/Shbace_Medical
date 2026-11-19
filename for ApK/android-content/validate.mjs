@@ -609,8 +609,10 @@ if (ui != null) {
     assert(ui.appearance && typeof ui.appearance === 'object' && !Array.isArray(ui.appearance),
       'Remote UI appearance must be an object.');
     const hex = /^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$/;
-    for (const key of ['accentColor', 'accentSoft', 'backgroundColor', 'surfaceColor',
-      'cardColor', 'textColor', 'mutedColor', 'borderColor']) {
+    if (ui.appearance.schemaVersion != null) assert(ui.appearance.schemaVersion === 1,
+      'appearance.schemaVersion must be 1.');
+    for (const key of ['accentColor', 'accentSoft', 'backgroundColor', 'surfaceColor', 'surfaceAltColor',
+      'cardColor', 'textColor', 'mutedColor', 'borderColor', 'successColor', 'dangerColor', 'warningColor']) {
       if (ui.appearance[key] != null) assert(typeof ui.appearance[key] === 'string' && hex.test(ui.appearance[key]),
         'Invalid remote UI color: ' + key);
     }
@@ -620,6 +622,12 @@ if (ui != null) {
     if (ui.appearance.cardRadius != null) assert(Number.isInteger(ui.appearance.cardRadius) &&
       ui.appearance.cardRadius >= 6 && ui.appearance.cardRadius <= 32,
       'appearance.cardRadius must be an integer from 6 to 32.');
+    if (ui.appearance.lineHeight != null) assert(Number.isFinite(Number(ui.appearance.lineHeight)) &&
+      Number(ui.appearance.lineHeight) >= 1.2 && Number(ui.appearance.lineHeight) <= 1.9,
+      'appearance.lineHeight must be from 1.2 to 1.9.');
+    if (ui.appearance.spacingScale != null) assert(Number.isFinite(Number(ui.appearance.spacingScale)) &&
+      Number(ui.appearance.spacingScale) >= 0.8 && Number(ui.appearance.spacingScale) <= 1.2,
+      'appearance.spacingScale must be from 0.8 to 1.2.');
     if (ui.appearance.density != null) assert(['compact', 'comfortable'].includes(ui.appearance.density),
       'appearance.density must be compact or comfortable.');
   }
