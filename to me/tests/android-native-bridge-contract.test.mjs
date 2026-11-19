@@ -26,7 +26,7 @@ function walk(directory) {
 
 function exposedMethods(source) {
   return [...source.matchAll(
-    /@JavascriptInterface\\s+public\\s+(?:final\\s+)?[\\w.$<>?\\[\\]]+\\s+([A-Za-z_$][\\w$]*)\\s*\\(/g
+    /@JavascriptInterface\s+public\s+[\w.<>?]+\s+([A-Za-z_]\w*)\s*\(/g
   )].map((match) => match[1]).sort();
 }
 
@@ -37,13 +37,12 @@ function sorted(values) {
 function scanJavaScriptCalls(sources, interfaceName) {
   const calls = new Set();
   const aliases = new Set();
-  const escaped = interfaceName.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&");
   const direct = new RegExp(
-    "(?:window\\s*\\.\\s*)?" + escaped + "\\s*\\.\\s*([A-Za-z_$][\\w$]*)", "g"
+    "(?:window\\s*\\.\\s*)?" + interfaceName + "\\s*\\.\\s*([A-Za-z_$][\\w$]*)", "g"
   );
   const aliasDeclaration = new RegExp(
-    "\\b(?:var|let|const)\\s+([A-Za-z_$][\\w$]*)\\s*=\\s*(?:window\\s*\\.\\s*)?" +
-      escaped + "\\b", "g"
+    "\\b(?:var|let|const)\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*=\\s*(?:window\\s*\\.\\s*)?" +
+      interfaceName + "\\b", "g"
   );
 
   for (const source of sources) {
@@ -53,8 +52,7 @@ function scanJavaScriptCalls(sources, interfaceName) {
 
   for (const alias of aliases) {
     const aliasCalls = new RegExp(
-      "\\b" + alias.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&") +
-        "\\s*\\.\\s*([A-Za-z_$][\\w$]*)", "g"
+      "\\b" + alias + "\\s*\\.\\s*([A-Za-z_$][\\w$]*)", "g"
     );
     for (const source of sources) {
       for (const match of source.content.matchAll(aliasCalls)) calls.add(match[1]);
@@ -100,7 +98,7 @@ test("all @JavascriptInterface methods are declared in the reviewed Android brid
     const methods = exposedMethods(readFileSync(path, "utf8"));
     if (!methods.length) continue;
 
-    const owner = relative(repositoryRoot, path).replaceAll("\\\\", "/");
+    const owner = relative(repositoryRoot, path);
     const declaration = allowedOwners.get(owner);
     assert.ok(declaration, "unreviewed JavaScript interface owner: " + owner);
     discovered.set(declaration.name, methods);
@@ -117,9 +115,9 @@ test("all @JavascriptInterface methods are declared in the reviewed Android brid
 test("MainActivity registers only the two declared WebView interfaces", () => {
   const activityPath = resolve(repositoryRoot, "android/app/src/main/java/com/shbace/medical/MainActivity.java");
   const activity = readFileSync(activityPath, "utf8");
-  assert.match(activity, /nativeBridge\\s*=\\s*new\\s+ShbaceNative\\(this,\\s*web\\)/);
-  assert.match(activity, /web\\.addJavascriptInterface\\(nativeBridge,\\s*"ShbaceNative"\\)/);
-  assert.match(activity, /web\\.addJavascriptInterface\\(new\\s+InsetsBridge\\(\\),\\s*"ShbaceInsets"\\)/);
+  assert.match(activity, /nativeBridge\s*=\s*new\s+ShbaceNative\(this,\s*web\)/);
+  assert.match(activity, /web\.addJavascriptInterface\(nativeBridge,\s*"ShbaceNative"\)/);
+  assert.match(activity, /web\.addJavascriptInterface\(new\s+InsetsBridge\(\),\s*"ShbaceInsets"\)/);
 });
 
 test("JavaScript call sites use only methods in the corresponding approved bridge", () => {
