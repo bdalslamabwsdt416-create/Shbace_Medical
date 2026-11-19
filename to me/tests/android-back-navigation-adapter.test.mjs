@@ -16,7 +16,7 @@ const handler = nativeNavigation.slice(start, end);
 
 function runtime({
   route = "quizrun",
-  stack = ["subjects", "quiz", "quizrun"],
+  stack = ["subjects", "quiz"],
   resolvedTarget = "subjects",
   spec = "respiratory",
   adapterMode = "ok",
@@ -57,7 +57,7 @@ test("hardware and in-app Back dispatch through the shared route adapter while t
 
   assert.deepEqual(app.calls.routes, [{target:"quiz",backing:true}]);
   assert.equal(app.context.appPage, "quiz");
-  assert.equal(app.context.stack.length, 2);
+  assert.equal(app.context.stack.length, 1);
   assert.equal(app.calls.renders, 1);
   assert.equal(app.context.backing, false, "backing guard must always be released");
 });
