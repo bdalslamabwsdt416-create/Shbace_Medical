@@ -244,6 +244,10 @@ if (ui != null) {
   const knownResources = new Set(resourceIds);
   const knownBanks = new Set(bankIds);
   const knownDecks = new Set(deckIds);
+  const remoteUiBuiltinPageIds = new Set(['subjects', 'specialties', 'topics', 'questions',
+    'quiz', 'quizrun', 'quizresult', 'quizhistory', 'review', 'stats', 'search', 'settings',
+    'about', 'changelog', 'feedback', 'rate', 'pinned', 'saved', 'wrong', 'reported',
+    'notifs', 'timer']);
 
   function validateUiBlocks(blocks, label, options = {}) {
     const depth = Number.isInteger(options.depth) ? options.depth : 0;
@@ -381,7 +385,7 @@ if (ui != null) {
           block.label.length <= 120 && validId(block.target), 'Invalid UI button in ' + pathLabel);
         const action = String(block.action || '');
         const allowed = action === 'page' ? pageIds :
-          (action === 'builtin' ? builtinPageIds :
+          (action === 'builtin' ? remoteUiBuiltinPageIds :
           (action === 'resource' ? knownResources :
           (action === 'bank' ? knownBanks : (action === 'deck' ? knownDecks : null))));
         assert(allowed && allowed.has(String(block.target)),
