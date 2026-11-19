@@ -22,7 +22,7 @@
   var catalog = API.getCatalog();
   var ui = catalog && catalog.ui && typeof catalog.ui === 'object' ? catalog.ui : {};
   var sidebar = ui.sidebar && typeof ui.sidebar === 'object' ? ui.sidebar : {};
-  var pages = Array.isArray(ui.pages) ? ui.pages : [];
+  var pages = Array.isArray(ui.pages) ? ui.pages.slice(0, 40) : [];
   var pageById = Object.create(null);
   var resourceById = Object.create(null);
   var bankById = Object.create(null);
@@ -53,16 +53,44 @@
   API.getBanks().forEach(function (item) { bankById[item.id] = item; });
   API.getFlashcardDecks().forEach(function (item) { deckById[item.id] = item; });
 
-  function validateBlock(block, depth, budget) {
+  var templates = Array.isArray(ui.templates) ? ui.templates.slice(0, 20) : [];
+  var templateById = Object.create(null);
+  var declaredPageIds = Object.create(null);
+  pages.forEach(function (page) {
+    if (page && validId(page.id) && typeof page.title === 'string' &&
+        page.title.trim() && !declaredPageIds[page.id]) declaredPageIds[page.id] = true;
+  });
+  var SAFE_CONDITIONS = {
+    always:1, hasBanks:1, hasResources:1, hasFlashcardDecks:1, hasLearningContent:1
+  };
+
+  function validateBlock(block, depth, budget, allowSlots) {
     depth = Number.isInteger(depth) ? depth : 0;
-    budget = budget || { count:0 };
-    if (!block || typeof block !== 'object' || depth > 4 || ++budget.count > 120) return false;
+    if (!block || typeof block !== 'object' || Array.isArray(block) ||
+        depth > 4 || ++budget.count > 120) return false;
     var type = String(block.type || '');
     if (type === 'stack' || type === 'grid') {
       if (!Array.isArray(block.children) || block.children.length > 30) return false;
       if (type === 'grid' && (!Number.isInteger(block.columns) || block.columns < 1 || block.columns > 3)) return false;
       if (block.gap != null && (!Number.isInteger(block.gap) || block.gap < 0 || block.gap > 32)) return false;
-      return block.children.every(function (child) { return validateBlock(child, depth + 1, budget); });
+      return block.children.every(function (child) { return validateBlock(child, depth + 1, budget, allowSlots); });
+    }
+    if (type === 'section') {
+      if (['stack', 'row', 'grid'].indexOf(String(block.layout || 'stack')) < 0 ||
+          !Array.isArray(block.blocks) || block.blocks.length > 60) return false;
+      if (block.gap != null && (!Number.isInteger(block.gap) || block.gap < 0 || block.gap > 32)) return false;
+      if (block.layout === 'grid' && block.columns != null &&
+          (!Number.isInteger(block.columns) || block.columns < 1 || block.columns > 3)) return false;
+      return block.blocks.every(function (child) { return validateBlock(child, depth + 1, budget, allowSlots); });
+    }
+    if (type === 'when') {
+      if (!SAFE_CONDITIONS[String(block.condition || '')] ||
+          (block.not != null && typeof block.not !== 'boolean') ||
+          !Array.isArray(block.blocks) || block.blocks.length > 60) return false;
+      return block.blocks.every(function (child) { return validateBlock(child, depth + 1, budget, allowSlots); });
+    }
+    if (type === 'slot') {
+      return allowSlots === true && /^[a-z][a-z0-9_-]{0,31}$/.test(String(block.name || ''));
     }
     if (type === 'tabs') {
       if (!Array.isArray(block.tabs) || block.tabs.length < 2 || block.tabs.length > 6) return false;
@@ -71,7 +99,7 @@
         if (!tab || !validId(tab.id) || ids[tab.id] || typeof tab.label !== 'string' ||
             !tab.label.trim() || tab.label.length > 48 || !Array.isArray(tab.blocks) || tab.blocks.length > 30) return false;
         ids[tab.id] = true;
-        return tab.blocks.every(function (child) { return validateBlock(child, depth + 1, budget); });
+        return tab.blocks.every(function (child) { return validateBlock(child, depth + 1, budget, allowSlots); });
       });
       return valid && (block.defaultTab == null || !!ids[String(block.defaultTab)]);
     }
@@ -86,44 +114,105 @@
           itemIds[item.id] = true;
         }
         if (item.open != null && typeof item.open !== 'boolean') return false;
-        return item.blocks.every(function (child) { return validateBlock(child, depth + 1, budget); });
+        return item.blocks.every(function (child) { return validateBlock(child, depth + 1, budget, allowSlots); });
       });
     }
     if (['heading', 'text', 'notice', 'divider', 'image', 'resourceList',
          'bankList', 'flashcardDeckList', 'link', 'button', 'card', 'list', 'metric', 'spacer'].indexOf(type) < 0) return false;
-    if (type === 'heading' || type === 'text') return typeof block.text === 'string';
-    if (type === 'notice') return typeof block.text === 'string';
-    if (type === 'image') return typeof block.file === 'string';
-    if (type === 'card') return (block.title == null || typeof block.title === 'string') &&
-      (block.text == null || typeof block.text === 'string');
+    if (type === 'heading' || type === 'text') return typeof block.text === 'string' && block.text.length <= 3000;
+    if (type === 'notice') return typeof block.text === 'string' && block.text.length <= 3000 &&
+      ['info', 'success', 'warning', 'neutral'].indexOf(String(block.tone || 'info')) >= 0;
+    if (type === 'image') return typeof block.file === 'string' && block.file.length <= 240;
+    if (type === 'card') {
+      if ((block.title != null && typeof block.title !== 'string') ||
+          (block.text != null && typeof block.text !== 'string')) return false;
+      return block.blocks == null || (Array.isArray(block.blocks) && block.blocks.length <= 30 &&
+        block.blocks.every(function (child) { return validateBlock(child, depth + 1, budget, allowSlots); }));
+    }
     if (type === 'list') return Array.isArray(block.items) && block.items.length <= 30 &&
-      block.items.every(function (item) { return typeof item === 'string'; });
+      block.items.every(function (item) { return typeof item === 'string' && item.length <= 300; });
     if (type === 'metric') return (typeof block.label === 'string' || typeof block.label === 'number') &&
       (typeof block.value === 'string' || typeof block.value === 'number');
     if (type === 'spacer') return Number.isInteger(block.size) && block.size >= 4 && block.size <= 64;
-    if (type === 'link') return typeof block.label === 'string' && !!safeUrl(block.url);
+    if (type === 'link') return typeof block.label === 'string' && block.label.trim().length <= 120 && !!safeUrl(block.url);
     if (type === 'button') {
-      return typeof block.label === 'string' &&
-        ['page', 'builtin', 'resource', 'bank', 'deck'].indexOf(String(block.action || '')) >= 0 &&
-        validId(block.target);
+      if (typeof block.label !== 'string' || !block.label.trim() || block.label.length > 120 || !validId(block.target)) return false;
+      var action = String(block.action || ''), target = String(block.target);
+      if (action === 'page') return !!declaredPageIds[target];
+      if (action === 'builtin') return !!BUILTIN_PAGES[target];
+      if (action === 'resource') return !!resourceById[target];
+      if (action === 'bank') return !!bankById[target];
+      if (action === 'deck') return !!deckById[target];
+      return false;
     }
     if (type === 'resourceList' || type === 'bankList' || type === 'flashcardDeckList') {
-      return Array.isArray(block.ids) && block.ids.length <= 120;
+      if (!Array.isArray(block.ids) || block.ids.length > 120) return false;
+      var source = type === 'resourceList' ? resourceById :
+        (type === 'bankList' ? bankById : deckById);
+      return block.ids.every(function (id) { return !!source[String(id)]; });
     }
-    return true;
+    return type === 'divider';
   }
 
-  function validateBlocks(blocks) {
+  function validateBlocks(blocks, allowSlots) {
     if (!Array.isArray(blocks) || blocks.length > 60) return false;
     var budget = { count:0 };
-    return blocks.every(function (block) { return validateBlock(block, 0, budget); });
+    return blocks.every(function (block) { return validateBlock(block, 0, budget, allowSlots === true); });
   }
+
+  function collectTemplateSlots(blocks, found) {
+    (blocks || []).forEach(function (block) {
+      if (!block || typeof block !== 'object') return;
+      if (block.type === 'slot') found[String(block.name)] = true;
+      if (Array.isArray(block.children)) collectTemplateSlots(block.children, found);
+      if (Array.isArray(block.blocks)) collectTemplateSlots(block.blocks, found);
+      if (Array.isArray(block.tabs)) block.tabs.forEach(function (tab) {
+        if (tab && Array.isArray(tab.blocks)) collectTemplateSlots(tab.blocks, found);
+      });
+      if (Array.isArray(block.items)) block.items.forEach(function (item) {
+        if (item && Array.isArray(item.blocks)) collectTemplateSlots(item.blocks, found);
+      });
+    });
+  }
+
+  templates.forEach(function (template) {
+    if (!template || !validId(template.id) || templateById[template.id] ||
+        !validateBlocks(template.blocks, true)) return;
+    var slots = Object.create(null);
+    collectTemplateSlots(template.blocks, slots);
+    templateById[template.id] = { source:template, slots:slots };
+  });
 
   pages.forEach(function (page) {
     if (!page || !validId(page.id) || typeof page.title !== 'string' ||
-        !page.title.trim() || pageById[page.id] || !validateBlocks(page.blocks)) return;
+        !page.title.trim() || pageById[page.id]) return;
+    if (page.templateId != null) {
+      var template = templateById[String(page.templateId)];
+      if (!template || !page.slots || typeof page.slots !== 'object' || Array.isArray(page.slots) ||
+          Object.keys(page.slots).length > 20) return;
+      var slotBudget = { count:0 };
+      var slotNames = Object.keys(page.slots);
+      var validSlots = slotNames.every(function (name) {
+        return !!template.slots[name] && Array.isArray(page.slots[name]) &&
+          page.slots[name].every(function (block) { return validateBlock(block, 0, slotBudget, false); });
+      });
+      if (!validSlots) return;
+    } else if (!validateBlocks(page.blocks, false)) return;
     pageById[page.id] = page;
   });
+
+  function pageBuilderConditions() {
+    var hasBanks = Object.keys(bankById).length > 0;
+    var hasResources = Object.keys(resourceById).length > 0;
+    var hasDecks = Object.keys(deckById).length > 0;
+    return {
+      always:true,
+      hasBanks:hasBanks,
+      hasResources:hasResources,
+      hasFlashcardDecks:hasDecks,
+      hasLearningContent:hasBanks || hasResources || hasDecks
+    };
+  }
 
   function openTarget(action, target) {
     var key = String(target || '');
@@ -228,9 +317,13 @@
   }
 
   function renderPage(page) {
+    var template = page.templateId != null ? templateById[String(page.templateId)] : null;
+    var sourceBlocks = template ? template.source.blocks : page.blocks;
     var pageBuilder = window.SHBACEPageBuilder;
-    var blocks = pageBuilder ? pageBuilder.render(page.blocks, renderBlock, page.id) :
-      toArray(page.blocks).map(renderBlock).join('');
+    var context = { id:page.id, slots:template ? page.slots : {},
+      conditions:pageBuilderConditions() };
+    var blocks = pageBuilder ? pageBuilder.render(sourceBlocks, renderBlock, context) :
+      toArray(sourceBlocks).map(renderBlock).join('');
     return '<div class="app-head"><div class="app-head-title">' + esc(page.title) +
       '</div></div><div class="rs shb-remote-ui-page">' +
       '<div class="ped-collection-kicker">SHBACE MEDICAL · REMOTE SECTION</div>' +
@@ -336,7 +429,8 @@
     var wrapper = document.createElement('section');
     wrapper.className = 'shb-remote-home-blocks';
     wrapper.innerHTML = window.SHBACEPageBuilder ?
-      window.SHBACEPageBuilder.render(blocks, renderBlock, 'home') : blocks.map(renderBlock).join('');
+      window.SHBACEPageBuilder.render(blocks, renderBlock, { id:'home', slots:{}, conditions:pageBuilderConditions() }) :
+      blocks.map(renderBlock).join('');
     root.appendChild(wrapper);
   }
 
