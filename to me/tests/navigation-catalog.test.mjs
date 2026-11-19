@@ -15,6 +15,7 @@ const examPlanner = readFileSync(resolve(root, "js/36-exam-planner-settings-smar
 const remoteContent = readFileSync(resolve(root, "js/45-android-remote-content.js"), "utf8");
 const remoteUi = readFileSync(resolve(root, "js/46-android-remote-ui.js"), "utf8");
 const remoteControl = readFileSync(resolve(root, "js/47-android-remote-control.js"), "utf8");
+const drawer = readFileSync(resolve(root, "js/06-drawer-menu.js"), "utf8");
 const index = readFileSync(resolve(root, "index.html"), "utf8");
 const gradle = readFileSync(resolve(root, "../android/app/build.gradle"), "utf8");
 
@@ -138,6 +139,16 @@ test("route observer emits a route change after the real renderer is called",()=
   assert.equal(changes.length,1);
   assert.equal(changes[0].from,"subjects");
   assert.equal(changes[0].to,"stats");
+});
+
+
+test("built-in remote UI and drawer navigation use the shared route adapter",()=>{
+  assert.match(remoteUi,/navigation\.navigate\(key\)/);
+  assert.match(drawer,/data-shb-drawer-route/);
+  assert.match(drawer,/navigation\.navigate\(key\)/);
+  assert.match(drawer,/key\.slice\(14\)/);
+  assert.match(drawer,/appPage=key;renderAppDemo\(\)/);
+  assert.doesNotMatch(drawer,/onclick="appPage='/);
 });
 
 test("Back adapter delegates to the existing navBack function for routes with a shared Back target",()=>{
