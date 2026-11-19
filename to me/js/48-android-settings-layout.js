@@ -81,7 +81,7 @@
 
   function categoryFor(node) {
     if (node.id === 'bkFile') return 'data';
-    if (node.classList.contains('shb-remote-settings')) return 'updates';
+    if (node.classList.contains('shb-remote-settings') || node.classList.contains('shb-apk-update-card')) return 'updates';
     if (node.classList.contains('u10-settings-card')) return 'notifications';
     if (node.id === 'shbUnifiedVoiceSettings') return 'appearance';
     if (node.id === 'shbAndroidSettings') return 'study';
