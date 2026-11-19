@@ -44,3 +44,29 @@ test("the Android settings layout loads after the existing Android remote engine
   const settings = index.indexOf('data-src="js/48-android-settings-layout.js"');
   assert.ok(content >= 0 && ui > content && settings > ui);
 });
+
+
+test("APK release checker compares the installed APK to the public latest release", () => {
+  assert.match(layout, /api\.github\.com\/repos\/bdalslamabwsdt416-create\/Shbace_Medical\/releases\/latest/);
+  assert.match(layout, /installedApkVersion/);
+  assert.match(layout, /compareVersions/);
+  assert.match(layout, /safeReleaseAssetUrl/);
+  assert.match(layout, /openExternalUrl/);
+  assert.match(layout, /data-shb-apk-check/);
+});
+
+test("native external-browser bridge only permits HTTPS GitHub URLs", () => {
+  const native = readFileSync(resolve(root, "../android/app/src/main/java/com/shbace/medical/ShbaceNative.java"), "utf8");
+  assert.match(native, /public boolean openExternalUrl\(String rawUrl\)/);
+  assert.match(native, /"https"\.equalsIgnoreCase\(scheme\)/);
+  assert.match(native, /"github.com"\.equalsIgnoreCase\(host\)/);
+});
+
+test("main Android release pipeline publishes a signed APK and checksum", () => {
+  const workflow = readFileSync(resolve(root, "../.github/workflows/android-build.yml"), "utf8");
+  assert.match(workflow, /Publish signed Android APK release/);
+  assert.match(workflow, /github\.ref == 'refs\/heads\/main'/);
+  assert.match(workflow, /gh release upload/);
+  assert.match(workflow, /sha256sum/);
+  assert.match(workflow, /make_latest=true/);
+});
