@@ -11,6 +11,7 @@
   var MANIFEST_URL = 'https://raw.githubusercontent.com/bdalslamabwsdt416-create/Shbace_Medical/main/android-content/manifest.json';
   var CHECK_KEY = 'shbace_android_content_check_at_v1';
   var CHECK_EVERY = 48 * 60 * 60 * 1000;
+  var CHECK_RETRY = 2 * 60 * 60 * 1000;
   var BANK_KEY = 'remote-content';
   var B = window.__SHB_BRIDGE;
   var N = window.ShbaceNative;
@@ -380,6 +381,7 @@
     syncStarted = false;
     var result = safeJson(raw) || { ok: false, error: 'Invalid update response.' };
     if (!result.ok) {
+      try { localStorage.setItem(CHECK_KEY, String(Date.now() - CHECK_EVERY + CHECK_RETRY)); } catch (e) {}
       updateSettingsStatus('Update check failed: ' + String(result.error || 'Unknown error'));
       if (window.appPage === 'settings') renderSettingsStatus();
       return;
