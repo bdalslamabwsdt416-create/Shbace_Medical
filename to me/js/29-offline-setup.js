@@ -209,7 +209,7 @@ function dbPut(s,k,v){return dbOp(s,'readwrite',function(o){return o.put(v,k)})}
    needs-network / error are recoverable and retry on their own. */
 var state='boot',S={pct:0,done:0,total:0,bytes:0,totalBytes:0,msg:'',announce:false};
 var splashDone=false,splashP=null,chip=null,lastPaint='',announceTimer=null;
-var setupUi=null,setupPlan=null,setupFails=0,setupSkipped=false;
+var setupUi=null,setupPlan=null,setupFails=0,setupSkipped=false,silentReinstall=false;
 /* Emergency exit: after 3 failed Setup attempts the student may continue online instead of being stuck on Setup.
    Nothing is marked as installed, so the next launch runs Setup again. */
 function paintSkip(){
@@ -602,7 +602,8 @@ async function runPlan(plan,mode){
    if(mode==='install'){
     /* The verified package is now complete, so register the worker only after Setup has finished its downloads. */
     registerSW();
-    setState('setup-complete',{pct:100,done:plan.files.length,total:plan.files.length,bytes:plan.bytes,totalBytes:plan.bytes});
+    if(silentReinstall){silentReinstall=false;announceReady()}
+    else setState('setup-complete',{pct:100,done:plan.files.length,total:plan.files.length,bytes:plan.bytes,totalBytes:plan.bytes});
    }else announceReady();
   }
  }catch(e){
@@ -615,7 +616,7 @@ async function runPlan(plan,mode){
 }
 async function startPlan(plan,mode){
  if(busy)return;
- if(mode==='install'){setupPlan=plan;mountSetupOverlay();}
+ if(mode==='install'&&!silentReinstall){setupPlan=plan;mountSetupOverlay();}
  busy=true;
  try{await runPlan(plan,mode)}finally{busy=false}
 }
@@ -709,6 +710,30 @@ async function recoverInstalledFromCache(){
    await dbPut('meta','ready',{version:cachedManifest.version,verified:true,fileCount:cachedManifest.files.length,totalBytes:cachedManifest.totalBytes||total,completedAt:at}).catch(noop);
   }else{
    await dbPut('meta','ready',null).catch(noop);
+  }
+  return {recovered:true,complete:complete,missing:checked.bad.length,installed:record};
+ }catch(e){return {recovered:false,error:e}}
+}
+/* Installs made before the READY marker existed have the cached manifest but no marker. Treat intact cached files
+   as proof of a previous install so a returning student is never sent back to the blocking Setup screen. */
+async function recoverLegacyInstalledFromCache(){
+ try{
+  var c=await caches.open(CACHE_NAME);
+  var r=await c.match(MANIFEST_URL);
+  if(!r||!r.ok)return {recovered:false};
+  var m;try{m=await r.json()}catch(e){return {recovered:false}}
+  if(!validManifest(m))return {recovered:false};
+  var checked=await verifyCachedFiles(m.files,'Restoring saved offline files',true);
+  /* Require the app shell to be intact; anything else missing is repaired in the background. */
+  var hasShell=checked.good.some(function(f){return f.path==='index.html'});
+  if(!hasShell||checked.good.length<Math.ceil(m.files.length/2))return {recovered:false};
+  var complete=checked.bad.length===0,total=checked.good.reduce(function(s,f){return s+(Number(f.bytes)||0)},0),at=Date.now();
+  var record={version:m.version,files:fileMap(checked.good),verified:complete,fileCount:checked.good.length,totalBytes:total,completedAt:at,recoveredAt:at};
+  await dbPut('meta',INSTALLED_KEY,record).catch(noop);
+  if(complete){
+   await dbPut('meta','ready',{version:m.version,verified:true,fileCount:m.files.length,totalBytes:m.totalBytes||total,completedAt:at}).catch(noop);
+   await c.put(READY_URL,new Response(JSON.stringify({version:m.version,verified:true,completedAt:at}),{status:200,headers:{'content-type':'application/json'}})).catch(noop);
+   await c.put(manifestSnapshotUrl(m.version),new Response(JSON.stringify(m),{status:200,headers:{'content-type':'application/json'}})).catch(noop);
   }
   return {recovered:true,complete:complete,missing:checked.bad.length,installed:record};
  }catch(e){return {recovered:false,error:e}}
@@ -833,6 +858,7 @@ async function boot(){
  var recoveredFromCache=false;
  if(!hasRec&&!hasReadyMarker){
   var recovery=await recoverInstalledFromCache();
+  if(!recovery.recovered)recovery=await recoverLegacyInstalledFromCache();
   if(recovery.recovered){
    recoveredFromCache=true;
    rec=recovery.installed;
@@ -853,6 +879,15 @@ async function boot(){
   caches.delete(STAGING_NAME).catch(noop);
  }
  if(!hasRec&&!hasReadyMarker&&!recoveredFromCache){
+  /* A returning student with prior successful-install evidence should not be forced through first-install Setup. */
+  if(lsGetJson(VER_KEY)||lsNum(CHECK_OK_KEY)){
+   silentReinstall=true;
+   setState('ready');
+   registerSW();
+   releaseBootGate();
+   if(online())runFullCheck({force:true}).catch(noop);
+   return;
+  }
   if(splashP)await splashP;
   mountSetupOverlay();
   setState('boot',{msg:'Preparing the complete installation…',done:0,total:0,bytes:0,totalBytes:0,pct:0});
@@ -863,9 +898,14 @@ async function boot(){
  setState('ready');
  registerSW();
  releaseBootGate();
- /* A recovered but incomplete cache gets an immediate targeted repair check; normal updates
-    retain the existing 48-hour schedule and never delay app startup. */
- if(recoveryNeedsRepair&&online()){
+ /* A missing app shell or a recovered incomplete cache gets immediate targeted repair;
+    normal updates retain the existing 48-hour schedule and never delay app startup. */
+ var shellHit=null;
+ try{shellHit=await (await caches.open(CACHE_NAME)).match(urlFor('index.html'))}catch(e){}
+ if(!shellHit&&online()){
+  recoveryCheckAt=Date.now();
+  runFullCheck({force:true}).catch(noop);
+ }else if(recoveryNeedsRepair&&online()){
   recoveryCheckAt=Date.now();
   runFullCheck({force:true}).catch(noop);
  }else if(online()&&checkDue())runFullCheck({force:true}).catch(noop);
