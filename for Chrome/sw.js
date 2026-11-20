@@ -76,7 +76,8 @@ self.addEventListener('activate', event => {
     await self.clients.claim();
     const names = await caches.keys();
     await Promise.all(names
-      .filter(name => name.startsWith('shbace-to-me-chrome-offline-'))
+      .filter(name => name.startsWith('shbace-to-me-chrome-offline-') ||
+        (name.startsWith('shbace-chrome-offline-') && name !== CACHE_NAME))
       .map(name => caches.delete(name)));
   })());
 });
