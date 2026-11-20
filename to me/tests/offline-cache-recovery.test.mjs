@@ -5,6 +5,7 @@ import { runInNewContext } from "node:vm";
 import { createHash, webcrypto } from "node:crypto";
 
 const source = readFileSync(new URL("../js/29-offline-setup.js", import.meta.url), "utf8");
+const serviceWorkerSource = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
 
 function blockBetween(start, end) {
   const from = source.indexOf(start);
@@ -63,7 +64,7 @@ test("partial recovery remains marked for targeted repair on later launches", ()
 });
 
 
-function makeBrowserHarness({ version = "offline-recovery-test-v1", missing = [], corrupt = [], online = true } = {}) {
+function makeBrowserHarness({ version = "offline-recovery-test-v1", missing = [], corrupt = [], online = true, readyMarker = true, snapshot = true, manifestCached = true, localMarkers = true } = {}) {
   const baseUrl = "https://shbace.test/app/index.html";
   const manifestUrl = new URL("./offline-assets-manifest.json", baseUrl).href;
   const readyUrl = new URL("./__shbace_offline_ready__", baseUrl).href;
@@ -138,10 +139,13 @@ function makeBrowserHarness({ version = "offline-recovery-test-v1", missing = []
 
   const missingSet = new Set(missing);
   const corruptSet = new Set(corrupt);
-  cacheEntries.set(readyUrl, new Response(JSON.stringify({
+  if (manifestCached) cacheEntries.set(manifestUrl, new Response(JSON.stringify(manifest), {
+    status: 200, headers: { "content-type": "application/json" }
+  }));
+  if (readyMarker) cacheEntries.set(readyUrl, new Response(JSON.stringify({
     version, verified: true, completedAt: Date.now()
   }), { status: 200, headers: { "content-type": "application/json" } }));
-  cacheEntries.set(snapshotUrl, new Response(JSON.stringify(manifest), {
+  if (snapshot) cacheEntries.set(snapshotUrl, new Response(JSON.stringify(manifest), {
     status: 200, headers: { "content-type": "application/json" }
   }));
   for (const [path, body] of payloads) {
@@ -152,7 +156,7 @@ function makeBrowserHarness({ version = "offline-recovery-test-v1", missing = []
     );
   }
 
-  const localValues = new Map([["shbace_pkg_check_ok_v1", String(Date.now())]]);
+  const localValues = new Map(localMarkers ? [["shbace_pkg_check_ok_v1", String(Date.now())]] : []);
   const localStorage = {
     getItem: key => localValues.has(key) ? localValues.get(key) : null,
     setItem: (key, value) => localValues.set(key, String(value)),
@@ -224,4 +228,84 @@ test("keeps intact files and records targeted repair when one cached file is cor
   assert.equal(harness.stores.meta.get("ready"), null);
   const corruptUrl = new URL("data/questions.json", new URL("./", harness.baseUrl)).href;
   assert.ok(await harness.cache.match(corruptUrl), "the repair plan, not recovery, replaces the damaged entry");
+});
+
+
+test("legacy cache recovery can restore an installation without a READY marker", () => {
+  const recovery = blockBetween("async function recoverLegacyInstalledFromCache()", "async function computePlan");
+  assert.match(recovery, /c\.match\(MANIFEST_URL\)/);
+  assert.match(recovery, /validManifest\(m\)/);
+  assert.match(recovery, /verifyCachedFiles\(m\.files/);
+  assert.match(recovery, /f\.path==='index\.html'/);
+  assert.match(recovery, /Math\.ceil\(m\.files\.length\/2\)/);
+  assert.match(recovery, /dbPut\('meta',INSTALLED_KEY,record\)/);
+});
+
+test("boot falls back to legacy recovery before first-install Setup", () => {
+  const boot = blockBetween("async function boot()", "function kick()");
+  const currentRecovery = boot.indexOf("recoverInstalledFromCache()");
+  const legacyRecovery = boot.indexOf("recoverLegacyInstalledFromCache()");
+  const setupGate = boot.indexOf("if(!hasRec&&!hasReadyMarker&&!recoveredFromCache)");
+  assert.ok(currentRecovery >= 0);
+  assert.ok(legacyRecovery > currentRecovery);
+  assert.ok(setupGate > legacyRecovery);
+});
+
+test("prior successful-install evidence enables silent reinstall without blocking Setup", () => {
+  const boot = blockBetween("async function boot()", "function kick()");
+  const plan = blockBetween("async function runPlan(plan,mode)", "async function startPlan");
+  const start = blockBetween("async function startPlan(plan,mode)", "/* Swap a fully verified staged update");
+  assert.match(boot, /lsGetJson\(VER_KEY\)\|\|lsNum\(CHECK_OK_KEY\)/);
+  assert.match(boot, /silentReinstall=true/);
+  assert.match(plan, /if\(silentReinstall\)\{silentReinstall=false;announceReady\(\)\}/);
+  assert.match(start, /mode==='install'&&!silentReinstall/);
+});
+
+test("missing cached index.html triggers immediate repair without waiting for the 48-hour check", () => {
+  const boot = blockBetween("async function boot()", "function kick()");
+  assert.match(boot, /match\(urlFor\('index\.html'\)\)/);
+  assert.match(boot, /if\(!shellHit&&online\(\)\)/);
+  assert.match(boot, /runFullCheck\(\{force:true\}\)/);
+});
+
+test("service worker removes stale offline cache generations but preserves the active cache", () => {
+  assert.match(serviceWorkerSource, /name\.startsWith\('shbace-to-me-chrome-offline-'\)/);
+  assert.match(serviceWorkerSource, /name\.startsWith\('shbace-chrome-offline-'\)\s*&&\s*name !== CACHE_NAME/);
+});
+
+
+test("recovers a complete legacy cached package without a READY marker", { timeout: 3000 }, async () => {
+  const harness = makeBrowserHarness({
+    readyMarker: false, snapshot: false, manifestCached: true, localMarkers: false, online: false
+  });
+  await harness.window.__SHBACE_OFFLINE_BOOT_PROMISE__;
+  const installed = harness.stores.meta.get("installed");
+  assert.equal(installed.verified, true);
+  assert.equal(installed.fileCount, harness.manifest.files.length);
+  assert.equal(harness.stores.meta.get("ready").verified, true);
+  const readyUrl = new URL("./__shbace_offline_ready__", harness.baseUrl).href;
+  assert.ok(await harness.cache.match(readyUrl), "legacy recovery publishes the READY marker after a complete verification");
+});
+
+test("keeps a partial legacy cache and marks it for targeted repair", { timeout: 3000 }, async () => {
+  const harness = makeBrowserHarness({
+    readyMarker: false, snapshot: false, manifestCached: true, localMarkers: false,
+    missing: ["data/questions.json"], online: false
+  });
+  await harness.window.__SHBACE_OFFLINE_BOOT_PROMISE__;
+  const installed = harness.stores.meta.get("installed");
+  assert.equal(installed.verified, false);
+  assert.equal(installed.fileCount, harness.manifest.files.length - 1);
+  assert.equal(Object.hasOwn(installed.files, "index.html"), true);
+  assert.equal(Object.hasOwn(installed.files, "data/questions.json"), false);
+  assert.equal(harness.stores.meta.has("ready"), false);
+});
+
+test("returns a previously installed student to the app without showing first-install Setup", { timeout: 3000 }, async () => {
+  const harness = makeBrowserHarness({
+    readyMarker: false, snapshot: false, manifestCached: false, localMarkers: true, online: false
+  });
+  await harness.window.__SHBACE_OFFLINE_BOOT_PROMISE__;
+  assert.equal(harness.stores.meta.has("installed"), false, "offline mode should not fabricate a restored install record");
+  assert.equal(harness.stores.meta.has("ready"), false);
 });
