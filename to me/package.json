@@ -9,6 +9,7 @@
     "test:unit": "node --test"
   },
   "dependencies": {
-    "sharp": "0.35.5"
+    "sharp": "0.35.5",
+    "@neondatabase/serverless": "1.2.1"
   }
 }
