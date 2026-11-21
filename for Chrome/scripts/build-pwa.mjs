@@ -216,6 +216,14 @@ for (const dir of requiredDirs) {
   cpSync(join(root, dir), join(output, dir), { recursive: true });
 }
 
+/* Package the single canonical analytics client from the To Me source; do not fork its implementation. */
+const sharedAnalyticsSource = join(root, "../to me/js/54-usage-analytics.js");
+if (!existsSync(sharedAnalyticsSource) || !statSync(sharedAnalyticsSource).isFile()) {
+  fail("The canonical shared Basic Usage Analytics client is missing");
+}
+copyFileSync(sharedAnalyticsSource, join(output, "js/54-usage-analytics.js"));
+
+
 for (const dir of optionalDirs) {
   const source = join(root, dir);
   if (existsSync(source) && statSync(source).isDirectory()) {
@@ -301,17 +309,29 @@ const [ajPortraitData, facultyLogoData] = await Promise.all([
 ]);
 const ajSlot = 'window.__SHBACE_AJ_PORTRAIT_DATA__="__SHBACE_AJ_PORTRAIT_DATA__";';
 const facultySlot = 'window.__SHBACE_FACULTY_LOGO_DATA__="__SHBACE_FACULTY_LOGO_DATA__";';
-if (!html.includes(ajSlot) || !html.includes(facultySlot)) {
-  fail("Pediatrics image slots are missing from index.html");
+const analyticsApiSlot = 'window.SHBACE_ANALYTICS_API_BASE_URL="__SHBACE_ANALYTICS_API_BASE_URL__";';
+if (!html.includes(ajSlot) || !html.includes(facultySlot) || !html.includes(analyticsApiSlot)) {
+  fail("A required Pediatrics or analytics API configuration slot is missing from index.html");
 }
 html = html.replace(ajSlot, "window.__SHBACE_AJ_PORTRAIT_DATA__=" + JSON.stringify(ajPortraitData) + ";");
 html = html.replace(facultySlot, "window.__SHBACE_FACULTY_LOGO_DATA__=" + JSON.stringify(facultyLogoData) + ";");
+const configuredAnalyticsOrigin = String(process.env.SHBACE_ANALYTICS_API_BASE_URL || "").trim();
+let analyticsOrigin = "";
+if (configuredAnalyticsOrigin) {
+  const parsedAnalyticsOrigin = new URL(configuredAnalyticsOrigin);
+  if (parsedAnalyticsOrigin.protocol !== "https:" || parsedAnalyticsOrigin.username || parsedAnalyticsOrigin.password ||
+      parsedAnalyticsOrigin.pathname !== "/" || parsedAnalyticsOrigin.search || parsedAnalyticsOrigin.hash) {
+    fail("SHBACE_ANALYTICS_API_BASE_URL must be an HTTPS origin without credentials, path, query or fragment");
+  }
+  analyticsOrigin = parsedAnalyticsOrigin.origin;
+}
+html = html.replace(analyticsApiSlot, "window.SHBACE_ANALYTICS_API_BASE_URL=" + JSON.stringify(analyticsOrigin) + ";");
 writeFileSync(htmlPath, html);
 if (!html.includes("js/35-pediatrics-collections.js") ||
     !html.includes("js/36-exam-planner-settings-smartreview.js") ||
     !html.includes("css/bundle-late.css") ||
     !html.includes("js/37-study-hub-linkage.js") ||
-    !html.includes("js/38-all-once-pediatrics.js") || !html.includes("js/39-clinical-case-pediatrics.js") || !html.includes("js/40-egyptian-book-pediatrics.js")) {
+    !html.includes("js/38-all-once-pediatrics.js") || !html.includes("js/39-clinical-case-pediatrics.js") || !html.includes("js/40-egyptian-book-pediatrics.js") || !html.includes("js/54-usage-analytics.js")) {
   fail("Pediatrics, Exam Planner/Smart Review or layout refinement assets are not referenced by index.html");
 }
 const consolidatedLateCss = readFileSync(join(root, "css/bundle-late.css"), "utf8");

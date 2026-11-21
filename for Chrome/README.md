@@ -46,3 +46,9 @@ npm run build:pwa
 The build creates the static PWA in `www/` and generates `offline-assets-manifest.json` from the verified app files.
 
 This folder is the Chrome Android web delivery only. Do not change the iOS, signed Android APK or the separate `to me/` source while maintaining this delivery.
+
+
+## Basic Usage Analytics
+The Chrome PWA build packages the canonical analytics client from `../to me/js/54-usage-analytics.js` at build time; do not create a second maintained implementation here. The install UUID and bounded offline queue use dedicated LocalStorage keys and do not touch the existing student IndexedDB stores or Chrome offline cache namespace. Its Service Worker handles GET only, so analytics POST requests go directly to the API.
+
+For a separate hosting origin, set the build-time `SHBACE_ANALYTICS_API_BASE_URL` variable to the approved HTTPS API origin and include the exact Chrome PWA origin in the API deployment's `ANALYTICS_ALLOWED_ORIGIN` allowlist. Leave it unset until the API host is approved.
