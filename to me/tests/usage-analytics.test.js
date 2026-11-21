@@ -352,3 +352,81 @@ test('Admin logout rejects cross-origin requests and clears the hardened session
  assert.ok(accepted.headers['Set-Cookie'].includes('Secure'));
  assert.ok(accepted.headers['Set-Cookie'].includes('SameSite=Strict'));
 });
+
+test('Admin session-secret rotation immediately invalidates copied stateless tokens',()=>{
+ const previous=process.env.ANALYTICS_SESSION_SECRET;
+ try{
+  process.env.ANALYTICS_SESSION_SECRET='first-session-secret-with-at-least-32-bytes';
+  const session=analytics.createSession(now);
+  assert.equal(analytics.validSession(session.token,now),true);
+  process.env.ANALYTICS_SESSION_SECRET='rotated-session-secret-with-at-least-32-bytes';
+  assert.equal(analytics.validSession(session.token,now),false);
+ }finally{
+  if(previous===undefined)delete process.env.ANALYTICS_SESSION_SECRET;
+  else process.env.ANALYTICS_SESSION_SECRET=previous;
+ }
+});
+
+test('PostgreSQL query failure returns 503 from analytics APIs without changing app-side client state',async()=>{
+ const analyticsPath=require.resolve('../lib/usage-analytics');
+ const eventPath=require.resolve('../api/analytics/pwa-event');
+ const summaryPath=require.resolve('../api/analytics/admin-summary');
+ const pgPath=require.resolve('@neondatabase/serverless');
+ const paths=[analyticsPath,eventPath,summaryPath,pgPath];
+ const cached=new Map(paths.map(path=>[path,require.cache[path]]));
+ const previousEnv={
+  DATABASE_URL:process.env.DATABASE_URL,
+  ANALYTICS_SESSION_SECRET:process.env.ANALYTICS_SESSION_SECRET,
+  UPSTASH_REDIS_REST_URL:process.env.UPSTASH_REDIS_REST_URL,
+  UPSTASH_REDIS_REST_TOKEN:process.env.UPSTASH_REDIS_REST_TOKEN,
+  ANALYTICS_RATE_LIMIT_SECRET:process.env.ANALYTICS_RATE_LIMIT_SECRET
+ };
+ const oldFetch=global.fetch;
+ try{
+  process.env.DATABASE_URL='postgresql://analytics-test.invalid/db';
+  process.env.ANALYTICS_SESSION_SECRET='database-outage-session-secret-32-bytes';
+  process.env.UPSTASH_REDIS_REST_URL='https://unit-test.upstash.io';
+  process.env.UPSTASH_REDIS_REST_TOKEN='test-token';
+  process.env.ANALYTICS_RATE_LIMIT_SECRET='database-outage-rate-limit-secret-32-bytes';
+  require.cache[pgPath]={id:pgPath,filename:pgPath,loaded:true,exports:{
+   neon:()=>({query:async()=>{throw new Error('simulated PostgreSQL connection failure');}})
+  }};
+  for(const path of [analyticsPath,eventPath,summaryPath])delete require.cache[path];
+  global.fetch=async(_url,options)=>{
+   const command=JSON.parse(options.body);
+   if(command[0]==='EVAL')return {ok:true,json:async()=>({result:[1,1,1,0,0]})};
+   return {ok:true,json:async()=>({result:1})};
+  };
+  const isolated=require(analyticsPath);
+  const session=isolated.createSession();
+  const summaryHandler=require(summaryPath),summaryResponse=responseStub();
+  await summaryHandler({method:'GET',url:'/api/analytics/admin-summary?platform=all',headers:{
+   host:'shbace-preview.example',
+   cookie:'shbace_analytics_admin='+encodeURIComponent(session.token)
+  }},summaryResponse);
+  assert.equal(summaryResponse.statusCode,503);
+  assert.equal(JSON.parse(summaryResponse.body).error,'analytics_summary_unavailable');
+
+  const eventHandler=require(eventPath),eventResponse=responseStub();
+  await eventHandler({method:'POST',headers:{'content-type':'application/json'},body:{
+   eventId:event,installId:install,occurredAt:new Date().toISOString()
+  }},eventResponse);
+  assert.equal(eventResponse.statusCode,503);
+  assert.equal(JSON.parse(eventResponse.body).error,'analytics_storage_unavailable');
+
+  // Client-side study state is separate from server analytics storage.
+  const storage=new Map([['shbace-study-state','preserved']]);
+  const client=makeClient({storage,online:false});
+  assert.equal(storage.get('shbace-study-state'),'preserved');
+  assert.ok(client.window);
+ }finally{
+  global.fetch=oldFetch;
+  for(const [key,value] of Object.entries(previousEnv)){
+   if(value===undefined)delete process.env[key];else process.env[key]=value;
+  }
+  for(const path of paths){
+   delete require.cache[path];
+   if(cached.get(path))require.cache[path]=cached.get(path);
+  }
+ }
+});
