@@ -110,6 +110,7 @@ test('PWA and Android event endpoints fail closed without Redis and return 429 a
   const oldUrl = process.env.UPSTASH_REDIS_REST_URL;
   const oldDb = process.env.DATABASE_URL;
   const response = () => ({ statusCode: 0, headers: {}, body: '', setHeader(k, v) { this.headers[k] = v; }, end(v) { this.body = v || ''; } });
+  let realNow;
   try {
     delete process.env.UPSTASH_REDIS_REST_URL;
     const unavailable = response();
@@ -124,7 +125,7 @@ test('PWA and Android event endpoints fail closed without Redis and return 429 a
     process.env.UPSTASH_REDIS_REST_URL = oldUrl || baseUrl;
     process.env.DATABASE_URL = '';
     const minute = Math.floor(Date.now() / 60000);
-    const realNow = Date.now;
+    realNow = Date.now;
     Date.now = () => minute * 60000 + 1000;
     for (let i = 0; i < analytics.INGESTION_PER_MINUTE_LIMIT; i++) {
       const allowed = await freshAnalytics().consumeIngestionAttempt('pwa', minute * 60000 + 1000);
