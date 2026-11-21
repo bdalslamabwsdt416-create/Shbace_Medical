@@ -22,16 +22,21 @@ const ADMIN_RATE_LIMIT_SCRIPT =
   "if count == 1 then redis.call('EXPIRE', KEYS[1], ARGV[1]); end; " +
   "return {count, redis.call('TTL', KEYS[1])}";
 const INGESTION_RATE_LIMIT_SCRIPT =
-  "local minuteCount = tonumber(redis.call('GET', KEYS[1]) or '0'); " +
+  "local now = tonumber(ARGV[1]); local minuteLimit = tonumber(ARGV[2]); local dayLimit = tonumber(ARGV[3]); " +
+  "redis.call('ZREMRANGEBYSCORE', KEYS[1], '-inf', now - 60000); " +
+  "local minuteCount = tonumber(redis.call('ZCARD', KEYS[1])); " +
   "local dayCount = tonumber(redis.call('GET', KEYS[2]) or '0'); " +
-  "local minuteLimit = tonumber(ARGV[1]); local dayLimit = tonumber(ARGV[2]); " +
-  "if minuteCount >= minuteLimit then return {0, minuteCount, dayCount, redis.call('TTL', KEYS[1]), 1}; end; " +
-  "if dayCount >= dayLimit then return {0, minuteCount, dayCount, redis.call('TTL', KEYS[2]), 2}; end; " +
-  "local nextMinute = redis.call('INCR', KEYS[1]); " +
-  "if nextMinute == 1 then redis.call('EXPIRE', KEYS[1], 120); end; " +
+  "if minuteCount >= minuteLimit then " +
+  " local oldest = redis.call('ZRANGE', KEYS[1], 0, 0, 'WITHSCORES'); " +
+  " local retry = 1; if oldest[2] then retry = math.max(1, math.ceil((tonumber(oldest[2]) + 60000 - now) / 1000)); end; " +
+  " return {0, minuteCount, dayCount, retry, 1}; end; " +
+  "if dayCount >= dayLimit then return {0, minuteCount, dayCount, math.max(1, redis.call('TTL', KEYS[2])), 2}; end; " +
+  "local sequence = redis.call('INCR', KEYS[3]); redis.call('EXPIRE', KEYS[3], 120); " +
+  "local member = tostring(now) .. ':' .. tostring(sequence); " +
+  "redis.call('ZADD', KEYS[1], now, member); redis.call('EXPIRE', KEYS[1], 120); " +
   "local nextDay = redis.call('INCR', KEYS[2]); " +
   "if nextDay == 1 then redis.call('EXPIRE', KEYS[2], 172800); end; " +
-  "return {1, nextMinute, nextDay, 0, 0}";
+  "return {1, minuteCount + 1, nextDay, 0, 0}";
 
 function rateLimitConfig() {
   const endpoint = process.env.UPSTASH_REDIS_REST_URL || '';
@@ -61,8 +66,9 @@ function ingestionRateLimitKeys(platform, now) {
   const day = new Date(now).toISOString().slice(0, 10);
   const prefix = 'shbace:analytics:ingest:v1:' + platform + ':';
   return {
-    minute: prefix + 'minute:' + minute,
-    day: prefix + 'day:' + day
+    minute: prefix + 'sliding-minute',
+    day: prefix + 'day:' + day,
+    sequence: prefix + 'sequence'
   };
 }
 async function redisRateLimitCommand(command) {
@@ -99,8 +105,8 @@ async function consumeIngestionAttempt(platform, now) {
   const keys = ingestionRateLimitKeys(platform, now);
   if (!keys) return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'unconfigured' };
   const result = await redisRateLimitCommand([
-    'EVAL', INGESTION_RATE_LIMIT_SCRIPT, '2', keys.minute, keys.day,
-    String(INGESTION_PER_MINUTE_LIMIT), String(INGESTION_PER_DAY_LIMIT)
+    'EVAL', INGESTION_RATE_LIMIT_SCRIPT, '3', keys.minute, keys.day, keys.sequence,
+    String(now === undefined ? Date.now() : now), String(INGESTION_PER_MINUTE_LIMIT), String(INGESTION_PER_DAY_LIMIT)
   ]);
   if (!Array.isArray(result) || result.length < 5) {
     return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'unavailable' };
