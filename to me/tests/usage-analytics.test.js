@@ -42,3 +42,72 @@ test('the API does not accept a client-selected platform',()=>{
  assert.equal(analytics.getTables('pwa').events,'pwa_analytics_events');
  assert.equal(analytics.getTables('android').events,'android_analytics_events');
 });
+
+
+const fs=require('node:fs');
+const vm=require('node:vm');
+const clientSource=fs.readFileSync(require('node:path').join(__dirname,'../js/54-usage-analytics.js'),'utf8');
+
+function makeClient({storage,online,native}) {
+ const listeners={},docListeners={},calls=[];
+ const localStorage={
+  getItem(key){return storage.has(key)?storage.get(key):null;},
+  setItem(key,value){storage.set(key,String(value));},
+  removeItem(key){storage.delete(key);}
+ };
+ function element(){
+  return {style:{},children:[],parentNode:null,textContent:'',setAttribute(){},addEventListener(){},appendChild(child){this.children.push(child);child.parentNode=this;}};
+ }
+ const document={
+  readyState:'complete',visibilityState:'hidden',body:{appendChild(){}},
+  createElement:element,
+  addEventListener(name,fn){docListeners[name]=fn;}
+ };
+ const window={
+  localStorage,crypto:crypto.webcrypto,location:{origin:'https://shbace-test.example'},
+  navigator:{onLine:online},addEventListener(name,fn){listeners[name]=fn;},
+  AbortController, setTimeout,clearTimeout,
+  fetch:async function(url,options){calls.push({url,options});return {ok:true,status:200};}
+ };
+ if(native)window.ShbaceNative=native;
+ vm.runInNewContext(clientSource,{window,document,URL,Promise,Date,Uint8Array,JSON,Array,Math,Number,String,RegExp,Object,Error,AbortController,setTimeout,clearTimeout});
+ return {window,document,listeners,docListeners,calls,storage};
+}
+
+test('PWA installation UUID remains stable and daily queue stays bounded to one event',()=>{
+ const storage=new Map();
+ const first=makeClient({storage,online:false});
+ const idKey='shbace_usage_analytics_install_id_v1';
+ const queueKey='shbace_usage_analytics_queue_v1_pwa';
+ const firstId=storage.get(idKey);
+ assert.match(firstId,/^[0-9a-f-]{36}$/i);
+ const firstQueue=JSON.parse(storage.get(queueKey));
+ assert.equal(firstQueue.queue.length,1);
+ const second=makeClient({storage,online:false});
+ assert.equal(storage.get(idKey),firstId);
+ assert.equal(JSON.parse(storage.get(queueKey)).queue.length,1);
+ assert.equal(second.calls.length,0);
+});
+
+test('PWA offline activity is synchronized after connectivity returns',async()=>{
+ const storage=new Map();
+ const offline=makeClient({storage,online:false});
+ assert.equal(JSON.parse(storage.get('shbace_usage_analytics_queue_v1_pwa')).queue.length,1);
+ const online=makeClient({storage,online:true});
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(online.calls.length,1);
+ assert.equal(online.calls[0].url,'https://shbace-test.example/api/analytics/pwa-event');
+ assert.equal(JSON.parse(storage.get('shbace_usage_analytics_queue_v1_pwa')).queue.length,0);
+});
+
+test('Android client uses the native SharedPreferences UUID and its separate endpoint',()=>{
+ const storage=new Map();
+ const nativeId='3b6fb4f4-97e1-4a28-9615-7a090e8a2399';
+ const native={getAnalyticsInstallId(){return nativeId;},getAnalyticsApiBaseUrl(){return 'https://api.shbace.example';}};
+ const app=makeClient({storage,online:false,native});
+ const queued=JSON.parse(storage.get('shbace_usage_analytics_queue_v1_android')).queue;
+ assert.equal(queued.length,1);
+ assert.equal(queued[0].installId,nativeId);
+ assert.equal(storage.has('shbace_usage_analytics_install_id_v1'),false);
+ assert.equal(app.calls.length,0);
+});
