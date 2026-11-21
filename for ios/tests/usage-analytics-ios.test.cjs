@@ -6,12 +6,12 @@ const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
 const builder=fs.readFileSync(path.join(__dirname,'../scripts/restore-ios-packed.js'),'utf8');
 const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
 const updater=fs.readFileSync(path.join(__dirname,'../js/29-offline-setup.js'),'utf8');
-function createClient(storage,online){
+function createClient(storage,online,apiBase){
  const listeners={},requests=[];
  const localStorage={getItem:k=>storage.has(k)?storage.get(k):null,setItem:(k,v)=>storage.set(k,String(v)),removeItem:k=>storage.delete(k)};
  function element(){return {style:{},parentNode:null,setAttribute(){},addEventListener(){},appendChild(child){child.parentNode=this;}}}
  const document={readyState:'complete',visibilityState:'hidden',body:{appendChild(){}},createElement:element,addEventListener(){}};
- const window={localStorage,crypto:crypto.webcrypto,location:{origin:'https://ios-shbace.example'},navigator:{onLine:online},addEventListener:(n,f)=>{listeners[n]=f;},setTimeout,clearTimeout,AbortController,fetch:async(url,options)=>{requests.push({url,body:JSON.parse(options.body)});return {ok:true,status:200};}};
+ const window={localStorage,crypto:crypto.webcrypto,location:{origin:'https://ios-shbace.example'},SHBACE_ANALYTICS_API_BASE_URL:apiBase||'',navigator:{onLine:online},addEventListener:(n,f)=>{listeners[n]=f;},setTimeout,clearTimeout,AbortController,fetch:async(url,options)=>{requests.push({url,body:JSON.parse(options.body)});return {ok:true,status:200};}};
  vm.runInNewContext(clientSource,{window,document,URL,Promise,Date,Uint8Array,JSON,Array,Math,Number,String,RegExp,Object,Error,AbortController,setTimeout,clearTimeout});
  return {window,listeners,requests};
 }
@@ -20,7 +20,16 @@ test('iOS PWA loads the canonical shared analytics client exactly once',()=>{
  assert.equal((html.match(new RegExp('data-src="js/54-usage-analytics\\.js"','g'))||[]).length,1);
  assert.ok(builder.includes("path.resolve(root, '../to me/js/54-usage-analytics.js')"));
  assert.ok(builder.includes("'js/54-usage-analytics.js'"));
+ assert.ok(builder.includes('SHBACE_ANALYTICS_API_BASE_URL'));
+ assert.ok(html.includes('__SHBACE_ANALYTICS_API_BASE_URL__'));
  assert.ok(html.indexOf('js/33-ios-exam-planner.js')<html.indexOf('js/54-usage-analytics.js'));
+});
+test('iOS API base override accepts only a configured HTTPS origin',()=>{
+ const storage=new Map(),app=createClient(storage,false,'https://analytics-api.example');
+ app.window.navigator.onLine=true;app.listeners.online();
+ assert.equal(app.requests[0].url,'https://analytics-api.example/api/analytics/pwa-event');
+ const invalid=createClient(new Map(),false,'http://analytics-api.example');
+ assert.equal(invalid.requests.length,0);
 });
 test('UUID and daily queue survive simulated reload/update without touching student stores',()=>{
  const storage=new Map();createClient(storage,false);
@@ -43,5 +52,5 @@ test('iOS updater and Service Worker keep their original cache and student datab
  assert.match(worker,/if \(request\.method !== 'GET'\) return;/);assert.doesNotMatch(worker,/indexedDB|localStorage|shbace_usage_analytics/);assert.doesNotMatch(updater,/shbace_usage_analytics_install_id_v1|shbace_usage_analytics_queue_v1/);
 });
 test('iOS PWA declares Safari standalone support but does not rely on guaranteed background execution',()=>{
- assert.ok(html.includes('apple-mobile-web-app-capable'));assert.ok(html.includes('apple-mobile-web-app-status-bar-style'));assert.ok(updater.includes('function standalone()'));assert.ok(updater.includes('function iosDevice()'));assert.ok(updater.includes('function autoAllowed()'));
+ assert.ok(html.includes('apple-mobile-web-app-capable'));assert.ok(html.includes('apple-mobile-web-app-status-bar-style'));assert.ok(updater.includes('function standalone()'));assert.ok(updater.includes('function iosDevice()'));assert.ok(updater.includes('function autoAllowed()'));assert.doesNotMatch(clientSource,/SyncManager|registration\\.sync/);
 });

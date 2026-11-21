@@ -75,11 +75,23 @@ async function buildPwa() {
       let html = bytes.toString('utf8');
       const ajSlot = 'window.__SHBACE_AJ_PORTRAIT_DATA__="__SHBACE_AJ_PORTRAIT_DATA__";';
       const facultySlot = 'window.__SHBACE_FACULTY_LOGO_DATA__="__SHBACE_FACULTY_LOGO_DATA__";';
-      if (!html.includes(ajSlot) || !html.includes(facultySlot)) {
-        throw new Error('The two To Me Pediatrics image slots are missing from index.html.');
+      const analyticsApiSlot = 'window.SHBACE_ANALYTICS_API_BASE_URL="__SHBACE_ANALYTICS_API_BASE_URL__";';
+      if (!html.includes(ajSlot) || !html.includes(facultySlot) || !html.includes(analyticsApiSlot)) {
+        throw new Error('A required Pediatrics or analytics API configuration slot is missing from index.html.');
       }
       html = html.replace(ajSlot, 'window.__SHBACE_AJ_PORTRAIT_DATA__=' + JSON.stringify(ajPortraitData) + ';');
       html = html.replace(facultySlot, 'window.__SHBACE_FACULTY_LOGO_DATA__=' + JSON.stringify(facultyLogoData) + ';');
+      const configuredAnalyticsOrigin = String(process.env.SHBACE_ANALYTICS_API_BASE_URL || '').trim();
+      let analyticsOrigin = '';
+      if (configuredAnalyticsOrigin) {
+        const parsedAnalyticsOrigin = new URL(configuredAnalyticsOrigin);
+        if (parsedAnalyticsOrigin.protocol !== 'https:' || parsedAnalyticsOrigin.username || parsedAnalyticsOrigin.password ||
+            parsedAnalyticsOrigin.pathname !== '/' || parsedAnalyticsOrigin.search || parsedAnalyticsOrigin.hash) {
+          throw new Error('SHBACE_ANALYTICS_API_BASE_URL must be an HTTPS origin without credentials, path, query or fragment.');
+        }
+        analyticsOrigin = parsedAnalyticsOrigin.origin;
+      }
+      html = html.replace(analyticsApiSlot, 'window.SHBACE_ANALYTICS_API_BASE_URL=' + JSON.stringify(analyticsOrigin) + ';');
       bytes = Buffer.from(html, 'utf8');
     }
 
@@ -106,7 +118,8 @@ if (
     html.includes('window.__SHBACE_AJ_PORTRAIT_DATA__="__SHBACE_AJ_PORTRAIT_DATA__";') ||
     html.includes('window.__SHBACE_FACULTY_LOGO_DATA__="__SHBACE_FACULTY_LOGO_DATA__";') ||
     !html.includes('window.__SHBACE_AJ_PORTRAIT_DATA__="data:image/webp;base64,') ||
-    !html.includes('window.__SHBACE_FACULTY_LOGO_DATA__="data:image/webp;base64,')
+    !html.includes('window.__SHBACE_FACULTY_LOGO_DATA__="data:image/webp;base64,') ||
+    html.includes('__SHBACE_ANALYTICS_API_BASE_URL__')
 ) {
   throw new Error('The To Me bank portrait or University of Tripoli logo was not embedded into the iOS build.');
 }
