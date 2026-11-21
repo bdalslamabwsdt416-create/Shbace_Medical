@@ -182,6 +182,20 @@ test('PWA and Android event endpoints fail closed without Redis and return 429 a
     }, limited);
     assert.equal(limited.statusCode, 429);
     assert.equal(limited.headers['Retry-After'] > 0, true);
+
+    redisCommand(['FLUSHDB']);
+    for (let i = 0; i < analytics.INGESTION_PER_MINUTE_LIMIT; i++) {
+      const allowed = await freshAnalytics().consumeIngestionAttempt('android', minute * 60000 + 1000);
+      assert.equal(allowed.allowed, true);
+    }
+    const androidLimited = response();
+    await require('../api/analytics/android-event')({
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: { eventId: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee', installId: 'ffffffff-ffff-4fff-8fff-ffffffffffff', occurredAt: new Date().toISOString() }
+    }, androidLimited);
+    assert.equal(androidLimited.statusCode, 429);
+    assert.ok(Number(androidLimited.headers['Retry-After']) > 0);
     Date.now = realNow;
   } finally {
     if (typeof realNow === 'function') Date.now = realNow;
