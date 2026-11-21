@@ -158,7 +158,7 @@ async function ingest(req, res, platform) {
   try {
     const rows = await sql.query(
       'WITH created_install AS (' +
-      ' INSERT INTO ' + t.installs + ' (install_id, first_seen_at) VALUES ($1::uuid, $3::timestamptz)' +
+      ' INSERT INTO ' + t.installs + ' (install_id, first_seen_at, last_active_at) VALUES ($1::uuid, $3::timestamptz, $3::timestamptz)' +
       ' ON CONFLICT (install_id) DO NOTHING RETURNING install_id' +
       '), target_install AS (' +
       ' SELECT install_id FROM created_install UNION ALL' +
