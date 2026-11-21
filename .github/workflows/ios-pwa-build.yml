@@ -5,11 +5,17 @@ on:
     paths:
       - 'for ios/**'
       - 'to me/js/54-usage-analytics.js'
+      - 'to me/lib/usage-analytics.js'
+      - 'to me/api/analytics/**'
+      - 'to me/tests/**'
       - '.github/workflows/ios-pwa-build.yml'
   pull_request:
     paths:
       - 'for ios/**'
       - 'to me/js/54-usage-analytics.js'
+      - 'to me/lib/usage-analytics.js'
+      - 'to me/api/analytics/**'
+      - 'to me/tests/**'
       - '.github/workflows/ios-pwa-build.yml'
   workflow_dispatch:
 
