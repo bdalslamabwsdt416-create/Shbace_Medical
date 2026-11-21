@@ -72,5 +72,11 @@
         }
       ]
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/analytics/cleanup",
+      "schedule": "0 3 * * *"
+    }
   ]
 }
