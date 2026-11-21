@@ -101,11 +101,12 @@ async function clearAdminLoginAttempts() {
   return result !== null && Number.isFinite(Number(result)) && Number(result) >= 0;
 }
 async function consumeIngestionAttempt(platform, now) {
+  now = now === undefined ? Date.now() : now;
   const keys = ingestionRateLimitKeys(platform, now);
   if (!keys) return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'unconfigured' };
   const result = await redisRateLimitCommand([
     'EVAL', INGESTION_RATE_LIMIT_SCRIPT, '3', keys.minute, keys.day, keys.sequence,
-    String(now === undefined ? Date.now() : now), String(INGESTION_PER_MINUTE_LIMIT), String(INGESTION_PER_DAY_LIMIT)
+    String(now), String(INGESTION_PER_MINUTE_LIMIT), String(INGESTION_PER_DAY_LIMIT)
   ]);
   if (!Array.isArray(result) || result.length < 5) {
     return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'unavailable' };
