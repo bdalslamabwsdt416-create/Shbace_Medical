@@ -21,7 +21,7 @@ Set the following Vercel Preview environment variables:
 - CRON_SECRET: a random secret of at least 32 characters; Vercel sends it as the Bearer token for the daily retention-cleanup request.
 - UPSTASH_REDIS_REST_URL: HTTPS REST endpoint of an explicitly approved Redis REST service. Do not create or select a paid service without separate approval.
 - UPSTASH_REDIS_REST_TOKEN: private Upstash REST token.
-- ANALYTICS_RATE_LIMIT_SECRET: independent random secret of at least 32 bytes used to HMAC the client IP into a non-reversible, short-lived rate-limit key.
+- ANALYTICS_RATE_LIMIT_SECRET: independent random secret of at least 32 bytes used to derive the opaque global Admin login limiter key. It is not used to identify clients; no IP address, install UUID, User-Agent or device fingerprint is used in rate-limit keys.
 
 The Admin page is /admin/usage.html. API endpoints enforce an eight-hour signed HMAC session in a Secure, HttpOnly, SameSite=Strict cookie. No password or secret is embedded in frontend code. Admin login uses an atomic Redis INCR/EXPIRE operation through Upstash REST, with a single global quota of five attempts per 15-minute window shared across all Serverless Function instances. It deliberately does not use x-real-ip, forwarded IP headers, User-Agent or device fingerprinting; no request-originating IP or device identifier is sent to Redis.
 
