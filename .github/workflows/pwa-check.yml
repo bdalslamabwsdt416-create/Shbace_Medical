@@ -24,6 +24,34 @@ jobs:
       - run: npm run check:bank
       - run: npm run build:pwa
 
+  analytics-rate-limit-integration:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Redis CLI for the local REST adapter
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes redis-tools
+      - name: Verify distributed Admin and ingestion quotas against Redis 7
+        working-directory: to me
+        env:
+          NODE_ENV: test
+          REDIS_PORT: 6379
+        run: node --test tests/usage-analytics-rate-limit.integration.test.js
+
   analytics-postgres-schema:
     runs-on: ubuntu-latest
     services:
