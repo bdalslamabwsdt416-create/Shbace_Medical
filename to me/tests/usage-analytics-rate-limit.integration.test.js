@@ -14,7 +14,7 @@ let server;
 let baseUrl;
 
 function redisCommand(command) {
-  const args = ['--raw', '-h', '127.0.0.1', '-p', String(process.env.REDIS_PORT || '6379'), ...command.slice(1).map(String)];
+  const args = ['--raw', '-h', '127.0.0.1', '-p', String(process.env.REDIS_PORT || '6379'), ...command.map(String)];
   const output = execFileSync('redis-cli', args, { encoding: 'utf8' }).trim();
   if (!output) return null;
   if (command[0] === 'EVAL') return output.split(/\r?\n/).map(Number);
