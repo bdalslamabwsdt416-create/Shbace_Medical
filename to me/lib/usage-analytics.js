@@ -1,5 +1,6 @@
 'use strict';
 const crypto = require('node:crypto');
+const net = require('node:net');
 const DAY = 86400000;
 const MAX_AGE = 30 * DAY;
 const SESSION_TTL = 8 * 60 * 60 * 1000;
@@ -14,6 +15,62 @@ let failures = 0;
 let blockedUntil = 0;
 
 function getTables(platform) { return TABLES[platform] || null; }
+
+const RATE_LIMIT_WINDOW_SECONDS = 900;
+const RATE_LIMIT_MAX_ATTEMPTS = 5;
+const RATE_LIMIT_SCRIPT =
+  "local count = redis.call('INCR', KEYS[1]); " +
+  "if count == 1 then redis.call('EXPIRE', KEYS[1], ARGV[1]); end; " +
+  "return {count, redis.call('TTL', KEYS[1])}";
+
+function rateLimitConfig() {
+  const endpoint = process.env.UPSTASH_REDIS_REST_URL || '';
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN || '';
+  const secret = process.env.ANALYTICS_RATE_LIMIT_SECRET || '';
+  if (!endpoint || !token || Buffer.byteLength(secret, 'utf8') < 32) return null;
+  try {
+    const parsed = new URL(endpoint);
+    if (parsed.protocol !== 'https:' || parsed.username || parsed.password) return null;
+    return { endpoint: parsed.toString().replace(/\\/$/, ''), token, secret };
+  } catch (_) { return null; }
+}
+function adminRateLimitKey(req) {
+  const config = rateLimitConfig();
+  const ip = String(req && req.headers && req.headers['x-real-ip'] || '').trim();
+  if (!config || !ip || !net.isIP(ip)) return null;
+  const digest = crypto.createHmac('sha256', config.secret).update(ip).digest('hex');
+  return 'shbace:analytics:admin-login:v1:' + digest;
+}
+async function redisRateLimitCommand(req, command) {
+  const config = rateLimitConfig();
+  const key = adminRateLimitKey(req);
+  if (!config || !key || typeof fetch !== 'function') return null;
+  try {
+    const response = await fetch(config.endpoint, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + config.token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(command),
+      signal: AbortSignal.timeout(3000)
+    });
+    if (!response.ok) return null;
+    const payload = await response.json();
+    return payload && !payload.error ? payload.result : null;
+  } catch (_) { return null; }
+}
+async function consumeAdminLoginAttempt(req) {
+  const key = adminRateLimitKey(req);
+  if (!key) return { available: false, allowed: false, retryAfterSeconds: 0 };
+  const result = await redisRateLimitCommand(req, ['EVAL', RATE_LIMIT_SCRIPT, '1', key, String(RATE_LIMIT_WINDOW_SECONDS)]);
+  if (!Array.isArray(result) || result.length < 2) return { available: false, allowed: false, retryAfterSeconds: 0 };
+  const count = Number(result[0]), ttl = Number(result[1]);
+  if (!Number.isFinite(count) || !Number.isFinite(ttl) || ttl < 0) return { available: false, allowed: false, retryAfterSeconds: 0 };
+  return { available: true, allowed: count <= RATE_LIMIT_MAX_ATTEMPTS, retryAfterSeconds: Math.max(1, ttl) };
+}
+async function clearAdminLoginAttempts(req) {
+  const result = await redisRateLimitCommand(req, ['DEL', adminRateLimitKey(req)]);
+  return Number(result) >= 0;
+}
+
 
 function validateEvent(body, now) {
   now = now === undefined ? Date.now() : now;
@@ -141,6 +198,7 @@ function loginFailed(now) {
   if (failures >= 5) { blockedUntil = (now === undefined ? Date.now() : now) + 900000; failures = 0; }
 }
 function resetLoginFailures() { failures = 0; blockedUntil = 0; }
+
 function cronAuthorized(req) {
   const secret = process.env.CRON_SECRET || '';
   if (Buffer.byteLength(secret, 'utf8') < 32) return false;
@@ -158,6 +216,7 @@ async function cleanupExpiredEvents() {
   return { pwa: Number(rows[0] && rows[0].pwa || 0), android: Number(rows[0] && rows[0].android || 0) };
 }
 
+
 async function ingest(req, res, platform) {
   const t = getTables(platform);
   if (!t) return sendJson(res, 404, { error: 'not_found' });
@@ -173,18 +232,22 @@ async function ingest(req, res, platform) {
   if (!sql) return sendJson(res, 503, { error: 'analytics_database_not_configured' });
   try {
     const rows = await sql.query(
-      'WITH inserted_event AS (' +
+      'WITH created_install AS (' +
+      ' INSERT INTO ' + t.installs + ' (install_id, first_seen_at, last_active_at) VALUES ($1::uuid, $3::timestamptz, $3::timestamptz)' +
+      ' ON CONFLICT (install_id) DO NOTHING RETURNING install_id' +
+      '), target_install AS (' +
+      ' SELECT install_id FROM created_install UNION ALL' +
+      ' SELECT install_id FROM ' + t.installs + ' WHERE install_id = $1::uuid AND NOT EXISTS (SELECT 1 FROM created_install)' +
+      '), inserted_event AS (' +
       ' INSERT INTO ' + t.events + ' (event_id, install_id, event_date, occurred_at)' +
-      " VALUES ($2::uuid, $1::uuid, ($3::timestamptz AT TIME ZONE 'UTC')::date, $3::timestamptz)" +
-      ' ON CONFLICT DO NOTHING RETURNING event_id, install_id, occurred_at' +
-      '), upsert_install AS (' +
-      ' INSERT INTO ' + t.installs + ' (install_id, first_seen_at, last_active_at)' +
-      ' SELECT install_id, occurred_at, occurred_at FROM inserted_event' +
-      ' ON CONFLICT (install_id) DO UPDATE SET last_active_at = GREATEST(COALESCE(' + t.installs + '.last_active_at, EXCLUDED.last_active_at), EXCLUDED.last_active_at)' +
-      ' RETURNING install_id' +
+      ' SELECT $2::uuid, install_id, ($3::timestamptz AT TIME ZONE \'UTC\')::date, $3::timestamptz FROM target_install' +
+      ' ON CONFLICT DO NOTHING RETURNING install_id, occurred_at, event_id' +
+      '), updated_install AS (' +
+      ' UPDATE ' + t.installs + ' AS i SET last_active_at = GREATEST(COALESCE(i.last_active_at, e.occurred_at), e.occurred_at)' +
+      ' FROM inserted_event AS e WHERE i.install_id = e.install_id RETURNING e.event_id' +
       '), pruned_events AS (' +
-      ' DELETE FROM ' + t.events + " WHERE occurred_at < NOW() - INTERVAL '12 months' AND EXISTS (SELECT 1 FROM inserted_event) RETURNING event_id" +
-      ') SELECT event_id FROM inserted_event',
+      ' DELETE FROM ' + t.events + " WHERE occurred_at < NOW() - INTERVAL \'12 months\' AND EXISTS (SELECT 1 FROM inserted_event) RETURNING event_id" +
+      ') SELECT event_id FROM updated_install',
       [ev.installId, ev.eventId, ev.occurredAt]
     );
     return sendJson(res, 200, { accepted: Array.isArray(rows) && rows.length > 0 });
@@ -227,6 +290,7 @@ async function summary(platform, page, size) {
 }
 module.exports = {
   getTables, validateEvent, sendJson, bodyBytes, sameOrigin, adminPassword, sessionSecret, passwordMatches,
-  createSession, validSession, hasSession, setCookie, clearCookie, loginBlocked, loginFailed, resetLoginFailures,
+  createSession, validSession, hasSession, setCookie, clearCookie,
+  consumeAdminLoginAttempt, clearAdminLoginAttempts,
   ingest, summary, cronAuthorized, cleanupExpiredEvents
 };
