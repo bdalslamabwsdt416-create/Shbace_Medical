@@ -6,20 +6,22 @@
 var B=window.__SHB_BRIDGE;
 if(!B){console.error('AI bank adapter: shared question engine is unavailable.');return;}
 var BANKS={
- 'clinical-ai':{label:'AI Clinical Cases',total:1840,store:'shbace_clinical_case_answers_v1',source:'data/clinicalCaseBank.json'},
- 'generated-ai':{label:'AI Generated',total:1881,store:'shbace_ai_generated_answers_v1'}
+ 'clinical-ai':{label:'AI Clinical Cases',total:1840,store:'shbace_clinical_case_answers_v1',source:'data/clinicalCaseBank.json',idPrefix:'ai07-'},
+ 'generated-ai':{label:'AI Generated',total:1881,store:'shbace_ai_generated_answers_v1',idPrefix:'ai08-'},
+ 'haitham':{label:'Dr. Haitham Nabil',description:'Clinical Case Question Bank by an Iraqi Doctor.',total:458,store:'shbace_haitham_answers_v1',source:'data/external-banks/haitham-nabil.json',idPrefix:'haitham-'},
+ 'aster':{label:'Aster Qbank',description:'Clinical Case Question Bank.',total:1516,store:'shbace_aster_answers_v1',source:'data/external-banks/aster-qbank.json',idPrefix:'aster-'}
 };
 var registry={},errors={},pending={},currentBank='',currentSystem='',studyToolPromise=null,studyToolReady=false,studyToolLastAttempt=0;
 Object.keys(BANKS).forEach(function(key){if(!B.BANK_KEYS.has(key)){B.BANK_KEYS.add(key);B.BANK_OPTS.push([key,BANKS[key].label]);}});
 var priorCollectionInTopic=B.inTopic;
 B.inTopic=function(){
- if(currentBank==='clinical-ai'||currentBank==='generated-ai')return B.coreInTopic().filter(function(q){return B.bankOf(q)===currentBank;});
+ if(BANKS[currentBank])return B.coreInTopic().filter(function(q){return B.bankOf(q)===currentBank;});
  if(appPage==='saved'||appPage==='wrong')return B.coreInTopic();
  return priorCollectionInTopic.apply(this,arguments);
 };
 var systemAliases=[
  [/central nervous|neurolog|\bcns\b/,'cns'],
- [/cardiovascular|cardiac|\bheart\b/,'cardio'],
+ [/cardiovascular|cardiac|cardiology|\bcardio\b|\bheart\b/,'cardio'],
  [/endocrin|inborn errors|metabolic/,'endocrinology'],
  [/gastro|digestive|intestinal|\bgit\b/,'git'],
  [/ha?ematolog|blood/,'haematology'],
@@ -30,6 +32,7 @@ var systemAliases=[
  [/growth|nutrition|development/,'growth'],
  [/genetic|dysmorph/,'genetics'],
  [/general pediatrics|clinical skills/,'general'],
+ [/miscellaneous/,'growth'],
  [/dermatolog|child protection|skin/,'dermatology'],
  [/immunolog|allerg/,'immunology'],
  [/emergency|critical care|toxic|poison/,'emergency'],
@@ -66,20 +69,20 @@ function normalizeQuestion(q,key,systemSpec,caseInfo){
  var opts=Array.isArray(q&&q.options)?q.options:[];
  var idx=answerIndex(q);
  var more=[q&&q.detailedExplanation,q&&q.highYieldPoints].filter(Boolean).join('\n\nHigh-yield points:\n');
+ var prefix=(BANKS[key]&&BANKS[key].idPrefix)||'';
+ var labels=opts.map(function(o){return safeText(o&&o.label).trim().toUpperCase();});
+ var standard=labels.every(function(label,i){return label===String.fromCharCode(65+i);});
  var out={
-  id:(key==='clinical-ai'?'ai07-':'ai08-')+safeText(q&&q.id),
-  spec:systemSpec,topic:0,
-  tag:key==='clinical-ai'?'Clinical Case':'AI Generated',
-  kind:'',
-  q:safeText(q&&q.stem),o:opts.map(function(o){return safeText(o&&o.text)}),
+  id:prefix+safeText(q&&q.id),spec:systemSpec,topic:0,
+  tag:key==='clinical-ai'?'Clinical Case':key==='generated-ai'?'AI Generated':'Clinical Case',
+  kind:'',q:safeText(q&&q.stem),o:opts.map(function(o){return safeText(o&&o.text)}),
   k:idx>=0?idx:0,kx:idx<0,ex:safeText(q&&q.initialExplanation),more:more,
-  src:sourceText(q&&q.source),aiBank:key,
+  src:(key==='haitham'||key==='aster')?'':sourceText(q&&q.source),aiBank:key,
   py:false,nl:false,ao:false,cc:false,eb:false,rq:[],rc:[]
  };
- if(caseInfo&&caseInfo.vignette&&caseInfo.first){
-  out.aiCaseVignette=caseInfo.vignette;
- }
- if(!out.id||!out.q||out.o.length<2)throw new Error('Invalid question record in '+key+': '+safeText(q&&q.id));
+ if(!standard)out.ol=labels;
+ if(caseInfo&&caseInfo.vignette&&caseInfo.first)out.aiCaseVignette=caseInfo.vignette;
+ if(!out.id||!out.q||out.o.length<4||idx<0)throw new Error('Invalid question record in '+key+': '+safeText(q&&q.id));
  return out;
 }
 function clinicalGroups(data){
@@ -102,17 +105,18 @@ function clinicalGroups(data){
  });
  return groups;
 }
-function generatedGroups(data){
- var groups=[];
+function structuredGroups(data,key){
+ var groups=[],label=BANKS[key].label;
  (data.systems||[]).forEach(function(system){
   var spec=specFor(system.name),sLabel=systemLabel(spec);
   (system.topics||[]).forEach(function(topic){
-   var questions=(topic.questions||[]).map(function(q){return normalizeQuestion(q,'generated-ai',spec,null);});
-   if(questions.length)groups.push({spec:spec,systemName:system.name,systemLabel:sLabel,topicName:topic.name,bankLabel:'AI Generated',questions:questions});
+   var questions=(topic.questions||[]).map(function(q){return normalizeQuestion(q,key,spec,null);});
+   if(questions.length)groups.push({spec:spec,systemName:system.name,systemLabel:sLabel,topicName:topic.name,bankLabel:label,questions:questions});
   });
  });
  return groups;
 }
+function generatedGroups(data){return structuredGroups(data,'generated-ai');}
 function migrateAnswers(key,groups){
  var config=BANKS[key],legacy={};
  try{legacy=JSON.parse(localStorage.getItem(config.store)||'{}')||{};}catch(e){legacy={};}
@@ -130,11 +134,12 @@ function migrateAnswers(key,groups){
  return changed;
 }
 function installBank(key,data){
- var groups=key==='clinical-ai'?clinicalGroups(data):generatedGroups(data);
+ var groups=key==='clinical-ai'?clinicalGroups(data):structuredGroups(data,key);
  var flat=groups.reduce(function(a,g){return a.concat(g.questions);},[]);
  var unique=new Set(flat.map(function(q){return q.id;}));
  if(flat.length!==BANKS[key].total||unique.size!==flat.length)throw new Error(BANKS[key].label+' failed its question count / unique-ID check.');
  var registration=B.registerExternalBank(key,BANKS[key].label,groups);
+ if(registration.added!==flat.length)throw new Error(BANKS[key].label+' registration skipped question IDs.');
  var imported=migrateAnswers(key,groups);
  var systemsMap=new Map();
  groups.forEach(function(g){
@@ -189,12 +194,21 @@ function loadGenerated(){
   return data;
  });
 }
+function loadExternal(key){
+ return fetchJson(BANKS[key].source).then(function(data){
+  var count=(data&&data.systems||[]).reduce(function(total,s){return total+(s.topics||[]).reduce(function(n,t){return n+(t.questions||[]).length;},0);},0);
+  if(!data||data.schema!=='shbace-external-qbank-v1'||data.key!==key||!Array.isArray(data.systems)||Number(data.totalQuestions)!==BANKS[key].total||count!==BANKS[key].total)throw new Error(BANKS[key].label+' data validation failed.');
+  return data;
+ });
+}
 var loaders={
  'clinical-ai':function(){return fetchJson(BANKS['clinical-ai'].source).then(function(data){
   if(!data||data.schema!=='shbace-clinical-case-bank-v1'||!Array.isArray(data.systems)||data.systems.length!==10||Number(data.totalQuestions||1840)!==1840)throw new Error('AI Clinical Cases data validation failed.');
   return data;
  });},
- 'generated-ai':loadGenerated
+ 'generated-ai':loadGenerated,
+ 'haitham':function(){return loadExternal('haitham');},
+ 'aster':function(){return loadExternal('aster');}
 };
 function ensureBank(key){
  if(registry[key])return Promise.resolve(registry[key]);
@@ -233,14 +247,14 @@ var priorSpecialties=window.specialtiesView,priorTopics=window.topicsView;
 var priorOpenQuestion=window.openQ;
 if(typeof priorOpenQuestion==='function')window.openQ=function(id){
  var q=B.QB.find(function(item){return item&&item.id===id;}),key=q?B.bankOf(q):'';
- if(key==='clinical-ai'||key==='generated-ai'){
+ if(BANKS[key]){
   var source=registry[key],system=source&&source.systems.find(function(s){return s.groups.some(function(g){return g.topicId===q.topic;});});
   currentBank=key;currentSystem=system?system.id:'';
   B.setActiveBank(key,system?system.groups.map(function(g){return g.topicId;}):[q.topic]);
   if(typeof window.__shbSetPedCollection==='function')window.__shbSetPedCollection(key);else window.__SHB_PED_COLLECTION__=key;
  }else{currentBank='';currentSystem='';B.setActiveBank('all');}
  var result=priorOpenQuestion.apply(this,arguments);
- if(key==='clinical-ai'||key==='generated-ai'){B.setActiveBank(key,system?system.groups.map(function(g){return g.topicId;}):[q.topic]);if(typeof window.__shbSetPedCollection==='function')window.__shbSetPedCollection(key);else window.__SHB_PED_COLLECTION__=key;}
+ if(BANKS[key]){B.setActiveBank(key,system?system.groups.map(function(g){return g.topicId;}):[q.topic]);if(typeof window.__shbSetPedCollection==='function')window.__shbSetPedCollection(key);else window.__SHB_PED_COLLECTION__=key;}
  return result;
 };
 window.specialtiesView=function(){if(currentBank)return systemPage();return typeof priorSpecialties==='function'?priorSpecialties.apply(this,arguments):'';};
@@ -283,16 +297,21 @@ window.openClinicalCaseBank07=function(){window.shbAiOpenBank('clinical-ai');};
 window.openAiGeneratedBank08=function(){window.shbAiOpenBank('generated-ai');};
 window.__shbClinicalCaseBank={count:function(){return BANKS['clinical-ai'].total;},dataLoaded:function(){return !!registry['clinical-ai'];},validation:function(){return registry['clinical-ai']&&registry['clinical-ai'].validation;}};
 window.__shbAiGeneratedBank08={count:function(){return BANKS['generated-ai'].total;},dataLoaded:function(){return !!registry['generated-ai'];},validation:function(){return registry['generated-ai']&&registry['generated-ai'].validation;}};
+window.__shbHaithamBank09={count:function(){return BANKS.haitham.total;},dataLoaded:function(){return !!registry.haitham;},validation:function(){return registry.haitham&&registry.haitham.validation;}};
+window.__shbAsterBank10={count:function(){return BANKS.aster.total;},dataLoaded:function(){return !!registry.aster;},validation:function(){return registry.aster&&registry.aster.validation;}};
 function addBankCards(html){
  var root=document.createElement('div');root.innerHTML=String(html||'');
  var grid=root.querySelector('.ped-collections-grid');if(!grid)return html;
  var cards=[
-  ['clinical-ai','ped-collection-card ped-collection-clinicalcase ped-collection-bank07','AI CLINICAL CASES QUESTION BANK','AI Clinical Cases','Case-based questions, with every case and its linked questions.','bank-ai-clinical-cases.webp'],
-  ['generated-ai','ped-collection-card ped-collection-allonce ped-collection-bank08','AI-GENERATED MCQ BANK','AI Generated','Single-best-answer questions written from the supplied medical sheets.','bank-ai-generated.webp']
+  ['clinical-ai','ped-collection-card ped-collection-clinicalcase ped-collection-bank07','AI CLINICAL CASES QUESTION BANK','AI Clinical Cases','Case-based questions, with every case and its linked questions.','bank-ai-clinical-cases.webp',''],
+  ['generated-ai','ped-collection-card ped-collection-allonce ped-collection-bank08','AI-GENERATED MCQ BANK','AI Generated','Single-best-answer questions written from the supplied medical sheets.','bank-ai-generated.webp',''],
+  ['haitham','ped-collection-card ped-collection-clinicalcase ped-collection-bank09','CLINICAL CASE QUESTION BANK','Dr. Haitham Nabil','Clinical Case Question Bank by an Iraqi Doctor.','','HN'],
+  ['aster','ped-collection-card ped-collection-allonce ped-collection-bank10','CLINICAL CASE QUESTION BANK','Aster Qbank','Clinical Case Question Bank.','','AQ']
  ];
  cards.forEach(function(item){
   if(grid.querySelector('.'+item[1].split(' ').pop()))return;
-  var card='<button type="button" class="'+item[1]+'" onclick="shbAiOpenBank(\''+item[0]+'\')"><div class="ped-collection-avatar ped-avatar-allonce ped-avatar-icon"><img src="/assets/img/'+item[5]+'" alt="" loading="lazy"></div><span class="ped-collection-copy"><span class="eyebrow">'+item[2]+'</span><b>'+item[3]+'</b><small>'+item[4]+'</small><span class="ped-collection-count">'+BANKS[item[0]].total.toLocaleString()+' questions</span></span><span class="ped-collection-arrow">›</span></button>';
+  var avatar=item[5]?'<img src="/assets/img/'+item[5]+'" alt="" loading="lazy">':'<span style="font-weight:800;letter-spacing:.06em;font-size:18px">'+item[6]+'</span>';
+  var card='<button type="button" class="'+item[1]+'" onclick="shbAiOpenBank(\''+item[0]+'\')"><div class="ped-collection-avatar ped-avatar-allonce ped-avatar-icon">'+avatar+'</div><span class="ped-collection-copy"><span class="eyebrow">'+item[2]+'</span><b>'+item[3]+'</b><small>'+item[4]+'</small><span class="ped-collection-count">'+BANKS[item[0]].total.toLocaleString()+' questions</span></span><span class="ped-collection-arrow">›</span></button>';
   grid.insertAdjacentHTML('beforeend',card);
  });
  var firstFour=['ped-collection-aj','ped-collection-previous','ped-collection-bank07','ped-collection-bank08'];
