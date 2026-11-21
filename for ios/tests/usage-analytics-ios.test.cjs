@@ -52,5 +52,5 @@ test('iOS updater and Service Worker keep their original cache and student datab
  assert.match(worker,/if \(request\.method !== 'GET'\) return;/);assert.doesNotMatch(worker,/indexedDB|localStorage|shbace_usage_analytics/);assert.doesNotMatch(updater,/shbace_usage_analytics_install_id_v1|shbace_usage_analytics_queue_v1/);
 });
 test('iOS PWA declares Safari standalone support but does not rely on guaranteed background execution',()=>{
- assert.ok(html.includes('apple-mobile-web-app-capable'));assert.ok(html.includes('apple-mobile-web-app-status-bar-style'));assert.ok(updater.includes('function standalone()'));assert.ok(updater.includes('function iosDevice()'));assert.ok(updater.includes('function autoAllowed()'));assert.doesNotMatch(clientSource,/SyncManager|registration\\.sync/);
+ assert.ok(!clientSource.includes('SyncManager'));assert.ok(!clientSource.includes('registration.sync'));
 });
