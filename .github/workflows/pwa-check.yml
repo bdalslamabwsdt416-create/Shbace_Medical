@@ -123,3 +123,7 @@ jobs:
           SELECT 1 / (NOT EXISTS (SELECT 1 FROM pwa_analytics_events WHERE occurred_at < NOW() - INTERVAL '12 months'))::int;
           SELECT 1 / (NOT EXISTS (SELECT 1 FROM android_analytics_events WHERE occurred_at < NOW() - INTERVAL '12 months'))::int;
           SQL
+      - name: Verify concurrent first-install ingestion
+        env:
+          PGPASSWORD: shbace_test
+        run: bash "to me/scripts/test-analytics-concurrency.sh"

@@ -233,10 +233,9 @@ async function ingest(req, res, platform) {
     const rows = await sql.query(
       'WITH created_install AS (' +
       ' INSERT INTO ' + t.installs + ' (install_id, first_seen_at, last_active_at) VALUES ($1::uuid, $3::timestamptz, $3::timestamptz)' +
-      ' ON CONFLICT (install_id) DO NOTHING RETURNING install_id' +
+      ' ON CONFLICT (install_id) DO UPDATE SET install_id = EXCLUDED.install_id RETURNING install_id' +
       '), target_install AS (' +
-      ' SELECT install_id FROM created_install UNION ALL' +
-      ' SELECT install_id FROM ' + t.installs + ' WHERE install_id = $1::uuid AND NOT EXISTS (SELECT 1 FROM created_install)' +
+      ' SELECT install_id FROM created_install' +
       '), inserted_event AS (' +
       ' INSERT INTO ' + t.events + ' (event_id, install_id, event_date, occurred_at)' +
       ' SELECT $2::uuid, install_id, ($3::timestamptz AT TIME ZONE \'UTC\')::date, $3::timestamptz FROM target_install' +
