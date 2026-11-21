@@ -165,13 +165,13 @@ async function ingest(req, res, platform) {
       ' SELECT install_id FROM ' + t.installs + ' WHERE install_id = $1::uuid AND NOT EXISTS (SELECT 1 FROM created_install)' +
       '), inserted_event AS (' +
       ' INSERT INTO ' + t.events + ' (event_id, install_id, event_date, occurred_at)' +
-      ' SELECT $2::uuid, install_id, ($3::timestamptz AT TIME ZONE \\'UTC\\')::date, $3::timestamptz FROM target_install' +
+      ' SELECT $2::uuid, install_id, ($3::timestamptz AT TIME ZONE \'UTC\')::date, $3::timestamptz FROM target_install' +
       ' ON CONFLICT DO NOTHING RETURNING install_id, occurred_at, event_id' +
       '), updated_install AS (' +
       ' UPDATE ' + t.installs + ' AS i SET last_active_at = GREATEST(COALESCE(i.last_active_at, e.occurred_at), e.occurred_at)' +
       ' FROM inserted_event AS e WHERE i.install_id = e.install_id RETURNING e.event_id' +
       '), pruned_events AS (' +
-      ' DELETE FROM ' + t.events + " WHERE occurred_at < NOW() - INTERVAL \\'12 months\\' AND EXISTS (SELECT 1 FROM inserted_event) RETURNING event_id" +
+      ' DELETE FROM ' + t.events + " WHERE occurred_at < NOW() - INTERVAL '12 months' AND EXISTS (SELECT 1 FROM inserted_event) RETURNING event_id" +
       ') SELECT event_id FROM updated_install',
       [ev.installId, ev.eventId, ev.occurredAt]
     );
@@ -183,15 +183,15 @@ async function platformSummary(sql, platform, page, pageSize) {
   const t = TABLES[platform];
   const m = await sql.query(
     'SELECT (SELECT COUNT(*)::int FROM ' + t.installs + ') AS total,' +
-    ' (SELECT COUNT(*)::int FROM ' + t.installs + ' WHERE first_seen_at >= NOW() - INTERVAL \\'24 hours\\') AS new24,' +
-    ' (SELECT COUNT(*)::int FROM ' + t.installs + ' WHERE first_seen_at >= NOW() - INTERVAL \\'7 days\\') AS new7,' +
-    ' (SELECT COUNT(*)::int FROM ' + t.installs + ' WHERE first_seen_at >= NOW() - INTERVAL \\'30 days\\') AS new30,' +
-    ' (SELECT COUNT(DISTINCT install_id)::int FROM ' + t.events + ' WHERE occurred_at >= NOW() - INTERVAL \\'24 hours\\') AS active24,' +
-    ' (SELECT COUNT(DISTINCT install_id)::int FROM ' + t.events + ' WHERE occurred_at >= NOW() - INTERVAL \\'7 days\\') AS active7,' +
-    ' (SELECT COUNT(DISTINCT install_id)::int FROM ' + t.events + ' WHERE occurred_at >= NOW() - INTERVAL \\'30 days\\') AS active30', []);
+    ' (SELECT COUNT(*)::int FROM ' + t.installs + ' WHERE first_seen_at >= NOW() - INTERVAL \'24 hours\') AS new24,' +
+    ' (SELECT COUNT(*)::int FROM ' + t.installs + ' WHERE first_seen_at >= NOW() - INTERVAL \'7 days\') AS new7,' +
+    ' (SELECT COUNT(*)::int FROM ' + t.installs + ' WHERE first_seen_at >= NOW() - INTERVAL \'30 days\') AS new30,' +
+    ' (SELECT COUNT(DISTINCT install_id)::int FROM ' + t.events + ' WHERE occurred_at >= NOW() - INTERVAL \'24 hours\') AS active24,' +
+    ' (SELECT COUNT(DISTINCT install_id)::int FROM ' + t.events + ' WHERE occurred_at >= NOW() - INTERVAL \'7 days\') AS active7,' +
+    ' (SELECT COUNT(DISTINCT install_id)::int FROM ' + t.events + ' WHERE occurred_at >= NOW() - INTERVAL \'30 days\') AS active30', []);
   const daily = await sql.query(
-    'SELECT TO_CHAR(days.day, \\'YYYY-MM-DD\\') AS day, COUNT(DISTINCT events.install_id)::int AS count' +
-    ' FROM GENERATE_SERIES((CURRENT_DATE - INTERVAL \\'29 days\\')::date, CURRENT_DATE, INTERVAL \\'1 day\\') days(day)' +
+    'SELECT TO_CHAR(days.day, \'YYYY-MM-DD\') AS day, COUNT(DISTINCT events.install_id)::int AS count' +
+    ' FROM GENERATE_SERIES((CURRENT_DATE - INTERVAL \'29 days\')::date, CURRENT_DATE, INTERVAL \'1 day\') days(day)' +
     ' LEFT JOIN ' + t.events + ' events ON events.event_date = days.day::date GROUP BY days.day ORDER BY days.day', []);
   const installs = await sql.query(
     'SELECT install_id::text AS install_id, first_seen_at, last_active_at FROM ' + t.installs +
