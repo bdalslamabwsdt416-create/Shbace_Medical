@@ -141,6 +141,22 @@ function loginFailed(now) {
   if (failures >= 5) { blockedUntil = (now === undefined ? Date.now() : now) + 900000; failures = 0; }
 }
 function resetLoginFailures() { failures = 0; blockedUntil = 0; }
+function cronAuthorized(req) {
+  const secret = process.env.CRON_SECRET || '';
+  if (Buffer.byteLength(secret, 'utf8') < 32) return false;
+  return passwordMatches(req && req.headers && req.headers.authorization, 'Bearer ' + secret);
+}
+async function cleanupExpiredEvents() {
+  const sql = database();
+  if (!sql) throw new Error('analytics_database_not_configured');
+  const rows = await sql.query(
+    "WITH pwa_deleted AS (DELETE FROM pwa_analytics_events WHERE occurred_at < NOW() - INTERVAL '12 months' RETURNING 1)," +
+    " android_deleted AS (DELETE FROM android_analytics_events WHERE occurred_at < NOW() - INTERVAL '12 months' RETURNING 1)" +
+    " SELECT (SELECT COUNT(*)::int FROM pwa_deleted) AS pwa, (SELECT COUNT(*)::int FROM android_deleted) AS android",
+    []
+  );
+  return { pwa: Number(rows[0] && rows[0].pwa || 0), android: Number(rows[0] && rows[0].android || 0) };
+}
 
 async function ingest(req, res, platform) {
   const t = getTables(platform);
@@ -212,5 +228,5 @@ async function summary(platform, page, size) {
 module.exports = {
   getTables, validateEvent, sendJson, bodyBytes, sameOrigin, adminPassword, sessionSecret, passwordMatches,
   createSession, validSession, hasSession, setCookie, clearCookie, loginBlocked, loginFailed, resetLoginFailures,
-  ingest, summary
+  ingest, summary, cronAuthorized, cleanupExpiredEvents
 };
