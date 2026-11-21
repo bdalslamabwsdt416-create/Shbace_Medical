@@ -50,7 +50,7 @@ jobs:
         env:
           NODE_ENV: test
           REDIS_PORT: 6379
-        run: node --test tests/usage-analytics-rate-limit.integration.test.js
+        run: node --test tests/usage-analytics-rate-limit.integration.cjs
 
   analytics-postgres-schema:
     runs-on: ubuntu-latest
