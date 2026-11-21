@@ -289,8 +289,8 @@ test('Admin login blocks the sixth failed attempt across requests and issues a h
  }
 });
 test('Android UUID remains backed by private SharedPreferences and Android release version is unchanged',()=>{
- const native=fs.readFileSync(require('node:path').join(__dirname,'../../../android/app/src/main/java/com/shbace/medical/ShbaceNative.java'),'utf8');
- const gradle=fs.readFileSync(require('node:path').join(__dirname,'../../../android/app/build.gradle'),'utf8');
+ const native=fs.readFileSync(require('node:path').join(__dirname,'../../android/app/src/main/java/com/shbace/medical/ShbaceNative.java'),'utf8');
+ const gradle=fs.readFileSync(require('node:path').join(__dirname,'../../android/app/build.gradle'),'utf8');
  assert.ok(native.includes('ANALYTICS_PREFS = "shbace_usage_analytics_v1"'));
  assert.ok(native.includes('ANALYTICS_ID_KEY = "install_id"'));
  assert.ok(native.includes('getSharedPreferences(ANALYTICS_PREFS, Context.MODE_PRIVATE)'));
