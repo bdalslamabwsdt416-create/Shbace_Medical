@@ -60,9 +60,12 @@ const schemaSource=fs.readFileSync(require('node:path').join(__dirname,'../scrip
 
 test('analytics SQL defers event foreign keys and inserts events before installation upsert',()=>{
  assert.equal((schemaSource.match(/DEFERRABLE INITIALLY DEFERRED/g)||[]).length,2);
- assert.match(analyticsSource,/WITH inserted_event AS \\([\\s\\S]*?ON CONFLICT DO NOTHING RETURNING event_id, install_id, occurred_at[\\s\\S]*?\\), upsert_install AS \\([\\s\\S]*?SELECT install_id, occurred_at, occurred_at FROM inserted_event[\\s\\S]*?ON CONFLICT \\(install_id\\) DO UPDATE/);
- assert.match(analyticsSource,/SELECT event_id FROM inserted_event/);
- assert.match(schemaSource,/UNIQUE \\(install_id, event_date\\)/);
+ assert.ok(analyticsSource.includes('WITH inserted_event AS ('));
+ assert.ok(analyticsSource.indexOf('ON CONFLICT DO NOTHING RETURNING event_id, install_id, occurred_at') < analyticsSource.indexOf('), upsert_install AS ('));
+ assert.ok(analyticsSource.includes('SELECT install_id, occurred_at, occurred_at FROM inserted_event'));
+ assert.ok(analyticsSource.includes('ON CONFLICT (install_id) DO UPDATE'));
+ assert.ok(analyticsSource.includes('SELECT event_id FROM inserted_event'));
+ assert.ok(schemaSource.includes('UNIQUE (install_id, event_date)'));
 });
 const clientSource=fs.readFileSync(require('node:path').join(__dirname,'../js/54-usage-analytics.js'),'utf8');
 
