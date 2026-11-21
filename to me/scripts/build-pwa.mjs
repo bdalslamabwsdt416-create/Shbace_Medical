@@ -21,6 +21,7 @@ const requiredFiles = [
   "admin/usage.html",
   "api/analytics/pwa-event.js",
   "api/analytics/android-event.js",
+  "api/analytics/cleanup.js",
   "api/analytics/admin-login.js",
   "api/analytics/admin-logout.js",
   "api/analytics/admin-summary.js",
