@@ -38,6 +38,15 @@ test('admin session is signed, expiring and tamper-resistant',()=>{
  assert.equal(analytics.validSession(session.token+'x',now),false);
  delete process.env.ANALYTICS_SESSION_SECRET;
 });
+test('admin login throttling blocks five consecutive failures for fifteen minutes',()=>{
+ analytics.resetLoginFailures();
+ for(let i=0;i<4;i++)analytics.loginFailed(now);
+ assert.equal(analytics.loginBlocked(now),false);
+ analytics.loginFailed(now);
+ assert.equal(analytics.loginBlocked(now),true);
+ assert.equal(analytics.loginBlocked(now+15*60*1000),false);
+ analytics.resetLoginFailures();
+});
 test('the API does not accept a client-selected platform',()=>{
  assert.equal(analytics.getTables('pwa').events,'pwa_analytics_events');
  assert.equal(analytics.getTables('android').events,'android_analytics_events');
@@ -46,6 +55,15 @@ test('the API does not accept a client-selected platform',()=>{
 
 const fs=require('node:fs');
 const vm=require('node:vm');
+const analyticsSource=fs.readFileSync(require('node:path').join(__dirname,'../lib/usage-analytics.js'),'utf8');
+const schemaSource=fs.readFileSync(require('node:path').join(__dirname,'../scripts/usage-analytics-schema.sql'),'utf8');
+
+test('analytics SQL defers event foreign keys and inserts events before installation upsert',()=>{
+ assert.equal((schemaSource.match(/DEFERRABLE INITIALLY DEFERRED/g)||[]).length,2);
+ assert.match(analyticsSource,/WITH inserted_event AS \\([\\s\\S]*?ON CONFLICT DO NOTHING RETURNING event_id, install_id, occurred_at[\\s\\S]*?\\), upsert_install AS \\([\\s\\S]*?SELECT install_id, occurred_at, occurred_at FROM inserted_event[\\s\\S]*?ON CONFLICT \\(install_id\\) DO UPDATE/);
+ assert.match(analyticsSource,/SELECT event_id FROM inserted_event/);
+ assert.match(schemaSource,/UNIQUE \\(install_id, event_date\\)/);
+});
 const clientSource=fs.readFileSync(require('node:path').join(__dirname,'../js/54-usage-analytics.js'),'utf8');
 
 function makeClient({storage,online,native}) {
