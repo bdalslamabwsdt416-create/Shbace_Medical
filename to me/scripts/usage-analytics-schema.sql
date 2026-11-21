@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS pwa_analytics_installs (
 );
 CREATE TABLE IF NOT EXISTS pwa_analytics_events (
   event_id UUID PRIMARY KEY,
-  install_id UUID NOT NULL REFERENCES pwa_analytics_installs(install_id) ON DELETE CASCADE,
+  install_id UUID NOT NULL REFERENCES pwa_analytics_installs(install_id) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED,
   event_date DATE NOT NULL,
   occurred_at TIMESTAMPTZ NOT NULL,
   CONSTRAINT pwa_analytics_one_event_per_install_day UNIQUE (install_id, event_date)
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS android_analytics_installs (
 );
 CREATE TABLE IF NOT EXISTS android_analytics_events (
   event_id UUID PRIMARY KEY,
-  install_id UUID NOT NULL REFERENCES android_analytics_installs(install_id) ON DELETE CASCADE,
+  install_id UUID NOT NULL REFERENCES android_analytics_installs(install_id) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED,
   event_date DATE NOT NULL,
   occurred_at TIMESTAMPTZ NOT NULL,
   CONSTRAINT android_analytics_one_event_per_install_day UNIQUE (install_id, event_date)
