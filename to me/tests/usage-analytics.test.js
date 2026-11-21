@@ -38,14 +38,52 @@ test('admin session is signed, expiring and tamper-resistant',()=>{
  assert.equal(analytics.validSession(session.token+'x',now),false);
  delete process.env.ANALYTICS_SESSION_SECRET;
 });
-test('admin login throttling blocks five consecutive failures for fifteen minutes',()=>{
- analytics.resetLoginFailures();
- for(let i=0;i<4;i++)analytics.loginFailed(now);
- assert.equal(analytics.loginBlocked(now),false);
- analytics.loginFailed(now);
- assert.equal(analytics.loginBlocked(now),true);
- assert.equal(analytics.loginBlocked(now+15*60*1000),false);
- analytics.resetLoginFailures();
+test('distributed Admin rate limiter fails closed without approved Upstash configuration',async()=>{
+ const old={url:process.env.UPSTASH_REDIS_REST_URL,token:process.env.UPSTASH_REDIS_REST_TOKEN,secret:process.env.ANALYTICS_RATE_LIMIT_SECRET};
+ delete process.env.UPSTASH_REDIS_REST_URL;delete process.env.UPSTASH_REDIS_REST_TOKEN;delete process.env.ANALYTICS_RATE_LIMIT_SECRET;
+ const result=await analytics.consumeAdminLoginAttempt({headers:{'x-real-ip':'203.0.113.10'}});
+ assert.equal(result.available,false);assert.equal(result.allowed,false);
+ if(old.url!==undefined)process.env.UPSTASH_REDIS_REST_URL=old.url;
+ if(old.token!==undefined)process.env.UPSTASH_REDIS_REST_TOKEN=old.token;
+ if(old.secret!==undefined)process.env.ANALYTICS_RATE_LIMIT_SECRET=old.secret;
+});
+test('distributed Admin rate limit is shared across fresh module instances and never sends raw IP',async()=>{
+ const old={url:process.env.UPSTASH_REDIS_REST_URL,token:process.env.UPSTASH_REDIS_REST_TOKEN,secret:process.env.ANALYTICS_RATE_LIMIT_SECRET};
+ const oldFetch=global.fetch, counters=new Map(), seen=[];
+ process.env.UPSTASH_REDIS_REST_URL='https://example.upstash.io';
+ process.env.UPSTASH_REDIS_REST_TOKEN='test-token';
+ process.env.ANALYTICS_RATE_LIMIT_SECRET='test-rate-limit-secret-with-at-least-32-bytes';
+ global.fetch=async(url,options)=>{
+  const cmd=JSON.parse(options.body);seen.push(cmd);
+  if(cmd[0]==='EVAL'){
+   const key=cmd[3],count=(counters.get(key)||0)+1;counters.set(key,count);
+   return {ok:true,json:async()=>({result:[count,900]})};
+  }
+  if(cmd[0]==='DEL'){counters.delete(cmd[1]);return {ok:true,json:async()=>({result:1})};}
+  return {ok:false,json:async()=>({})};
+ };
+ try{
+  const req={headers:{'x-real-ip':'203.0.113.44'}};
+  for(let i=0;i<5;i++){
+   delete require.cache[require.resolve('../lib/usage-analytics')];
+   const isolated=require('../lib/usage-analytics');
+   const result=await isolated.consumeAdminLoginAttempt(req);
+   assert.equal(result.available,true);assert.equal(result.allowed,true);
+  }
+  delete require.cache[require.resolve('../lib/usage-analytics')];
+  const isolated=require('../lib/usage-analytics');
+  const blocked=await isolated.consumeAdminLoginAttempt(req);
+  assert.equal(blocked.available,true);assert.equal(blocked.allowed,false);
+  assert.ok(seen.every(cmd=>!JSON.stringify(cmd).includes('203.0.113.44')));
+  assert.match(seen[0][3],/^shbace:analytics:admin-login:v1:[a-f0-9]{64}$/);
+  assert.equal(await isolated.clearAdminLoginAttempts(req),true);
+  assert.equal(counters.size,0);
+ } finally {
+  global.fetch=oldFetch;
+  for(const [key,value] of Object.entries({UPSTASH_REDIS_REST_URL:old.url,UPSTASH_REDIS_REST_TOKEN:old.token,ANALYTICS_RATE_LIMIT_SECRET:old.secret})){
+   if(value===undefined)delete process.env[key];else process.env[key]=value;
+  }
+ }
 });
 test('the API does not accept a client-selected platform',()=>{
  assert.equal(analytics.getTables('pwa').events,'pwa_analytics_events');
@@ -58,13 +96,11 @@ const vm=require('node:vm');
 const analyticsSource=fs.readFileSync(require('node:path').join(__dirname,'../lib/usage-analytics.js'),'utf8');
 const schemaSource=fs.readFileSync(require('node:path').join(__dirname,'../scripts/usage-analytics-schema.sql'),'utf8');
 
-test('analytics SQL defers event foreign keys and inserts events before installation upsert',()=>{
- assert.equal((schemaSource.match(/DEFERRABLE INITIALLY DEFERRED/g)||[]).length,2);
- assert.ok(analyticsSource.includes('WITH inserted_event AS ('));
- assert.ok(analyticsSource.indexOf('ON CONFLICT DO NOTHING RETURNING event_id, install_id, occurred_at') < analyticsSource.indexOf('), upsert_install AS ('));
- assert.ok(analyticsSource.includes('SELECT install_id, occurred_at, occurred_at FROM inserted_event'));
- assert.ok(analyticsSource.includes('ON CONFLICT (install_id) DO UPDATE'));
- assert.ok(analyticsSource.includes('SELECT event_id FROM inserted_event'));
+test('analytics SQL inserts or locates the install before idempotent event insertion',()=>{
+ assert.ok(analyticsSource.includes('WITH created_install AS ('));
+ assert.ok(analyticsSource.includes('target_install AS ('));
+ assert.ok(analyticsSource.includes('ON CONFLICT DO NOTHING RETURNING install_id, occurred_at, event_id'));
+ assert.ok(analyticsSource.includes('UPDATE '));
  assert.ok(schemaSource.includes('UNIQUE (install_id, event_date)'));
 });
 const clientSource=fs.readFileSync(require('node:path').join(__dirname,'../js/54-usage-analytics.js'),'utf8');
