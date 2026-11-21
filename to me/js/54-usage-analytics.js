@@ -68,7 +68,7 @@ function remove(id){var v=state();v.queue=v.queue.filter(function(x){return x.ev
 async function flush(){
  if(flushing||!endpoint||!installId)return;
  try{if(window.navigator.onLine===false)return}catch(_){}
- flushing=true;
+ flushing=true;var sent=0;
  try{
   for(var i=0;i<5;i++){
    var v=state(),item=v.queue[0];if(!item)break;
@@ -81,12 +81,13 @@ async function flush(){
      signal:controller?controller.signal:undefined
     });
     if(timer!==null)window.clearTimeout(timer);
-    if(response.ok){remove(item.eventId);continue}
+    if(response.ok){remove(item.eventId);sent++;continue}
     if([400,401,403,404,413,415,422].indexOf(response.status)>=0){remove(item.eventId);continue}
     break;
    }catch(_){if(timer!==null)window.clearTimeout(timer);break}
   }
  }finally{flushing=false}
+ if(sent===5&&state().queue.length&&window.setTimeout)window.setTimeout(flush,250);
 }
 function privacyNotice(){
  var s=store();try{if(s&&s.getItem(NOTICE_KEY)==='1')return}catch(_){}
