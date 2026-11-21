@@ -281,7 +281,7 @@ test('Admin login blocks the sixth failed attempt across requests and issues a h
   assert.match(success.headers['Set-Cookie'],/HttpOnly/);
   assert.match(success.headers['Set-Cookie'],/Secure/);
   assert.match(success.headers['Set-Cookie'],/SameSite=Strict/);
-  assert.match(success.headers['Set-Cookie'],/Path=\\/api\\/analytics/);
+  assert.ok(success.headers['Set-Cookie'].includes('Path=/api/analytics'));
  }finally{
   global.fetch=oldFetch;
   const values={ANALYTICS_ADMIN_PASSWORD:prior.password,ANALYTICS_SESSION_SECRET:prior.session,UPSTASH_REDIS_REST_URL:prior.url,UPSTASH_REDIS_REST_TOKEN:prior.token,ANALYTICS_RATE_LIMIT_SECRET:prior.secret};
@@ -296,6 +296,6 @@ test('Android UUID remains backed by private SharedPreferences and Android relea
  assert.ok(native.includes('getSharedPreferences(ANALYTICS_PREFS, Context.MODE_PRIVATE)'));
  assert.ok(native.includes('UUID.randomUUID().toString()'));
  assert.ok(native.includes('prefs.edit().putString(ANALYTICS_ID_KEY, created).commit()'));
- assert.match(gradle,/versionCode\\s+18/);
- assert.match(gradle,/versionName\\s+"1\\.3\\.9"/);
+ assert.ok(gradle.includes('versionCode 18'));
+ assert.ok(gradle.includes('versionName "1.3.9"'));
 });
