@@ -22,7 +22,7 @@ function validateEvent(body, now) {
   if (keys.join(',') !== 'eventId,installId,occurredAt') throw new Error('invalid_fields');
   if (typeof body.installId !== 'string' || !UUID.test(body.installId)) throw new Error('invalid_install_id');
   if (typeof body.eventId !== 'string' || !UUID.test(body.eventId)) throw new Error('invalid_event_id');
-  if (typeof body.occurredAt !== 'string' || !/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/.test(body.occurredAt)) throw new Error('invalid_timestamp');
+  if (typeof body.occurredAt !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(body.occurredAt)) throw new Error('invalid_timestamp');
   const time = Date.parse(body.occurredAt);
   if (!Number.isFinite(time) || new Date(time).toISOString() !== body.occurredAt) throw new Error('invalid_timestamp');
   if (time > now + 300000) throw new Error('timestamp_in_future');
