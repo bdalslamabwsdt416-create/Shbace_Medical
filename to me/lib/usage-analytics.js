@@ -231,21 +231,18 @@ async function ingest(req, res, platform) {
   if (!sql) return sendJson(res, 503, { error: 'analytics_database_not_configured' });
   try {
     const rows = await sql.query(
-      'WITH created_install AS (' +
-      ' INSERT INTO ' + t.installs + ' (install_id, first_seen_at, last_active_at) VALUES ($1::uuid, $3::timestamptz, $3::timestamptz)' +
-      ' ON CONFLICT (install_id) DO UPDATE SET install_id = EXCLUDED.install_id RETURNING install_id' +
-      '), target_install AS (' +
-      ' SELECT install_id FROM created_install' +
-      '), inserted_event AS (' +
+      'WITH inserted_event AS (' +
       ' INSERT INTO ' + t.events + ' (event_id, install_id, event_date, occurred_at)' +
-      ' SELECT $2::uuid, install_id, ($3::timestamptz AT TIME ZONE \'UTC\')::date, $3::timestamptz FROM target_install' +
+      ' VALUES ($2::uuid, $1::uuid, ($3::timestamptz AT TIME ZONE \'UTC\')::date, $3::timestamptz)' +
       ' ON CONFLICT DO NOTHING RETURNING install_id, occurred_at, event_id' +
-      '), updated_install AS (' +
-      ' UPDATE ' + t.installs + ' AS i SET last_active_at = GREATEST(COALESCE(i.last_active_at, e.occurred_at), e.occurred_at)' +
-      ' FROM inserted_event AS e WHERE i.install_id = e.install_id RETURNING e.event_id' +
+      '), upsert_install AS (' +
+      ' INSERT INTO ' + t.installs + ' (install_id, first_seen_at, last_active_at)' +
+      ' SELECT install_id, occurred_at, occurred_at FROM inserted_event' +
+      ' ON CONFLICT (install_id) DO UPDATE SET last_active_at = GREATEST(COALESCE(' + t.installs + '.last_active_at, EXCLUDED.last_active_at), EXCLUDED.last_active_at)' +
+      ' RETURNING install_id' +
       '), pruned_events AS (' +
       ' DELETE FROM ' + t.events + " WHERE occurred_at < NOW() - INTERVAL \'12 months\' AND EXISTS (SELECT 1 FROM inserted_event) RETURNING event_id" +
-      ') SELECT event_id FROM updated_install',
+      ') SELECT event_id FROM inserted_event',
       [ev.installId, ev.eventId, ev.occurredAt]
     );
     return sendJson(res, 200, { accepted: Array.isArray(rows) && rows.length > 0 });

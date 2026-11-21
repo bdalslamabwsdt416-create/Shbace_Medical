@@ -96,11 +96,12 @@ const vm=require('node:vm');
 const analyticsSource=fs.readFileSync(require('node:path').join(__dirname,'../lib/usage-analytics.js'),'utf8');
 const schemaSource=fs.readFileSync(require('node:path').join(__dirname,'../scripts/usage-analytics-schema.sql'),'utf8');
 
-test('concurrent first-install conflicts return the winning install row to the same statement snapshot',()=>{
- assert.ok(analyticsSource.includes('ON CONFLICT (install_id) DO UPDATE SET install_id = EXCLUDED.install_id RETURNING install_id'));
- assert.ok(analyticsSource.includes('target_install AS ('));
- assert.ok(analyticsSource.includes('SELECT install_id FROM created_install'));
- assert.ok(!analyticsSource.includes('NOT EXISTS (SELECT 1 FROM created_install)'));
+test('event-first ingestion relies on deferred foreign keys and upserts the install only for a new event',()=>{
+ assert.ok(analyticsSource.includes('WITH inserted_event AS ('));
+ assert.ok(analyticsSource.includes('SELECT install_id, occurred_at, occurred_at FROM inserted_event'));
+ assert.ok(analyticsSource.includes('ON CONFLICT (install_id) DO UPDATE SET last_active_at = GREATEST'));
+ assert.ok(analyticsSource.includes('RETURNING install_id'));
+ assert.ok(analyticsSource.includes('SELECT event_id FROM inserted_event'));
 });
 test('analytics SQL inserts or locates the install before idempotent event insertion',()=>{
  assert.ok(analyticsSource.includes('WITH created_install AS ('));
