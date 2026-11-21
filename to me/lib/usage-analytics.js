@@ -101,8 +101,9 @@ function sameOrigin(req) {
   if (!origin) return false;
   try {
     const parsed = new URL(origin);
-    const configured = process.env.ANALYTICS_ALLOWED_ORIGIN;
-    if (configured && parsed.origin === configured) return true;
+    const configured = String(process.env.ANALYTICS_ALLOWED_ORIGIN || '')
+      .split(',').map(value => value.trim()).filter(Boolean);
+    if (configured.includes(parsed.origin)) return true;
     const host = req.headers.host;
     const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0].trim();
     return !!host && parsed.origin === proto + '://' + host;

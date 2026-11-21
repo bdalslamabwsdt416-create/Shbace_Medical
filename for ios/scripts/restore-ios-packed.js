@@ -28,7 +28,7 @@ function walkRuntimeDirectory(directory, output) {
   }
 }
 function runtimeFiles() {
-  const files = ['index.html', 'manifest.webmanifest', 'pwa-version.json', 'sw.js'];
+  const files = ['index.html', 'manifest.webmanifest', 'pwa-version.json', 'sw.js', 'js/54-usage-analytics.js'];
   for (const directory of ['assets', 'css', 'data', 'js', 'fonts', 'audio', 'media', 'videos', 'documents', 'img', 'img1', 'img2']) {
     walkRuntimeDirectory(directory, files);
   }
@@ -63,7 +63,12 @@ async function buildPwa() {
   ]);
 
   for (const relative of runtimeFiles()) {
-    const originalBytes = fs.readFileSync(path.join(root, relative));
+    /* Consume the canonical To Me analytics client; do not maintain a fork in this PWA. */
+    const sourcePath = relative === 'js/54-usage-analytics.js'
+      ? path.resolve(root, '../to me/js/54-usage-analytics.js')
+      : path.join(root, relative);
+    if (!fs.existsSync(sourcePath)) throw new Error('Required shared analytics client is missing: ' + sourcePath);
+    const originalBytes = fs.readFileSync(sourcePath);
     let bytes = originalBytes;
 
     if (relative === 'index.html') {
@@ -109,14 +114,15 @@ const deferredRefs = [...html.matchAll(/data-src=["']([^"']+)["']/g)].map(match 
 for (const relative of deferredRefs) {
   if (!fs.existsSync(safePath(relative))) throw new Error('Deferred runtime asset is missing: ' + relative);
 }
-const requiredIosTools = ['js/32-ios-study-tools.js','js/33-ios-exam-planner.js'];
+const requiredIosTools = ['js/32-ios-study-tools.js','js/33-ios-exam-planner.js','js/54-usage-analytics.js'];
 for (const relative of requiredIosTools) {
   if (deferredRefs.filter(file => file === relative).length !== 1) throw new Error('Required iOS feature runtime must be loaded exactly once: ' + relative);
 }
 const runtimePosition = relative => deferredRefs.indexOf(relative);
 if (!(runtimePosition('js/09-app-features-v6.js') < runtimePosition('js/36-exam-planner-settings-smartreview.js') &&
       runtimePosition('js/36-exam-planner-settings-smartreview.js') < runtimePosition('js/32-ios-study-tools.js') &&
-      runtimePosition('js/32-ios-study-tools.js') < runtimePosition('js/33-ios-exam-planner.js'))) {
+      runtimePosition('js/32-ios-study-tools.js') < runtimePosition('js/33-ios-exam-planner.js') &&
+      runtimePosition('js/33-ios-exam-planner.js') < runtimePosition('js/54-usage-analytics.js'))) {
   throw new Error('iOS feature runtime order is invalid; app core and Smart Review must load before study tools, followed by the iOS Exam Planner navigation layer.');
 }
 if (/js\/30-android-enhancements|js\/31-android-v13|js\/32-chrome-android/.test(html)) throw new Error('Android-only runtime module leaked into the iOS build.');
@@ -226,7 +232,7 @@ manifest.generatedAt = new Date().toISOString();
 fs.writeFileSync(path.join(out, 'offline-assets-manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 
 console.log('Shbace Medical iOS PWA build successful');
-console.log('First-install Setup gate, deferred onboarding load, 48-hour updater, iOS local-first Service Worker and Settings control verified.');
+console.log('First-install Setup gate, deferred onboarding load, 48-hour updater, iOS local-first Service Worker, Settings control and shared Basic Usage Analytics client verified.');
 console.log('Base question bank: '+baseBank.questions.length);
 console.log('Deferred runtime assets verified: '+deferredRefs.length);
 console.log('Offline inventory: '+manifest.fileCount+' files ('+(manifest.totalBytes/1024/1024).toFixed(2)+' MiB).');

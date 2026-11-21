@@ -56,7 +56,13 @@ function queueDaily(){
  v.day=day;save(v);
 }
 function endpointUrl(){
- if(platform==='pwa')return window.location.origin+'/api/analytics/pwa-event';
+ if(platform==='pwa'){
+  try{
+   var base=new URL(String(window.SHBACE_ANALYTICS_API_BASE_URL||window.location.origin));
+   if((base.protocol!=='https:'&&base.hostname!=='localhost')||base.username||base.password||base.pathname!=='/'||base.search||base.hash)return '';
+   return base.origin+'/api/analytics/pwa-event';
+  }catch(_){return ''}
+ }
  try{
   if(!native||typeof native.getAnalyticsApiBaseUrl!=='function')return '';
   var base=new URL(String(native.getAnalyticsApiBaseUrl()||''));
@@ -82,7 +88,7 @@ async function flush(){
     });
     if(timer!==null)window.clearTimeout(timer);
     if(response.ok){remove(item.eventId);sent++;continue}
-    if([400,401,403,404,413,415,422].indexOf(response.status)>=0){remove(item.eventId);continue}
+    if([400,413,415,422].indexOf(response.status)>=0){remove(item.eventId);continue}
     break;
    }catch(_){if(timer!==null)window.clearTimeout(timer);break}
   }

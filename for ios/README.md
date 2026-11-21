@@ -34,3 +34,9 @@ This branch is a reorganized working copy based on `main`. The original `version
 - After the first installation, the app opens from the saved local package. Repairs and updates run in the background with a compact progress chip; updates are staged, checked by byte size and SHA-256, then committed together before one safe restart.
 - Automatic update checks run every 48 hours; Settings → Check for updates can trigger a manual check at any time.
 - The existing iOS Cache Storage name (`shbace-medical-offline-v2`), IndexedDB database (`shbace-medical-offline-state-v1`), iOS home-screen icon, onboarding screens, and student progress stores are retained.
+
+
+## Basic Usage Analytics
+The iOS PWA build includes the canonical Basic Usage Analytics client from `../to me/js/54-usage-analytics.js` at build time. Keep the source shared; do not copy a second maintained implementation into this folder. Its installation UUID and bounded offline queue use dedicated LocalStorage keys, separate from the app's IndexedDB study data and offline updater state. The Service Worker does not intercept analytics POST requests.
+
+A separately hosted iOS PWA needs the approved shared API origin configured as `window.SHBACE_ANALYTICS_API_BASE_URL` before the analytics runtime executes, and its exact origin must be included in the API deployment's `ANALYTICS_ALLOWED_ORIGIN` allowlist. Until that route and allowlist are configured, events remain queued. Safari storage can be cleared or evicted, and Home Screen PWA background execution is best-effort; retry occurs when the app returns online or to the foreground. No actual iPhone/iPad device test is implied by the automated tests.
