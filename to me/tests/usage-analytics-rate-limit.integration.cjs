@@ -68,21 +68,26 @@ function freshAnalytics() {
 test('Redis Lua ingestion quota is atomic and shared across fresh serverless module instances', async () => {
   const analytics = freshAnalytics();
   const minute = Math.floor(Date.now() / 60000);
-  const results = [];
-  for (let i = 0; i < analytics.INGESTION_PER_MINUTE_LIMIT; i++) {
-    const isolated = freshAnalytics();
-    results.push(await isolated.consumeIngestionAttempt('pwa', minute * 60000 + 1000));
-  }
-  assert.ok(results.every(result => result.available && result.allowed));
-  const blocked = await freshAnalytics().consumeIngestionAttempt('pwa', minute * 60000 + 1000);
-  assert.equal(blocked.available, true);
-  assert.equal(blocked.allowed, false);
+  const fixedNow = minute * 60000 + 1000;
+  const results = await Promise.all(Array.from({ length: analytics.INGESTION_PER_MINUTE_LIMIT + 20 }, () =>
+    freshAnalytics().consumeIngestionAttempt('pwa', fixedNow)));
+  assert.ok(results.every(result => result.available));
+  assert.equal(results.filter(result => result.allowed).length, analytics.INGESTION_PER_MINUTE_LIMIT);
+  assert.equal(results.filter(result => !result.allowed).length, 20);
+  const blocked = results.find(result => !result.allowed);
   assert.equal(blocked.reason, 'minute_limit');
   assert.ok(blocked.retryAfterSeconds > 0);
 
-  const otherPlatform = await analytics.consumeIngestionAttempt('android', minute * 60000 + 1000);
+  const otherPlatform = await analytics.consumeIngestionAttempt('android', fixedNow);
   assert.equal(otherPlatform.available, true);
   assert.equal(otherPlatform.allowed, true);
+
+  const dailyKeys = analytics.ingestionRateLimitKeys('android', fixedNow);
+  redisCommand(['SET', dailyKeys.day, String(analytics.INGESTION_PER_DAY_LIMIT), 'EX', '172800']);
+  const dailyBlocked = await freshAnalytics().consumeIngestionAttempt('android', fixedNow);
+  assert.equal(dailyBlocked.available, true);
+  assert.equal(dailyBlocked.allowed, false);
+  assert.equal(dailyBlocked.reason, 'daily_limit');
 });
 
 test('Admin login quota is global, distributed, and independent of client IP headers', async () => {
