@@ -75,7 +75,7 @@ test('distributed Admin rate limit is shared across fresh module instances and n
   const blocked=await isolated.consumeAdminLoginAttempt(req);
   assert.equal(blocked.available,true);assert.equal(blocked.allowed,false);
   assert.ok(seen.every(cmd=>!JSON.stringify(cmd).includes('203.0.113.44')));
-  assert.match(seen[0][3],/^shbace:analytics:admin-login:v1:[a-f0-9]{64}$/);
+  assert.match(seen[0][3],/^shbace:analytics:admin-login:v2:[a-f0-9]{64}$/);
   assert.equal(await isolated.clearAdminLoginAttempts(req),true);
   assert.equal(counters.size,0);
  } finally {
