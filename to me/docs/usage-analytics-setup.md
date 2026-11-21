@@ -19,8 +19,11 @@ Set the following Vercel Preview environment variables:
 - ANALYTICS_SESSION_SECRET: a random secret of at least 32 bytes.
 - ANALYTICS_ALLOWED_ORIGIN: the exact HTTPS origin used by the application, with no path.
 - CRON_SECRET: a random secret of at least 32 characters; Vercel sends it as the Bearer token for the daily retention-cleanup request.
+- UPSTASH_REDIS_REST_URL: HTTPS REST endpoint of an approved Upstash Redis database (choose a free plan if available; no database is created by this code).
+- UPSTASH_REDIS_REST_TOKEN: private Upstash REST token.
+- ANALYTICS_RATE_LIMIT_SECRET: independent random secret of at least 32 bytes used to HMAC the client IP into a non-reversible, short-lived rate-limit key.
 
-The Admin page is /admin/usage.html. API endpoints enforce an eight-hour signed HMAC session in a Secure, HttpOnly, SameSite=Strict cookie. No password or secret is embedded in frontend code. The login route applies a best-effort five-failure/15-minute cooldown in each warm function instance; a distributed rate limiter would require an additional approved service.
+The Admin page is /admin/usage.html. API endpoints enforce an eight-hour signed HMAC session in a Secure, HttpOnly, SameSite=Strict cookie. No password or secret is embedded in frontend code. The login route uses an atomic Redis INCR/EXPIRE operation through Upstash REST, so the five-failure/15-minute window is shared across Serverless Function instances. Only an HMAC-SHA256 digest of the platform-provided x-real-ip value is used as the short-lived Redis key; the raw IP is not sent to Redis or written to the analytics database. Login fails closed with HTTP 503 until the approved rate-limit store is configured. This integration does not provision a service or incur a charge by itself.
 
 ## Android endpoint activation
 The APK loads assets from the local Capacitor origin, rather than the PWA origin. Android UUID persistence uses a dedicated SharedPreferences file named shbace_usage_analytics_v1. To enable upload after the official HTTPS Vercel hostname is known, set the public ANALYTICS_API_BASE_URL constant in ShbaceNative.java and then create a separately approved Android build. This branch does not bump versionCode or versionName and does not publish an APK. Until the origin is configured in a future build, Android activity events remain queued locally.
@@ -39,4 +42,4 @@ After approving the database and Preview environment variables, test:
 5. PWA and Android counts remain distinct. Android upload testing requires the approved API origin in a later APK.
 6. Verify 24-hour, 7-day and 30-day activity and the 30-day daily series.
 
-Do not configure Production variables or promote this Preview as part of this change.
+Do not configure Production variables or promote this Preview as part of this change. The Redis service and its secrets must remain unconfigured until separately approved.
