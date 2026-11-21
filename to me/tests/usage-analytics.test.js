@@ -23,7 +23,7 @@ test('rejects invalid fields, identifiers and timestamps',()=>{
  assert.throws(()=>analytics.validateEvent({eventId:event,installId:install,occurredAt:'bad'},now),/invalid_timestamp/);
 });
 test('rejects stale or future-dated offline events',()=>{
- assert.throws(()=>analytics.validateEvent({eventId:event,installId:install,occurredAt:new Date(now-31*analytics.DAY).toISOString()},now),/event_too_old/);
+ assert.throws(()=>analytics.validateEvent({eventId:event,installId:install,occurredAt:new Date(now-31*24*60*60*1000).toISOString()},now),/event_too_old/);
  assert.throws(()=>analytics.validateEvent({eventId:event,installId:install,occurredAt:new Date(now+6*60*1000).toISOString()},now),/timestamp_in_future/);
 });
 test('admin password comparison is constant input independent and correct',()=>{
