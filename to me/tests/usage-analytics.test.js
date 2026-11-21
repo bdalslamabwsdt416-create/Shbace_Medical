@@ -293,7 +293,7 @@ test('Admin login fails closed when the shared rate limiter is unavailable',asyn
   for(const [key,value] of Object.entries(values)){if(value===undefined)delete process.env[key];else process.env[key]=value;}
  }
 });
-test('Admin login blocks the sixth failed attempt across requests and issues a hardened session cookie after valid login',async()=>{
+test('Admin global login lockout blocks every client until its window resets, then issues a hardened session cookie',async()=>{
  const handler=require('../api/analytics/admin-login'),oldFetch=global.fetch,counters=new Map();
  const prior={password:process.env.ANALYTICS_ADMIN_PASSWORD,session:process.env.ANALYTICS_SESSION_SECRET,url:process.env.UPSTASH_REDIS_REST_URL,token:process.env.UPSTASH_REDIS_REST_TOKEN,secret:process.env.ANALYTICS_RATE_LIMIT_SECRET};
  process.env.ANALYTICS_ADMIN_PASSWORD='test-admin-password-long';
@@ -312,6 +312,9 @@ test('Admin login blocks the sixth failed attempt across requests and issues a h
   const blocked=responseStub();await handler(req('203.0.113.77','incorrect-password'),blocked);
   assert.equal(blocked.statusCode,429);assert.ok(Number(blocked.headers['Retry-After'])>0);
   assert.equal(blocked.headers['Set-Cookie'],undefined);
+  const correctButLocked=responseStub();await handler(req('203.0.113.78','test-admin-password-long'),correctButLocked);
+  assert.equal(correctButLocked.statusCode,429);
+  counters.clear(); // Simulate expiry of the shared 15-minute Redis window.
   const success=responseStub();await handler(req('203.0.113.78','test-admin-password-long'),success);
   assert.equal(success.statusCode,200);
   assert.match(success.headers['Set-Cookie'],/HttpOnly/);
