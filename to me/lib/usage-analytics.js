@@ -29,7 +29,7 @@ function rateLimitConfig() {
   try {
     const parsed = new URL(endpoint);
     if (parsed.protocol !== 'https:' || parsed.username || parsed.password) return null;
-    return { endpoint: parsed.toString().replace(/\\/$/, ''), token, secret };
+    return { endpoint: parsed.href.endsWith('/') ? parsed.href.slice(0, -1) : parsed.href, token, secret };
   } catch (_) { return null; }
 }
 function adminRateLimitKey(req) {
