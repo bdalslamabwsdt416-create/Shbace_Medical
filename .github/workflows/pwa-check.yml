@@ -1,10 +1,10 @@
 name: PWA checks
 on:
   pull_request:
-    paths: ["to me/**", "for Computer/**", "for Chrome/**"]
+    paths: ["to me/**", "for Computer/**", "for Chrome/**", ".github/workflows/**"]
   push:
     branches-ignore: [main]
-    paths: ["to me/**", "for Computer/**", "for Chrome/**"]
+    paths: ["to me/**", "for Computer/**", "for Chrome/**", ".github/workflows/**"]
 jobs:
   check:
     runs-on: ubuntu-latest
