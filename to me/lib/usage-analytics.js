@@ -1,6 +1,5 @@
 'use strict';
 const crypto = require('node:crypto');
-const net = require('node:net');
 const DAY = 86400000;
 const MAX_AGE = 30 * DAY;
 const SESSION_TTL = 8 * 60 * 60 * 1000;
@@ -16,10 +15,23 @@ function getTables(platform) { return TABLES[platform] || null; }
 
 const RATE_LIMIT_WINDOW_SECONDS = 900;
 const RATE_LIMIT_MAX_ATTEMPTS = 5;
-const RATE_LIMIT_SCRIPT =
+const INGESTION_PER_MINUTE_LIMIT = 120;
+const INGESTION_PER_DAY_LIMIT = 5000;
+const ADMIN_RATE_LIMIT_SCRIPT =
   "local count = redis.call('INCR', KEYS[1]); " +
   "if count == 1 then redis.call('EXPIRE', KEYS[1], ARGV[1]); end; " +
   "return {count, redis.call('TTL', KEYS[1])}";
+const INGESTION_RATE_LIMIT_SCRIPT =
+  "local minuteCount = tonumber(redis.call('GET', KEYS[1]) or '0'); " +
+  "local dayCount = tonumber(redis.call('GET', KEYS[2]) or '0'); " +
+  "local minuteLimit = tonumber(ARGV[1]); local dayLimit = tonumber(ARGV[2]); " +
+  "if minuteCount >= minuteLimit then return {0, minuteCount, dayCount, redis.call('TTL', KEYS[1]), 1}; end; " +
+  "if dayCount >= dayLimit then return {0, minuteCount, dayCount, redis.call('TTL', KEYS[2]), 2}; end; " +
+  "local nextMinute = redis.call('INCR', KEYS[1]); " +
+  "if nextMinute == 1 then redis.call('EXPIRE', KEYS[1], 120); end; " +
+  "local nextDay = redis.call('INCR', KEYS[2]); " +
+  "if nextDay == 1 then redis.call('EXPIRE', KEYS[2], 172800); end; " +
+  "return {1, nextMinute, nextDay, 0, 0}";
 
 function rateLimitConfig() {
   const endpoint = process.env.UPSTASH_REDIS_REST_URL || '';
@@ -28,21 +40,34 @@ function rateLimitConfig() {
   if (!endpoint || !token || Buffer.byteLength(secret, 'utf8') < 32) return null;
   try {
     const parsed = new URL(endpoint);
-    if (parsed.protocol !== 'https:' || parsed.username || parsed.password) return null;
+    const localTestEndpoint = process.env.NODE_ENV === 'test' &&
+      (parsed.hostname === '127.0.0.1' || parsed.hostname === 'localhost');
+    if ((parsed.protocol !== 'https:' && !(localTestEndpoint && parsed.protocol === 'http:')) ||
+        parsed.username || parsed.password) return null;
     return { endpoint: parsed.href.endsWith('/') ? parsed.href.slice(0, -1) : parsed.href, token, secret };
   } catch (_) { return null; }
 }
-function adminRateLimitKey(req) {
+function adminRateLimitKey() {
   const config = rateLimitConfig();
-  const ip = String(req && req.headers && req.headers['x-real-ip'] || '').trim();
-  if (!config || !ip || !net.isIP(ip)) return null;
-  const digest = crypto.createHmac('sha256', config.secret).update(ip).digest('hex');
-  return 'shbace:analytics:admin-login:v1:' + digest;
+  if (!config) return null;
+  const digest = crypto.createHmac('sha256', config.secret).update('admin-login-global-v1').digest('hex');
+  return 'shbace:analytics:admin-login:v2:' + digest;
 }
-async function redisRateLimitCommand(req, command) {
+function ingestionRateLimitKeys(platform, now) {
   const config = rateLimitConfig();
-  const key = adminRateLimitKey(req);
-  if (!config || !key || typeof fetch !== 'function') return null;
+  if (!config || !TABLES[platform]) return null;
+  now = now === undefined ? Date.now() : now;
+  const minute = Math.floor(now / 60000);
+  const day = new Date(now).toISOString().slice(0, 10);
+  const prefix = 'shbace:analytics:ingest:v1:' + platform + ':';
+  return {
+    minute: prefix + 'minute:' + minute,
+    day: prefix + 'day:' + day
+  };
+}
+async function redisRateLimitCommand(command) {
+  const config = rateLimitConfig();
+  if (!config || typeof fetch !== 'function') return null;
   try {
     const response = await fetch(config.endpoint, {
       method: 'POST',
@@ -55,18 +80,41 @@ async function redisRateLimitCommand(req, command) {
     return payload && !payload.error ? payload.result : null;
   } catch (_) { return null; }
 }
-async function consumeAdminLoginAttempt(req) {
-  const key = adminRateLimitKey(req);
+async function consumeAdminLoginAttempt() {
+  const key = adminRateLimitKey();
   if (!key) return { available: false, allowed: false, retryAfterSeconds: 0 };
-  const result = await redisRateLimitCommand(req, ['EVAL', RATE_LIMIT_SCRIPT, '1', key, String(RATE_LIMIT_WINDOW_SECONDS)]);
+  const result = await redisRateLimitCommand(['EVAL', ADMIN_RATE_LIMIT_SCRIPT, '1', key, String(RATE_LIMIT_WINDOW_SECONDS)]);
   if (!Array.isArray(result) || result.length < 2) return { available: false, allowed: false, retryAfterSeconds: 0 };
   const count = Number(result[0]), ttl = Number(result[1]);
   if (!Number.isFinite(count) || !Number.isFinite(ttl) || ttl < 0) return { available: false, allowed: false, retryAfterSeconds: 0 };
   return { available: true, allowed: count <= RATE_LIMIT_MAX_ATTEMPTS, retryAfterSeconds: Math.max(1, ttl) };
 }
-async function clearAdminLoginAttempts(req) {
-  const result = await redisRateLimitCommand(req, ['DEL', adminRateLimitKey(req)]);
+async function clearAdminLoginAttempts() {
+  const key = adminRateLimitKey();
+  if (!key) return false;
+  const result = await redisRateLimitCommand(['DEL', key]);
   return result !== null && Number.isFinite(Number(result)) && Number(result) >= 0;
+}
+async function consumeIngestionAttempt(platform, now) {
+  const keys = ingestionRateLimitKeys(platform, now);
+  if (!keys) return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'unconfigured' };
+  const result = await redisRateLimitCommand([
+    'EVAL', INGESTION_RATE_LIMIT_SCRIPT, '2', keys.minute, keys.day,
+    String(INGESTION_PER_MINUTE_LIMIT), String(INGESTION_PER_DAY_LIMIT)
+  ]);
+  if (!Array.isArray(result) || result.length < 5) {
+    return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'unavailable' };
+  }
+  const allowed = Number(result[0]) === 1;
+  const minuteCount = Number(result[1]), dayCount = Number(result[2]), ttl = Number(result[3]), window = Number(result[4]);
+  if (![minuteCount, dayCount, ttl, window].every(Number.isFinite) || ttl < 0) {
+    return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'invalid_response' };
+  }
+  return {
+    available: true, allowed, minuteCount, dayCount,
+    retryAfterSeconds: allowed ? 0 : Math.max(1, ttl),
+    reason: allowed ? null : (window === 2 ? 'daily_limit' : 'minute_limit')
+  };
 }
 
 
@@ -226,6 +274,12 @@ async function ingest(req, res, platform) {
   if (bodyBytes(req.body) > 1024) return sendJson(res, 413, { error: 'payload_too_large' });
   let ev;
   try { ev = validateEvent(req.body); } catch (e) { return sendJson(res, 422, { error: e.message || 'invalid_event' }); }
+  const quota = await consumeIngestionAttempt(platform);
+  if (!quota.available) return sendJson(res, 503, { error: 'analytics_rate_limiter_unavailable' });
+  if (!quota.allowed) {
+    res.setHeader('Retry-After', String(quota.retryAfterSeconds));
+    return sendJson(res, 429, { error: 'analytics_rate_limited', retryAfterSeconds: quota.retryAfterSeconds });
+  }
   let sql;
   try { sql = database(); } catch (_) { return sendJson(res, 503, { error: 'analytics_database_unavailable' }); }
   if (!sql) return sendJson(res, 503, { error: 'analytics_database_not_configured' });
@@ -286,6 +340,7 @@ async function summary(platform, page, size) {
 module.exports = {
   getTables, validateEvent, sendJson, bodyBytes, sameOrigin, adminPassword, sessionSecret, passwordMatches,
   createSession, validSession, hasSession, setCookie, clearCookie,
-  consumeAdminLoginAttempt, clearAdminLoginAttempts,
+  consumeAdminLoginAttempt, clearAdminLoginAttempts, consumeIngestionAttempt,
+  ingestionRateLimitKeys, INGESTION_PER_MINUTE_LIMIT, INGESTION_PER_DAY_LIMIT,
   ingest, summary, cronAuthorized, cleanupExpiredEvents
 };
