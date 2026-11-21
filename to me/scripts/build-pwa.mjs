@@ -18,6 +18,14 @@ const root = process.cwd();
 const output = join(root, "www");
 const requiredFiles = [
   "index.html",
+  "admin/usage.html",
+  "api/analytics/pwa-event.js",
+  "api/analytics/android-event.js",
+  "api/analytics/admin-login.js",
+  "api/analytics/admin-logout.js",
+  "api/analytics/admin-summary.js",
+  "lib/usage-analytics.js",
+  "scripts/usage-analytics-schema.sql",
   "manifest.webmanifest",
   "sw.js",
   "css/bundle-core.css",
