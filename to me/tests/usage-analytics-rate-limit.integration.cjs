@@ -109,6 +109,44 @@ test('Admin login quota is global, distributed, and independent of client IP hea
   assert.equal(afterReset.allowed, true);
 });
 
+test('Admin login endpoint enforces the real Redis quota across requests without trusting IP headers', async () => {
+  redisCommand(['FLUSHDB']);
+  const prior = {
+    ANALYTICS_ADMIN_PASSWORD: process.env.ANALYTICS_ADMIN_PASSWORD,
+    ANALYTICS_SESSION_SECRET: process.env.ANALYTICS_SESSION_SECRET,
+    ANALYTICS_ALLOWED_ORIGIN: process.env.ANALYTICS_ALLOWED_ORIGIN
+  };
+  process.env.ANALYTICS_ADMIN_PASSWORD = 'integration-test-admin-password';
+  process.env.ANALYTICS_SESSION_SECRET = 'integration-test-session-secret-at-least-32-bytes';
+  process.env.ANALYTICS_ALLOWED_ORIGIN = 'https://admin.local';
+  const login = require('../api/analytics/admin-login');
+  const response = () => ({ statusCode: 0, headers: {}, body: '', setHeader(k, v) { this.headers[k] = v; }, end(v) { this.body = v || ''; } });
+  try {
+    for (let i = 0; i < 5; i++) {
+      const res = response();
+      await login({
+        method: 'POST',
+        headers: { origin: 'https://admin.local', host: 'admin.local', 'content-type': 'application/json', 'x-real-ip': '198.51.100.' + (i + 1) },
+        body: { password: 'wrong-password' }
+      }, res);
+      assert.equal(res.statusCode, 401);
+    }
+    const blocked = response();
+    await login({
+      method: 'POST',
+      headers: { origin: 'https://admin.local', host: 'admin.local', 'content-type': 'application/json', 'x-real-ip': '203.0.113.200' },
+      body: { password: 'wrong-password' }
+    }, blocked);
+    assert.equal(blocked.statusCode, 429);
+    assert.ok(Number(blocked.headers['Retry-After']) > 0);
+  } finally {
+    for (const [key, value] of Object.entries(prior)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+});
+
 test('PWA and Android event endpoints fail closed without Redis and return 429 at the shared quota', async () => {
   const analytics = freshAnalytics();
   const oldFetch = global.fetch;
