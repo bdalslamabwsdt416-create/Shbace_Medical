@@ -1,5 +1,6 @@
 'use strict';
 const crypto = require('node:crypto');
+const net = require('node:net');
 const DAY = 86400000;
 const MAX_AGE = 30 * DAY;
 const SESSION_TTL = 8 * 60 * 60 * 1000;
@@ -10,10 +11,64 @@ const TABLES = Object.freeze({
   android: { installs: 'android_analytics_installs', events: 'android_analytics_events' }
 });
 let db = null;
-let failures = 0;
-let blockedUntil = 0;
 
 function getTables(platform) { return TABLES[platform] || null; }
+
+const RATE_LIMIT_WINDOW_SECONDS = 900;
+const RATE_LIMIT_MAX_ATTEMPTS = 5;
+const RATE_LIMIT_SCRIPT =
+  "local count = redis.call('INCR', KEYS[1]); " +
+  "if count == 1 then redis.call('EXPIRE', KEYS[1], ARGV[1]); end; " +
+  "return {count, redis.call('TTL', KEYS[1])}";
+
+function rateLimitConfig() {
+  const endpoint = process.env.UPSTASH_REDIS_REST_URL || '';
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN || '';
+  const secret = process.env.ANALYTICS_RATE_LIMIT_SECRET || '';
+  if (!endpoint || !token || Buffer.byteLength(secret, 'utf8') < 32) return null;
+  try {
+    const parsed = new URL(endpoint);
+    if (parsed.protocol !== 'https:' || parsed.username || parsed.password) return null;
+    return { endpoint: parsed.href.endsWith('/') ? parsed.href.slice(0, -1) : parsed.href, token, secret };
+  } catch (_) { return null; }
+}
+function adminRateLimitKey(req) {
+  const config = rateLimitConfig();
+  const ip = String(req && req.headers && req.headers['x-real-ip'] || '').trim();
+  if (!config || !ip || !net.isIP(ip)) return null;
+  const digest = crypto.createHmac('sha256', config.secret).update(ip).digest('hex');
+  return 'shbace:analytics:admin-login:v1:' + digest;
+}
+async function redisRateLimitCommand(req, command) {
+  const config = rateLimitConfig();
+  const key = adminRateLimitKey(req);
+  if (!config || !key || typeof fetch !== 'function') return null;
+  try {
+    const response = await fetch(config.endpoint, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + config.token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(command),
+      signal: AbortSignal.timeout(3000)
+    });
+    if (!response.ok) return null;
+    const payload = await response.json();
+    return payload && !payload.error ? payload.result : null;
+  } catch (_) { return null; }
+}
+async function consumeAdminLoginAttempt(req) {
+  const key = adminRateLimitKey(req);
+  if (!key) return { available: false, allowed: false, retryAfterSeconds: 0 };
+  const result = await redisRateLimitCommand(req, ['EVAL', RATE_LIMIT_SCRIPT, '1', key, String(RATE_LIMIT_WINDOW_SECONDS)]);
+  if (!Array.isArray(result) || result.length < 2) return { available: false, allowed: false, retryAfterSeconds: 0 };
+  const count = Number(result[0]), ttl = Number(result[1]);
+  if (!Number.isFinite(count) || !Number.isFinite(ttl) || ttl < 0) return { available: false, allowed: false, retryAfterSeconds: 0 };
+  return { available: true, allowed: count <= RATE_LIMIT_MAX_ATTEMPTS, retryAfterSeconds: Math.max(1, ttl) };
+}
+async function clearAdminLoginAttempts(req) {
+  const result = await redisRateLimitCommand(req, ['DEL', adminRateLimitKey(req)]);
+  return result !== null && Number.isFinite(Number(result)) && Number(result) >= 0;
+}
+
 
 function validateEvent(body, now) {
   now = now === undefined ? Date.now() : now;
@@ -142,6 +197,24 @@ function loginFailed(now) {
 }
 function resetLoginFailures() { failures = 0; blockedUntil = 0; }
 
+function cronAuthorized(req) {
+  const secret = process.env.CRON_SECRET || '';
+  if (Buffer.byteLength(secret, 'utf8') < 32) return false;
+  return passwordMatches(req && req.headers && req.headers.authorization, 'Bearer ' + secret);
+}
+async function cleanupExpiredEvents() {
+  const sql = database();
+  if (!sql) throw new Error('analytics_database_not_configured');
+  const rows = await sql.query(
+    "WITH pwa_deleted AS (DELETE FROM pwa_analytics_events WHERE occurred_at < NOW() - INTERVAL '12 months' RETURNING 1)," +
+    " android_deleted AS (DELETE FROM android_analytics_events WHERE occurred_at < NOW() - INTERVAL '12 months' RETURNING 1)" +
+    " SELECT (SELECT COUNT(*)::int FROM pwa_deleted) AS pwa, (SELECT COUNT(*)::int FROM android_deleted) AS android",
+    []
+  );
+  return { pwa: Number(rows[0] && rows[0].pwa || 0), android: Number(rows[0] && rows[0].android || 0) };
+}
+
+
 async function ingest(req, res, platform) {
   const t = getTables(platform);
   if (!t) return sendJson(res, 404, { error: 'not_found' });
@@ -215,6 +288,7 @@ async function summary(platform, page, size) {
 }
 module.exports = {
   getTables, validateEvent, sendJson, bodyBytes, sameOrigin, adminPassword, sessionSecret, passwordMatches,
-  createSession, validSession, hasSession, setCookie, clearCookie, loginBlocked, loginFailed, resetLoginFailures,
-  ingest, summary
+  createSession, validSession, hasSession, setCookie, clearCookie,
+  consumeAdminLoginAttempt, clearAdminLoginAttempts,
+  ingest, summary, cronAuthorized, cleanupExpiredEvents
 };

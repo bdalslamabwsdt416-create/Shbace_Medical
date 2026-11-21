@@ -18,6 +18,15 @@ const root = process.cwd();
 const output = join(root, "www");
 const requiredFiles = [
   "index.html",
+  "admin/usage.html",
+  "api/analytics/pwa-event.js",
+  "api/analytics/android-event.js",
+  "api/analytics/cleanup.js",
+  "api/analytics/admin-login.js",
+  "api/analytics/admin-logout.js",
+  "api/analytics/admin-summary.js",
+  "lib/usage-analytics.js",
+  "scripts/usage-analytics-schema.sql",
   "manifest.webmanifest",
   "sw.js",
   "css/bundle-core.css",
@@ -95,9 +104,10 @@ const requiredFiles = [
   "js/39-clinical-case-pediatrics.js",
   "js/40-egyptian-book-pediatrics.js",
   "js/41-collections-integration.js",
-  "js/43-ai-bank-engine-adapter.js"
+  "js/43-ai-bank-engine-adapter.js",
+  "js/54-usage-analytics.js"
 ];
-const requiredDirs = ["css", "js", "data"];
+const requiredDirs = ["css", "js", "data", "admin"];
 const imageDirs = ["img", "img1", "img2"];
 const optionalDirs = ["fonts", "audio", "media", "videos", "documents"];
 
@@ -343,7 +353,7 @@ if (!consolidatedLateCss.includes(".cc-page") || !consolidatedLateCss.includes("
     !consolidatedLateCss.includes(".cc-case-group")) {
   fail("The consolidated late stylesheet is missing the Clinical Cases / AI Generated shared bank presentation.");
 }
-if (!html.includes("navigator.serviceWorker.register('./sw.js'") || !html.includes("js/29-offline-setup.js") || !html.includes("js/29-reviewed-bank-controls.js") || !html.includes("qbData_reviewed_patch.json")) {
+if (!html.includes("navigator.serviceWorker.register('./sw.js'") || !html.includes("js/29-offline-setup.js") || !html.includes("js/29-reviewed-bank-controls.js") || !html.includes("qbData_reviewed_patch.json") || !html.includes("js/54-usage-analytics.js")) {
   fail("index.html does not register ./sw.js");
 }
 
