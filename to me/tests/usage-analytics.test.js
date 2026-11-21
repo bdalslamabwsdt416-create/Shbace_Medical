@@ -103,11 +103,13 @@ test('event-first ingestion relies on deferred foreign keys and upserts the inst
  assert.ok(analyticsSource.includes('RETURNING install_id'));
  assert.ok(analyticsSource.includes('SELECT event_id FROM inserted_event'));
 });
-test('analytics SQL inserts or locates the install before idempotent event insertion',()=>{
- assert.ok(analyticsSource.includes('WITH created_install AS ('));
- assert.ok(analyticsSource.includes('target_install AS ('));
- assert.ok(analyticsSource.includes('ON CONFLICT DO NOTHING RETURNING install_id, occurred_at, event_id'));
- assert.ok(analyticsSource.includes('UPDATE '));
+test('analytics SQL inserts the event first and then upserts the install through the deferred foreign key',()=>{
+ assert.ok(analyticsSource.includes('WITH inserted_event AS ('));
+ assert.ok(analyticsSource.includes('VALUES ($2::uuid, $1::uuid,'));
+ assert.ok(analyticsSource.includes('SELECT install_id, occurred_at, occurred_at FROM inserted_event'));
+ assert.ok(analyticsSource.includes('ON CONFLICT (install_id) DO UPDATE SET last_active_at = GREATEST'));
+ assert.ok(analyticsSource.includes('SELECT event_id FROM inserted_event'));
+ assert.ok(schemaSource.includes('DEFERRABLE INITIALLY DEFERRED'));
  assert.ok(schemaSource.includes('UNIQUE (install_id, event_date)'));
 });
 const clientSource=fs.readFileSync(require('node:path').join(__dirname,'../js/54-usage-analytics.js'),'utf8');
