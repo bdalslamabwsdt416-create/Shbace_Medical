@@ -223,3 +223,79 @@ test('Android event endpoint is independent and rejects malformed IDs',async()=>
  await handler({method:'POST',headers:{origin:'https://localhost',host:'shbace-preview.example','content-type':'application/json'},body:{eventId:'bad',installId:install,occurredAt:new Date().toISOString()}},res);
  assert.equal(res.statusCode,422);
 });
+
+test('Admin login enforces Origin validation before touching the distributed limiter',async()=>{
+ const handler=require('../api/analytics/admin-login'),res=responseStub();
+ const oldFetch=global.fetch;let called=false;global.fetch=async()=>{called=true;return {ok:true,json:async()=>({result:[1,900]})};};
+ const prior={password:process.env.ANALYTICS_ADMIN_PASSWORD,session:process.env.ANALYTICS_SESSION_SECRET};
+ process.env.ANALYTICS_ADMIN_PASSWORD='test-admin-password-long';
+ process.env.ANALYTICS_SESSION_SECRET='test-session-secret-with-at-least-32-bytes';
+ try{
+  await handler({method:'POST',headers:{origin:'https://evil.example',host:'shbace-preview.example','content-type':'application/json'},body:{password:'wrong'}},res);
+  assert.equal(res.statusCode,403);assert.equal(called,false);
+ }finally{
+  global.fetch=oldFetch;
+  if(prior.password===undefined)delete process.env.ANALYTICS_ADMIN_PASSWORD;else process.env.ANALYTICS_ADMIN_PASSWORD=prior.password;
+  if(prior.session===undefined)delete process.env.ANALYTICS_SESSION_SECRET;else process.env.ANALYTICS_SESSION_SECRET=prior.session;
+ }
+});
+test('Admin login fails closed when the shared rate limiter is unavailable',async()=>{
+ const handler=require('../api/analytics/admin-login'),res=responseStub(),oldFetch=global.fetch;
+ const prior={password:process.env.ANALYTICS_ADMIN_PASSWORD,session:process.env.ANALYTICS_SESSION_SECRET,url:process.env.UPSTASH_REDIS_REST_URL,token:process.env.UPSTASH_REDIS_REST_TOKEN,secret:process.env.ANALYTICS_RATE_LIMIT_SECRET};
+ process.env.ANALYTICS_ADMIN_PASSWORD='test-admin-password-long';
+ process.env.ANALYTICS_SESSION_SECRET='test-session-secret-with-at-least-32-bytes';
+ process.env.UPSTASH_REDIS_REST_URL='https://example.upstash.io';process.env.UPSTASH_REDIS_REST_TOKEN='test-token';
+ process.env.ANALYTICS_RATE_LIMIT_SECRET='test-rate-limit-secret-with-at-least-32-bytes';
+ global.fetch=async()=>{throw new Error('Redis unavailable');};
+ try{
+  await handler({method:'POST',headers:{origin:'https://shbace-preview.example',host:'shbace-preview.example','content-type':'application/json','x-real-ip':'203.0.113.55'},body:{password:'test-admin-password-long'}},res);
+  assert.equal(res.statusCode,503);assert.equal(JSON.parse(res.body).error,'admin_rate_limiter_unavailable');
+  assert.equal(res.headers['Set-Cookie'],undefined);
+ }finally{
+  global.fetch=oldFetch;
+  const values={ANALYTICS_ADMIN_PASSWORD:prior.password,ANALYTICS_SESSION_SECRET:prior.session,UPSTASH_REDIS_REST_URL:prior.url,UPSTASH_REDIS_REST_TOKEN:prior.token,ANALYTICS_RATE_LIMIT_SECRET:prior.secret};
+  for(const [key,value] of Object.entries(values)){if(value===undefined)delete process.env[key];else process.env[key]=value;}
+ }
+});
+test('Admin login blocks the sixth failed attempt across requests and issues a hardened session cookie after valid login',async()=>{
+ const handler=require('../api/analytics/admin-login'),oldFetch=global.fetch,counters=new Map();
+ const prior={password:process.env.ANALYTICS_ADMIN_PASSWORD,session:process.env.ANALYTICS_SESSION_SECRET,url:process.env.UPSTASH_REDIS_REST_URL,token:process.env.UPSTASH_REDIS_REST_TOKEN,secret:process.env.ANALYTICS_RATE_LIMIT_SECRET};
+ process.env.ANALYTICS_ADMIN_PASSWORD='test-admin-password-long';
+ process.env.ANALYTICS_SESSION_SECRET='test-session-secret-with-at-least-32-bytes';
+ process.env.UPSTASH_REDIS_REST_URL='https://example.upstash.io';process.env.UPSTASH_REDIS_REST_TOKEN='test-token';
+ process.env.ANALYTICS_RATE_LIMIT_SECRET='test-rate-limit-secret-with-at-least-32-bytes';
+ global.fetch=async(url,options)=>{
+  const cmd=JSON.parse(options.body);
+  if(cmd[0]==='EVAL'){const key=cmd[3],count=(counters.get(key)||0)+1;counters.set(key,count);return {ok:true,json:async()=>({result:[count,900]})};}
+  if(cmd[0]==='DEL'){counters.delete(cmd[1]);return {ok:true,json:async()=>({result:1})};}
+  return {ok:false,json:async()=>({})};
+ };
+ const req=(ip,password)=>({method:'POST',headers:{origin:'https://shbace-preview.example',host:'shbace-preview.example','content-type':'application/json','x-real-ip':ip},body:{password}});
+ try{
+  for(let i=0;i<5;i++){const res=responseStub();await handler(req('203.0.113.77','incorrect-password'),res);assert.equal(res.statusCode,401);}
+  const blocked=responseStub();await handler(req('203.0.113.77','incorrect-password'),blocked);
+  assert.equal(blocked.statusCode,429);assert.ok(Number(blocked.headers['Retry-After'])>0);
+  assert.equal(blocked.headers['Set-Cookie'],undefined);
+  const success=responseStub();await handler(req('203.0.113.78','test-admin-password-long'),success);
+  assert.equal(success.statusCode,200);
+  assert.match(success.headers['Set-Cookie'],/HttpOnly/);
+  assert.match(success.headers['Set-Cookie'],/Secure/);
+  assert.match(success.headers['Set-Cookie'],/SameSite=Strict/);
+  assert.match(success.headers['Set-Cookie'],/Path=\\/api\\/analytics/);
+ }finally{
+  global.fetch=oldFetch;
+  const values={ANALYTICS_ADMIN_PASSWORD:prior.password,ANALYTICS_SESSION_SECRET:prior.session,UPSTASH_REDIS_REST_URL:prior.url,UPSTASH_REDIS_REST_TOKEN:prior.token,ANALYTICS_RATE_LIMIT_SECRET:prior.secret};
+  for(const [key,value] of Object.entries(values)){if(value===undefined)delete process.env[key];else process.env[key]=value;}
+ }
+});
+test('Android UUID remains backed by private SharedPreferences and Android release version is unchanged',()=>{
+ const native=fs.readFileSync(require('node:path').join(__dirname,'../../../android/app/src/main/java/com/shbace/medical/ShbaceNative.java'),'utf8');
+ const gradle=fs.readFileSync(require('node:path').join(__dirname,'../../../android/app/build.gradle'),'utf8');
+ assert.ok(native.includes('ANALYTICS_PREFS = "shbace_usage_analytics_v1"'));
+ assert.ok(native.includes('ANALYTICS_ID_KEY = "install_id"'));
+ assert.ok(native.includes('getSharedPreferences(ANALYTICS_PREFS, Context.MODE_PRIVATE)'));
+ assert.ok(native.includes('UUID.randomUUID().toString()'));
+ assert.ok(native.includes('prefs.edit().putString(ANALYTICS_ID_KEY, created).commit()'));
+ assert.match(gradle,/versionCode\\s+18/);
+ assert.match(gradle,/versionName\\s+"1\\.3\\.9"/);
+});
