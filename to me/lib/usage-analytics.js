@@ -62,7 +62,6 @@ function ingestionRateLimitKeys(platform, now) {
   const config = rateLimitConfig();
   if (!config || !TABLES[platform]) return null;
   now = now === undefined ? Date.now() : now;
-  const minute = Math.floor(now / 60000);
   const day = new Date(now).toISOString().slice(0, 10);
   const prefix = 'shbace:analytics:ingest:v1:' + platform + ':';
   return {
