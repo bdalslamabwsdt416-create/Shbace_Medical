@@ -299,3 +299,17 @@ test('Android UUID remains backed by private SharedPreferences and Android relea
  assert.ok(gradle.includes('versionCode 18'));
  assert.ok(gradle.includes('versionName "1.3.9"'));
 });
+
+test('Admin logout rejects cross-origin requests and clears the hardened session cookie on same-origin POST',async()=>{
+ const handler=require('../api/analytics/admin-logout');
+ const hostile=responseStub();
+ await handler({method:'POST',headers:{origin:'https://evil.example',host:'shbace-preview.example'}},hostile);
+ assert.equal(hostile.statusCode,403);assert.equal(hostile.headers['Set-Cookie'],undefined);
+ const accepted=responseStub();
+ await handler({method:'POST',headers:{origin:'https://shbace-preview.example',host:'shbace-preview.example'}},accepted);
+ assert.equal(accepted.statusCode,200);
+ assert.ok(accepted.headers['Set-Cookie'].includes('Max-Age=0'));
+ assert.ok(accepted.headers['Set-Cookie'].includes('HttpOnly'));
+ assert.ok(accepted.headers['Set-Cookie'].includes('Secure'));
+ assert.ok(accepted.headers['Set-Cookie'].includes('SameSite=Strict'));
+});
