@@ -2,7 +2,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const http = require('node:http');
-const { execFileSync } = require('node:child_process');
+const { execFileSync, execFile } = require('node:child_process');
 
 const previousEnv = {
   NODE_ENV: process.env.NODE_ENV,
@@ -19,6 +19,17 @@ function redisCommand(command) {
   if (!output) return null;
   if (command[0] === 'EVAL') return output.split(/\r?\n/).map(Number);
   return Number(output);
+}
+function redisCommandAsync(command) {
+  const args = ['--raw', '-h', '127.0.0.1', '-p', String(process.env.REDIS_PORT || '6379'), ...command.map(String)];
+  return new Promise((resolve, reject) => {
+    execFile('redis-cli', args, { encoding: 'utf8' }, (error, stdout, stderr) => {
+      if (error) return reject(new Error(stderr || error.message));
+      const output = String(stdout || '').trim();
+      if (!output) return resolve(null);
+      resolve(command[0] === 'EVAL' ? output.split(/\r?\n/).map(Number) : Number(output));
+    });
+  });
 }
 
 test.before(async () => {
@@ -37,9 +48,13 @@ test.before(async () => {
       }
       try {
         const command = JSON.parse(raw);
-        const result = redisCommand(command);
-        res.writeHead(200, { 'content-type': 'application/json' });
-        res.end(JSON.stringify({ result }));
+        redisCommandAsync(command).then(result => {
+          res.writeHead(200, { 'content-type': 'application/json' });
+          res.end(JSON.stringify({ result }));
+        }).catch(error => {
+          res.writeHead(500, { 'content-type': 'application/json' });
+          res.end(JSON.stringify({ error: String(error) }));
+        });
       } catch (error) {
         res.writeHead(500, { 'content-type': 'application/json' });
         res.end(JSON.stringify({ error: String(error) }));
@@ -69,8 +84,13 @@ test('Redis Lua ingestion quota is atomic and shared across fresh serverless mod
   const analytics = freshAnalytics();
   const minute = Math.floor(Date.now() / 60000);
   const fixedNow = minute * 60000 + 1000;
-  const results = await Promise.all(Array.from({ length: analytics.INGESTION_PER_MINUTE_LIMIT + 20 }, () =>
+  const firstWave = [];
+  for (let i = 0; i < analytics.INGESTION_PER_MINUTE_LIMIT - 10; i++) {
+    firstWave.push(await freshAnalytics().consumeIngestionAttempt('pwa', fixedNow));
+  }
+  const concurrentWave = await Promise.all(Array.from({ length: 30 }, () =>
     freshAnalytics().consumeIngestionAttempt('pwa', fixedNow)));
+  const results = firstWave.concat(concurrentWave);
   assert.ok(results.every(result => result.available));
   assert.equal(results.filter(result => result.allowed).length, analytics.INGESTION_PER_MINUTE_LIMIT);
   assert.equal(results.filter(result => !result.allowed).length, 20);
