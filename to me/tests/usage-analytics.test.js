@@ -160,6 +160,28 @@ test('Admin summary denies access without an authenticated session',async()=>{
  assert.equal(res.statusCode,401);
  assert.equal(JSON.parse(res.body).error,'admin_auth_required');
 });
+test('scheduled retention cleanup is authenticated, method-limited and fails closed without a database',async()=>{
+ const handler=require('../api/analytics/cleanup');
+ const priorSecret=process.env.CRON_SECRET, priorDatabase=process.env.DATABASE_URL;
+ process.env.CRON_SECRET='test-only-cron-secret-with-at-least-32-bytes';
+ delete process.env.DATABASE_URL;
+ const unauthorized=responseStub();
+ await handler({method:'GET',headers:{}},unauthorized);
+ assert.equal(unauthorized.statusCode,401);
+ const wrongMethod=responseStub();
+ await handler({method:'POST',headers:{authorization:'Bearer '+process.env.CRON_SECRET}},wrongMethod);
+ assert.equal(wrongMethod.statusCode,405);
+ const unavailable=responseStub();
+ await handler({method:'GET',headers:{authorization:'Bearer '+process.env.CRON_SECRET}},unavailable);
+ assert.equal(unavailable.statusCode,503);
+ if(priorSecret===undefined)delete process.env.CRON_SECRET;else process.env.CRON_SECRET=priorSecret;
+ if(priorDatabase===undefined)delete process.env.DATABASE_URL;else process.env.DATABASE_URL=priorDatabase;
+});
+test('retention cleanup covers both isolated event tables and the 12-month cutoff',()=>{
+ assert.ok(analyticsSource.includes('cleanupExpiredEvents'));
+ assert.ok(analyticsSource.includes('pwa_analytics_events WHERE occurred_at < NOW() - INTERVAL \'12 months\''));
+ assert.ok(analyticsSource.includes('android_analytics_events WHERE occurred_at < NOW() - INTERVAL \'12 months\''));
+});
 test('Android event endpoint is independent and rejects malformed IDs',async()=>{
  const handler=require('../api/analytics/android-event'),res=responseStub();
  await handler({method:'POST',headers:{origin:'https://localhost',host:'shbace-preview.example','content-type':'application/json'},body:{eventId:'bad',installId:install,occurredAt:new Date().toISOString()}},res);
