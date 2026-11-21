@@ -111,3 +111,36 @@ test('Android client uses the native SharedPreferences UUID and its separate end
  assert.equal(storage.has('shbace_usage_analytics_install_id_v1'),false);
  assert.equal(app.calls.length,0);
 });
+
+
+function responseStub(){
+ const headers={};return {headers,statusCode:200,body:'',setHeader(k,v){headers[k]=v;},end(body){this.body=body||'';}};
+}
+test('PWA event endpoint rejects hostile origins and invalid payloads',async()=>{
+ const handler=require('../api/analytics/pwa-event');
+ const hostile=responseStub();
+ await handler({method:'POST',headers:{origin:'https://evil.example',host:'shbace-preview.example','content-type':'application/json'},body:{eventId:event,installId:install,occurredAt:new Date().toISOString()}},hostile);
+ assert.equal(hostile.statusCode,403);
+ const invalid=responseStub();
+ await handler({method:'POST',headers:{origin:'https://shbace-preview.example',host:'shbace-preview.example','content-type':'application/json'},body:{eventId:'bad',installId:install,occurredAt:new Date().toISOString()}},invalid);
+ assert.equal(invalid.statusCode,422);
+});
+test('PWA endpoint fails closed until the approved database exists',async()=>{
+ const old=process.env.DATABASE_URL;delete process.env.DATABASE_URL;
+ const handler=require('../api/analytics/pwa-event'),res=responseStub();
+ await handler({method:'POST',headers:{origin:'https://shbace-preview.example',host:'shbace-preview.example','content-type':'application/json'},body:{eventId:event,installId:install,occurredAt:new Date().toISOString()}},res);
+ assert.equal(res.statusCode,503);
+ assert.equal(JSON.parse(res.body).error,'analytics_database_not_configured');
+ if(old!==undefined)process.env.DATABASE_URL=old;
+});
+test('Admin summary denies access without an authenticated session',async()=>{
+ const handler=require('../api/analytics/admin-summary'),res=responseStub();
+ await handler({method:'GET',url:'/api/analytics/admin-summary?platform=all',headers:{host:'shbace-preview.example'}},res);
+ assert.equal(res.statusCode,401);
+ assert.equal(JSON.parse(res.body).error,'admin_auth_required');
+});
+test('Android event endpoint is independent and rejects malformed IDs',async()=>{
+ const handler=require('../api/analytics/android-event'),res=responseStub();
+ await handler({method:'POST',headers:{origin:'https://localhost',host:'shbace-preview.example','content-type':'application/json'},body:{eventId:'bad',installId:install,occurredAt:new Date().toISOString()}},res);
+ assert.equal(res.statusCode,422);
+});
