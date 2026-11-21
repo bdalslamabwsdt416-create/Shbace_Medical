@@ -165,7 +165,7 @@ async function ingest(req, res, platform) {
       ' SELECT install_id FROM ' + t.installs + ' WHERE install_id = $1::uuid AND NOT EXISTS (SELECT 1 FROM created_install)' +
       '), inserted_event AS (' +
       ' INSERT INTO ' + t.events + ' (event_id, install_id, event_date, occurred_at)' +
-      ' SELECT $2::uuid, install_id, ($3::timestamptz AT TIME ZONE \'UTC\')::date, $3::timestamptz FROM target_install' +
+      " SELECT $2::uuid, install_id, ($3::timestamptz AT TIME ZONE 'UTC')::date, $3::timestamptz FROM target_install" +
       ' ON CONFLICT DO NOTHING RETURNING install_id, occurred_at, event_id' +
       '), updated_install AS (' +
       ' UPDATE ' + t.installs + ' AS i SET last_active_at = GREATEST(COALESCE(i.last_active_at, e.occurred_at), e.occurred_at)' +
