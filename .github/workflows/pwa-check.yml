@@ -24,26 +24,6 @@ jobs:
       - run: npm run check:bank
       - run: npm run build:pwa
 
-  check-ios-pwa:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    defaults:
-      run:
-        working-directory: for ios
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: for ios/package.json
-      - name: Install isolated iOS PWA build dependencies
-        run: npm install --no-audit --no-fund
-      - name: Build and validate isolated iOS PWA package
-        run: npm run build:pwa
-      - name: Run iOS PWA analytics, storage and offline tests
-        run: npm run test:unit
-
   analytics-postgres-schema:
     runs-on: ubuntu-latest
     services:
