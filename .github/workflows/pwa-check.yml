@@ -23,3 +23,53 @@ jobs:
       - run: npm run test:unit
       - run: npm run check:bank
       - run: npm run build:pwa
+
+  analytics-postgres-schema:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: shbace_analytics_test
+          POSTGRES_USER: shbace_test
+          POSTGRES_PASSWORD: shbace_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U shbace_test -d shbace_analytics_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-client
+      - name: Apply analytics schema twice (idempotency)
+        env:
+          PGPASSWORD: shbace_test
+        run: |
+          psql -v ON_ERROR_STOP=1 -h localhost -U shbace_test -d shbace_analytics_test -f "to me/scripts/usage-analytics-schema.sql"
+          psql -v ON_ERROR_STOP=1 -h localhost -U shbace_test -d shbace_analytics_test -f "to me/scripts/usage-analytics-schema.sql"
+      - name: Verify platform isolation and database constraints
+        env:
+          PGPASSWORD: shbace_test
+        run: |
+          psql -v ON_ERROR_STOP=1 -h localhost -U shbace_test -d shbace_analytics_test <<'SQL'
+          DO $
+          BEGIN
+            IF to_regclass('public.pwa_analytics_installs') IS NULL OR to_regclass('public.android_analytics_installs') IS NULL THEN
+              RAISE EXCEPTION 'platform install tables are missing';
+            END IF;
+            IF to_regclass('public.pwa_analytics_events') IS NULL OR to_regclass('public.android_analytics_events') IS NULL THEN
+              RAISE EXCEPTION 'platform event tables are missing';
+            END IF;
+            IF (SELECT count(*) FROM pg_constraint WHERE conname IN ('pwa_analytics_one_event_per_install_day','android_analytics_one_event_per_install_day')) <> 2 THEN
+              RAISE EXCEPTION 'daily uniqueness constraints are missing';
+            END IF;
+            IF (SELECT count(*) FROM pg_constraint WHERE conname IN ('pwa_analytics_events_install_id_fkey','android_analytics_events_install_id_fkey') AND condeferrable) <> 2 THEN
+              RAISE EXCEPTION 'deferred install foreign keys are missing';
+            END IF;
+          END $;
+          SQL
