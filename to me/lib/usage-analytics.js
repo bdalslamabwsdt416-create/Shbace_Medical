@@ -11,8 +11,6 @@ const TABLES = Object.freeze({
   android: { installs: 'android_analytics_installs', events: 'android_analytics_events' }
 });
 let db = null;
-let failures = 0;
-let blockedUntil = 0;
 
 function getTables(platform) { return TABLES[platform] || null; }
 
@@ -68,7 +66,7 @@ async function consumeAdminLoginAttempt(req) {
 }
 async function clearAdminLoginAttempts(req) {
   const result = await redisRateLimitCommand(req, ['DEL', adminRateLimitKey(req)]);
-  return Number(result) >= 0;
+  return result !== null && Number.isFinite(Number(result)) && Number(result) >= 0;
 }
 
 
