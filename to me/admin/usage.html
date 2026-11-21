@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+<title>Shbace Medical · Usage Admin</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#07111e;color:#e8f1fb}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#102b43,#07111e 58%);padding:28px 16px 56px}
+main{max-width:1160px;margin:auto}h1{font-size:clamp(25px,4vw,36px);margin:0 0 8px}h2{font-size:21px;margin:28px 0 12px}
+p{color:#adc1d5;line-height:1.55}.small{font-size:13px}.panel,.platform{background:#0f1f31;border:1px solid #24425e;border-radius:17px;padding:20px}
+.notice{margin:16px 0 24px;border-left:4px solid #40a9ff;background:#10263b;padding:13px 16px;border-radius:8px;color:#cfe5f8}
+form{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}input{flex:1;min-width:210px;background:#081523;border:1px solid #35516c;color:white;border-radius:9px;padding:12px 14px;font-size:15px}
+button{border:0;border-radius:9px;padding:11px 16px;background:#1683d8;color:#fff;font-weight:650;cursor:pointer}button.secondary{background:#294157}button:disabled{opacity:.5;cursor:wait}
+.hidden{display:none!important}.error{color:#ffaaa5;min-height:22px;margin-top:8px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.platform h2{margin:0 0 14px}.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.metric{background:#0a1b2b;border:1px solid #1e3a53;padding:13px;border-radius:12px;min-width:0}.metric span{display:block;color:#99b3ca;font-size:12px}
+.metric strong{display:block;font-size:26px;margin-top:5px;overflow-wrap:anywhere}.metric small{display:block;color:#829bb2;margin-top:4px}
+.compare{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.compare span{background:#142b40;border-radius:9px;padding:8px 11px;font-size:13px}
+.chart{display:flex;align-items:end;gap:3px;height:145px;padding:12px 0 22px;overflow-x:auto;border-bottom:1px solid #294258}
+.bar{flex:1;min-width:5px;background:#2489ce;border-radius:4px 4px 0 0;max-width:22px}.bar.android{background:#52b69a}
+.legend{display:flex;gap:15px;font-size:12px;color:#a7bdd0}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;background:#2489ce}.dot.android{background:#52b69a}
+.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:650px}th,td{text-align:left;padding:11px 9px;border-bottom:1px solid #223c53;font-size:13px}
+th{color:#a6bfd4;font-weight:600}td code{color:#d6e8fa}.status{color:#aac2d8;margin-top:12px;min-height:22px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.panel,.platform{padding:15px}.metric strong{font-size:23px}}
+</style></head><body><main>
+<header><h1>Shbace Medical · Usage Analytics</h1><p class="small">Private administration dashboard</p></header>
+<div class="notice">Counts represent registered app installations/devices, not necessarily unique people. Analytics records a random installation ID and at most one activity timestamp per UTC day. It does not collect student names, phone numbers, locations, study content, answers, scores, notes, bookmarks or saved progress.</div>
+<section id="login" class="panel"><h2>Admin sign in</h2><p class="small">Use the administrator password configured in the hosting environment. It is not embedded in this page.</p>
+<form id="loginForm"><input id="password" type="password" autocomplete="current-password" placeholder="Administrator password" required maxlength="256"><button id="loginButton" type="submit">Sign in</button></form><div id="loginError" class="error" role="alert"></div></section>
+<section id="dashboard" class="hidden">
+<div class="compare"><span id="totalPwa">PWA: —</span><span id="totalAndroid">Android: —</span><span id="totalAll">Combined: —</span><button id="refreshButton" class="secondary">Refresh</button><button id="logoutButton" class="secondary">Sign out</button></div>
+<h2>Platform comparison</h2><div class="grid"><section class="platform"><h2>PWA · Phones and browsers</h2><div id="pwaMetrics" class="metrics"></div></section><section class="platform"><h2>Android app</h2><div id="androidMetrics" class="metrics"></div></section></div>
+<h2>Daily activity · Last 30 days</h2><section class="panel"><div class="legend"><span><i class="dot"></i>PWA</span><span><i class="dot android"></i>Android</span></div><div id="activityChart" class="chart" aria-label="Daily active installations for the last 30 days"></div></section>
+<h2>Last activity per installation</h2><section class="panel table-wrap"><table><thead><tr><th>Platform</th><th>Installation ID</th><th>First seen</th><th>Last activity</th></tr></thead><tbody id="installRows"></tbody></table><div class="compare"><button id="moreButton" class="secondary">Load next page</button><span id="pageLabel" class="small"></span></div></section>
+<div id="dashboardStatus" class="status" role="status"></div></section>
+</main><script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id)},page=1,busy=false;
+function num(v){return Number(v||0).toLocaleString('en-US')}
+function date(v){if(!v)return 'Not recorded';var d=new Date(v);return isNaN(d.getTime())?'Not recorded':d.toLocaleString()}
+function metric(label,value){var box=document.createElement('div'),l=document.createElement('span'),n=document.createElement('strong');box.className='metric';l.textContent=label;n.textContent=num(value);box.append(l,n);return box}
+function renderMetrics(id,data){
+var root=$(id);root.replaceChildren();
+root.append(metric('Total installations',data.totalInstallations),metric('New · 24 hours',data.newInstallations.last24Hours),metric('New · 7 days',data.newInstallations.last7Days),metric('New · 30 days',data.newInstallations.last30Days),metric('Active · 24 hours',data.activeInstallations.last24Hours),metric('Active · 7 days',data.activeInstallations.last7Days),metric('Active · 30 days',data.activeInstallations.last30Days));
+}
+function renderChart(platforms){
+var p=platforms.pwa.dailyActivity||[],a=platforms.android.dailyActivity||[],max=1;p.concat(a).forEach(function(x){max=Math.max(max,x.activeInstallations||0)});
+var chart=$('activityChart');chart.replaceChildren();
+for(var i=0;i<30;i++){
+var d=p[i]||a[i];if(!d)continue;var group=document.createElement('div');group.style.cssText='flex:1;min-width:6px;max-width:22px;height:100%;display:flex;align-items:end;gap:2px';
+[[p[i]?p[i].activeInstallations:0,'bar'],[a[i]?a[i].activeInstallations:0,'bar android']].forEach(function(pair){var bar=document.createElement('div');bar.className=pair[1];bar.style.height=Math.max(2,100*pair[0]/max)+'%';bar.title=d.day+': '+pair[0]+' active installations';group.append(bar)});
+chart.append(group);
+}
+}
+function appendRows(platforms){
+['pwa','android'].forEach(function(platform){(platforms[platform].installations||[]).forEach(function(item){
+var row=document.createElement('tr');
+[platform.toUpperCase(),item.installId,date(item.firstSeenAt),date(item.lastActiveAt)].forEach(function(v,i){var cell=document.createElement('td');if(i===1){var code=document.createElement('code');code.textContent=v;cell.append(code)}else cell.textContent=v;row.append(cell)});
+$('installRows').append(row);
+})});
+}
+async function request(url,opts){
+var r=await fetch(url,Object.assign({cache:'no-store',credentials:'same-origin'},opts||{})),data={};try{data=await r.json()}catch(_){}
+if(!r.ok){var e=new Error(data.error||('Request failed ('+r.status+')'));e.status=r.status;throw e}return data;
+}
+async function load(append){
+if(busy)return;busy=true;$('dashboardStatus').textContent='Loading…';$('refreshButton').disabled=true;
+try{
+var d=await request('/api/analytics/admin-summary?platform=all&page='+page),p=d.platforms.pwa,a=d.platforms.android;
+renderMetrics('pwaMetrics',p);renderMetrics('androidMetrics',a);renderChart(d.platforms);
+if(!append)$('installRows').replaceChildren();appendRows(d.platforms);
+$('totalPwa').textContent='PWA: '+num(p.totalInstallations);$('totalAndroid').textContent='Android: '+num(a.totalInstallations);$('totalAll').textContent='Combined: '+num(p.totalInstallations+a.totalInstallations);
+$('pageLabel').textContent='Page '+page+' · up to 50 installations per platform';$('moreButton').disabled=p.installations.length<50&&a.installations.length<50;
+$('dashboardStatus').textContent='Updated '+new Date().toLocaleTimeString()+'.';
+}catch(e){if(e.status===401){$('dashboard').classList.add('hidden');$('login').classList.remove('hidden');$('loginError').textContent='Please sign in again.'}
+else $('dashboardStatus').textContent=e.message==='analytics_database_not_configured'?'Database not configured. See the setup guide in this repository.':e.message}
+finally{busy=false;$('refreshButton').disabled=false}
+}
+$('loginForm').addEventListener('submit',async function(ev){
+ev.preventDefault();$('loginError').textContent='';$('loginButton').disabled=true;
+try{await request('/api/analytics/admin-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:$('password').value})});$('password').value='';$('login').classList.add('hidden');$('dashboard').classList.remove('hidden');page=1;await load(false)}
+catch(e){$('loginError').textContent=e.message==='admin_auth_not_configured'?'Admin authentication is not configured on the hosting environment.':e.message}
+finally{$('loginButton').disabled=false}
+});
+$('logoutButton').addEventListener('click',async function(){try{await request('/api/analytics/admin-logout',{method:'POST'})}catch(_){}$('dashboard').classList.add('hidden');$('login').classList.remove('hidden')});
+$('refreshButton').addEventListener('click',function(){page=1;load(false)});$('moreButton').addEventListener('click',function(){page++;load(true)});
+request('/api/analytics/admin-summary?platform=all&page=1').then(function(d){
+$('login').classList.add('hidden');$('dashboard').classList.remove('hidden');renderMetrics('pwaMetrics',d.platforms.pwa);renderMetrics('androidMetrics',d.platforms.android);renderChart(d.platforms);appendRows(d.platforms);
+$('totalPwa').textContent='PWA: '+num(d.platforms.pwa.totalInstallations);$('totalAndroid').textContent='Android: '+num(d.platforms.android.totalInstallations);$('totalAll').textContent='Combined: '+num(d.platforms.pwa.totalInstallations+d.platforms.android.totalInstallations);
+}).catch(function(e){if(e.status!==401)$('loginError').textContent=e.message==='analytics_database_not_configured'?'Database not configured.':e.message});
+})();
+</script></body></html>
