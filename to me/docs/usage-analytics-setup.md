@@ -11,13 +11,14 @@ The serverless PostgreSQL driver dependency does not create a database or provis
 3. Set DATABASE_URL in Vercel Preview environment variables only, using a TLS-enabled pooled connection string.
 4. Do not place this secret in GitHub, the repository, HTML, JavaScript, Android resources or build logs.
 
-PWA and Android use different install and event tables. Each install has a random UUID. Each installation can record at most one activity event per UTC date, with database uniqueness constraints and event UUID idempotency. Event detail is deleted after 12 months when a new event is accepted; install totals and first/last activity timestamps remain as aggregate installation records.
+PWA and Android use different install and event tables. Each install has a random UUID. Each installation can record at most one activity event per UTC date, with database uniqueness constraints and event UUID idempotency. Event detail is pruned opportunistically on accepted ingestion and by a daily Vercel Cron cleanup at 03:00 UTC; records older than 12 months are deleted from both platform event tables. Install totals and first/last activity timestamps remain as aggregate installation records. The scheduled cleanup requires CRON_SECRET (at least 32 characters) and runs only after a Production deployment; it is not active in this branch or on Preview.
 
 ## Admin access (approval required)
 Set the following Vercel Preview environment variables:
 - ANALYTICS_ADMIN_PASSWORD: a unique password of at least 16 characters.
 - ANALYTICS_SESSION_SECRET: a random secret of at least 32 bytes.
 - ANALYTICS_ALLOWED_ORIGIN: the exact HTTPS origin used by the application, with no path.
+- CRON_SECRET: a random secret of at least 32 characters; Vercel sends it as the Bearer token for the daily retention-cleanup request.
 
 The Admin page is /admin/usage.html. API endpoints enforce an eight-hour signed HMAC session in a Secure, HttpOnly, SameSite=Strict cookie. No password or secret is embedded in frontend code. The login route applies a best-effort five-failure/15-minute cooldown in each warm function instance; a distributed rate limiter would require an additional approved service.
 
