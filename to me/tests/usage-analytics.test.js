@@ -191,13 +191,27 @@ test('PWA event endpoint rejects hostile origins and invalid payloads',async()=>
  await handler({method:'POST',headers:{origin:'https://shbace-preview.example',host:'shbace-preview.example','content-type':'application/json'},body:{eventId:'bad',installId:install,occurredAt:new Date().toISOString()}},invalid);
  assert.equal(invalid.statusCode,422);
 });
-test('PWA endpoint fails closed until the approved database exists',async()=>{
- const old=process.env.DATABASE_URL;delete process.env.DATABASE_URL;
- const handler=require('../api/analytics/pwa-event'),res=responseStub();
- await handler({method:'POST',headers:{origin:'https://shbace-preview.example',host:'shbace-preview.example','content-type':'application/json'},body:{eventId:event,installId:install,occurredAt:new Date().toISOString()}},res);
- assert.equal(res.statusCode,503);
- assert.equal(JSON.parse(res.body).error,'analytics_database_not_configured');
- if(old!==undefined)process.env.DATABASE_URL=old;
+test('PWA endpoint fails closed until the approved database exists after distributed quota admission',async()=>{
+ const oldDb=process.env.DATABASE_URL;
+ const oldRedis={url:process.env.UPSTASH_REDIS_REST_URL,token:process.env.UPSTASH_REDIS_REST_TOKEN,secret:process.env.ANALYTICS_RATE_LIMIT_SECRET};
+ const oldFetch=global.fetch;
+ delete process.env.DATABASE_URL;
+ process.env.UPSTASH_REDIS_REST_URL='https://unit-test.upstash.io';
+ process.env.UPSTASH_REDIS_REST_TOKEN='test-token';
+ process.env.ANALYTICS_RATE_LIMIT_SECRET='test-rate-limit-secret-with-at-least-32-bytes';
+ global.fetch=async()=>({ok:true,json:async()=>({result:[1,1,1,0,0]})});
+ try {
+  const handler=require('../api/analytics/pwa-event'),res=responseStub();
+  await handler({method:'POST',headers:{origin:'https://shbace-preview.example',host:'shbace-preview.example','content-type':'application/json'},body:{eventId:event,installId:install,occurredAt:new Date().toISOString()}},res);
+  assert.equal(res.statusCode,503);
+  assert.equal(JSON.parse(res.body).error,'analytics_database_not_configured');
+ } finally {
+  global.fetch=oldFetch;
+  if(oldDb===undefined)delete process.env.DATABASE_URL;else process.env.DATABASE_URL=oldDb;
+  for(const [key,value] of Object.entries({UPSTASH_REDIS_REST_URL:oldRedis.url,UPSTASH_REDIS_REST_TOKEN:oldRedis.token,ANALYTICS_RATE_LIMIT_SECRET:oldRedis.secret})){
+   if(value===undefined)delete process.env[key];else process.env[key]=value;
+  }
+ }
 });
 test('Admin summary denies access without an authenticated session',async()=>{
  const handler=require('../api/analytics/admin-summary'),res=responseStub();
