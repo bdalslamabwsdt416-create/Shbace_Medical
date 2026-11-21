@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.UUID;
 
 /**
  * Two things a plain Android WebView cannot do on its own, exposed to the page as window.ShbaceNative:
@@ -37,6 +39,10 @@ import java.io.OutputStream;
  */
 final class ShbaceNative {
     private static final String TAG = "ShbaceNative";
+    private static final String ANALYTICS_PREFS = "shbace_usage_analytics_v1";
+    private static final String ANALYTICS_ID_KEY = "install_id";
+    // Public origin only. Fill this after the hosting domain is approved; never put a secret here.
+    private static final String ANALYTICS_API_BASE_URL = "";
 
     private final Activity activity;
     private final RemoteContentManager remoteContent;
@@ -317,6 +323,29 @@ final class ShbaceNative {
             }
         });
     }
+
+    /** A random per-install UUID, isolated from Android system/device identifiers. */
+    @JavascriptInterface
+    public String getAnalyticsInstallId() {
+        try {
+            SharedPreferences prefs = activity.getSharedPreferences(ANALYTICS_PREFS, Context.MODE_PRIVATE);
+            String saved = prefs.getString(ANALYTICS_ID_KEY, null);
+            if (saved != null) {
+                try { return UUID.fromString(saved).toString(); }
+                catch (IllegalArgumentException ignored) { /* replace invalid stored value */ }
+            }
+            String created = UUID.randomUUID().toString();
+            if (!prefs.edit().putString(ANALYTICS_ID_KEY, created).commit()) return "";
+            return created;
+        } catch (Throwable t) {
+            Log.w(TAG, "Usage analytics identifier is unavailable", t);
+            return "";
+        }
+    }
+
+    /** Empty until an approved HTTPS hosting origin is configured for a future APK build. */
+    @JavascriptInterface
+    public String getAnalyticsApiBaseUrl() { return ANALYTICS_API_BASE_URL; }
 
     @JavascriptInterface
     public String getDeviceInfo() {
