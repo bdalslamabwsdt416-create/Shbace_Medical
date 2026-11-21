@@ -155,17 +155,26 @@ async function ingest(req, res, platform) {
   try { sql = database(); } catch (_) { return sendJson(res, 503, { error: 'analytics_database_unavailable' }); }
   if (!sql) return sendJson(res, 503, { error: 'analytics_database_not_configured' });
   try {
-    await sql.query('INSERT INTO ' + t.installs + ' (install_id, first_seen_at) VALUES ($1::uuid, $2::timestamptz) ON CONFLICT (install_id) DO NOTHING', [ev.installId, ev.occurredAt]);
     const rows = await sql.query(
-      'INSERT INTO ' + t.events + ' (event_id, install_id, event_date, occurred_at) VALUES ($1::uuid, $2::uuid, ($3::timestamptz AT TIME ZONE \\'UTC\\')::date, $3::timestamptz) ON CONFLICT DO NOTHING RETURNING event_id',
-      [ev.eventId, ev.installId, ev.occurredAt]
+      'WITH created_install AS (' +
+      ' INSERT INTO ' + t.installs + ' (install_id, first_seen_at) VALUES ($1::uuid, $3::timestamptz)' +
+      ' ON CONFLICT (install_id) DO NOTHING RETURNING install_id' +
+      '), target_install AS (' +
+      ' SELECT install_id FROM created_install UNION ALL' +
+      ' SELECT install_id FROM ' + t.installs + ' WHERE install_id = $1::uuid AND NOT EXISTS (SELECT 1 FROM created_install)' +
+      '), inserted_event AS (' +
+      ' INSERT INTO ' + t.events + ' (event_id, install_id, event_date, occurred_at)' +
+      ' SELECT $2::uuid, install_id, ($3::timestamptz AT TIME ZONE \\'UTC\\')::date, $3::timestamptz FROM target_install' +
+      ' ON CONFLICT DO NOTHING RETURNING install_id, occurred_at, event_id' +
+      '), updated_install AS (' +
+      ' UPDATE ' + t.installs + ' AS i SET last_active_at = GREATEST(COALESCE(i.last_active_at, e.occurred_at), e.occurred_at)' +
+      ' FROM inserted_event AS e WHERE i.install_id = e.install_id RETURNING e.event_id' +
+      '), pruned_events AS (' +
+      ' DELETE FROM ' + t.events + " WHERE occurred_at < NOW() - INTERVAL \\'12 months\\' AND EXISTS (SELECT 1 FROM inserted_event) RETURNING event_id" +
+      ') SELECT event_id FROM updated_install',
+      [ev.installId, ev.eventId, ev.occurredAt]
     );
-    const inserted = Array.isArray(rows) && rows.length > 0;
-    if (inserted) {
-      await sql.query('UPDATE ' + t.installs + ' SET last_active_at = GREATEST(COALESCE(last_active_at, $2::timestamptz), $2::timestamptz) WHERE install_id = $1::uuid', [ev.installId, ev.occurredAt]);
-      await sql.query('DELETE FROM ' + t.events + ' WHERE occurred_at < NOW() - INTERVAL \\'12 months\\'', []);
-    }
-    return sendJson(res, 200, { accepted: inserted });
+    return sendJson(res, 200, { accepted: Array.isArray(rows) && rows.length > 0 });
   } catch (_) { return sendJson(res, 503, { error: 'analytics_storage_unavailable' }); }
 }
 
