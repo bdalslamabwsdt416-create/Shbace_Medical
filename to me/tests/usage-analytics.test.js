@@ -191,6 +191,19 @@ test('PWA event endpoint rejects hostile origins and invalid payloads',async()=>
  await handler({method:'POST',headers:{origin:'https://shbace-preview.example',host:'shbace-preview.example','content-type':'application/json'},body:{eventId:'bad',installId:install,occurredAt:new Date().toISOString()}},invalid);
  assert.equal(invalid.statusCode,422);
 });
+test('event ingestion rejects oversized bodies, batches and unsupported methods before Redis or database access',async()=>{
+ const handler=require('../api/analytics/pwa-event');
+ const oversized=responseStub();
+ await handler({method:'POST',headers:{origin:'https://shbace-preview.example',host:'shbace-preview.example','content-type':'application/json'},body:'x'.repeat(1025)},oversized);
+ assert.equal(oversized.statusCode,413);
+ const batch=responseStub();
+ await handler({method:'POST',headers:{origin:'https://shbace-preview.example',host:'shbace-preview.example','content-type':'application/json'},body:[{eventId:event,installId:install,occurredAt:new Date().toISOString()}]},batch);
+ assert.equal(batch.statusCode,422);
+ const method=responseStub();
+ await handler({method:'GET',headers:{origin:'https://shbace-preview.example',host:'shbace-preview.example'}},method);
+ assert.equal(method.statusCode,405);
+});
+
 test('PWA endpoint fails closed until the approved database exists after distributed quota admission',async()=>{
  const oldDb=process.env.DATABASE_URL;
  const oldRedis={url:process.env.UPSTASH_REDIS_REST_URL,token:process.env.UPSTASH_REDIS_REST_TOKEN,secret:process.env.ANALYTICS_RATE_LIMIT_SECRET};
