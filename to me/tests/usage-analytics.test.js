@@ -137,6 +137,8 @@ test('PWA source summary groups official domain aliases into the five published 
 test('source_host is added only to PWA inserts; Android analytics keeps its original schema',()=>{
  assert.ok(analyticsSource.includes("const sourceColumn = platform === 'pwa' ? ', source_host' : '';"));
  assert.ok(analyticsSource.includes("const sourceValue = platform === 'pwa' ? ', $4::text' : '';"));
+ assert.ok(analyticsSource.includes("const sourceUpdate = platform === 'pwa'"));
+ assert.ok(analyticsSource.includes("COALESCE(' + t.installs + '.source_host, EXCLUDED.source_host)"));
  assert.ok(analyticsSource.includes("const params = platform === 'pwa'"));
  assert.ok(analyticsSource.includes("' INSERT INTO ' + t.installs + ' (install_id, first_seen_at, last_active_at' + sourceColumn + ')'"));
 });
@@ -146,9 +148,7 @@ test('PWA source is captured once and fills legacy rows without overwriting know
  assert.ok(analyticsSource.includes("const params = platform === 'pwa'"));
  const conflict=analyticsSource.slice(analyticsSource.indexOf('ON CONFLICT (install_id) DO UPDATE'),analyticsSource.indexOf('RETURNING install_id',analyticsSource.indexOf('ON CONFLICT (install_id) DO UPDATE')));
  assert.ok(conflict.includes('last_active_at'));
- assert.ok(conflict.includes('source_host = COALESCE('));
- assert.ok(conflict.includes('.source_host, EXCLUDED.source_host'));
- assert.ok(!conflict.includes('source_host = EXCLUDED.source_host'));
+ assert.ok(conflict.includes('sourceUpdate'));
  assert.ok(schemaSource.includes('ADD COLUMN IF NOT EXISTS source_host TEXT'));
 });
 test('event-first ingestion relies on deferred foreign keys and upserts the install only for a new event',()=>{
