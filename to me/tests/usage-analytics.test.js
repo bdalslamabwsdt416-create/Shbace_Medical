@@ -141,6 +141,12 @@ function makeClient({storage,online,native}) {
  return {window,document,listeners,docListeners,calls,storage};
 }
 
+test('Vercel raw-body endpoints explicitly disable automatic body parsing',()=>{
+ for(const route of ['../api/analytics/pwa-event','../api/analytics/android-event','../api/analytics/admin-login']){
+  const handler=require(route);
+  assert.deepEqual(handler.config,{api:{bodyParser:false}});
+ }
+});
 test('PWA installation UUID remains stable and daily queue stays bounded to one event',()=>{
  const storage=new Map();
  const first=makeClient({storage,online:false});
