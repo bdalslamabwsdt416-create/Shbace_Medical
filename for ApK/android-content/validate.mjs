@@ -207,8 +207,12 @@ for (const overridePath of (catalog.overrideFiles || [])) {
     seenAddedQuestionIds.add(addition.id);
     assert(typeof addition.targetSpec === 'string' && addition.targetSpec.trim(),
       'New-question insertion needs targetSpec: ' + addition.id);
-    assert(Number.isInteger(addition.targetTopicId),
-      'New-question insertion needs an integer targetTopicId: ' + addition.id);
+    assert(typeof addition.targetBank === 'string' && /^[a-z][a-z0-9-]*$/.test(addition.targetBank),
+      'New-question insertion needs a valid targetBank: ' + addition.id);
+    assert(typeof addition.targetTopicName === 'string' && addition.targetTopicName.trim(),
+      'New-question insertion needs targetTopicName: ' + addition.id);
+    if (addition.targetTopicId != null) assert(Number.isInteger(addition.targetTopicId) && addition.targetTopicId > 0,
+      'New-question insertion targetTopicId must be a positive integer when supplied: ' + addition.id);
     const q = addition.question;
     assert(q && typeof q === 'object' && !Array.isArray(q),
       'New-question insertion needs a question object: ' + addition.id);
