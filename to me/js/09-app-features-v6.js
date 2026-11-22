@@ -3023,7 +3023,8 @@ window.__SHB_BRIDGE={
     QB.push(q);known.add(q.id);QBY.set(q.id,q);qmap.set(q.id,q);topicQuestions.push(q);added++;
    });
    REAL.spec[spec].q=(Number(REAL.spec[spec].q)||0)+topicQuestions.length;
-   SRT_Q.set(topicId,topicQuestions);g.questions=topicQuestions;
+   SRT_Q.set(topicId,topicQuestions);
+   try{var cap=window.Capacitor;if(cap&&cap.getPlatform&&cap.getPlatform()==='android'&&cap.isNativePlatform&&cap.isNativePlatform())g.questions=topicQuestions;}catch(e){}
    var topicRecord={id:topicId,name:topicName,sy:String(g.systemName||g.bankLabel||label||key),spec:spec,specLabel:SPEC_NAME[spec]||spec,key:spec+'|'+String(g.systemName||g.bankLabel||label||key)+'|'+topicName};
    SRT.push(topicRecord);SRT_BY.set(topicId,topicRecord);
   });
