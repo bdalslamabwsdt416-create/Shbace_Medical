@@ -367,8 +367,8 @@ test('Android UUID remains backed by private SharedPreferences and Android relea
  assert.ok(native.includes('getSharedPreferences(ANALYTICS_PREFS, Context.MODE_PRIVATE)'));
  assert.ok(native.includes('UUID.randomUUID().toString()'));
  assert.ok(native.includes('prefs.edit().putString(ANALYTICS_ID_KEY, created).commit()'));
- assert.ok(gradle.includes('versionCode 18'));
- assert.ok(gradle.includes('versionName "1.3.9"'));
+ assert.ok(gradle.includes('versionCode 19'));
+ assert.ok(gradle.includes('versionName "1.3.10"'));
 });
 
 test('Admin logout rejects cross-origin requests and clears the hardened session cookie on same-origin POST',async()=>{

@@ -3,5 +3,30 @@
   "systems": [],
   "topics": [],
   "questionPatches": [],
+  "questionAdds": [
+    {
+      "id": "crohn-case-001",
+      "targetSpec": "git",
+      "targetBank": "generated-ai",
+      "targetTopicName": "Chronic Abdominal Pain and Infantile Colic",
+      "question": {
+        "id": "crohn-case-001",
+        "stem": "A 10-year-old boy is brought to the pediatric clinic with a 5-month history of recurrent abdominal pain. The pain initially was periumbilical but has progressively become localized to the right lower quadrant. His parents report that he has recently lost weight and has been waking up at night because of abdominal pain. He also complains of painful defecation. On examination, his height and weight are below the expected percentiles for age. He has mild pallor, right lower quadrant tenderness, perianal skin tags, and a small fistula. Investigations show iron-deficiency anemia, elevated ESR, and hypoalbuminemia. Which is the most likely diagnosis?",
+        "options": [
+          "Functional abdominal pain disorder with visceral hypersensitivity",
+          "Irritable bowel syndrome associated with psychological stress",
+          "Crohn's disease with intestinal and perianal involvement",
+          "Peptic ulcer disease causing chronic gastrointestinal blood loss",
+          "Eosinophilic esophagitis presenting with atypical abdominal symptoms"
+        ],
+        "correctIndex": 2,
+        "explanation": "Weight loss, growth failure, nocturnal pain, anemia, elevated ESR, and hypoalbuminemia are alarm features indicating organic disease. Perianal skin tags and a fistula strongly support Crohn's disease rather than functional abdominal pain or irritable bowel syndrome.",
+        "extendedExplanation": "Crohn's disease is a transmural inflammatory bowel disease that can affect any part of the gastrointestinal tract, commonly the terminal ileum. Terminal ileal inflammation explains progressive right-lower-quadrant pain, while transmural inflammation can extend through the bowel wall and produce perianal fistulas and skin tags. Chronic intestinal inflammation causes iron-deficiency anemia, elevated ESR, hypoalbuminemia, weight loss, and impaired linear growth. Nocturnal pain and growth faltering are red flags against a functional abdominal pain disorder. The combination of intestinal and perianal manifestations makes Crohn's disease the most likely diagnosis.",
+        "tag": "Clinical Case",
+        "kind": "Diagnosis",
+        "source": "SHBACE Medical — Clinical Case"
+      }
+    }
+  ],
   "collections": []
 }

@@ -3024,6 +3024,7 @@ window.__SHB_BRIDGE={
    });
    REAL.spec[spec].q=(Number(REAL.spec[spec].q)||0)+topicQuestions.length;
    SRT_Q.set(topicId,topicQuestions);
+   try{var cap=window.Capacitor;if(cap&&cap.getPlatform&&cap.getPlatform()==='android'&&cap.isNativePlatform&&cap.isNativePlatform())g.questions=topicQuestions;}catch(e){}
    var topicRecord={id:topicId,name:topicName,sy:String(g.systemName||g.bankLabel||label||key),spec:spec,specLabel:SPEC_NAME[spec]||spec,key:spec+'|'+String(g.systemName||g.bankLabel||label||key)+'|'+topicName};
    SRT.push(topicRecord);SRT_BY.set(topicId,topicRecord);
   });
@@ -3034,6 +3035,55 @@ window.__SHB_BRIDGE={
  get topicIcon(){return topicIcon},set topicIcon(f){topicIcon=f},
  get topicCards(){return topicCards},set topicCards(f){topicCards=f}
 };
+/* Android-only append operation for an already registered local topic.
+   Keeps the canonical question array, lookup maps, topic counts and derived caches in sync. */
+(function installAndroidLocalTopicAppend(){
+ var C=window.Capacitor;
+ var nativeAndroid=false;
+ try{nativeAndroid=!!(C&&C.getPlatform&&C.getPlatform()==='android'&&C.isNativePlatform&&C.isNativePlatform());}catch(e){}
+ if(!nativeAndroid)return;
+ window.__SHB_BRIDGE.appendQuestionToExistingTopic=function(question,targetBank,targetSpec,targetTopicName,expectedTopicId){
+  var bank=String(targetBank||''),spec=String(targetSpec||''),name=String(targetTopicName||'');
+  if(!question||typeof question!=='object'||!question.id||!question.q||!Array.isArray(question.o)||question.o.length<2||
+     !Number.isInteger(question.k)||question.k<0||question.k>=question.o.length)throw new Error('Invalid question for local-topic append.');
+  if(!BANK_KEYS.has(bank))throw new Error('Unknown target question bank: '+bank);
+  if(!REAL.spec||!REAL.spec[spec])return false;
+  var matches=SRT.filter(function(record){
+   if(!record||record.spec!==spec||record.name!==name)return false;
+   var list=SRT_Q.get(Number(record.id))||[];
+   return list.some(function(existing){return existing&&bankOf(existing)===bank;});
+  });
+  if(!matches.length)return false;
+  if(matches.length!==1)throw new Error('Target topic name is ambiguous in '+spec+': '+name);
+  var topicId=Number(matches[0].id);
+  if(expectedTopicId!=null&&Number(expectedTopicId)!==topicId)throw new Error('Target topic ID does not match the registered topic.');
+  if(QBY.has(String(question.id))||QB.some(function(existing){return existing&&String(existing.id)===String(question.id);}))
+   throw new Error('Question ID already exists: '+question.id);
+  var topicRow=REAL.spec[spec].topics.find(function(row){return row&&Number(row[0])===topicId;});
+  if(!topicRow)throw new Error('Registered topic metadata is missing: '+spec+'/'+topicId);
+  var list=SRT_Q.get(topicId);
+  if(!Array.isArray(list))throw new Error('Registered topic question list is missing: '+topicId);
+  question.spec=spec;question.topic=topicId;question.bank=bank;
+  QB.push(question);QBY.set(question.id,question);qmap.set(question.id,question);list.push(question);
+  topicRow[2]=(Number(topicRow[2])||0)+1;
+  REAL.spec[spec].q=(Number(REAL.spec[spec].q)||0)+1;
+  REAL.total=QB.length;
+  if(window.__bank)window.__bank.total=QB.length;
+  var bankRegistry=window.__SHB_BRIDGE.AI_BANK_REGISTRY;
+  var bankEntry=bankRegistry&&bankRegistry[bank];
+  if(bankEntry){
+   bankEntry.questions=(Number(bankEntry.questions)||0)+1;
+   if(bankEntry.validation){
+    bankEntry.validation.questions=(Number(bankEntry.validation.questions)||0)+1;
+    bankEntry.validation.registered=(Number(bankEntry.validation.registered)||0)+1;
+   }
+   var systemEntry=(bankEntry.systems||[]).find(function(entry){return entry&&entry.spec===spec&&entry.name===matches[0].sy;});
+   if(systemEntry)systemEntry.count=(Number(systemEntry.count)||0)+1;
+  }
+  gIdx=null;srCache=null;_qsg=null;_qsgN=-1;
+  return {added:1,topicId:topicId,total:QB.length};
+ };
+})();
 /*SHB-BRIDGE-END*/
 
 /* =====================================================================

@@ -40,6 +40,8 @@
   var installedManifest = null;
   var loadedVersion = '';
   var banks = Object.create(null);
+  var pendingQuestionAdds = Object.create(null);
+  var appliedQuestionAdds = Object.create(null);
   var resources = [];
   var flashcardDecks = [];
   var currentDeckId = '';
@@ -242,15 +244,78 @@
       if (!source || source.schema !== 'shbace-remote-overrides-v1') {
         throw new Error('Remote overrides file is invalid: ' + path);
       }
-      ['systems', 'topics', 'questionPatches', 'collections'].forEach(function (key) {
+      ['systems', 'topics', 'questionPatches', 'questionAdds', 'collections'].forEach(function (key) {
         if (source[key] != null && !Array.isArray(source[key])) throw new Error('Invalid override list: ' + key);
       });
       (source.systems || []).forEach(updateSystem);
       (source.topics || []).forEach(updateTopic);
       (source.questionPatches || []).forEach(updateQuestion);
+      (source.questionAdds || []).forEach(function (item) {
+        if (!item || !String(item.id || '').trim() || !String(item.targetSpec || '').trim() ||
+            !String(item.targetBank || '').trim() || !String(item.targetTopicName || '').trim() ||
+            !item.question || typeof item.question !== 'object' || Array.isArray(item.question)) {
+          throw new Error('Invalid new-question insertion record.');
+        }
+        var rawId = String(item.id).trim();
+        if (rawId.length > 160 || expected['add:' + rawId]) {
+          throw new Error('Duplicate or oversized new-question insertion ID: ' + rawId);
+        }
+        expected['add:' + rawId] = true;
+        var targetSpec = String(item.targetSpec).trim();
+        var targetBank = String(item.targetBank).trim();
+        var targetTopicName = String(item.targetTopicName).trim();
+        var operationKey = targetBank + '|' + targetSpec + '|' + targetTopicName + '|' + rawId;
+        if (appliedQuestionAdds[operationKey] || pendingQuestionAdds[operationKey]) return;
+        var bank = { id: 'local-additions', label: 'Remote question additions' };
+        var system = { spec: targetSpec };
+        var question = normalizeQuestion(item.question, bank, system, null);
+        question.id = 'rc-add-' + stableHash(operationKey).toString(36) + '-' + slug(rawId).slice(0, 32);
+        question.spec = targetSpec;
+        question.remoteBankId = 'local-additions';
+        var pending = {
+          operationKey: operationKey, targetBank: targetBank, targetSpec: targetSpec,
+          targetTopicName: targetTopicName,
+          targetTopicId: item.targetTopicId == null ? null : Number(item.targetTopicId),
+          question: question
+        };
+        var result = B.appendQuestionToExistingTopic &&
+          B.appendQuestionToExistingTopic(question, targetBank, targetSpec, targetTopicName, pending.targetTopicId);
+        if (result) appliedQuestionAdds[operationKey] = true;
+        else pendingQuestionAdds[operationKey] = pending;
+      });
       (source.collections || []).forEach(updateCollection);
     });
     window.__SHB_REMOTE_COLLECTION_OVERRIDES__ = bankImageChanges;
+  }
+
+  function flushPendingQuestionAdds(bankId) {
+    Object.keys(pendingQuestionAdds).forEach(function (key) {
+      var pending = pendingQuestionAdds[key];
+      if (!pending || pending.targetBank !== bankId) return;
+      try {
+        var result = B.appendQuestionToExistingTopic &&
+          B.appendQuestionToExistingTopic(pending.question, pending.targetBank, pending.targetSpec,
+            pending.targetTopicName, pending.targetTopicId);
+        if (result) {
+          appliedQuestionAdds[key] = true;
+          delete pendingQuestionAdds[key];
+          console.info('SHBACE remote content: appended question to existing topic', key, result.topicId);
+        }
+      } catch (error) {
+        console.error('SHBACE remote content: deferred question append failed', key, error);
+      }
+    });
+  }
+  /* Existing AI/external banks are registered lazily. Retry queued additions immediately after
+     their native question engine registration completes, without changing the bank adapter. */
+  if (typeof B.registerExternalBank === 'function' && !B.__questionAddsWrapped) {
+    var originalRegisterExternalBank = B.registerExternalBank;
+    B.registerExternalBank = function (key, label, groups) {
+      var result = originalRegisterExternalBank.apply(this, arguments);
+      flushPendingQuestionAdds(String(key || ''));
+      return result;
+    };
+    B.__questionAddsWrapped = true;
   }
 
   function injectCollectionOverrides() {
