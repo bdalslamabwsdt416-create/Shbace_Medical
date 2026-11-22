@@ -5,8 +5,13 @@
 CREATE TABLE IF NOT EXISTS pwa_analytics_installs (
   install_id UUID PRIMARY KEY,
   first_seen_at TIMESTAMPTZ NOT NULL,
-  last_active_at TIMESTAMPTZ
+  last_active_at TIMESTAMPTZ,
+  source_host TEXT
 );
+-- Existing rows remain NULL: their original PWA hostname was never recorded.
+ALTER TABLE pwa_analytics_installs
+  ADD COLUMN IF NOT EXISTS source_host TEXT;
+
 CREATE TABLE IF NOT EXISTS pwa_analytics_events (
   event_id UUID PRIMARY KEY,
   install_id UUID NOT NULL REFERENCES pwa_analytics_installs(install_id) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED,
