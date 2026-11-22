@@ -312,6 +312,24 @@ function allowedEventOrigin(req) {
     return sameOrigin(req);
   } catch (_) { return false; }
 }
+
+/* Attribute a new PWA installation to the serving hostname only.
+   Never persist referrers, query strings, IP addresses or User-Agent values. */
+function sourceHost(req) {
+  const headers = req && req.headers || {};
+  let host = '';
+  try {
+    if (headers.origin) host = new URL(headers.origin).hostname;
+    else if (headers.host) host = new URL('https://' + String(headers.host)).hostname;
+  } catch (_) { return null; }
+  host = String(host || '').toLowerCase().replace(/\\.$/, '');
+  if (host === 'localhost') return host;
+  if (!host || host.length > 253 || !host.includes('.') ||
+      /^(?:\\d{1,3}\\.){3}\\d{1,3}$/.test(host)) return null;
+  const labels = host.split('.');
+  if (labels.some(label => !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label))) return null;
+  return host;
+}
 function cors(req, res) {
   const origin = req.headers && req.headers.origin;
   if (!origin) return true;
@@ -441,14 +459,14 @@ async function ingest(req, res, platform) {
       ' VALUES ($2::uuid, $1::uuid, ($3::timestamptz AT TIME ZONE \'UTC\')::date, $3::timestamptz)' +
       ' ON CONFLICT DO NOTHING RETURNING install_id, occurred_at, event_id' +
       '), upsert_install AS (' +
-      ' INSERT INTO ' + t.installs + ' (install_id, first_seen_at, last_active_at)' +
-      ' SELECT install_id, occurred_at, occurred_at FROM inserted_event' +
+      ' INSERT INTO ' + t.installs + ' (install_id, first_seen_at, last_active_at, source_host)' +
+      ' SELECT install_id, occurred_at, occurred_at, $4::text FROM inserted_event' +
       ' ON CONFLICT (install_id) DO UPDATE SET last_active_at = GREATEST(COALESCE(' + t.installs + '.last_active_at, EXCLUDED.last_active_at), EXCLUDED.last_active_at)' +
       ' RETURNING install_id' +
       '), pruned_events AS (' +
       ' DELETE FROM ' + t.events + " WHERE occurred_at < NOW() - INTERVAL \'12 months\' AND EXISTS (SELECT 1 FROM inserted_event) RETURNING event_id" +
       ') SELECT event_id FROM inserted_event',
-      [ev.installId, ev.eventId, ev.occurredAt]
+      [ev.installId, ev.eventId, ev.occurredAt, platform === 'pwa' ? sourceHost(req) : null]
     );
     return sendJson(res, 200, { accepted: Array.isArray(rows) && rows.length > 0 });
   } catch (_) { return sendJson(res, 503, { error: 'analytics_storage_unavailable' }); }
@@ -481,11 +499,28 @@ async function platformSummary(sql, platform, page, pageSize) {
     page, pageSize
   };
 }
+async function pwaSourceBreakdown(sql) {
+  const rows = await sql.query(
+    'SELECT COALESCE(source_host, \'unattributed\') AS source_host, COUNT(*)::int AS installations' +
+    ' FROM pwa_analytics_installs GROUP BY source_host ORDER BY installations DESC, source_host ASC', []
+  );
+  return (rows || []).map(row => ({
+    sourceHost: row.source_host,
+    installations: Number(row.installations || 0)
+  }));
+}
+
 async function summary(platform, page, size) {
   const sql = database();
   if (!sql) throw new Error('analytics_database_not_configured');
-  if (platform === 'pwa' || platform === 'android') return { platform, page, pageSize: size, platforms: { [platform]: await platformSummary(sql, platform, page, size) } };
+  if (platform === 'pwa') {
+    const data = await platformSummary(sql, 'pwa', page, size);
+    data.sourceBreakdown = await pwaSourceBreakdown(sql);
+    return { platform, page, pageSize: size, platforms: { pwa: data } };
+  }
+  if (platform === 'android') return { platform, page, pageSize: size, platforms: { android: await platformSummary(sql, 'android', page, size) } };
   const result = await Promise.all([platformSummary(sql, 'pwa', page, size), platformSummary(sql, 'android', page, size)]);
+  result[0].sourceBreakdown = await pwaSourceBreakdown(sql);
   return { platform: 'all', page, pageSize: size, platforms: { pwa: result[0], android: result[1] } };
 }
 module.exports = {
@@ -493,5 +528,5 @@ module.exports = {
   createSession, validSession, hasSession, setCookie, clearCookie,
   consumeAdminLoginAttempt, clearAdminLoginAttempts, consumeIngestionAttempt,
   ingestionRateLimitKeys, INGESTION_PER_MINUTE_LIMIT, INGESTION_PER_DAY_LIMIT,
-  ingest, summary, cronAuthorized, cleanupExpiredEvents
+  ingest, summary, sourceHost, cronAuthorized, cleanupExpiredEvents
 };
