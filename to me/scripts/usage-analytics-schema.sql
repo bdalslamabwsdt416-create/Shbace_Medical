@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS pwa_analytics_installs (
   last_active_at TIMESTAMPTZ,
   source_host TEXT
 );
--- Existing rows remain NULL: their original PWA hostname was never recorded.
+-- Existing rows start NULL and are attributed on their next same-origin activity; known sources are never overwritten.
 ALTER TABLE pwa_analytics_installs
   ADD COLUMN IF NOT EXISTS source_host TEXT;
 
