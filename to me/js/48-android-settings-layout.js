@@ -26,6 +26,7 @@
     { id: 'reminders', title: 'Study reminders', description: 'Reminder settings connected to your study and exam plans.' },
     { id: 'experience', title: 'Onboarding', description: 'Control the welcome screens shown when the app starts.' },
     { id: 'data', title: 'Backup & restore', description: 'Export or restore student information saved on this device.' },
+    { id: 'privacy', title: 'Privacy & data', description: 'Review the limited technical data used for basic app operation.' },
     { id: 'progress', title: 'Study progress', description: 'Manage answers and progress without removing your saved notes or bookmarks.' },
     { id: 'other', title: 'More settings', description: 'Other settings and controls remain available here.' },
     { id: 'updates', title: 'Updates', description: 'Check for a new APK version and refresh learning content.' }
@@ -81,6 +82,7 @@
 
   function categoryFor(node) {
     if (node.id === 'bkFile') return 'data';
+    if (node.classList.contains('shb-privacy-card')) return 'privacy';
     if (node.classList.contains('shb-remote-settings') || node.classList.contains('shb-apk-update-card')) return 'updates';
     if (node.classList.contains('u10-settings-card')) return 'notifications';
     if (node.id === 'shbUnifiedVoiceSettings') return 'appearance';
