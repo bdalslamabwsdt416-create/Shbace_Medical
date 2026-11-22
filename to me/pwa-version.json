@@ -1,10 +1,11 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.10-to-me.52",
-  "displayVersion": "1.3.10.52 · Chrome (Phone + Computer)",
+  "version": "1.3.10-to-me.53",
+  "displayVersion": "1.3.10.53 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-22",
   "releaseNotes": [
+    "Adds the Read More control for remote-added questions with an extended explanation, and labels their source correctly.",
     "Restores older installed copies from the cached offline manifest when IndexedDB or the READY marker is missing, preventing returning students from being forced through first-install Setup.",
     "Adds silent repair for returning installs with prior successful-install evidence and immediate online repair when the cached app shell is missing. Keeps the existing 48-hour update-check cadence, cache namespace, IndexedDB identity and student progress.",
     "Adds a direction-aware sticky Back control to study screens: it stays accessible while scrolling, becomes compact and translucent when scrolling down, and becomes fully visible on the first upward movement. Restores the exact scroll position and list state when returning from a topic to its system/topic list, while preserving existing student answers and progress.",
@@ -26,7 +27,6 @@
     "Shows the cinematic splash on every app open. The seven-day interval applies only to automatic update checks, not the splash."
   ],
   "summary": [
-    "Restores older installed offline copies without forcing a blocking first-install Setup screen when recoverable cached files or prior installation evidence remain.",
-    "Repairs a missing cached app shell immediately when online, while keeping the routine manifest check every 48 hours and preserving the existing cache namespace and student progress."
+    "Remote-added questions now display their advanced explanation through Read More after the answer is submitted, while retaining the short explanation and source attribution."
   ]
 }

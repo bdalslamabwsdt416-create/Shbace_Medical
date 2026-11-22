@@ -88,8 +88,8 @@ test("questionAdds waits for lazily registered banks and uses bank/topic names r
   assert.match(remote, /originalRegisterExternalBank\.apply\(this, arguments\)/);
   assert.match(adapter, /if\(nativeAndroid\)B\.AI_BANK_REGISTRY=registry/);
   assert.match(core, /if\(!nativeAndroid\)return/);
-  assert.equal(packageManifest.version, "1.0.4");
-  assert.equal(packageManifest.contentVersionCode, 4);
+  assert.equal(packageManifest.version, "1.0.5");
+  assert.equal(packageManifest.contentVersionCode, 5);
   assert.equal(packageManifest.minAppVersionCode, 19);
   assert.equal(packageCatalog.version, packageManifest.version);
   const addition = overrides.questionAdds.find((item) => item.id === "crohn-case-001");
@@ -98,4 +98,10 @@ test("questionAdds waits for lazily registered banks and uses bank/topic names r
   assert.equal(addition.targetBank, "generated-ai");
   assert.equal(addition.targetTopicName, "Chronic Abdominal Pain and Infantile Colic");
   assert.equal(addition.question.correctIndex, 2);
+});
+
+test("remote-added questions with extended explanations render the Read More section", () => {
+  assert.match(core, /!q\.remoteBankId\)\|\|!q\.more\)return ''/);
+  assert.match(core, /q\.remoteBankId\?String\(q\.src\|\|'Remote question bank source'\)/);
+  assert.match(core, /<summary>'\+'Read More'\+'<\/summary>/);
 });

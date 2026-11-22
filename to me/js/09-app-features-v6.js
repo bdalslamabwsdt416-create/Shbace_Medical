@@ -283,8 +283,8 @@ function fmtExplanationHTML(text){
   return rest?'<p class="nl-sec"><b class="nl-lbl">'+esc(m[1])+'</b>'+esc(rest)+'</p>':''}).join('');
 }
 function nelsonDetails(q){
- if(!q||(!q.nl&&!q.ao&&!q.cc&&!q.aiBank)||!q.more)return '';
- const source=q.aiBank?String(q.src||'AI question bank source'):q.eb?(q.ebSourceFile||'Egyptian Book source'):q.cc?(q.ccSource||'Accepted Clinical Case source'):q.ao?(q.aoSource||'Source details unavailable'):'Nelson Textbook of Pediatrics.';
+ if(!q||(!q.nl&&!q.ao&&!q.cc&&!q.aiBank&&!q.remoteBankId)||!q.more)return '';
+ const source=q.remoteBankId?String(q.src||'Remote question bank source'):q.aiBank?String(q.src||'AI question bank source'):q.eb?(q.ebSourceFile||'Egyptian Book source'):q.cc?(q.ccSource||'Accepted Clinical Case source'):q.ao?(q.aoSource||'Source details unavailable'):'Nelson Textbook of Pediatrics.';
  let moreBody=cleanExplanationText(q.more).replace(/^Explanation\s*:\s*/i,'');const lead=cleanExplanationText(q.ex).replace(/^Explanation\s*:\s*/i,'');
  if(lead&&moreBody.startsWith(lead))moreBody=moreBody.slice(lead.length).trim();
  const alt=q.ao&&!q.eb&&q.aoAltSource?'<p class="nl-source">Also found in: '+esc(q.aoAltSource)+'</p>':'';
