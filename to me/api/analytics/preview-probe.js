@@ -31,20 +31,21 @@ module.exports = async function previewAnalyticsProbe(req, res) {
   }
 
   const host = req.headers.host;
-  const share = url.searchParams.get('_vercel_share') || '';
   const base = 'https://' + host;
   const configuredOrigins = String(process.env.ANALYTICS_ALLOWED_ORIGIN || '').split(',').map(x => x.trim()).filter(Boolean);
   const pwaOrigin = configuredOrigins.find(x => x.includes('computer')) || configuredOrigins[0] || '';
-  const shareSuffix = share ? '?_vercel_share=' + encodeURIComponent(share) : '';
+
   const stages = {};
   const installIds = { pwa: crypto.randomUUID(), android: crypto.randomUUID() };
   let sessionCookie = '';
   let sql;
 
-  async function call(path, method, body, headers) {
+  async function call(path, method, body, headers, shareToken) {
     const options = { method, headers: headers || {} };
     if (body !== undefined) options.body = body;
-    const response = await fetch(base + path + shareSuffix, options);
+    const separator = path.includes('?') ? '&' : '?';
+    const target = base + path + (shareToken ? separator + '_vercel_share=' + encodeURIComponent(shareToken) : '');
+    const response = await fetch(target, options);
     const raw = await response.text();
     let payload;
     try { payload = JSON.parse(raw); } catch (_) { payload = { raw: raw.slice(0, 180) }; }
@@ -62,34 +63,34 @@ module.exports = async function previewAnalyticsProbe(req, res) {
     const pwaEvent = eventPayload(installIds.pwa, crypto.randomUUID());
     const pwa = await call('/api/analytics/pwa-event', 'POST', JSON.stringify(pwaEvent), {
       'Content-Type': 'application/json', Origin: pwaOrigin
-    });
+    }, process.env.ANALYTICS_TEST_SHARE_PWA);
     check(pwa.status === 200 && pwa.payload.accepted === true, 'pwa_post_failed', { status: pwa.status, payload: pwa.payload, allowOrigin: pwa.headers.get('access-control-allow-origin'), pwaOrigin });
     check(pwa.headers.get('access-control-allow-origin') === pwaOrigin, 'pwa_cors_failed');
     stages.pwaPost = 'passed';
 
     const replay = await call('/api/analytics/pwa-event', 'POST', JSON.stringify(pwaEvent), {
       'Content-Type': 'application/json', Origin: pwaOrigin
-    });
+    }, process.env.ANALYTICS_TEST_SHARE_PWA);
     check(replay.status === 200 && replay.payload.accepted === false, 'pwa_idempotency_failed');
     stages.pwaReplay = 'passed';
 
     const sameDay = await call('/api/analytics/pwa-event', 'POST',
       JSON.stringify(eventPayload(installIds.pwa, crypto.randomUUID())), {
         'Content-Type': 'application/json', Origin: pwaOrigin
-      });
+      }, process.env.ANALYTICS_TEST_SHARE_PWA);
     check(sameDay.status === 200 && sameDay.payload.accepted === false, 'pwa_daily_uniqueness_failed');
     stages.pwaDailyUniqueness = 'passed';
 
     const android = await call('/api/analytics/android-event', 'POST',
       JSON.stringify(eventPayload(installIds.android, crypto.randomUUID())), {
         'Content-Type': 'application/json', Origin: 'capacitor://localhost'
-      });
+      }, process.env.ANALYTICS_TEST_SHARE_ANDROID);
     check(android.status === 200 && android.payload.accepted === true, 'android_post_failed');
     stages.androidPost = 'passed';
 
     const oversized = await call('/api/analytics/pwa-event', 'POST', 'x'.repeat(1025), {
       'Content-Type': 'application/json', Origin: pwaOrigin
-    });
+    }, process.env.ANALYTICS_TEST_SHARE_PWA);
     check(oversized.status === 413, 'raw_body_limit_failed');
     stages.rawBodyLimit = 'passed';
 
@@ -107,7 +108,7 @@ module.exports = async function previewAnalyticsProbe(req, res) {
 
     const summary = await call('/api/analytics/admin-summary?platform=all&page=1', 'GET', undefined, {
       Cookie: sessionCookie
-    });
+    }, process.env.ANALYTICS_TEST_SHARE_SUMMARY);
     check(summary.status === 200 && summary.payload.platforms &&
       summary.payload.platforms.pwa && summary.payload.platforms.android, 'admin_summary_failed');
     check(summary.payload.platforms.pwa.totalInstallations >= 1 &&
@@ -116,14 +117,14 @@ module.exports = async function previewAnalyticsProbe(req, res) {
 
     const logout = await call('/api/analytics/admin-logout', 'POST', undefined, {
       Origin: pwaOrigin, Cookie: sessionCookie
-    });
+    }, process.env.ANALYTICS_TEST_SHARE_LOGOUT);
     check(logout.status === 200 && logout.payload.authenticated === false, 'admin_logout_failed');
     stages.adminLogout = 'passed';
     sessionCookie = '';
 
     const cleanup = await call('/api/analytics/cleanup', 'GET', undefined, {
       Authorization: 'Bearer ' + process.env.CRON_SECRET
-    });
+    }, process.env.ANALYTICS_TEST_SHARE_CLEANUP);
     check(cleanup.status === 200 && cleanup.payload.cleaned === true, 'cron_cleanup_failed');
     stages.cronCleanup = 'passed';
 
@@ -152,7 +153,7 @@ module.exports = async function previewAnalyticsProbe(req, res) {
     } catch (_) {}
     if (sessionCookie) {
       try {
-        await call('/api/analytics/admin-logout', 'POST', undefined, { Origin: pwaOrigin, Cookie: sessionCookie });
+        await call('/api/analytics/admin-logout', 'POST', undefined, { Origin: pwaOrigin, Cookie: sessionCookie }, process.env.ANALYTICS_TEST_SHARE_LOGOUT);
       } catch (_) {}
     }
     return reply(res, 502, { ok: false, failedStage: error.message || 'preview_probe_failed', diagnostic: error.info || null, stages });
