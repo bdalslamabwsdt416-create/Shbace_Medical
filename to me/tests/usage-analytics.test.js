@@ -141,7 +141,7 @@ test('source_host is added only to PWA inserts; Android analytics keeps its orig
  assert.ok(analyticsSource.includes("' INSERT INTO ' + t.installs + ' (install_id, first_seen_at, last_active_at' + sourceColumn + ')'"));
 });
 test('PWA source is captured on first install insert and never overwritten on later activity',()=>{
- assert.ok(analyticsSource.includes('(install_id, first_seen_at, last_active_at, source_host)'));
+ assert.ok(analyticsSource.includes("' INSERT INTO ' + t.installs + ' (install_id, first_seen_at, last_active_at' + sourceColumn + ')'"));
  assert.ok(analyticsSource.includes("' SELECT install_id, occurred_at, occurred_at' + sourceValue + ' FROM inserted_event'"));
  assert.ok(analyticsSource.includes('platform === \'pwa\' ? sourceHost(req) : null'));
  const conflict=analyticsSource.slice(analyticsSource.indexOf('ON CONFLICT (install_id) DO UPDATE'),analyticsSource.indexOf('RETURNING install_id',analyticsSource.indexOf('ON CONFLICT (install_id) DO UPDATE')));
