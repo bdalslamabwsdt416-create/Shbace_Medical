@@ -159,7 +159,7 @@ function readRawRequestBody(req, maxBytes) {
     const contentLength = headers['content-length'];
     if (contentLength !== undefined) {
       const value = String(contentLength);
-      if (!/^\\d+$/.test(value) || !Number.isSafeInteger(Number(value))) {
+      if (!/^\d+$/.test(value) || !Number.isSafeInteger(Number(value))) {
         req.pause();
         return resolve({ invalidLength: true });
       }
