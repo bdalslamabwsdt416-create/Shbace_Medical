@@ -4,6 +4,29 @@
   "version": "1.3.10-to-me.52",
   "displayVersion": "1.3.10.52 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-22",
-  "releaseNotes": [],
-  "summary": []
+  "releaseNotes": [
+    "Restores older installed copies from the cached offline manifest when IndexedDB or the READY marker is missing, preventing returning students from being forced through first-install Setup.",
+    "Adds silent repair for returning installs with prior successful-install evidence and immediate online repair when the cached app shell is missing. Keeps the existing 48-hour update-check cadence, cache namespace, IndexedDB identity and student progress.",
+    "Adds a direction-aware sticky Back control to study screens: it stays accessible while scrolling, becomes compact and translucent when scrolling down, and becomes fully visible on the first upward movement. Restores the exact scroll position and list state when returning from a topic to its system/topic list, while preserving existing student answers and progress.",
+    "Prevents repeated full offline-package downloads after Chrome loses IndexedDB installation or per-file verification records: existing Cache Storage files are rechecked by byte size and SHA-256, and valid files rebuild their verification records instead of being downloaded again. Requests persistent origin storage at app startup; if Chrome declines or later evicts data, recovery downloads only files genuinely missing or invalid. Preserves the existing cache namespace, IndexedDB identity and student progress.",
+    "Hardens the final update-commit stage against IndexedDB connections that are closing: tracks version changes and unexpected closes, discards stale handles, and retries one closing-connection transaction without resetting student data.",
+    "First installation now opens the one-time Setup screen immediately after Splash. Setup downloads and verifies the complete offline package before question-bank loading, script preloads or onboarding can begin. Existing To Me storage and student progress remain unchanged.",
+    "Installed copies open from the verified local package without a blocking setup screen. The single update engine checks the manifest every 48 hours or on manual request, downloads only changed files in the background, and no longer runs periodic full-package hashing on every install.",
+    "Adds 242 verified supplementary AI Clinical Cases questions across the ten medical systems, with four new topics. Preserves each source case, question, option, key, explanation and provenance; the duplicate Proteus question is not imported.",
+    "Gives every topic a matching medical illustration in the Nephrotic Syndrome glossy blue icon style. Existing topic artwork is retained; missing topics receive a unique subject-aware illustration.",
+    "AI Clinical Cases now displays case text directly inside the first linked question card, without case numbers, titles or CONTINUED labels. Adds a newly authored, diagnosis-neutral clinical vignette for CVS Q1 (VSD); the remaining introductory CVS questions stay independent. Existing question stems, options, answer keys and explanations are preserved.",
+    "Serves the verified offline package locally first for the page, scripts, styles and assets; successful network fallbacks are cached. Only the scheduled/manual updater checks and integrity downloads bypass the local copy. Shortens the Splash-to-app portal handoff from about 2.86 s to about 0.85 s.",
+    "Prevents the startup splash from revealing Home before every deferred app script has completed; startup stays behind the splash until the complete renderer is ready, and the duplicate late Home redraw is removed.",
+    "Removes the retired design-prototype interface: sidebar, handoff panels, guide/document views, mock in-app screens and intermediate legacy Subjects renderer. The live Home and question-bank engine are now the only in-app render path. Splash, first-run onboarding, student data, offline package and update storage remain preserved.",
+    "AI Clinical Cases and AI Generated now feed the same Dr. Al-Joaki question engine, question cards, answer state, Save and Personal note controls; their source data and separate progress remain independent.",
+    "The two AI banks now participate in Quiz and Smart Review bank selection. Quiz topic choices are scoped to the chosen bank and system, and saved AI quiz attempts are retained across app restarts.",
+    "Retires the separate AI question renderers and blocks their legacy page routes. The current Home is redrawn after all startup scripts finish to prevent a stale first screen.",
+    "Fixes AI Clinical Cases topic-to-case-to-questions navigation and retains the shared compact question-card styling.",
+    "Updates bank validation to recognize Egyptian Book styling inside the consolidated late CSS bundle.",
+    "Shows the cinematic splash on every app open. The seven-day interval applies only to automatic update checks, not the splash."
+  ],
+  "summary": [
+    "Restores older installed offline copies without forcing a blocking first-install Setup screen when recoverable cached files or prior installation evidence remain.",
+    "Repairs a missing cached app shell immediately when online, while keeping the routine manifest check every 48 hours and preserving the existing cache namespace and student progress."
+  ]
 }

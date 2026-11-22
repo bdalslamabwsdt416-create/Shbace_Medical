@@ -135,8 +135,10 @@ const runtimePosition = relative => deferredRefs.indexOf(relative);
 if (!(runtimePosition('js/09-app-features-v6.js') < runtimePosition('js/36-exam-planner-settings-smartreview.js') &&
       runtimePosition('js/36-exam-planner-settings-smartreview.js') < runtimePosition('js/32-ios-study-tools.js') &&
       runtimePosition('js/32-ios-study-tools.js') < runtimePosition('js/33-ios-exam-planner.js') &&
-      runtimePosition('js/33-ios-exam-planner.js') < runtimePosition('js/43-ai-bank-engine-adapter.js') &&
-      runtimePosition('js/43-ai-bank-engine-adapter.js') < runtimePosition('js/54-usage-analytics.js'))) {
+      runtimePosition('js/36-exam-planner-settings-smartreview.js') < runtimePosition('js/43-ai-bank-engine-adapter.js') &&
+      runtimePosition('js/43-ai-bank-engine-adapter.js') < runtimePosition('js/32-ios-study-tools.js') &&
+      runtimePosition('js/32-ios-study-tools.js') < runtimePosition('js/33-ios-exam-planner.js') &&
+      runtimePosition('js/33-ios-exam-planner.js') < runtimePosition('js/54-usage-analytics.js'))) {
   throw new Error('iOS feature runtime order is invalid; app core and Smart Review must load before study tools, followed by the iOS Exam Planner navigation layer.');
 }
 if (/js\/30-android-enhancements|js\/31-android-v13|js\/32-chrome-android/.test(html)) throw new Error('Android-only runtime module leaked into the iOS build.');

@@ -4,5 +4,15 @@
   "version": "1.4.18",
   "displayVersion": "1.4.18",
   "releaseDate": "2026-11-22",
-  "releaseNotes": []
+  "releaseNotes": [
+    "Fixes iOS topic-list scroll restoration: removes the legacy Exam Planner page-only scroll memo that reset the real app scroller to the top, while keeping the navigation history stack. The shared route-aware scroll layer now restores the exact previous topic-list position.",
+    "Synchronizes the Clinical Case bank with To Me: 481 shared cases and 1,840 questions, preserving case and question IDs while aligning vignettes, stems, options, correct-answer text, explanations and validation metadata.",
+    "Adds the direction-aware sticky Back control and route-aware scroll restoration from To Me, returning to the exact previous bank, system or topic-list position without resetting student progress.",
+    "Restores the original layout of the final two onboarding screens: the wider grade-selection panel, full-width overflow, final artwork proportions, welcome spacing, and hidden description and grade badge.",
+    "Restores the full-screen Setup experience for the first offline installation only. The installer prepares its checklist and storage during the ECG splash, then the Setup screen appears immediately after the splash.",
+    "The first-install package is downloaded and verified before the onboarding scripts and question-bank data are loaded, preventing them from competing with the installer for network and startup resources.",
+    "After the first install, the app opens from its saved local package. Repairs and updates stay in the background with a compact progress chip; automatic update checks run every 48 hours and Settings can trigger a manual check.",
+    "Keeps the To Me verified updater with resumable downloads, per-file size and SHA-256 validation, staged updates, and one safe restart after verified changes are committed.",
+    "Preserves the existing iOS cache namespace shbace-medical-offline-v2, IndexedDB database shbace-medical-offline-state-v1, student data, iOS icon, and onboarding screens."
+  ]
 }
