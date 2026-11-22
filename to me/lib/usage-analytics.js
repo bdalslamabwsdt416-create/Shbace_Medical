@@ -150,6 +150,86 @@ function bodyBytes(body) {
   try { return Buffer.byteLength(typeof body === 'string' ? body : JSON.stringify(body === undefined ? null : body), 'utf8'); }
   catch (_) { return Infinity; }
 }
+
+// Read Vercel's raw Node IncomingMessage stream before touching its lazy req.body
+// parser. This enforces the small application limit before JSON allocation.
+function readRawRequestBody(req, maxBytes) {
+  return new Promise((resolve, reject) => {
+    const headers = req && req.headers || {};
+    const contentLength = headers['content-length'];
+    if (contentLength !== undefined) {
+      const value = String(contentLength);
+      if (!/^\\d+$/.test(value) || !Number.isSafeInteger(Number(value))) {
+        req.pause();
+        return resolve({ invalidLength: true });
+      }
+      if (Number(value) > maxBytes) {
+        req.pause();
+        return resolve({ tooLarge: true });
+      }
+    }
+
+    const chunks = [];
+    let total = 0;
+    let settled = false;
+    const cleanup = () => {
+      req.removeListener('data', onData);
+      req.removeListener('end', onEnd);
+      req.removeListener('error', onError);
+      req.removeListener('aborted', onAborted);
+    };
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve(value);
+    };
+    const fail = (error) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(error);
+    };
+    const onData = (chunk) => {
+      const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      total += buffer.length;
+      if (total > maxBytes) {
+        // Stop consuming immediately. The hosting runtime will close/drain
+        // the rejected request; no JSON parser or application handler sees it.
+        req.pause();
+        finish({ tooLarge: true });
+        return;
+      }
+      chunks.push(buffer);
+    };
+    const onEnd = () => finish({ raw: Buffer.concat(chunks, total) });
+    const onError = (error) => fail(error);
+    const onAborted = () => fail(new Error('request_aborted'));
+
+    req.on('data', onData);
+    req.once('end', onEnd);
+    req.once('error', onError);
+    req.once('aborted', onAborted);
+  });
+}
+
+async function readJsonBody(req, maxBytes) {
+  // Vercel's Node request exposes body as a lazy parsed getter. For a real
+  // IncomingMessage, consume the raw stream first so the limit precedes JSON
+  // parsing. Plain request doubles use the parsed-body fallback in unit tests.
+  if (req && typeof req.on === 'function' && typeof req.pause === 'function' &&
+      typeof req.removeListener === 'function') {
+    const result = await readRawRequestBody(req, maxBytes);
+    if (result.invalidLength) throw new Error('invalid_content_length');
+    if (result.tooLarge) throw new Error('payload_too_large');
+    try { return JSON.parse(result.raw.toString('utf8')); }
+    catch (_) { throw new Error('invalid_json'); }
+  }
+
+  const body = req ? req.body : undefined;
+  if (bodyBytes(body) > maxBytes) throw new Error('payload_too_large');
+  return body;
+}
 function sameOrigin(req) {
   const origin = req.headers && req.headers.origin;
   if (!origin) return false;
@@ -277,9 +357,14 @@ async function ingest(req, res, platform) {
   if (req.method === 'OPTIONS') { res.statusCode = 204; return res.end(); }
   if (req.method !== 'POST') { res.setHeader('Allow', 'POST, OPTIONS'); return sendJson(res, 405, { error: 'method_not_allowed' }); }
   if (!String(req.headers['content-type'] || '').toLowerCase().includes('application/json')) return sendJson(res, 415, { error: 'json_required' });
-  if (bodyBytes(req.body) > 1024) return sendJson(res, 413, { error: 'payload_too_large' });
+  let body;
+  try { body = await readJsonBody(req, 1024); }
+  catch (e) {
+    if (e.message === 'payload_too_large') return sendJson(res, 413, { error: 'payload_too_large' });
+    return sendJson(res, 400, { error: e.message === 'invalid_content_length' ? 'invalid_content_length' : 'invalid_json' });
+  }
   let ev;
-  try { ev = validateEvent(req.body); } catch (e) { return sendJson(res, 422, { error: e.message || 'invalid_event' }); }
+  try { ev = validateEvent(body); } catch (e) { return sendJson(res, 422, { error: e.message || 'invalid_event' }); }
   const quota = await consumeIngestionAttempt(platform);
   if (!quota.available) return sendJson(res, 503, { error: 'analytics_rate_limiter_unavailable' });
   if (!quota.allowed) {
@@ -344,7 +429,7 @@ async function summary(platform, page, size) {
   return { platform: 'all', page, pageSize: size, platforms: { pwa: result[0], android: result[1] } };
 }
 module.exports = {
-  getTables, validateEvent, sendJson, bodyBytes, sameOrigin, adminPassword, sessionSecret, passwordMatches,
+  getTables, validateEvent, sendJson, bodyBytes, readJsonBody, sameOrigin, adminPassword, sessionSecret, passwordMatches,
   createSession, validSession, hasSession, setCookie, clearCookie,
   consumeAdminLoginAttempt, clearAdminLoginAttempts, consumeIngestionAttempt,
   ingestionRateLimitKeys, INGESTION_PER_MINUTE_LIMIT, INGESTION_PER_DAY_LIMIT,
