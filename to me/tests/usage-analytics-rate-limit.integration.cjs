@@ -141,7 +141,7 @@ test('Admin login endpoint enforces the real Redis quota across requests without
   process.env.ANALYTICS_ADMIN_PASSWORD = 'integration-test-admin-password';
   process.env.ANALYTICS_SESSION_SECRET = 'integration-test-session-secret-at-least-32-bytes';
   process.env.ANALYTICS_ALLOWED_ORIGIN = 'https://admin.local';
-  const login = require('../api/analytics/admin-login');
+  const login = require('../server/analytics/admin-login');
   const response = () => ({ statusCode: 0, headers: {}, body: '', setHeader(k, v) { this.headers[k] = v; }, end(v) { this.body = v || ''; } });
   try {
     for (let i = 0; i < 5; i++) {
@@ -179,7 +179,7 @@ test('PWA and Android event endpoints fail closed without Redis and return 429 a
   try {
     delete process.env.UPSTASH_REDIS_REST_URL;
     const unavailable = response();
-    await require('../api/analytics/pwa-event')({
+    await require('../server/analytics/pwa-event')({
       method: 'POST',
       headers: { origin: 'https://localhost', host: 'localhost', 'content-type': 'application/json' },
       body: { eventId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', installId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', occurredAt: new Date().toISOString() }
@@ -197,7 +197,7 @@ test('PWA and Android event endpoints fail closed without Redis and return 429 a
       assert.equal(allowed.allowed, true);
     }
     const limited = response();
-    await require('../api/analytics/pwa-event')({
+    await require('../server/analytics/pwa-event')({
       method: 'POST',
       headers: { origin: 'https://localhost', host: 'localhost', 'content-type': 'application/json' },
       body: { eventId: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc', installId: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd', occurredAt: new Date().toISOString() }
@@ -211,7 +211,7 @@ test('PWA and Android event endpoints fail closed without Redis and return 429 a
       assert.equal(allowed.allowed, true);
     }
     const androidLimited = response();
-    await require('../api/analytics/android-event')({
+    await require('../server/analytics/android-event')({
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: { eventId: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee', installId: 'ffffffff-ffff-4fff-8fff-ffffffffffff', occurredAt: new Date().toISOString() }

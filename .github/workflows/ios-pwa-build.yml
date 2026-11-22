@@ -6,7 +6,7 @@ on:
       - 'for ios/**'
       - 'to me/js/54-usage-analytics.js'
       - 'to me/lib/usage-analytics.js'
-      - 'to me/api/analytics/**'
+      - 'to me/server/analytics/**'
       - 'to me/tests/**'
       - '.github/workflows/ios-pwa-build.yml'
   pull_request:
@@ -14,7 +14,7 @@ on:
       - 'for ios/**'
       - 'to me/js/54-usage-analytics.js'
       - 'to me/lib/usage-analytics.js'
-      - 'to me/api/analytics/**'
+      - 'to me/server/analytics/**'
       - 'to me/tests/**'
       - '.github/workflows/ios-pwa-build.yml'
   workflow_dispatch:

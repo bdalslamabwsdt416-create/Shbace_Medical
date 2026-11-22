@@ -156,7 +156,7 @@ function makeClient({storage,online,native}) {
 }
 
 test('Vercel raw-body endpoints explicitly disable automatic body parsing',()=>{
- for(const route of ['../api/analytics/pwa-event','../api/analytics/android-event','../api/analytics/admin-login']){
+ for(const route of ['../server/analytics/pwa-event','../server/analytics/android-event','../server/analytics/admin-login']){
   const handler=require(route);
   assert.deepEqual(handler.config,{api:{bodyParser:false}});
  }
@@ -204,7 +204,7 @@ function responseStub(){
  const headers={};return {headers,statusCode:200,body:'',setHeader(k,v){headers[k]=v;},end(body){this.body=body||'';}};
 }
 test('PWA event endpoint rejects hostile origins and invalid payloads',async()=>{
- const handler=require('../api/analytics/pwa-event');
+ const handler=require('../server/analytics/pwa-event');
  const hostile=responseStub();
  await handler({method:'POST',headers:{origin:'https://evil.example',host:'shbace-preview.example','content-type':'application/json'},body:{eventId:event,installId:install,occurredAt:new Date().toISOString()}},hostile);
  assert.equal(hostile.statusCode,403);
@@ -213,7 +213,7 @@ test('PWA event endpoint rejects hostile origins and invalid payloads',async()=>
  assert.equal(invalid.statusCode,422);
 });
 test('raw PWA request stream enforces the 1 KiB limit without reading req.body',async()=>{
- const handler=require('../api/analytics/pwa-event');
+ const handler=require('../server/analytics/pwa-event');
  const req=Readable.from([Buffer.alloc(1025,0x61)]);
  req.method='POST';
  req.headers={origin:'https://shbace-preview.example',host:'shbace-preview.example','content-type':'application/json'};
@@ -224,7 +224,7 @@ test('raw PWA request stream enforces the 1 KiB limit without reading req.body',
  assert.equal(JSON.parse(res.body).error,'payload_too_large');
 });
 test('event ingestion rejects oversized bodies, batches and unsupported methods before Redis or database access',async()=>{
- const handler=require('../api/analytics/pwa-event');
+ const handler=require('../server/analytics/pwa-event');
  const oversized=responseStub();
  await handler({method:'POST',headers:{origin:'https://shbace-preview.example',host:'shbace-preview.example','content-type':'application/json'},body:'x'.repeat(1025)},oversized);
  assert.equal(oversized.statusCode,413);
@@ -246,7 +246,7 @@ test('PWA endpoint fails closed until the approved database exists after distrib
  process.env.ANALYTICS_RATE_LIMIT_SECRET='test-rate-limit-secret-with-at-least-32-bytes';
  global.fetch=async()=>({ok:true,json:async()=>({result:[1,1,1,0,0]})});
  try {
-  const handler=require('../api/analytics/pwa-event'),res=responseStub();
+  const handler=require('../server/analytics/pwa-event'),res=responseStub();
   await handler({method:'POST',headers:{origin:'https://shbace-preview.example',host:'shbace-preview.example','content-type':'application/json'},body:{eventId:event,installId:install,occurredAt:new Date().toISOString()}},res);
   assert.equal(res.statusCode,503);
   assert.equal(JSON.parse(res.body).error,'analytics_database_not_configured');
@@ -259,13 +259,13 @@ test('PWA endpoint fails closed until the approved database exists after distrib
  }
 });
 test('Admin summary denies access without an authenticated session',async()=>{
- const handler=require('../api/analytics/admin-summary'),res=responseStub();
+ const handler=require('../server/analytics/admin-summary'),res=responseStub();
  await handler({method:'GET',url:'/api/analytics/admin-summary?platform=all',headers:{host:'shbace-preview.example'}},res);
  assert.equal(res.statusCode,401);
  assert.equal(JSON.parse(res.body).error,'admin_auth_required');
 });
 test('scheduled retention cleanup is authenticated, method-limited and fails closed without a database',async()=>{
- const handler=require('../api/analytics/cleanup');
+ const handler=require('../server/analytics/cleanup');
  const priorSecret=process.env.CRON_SECRET, priorDatabase=process.env.DATABASE_URL;
  process.env.CRON_SECRET='test-only-cron-secret-with-at-least-32-bytes';
  delete process.env.DATABASE_URL;
@@ -287,13 +287,13 @@ test('retention cleanup covers both isolated event tables and the 12-month cutof
  assert.ok(analyticsSource.includes('android_analytics_events WHERE occurred_at < NOW() - INTERVAL \'12 months\''));
 });
 test('Android event endpoint is independent and rejects malformed IDs',async()=>{
- const handler=require('../api/analytics/android-event'),res=responseStub();
+ const handler=require('../server/analytics/android-event'),res=responseStub();
  await handler({method:'POST',headers:{origin:'https://localhost',host:'shbace-preview.example','content-type':'application/json'},body:{eventId:'bad',installId:install,occurredAt:new Date().toISOString()}},res);
  assert.equal(res.statusCode,422);
 });
 
 test('Admin login enforces Origin validation before touching the distributed limiter',async()=>{
- const handler=require('../api/analytics/admin-login'),res=responseStub();
+ const handler=require('../server/analytics/admin-login'),res=responseStub();
  const oldFetch=global.fetch;let called=false;global.fetch=async()=>{called=true;return {ok:true,json:async()=>({result:[1,900]})};};
  const prior={password:process.env.ANALYTICS_ADMIN_PASSWORD,session:process.env.ANALYTICS_SESSION_SECRET};
  process.env.ANALYTICS_ADMIN_PASSWORD='test-admin-password-long';
@@ -308,7 +308,7 @@ test('Admin login enforces Origin validation before touching the distributed lim
  }
 });
 test('Admin login fails closed when the shared rate limiter is unavailable',async()=>{
- const handler=require('../api/analytics/admin-login'),res=responseStub(),oldFetch=global.fetch;
+ const handler=require('../server/analytics/admin-login'),res=responseStub(),oldFetch=global.fetch;
  const prior={password:process.env.ANALYTICS_ADMIN_PASSWORD,session:process.env.ANALYTICS_SESSION_SECRET,url:process.env.UPSTASH_REDIS_REST_URL,token:process.env.UPSTASH_REDIS_REST_TOKEN,secret:process.env.ANALYTICS_RATE_LIMIT_SECRET};
  process.env.ANALYTICS_ADMIN_PASSWORD='test-admin-password-long';
  process.env.ANALYTICS_SESSION_SECRET='test-session-secret-with-at-least-32-bytes';
@@ -326,7 +326,7 @@ test('Admin login fails closed when the shared rate limiter is unavailable',asyn
  }
 });
 test('Admin global login lockout blocks every client until its window resets, then issues a hardened session cookie',async()=>{
- const handler=require('../api/analytics/admin-login'),oldFetch=global.fetch,counters=new Map();
+ const handler=require('../server/analytics/admin-login'),oldFetch=global.fetch,counters=new Map();
  const prior={password:process.env.ANALYTICS_ADMIN_PASSWORD,session:process.env.ANALYTICS_SESSION_SECRET,url:process.env.UPSTASH_REDIS_REST_URL,token:process.env.UPSTASH_REDIS_REST_TOKEN,secret:process.env.ANALYTICS_RATE_LIMIT_SECRET};
  process.env.ANALYTICS_ADMIN_PASSWORD='test-admin-password-long';
  process.env.ANALYTICS_SESSION_SECRET='test-session-secret-with-at-least-32-bytes';
@@ -372,7 +372,7 @@ test('Android UUID remains backed by private SharedPreferences and Android relea
 });
 
 test('Admin logout rejects cross-origin requests and clears the hardened session cookie on same-origin POST',async()=>{
- const handler=require('../api/analytics/admin-logout');
+ const handler=require('../server/analytics/admin-logout');
  const hostile=responseStub();
  await handler({method:'POST',headers:{origin:'https://evil.example',host:'shbace-preview.example'}},hostile);
  assert.equal(hostile.statusCode,403);assert.equal(hostile.headers['Set-Cookie'],undefined);
@@ -401,8 +401,8 @@ test('Admin session-secret rotation immediately invalidates copied stateless tok
 
 test('PostgreSQL query failure returns 503 from analytics APIs without changing app-side client state',async()=>{
  const analyticsPath=require.resolve('../lib/usage-analytics');
- const eventPath=require.resolve('../api/analytics/pwa-event');
- const summaryPath=require.resolve('../api/analytics/admin-summary');
+ const eventPath=require.resolve('../server/analytics/pwa-event');
+ const summaryPath=require.resolve('../server/analytics/admin-summary');
  const pgPath=require.resolve('@neondatabase/serverless');
  const paths=[analyticsPath,eventPath,summaryPath,pgPath];
  const cached=new Map(paths.map(path=>[path,require.cache[path]]));
@@ -466,7 +466,7 @@ test('PostgreSQL query failure returns 503 from analytics APIs without changing 
 
 test('PWA ingestion enforces the 1 KiB raw stream limit before accessing Vercel parsed req.body',async()=>{
  const {Readable}=require('node:stream');
- const handler=require('../api/analytics/pwa-event');
+ const handler=require('../server/analytics/pwa-event');
  const makeRequest=(raw,extraHeaders={})=>{
   const req=Readable.from([Buffer.from(raw)]);
   req.method='POST';
@@ -498,7 +498,7 @@ test('PWA ingestion enforces the 1 KiB raw stream limit before accessing Vercel 
 
 test('Admin login enforces its 512-byte raw body limit before accessing Vercel parsed req.body',async()=>{
  const {Readable}=require('node:stream');
- const handler=require('../api/analytics/admin-login');
+ const handler=require('../server/analytics/admin-login');
  const req=Readable.from([Buffer.from('x'.repeat(513))]);
  req.method='POST';
  req.headers={origin:'https://shbace-preview.example',host:'shbace-preview.example','content-type':'application/json'};
