@@ -18,7 +18,7 @@ test('Admin login rejects cross-origin requests before Redis access',async()=>en
  const original=global.fetch;let called=false;global.fetch=async()=>{called=true;throw Error('unexpected Redis call');};
  try{const r=res();await login({method:'POST',headers:{origin:'https://attacker.test',host:'to-me.example','content-type':'application/json'},body:{password:config.ANALYTICS_ADMIN_PASSWORD}},r);assert.equal(r.statusCode,403);assert.equal(called,false);}finally{global.fetch=original;}
 }));
-test('Admin login fails closed without the approved distributed rate limiter',async()=>env({...config,UPSTASH_REDIS_REST_URL:null,UPSTASH_REDIS_REST_TOKEN:null,ANALYTICS_RATE_LIMIT_SECRET:null},async()=>{
+test('Admin login fails closed when neither Redis nor PostgreSQL rate limiting is configured',async()=>env({...config,UPSTASH_REDIS_REST_URL:null,UPSTASH_REDIS_REST_TOKEN:null,ANALYTICS_RATE_LIMIT_SECRET:null,DATABASE_URL:null},async()=>{
  const r=res();await login({method:'POST',headers:{origin:'https://ios-pwa.example',host:'api.example','x-forwarded-proto':'https','x-real-ip':'203.0.113.20','content-type':'application/json'},body:{password:config.ANALYTICS_ADMIN_PASSWORD}},r);assert.equal(r.statusCode,503);
 }));
 test('Admin login issues Secure HttpOnly SameSite=Strict cookie after Redis and password checks',async()=>env(config,async()=>{
