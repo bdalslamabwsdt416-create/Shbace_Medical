@@ -430,3 +430,51 @@ test('PostgreSQL query failure returns 503 from analytics APIs without changing 
   }
  }
 });
+
+
+test('PWA ingestion enforces the 1 KiB raw stream limit before accessing Vercel parsed req.body',async()=>{
+ const {Readable}=require('node:stream');
+ const handler=require('../api/analytics/pwa-event');
+ const makeRequest=(raw,extraHeaders={})=>{
+  const req=Readable.from([Buffer.from(raw)]);
+  req.method='POST';
+  req.headers={origin:'https://shbace-preview.example',host:'shbace-preview.example','content-type':'application/json',...extraHeaders};
+  let bodyAccessed=false;
+  Object.defineProperty(req,'body',{get(){bodyAccessed=true;throw new Error('parsed req.body must not be accessed');}});
+  req.wasBodyAccessed=()=>bodyAccessed;
+  return req;
+ };
+ const declaredOversized=makeRequest('{}',{'content-length':'1025'});
+ const declaredResponse=responseStub();
+ await handler(declaredOversized,declaredResponse);
+ assert.equal(declaredResponse.statusCode,413);
+ assert.equal(declaredOversized.wasBodyAccessed(),false);
+
+ const streamedOversized=makeRequest('x'.repeat(1025));
+ const streamedResponse=responseStub();
+ await handler(streamedOversized,streamedResponse);
+ assert.equal(streamedResponse.statusCode,413);
+ assert.equal(streamedOversized.wasBodyAccessed(),false);
+
+ const malformed=makeRequest('{');
+ const malformedResponse=responseStub();
+ await handler(malformed,malformedResponse);
+ assert.equal(malformedResponse.statusCode,400);
+ assert.equal(JSON.parse(malformedResponse.body).error,'invalid_json');
+ assert.equal(malformed.wasBodyAccessed(),false);
+});
+
+test('Admin login enforces its 512-byte raw body limit before accessing Vercel parsed req.body',async()=>{
+ const {Readable}=require('node:stream');
+ const handler=require('../api/analytics/admin-login');
+ const req=Readable.from([Buffer.from('x'.repeat(513))]);
+ req.method='POST';
+ req.headers={origin:'https://shbace-preview.example',host:'shbace-preview.example','content-type':'application/json'};
+ let bodyAccessed=false;
+ Object.defineProperty(req,'body',{get(){bodyAccessed=true;throw new Error('parsed req.body must not be accessed');}});
+ const res=responseStub();
+ await handler(req,res);
+ assert.equal(res.statusCode,413);
+ assert.equal(JSON.parse(res.body).error,'payload_too_large');
+ assert.equal(bodyAccessed,false);
+});
