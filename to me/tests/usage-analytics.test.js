@@ -123,16 +123,19 @@ test('PWA source summary groups official domain aliases into the five published 
   {source_host:'shbace-medical-app.vercel.app',installations:2},
   {source_host:'shbace-medical-computer.vercel.app',installations:1},
   {source_host:'shbace-medical-chrome.vercel.app',installations:4},
+  {source_host:'shbacemedical-kz9yaa2vy-absi3.vercel.app',installations:2},
+  {source_host:'shbacemedical-iteri5mgo-absi3.vercel.app',installations:2},
   {source_host:'unattributed',installations:11}
  ];
  const result=await analytics.pwaSourceBreakdown({query:async()=>rows});
- assert.equal(result.length,6);
+ assert.equal(result.length,7);
  assert.equal(result.find(row=>row.sourceName==='Shbace Medical iOS').installations,5);
  assert.equal(result.find(row=>row.sourceName==='Shbace Medical Computer').installations,1);
  assert.equal(result.find(row=>row.sourceName==='Shbace Medical Chrome').installations,4);
  assert.equal(result.find(row=>row.sourceName==='Unattributed · existing installations').installations,11);
  assert.equal(result.find(row=>row.sourceName==='Shbace Medical Chrome Android').installations,0);
  assert.equal(result.find(row=>row.sourceName==='Shbace Medical Web').installations,0);
+ assert.equal(result.find(row=>row.sourceName==='Vercel deployment aliases · not one of the five official links').installations,4);
 });
 test('source_host is added only to PWA inserts; Android analytics keeps its original schema',()=>{
  assert.ok(analyticsSource.includes("const sourceColumn = platform === 'pwa' ? ', source_host' : '';"));
