@@ -150,6 +150,45 @@ jobs:
           DELETE FROM android_analytics_events WHERE occurred_at < NOW() - INTERVAL '12 months';
           SELECT 1 / (NOT EXISTS (SELECT 1 FROM pwa_analytics_events WHERE occurred_at < NOW() - INTERVAL '12 months'))::int;
           SELECT 1 / (NOT EXISTS (SELECT 1 FROM android_analytics_events WHERE occurred_at < NOW() - INTERVAL '12 months'))::int;
+          -- Shared database rate limiter schema and UTC boundary behavior.
+          SELECT 1 / (to_regclass('public.analytics_rate_limit_events') IS NOT NULL)::int;
+          SELECT 1 / ((SELECT count(*) FROM pg_proc WHERE proname = 'consume_shbace_analytics_rate_limit') = 1)::int;
+          SELECT 1 / ((SELECT count(*) FROM pg_proc WHERE proname = 'reset_shbace_analytics_rate_limit') = 1)::int;
+          DO $rate_limit_test$
+          DECLARE
+            v_day_start TIMESTAMPTZ := date_trunc('day', NOW() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC';
+            v_now TIMESTAMPTZ := NOW();
+            v_result RECORD;
+          BEGIN
+            PERFORM reset_shbace_analytics_rate_limit('ci-minute-boundary');
+            SELECT * INTO v_result FROM consume_shbace_analytics_rate_limit('ci-minute-boundary', v_now, 60, 2, 100);
+            IF NOT v_result.allowed THEN RAISE EXCEPTION 'first minute-window request was blocked'; END IF;
+            SELECT * INTO v_result FROM consume_shbace_analytics_rate_limit('ci-minute-boundary', v_now + INTERVAL '1 second', 60, 2, 100);
+            IF NOT v_result.allowed THEN RAISE EXCEPTION 'second minute-window request was blocked'; END IF;
+            SELECT * INTO v_result FROM consume_shbace_analytics_rate_limit('ci-minute-boundary', v_now + INTERVAL '2 seconds', 60, 2, 100);
+            IF v_result.allowed OR v_result.reason <> 'minute_limit' OR v_result.retry_after_seconds < 1 THEN
+              RAISE EXCEPTION 'minute window limit or Retry-After failed';
+            END IF;
+            SELECT * INTO v_result FROM consume_shbace_analytics_rate_limit('ci-minute-boundary', v_now + INTERVAL '61 seconds', 60, 2, 100);
+            IF NOT v_result.allowed THEN RAISE EXCEPTION 'sliding minute window did not release'; END IF;
+
+            PERFORM reset_shbace_analytics_rate_limit('ci-utc-midnight');
+            SELECT * INTO v_result FROM consume_shbace_analytics_rate_limit('ci-utc-midnight', v_day_start + INTERVAL '23 hours 59 minutes 58 seconds', 60, 100, 2);
+            IF NOT v_result.allowed THEN RAISE EXCEPTION 'first daily request was blocked'; END IF;
+            SELECT * INTO v_result FROM consume_shbace_analytics_rate_limit('ci-utc-midnight', v_day_start + INTERVAL '23 hours 59 minutes 59 seconds', 60, 100, 2);
+            IF NOT v_result.allowed THEN RAISE EXCEPTION 'second daily request was blocked'; END IF;
+            SELECT * INTO v_result FROM consume_shbace_analytics_rate_limit('ci-utc-midnight', v_day_start + INTERVAL '23 hours 59 minutes 59 seconds', 60, 100, 2);
+            IF v_result.allowed OR v_result.reason <> 'daily_limit' OR v_result.retry_after_seconds <> 1 THEN
+              RAISE EXCEPTION 'daily quota or UTC midnight Retry-After failed';
+            END IF;
+            SELECT * INTO v_result FROM consume_shbace_analytics_rate_limit('ci-utc-midnight', v_day_start + INTERVAL '1 day 1 second', 60, 100, 2);
+            IF NOT v_result.allowed OR v_result.daily_count <> 1 THEN
+              RAISE EXCEPTION 'daily quota did not reset at UTC midnight';
+            END IF;
+            PERFORM reset_shbace_analytics_rate_limit('ci-minute-boundary');
+            PERFORM reset_shbace_analytics_rate_limit('ci-utc-midnight');
+          END;
+          $rate_limit_test$;
           SQL
       - name: Verify concurrent first-install ingestion
         env:
