@@ -87,9 +87,9 @@ module.exports = async function previewAnalyticsProbe(req, res) {
 
     const android = await call('/api/analytics/android-event', 'POST',
       JSON.stringify(eventPayload(installIds.android, crypto.randomUUID())), {
-        'Content-Type': 'application/json', Origin: 'capacitor://localhost'
+        'Content-Type': 'application/json', Origin: 'https://localhost'
       }, process.env.ANALYTICS_TEST_SHARE_ANDROID);
-    check(android.status === 200 && android.payload.accepted === true, 'android_post_failed');
+    check(android.status === 200 && android.payload.accepted === true, 'android_post_failed', { status: android.status, payload: android.payload, allowOrigin: android.headers.get('access-control-allow-origin'), androidOrigin: 'https://localhost' });
     stages.androidPost = 'passed';
 
     const oversized = await call('/api/analytics/pwa-event', 'POST', 'x'.repeat(1025), {
