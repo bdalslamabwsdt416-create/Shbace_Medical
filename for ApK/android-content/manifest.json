@@ -1,24 +1,24 @@
 {
   "schema": "shbace-android-content-v1",
-  "version": "1.0.3",
-  "generatedAt": "2026-11-19T17:00:00.000Z",
+  "version": "1.0.4",
+  "generatedAt": "2026-11-22T13:00:00.000Z",
   "catalogPath": "catalog.json",
-  "contentVersionCode": 3,
-  "minAppVersionCode": 18,
+  "contentVersionCode": 4,
+  "minAppVersionCode": 19,
   "channel": "stable",
-  "releaseNotes": "Adds monotonic content package metadata and a forward-compatible rollback baseline.",
+  "releaseNotes": "Adds a Crohn's disease clinical case to the existing Pediatrics GI topic and requires the updated Android OTA engine.",
   "files": [
     {
       "path": "catalog.json",
       "bytes": 203,
-      "sha256": "ad8513a7d3b6a63220289ff0470e50a34cfc0f8b394e657bde5c4eb614ae646d",
+      "sha256": "0a8657664aa4fae0165d5f4d760ad4eee665ffd22c6a7ab2d98a8fc5d83231f7",
       "mime": "application/json",
       "kind": "catalog"
     },
     {
       "path": "overrides/patches.json",
-      "bytes": 124,
-      "sha256": "72bf75ec8ef652f69eee94984c59a479b9b3b974a133802347d414c749eb33c0",
+      "bytes": 2607,
+      "sha256": "eac48b60e347bb9675c6f5d242796ba26b12ee87a300e85840a1bb97147208fa",
       "mime": "application/json",
       "kind": "overrides"
     }
