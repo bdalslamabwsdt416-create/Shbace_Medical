@@ -4,7 +4,7 @@ on:
     paths: ["to me/**", "for Computer/**", "for Chrome/**", "for ios/**", "api/**", "package.json", "vercel.json", ".github/workflows/**"]
   push:
     branches-ignore: [main]
-    paths: ["to me/**", "for Computer/**", "for Chrome/**", "for ios/**", ".github/workflows/**"]
+    paths: ["to me/**", "for Computer/**", "for Chrome/**", "for ios/**", "api/**", "package.json", "vercel.json", ".github/workflows/**"]
 jobs:
   check:
     runs-on: ubuntu-latest
