@@ -1,33 +1,38 @@
 # Basic Usage Analytics · Setup and approval boundary
 
 ## Current implementation status
-The client, API handlers, SQL schema and Admin dashboard are part of this branch. No database has been provisioned, no Neon/Vercel integration has been connected, no environment secrets have been configured and no Production deployment has been made. In the absence of DATABASE_URL, the API fails closed with HTTP 503; the clients retain a small local pending queue.
 
-The serverless PostgreSQL driver dependency does not create a database or provision paid infrastructure. Creating a database, connecting Vercel to it and setting secrets must be done only after explicit approval.
+The client, API handlers, SQL schema, Admin dashboard and distributed quota controls are implemented. A dedicated Neon Free PostgreSQL 16 project has been provisioned for analytics in `aws-us-east-1`. The four PWA/Android tables and the shared rate-limit functions are installed. The To Me Vercel project has a TLS pooled `DATABASE_URL` stored as a **Sensitive Preview-only** environment variable; no Production database variable has been added.
 
-## Database configuration (approval required)
-1. Create or select an approved PostgreSQL database.
-2. Run scripts/usage-analytics-schema.sql using the provider SQL editor.
-3. Set DATABASE_URL in Vercel Preview environment variables only, using a TLS-enabled pooled connection string.
-4. Do not place this secret in GitHub, the repository, HTML, JavaScript, Android resources or build logs.
+The API fails closed with HTTP 503 when the database or the active distributed rate limiter is unavailable. Client queues remain bounded and retain events for a later retry.
 
-PWA and Android use different install and event tables. Each install has a random UUID. Each installation can record at most one activity event per UTC date, with database uniqueness constraints and event UUID idempotency. Event detail is pruned opportunistically on accepted ingestion and by a daily Vercel Cron cleanup at 03:00 UTC; records older than 12 months are deleted from both platform event tables. Install totals and first/last activity timestamps remain as aggregate installation records. The scheduled cleanup requires CRON_SECRET (at least 32 characters) and runs only after a Production deployment; it is not active in this branch or on Preview.
+## Database configuration
 
-## Admin access (approval required)
-Set the following Vercel Preview environment variables:
-- ANALYTICS_ADMIN_PASSWORD: a unique password of at least 16 characters.
-- ANALYTICS_SESSION_SECRET: a random secret of at least 32 bytes.
-- ANALYTICS_ALLOWED_ORIGIN: the exact HTTPS origin used by the application, with no path.
-- CRON_SECRET: a random secret of at least 32 characters; Vercel sends it as the Bearer token for the daily retention-cleanup request.
-- UPSTASH_REDIS_REST_URL: HTTPS REST endpoint of an explicitly approved Redis REST service. Do not create or select a paid service without separate approval.
-- UPSTASH_REDIS_REST_TOKEN: private Upstash REST token.
-- ANALYTICS_RATE_LIMIT_SECRET: independent random secret of at least 32 bytes used to derive the opaque global Admin login limiter key. It is not used to identify clients; no IP address, install UUID, User-Agent or device fingerprint is used in rate-limit keys.
+The database schema is in `scripts/usage-analytics-schema.sql`. It creates separate PWA and Android installation/event tables, plus `analytics_rate_limit_events` and two PostgreSQL functions for shared request quotas. Migrations are idempotent.
 
-The Admin page is /admin/usage.html. API endpoints enforce an eight-hour signed HMAC session in a Secure, HttpOnly, SameSite=Strict cookie. No password or secret is embedded in frontend code. Admin login uses an atomic Redis INCR/EXPIRE operation through Upstash REST, with a single global quota of five attempts per 15-minute window shared across all Serverless Function instances. It deliberately does not use x-real-ip, forwarded IP headers, User-Agent or device fingerprinting; no request-originating IP or device identifier is sent to Redis.
+PWA and Android use different install and event tables. Each install has a random UUID. Each installation can record at most one activity event per UTC date, with database uniqueness constraints and event UUID idempotency. Event detail is pruned opportunistically on accepted ingestion and by a daily Vercel Cron cleanup at 03:00 UTC; records older than 12 months are deleted from both platform event tables. Install totals and first/last activity timestamps remain as aggregate installation records. The scheduled cleanup requires `CRON_SECRET` (at least 32 characters) and runs only after a Production deployment.
 
-PWA and Android ingestion also require the same approved Redis REST store. An atomic Lua script enforces global per-platform quotas of 120 valid event submissions in any rolling 60-second window and 5,000 per UTC day, shared across all Serverless instances. Redis keys contain only platform and fixed time-window identifiers, not install UUIDs, IP addresses or device fingerprints. The endpoints fail closed with HTTP 503 when Redis is missing or unavailable and return HTTP 429 with Retry-After when a quota is exhausted. Each request accepts exactly one event; JSON bodies are capped at 1,024 bytes; UUID v4, timestamp age/future bounds and exact event fields are validated before consuming quota. Database UUID idempotency and one-event-per-install-per-UTC-day constraints remain in place.
+## Admin access and distributed rate limiting
 
-These are global quotas, not per-user fairness controls: one abusive sender can consume a platform's shared allowance and temporarily cause legitimate clients on that platform to receive 429. This trade-off avoids using IP/device identifiers and prevents unbounded accepted database writes, but it does not eliminate request traffic or database/Redis pressure from a high-volume attacker. A trusted hosting-edge/WAF limit could reduce that upstream load, but no such paid service or configuration is added here. Login fails closed with HTTP 503 until the approved rate-limit store is configured. The allowed-origin setting accepts a comma-separated exact-origin allowlist for separately hosted PWAs; do not use wildcard origins. The repository code does not provision Redis or incur a service charge by itself.
+Set the following Vercel environment variables for each environment that is intentionally enabled:
+
+- `ANALYTICS_ADMIN_PASSWORD`: a unique password of at least 16 characters.
+- `ANALYTICS_SESSION_SECRET`: a random secret of at least 32 bytes.
+- `ANALYTICS_ALLOWED_ORIGIN`: comma-separated exact HTTPS origins, without paths. Never use wildcard origins.
+- `CRON_SECRET`: a random secret of at least 32 characters; Vercel sends it as the Bearer token for the daily retention-cleanup request.
+
+**PostgreSQL is the default distributed limiter.** It stores only fixed logical scopes (`ingest:pwa`, `ingest:android`, and `admin-login`) and timestamps. A PostgreSQL transaction-scoped advisory lock serializes requests across all Vercel Function instances before counting and inserting attempts. It enforces:
+- 120 requests per rolling 60-second window and 5,000 per UTC day, separately for PWA and Android.
+- Five Admin login attempts per rolling 15-minute window; a successful login clears that Admin scope.
+- `Retry-After` for exhausted quotas, including the exact next UTC midnight for daily limits.
+
+No IP address, forwarded-IP header, User-Agent, installation UUID or device fingerprint is collected or used in limiter scopes. Rate-limit rows older than 48 hours are pruned within the same locked function. A valid event request consumes its quota before the event-table idempotency check, so duplicate valid retries also consume quota.
+
+**Optional Redis acceleration.** A fully configured Upstash REST service may be used instead by supplying `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, and `ANALYTICS_RATE_LIMIT_SECRET` (at least 32 bytes). When those three values form a valid configuration, Redis is the active limiter; if it becomes unavailable, the API fails closed rather than switching to a fresh quota store. Without a complete Redis configuration, the PostgreSQL limiter is used automatically. Redis is therefore optional, not a deployment prerequisite.
+
+The Admin page is `/admin/usage.html`. API endpoints enforce an eight-hour signed HMAC session in a Secure, HttpOnly, SameSite=Strict cookie. No password or secret is embedded in frontend code. Login fails closed with HTTP 503 if the database/limiter or Admin secrets are missing.
+
+These are global quotas, not per-user fairness controls: one abusive sender can consume a platform's shared allowance and temporarily cause legitimate clients on that platform to receive 429. This privacy-preserving design avoids IP/device identity but does not stop requests from reaching the Serverless Function. The PostgreSQL fallback also adds a serialized database operation per request; use Redis later if sustained traffic makes database contention or latency material. Vercel Hobby does not permit a custom header-key WAF rate limit, and the project does not enable IP/JA4-based WAF keys.
 
 ## Android endpoint activation
 The APK loads assets from the local Capacitor origin, rather than the PWA origin. Android UUID persistence uses a dedicated SharedPreferences file named shbace_usage_analytics_v1. To enable upload after the official HTTPS Vercel hostname is known, set the public ANALYTICS_API_BASE_URL constant in ShbaceNative.java and then create a separately approved Android build. This branch does not bump versionCode or versionName and does not publish an APK. Until the origin is configured in a future build, Android activity events remain queued locally.
@@ -38,7 +43,7 @@ Only the platform-specific endpoint, a random installation UUID, first-seen time
 PWA UUID: shbace_usage_analytics_install_id_v1 in LocalStorage. Android UUID: private SharedPreferences. Queue and consent notice use separate app-owned keys, not the study-data database. Pending events are limited to 30, attempted only once per UTC day, and retried on reconnect or when the app becomes visible.
 
 ## Preview verification
-After approving the database and Preview environment variables, test:
+After configuring the Preview Admin secrets, test:
 1. First PWA launch creates one stable UUID and queues one daily activity event.
 2. Repeated launches on the same UTC day do not enqueue duplicate events.
 3. Offline launch keeps the bounded queue; reconnect submits pending events; replays are idempotent.
@@ -46,7 +51,7 @@ After approving the database and Preview environment variables, test:
 5. PWA and Android counts remain distinct. Android upload testing requires the approved API origin in a later APK.
 6. Verify 24-hour, 7-day and 30-day activity and the 30-day daily series.
 
-Do not configure Production variables or promote this Preview as part of this change. The Redis service and its secrets must remain unconfigured until separately approved.
+Do not configure Production variables or promote this Preview until all operational gates pass. Redis remains optional; the database-backed distributed limiter is the default.
 
 
 ## Separate iOS PWA integration and Safari limits
