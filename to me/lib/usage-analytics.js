@@ -87,31 +87,89 @@ async function redisRateLimitCommand(command) {
     return payload && !payload.error ? payload.result : null;
   } catch (_) { return null; }
 }
-async function consumeAdminLoginAttempt() {
-  const key = adminRateLimitKey();
-  if (!key) return { available: false, allowed: false, retryAfterSeconds: 0 };
-  const result = await redisRateLimitCommand(['EVAL', ADMIN_RATE_LIMIT_SCRIPT, '1', key, String(RATE_LIMIT_WINDOW_SECONDS)]);
-  if (!Array.isArray(result) || result.length < 2) return { available: false, allowed: false, retryAfterSeconds: 0 };
-  const count = Number(result[0]), ttl = Number(result[1]);
-  if (!Number.isFinite(count) || !Number.isFinite(ttl) || ttl < 0) return { available: false, allowed: false, retryAfterSeconds: 0 };
-  return { available: true, allowed: count <= RATE_LIMIT_MAX_ATTEMPTS, retryAfterSeconds: Math.max(1, ttl) };
+async function consumePostgresRateLimit(scope, now, windowSeconds, windowLimit, dailyLimit) {
+  let sql;
+  try { sql = database(); } catch (_) { return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'database_unavailable' }; }
+  if (!sql) return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'database_not_configured' };
+  now = now === undefined ? Date.now() : now;
+  try {
+    const rows = await sql.query(
+      'SELECT allowed, window_count, daily_count, retry_after_seconds, reason ' +
+      'FROM consume_shbace_analytics_rate_limit($1, $2::timestamptz, $3::integer, $4::integer, $5::integer)',
+      [scope, new Date(now).toISOString(), windowSeconds, windowLimit, dailyLimit]
+    );
+    const row = Array.isArray(rows) ? rows[0] : null;
+    if (!row || typeof row.allowed !== 'boolean') {
+      return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'invalid_response' };
+    }
+    const windowCount = Number(row.window_count);
+    const dailyCount = Number(row.daily_count);
+    const retryAfterSeconds = Number(row.retry_after_seconds);
+    if (![windowCount, dailyCount, retryAfterSeconds].every(Number.isFinite) || retryAfterSeconds < 0) {
+      return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'invalid_response' };
+    }
+    return {
+      available: true,
+      allowed: row.allowed,
+      minuteCount: windowCount,
+      dayCount: dailyCount,
+      retryAfterSeconds: row.allowed ? 0 : Math.max(1, retryAfterSeconds),
+      reason: row.allowed ? null : (row.reason === 'daily_limit' ? 'daily_limit' : 'minute_limit')
+    };
+  } catch (_) {
+    return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'database_unavailable' };
+  }
 }
+
+async function consumeAdminLoginAttempt(_req, now) {
+  const key = adminRateLimitKey();
+  if (!key) return consumePostgresRateLimit('admin-login', now, RATE_LIMIT_WINDOW_SECONDS, RATE_LIMIT_MAX_ATTEMPTS, null);
+  const result = await redisRateLimitCommand(['EVAL', ADMIN_RATE_LIMIT_SCRIPT, '1', key, String(RATE_LIMIT_WINDOW_SECONDS)]);
+  if (!Array.isArray(result) || result.length < 2) return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'redis_unavailable' };
+  const count = Number(result[0]), ttl = Number(result[1]);
+  if (!Number.isFinite(count) || !Number.isFinite(ttl) || ttl < 0) return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'invalid_response' };
+  return { available: true, allowed: count <= RATE_LIMIT_MAX_ATTEMPTS, retryAfterSeconds: count <= RATE_LIMIT_MAX_ATTEMPTS ? 0 : Math.max(1, ttl), minuteCount: count };
+}
+
 async function clearAdminLoginAttempts() {
   const key = adminRateLimitKey();
-  if (!key) return false;
-  const result = await redisRateLimitCommand(['DEL', key]);
-  return result !== null && Number.isFinite(Number(result)) && Number(result) >= 0;
+  if (key) {
+    const result = await redisRateLimitCommand(['DEL', key]);
+    return result !== null && Number.isFinite(Number(result)) && Number(result) >= 0;
+  }
+  let sql;
+  try { sql = database(); } catch (_) { return false; }
+  if (!sql) return false;
+  try {
+    const rows = await sql.query(
+      'SELECT reset_shbace_analytics_rate_limit($1) AS reset',
+      ['admin-login']
+    );
+    return Array.isArray(rows) && rows.length > 0 && rows[0].reset === true;
+  } catch (_) { return false; }
 }
+
 async function consumeIngestionAttempt(platform, now) {
   now = now === undefined ? Date.now() : now;
+  if (!TABLES[platform]) {
+    return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'invalid_platform' };
+  }
   const keys = ingestionRateLimitKeys(platform, now);
-  if (!keys) return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'unconfigured' };
+  if (!keys) {
+    return consumePostgresRateLimit(
+      'ingest:' + platform,
+      now,
+      60,
+      INGESTION_PER_MINUTE_LIMIT,
+      INGESTION_PER_DAY_LIMIT
+    );
+  }
   const result = await redisRateLimitCommand([
     'EVAL', INGESTION_RATE_LIMIT_SCRIPT, '3', keys.minute, keys.day, keys.sequence,
     String(now), String(INGESTION_PER_MINUTE_LIMIT), String(INGESTION_PER_DAY_LIMIT)
   ]);
   if (!Array.isArray(result) || result.length < 5) {
-    return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'unavailable' };
+    return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'redis_unavailable' };
   }
   const allowed = Number(result[0]) === 1;
   const minuteCount = Number(result[1]), dayCount = Number(result[2]), ttl = Number(result[3]), window = Number(result[4]);
