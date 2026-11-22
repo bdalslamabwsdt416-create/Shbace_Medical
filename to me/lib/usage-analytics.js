@@ -295,6 +295,9 @@ function sameOrigin(req) {
   if (!origin) return false;
   try {
     const parsed = new URL(origin);
+    const hostname = parsed.hostname.toLowerCase();
+    // Generated deployment URLs are not official PWA links and must not create analytics installs.
+    if (hostname.startsWith('shbacemedical-') && hostname.endsWith('-absi3.vercel.app')) return false;
     const configured = String(process.env.ANALYTICS_ALLOWED_ORIGIN || '')
       .split(',').map(value => value.trim()).filter(Boolean);
     if (configured.includes(parsed.origin)) return true;
