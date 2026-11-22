@@ -39,14 +39,15 @@ test('admin session is signed, expiring and tamper-resistant',()=>{
  assert.equal(analytics.validSession(session.token+'x',now),false);
  delete process.env.ANALYTICS_SESSION_SECRET;
 });
-test('distributed Admin rate limiter fails closed without approved Upstash configuration',async()=>{
- const old={url:process.env.UPSTASH_REDIS_REST_URL,token:process.env.UPSTASH_REDIS_REST_TOKEN,secret:process.env.ANALYTICS_RATE_LIMIT_SECRET};
- delete process.env.UPSTASH_REDIS_REST_URL;delete process.env.UPSTASH_REDIS_REST_TOKEN;delete process.env.ANALYTICS_RATE_LIMIT_SECRET;
+test('distributed Admin rate limiter fails closed when both Redis and PostgreSQL are unavailable',async()=>{
+ const old={url:process.env.UPSTASH_REDIS_REST_URL,token:process.env.UPSTASH_REDIS_REST_TOKEN,secret:process.env.ANALYTICS_RATE_LIMIT_SECRET,database:process.env.DATABASE_URL};
+ delete process.env.UPSTASH_REDIS_REST_URL;delete process.env.UPSTASH_REDIS_REST_TOKEN;delete process.env.ANALYTICS_RATE_LIMIT_SECRET;delete process.env.DATABASE_URL;
  const result=await analytics.consumeAdminLoginAttempt({headers:{'x-real-ip':'203.0.113.10'}});
  assert.equal(result.available,false);assert.equal(result.allowed,false);
  if(old.url!==undefined)process.env.UPSTASH_REDIS_REST_URL=old.url;
  if(old.token!==undefined)process.env.UPSTASH_REDIS_REST_TOKEN=old.token;
  if(old.secret!==undefined)process.env.ANALYTICS_RATE_LIMIT_SECRET=old.secret;
+ if(old.database!==undefined)process.env.DATABASE_URL=old.database;
 });
 test('distributed Admin rate limit is shared across fresh module instances and never sends raw IP',async()=>{
  const old={url:process.env.UPSTASH_REDIS_REST_URL,token:process.env.UPSTASH_REDIS_REST_TOKEN,secret:process.env.ANALYTICS_RATE_LIMIT_SECRET};
@@ -495,4 +496,58 @@ test('Admin login enforces its 512-byte raw body limit before accessing Vercel p
  assert.equal(res.statusCode,413);
  assert.equal(JSON.parse(res.body).error,'payload_too_large');
  assert.equal(bodyAccessed,false);
+});
+
+
+test('PostgreSQL fallback keeps distributed ingestion and Admin quotas on fixed non-identifying scopes',async()=>{
+ const names=['UPSTASH_REDIS_REST_URL','UPSTASH_REDIS_REST_TOKEN','ANALYTICS_RATE_LIMIT_SECRET','DATABASE_URL'];
+ const before=Object.fromEntries(names.map(k=>[k,process.env[k]]));
+ const driverPath=require.resolve('@neondatabase/serverless');
+ const analyticsPath=require.resolve('../lib/usage-analytics');
+ const previousDriver=require.cache[driverPath];
+ const previousAnalytics=require.cache[analyticsPath];
+ const originalFetch=global.fetch;
+ const calls=[];
+ process.env.DATABASE_URL='postgresql://analytics-test.invalid/test';
+ delete process.env.UPSTASH_REDIS_REST_URL;
+ delete process.env.UPSTASH_REDIS_REST_TOKEN;
+ delete process.env.ANALYTICS_RATE_LIMIT_SECRET;
+ global.fetch=async()=>{throw new Error('Redis must not be called by the PostgreSQL fallback');};
+ require.cache[driverPath]={
+  id:driverPath,filename:driverPath,loaded:true,
+  exports:{neon:(url)=>{
+   assert.equal(url,process.env.DATABASE_URL);
+   return {query:async(sql,params)=>{
+    calls.push({sql,params});
+    if(sql.includes('reset_shbace_analytics_rate_limit')) return [{reset:true}];
+    return [{allowed:true,window_count:1,daily_count:1,retry_after_seconds:0,reason:null}];
+   }};
+  }}
+ };
+ delete require.cache[analyticsPath];
+ try{
+  const isolated=require('../lib/usage-analytics');
+  const pwa=await isolated.consumeIngestionAttempt('pwa',now);
+  const android=await isolated.consumeIngestionAttempt('android',now);
+  const admin=await isolated.consumeAdminLoginAttempt({headers:{'x-real-ip':'203.0.113.77','user-agent':'private-test'}},now);
+  assert.equal(pwa.available,true);assert.equal(pwa.allowed,true);
+  assert.equal(android.available,true);assert.equal(android.allowed,true);
+  assert.equal(admin.available,true);assert.equal(admin.allowed,true);
+  assert.equal(await isolated.clearAdminLoginAttempts(),true);
+  assert.deepEqual(calls.map(x=>x.params[0]),['ingest:pwa','ingest:android','admin-login','admin-login']);
+  assert.ok(calls.every(x=>x.sql.includes('consume_shbace_analytics_rate_limit')||x.sql.includes('reset_shbace_analytics_rate_limit')));
+  assert.ok(calls.every(x=>!JSON.stringify(x.params).includes('203.0.113.77')));
+  assert.ok(calls.every(x=>!JSON.stringify(x.params).includes('private-test')));
+  assert.equal(calls[0].params[2],60);
+  assert.equal(calls[0].params[3],isolated.INGESTION_PER_MINUTE_LIMIT);
+  assert.equal(calls[0].params[4],isolated.INGESTION_PER_DAY_LIMIT);
+  assert.equal(calls[2].params[2],900);
+  assert.equal(calls[2].params[3],5);
+  assert.equal(calls[2].params[4],null);
+ } finally {
+  global.fetch=originalFetch;
+  if(previousDriver)require.cache[driverPath]=previousDriver;else delete require.cache[driverPath];
+  if(previousAnalytics)require.cache[analyticsPath]=previousAnalytics;else delete require.cache[analyticsPath];
+  for(const [key,value] of Object.entries(before)){if(value===undefined)delete process.env[key];else process.env[key]=value;}
+ }
 });
