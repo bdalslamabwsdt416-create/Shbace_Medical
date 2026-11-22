@@ -168,7 +168,7 @@ function organizeSettings(){
     if(privacyItems&&!privacyItems.querySelector('.shb-privacy-card')){
       var privacyCard=document.createElement('section');
       privacyCard.className='card setcard shb-privacy-card';
-      privacyCard.innerHTML='<h3>Usage data</h3><p>Shbace stores a random installation identifier and records at most one activity timestamp per day. Events may be queued on this device while offline and sent when a connection is available. This data is used to understand basic app usage. Shbace does not collect names, phone numbers, precise location, study content, answers, scores, notes, bookmarks or saved progress. Counts represent installations or devices, not necessarily unique people.</p>';
+      privacyCard.innerHTML='<h3>Usage data</h3><p>Shbace stores a random installation identifier and records at most one activity timestamp per day. For PWA installations, it also stores the hostname of the Shbace link that first registered the installation so usage can be counted separately for each link. It does not store the full URL, referrer, query string, IP address or User-Agent. Events may be queued on this device while offline and sent when a connection is available. Shbace does not collect names, phone numbers, precise location, study content, answers, scores, notes, bookmarks or saved progress. Counts represent installations or devices, not necessarily unique people.</p>';
       privacyItems.appendChild(privacyCard);
     }
     var target=function(id){return order.querySelector('[data-shb-settings-items="'+id+'"]')};
