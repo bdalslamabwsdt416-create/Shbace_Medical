@@ -242,12 +242,42 @@
       if (!source || source.schema !== 'shbace-remote-overrides-v1') {
         throw new Error('Remote overrides file is invalid: ' + path);
       }
-      ['systems', 'topics', 'questionPatches', 'collections'].forEach(function (key) {
+      ['systems', 'topics', 'questionPatches', 'questionAdds', 'collections'].forEach(function (key) {
         if (source[key] != null && !Array.isArray(source[key])) throw new Error('Invalid override list: ' + key);
       });
       (source.systems || []).forEach(updateSystem);
       (source.topics || []).forEach(updateTopic);
       (source.questionPatches || []).forEach(updateQuestion);
+      (source.questionAdds || []).forEach(function (item) {
+        if (!item || !String(item.id || '').trim() || !String(item.targetSpec || '').trim() ||
+            !Number.isInteger(Number(item.targetTopicId)) || !item.question ||
+            typeof item.question !== 'object' || Array.isArray(item.question)) {
+          throw new Error('Invalid new-question insertion record.');
+        }
+        var rawId = String(item.id).trim();
+        if (rawId.length > 160 || expected['add:' + rawId]) {
+          throw new Error('Duplicate or oversized new-question insertion ID: ' + rawId);
+        }
+        expected['add:' + rawId] = true;
+        var targetSpec = String(item.targetSpec);
+        var targetTopicId = Number(item.targetTopicId);
+        var targetSystem = B.REAL && B.REAL.spec && B.REAL.spec[targetSpec];
+        var targetTopic = targetSystem && Array.isArray(targetSystem.topics) &&
+          targetSystem.topics.find(function (entry) { return entry && Number(entry[0]) === targetTopicId; });
+        if (!targetTopic) throw new Error('New question targets an unknown local topic: ' + targetSpec + '/' + targetTopicId);
+        var bank = { id: 'local-additions', label: 'Remote question additions' };
+        var system = { spec: targetSpec };
+        var question = normalizeQuestion(item.question, bank, system, targetTopic);
+        question.id = 'rc-add-' + stableHash(targetSpec + '|' + targetTopicId + '|' + rawId).toString(36) +
+          '-' + slug(rawId).slice(0, 32);
+        question.spec = targetSpec;
+        question.topic = targetTopicId;
+        question.remoteBankId = 'local-additions';
+        if (B.QB.some(function (entry) { return entry && String(entry.id) === question.id; })) {
+          throw new Error('New question ID already exists in the local bank: ' + question.id);
+        }
+        B.QB.push(question);
+      });
       (source.collections || []).forEach(updateCollection);
     });
     window.__SHB_REMOTE_COLLECTION_OVERRIDES__ = bankImageChanges;
