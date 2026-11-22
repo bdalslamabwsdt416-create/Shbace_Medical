@@ -554,5 +554,5 @@ module.exports = {
   createSession, validSession, hasSession, setCookie, clearCookie,
   consumeAdminLoginAttempt, clearAdminLoginAttempts, consumeIngestionAttempt,
   ingestionRateLimitKeys, INGESTION_PER_MINUTE_LIMIT, INGESTION_PER_DAY_LIMIT,
-  ingest, summary, sourceHost, cronAuthorized, cleanupExpiredEvents
+  ingest, summary, sourceHost, pwaSourceBreakdown, cronAuthorized, cleanupExpiredEvents
 };
