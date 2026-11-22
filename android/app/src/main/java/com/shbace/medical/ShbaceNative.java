@@ -42,7 +42,7 @@ final class ShbaceNative {
     private static final String ANALYTICS_PREFS = "shbace_usage_analytics_v1";
     private static final String ANALYTICS_ID_KEY = "install_id";
     // Public origin only. Fill this after the hosting domain is approved; never put a secret here.
-    private static final String ANALYTICS_API_BASE_URL = "";
+    private static final String ANALYTICS_API_BASE_URL = "https://shbacemedical-www.vercel.app";
 
     private final Activity activity;
     private final RemoteContentManager remoteContent;
