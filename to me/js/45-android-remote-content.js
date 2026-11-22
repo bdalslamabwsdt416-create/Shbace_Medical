@@ -40,6 +40,8 @@
   var installedManifest = null;
   var loadedVersion = '';
   var banks = Object.create(null);
+  var pendingQuestionAdds = Object.create(null);
+  var appliedQuestionAdds = Object.create(null);
   var resources = [];
   var flashcardDecks = [];
   var currentDeckId = '';
@@ -250,8 +252,8 @@
       (source.questionPatches || []).forEach(updateQuestion);
       (source.questionAdds || []).forEach(function (item) {
         if (!item || !String(item.id || '').trim() || !String(item.targetSpec || '').trim() ||
-            !Number.isInteger(Number(item.targetTopicId)) || !item.question ||
-            typeof item.question !== 'object' || Array.isArray(item.question)) {
+            !String(item.targetBank || '').trim() || !String(item.targetTopicName || '').trim() ||
+            !item.question || typeof item.question !== 'object' || Array.isArray(item.question)) {
           throw new Error('Invalid new-question insertion record.');
         }
         var rawId = String(item.id).trim();
@@ -259,28 +261,61 @@
           throw new Error('Duplicate or oversized new-question insertion ID: ' + rawId);
         }
         expected['add:' + rawId] = true;
-        var targetSpec = String(item.targetSpec);
-        var targetTopicId = Number(item.targetTopicId);
-        var targetSystem = B.REAL && B.REAL.spec && B.REAL.spec[targetSpec];
-        var targetTopic = targetSystem && Array.isArray(targetSystem.topics) &&
-          targetSystem.topics.find(function (entry) { return entry && Number(entry[0]) === targetTopicId; });
-        if (!targetTopic) throw new Error('New question targets an unknown local topic: ' + targetSpec + '/' + targetTopicId);
+        var targetSpec = String(item.targetSpec).trim();
+        var targetBank = String(item.targetBank).trim();
+        var targetTopicName = String(item.targetTopicName).trim();
+        var operationKey = targetBank + '|' + targetSpec + '|' + targetTopicName + '|' + rawId;
+        if (appliedQuestionAdds[operationKey] || pendingQuestionAdds[operationKey]) return;
         var bank = { id: 'local-additions', label: 'Remote question additions' };
         var system = { spec: targetSpec };
-        var question = normalizeQuestion(item.question, bank, system, targetTopic);
-        question.id = 'rc-add-' + stableHash(targetSpec + '|' + targetTopicId + '|' + rawId).toString(36) +
-          '-' + slug(rawId).slice(0, 32);
+        var question = normalizeQuestion(item.question, bank, system, null);
+        question.id = 'rc-add-' + stableHash(operationKey).toString(36) + '-' + slug(rawId).slice(0, 32);
         question.spec = targetSpec;
-        question.topic = targetTopicId;
         question.remoteBankId = 'local-additions';
-        if (B.QB.some(function (entry) { return entry && String(entry.id) === question.id; })) {
-          throw new Error('New question ID already exists in the local bank: ' + question.id);
-        }
-        B.QB.push(question);
+        var pending = {
+          operationKey: operationKey, targetBank: targetBank, targetSpec: targetSpec,
+          targetTopicName: targetTopicName,
+          targetTopicId: item.targetTopicId == null ? null : Number(item.targetTopicId),
+          question: question
+        };
+        var result = B.appendQuestionToExistingTopic &&
+          B.appendQuestionToExistingTopic(question, targetBank, targetSpec, targetTopicName, pending.targetTopicId);
+        if (result) appliedQuestionAdds[operationKey] = true;
+        else pendingQuestionAdds[operationKey] = pending;
       });
       (source.collections || []).forEach(updateCollection);
     });
     window.__SHB_REMOTE_COLLECTION_OVERRIDES__ = bankImageChanges;
+  }
+
+  function flushPendingQuestionAdds(bankId) {
+    Object.keys(pendingQuestionAdds).forEach(function (key) {
+      var pending = pendingQuestionAdds[key];
+      if (!pending || pending.targetBank !== bankId) return;
+      try {
+        var result = B.appendQuestionToExistingTopic &&
+          B.appendQuestionToExistingTopic(pending.question, pending.targetBank, pending.targetSpec,
+            pending.targetTopicName, pending.targetTopicId);
+        if (result) {
+          appliedQuestionAdds[key] = true;
+          delete pendingQuestionAdds[key];
+          console.info('SHBACE remote content: appended question to existing topic', key, result.topicId);
+        }
+      } catch (error) {
+        console.error('SHBACE remote content: deferred question append failed', key, error);
+      }
+    });
+  }
+  /* Existing AI/external banks are registered lazily. Retry queued additions immediately after
+     their native question engine registration completes, without changing the bank adapter. */
+  if (typeof B.registerExternalBank === 'function' && !B.__questionAddsWrapped) {
+    var originalRegisterExternalBank = B.registerExternalBank;
+    B.registerExternalBank = function (key, label, groups) {
+      var result = originalRegisterExternalBank.apply(this, arguments);
+      flushPendingQuestionAdds(String(key || ''));
+      return result;
+    };
+    B.__questionAddsWrapped = true;
   }
 
   function injectCollectionOverrides() {
