@@ -45,7 +45,7 @@ test("remote content uses monotonic version policy and verified last-known-good 
   const manifest = JSON.parse(readFileSync(resolve(root, "../for ApK/android-content/manifest.json"), "utf8"));
   const catalog = JSON.parse(readFileSync(resolve(root, "../for ApK/android-content/catalog.json"), "utf8"));
 
-  assert.equal(manifest.contentVersionCode, 4);
+  assert.equal(manifest.contentVersionCode, 5);
   assert.equal(manifest.minAppVersionCode, 19);
   assert.equal(manifest.channel, "stable");
   assert.equal(catalog.version, manifest.version);
