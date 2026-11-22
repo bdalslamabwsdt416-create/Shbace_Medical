@@ -6,6 +6,11 @@ The client, API handlers, SQL schema, Admin dashboard and distributed quota cont
 
 The API fails closed with HTTP 503 when the database or the active distributed rate limiter is unavailable. Client queues remain bounded and retain events for a later retry.
 
+### API origin for separately hosted PWA copies
+
+The official To Me deployment leaves `SHBACE_ANALYTICS_API_BASE_URL` unset and uses its own same-origin API. A separately hosted copy built from the To Me source may set this **public build-time** variable to the exact HTTPS origin of the approved central analytics API. The To Me build script validates the origin and embeds it before the shared client loads. Add that PWA's exact origin to the API project's `ANALYTICS_ALLOWED_ORIGIN` allowlist. Never put a secret or URL path in this variable. The Computer, iOS and Chrome Android builds use the same public variable with the same validation rules.
+
+
 ## Database configuration
 
 The database schema is in `scripts/usage-analytics-schema.sql`. It creates separate PWA and Android installation/event tables, plus `analytics_rate_limit_events` and two PostgreSQL functions for shared request quotas. Migrations are idempotent.
