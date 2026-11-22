@@ -7,7 +7,6 @@ var native=window.ShbaceNative||null;
 var platform=native?'android':'pwa';
 var ID_KEY='shbace_usage_analytics_install_id_v1';
 var QUEUE_KEY='shbace_usage_analytics_queue_v1_'+platform;
-var NOTICE_KEY='shbace_usage_analytics_notice_dismissed_v1';
 var LIMIT=30,installId='',endpoint='',flushing=false;
 
 function uuid(){
@@ -95,25 +94,8 @@ async function flush(){
  }finally{flushing=false}
  if(sent===5&&state().queue.length&&window.setTimeout)window.setTimeout(flush,250);
 }
-function privacyNotice(){
- var s=store();try{if(s&&s.getItem(NOTICE_KEY)==='1')return}catch(_){}
- if(!document.body)return;
- var box=document.createElement('aside');
- box.setAttribute('role','note');box.setAttribute('aria-label','Basic usage analytics notice');
- box.style.cssText='position:fixed;z-index:2147483000;left:12px;right:12px;bottom:12px;max-width:780px;margin:auto;padding:13px 15px;border:1px solid #426785;border-radius:13px;background:#0b1b2c;color:#eaf4ff;box-shadow:0 10px 32px #0006;font:13px/1.5 system-ui,sans-serif;display:flex;align-items:center;gap:12px';
- var text=document.createElement('span');
- text.textContent='Basic usage analytics: Shbace records a random installation ID and at most one activity timestamp per day. It does not collect names, phone numbers, locations, study content, answers, scores, notes, bookmarks or saved progress. Counts represent installations/devices, not necessarily unique people.';
- text.style.flex='1';
- var button=document.createElement('button');button.type='button';button.textContent='Got it';
- button.style.cssText='border:0;border-radius:8px;padding:8px 12px;background:#2688ce;color:#fff;font-weight:650';
- button.addEventListener('click',function(){
-  try{if(s)s.setItem(NOTICE_KEY,'1')}catch(_){}
-  if(box.parentNode)box.parentNode.removeChild(box);
- });
- box.appendChild(text);box.appendChild(button);document.body.appendChild(box);
-}
+
 installId=loadInstallId();endpoint=endpointUrl();
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',privacyNotice,{once:true});else privacyNotice();
 if(installId){
  queueDaily();
  if(window.addEventListener)window.addEventListener('online',function(){queueDaily();flush()});
