@@ -263,6 +263,23 @@ The `overrideFiles` property can point to one or more JSON files using schema `s
   "topics": [
     { "systemId": "cardio", "topicId": 42, "name": "Congenital Heart Disease", "icon": "media/topics/chd.webp" }
   ],
+  "questionAdds": [
+    {
+      "id": "crohn-case-001",
+      "targetSpec": "EXACT_LOCAL_SYSTEM_SPEC",
+      "targetTopicId": 123,
+      "question": {
+        "id": "crohn-case-001",
+        "stem": "Clinical question stem",
+        "options": ["Option A", "Option B", "Option C", "Option D"],
+        "correctIndex": 2,
+        "explanation": "Short explanation.",
+        "extendedExplanation": "Detailed explanation.",
+        "tag": "Clinical Case",
+        "source": "Reference"
+      }
+    }
+  ],
   "questionPatches": [
     {
       "id": "EXISTING-QUESTION-ID",
@@ -284,7 +301,15 @@ The `overrideFiles` property can point to one or more JSON files using schema `s
 }
 ```
 
-Allowed existing collection IDs are `aj`, `previous`, `nelson`, `kasr`, `clinical`, and `egyptian`. Existing question IDs must be copied exactly from the current question bank. The app changes only the listed fields; its original question IDs and local answer/bookmark/note records remain in place. When replacing an answer or option order, check the existing answer meaning carefully, because stored answer selections are attached to the question ID.
+Allowed existing collection IDs are `aj`, `previous`, `nelson`, `kasr`, `clinical`, and `egyptian`. Existing question IDs must be copied exactly from the current question bank. The app changes only the listed fields; its original question IDs and local answer/bookmark/note records remain in place.
+
+The `questionAdds` array supports appending a new remote question to an **existing local topic** without creating a separate bank. Each record must provide:
+- `id`: a unique, stable operation ID.
+- `targetSpec`: the exact existing local system key (not its display name).
+- `targetTopicId`: the exact numeric topic ID already present under that system.
+- `question`: a normal question record with its own stable `id`, stem, options, and zero-based `correctIndex`.
+
+At runtime, the APK rejects an unknown system/topic, malformed question, or generated question-ID collision. Added questions are reconstructed from the verified remote package at app startup; the existing local question-bank files are not rewritten. Keep both IDs stable across content updates. This is an additive operation only; it does not yet provide remote deletion, hiding, moving, or reordering of local questions. When replacing an answer or option order, check the existing answer meaning carefully, because stored answer selections are attached to the question ID.
 
 The override package can also change system/Topic names and illustrations, or replace a collection cover. Image paths must be present in the same manifest and are verified before they are displayed.
 
