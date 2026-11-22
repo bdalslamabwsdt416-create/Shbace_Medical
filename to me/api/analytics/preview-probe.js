@@ -41,7 +41,11 @@ module.exports = async function previewAnalyticsProbe(req, res) {
   let sql;
 
   async function call(path, method, body, headers, shareToken) {
-    const options = { method, headers: headers || {} };
+    const requestHeaders = Object.assign({}, headers || {});
+    if (process.env.VERCEL_AUTOMATION_BYPASS_SECRET) {
+      requestHeaders['x-vercel-protection-bypass'] = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+    }
+    const options = { method, headers: requestHeaders };
     if (body !== undefined) options.body = body;
     const separator = path.includes('?') ? '&' : '?';
     const target = base + path + (shareToken ? separator + '_vercel_share=' + encodeURIComponent(shareToken) : '');
