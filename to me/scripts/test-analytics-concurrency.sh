@@ -46,3 +46,23 @@ SQL
 wait "$lock_pid"
 trap - EXIT
 echo "Concurrent first-install ingestion passed."
+
+# Verify the PostgreSQL rate limiter serializes concurrent Serverless instances.
+# The shared scope is fixed test metadata and contains no client/device identifier.
+rate_scope="ci-ingest-concurrent"
+rate_log="$(mktemp)"
+rate_pids=()
+trap 'kill "$lock_pid" 2>/dev/null || true; rm -f "$rate_log"' EXIT
+for i in $(seq 1 12); do
+  "${PSQL[@]}" -At -c "SELECT allowed FROM consume_shbace_analytics_rate_limit('${rate_scope}', NOW(), 60, 5, 5000);" >>"$rate_log" &
+  rate_pids+=("$!")
+done
+for pid in "${rate_pids[@]}"; do wait "$pid"; done
+accepted="$(grep -c '^t$' "$rate_log" || true)"
+if [[ "$accepted" -ne 5 ]]; then
+  cat "$rate_log"
+  echo "Expected exactly 5 accepted concurrent requests, got $accepted." >&2
+  exit 1
+fi
+"${PSQL[@]}" -c "SELECT reset_shbace_analytics_rate_limit('${rate_scope}');"
+echo "PostgreSQL distributed rate-limit concurrency passed (5/12 accepted)."
