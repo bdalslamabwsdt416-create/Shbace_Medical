@@ -86,7 +86,7 @@ test("questionAdds waits for lazily registered banks and uses bank/topic names r
   assert.match(remote, /var pendingQuestionAdds = Object\.create\(null\)/);
   assert.match(remote, /flushPendingQuestionAdds\(String\(key \|\| ''\)\)/);
   assert.match(remote, /originalRegisterExternalBank\.apply\(this, arguments\)/);
-  assert.match(adapter, /B\.AI_BANK_REGISTRY=registry/);
+  assert.match(adapter, /if\(nativeAndroid\)B\.AI_BANK_REGISTRY=registry/);
   assert.match(core, /if\(!nativeAndroid\)return/);
   assert.equal(packageManifest.version, "1.0.4");
   assert.equal(packageManifest.contentVersionCode, 4);
