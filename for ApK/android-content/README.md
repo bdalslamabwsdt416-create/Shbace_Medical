@@ -266,8 +266,9 @@ The `overrideFiles` property can point to one or more JSON files using schema `s
   "questionAdds": [
     {
       "id": "crohn-case-001",
-      "targetSpec": "EXACT_LOCAL_SYSTEM_SPEC",
-      "targetTopicId": 123,
+      "targetSpec": "git",
+      "targetBank": "generated-ai",
+      "targetTopicName": "Chronic Abdominal Pain and Infantile Colic",
       "question": {
         "id": "crohn-case-001",
         "stem": "Clinical question stem",
@@ -305,8 +306,10 @@ Allowed existing collection IDs are `aj`, `previous`, `nelson`, `kasr`, `clinica
 
 The `questionAdds` array supports appending a new remote question to an **existing local topic** without creating a separate bank. Each record must provide:
 - `id`: a unique, stable operation ID.
-- `targetSpec`: the exact existing local system key (not its display name).
-- `targetTopicId`: the exact numeric topic ID already present under that system.
+- `targetSpec`: the exact existing system key (not its display name).
+- `targetBank`: the existing bank key that owns the topic (for example, `generated-ai`).
+- `targetTopicName`: the exact existing topic name. The APK resolves its runtime topic ID from the registered bank, so IDs remain correct even when lazily loaded banks register in a different order.
+- Optional `targetTopicId`: an additional runtime ID assertion when a deployment has a fixed, verified topic ID.
 - `question`: a normal question record with its own stable `id`, stem, options, and zero-based `correctIndex`.
 
 At runtime, the APK rejects an unknown system/topic, malformed question, or generated question-ID collision. Added questions are reconstructed from the verified remote package at app startup; the existing local question-bank files are not rewritten. Keep both IDs stable across content updates. This is an additive operation only; it does not yet provide remote deletion, hiding, moving, or reordering of local questions. When replacing an answer or option order, check the existing answer meaning carefully, because stored answer selections are attached to the question ID.
