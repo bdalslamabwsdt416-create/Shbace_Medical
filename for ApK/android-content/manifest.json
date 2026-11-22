@@ -11,14 +11,14 @@
     {
       "path": "catalog.json",
       "bytes": 203,
-      "sha256": "9a2127e3da29875ad404a60e1324d4a6e4b277d2eca6b7fbe29cea5951dcc21b",
+      "sha256": "f6d3e4d5e8e09531446912df717b0bc905071227df853c0d733c0f4fd4745202",
       "mime": "application/json",
       "kind": "catalog"
     },
     {
       "path": "overrides/patches.json",
       "bytes": 4815,
-      "sha256": "9c59a786428927fa639a073cddfcfaa2b524725eba947e41bd4e643c656abb4b",
+      "sha256": "0c645f69160f00dd80b4a5673398f432e017b3b9b4878b3db9209ddbcc6e9ea0",
       "mime": "application/json",
       "kind": "overrides"
     }
