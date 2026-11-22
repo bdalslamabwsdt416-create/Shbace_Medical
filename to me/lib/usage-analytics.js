@@ -30,7 +30,9 @@ const INGESTION_RATE_LIMIT_SCRIPT =
   " local oldest = redis.call('ZRANGE', KEYS[1], 0, 0, 'WITHSCORES'); " +
   " local retry = 1; if oldest[2] then retry = math.max(1, math.ceil((tonumber(oldest[2]) + 60000 - now) / 1000)); end; " +
   " return {0, minuteCount, dayCount, retry, 1}; end; " +
-  "if dayCount >= dayLimit then return {0, minuteCount, dayCount, math.max(1, redis.call('TTL', KEYS[2])), 2}; end; " +
+  "local nextUtcDay = (math.floor(now / 86400000) + 1) * 86400000; " +
+  "local dayRetry = math.max(1, math.ceil((nextUtcDay - now) / 1000)); " +
+  "if dayCount >= dayLimit then return {0, minuteCount, dayCount, dayRetry, 2}; end; " +
   "local sequence = redis.call('INCR', KEYS[3]); redis.call('EXPIRE', KEYS[3], 120); " +
   "local member = tostring(now) .. ':' .. tostring(sequence); " +
   "redis.call('ZADD', KEYS[1], now, member); redis.call('EXPIRE', KEYS[1], 120); " +
