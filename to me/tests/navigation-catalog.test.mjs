@@ -295,12 +295,12 @@ test("Back adapter delegates to the existing navBack function for routes with a 
   assert.equal(runtime.backCount(),1);
 });
 
-test("loader order, module registration and frozen Android version are preserved",()=>{
+test("loader order, module registration and Android version metadata is preserved",()=>{
   const p50=index.indexOf('data-src="js/50-module-registry-v1.js"');
   const p51=index.indexOf('data-src="js/51-navigation-contract-v1.js"');
   assert.ok(p50>=0&&p51>p50);
-  assert.match(gradle,/versionName\s+"1\.3\.9"/);
-  assert.match(gradle,/versionCode\s+18/);
+  assert.match(gradle,/versionName\s+"1\.3\.10"/);
+  assert.match(gradle,/versionCode\s+19/);
 });
 
 test("navigation adapter never rewrites student stores or executes remote code",()=>{
