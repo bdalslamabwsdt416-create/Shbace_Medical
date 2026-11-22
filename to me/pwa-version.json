@@ -1,8 +1,8 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.10-to-me.53",
-  "displayVersion": "1.3.10.53 · Chrome (Phone + Computer)",
+  "version": "1.3.10-to-me.52",
+  "displayVersion": "1.3.10.52 · Chrome (Phone + Computer)",
   "releaseDate": "2026-11-22",
   "releaseNotes": [
     "Adds the Read More control for remote-added questions with an extended explanation, and labels their source correctly.",
