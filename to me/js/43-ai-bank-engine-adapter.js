@@ -12,7 +12,9 @@ var BANKS={
  'aster':{label:'Aster Qbank',description:'Clinical Case Question Bank.',total:1516,store:'shbace_aster_answers_v1',source:'data/external-banks/aster-qbank.json',idPrefix:'aster-'}
 };
 var registry={},errors={},pending={},currentBank='',currentSystem='',studyToolPromise=null,studyToolReady=false,studyToolLastAttempt=0;
-B.AI_BANK_REGISTRY=registry;
+var nativeAndroid=false;
+try{var cap=window.Capacitor;nativeAndroid=!!(cap&&cap.getPlatform&&cap.getPlatform()==='android'&&cap.isNativePlatform&&cap.isNativePlatform());}catch(e){}
+if(nativeAndroid)B.AI_BANK_REGISTRY=registry;
 Object.keys(BANKS).forEach(function(key){if(!B.BANK_KEYS.has(key)){B.BANK_KEYS.add(key);B.BANK_OPTS.push([key,BANKS[key].label]);}});
 var priorCollectionInTopic=B.inTopic;
 B.inTopic=function(){
@@ -148,8 +150,9 @@ function installBank(key,data){
   if(!systemsMap.has(id))systemsMap.set(id,{id:id,name:id,spec:g.spec,groups:[],count:0});
   var s=systemsMap.get(id);s.groups.push(g);s.count+=g.questions.length;
  });
- var registeredCount=groups.reduce(function(total,group){return total+(Array.isArray(group.questions)?group.questions.length:0);},0);
- registry[key]={groups:groups,systems:Array.from(systemsMap.values()),questions:registeredCount,validation:{passed:true,questions:registeredCount,topics:groups.length,importedAnswers:imported,registered:registration.added+Math.max(0,registeredCount-flat.length)}};
+ var registeredCount=nativeAndroid?groups.reduce(function(total,group){return total+(Array.isArray(group.questions)?group.questions.length:0);},0):flat.length;
+ var remoteAdded=nativeAndroid?Math.max(0,registeredCount-flat.length):0;
+ registry[key]={groups:groups,systems:Array.from(systemsMap.values()),questions:registeredCount,validation:{passed:true,questions:registeredCount,topics:groups.length,importedAnswers:imported,registered:registration.added+remoteAdded}};
  return registry[key];
 }
 function fetchJson(path){
