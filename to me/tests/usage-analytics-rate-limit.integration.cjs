@@ -108,6 +108,8 @@ test('Redis Lua ingestion quota is atomic and shared across fresh serverless mod
   assert.equal(dailyBlocked.available, true);
   assert.equal(dailyBlocked.allowed, false);
   assert.equal(dailyBlocked.reason, 'daily_limit');
+  const expectedDailyRetry = Math.max(1, Math.ceil(((Math.floor(fixedNow / 86400000) + 1) * 86400000 - fixedNow) / 1000));
+  assert.equal(dailyBlocked.retryAfterSeconds, expectedDailyRetry);
 });
 
 test('Admin login quota is global, distributed, and independent of client IP headers', async () => {
