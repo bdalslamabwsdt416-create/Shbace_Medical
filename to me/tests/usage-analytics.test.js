@@ -117,6 +117,12 @@ test('To Me PWA build injects only a validated external HTTPS analytics API orig
 });
 
 
+test('source_host is added only to PWA inserts; Android analytics keeps its original schema',()=>{
+ assert.ok(analyticsSource.includes("const sourceColumn = platform === 'pwa' ? ', source_host' : '';"));
+ assert.ok(analyticsSource.includes("const sourceValue = platform === 'pwa' ? ', $4::text' : '';"));
+ assert.ok(analyticsSource.includes("const params = platform === 'pwa'"));
+ assert.ok(analyticsSource.includes("' INSERT INTO ' + t.installs + ' (install_id, first_seen_at, last_active_at' + sourceColumn + ')'"));
+});
 test('PWA source is captured on first install insert and never overwritten on later activity',()=>{
  assert.ok(analyticsSource.includes('(install_id, first_seen_at, last_active_at, source_host)'));
  assert.ok(analyticsSource.includes('SELECT install_id, occurred_at, occurred_at, $4::text FROM inserted_event'));
