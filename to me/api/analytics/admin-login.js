@@ -21,7 +21,7 @@ module.exports = async function adminLogin(req, res) {
     res.setHeader('Retry-After', String(limit.retryAfterSeconds));
     return a.sendJson(res, 429, { error: 'login_temporarily_blocked', retryAfterSeconds: limit.retryAfterSeconds });
   }
-  if (!a.passwordMatches(req.body.password, expected)) return a.sendJson(res, 401, { error: 'invalid_credentials' });
+  if (!a.passwordMatches(body.password, expected)) return a.sendJson(res, 401, { error: 'invalid_credentials' });
   if (!await a.clearAdminLoginAttempts(req)) return a.sendJson(res, 503, { error: 'admin_rate_limiter_unavailable' });
   try {
     const session = a.createSession();
