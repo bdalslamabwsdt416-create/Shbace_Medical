@@ -70,11 +70,11 @@ test('repo-root Vercel routes resolve to the canonical To Me handlers and preser
   ['cleanup','../server/analytics/cleanup']
  ];
  for(const [name,canonicalPath] of routes){
-  const rootRoute=require('../../server/analytics/'+name);
+  const rootRoute=require('../../api/analytics/'+name);
   const canonical=require(canonicalPath);
   assert.equal(rootRoute,canonical,name+' root route must reuse the canonical handler');
  }
- assert.deepEqual(require('../../server/analytics/pwa-event').config,{api:{bodyParser:false}});
- assert.deepEqual(require('../../server/analytics/android-event').config,{api:{bodyParser:false}});
- assert.deepEqual(require('../../server/analytics/admin-login').config,{api:{bodyParser:false}});
+ assert.deepEqual(require('../server/analytics/pwa-event').config,{api:{bodyParser:false}});
+ assert.deepEqual(require('../server/analytics/android-event').config,{api:{bodyParser:false}});
+ assert.deepEqual(require('../server/analytics/admin-login').config,{api:{bodyParser:false}});
 });
