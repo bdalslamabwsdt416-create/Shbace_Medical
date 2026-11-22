@@ -456,20 +456,25 @@ async function ingest(req, res, platform) {
   try { sql = database(); } catch (_) { return sendJson(res, 503, { error: 'analytics_database_unavailable' }); }
   if (!sql) return sendJson(res, 503, { error: 'analytics_database_not_configured' });
   try {
+    const sourceColumn = platform === 'pwa' ? ', source_host' : '';
+    const sourceValue = platform === 'pwa' ? ', $4::text' : '';
+    const params = platform === 'pwa'
+      ? [ev.installId, ev.eventId, ev.occurredAt, sourceHost(req)]
+      : [ev.installId, ev.eventId, ev.occurredAt];
     const rows = await sql.query(
       'WITH inserted_event AS (' +
       ' INSERT INTO ' + t.events + ' (event_id, install_id, event_date, occurred_at)' +
       ' VALUES ($2::uuid, $1::uuid, ($3::timestamptz AT TIME ZONE \'UTC\')::date, $3::timestamptz)' +
       ' ON CONFLICT DO NOTHING RETURNING install_id, occurred_at, event_id' +
       '), upsert_install AS (' +
-      ' INSERT INTO ' + t.installs + ' (install_id, first_seen_at, last_active_at, source_host)' +
-      ' SELECT install_id, occurred_at, occurred_at, $4::text FROM inserted_event' +
+      ' INSERT INTO ' + t.installs + ' (install_id, first_seen_at, last_active_at' + sourceColumn + ')' +
+      ' SELECT install_id, occurred_at, occurred_at' + sourceValue + ' FROM inserted_event' +
       ' ON CONFLICT (install_id) DO UPDATE SET last_active_at = GREATEST(COALESCE(' + t.installs + '.last_active_at, EXCLUDED.last_active_at), EXCLUDED.last_active_at)' +
       ' RETURNING install_id' +
       '), pruned_events AS (' +
       ' DELETE FROM ' + t.events + " WHERE occurred_at < NOW() - INTERVAL \'12 months\' AND EXISTS (SELECT 1 FROM inserted_event) RETURNING event_id" +
       ') SELECT event_id FROM inserted_event',
-      [ev.installId, ev.eventId, ev.occurredAt, platform === 'pwa' ? sourceHost(req) : null]
+      params
     );
     return sendJson(res, 200, { accepted: Array.isArray(rows) && rows.length > 0 });
   } catch (_) { return sendJson(res, 503, { error: 'analytics_storage_unavailable' }); }
