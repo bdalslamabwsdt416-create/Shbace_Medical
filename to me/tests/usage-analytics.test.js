@@ -128,7 +128,7 @@ test('PWA source is captured on first install insert and never overwritten on la
 });
 test('event-first ingestion relies on deferred foreign keys and upserts the install only for a new event',()=>{
  assert.ok(analyticsSource.includes('WITH inserted_event AS ('));
- assert.ok(analyticsSource.includes('SELECT install_id, occurred_at, occurred_at FROM inserted_event'));
+ assert.ok(analyticsSource.includes('SELECT install_id, occurred_at, occurred_at, $4::text FROM inserted_event'));
  assert.ok(analyticsSource.includes('ON CONFLICT (install_id) DO UPDATE SET last_active_at = GREATEST'));
  assert.ok(analyticsSource.includes('RETURNING install_id'));
  assert.ok(analyticsSource.includes('SELECT event_id FROM inserted_event'));
@@ -136,7 +136,7 @@ test('event-first ingestion relies on deferred foreign keys and upserts the inst
 test('analytics SQL inserts the event first and then upserts the install through the deferred foreign key',()=>{
  assert.ok(analyticsSource.includes('WITH inserted_event AS ('));
  assert.ok(analyticsSource.includes('VALUES ($2::uuid, $1::uuid,'));
- assert.ok(analyticsSource.includes('SELECT install_id, occurred_at, occurred_at FROM inserted_event'));
+ assert.ok(analyticsSource.includes('SELECT install_id, occurred_at, occurred_at, $4::text FROM inserted_event'));
  assert.ok(analyticsSource.includes('ON CONFLICT (install_id) DO UPDATE SET last_active_at = GREATEST'));
  assert.ok(analyticsSource.includes('SELECT event_id FROM inserted_event'));
  assert.ok(schemaSource.includes('DEFERRABLE INITIALLY DEFERRED'));
