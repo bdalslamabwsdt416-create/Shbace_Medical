@@ -50,8 +50,8 @@ module.exports = async function previewAnalyticsProbe(req, res) {
     try { payload = JSON.parse(raw); } catch (_) { payload = { raw: raw.slice(0, 180) }; }
     return { status: response.status, payload, headers: response.headers };
   }
-  function check(condition, stage) {
-    if (!condition) throw new Error(stage);
+  function check(condition, stage, info) {
+    if (!condition) { const error = new Error(stage); error.info = info || null; throw error; }
   }
 
   try {
@@ -63,7 +63,7 @@ module.exports = async function previewAnalyticsProbe(req, res) {
     const pwa = await call('/api/analytics/pwa-event', 'POST', JSON.stringify(pwaEvent), {
       'Content-Type': 'application/json', Origin: pwaOrigin
     });
-    check(pwa.status === 200 && pwa.payload.accepted === true, 'pwa_post_failed');
+    check(pwa.status === 200 && pwa.payload.accepted === true, 'pwa_post_failed', { status: pwa.status, payload: pwa.payload, allowOrigin: pwa.headers.get('access-control-allow-origin'), pwaOrigin });
     check(pwa.headers.get('access-control-allow-origin') === pwaOrigin, 'pwa_cors_failed');
     stages.pwaPost = 'passed';
 
@@ -155,6 +155,6 @@ module.exports = async function previewAnalyticsProbe(req, res) {
         await call('/api/analytics/admin-logout', 'POST', undefined, { Origin: pwaOrigin, Cookie: sessionCookie });
       } catch (_) {}
     }
-    return reply(res, 502, { ok: false, failedStage: error.message || 'preview_probe_failed', stages });
+    return reply(res, 502, { ok: false, failedStage: error.message || 'preview_probe_failed', diagnostic: error.info || null, stages });
   }
 };
