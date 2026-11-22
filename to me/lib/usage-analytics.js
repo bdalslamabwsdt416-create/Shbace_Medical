@@ -529,12 +529,22 @@ async function pwaSourceBreakdown(sql) {
     domains: group.hosts.join(', '),
     installations: group.hosts.reduce((sum, host) => sum + (counts.get(host) || 0), 0)
   }));
+  const deploymentAliases = [];
   for (const [host, installations] of counts) {
     if (host === 'unattributed') {
-      result.push({ sourceName: 'Unattributed · existing installations', domains: 'Source not recorded before this change', installations });
+      result.push({ sourceName: 'Unattributed · existing installations', domains: 'Source not recorded yet; filled on next activity', installations });
+    } else if (!known.has(host) && host.startsWith('shbacemedical-') && host.endsWith('-absi3.vercel.app')) {
+      deploymentAliases.push({ host, installations });
     } else if (!known.has(host)) {
       result.push({ sourceName: host, domains: host, installations });
     }
+  }
+  if (deploymentAliases.length) {
+    result.push({
+      sourceName: 'Vercel deployment aliases · not one of the five official links',
+      domains: deploymentAliases.map(item => item.host).join(', '),
+      installations: deploymentAliases.reduce((sum, item) => sum + item.installations, 0)
+    });
   }
   return result;
 }
