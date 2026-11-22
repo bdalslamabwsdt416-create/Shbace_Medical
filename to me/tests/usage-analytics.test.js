@@ -9,6 +9,17 @@ const install='1f7b3f6a-37af-4b90-b8b8-a985f2bfcb2b';
 const event='c97b1b2e-a184-4ad0-9e1e-1f50e5a20c60';
 const now=Date.parse('2026-11-22T12:00:00.000Z');
 
+test('noncanonical central Vercel deployment aliases are rejected as PWA origins',()=>{
+ const previous=process.env.ANALYTICS_ALLOWED_ORIGIN;
+ process.env.ANALYTICS_ALLOWED_ORIGIN='https://shbacemedical-www.vercel.app';
+ try {
+  assert.equal(analytics.sameOrigin({headers:{origin:'https://shbacemedical-abc123-absi3.vercel.app',host:'shbacemedical-abc123-absi3.vercel.app'}}),false);
+  assert.equal(analytics.sameOrigin({headers:{origin:'https://shbacemedical-www.vercel.app',host:'api.example'}}),true);
+ } finally {
+  if(previous===undefined)delete process.env.ANALYTICS_ALLOWED_ORIGIN;
+  else process.env.ANALYTICS_ALLOWED_ORIGIN=previous;
+ }
+});
 test('PWA source attribution stores only a validated hostname, not URL paths or IP addresses',()=>{
  assert.equal(analytics.sourceHost({headers:{origin:'https://shbace-medical-ios.vercel.app',host:'shbace-medical-ios.vercel.app'}}),'shbace-medical-ios.vercel.app');
  assert.equal(analytics.sourceHost({headers:{host:'shbace-medical-chrome.vercel.app'}}),'shbace-medical-chrome.vercel.app');
