@@ -1,6 +1,6 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),analytics=require('../lib/usage-analytics');
-const login=require('../api/analytics/admin-login'),logout=require('../api/analytics/admin-logout'),summary=require('../api/analytics/admin-summary');
+const login=require('../server/analytics/admin-login'),logout=require('../server/analytics/admin-logout'),summary=require('../server/analytics/admin-summary');
 const {Readable}=require('node:stream');
 function res(){return {statusCode:0,headers:{},body:'',setHeader(k,v){this.headers[k]=v;},end(v){this.body=v||'';}}}
 async function env(values,fn){const before={};for(const k of Object.keys(values)){before[k]=process.env[k];if(values[k]===null)delete process.env[k];else process.env[k]=values[k];}try{return await fn()}finally{for(const k of Object.keys(values)){if(before[k]===undefined)delete process.env[k];else process.env[k]=before[k];}}}
@@ -62,19 +62,19 @@ test('valid signed session passes auth while summary remains unavailable without
 
 test('repo-root Vercel routes resolve to the canonical To Me handlers and preserve raw-body config',()=>{
  const routes=[
-  ['pwa-event','../api/analytics/pwa-event'],
-  ['android-event','../api/analytics/android-event'],
-  ['admin-login','../api/analytics/admin-login'],
-  ['admin-logout','../api/analytics/admin-logout'],
-  ['admin-summary','../api/analytics/admin-summary'],
-  ['cleanup','../api/analytics/cleanup']
+  ['pwa-event','../server/analytics/pwa-event'],
+  ['android-event','../server/analytics/android-event'],
+  ['admin-login','../server/analytics/admin-login'],
+  ['admin-logout','../server/analytics/admin-logout'],
+  ['admin-summary','../server/analytics/admin-summary'],
+  ['cleanup','../server/analytics/cleanup']
  ];
  for(const [name,canonicalPath] of routes){
-  const rootRoute=require('../../api/analytics/'+name);
+  const rootRoute=require('../../server/analytics/'+name);
   const canonical=require(canonicalPath);
   assert.equal(rootRoute,canonical,name+' root route must reuse the canonical handler');
  }
- assert.deepEqual(require('../../api/analytics/pwa-event').config,{api:{bodyParser:false}});
- assert.deepEqual(require('../../api/analytics/android-event').config,{api:{bodyParser:false}});
- assert.deepEqual(require('../../api/analytics/admin-login').config,{api:{bodyParser:false}});
+ assert.deepEqual(require('../../server/analytics/pwa-event').config,{api:{bodyParser:false}});
+ assert.deepEqual(require('../../server/analytics/android-event').config,{api:{bodyParser:false}});
+ assert.deepEqual(require('../../server/analytics/admin-login').config,{api:{bodyParser:false}});
 });
