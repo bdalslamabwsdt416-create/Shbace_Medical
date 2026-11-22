@@ -29,3 +29,6 @@ module.exports = async function adminLogin(req, res) {
     return a.sendJson(res, 200, { authenticated: true, expiresAt: new Date(session.expiresAt).toISOString() });
   } catch (_) { return a.sendJson(res, 503, { error: 'admin_auth_unavailable' }); }
 };
+
+// Disable Vercel's automatic body parser so the handler can cap raw bytes before JSON parsing.
+module.exports.config = { api: { bodyParser: false } };
