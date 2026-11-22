@@ -507,10 +507,28 @@ async function pwaSourceBreakdown(sql) {
     'SELECT COALESCE(source_host, \'unattributed\') AS source_host, COUNT(*)::int AS installations' +
     ' FROM pwa_analytics_installs GROUP BY source_host ORDER BY installations DESC, source_host ASC', []
   );
-  return (rows || []).map(row => ({
-    sourceHost: row.source_host,
-    installations: Number(row.installations || 0)
+  const counts = new Map((rows || []).map(row => [row.source_host, Number(row.installations || 0)]));
+  const groups = [
+    { name: 'Shbace Medical iOS', hosts: ['shbace-medical-app.vercel.app', 'shbace-medical-ios.vercel.app', 'shbace-medical-ios-absi3.vercel.app', 'shbace-medical-ios-git-main-absi3.vercel.app'] },
+    { name: 'Shbace Medical Computer', hosts: ['shbace-medical-computer.vercel.app', 'shbace-medical-computer-absi3.vercel.app', 'shbace-medical-computer-git-main-absi3.vercel.app'] },
+    { name: 'Shbace Medical Chrome Android', hosts: ['shbace-medical-chrome-android.vercel.app', 'shbace-medical-chrome-android-absi3.vercel.app', 'shbace-medical-chrome-android-git-main-absi3.vercel.app'] },
+    { name: 'Shbace Medical Chrome', hosts: ['shbace-medical-chrome.vercel.app'] },
+    { name: 'Shbace Medical Web', hosts: ['shbacemedical-www.vercel.app'] }
+  ];
+  const known = new Set(groups.flatMap(group => group.hosts));
+  const result = groups.map(group => ({
+    sourceName: group.name,
+    domains: group.hosts.join(', '),
+    installations: group.hosts.reduce((sum, host) => sum + (counts.get(host) || 0), 0)
   }));
+  for (const [host, installations] of counts) {
+    if (host === 'unattributed') {
+      result.push({ sourceName: 'Unattributed · existing installations', domains: 'Source not recorded before this change', installations });
+    } else if (!known.has(host)) {
+      result.push({ sourceName: host, domains: host, installations });
+    }
+  }
+  return result;
 }
 
 async function summary(platform, page, size) {
