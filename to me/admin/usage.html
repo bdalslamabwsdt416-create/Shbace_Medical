@@ -24,7 +24,7 @@ th{color:#a6bfd4;font-weight:600}td code{color:#d6e8fa}.status{color:#aac2d8;mar
 @media(max-width:760px){.grid{grid-template-columns:1fr}.panel,.platform{padding:15px}.metric strong{font-size:23px}}
 </style></head><body><main>
 <header><h1>Shbace Medical · Usage Analytics</h1><p class="small">Private administration dashboard</p></header>
-<div class="notice">Counts represent registered app installations/devices, not necessarily unique people. Analytics records a random installation ID and at most one activity timestamp per UTC day. It does not collect student names, phone numbers, locations, study content, answers, scores, notes, bookmarks or saved progress.</div>
+<div class="notice">Counts represent registered app installations/devices, not necessarily unique people. Analytics records a random installation ID and at most one activity timestamp per UTC day. For PWA, it also records the hostname of the link that first registered the installation to separate counts by link. It does not store the full URL, referrer, query string, IP address or User-Agent, and does not collect student names, phone numbers, precise location, study content, answers, scores, notes, bookmarks or saved progress.</div>
 <section id="login" class="panel"><h2>Admin sign in</h2><p class="small">Use the administrator password configured in the hosting environment. It is not embedded in this page.</p>
 <form id="loginForm"><input id="password" type="password" autocomplete="current-password" placeholder="Administrator password" required maxlength="256"><button id="loginButton" type="submit">Sign in</button></form><div id="loginError" class="error" role="alert"></div></section>
 <section id="dashboard" class="hidden">
