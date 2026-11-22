@@ -458,6 +458,9 @@ async function ingest(req, res, platform) {
   try {
     const sourceColumn = platform === 'pwa' ? ', source_host' : '';
     const sourceValue = platform === 'pwa' ? ', $4::text' : '';
+    const sourceUpdate = platform === 'pwa'
+      ? ', source_host = COALESCE(' + t.installs + '.source_host, EXCLUDED.source_host)'
+      : '';
     const params = platform === 'pwa'
       ? [ev.installId, ev.eventId, ev.occurredAt, sourceHost(req)]
       : [ev.installId, ev.eventId, ev.occurredAt];
@@ -469,7 +472,7 @@ async function ingest(req, res, platform) {
       '), upsert_install AS (' +
       ' INSERT INTO ' + t.installs + ' (install_id, first_seen_at, last_active_at' + sourceColumn + ')' +
       ' SELECT install_id, occurred_at, occurred_at' + sourceValue + ' FROM inserted_event' +
-      ' ON CONFLICT (install_id) DO UPDATE SET last_active_at = GREATEST(COALESCE(' + t.installs + '.last_active_at, EXCLUDED.last_active_at), EXCLUDED.last_active_at)' +
+      ' ON CONFLICT (install_id) DO UPDATE SET last_active_at = GREATEST(COALESCE(' + t.installs + '.last_active_at, EXCLUDED.last_active_at), EXCLUDED.last_active_at)' + sourceUpdate +
       ' RETURNING install_id' +
       '), pruned_events AS (' +
       ' DELETE FROM ' + t.events + " WHERE occurred_at < NOW() - INTERVAL \'12 months\' AND EXISTS (SELECT 1 FROM inserted_event) RETURNING event_id" +
