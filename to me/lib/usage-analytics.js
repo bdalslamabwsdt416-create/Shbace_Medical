@@ -514,9 +514,9 @@ async function pwaSourceBreakdown(sql) {
   );
   const counts = new Map((rows || []).map(row => [row.source_host, Number(row.installations || 0)]));
   const groups = [
-    { name: 'Shbace Medical iOS', hosts: ['shbace-medical-app.vercel.app', 'shbace-medical-ios.vercel.app', 'shbace-medical-ios-absi3.vercel.app', 'shbace-medical-ios-git-main-absi3.vercel.app'] },
-    { name: 'Shbace Medical Computer', hosts: ['shbace-medical-computer.vercel.app', 'shbace-medical-computer-absi3.vercel.app', 'shbace-medical-computer-git-main-absi3.vercel.app'] },
-    { name: 'Shbace Medical Chrome Android', hosts: ['shbace-medical-chrome-android.vercel.app', 'shbace-medical-chrome-android-absi3.vercel.app', 'shbace-medical-chrome-android-git-main-absi3.vercel.app'] },
+    { name: 'Shbace Medical iOS', hosts: ['shbace-medical-app.vercel.app', 'shbace-medical-ios.vercel.app'] },
+    { name: 'Shbace Medical Computer', hosts: ['shbace-medical-computer.vercel.app'] },
+    { name: 'Shbace Medical Chrome Android', hosts: ['shbace-medical-chrome-android.vercel.app'] },
     { name: 'Shbace Medical Chrome', hosts: ['shbace-medical-chrome.vercel.app'] },
     { name: 'Shbace Medical Web', hosts: ['shbacemedical-www.vercel.app'] }
   ];
