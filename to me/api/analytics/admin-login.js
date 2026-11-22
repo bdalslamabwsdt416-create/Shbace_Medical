@@ -4,12 +4,17 @@ module.exports = async function adminLogin(req, res) {
   if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return a.sendJson(res, 405, { error: 'method_not_allowed' }); }
   if (!a.sameOrigin(req)) return a.sendJson(res, 403, { error: 'origin_not_allowed' });
   if (!String(req.headers['content-type'] || '').toLowerCase().includes('application/json')) return a.sendJson(res, 415, { error: 'json_required' });
-  if (a.bodyBytes(req.body) > 512) return a.sendJson(res, 413, { error: 'payload_too_large' });
+  let body;
+  try { body = await a.readJsonBody(req, 512); }
+  catch (e) {
+    if (e.message === 'payload_too_large') return a.sendJson(res, 413, { error: 'payload_too_large' });
+    return a.sendJson(res, 400, { error: e.message === 'invalid_content_length' ? 'invalid_content_length' : 'invalid_json' });
+  }
   const expected = a.adminPassword(), secret = a.sessionSecret();
   if (!expected || !secret) return a.sendJson(res, 503, { error: 'admin_auth_not_configured' });
-  if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body) ||
-      Object.keys(req.body).length !== 1 || typeof req.body.password !== 'string' ||
-      req.body.password.length > 256) return a.sendJson(res, 400, { error: 'invalid_login_payload' });
+  if (!body || typeof body !== 'object' || Array.isArray(body) ||
+      Object.keys(body).length !== 1 || typeof body.password !== 'string' ||
+      body.password.length > 256) return a.sendJson(res, 400, { error: 'invalid_login_payload' });
   const limit = await a.consumeAdminLoginAttempt(req);
   if (!limit.available) return a.sendJson(res, 503, { error: 'admin_rate_limiter_unavailable' });
   if (!limit.allowed) {
