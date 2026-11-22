@@ -97,7 +97,7 @@ module.exports = async function previewAnalyticsProbe(req, res) {
     const login = await call('/api/analytics/admin-login', 'POST',
       JSON.stringify({ password: process.env.ANALYTICS_ADMIN_PASSWORD }), {
         'Content-Type': 'application/json', Origin: pwaOrigin
-      });
+      }, process.env.ANALYTICS_TEST_SHARE_LOGIN);
     check(login.status === 200 && login.payload.authenticated === true, 'admin_login_failed');
     const setCookie = login.headers.get('set-cookie') || '';
     sessionCookie = setCookie.split(';')[0];
