@@ -322,14 +322,17 @@ function sourceHost(req) {
     if (headers.origin) host = new URL(headers.origin).hostname;
     else if (headers.host) host = new URL('https://' + String(headers.host)).hostname;
   } catch (_) { return null; }
-  host = String(host || '').toLowerCase().replace(/\\.$/, '');
+  host = String(host || '').toLowerCase();
+  if (host.endsWith('.')) host = host.slice(0, -1);
   if (host === 'localhost') return host;
-  if (!host || host.length > 253 || !host.includes('.') ||
-      /^(?:\\d{1,3}\\.){3}\\d{1,3}$/.test(host)) return null;
+  if (!host || host.length > 253 || !host.includes('.')) return null;
   const labels = host.split('.');
+  if (labels.length === 4 && labels.every(part =>
+      part !== '' && Number.isInteger(Number(part)) && Number(part) >= 0 && Number(part) <= 255)) return null;
   if (labels.some(label => !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label))) return null;
   return host;
 }
+
 function cors(req, res) {
   const origin = req.headers && req.headers.origin;
   if (!origin) return true;
