@@ -24,12 +24,13 @@ th{color:#a6bfd4;font-weight:600}td code{color:#d6e8fa}.status{color:#aac2d8;mar
 @media(max-width:760px){.grid{grid-template-columns:1fr}.panel,.platform{padding:15px}.metric strong{font-size:23px}}
 </style></head><body><main>
 <header><h1>Shbace Medical · Usage Analytics</h1><p class="small">Private administration dashboard</p></header>
-<div class="notice">Counts represent registered app installations/devices, not necessarily unique people. Analytics records a random installation ID and at most one activity timestamp per UTC day. It does not collect student names, phone numbers, locations, study content, answers, scores, notes, bookmarks or saved progress.</div>
+<div class="notice">Counts represent registered app installations/devices, not necessarily unique people. Analytics records a random installation ID and at most one activity timestamp per UTC day. For PWA, it records the hostname associated with each installation to separate counts by link. Older installations are attributed when they next send activity, and an existing source is never replaced. Only the hostname is stored, not the full URL, referrer, query string, IP address or User-Agent. It does not collect student names, phone numbers, precise location, study content, answers, scores, notes, bookmarks or saved progress.</div>
 <section id="login" class="panel"><h2>Admin sign in</h2><p class="small">Use the administrator password configured in the hosting environment. It is not embedded in this page.</p>
 <form id="loginForm"><input id="password" type="password" autocomplete="current-password" placeholder="Administrator password" required maxlength="256"><button id="loginButton" type="submit">Sign in</button></form><div id="loginError" class="error" role="alert"></div></section>
 <section id="dashboard" class="hidden">
 <div class="compare"><span id="totalPwa">PWA: —</span><span id="totalAndroid">Android: —</span><span id="totalAll">Combined: —</span><button id="refreshButton" class="secondary">Refresh</button><button id="logoutButton" class="secondary">Sign out</button></div>
 <h2>Platform comparison</h2><div class="grid"><section class="platform"><h2>PWA · Phones and browsers</h2><div id="pwaMetrics" class="metrics"></div></section><section class="platform"><h2>Android app</h2><div id="androidMetrics" class="metrics"></div></section></div>
+<h2>PWA installations by link / domain</h2><section class="panel table-wrap"><p class="small">The source is the hostname that first registered the installation. Existing installations collected before this change remain unattributed.</p><table><thead><tr><th>PWA link</th><th>Domains included</th><th>Installations</th></tr></thead><tbody id="pwaSourceRows"></tbody></table></section>
 <h2>Daily activity · Last 30 days</h2><section class="panel"><div class="legend"><span><i class="dot"></i>PWA</span><span><i class="dot android"></i>Android</span></div><div id="activityChart" class="chart" aria-label="Daily active installations for the last 30 days"></div></section>
 <h2>Last activity per installation</h2><section class="panel table-wrap"><table><thead><tr><th>Platform</th><th>Installation ID</th><th>First seen</th><th>Last activity</th></tr></thead><tbody id="installRows"></tbody></table><div class="compare"><button id="moreButton" class="secondary">Load next page</button><span id="pageLabel" class="small"></span></div></section>
 <div id="dashboardStatus" class="status" role="status"></div></section>
@@ -53,6 +54,15 @@ var d=p[i]||a[i];if(!d)continue;var group=document.createElement('div');group.st
 chart.append(group);
 }
 }
+function renderSourceBreakdown(data){
+var root=$('pwaSourceRows');root.replaceChildren();
+(data.sourceBreakdown||[]).forEach(function(item){
+var row=document.createElement('tr'),name=document.createElement('td'),domains=document.createElement('td'),count=document.createElement('td');
+name.textContent=item.sourceName||'Unknown source';domains.textContent=item.domains||'—';count.textContent=num(item.installations);
+row.append(name,domains,count);root.append(row);
+});
+}
+
 function appendRows(platforms){
 ['pwa','android'].forEach(function(platform){(platforms[platform].installations||[]).forEach(function(item){
 var row=document.createElement('tr');
@@ -68,7 +78,7 @@ async function load(append){
 if(busy)return;busy=true;$('dashboardStatus').textContent='Loading…';$('refreshButton').disabled=true;
 try{
 var d=await request('/api/analytics/admin-summary?platform=all&page='+page),p=d.platforms.pwa,a=d.platforms.android;
-renderMetrics('pwaMetrics',p);renderMetrics('androidMetrics',a);renderChart(d.platforms);
+renderMetrics('pwaMetrics',p);renderMetrics('androidMetrics',a);renderSourceBreakdown(p);renderChart(d.platforms);
 if(!append)$('installRows').replaceChildren();appendRows(d.platforms);
 $('totalPwa').textContent='PWA: '+num(p.totalInstallations);$('totalAndroid').textContent='Android: '+num(a.totalInstallations);$('totalAll').textContent='Combined: '+num(p.totalInstallations+a.totalInstallations);
 $('pageLabel').textContent='Page '+page+' · up to 50 installations per platform';$('moreButton').disabled=p.installations.length<50&&a.installations.length<50;
@@ -86,7 +96,7 @@ finally{$('loginButton').disabled=false}
 $('logoutButton').addEventListener('click',async function(){try{await request('/api/analytics/admin-logout',{method:'POST'})}catch(_){}$('dashboard').classList.add('hidden');$('login').classList.remove('hidden')});
 $('refreshButton').addEventListener('click',function(){page=1;load(false)});$('moreButton').addEventListener('click',function(){page++;load(true)});
 request('/api/analytics/admin-summary?platform=all&page=1').then(function(d){
-$('login').classList.add('hidden');$('dashboard').classList.remove('hidden');renderMetrics('pwaMetrics',d.platforms.pwa);renderMetrics('androidMetrics',d.platforms.android);renderChart(d.platforms);appendRows(d.platforms);
+$('login').classList.add('hidden');$('dashboard').classList.remove('hidden');renderMetrics('pwaMetrics',d.platforms.pwa);renderMetrics('androidMetrics',d.platforms.android);renderSourceBreakdown(d.platforms.pwa);renderChart(d.platforms);appendRows(d.platforms);
 $('totalPwa').textContent='PWA: '+num(d.platforms.pwa.totalInstallations);$('totalAndroid').textContent='Android: '+num(d.platforms.android.totalInstallations);$('totalAll').textContent='Combined: '+num(d.platforms.pwa.totalInstallations+d.platforms.android.totalInstallations);
 }).catch(function(e){if(e.status!==401)$('loginError').textContent=e.message==='analytics_database_not_configured'?'Database not configured.':e.message});
 })();

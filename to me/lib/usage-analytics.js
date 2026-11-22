@@ -295,6 +295,9 @@ function sameOrigin(req) {
   if (!origin) return false;
   try {
     const parsed = new URL(origin);
+    const hostname = parsed.hostname.toLowerCase();
+    // Generated deployment URLs are not official PWA links and must not create analytics installs.
+    if (hostname.startsWith('shbacemedical-') && hostname.endsWith('-absi3.vercel.app')) return false;
     const configured = String(process.env.ANALYTICS_ALLOWED_ORIGIN || '')
       .split(',').map(value => value.trim()).filter(Boolean);
     if (configured.includes(parsed.origin)) return true;
@@ -312,6 +315,27 @@ function allowedEventOrigin(req) {
     return sameOrigin(req);
   } catch (_) { return false; }
 }
+
+/* Attribute a new PWA installation to the serving hostname only.
+   Never persist referrers, query strings, IP addresses or User-Agent values. */
+function sourceHost(req) {
+  const headers = req && req.headers || {};
+  let host = '';
+  try {
+    if (headers.origin) host = new URL(headers.origin).hostname;
+    else if (headers.host) host = new URL('https://' + String(headers.host)).hostname;
+  } catch (_) { return null; }
+  host = String(host || '').toLowerCase();
+  if (host.endsWith('.')) host = host.slice(0, -1);
+  if (host === 'localhost') return host;
+  if (!host || host.length > 253 || !host.includes('.')) return null;
+  const labels = host.split('.');
+  if (labels.length === 4 && labels.every(part =>
+      part !== '' && Number.isInteger(Number(part)) && Number(part) >= 0 && Number(part) <= 255)) return null;
+  if (labels.some(label => !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label))) return null;
+  return host;
+}
+
 function cors(req, res) {
   const origin = req.headers && req.headers.origin;
   if (!origin) return true;
@@ -435,20 +459,28 @@ async function ingest(req, res, platform) {
   try { sql = database(); } catch (_) { return sendJson(res, 503, { error: 'analytics_database_unavailable' }); }
   if (!sql) return sendJson(res, 503, { error: 'analytics_database_not_configured' });
   try {
+    const sourceColumn = platform === 'pwa' ? ', source_host' : '';
+    const sourceValue = platform === 'pwa' ? ', $4::text' : '';
+    const sourceUpdate = platform === 'pwa'
+      ? ', source_host = COALESCE(' + t.installs + '.source_host, EXCLUDED.source_host)'
+      : '';
+    const params = platform === 'pwa'
+      ? [ev.installId, ev.eventId, ev.occurredAt, sourceHost(req)]
+      : [ev.installId, ev.eventId, ev.occurredAt];
     const rows = await sql.query(
       'WITH inserted_event AS (' +
       ' INSERT INTO ' + t.events + ' (event_id, install_id, event_date, occurred_at)' +
       ' VALUES ($2::uuid, $1::uuid, ($3::timestamptz AT TIME ZONE \'UTC\')::date, $3::timestamptz)' +
       ' ON CONFLICT DO NOTHING RETURNING install_id, occurred_at, event_id' +
       '), upsert_install AS (' +
-      ' INSERT INTO ' + t.installs + ' (install_id, first_seen_at, last_active_at)' +
-      ' SELECT install_id, occurred_at, occurred_at FROM inserted_event' +
-      ' ON CONFLICT (install_id) DO UPDATE SET last_active_at = GREATEST(COALESCE(' + t.installs + '.last_active_at, EXCLUDED.last_active_at), EXCLUDED.last_active_at)' +
+      ' INSERT INTO ' + t.installs + ' (install_id, first_seen_at, last_active_at' + sourceColumn + ')' +
+      ' SELECT install_id, occurred_at, occurred_at' + sourceValue + ' FROM inserted_event' +
+      ' ON CONFLICT (install_id) DO UPDATE SET last_active_at = GREATEST(COALESCE(' + t.installs + '.last_active_at, EXCLUDED.last_active_at), EXCLUDED.last_active_at)' + sourceUpdate +
       ' RETURNING install_id' +
       '), pruned_events AS (' +
       ' DELETE FROM ' + t.events + " WHERE occurred_at < NOW() - INTERVAL \'12 months\' AND EXISTS (SELECT 1 FROM inserted_event) RETURNING event_id" +
       ') SELECT event_id FROM inserted_event',
-      [ev.installId, ev.eventId, ev.occurredAt]
+      params
     );
     return sendJson(res, 200, { accepted: Array.isArray(rows) && rows.length > 0 });
   } catch (_) { return sendJson(res, 503, { error: 'analytics_storage_unavailable' }); }
@@ -481,11 +513,56 @@ async function platformSummary(sql, platform, page, pageSize) {
     page, pageSize
   };
 }
+async function pwaSourceBreakdown(sql) {
+  const rows = await sql.query(
+    'SELECT COALESCE(source_host, \'unattributed\') AS source_host, COUNT(*)::int AS installations' +
+    ' FROM pwa_analytics_installs GROUP BY source_host ORDER BY installations DESC, source_host ASC', []
+  );
+  const counts = new Map((rows || []).map(row => [row.source_host, Number(row.installations || 0)]));
+  const groups = [
+    { name: 'Shbace Medical iOS', hosts: ['shbace-medical-app.vercel.app', 'shbace-medical-ios.vercel.app'] },
+    { name: 'Shbace Medical Computer', hosts: ['shbace-medical-computer.vercel.app'] },
+    { name: 'Shbace Medical Chrome Android', hosts: ['shbace-medical-chrome-android.vercel.app'] },
+    { name: 'Shbace Medical Chrome', hosts: ['shbace-medical-chrome.vercel.app'] },
+    { name: 'Shbace Medical Web', hosts: ['shbacemedical-www.vercel.app'] }
+  ];
+  const known = new Set(groups.flatMap(group => group.hosts));
+  const result = groups.map(group => ({
+    sourceName: group.name,
+    domains: group.hosts.join(', '),
+    installations: group.hosts.reduce((sum, host) => sum + (counts.get(host) || 0), 0)
+  }));
+  const deploymentAliases = [];
+  for (const [host, installations] of counts) {
+    if (host === 'unattributed') {
+      result.push({ sourceName: 'Unattributed · existing installations', domains: 'Source not recorded yet; filled on next activity', installations });
+    } else if (!known.has(host) && host.startsWith('shbacemedical-') && host.endsWith('-absi3.vercel.app')) {
+      deploymentAliases.push({ host, installations });
+    } else if (!known.has(host)) {
+      result.push({ sourceName: host, domains: host, installations });
+    }
+  }
+  if (deploymentAliases.length) {
+    result.push({
+      sourceName: 'Vercel deployment aliases · not one of the five official links',
+      domains: deploymentAliases.map(item => item.host).join(', '),
+      installations: deploymentAliases.reduce((sum, item) => sum + item.installations, 0)
+    });
+  }
+  return result;
+}
+
 async function summary(platform, page, size) {
   const sql = database();
   if (!sql) throw new Error('analytics_database_not_configured');
-  if (platform === 'pwa' || platform === 'android') return { platform, page, pageSize: size, platforms: { [platform]: await platformSummary(sql, platform, page, size) } };
+  if (platform === 'pwa') {
+    const data = await platformSummary(sql, 'pwa', page, size);
+    data.sourceBreakdown = await pwaSourceBreakdown(sql);
+    return { platform, page, pageSize: size, platforms: { pwa: data } };
+  }
+  if (platform === 'android') return { platform, page, pageSize: size, platforms: { android: await platformSummary(sql, 'android', page, size) } };
   const result = await Promise.all([platformSummary(sql, 'pwa', page, size), platformSummary(sql, 'android', page, size)]);
+  result[0].sourceBreakdown = await pwaSourceBreakdown(sql);
   return { platform: 'all', page, pageSize: size, platforms: { pwa: result[0], android: result[1] } };
 }
 module.exports = {
@@ -493,5 +570,5 @@ module.exports = {
   createSession, validSession, hasSession, setCookie, clearCookie,
   consumeAdminLoginAttempt, clearAdminLoginAttempts, consumeIngestionAttempt,
   ingestionRateLimitKeys, INGESTION_PER_MINUTE_LIMIT, INGESTION_PER_DAY_LIMIT,
-  ingest, summary, cronAuthorized, cleanupExpiredEvents
+  ingest, summary, sourceHost, pwaSourceBreakdown, cronAuthorized, cleanupExpiredEvents
 };

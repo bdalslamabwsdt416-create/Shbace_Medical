@@ -10,8 +10,8 @@ event_id="eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"
 # schema's DEFERRABLE FK, then its install upsert must wait and return the
 # concurrently committed install row.
 "${PSQL[@]}" -c "BEGIN;
-  INSERT INTO pwa_analytics_installs (install_id, first_seen_at, last_active_at)
-  VALUES ('${install_id}', NOW(), NOW())
+  INSERT INTO pwa_analytics_installs (install_id, first_seen_at, last_active_at, source_host)
+  VALUES ('${install_id}', NOW(), NOW(), 'shbace-medical-ios.vercel.app')
   ON CONFLICT (install_id) DO UPDATE SET last_active_at = GREATEST(pwa_analytics_installs.last_active_at, EXCLUDED.last_active_at);
   SELECT pg_sleep(2);
   COMMIT;" >/tmp/shbace-analytics-lock.log &
@@ -26,8 +26,8 @@ WITH inserted_event AS (
   ON CONFLICT DO NOTHING
   RETURNING install_id, occurred_at, event_id
 ), upsert_install AS (
-  INSERT INTO pwa_analytics_installs (install_id, first_seen_at, last_active_at)
-  SELECT install_id, occurred_at, occurred_at FROM inserted_event
+  INSERT INTO pwa_analytics_installs (install_id, first_seen_at, last_active_at, source_host)
+  SELECT install_id, occurred_at, occurred_at, 'shbace-medical-chrome.vercel.app' FROM inserted_event
   ON CONFLICT (install_id) DO UPDATE
     SET last_active_at = GREATEST(COALESCE(pwa_analytics_installs.last_active_at, EXCLUDED.last_active_at), EXCLUDED.last_active_at)
   RETURNING install_id
@@ -40,6 +40,7 @@ WITH inserted_event AS (
 SELECT 1 / (COUNT(*) = 1)::int FROM inserted_event;
 
 SELECT 1 / ((SELECT COUNT(*) FROM pwa_analytics_installs WHERE install_id = '${install_id}') = 1)::int;
+SELECT 1 / ((SELECT source_host FROM pwa_analytics_installs WHERE install_id = '${install_id}') = 'shbace-medical-ios.vercel.app')::int;
 SELECT 1 / ((SELECT COUNT(*) FROM pwa_analytics_events WHERE install_id = '${install_id}' AND event_id = '${event_id}') = 1)::int;
 SQL
 

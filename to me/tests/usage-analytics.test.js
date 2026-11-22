@@ -9,6 +9,23 @@ const install='1f7b3f6a-37af-4b90-b8b8-a985f2bfcb2b';
 const event='c97b1b2e-a184-4ad0-9e1e-1f50e5a20c60';
 const now=Date.parse('2026-11-22T12:00:00.000Z');
 
+test('noncanonical central Vercel deployment aliases are rejected as PWA origins',()=>{
+ const previous=process.env.ANALYTICS_ALLOWED_ORIGIN;
+ process.env.ANALYTICS_ALLOWED_ORIGIN='https://shbacemedical-www.vercel.app';
+ try {
+  assert.equal(analytics.sameOrigin({headers:{origin:'https://shbacemedical-abc123-absi3.vercel.app',host:'shbacemedical-abc123-absi3.vercel.app'}}),false);
+  assert.equal(analytics.sameOrigin({headers:{origin:'https://shbacemedical-www.vercel.app',host:'api.example'}}),true);
+ } finally {
+  if(previous===undefined)delete process.env.ANALYTICS_ALLOWED_ORIGIN;
+  else process.env.ANALYTICS_ALLOWED_ORIGIN=previous;
+ }
+});
+test('PWA source attribution stores only a validated hostname, not URL paths or IP addresses',()=>{
+ assert.equal(analytics.sourceHost({headers:{origin:'https://shbace-medical-ios.vercel.app',host:'shbace-medical-ios.vercel.app'}}),'shbace-medical-ios.vercel.app');
+ assert.equal(analytics.sourceHost({headers:{host:'shbace-medical-chrome.vercel.app'}}),'shbace-medical-chrome.vercel.app');
+ assert.equal(analytics.sourceHost({headers:{host:'203.0.113.10'}}),null);
+ assert.equal(analytics.sourceHost({headers:{origin:'not a URL'}}),null);
+});
 test('platform storage is physically separated',()=>{
  assert.notEqual(analytics.getTables('pwa').installs,analytics.getTables('android').installs);
  assert.notEqual(analytics.getTables('pwa').events,analytics.getTables('android').events);
@@ -111,9 +128,46 @@ test('To Me PWA build injects only a validated external HTTPS analytics API orig
 });
 
 
+test('PWA source summary groups official domain aliases into the five published links',async()=>{
+ const rows=[
+  {source_host:'shbace-medical-ios.vercel.app',installations:3},
+  {source_host:'shbace-medical-app.vercel.app',installations:2},
+  {source_host:'shbace-medical-computer.vercel.app',installations:1},
+  {source_host:'shbace-medical-chrome.vercel.app',installations:4},
+  {source_host:'shbacemedical-kz9yaa2vy-absi3.vercel.app',installations:2},
+  {source_host:'shbacemedical-iteri5mgo-absi3.vercel.app',installations:2},
+  {source_host:'unattributed',installations:11}
+ ];
+ const result=await analytics.pwaSourceBreakdown({query:async()=>rows});
+ assert.equal(result.length,7);
+ assert.equal(result.find(row=>row.sourceName==='Shbace Medical iOS').installations,5);
+ assert.equal(result.find(row=>row.sourceName==='Shbace Medical Computer').installations,1);
+ assert.equal(result.find(row=>row.sourceName==='Shbace Medical Chrome').installations,4);
+ assert.equal(result.find(row=>row.sourceName==='Unattributed · existing installations').installations,11);
+ assert.equal(result.find(row=>row.sourceName==='Shbace Medical Chrome Android').installations,0);
+ assert.equal(result.find(row=>row.sourceName==='Shbace Medical Web').installations,0);
+ assert.equal(result.find(row=>row.sourceName==='Vercel deployment aliases · not one of the five official links').installations,4);
+});
+test('source_host is added only to PWA inserts; Android analytics keeps its original schema',()=>{
+ assert.ok(analyticsSource.includes("const sourceColumn = platform === 'pwa' ? ', source_host' : '';"));
+ assert.ok(analyticsSource.includes("const sourceValue = platform === 'pwa' ? ', $4::text' : '';"));
+ assert.ok(analyticsSource.includes("const sourceUpdate = platform === 'pwa'"));
+ assert.ok(analyticsSource.includes("COALESCE(' + t.installs + '.source_host, EXCLUDED.source_host)"));
+ assert.ok(analyticsSource.includes("const params = platform === 'pwa'"));
+ assert.ok(analyticsSource.includes("' INSERT INTO ' + t.installs + ' (install_id, first_seen_at, last_active_at' + sourceColumn + ')'"));
+});
+test('PWA source is captured once and fills legacy rows without overwriting known source',()=>{
+ assert.ok(analyticsSource.includes("' INSERT INTO ' + t.installs + ' (install_id, first_seen_at, last_active_at' + sourceColumn + ')'"));
+ assert.ok(analyticsSource.includes("' SELECT install_id, occurred_at, occurred_at' + sourceValue + ' FROM inserted_event'"));
+ assert.ok(analyticsSource.includes("const params = platform === 'pwa'"));
+ const conflict=analyticsSource.slice(analyticsSource.indexOf('ON CONFLICT (install_id) DO UPDATE'),analyticsSource.indexOf('RETURNING install_id',analyticsSource.indexOf('ON CONFLICT (install_id) DO UPDATE')));
+ assert.ok(conflict.includes('last_active_at'));
+ assert.ok(conflict.includes('sourceUpdate'));
+ assert.ok(schemaSource.includes('ADD COLUMN IF NOT EXISTS source_host TEXT'));
+});
 test('event-first ingestion relies on deferred foreign keys and upserts the install only for a new event',()=>{
  assert.ok(analyticsSource.includes('WITH inserted_event AS ('));
- assert.ok(analyticsSource.includes('SELECT install_id, occurred_at, occurred_at FROM inserted_event'));
+ assert.ok(analyticsSource.includes("' SELECT install_id, occurred_at, occurred_at' + sourceValue + ' FROM inserted_event'"));
  assert.ok(analyticsSource.includes('ON CONFLICT (install_id) DO UPDATE SET last_active_at = GREATEST'));
  assert.ok(analyticsSource.includes('RETURNING install_id'));
  assert.ok(analyticsSource.includes('SELECT event_id FROM inserted_event'));
@@ -121,7 +175,7 @@ test('event-first ingestion relies on deferred foreign keys and upserts the inst
 test('analytics SQL inserts the event first and then upserts the install through the deferred foreign key',()=>{
  assert.ok(analyticsSource.includes('WITH inserted_event AS ('));
  assert.ok(analyticsSource.includes('VALUES ($2::uuid, $1::uuid,'));
- assert.ok(analyticsSource.includes('SELECT install_id, occurred_at, occurred_at FROM inserted_event'));
+ assert.ok(analyticsSource.includes("' SELECT install_id, occurred_at, occurred_at' + sourceValue + ' FROM inserted_event'"));
  assert.ok(analyticsSource.includes('ON CONFLICT (install_id) DO UPDATE SET last_active_at = GREATEST'));
  assert.ok(analyticsSource.includes('SELECT event_id FROM inserted_event'));
  assert.ok(schemaSource.includes('DEFERRABLE INITIALLY DEFERRED'));
