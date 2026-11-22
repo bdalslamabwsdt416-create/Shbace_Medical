@@ -22,10 +22,13 @@ on:
       - integrate/for-apk-main-20261119
       - main
       - feat/basic-usage-analytics-20261121
+      - fix/vercel-production-api-paths-20261122
     paths:
       - 'android/**'
       - 'for ApK/native/**'
       - 'to me/**'
+      - 'api/**'
+      - 'vercel.json'
       - 'index.html'
       - 'css/**'
       - 'js/**'
