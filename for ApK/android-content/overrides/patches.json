@@ -26,6 +26,29 @@
         "kind": "Diagnosis",
         "source": "SHBACE Medical — Clinical Case"
       }
+    },
+    {
+      "id": "abdominal-migraine-001",
+      "targetSpec": "git",
+      "targetBank": "generated-ai",
+      "targetTopicName": "Chronic Abdominal Pain and Infantile Colic",
+      "question": {
+        "id": "abdominal-migraine-001",
+        "stem": "An 8-year-old girl presents with a 6-month history of recurrent abdominal pain, predominantly around the umbilicus. The pain frequently occurs before school and occasionally improves during weekends. Her growth parameters are normal, and physical examination is unremarkable. She has no fever, weight loss, vomiting, diarrhea, or gastrointestinal bleeding. However, her mother reports that the child has recently developed episodes of severe abdominal pain lasting approximately 3–5 hours, associated with pallor, nausea, and vomiting. Between episodes, she is completely asymptomatic. Her mother suffers from migraine. Which of the following is the MOST likely diagnosis?",
+        "options": [
+          "Functional dyspepsia",
+          "Irritable bowel syndrome",
+          "Abdominal migraine",
+          "Crohn's disease",
+          "Peptic ulcer disease"
+        ],
+        "correctIndex": 2,
+        "explanation": "The episodic severe abdominal pain lasting 3–5 hours, associated with pallor, nausea, and vomiting, strongly suggests abdominal migraine. The child is completely symptom-free between episodes, and the maternal history of migraine further supports the diagnosis.",
+        "extendedExplanation": "Abdominal migraine is a functional abdominal pain disorder characterized by recurrent episodes of intense, incapacitating abdominal pain, usually periumbilical or poorly localized, lasting at least one hour. Episodes are associated with symptoms such as pallor, anorexia, nausea, and vomiting, with complete resolution between attacks. A family history of migraine supports the diagnosis, suggesting a shared underlying neurobiological mechanism involving altered gut–brain interactions. Normal growth and the absence of alarm features help distinguish it from organic gastrointestinal diseases.",
+        "tag": "Clinical Case",
+        "kind": "Diagnosis",
+        "source": "SHBACE Medical — Clinical Case"
+      }
     }
   ],
   "collections": []
