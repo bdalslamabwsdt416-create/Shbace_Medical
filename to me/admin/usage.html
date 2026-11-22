@@ -30,7 +30,7 @@ th{color:#a6bfd4;font-weight:600}td code{color:#d6e8fa}.status{color:#aac2d8;mar
 <section id="dashboard" class="hidden">
 <div class="compare"><span id="totalPwa">PWA: —</span><span id="totalAndroid">Android: —</span><span id="totalAll">Combined: —</span><button id="refreshButton" class="secondary">Refresh</button><button id="logoutButton" class="secondary">Sign out</button></div>
 <h2>Platform comparison</h2><div class="grid"><section class="platform"><h2>PWA · Phones and browsers</h2><div id="pwaMetrics" class="metrics"></div></section><section class="platform"><h2>Android app</h2><div id="androidMetrics" class="metrics"></div></section></div>
-<h2>PWA installations by link / domain</h2><section class="panel table-wrap"><p class="small">The source is the hostname that first registered the installation. Existing installations collected before this change remain unattributed.</p><table><thead><tr><th>PWA hostname</th><th>Installations</th></tr></thead><tbody id="pwaSourceRows"></tbody></table></section>
+<h2>PWA installations by link / domain</h2><section class="panel table-wrap"><p class="small">The source is the hostname that first registered the installation. Existing installations collected before this change remain unattributed.</p><table><thead><tr><th>PWA link</th><th>Domains included</th><th>Installations</th></tr></thead><tbody id="pwaSourceRows"></tbody></table></section>
 <h2>Daily activity · Last 30 days</h2><section class="panel"><div class="legend"><span><i class="dot"></i>PWA</span><span><i class="dot android"></i>Android</span></div><div id="activityChart" class="chart" aria-label="Daily active installations for the last 30 days"></div></section>
 <h2>Last activity per installation</h2><section class="panel table-wrap"><table><thead><tr><th>Platform</th><th>Installation ID</th><th>First seen</th><th>Last activity</th></tr></thead><tbody id="installRows"></tbody></table><div class="compare"><button id="moreButton" class="secondary">Load next page</button><span id="pageLabel" class="small"></span></div></section>
 <div id="dashboardStatus" class="status" role="status"></div></section>
@@ -57,11 +57,12 @@ chart.append(group);
 function renderSourceBreakdown(data){
 var root=$('pwaSourceRows');root.replaceChildren();
 (data.sourceBreakdown||[]).forEach(function(item){
-var row=document.createElement('tr'),host=document.createElement('td'),count=document.createElement('td');
-host.textContent=item.sourceHost==='unattributed'?'Unattributed · existing installations':item.sourceHost;
-count.textContent=num(item.installations);row.append(host,count);root.append(row);
+var row=document.createElement('tr'),name=document.createElement('td'),domains=document.createElement('td'),count=document.createElement('td');
+name.textContent=item.sourceName||'Unknown source';domains.textContent=item.domains||'—';count.textContent=num(item.installations);
+row.append(name,domains,count);root.append(row);
 });
 }
+
 function appendRows(platforms){
 ['pwa','android'].forEach(function(platform){(platforms[platform].installations||[]).forEach(function(item){
 var row=document.createElement('tr');
