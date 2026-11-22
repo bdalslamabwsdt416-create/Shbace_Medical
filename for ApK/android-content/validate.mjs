@@ -181,7 +181,7 @@ for (const overridePath of (catalog.overrideFiles || [])) {
   overridePaths.add(overridePath);
   const source = await readJson(path.join(root, overridePath));
   assert(source && source.schema === 'shbace-remote-overrides-v1', 'Invalid override file schema: ' + overridePath);
-  for (const key of ['systems', 'topics', 'questionPatches', 'collections']) {
+  for (const key of ['systems', 'topics', 'questionPatches', 'questionAdds', 'collections']) {
     assert(source[key] == null || Array.isArray(source[key]), 'Invalid override array ' + key + ' in ' + overridePath);
   }
   const seenQuestionIds = new Set();
@@ -198,6 +198,30 @@ for (const overridePath of (catalog.overrideFiles || [])) {
     if (fields.correctIndex != null) assert(Number.isInteger(fields.correctIndex) && fields.correctIndex >= 0 &&
       Array.isArray(fields.options) && fields.correctIndex < fields.options.length, 'Invalid replacement answer index: ' + patch.id);
     if (fields.image != null) assetRef(fields.image, listedPaths, 'Question override image ' + patch.id);
+  }
+  const seenAddedQuestionIds = new Set();
+  for (const addition of (source.questionAdds || [])) {
+    assert(addition && typeof addition.id === 'string' && addition.id.trim() &&
+      addition.id.length <= 160, 'Invalid new-question insertion ID in ' + overridePath);
+    assert(!seenAddedQuestionIds.has(addition.id), 'Duplicate new-question insertion ID: ' + addition.id);
+    seenAddedQuestionIds.add(addition.id);
+    assert(typeof addition.targetSpec === 'string' && addition.targetSpec.trim(),
+      'New-question insertion needs targetSpec: ' + addition.id);
+    assert(Number.isInteger(addition.targetTopicId),
+      'New-question insertion needs an integer targetTopicId: ' + addition.id);
+    const q = addition.question;
+    assert(q && typeof q === 'object' && !Array.isArray(q),
+      'New-question insertion needs a question object: ' + addition.id);
+    assert(typeof q.id === 'string' && q.id.trim() && q.id.length <= 160,
+      'Inserted question needs a stable question.id: ' + addition.id);
+    assert(typeof (q.stem || q.question) === 'string' && (q.stem || q.question).trim(),
+      'Inserted question has an empty stem: ' + addition.id);
+    assert(Array.isArray(q.options) && q.options.length >= 2 &&
+      q.options.every(option => typeof option === 'string' && option.trim()),
+      'Inserted question has invalid options: ' + addition.id);
+    assert(Number.isInteger(q.correctIndex) && q.correctIndex >= 0 &&
+      q.correctIndex < q.options.length, 'Inserted question has an invalid answer index: ' + addition.id);
+    if (q.image != null) assetRef(q.image, listedPaths, 'Inserted question image ' + addition.id);
   }
   const seenSystems = new Set();
   for (const system of (source.systems || [])) {
