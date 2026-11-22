@@ -43,6 +43,9 @@ const requiredFiles = [
   "data/all-once/all-once-bank-10.js",
   "data/clinical-case/clinical-case-bank-01.js",
   "data/clinicalCaseBank.json",
+  "data/external-banks/haitham-nabil.json",
+  "data/external-banks/aster-qbank.json",
+  "data/audit/external-qbank-import-audit.json",
   "data/ai-generated/01-cns.json",
   "data/ai-generated/02-comprehensive-pediatrics.json",
   "data/ai-generated/03-cvs.json",
@@ -126,6 +129,26 @@ const explanationAudit = JSON.parse(readFileSync(join(root, "data/audit/Question
 const reviewedPatch = JSON.parse(readFileSync(join(root, "data/qbData_reviewed_patch.json"), "utf8"));
 const reviewLog = JSON.parse(readFileSync(join(root, "data/qbData_review_log.json"), "utf8"));
 const reviewStatus = JSON.parse(readFileSync(join(root, "data/audit/Reviewed_Copy_Status.json"), "utf8"));
+const externalHaitham = JSON.parse(readFileSync(join(root, "data/external-banks/haitham-nabil.json"), "utf8"));
+const externalAster = JSON.parse(readFileSync(join(root, "data/external-banks/aster-qbank.json"), "utf8"));
+const externalImportAudit = JSON.parse(readFileSync(join(root, "data/audit/external-qbank-import-audit.json"), "utf8"));
+for (const [key, bank] of [["haitham", externalHaitham], ["aster", externalAster]]) {
+  const questions = (bank.systems || []).flatMap(system => (system.topics || []).flatMap(topic => topic.questions || []));
+  const ids = new Set(questions.map(question => question.id));
+  if (bank.schema !== "shbace-external-qbank-v1" || bank.key !== key ||
+      questions.length !== bank.totalQuestions || ids.size !== questions.length ||
+      questions.some(question => !String(question.stem || "").trim() ||
+        !Array.isArray(question.options) || question.options.length < 4 ||
+        !question.options.some(option => option.label === question.correctAnswer && String(option.text || "").trim()))) {
+    fail("External question bank validation failed: " + key);
+  }
+}
+if (externalImportAudit.schema !== "shbace-external-qbank-import-audit-v1" ||
+    externalImportAudit.banks.haitham.imported !== externalHaitham.totalQuestions ||
+    externalImportAudit.banks.aster.imported !== externalAster.totalQuestions ||
+    externalImportAudit.totalImported !== externalHaitham.totalQuestions + externalAster.totalQuestions) {
+  fail("External question bank import audit does not match the imported data.");
+}
 if (!Array.isArray(baseBank.questions) || baseBank.questions.length !== 1718) {
   fail("Original question bank must remain the 1,718-question base");
 }

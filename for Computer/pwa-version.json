@@ -1,9 +1,9 @@
 {
   "app": "Shbace Medical",
   "platform": "Computer PWA",
-  "version": "1.3.10-computer.7",
-  "displayVersion": "1.3.10.7 · Computer",
-  "releaseDate": "2026-11-19",
+  "version": "1.3.10-computer.8",
+  "displayVersion": "1.3.10.8 · Computer",
+  "releaseDate": "2026-11-22",
   "releaseNotes": [
     "Synchronizes the Clinical Case bank with To Me: 481 shared cases and 1,840 questions, preserving case and question IDs while aligning vignettes, stems, options, correct-answer text, explanations and validation metadata.",
     "Adds the direction-aware sticky Back control and route-aware scroll restoration from To Me, returning to the exact previous bank, system or topic-list position without resetting student progress.",

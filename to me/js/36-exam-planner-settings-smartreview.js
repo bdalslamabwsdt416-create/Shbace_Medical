@@ -160,6 +160,17 @@ function organizeSettings(){
       makeSettingZone(order,'data','Backup & data','Export or restore the student information saved on this device.');
       makeSettingZone(order,'progress','Progress management','Reset study progress only when needed. This section stays at the bottom.');
     }
+
+    if(!order.querySelector('[data-shb-settings-zone="privacy"]')){
+      makeSettingZone(order,'privacy','Privacy & data','A clear summary of the limited technical data used to keep Shbace working.');
+    }
+    var privacyItems=order.querySelector('[data-shb-settings-items="privacy"]');
+    if(privacyItems&&!privacyItems.querySelector('.shb-privacy-card')){
+      var privacyCard=document.createElement('section');
+      privacyCard.className='card setcard shb-privacy-card';
+      privacyCard.innerHTML='<h3>Usage data</h3><p>Shbace stores a random installation identifier and records at most one activity timestamp per day. Events may be queued on this device while offline and sent when a connection is available. This data is used to understand basic app usage. Shbace does not collect names, phone numbers, precise location, study content, answers, scores, notes, bookmarks or saved progress. Counts represent installations or devices, not necessarily unique people.</p>';
+      privacyItems.appendChild(privacyCard);
+    }
     var target=function(id){return order.querySelector('[data-shb-settings-items="'+id+'"]')};
     var appearance=findSettingCard(root,'Appearance'),onboarding=findSettingCard(root,'Onboarding');
     var progress=findSettingCard(root,'Study progress'),backup=findSettingCard(root,'Student data backup');

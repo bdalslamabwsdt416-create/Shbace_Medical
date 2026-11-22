@@ -305,8 +305,8 @@ function addBankCards(html){
  var cards=[
   ['clinical-ai','ped-collection-card ped-collection-clinicalcase ped-collection-bank07','AI CLINICAL CASES QUESTION BANK','AI Clinical Cases','Case-based questions, with every case and its linked questions.','bank-ai-clinical-cases.webp',''],
   ['generated-ai','ped-collection-card ped-collection-allonce ped-collection-bank08','AI-GENERATED MCQ BANK','AI Generated','Single-best-answer questions written from the supplied medical sheets.','bank-ai-generated.webp',''],
-  ['haitham','ped-collection-card ped-collection-bank09','CLINICAL CASE QUESTION BANK','Dr. Haitham Nabil','Clinical Case Question Bank by an Iraqi Doctor.','','HN'],
-  ['aster','ped-collection-card ped-collection-bank10','CLINICAL CASE QUESTION BANK','Aster Qbank','Clinical Case Question Bank.','','AQ']
+  ['haitham','ped-collection-card ped-collection-bank09','CLINICAL CASE QUESTION BANK','Dr. Haitham Nabil','Clinical Case Question Bank by an Iraqi Doctor.','bank-haitham-nabil.webp',''],
+  ['aster','ped-collection-card ped-collection-bank10','CLINICAL CASE QUESTION BANK','Aster Qbank','Clinical Case Question Bank.','bank-aster-qbank.webp','']
  ];
  cards.forEach(function(item){
   if(grid.querySelector('.'+item[1].split(' ').pop()))return;

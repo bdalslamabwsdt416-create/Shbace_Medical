@@ -127,13 +127,16 @@ const deferredRefs = [...html.matchAll(/data-src=["']([^"']+)["']/g)].map(match 
 for (const relative of deferredRefs) {
   if (!fs.existsSync(safePath(relative))) throw new Error('Deferred runtime asset is missing: ' + relative);
 }
-const requiredIosTools = ['js/32-ios-study-tools.js','js/33-ios-exam-planner.js','js/54-usage-analytics.js'];
+const requiredIosTools = ['js/32-ios-study-tools.js','js/33-ios-exam-planner.js','js/43-ai-bank-engine-adapter.js','js/54-usage-analytics.js'];
 for (const relative of requiredIosTools) {
   if (deferredRefs.filter(file => file === relative).length !== 1) throw new Error('Required iOS feature runtime must be loaded exactly once: ' + relative);
 }
 const runtimePosition = relative => deferredRefs.indexOf(relative);
 if (!(runtimePosition('js/09-app-features-v6.js') < runtimePosition('js/36-exam-planner-settings-smartreview.js') &&
       runtimePosition('js/36-exam-planner-settings-smartreview.js') < runtimePosition('js/32-ios-study-tools.js') &&
+      runtimePosition('js/32-ios-study-tools.js') < runtimePosition('js/33-ios-exam-planner.js') &&
+      runtimePosition('js/36-exam-planner-settings-smartreview.js') < runtimePosition('js/43-ai-bank-engine-adapter.js') &&
+      runtimePosition('js/43-ai-bank-engine-adapter.js') < runtimePosition('js/32-ios-study-tools.js') &&
       runtimePosition('js/32-ios-study-tools.js') < runtimePosition('js/33-ios-exam-planner.js') &&
       runtimePosition('js/33-ios-exam-planner.js') < runtimePosition('js/54-usage-analytics.js'))) {
   throw new Error('iOS feature runtime order is invalid; app core and Smart Review must load before study tools, followed by the iOS Exam Planner navigation layer.');
@@ -161,6 +164,29 @@ if (missingOnboardingStyles.length) {
 }
 const baseBank = JSON.parse(fs.readFileSync(safePath('data/qbData.json'), 'utf8'));
 if (!Array.isArray(baseBank.questions) || baseBank.questions.length !== 1718) throw new Error('The base question bank must remain at 1,718 questions.');
+const externalHaitham = JSON.parse(fs.readFileSync(safePath('data/external-banks/haitham-nabil.json'), 'utf8'));
+const externalAster = JSON.parse(fs.readFileSync(safePath('data/external-banks/aster-qbank.json'), 'utf8'));
+const externalImportAudit = JSON.parse(fs.readFileSync(safePath('data/audit/external-qbank-import-audit.json'), 'utf8'));
+for (const [key, bank] of [['haitham', externalHaitham], ['aster', externalAster]]) {
+  const questions = (bank.systems || []).flatMap(system => (system.topics || []).flatMap(topic => topic.questions || []));
+  const ids = new Set(questions.map(question => question.id));
+  if (bank.schema !== 'shbace-external-qbank-v1' || bank.key !== key ||
+      questions.length !== bank.totalQuestions || ids.size !== questions.length ||
+      questions.some(question => !String(question.stem || '').trim() ||
+        !Array.isArray(question.options) || question.options.length < 4 ||
+        !question.options.some(option => option.label === question.correctAnswer && String(option.text || '').trim()))) {
+    throw new Error('External question bank validation failed: ' + key);
+  }
+}
+if (externalImportAudit.schema !== 'shbace-external-qbank-import-audit-v1' ||
+    externalImportAudit.banks.haitham.imported !== externalHaitham.totalQuestions ||
+    externalImportAudit.banks.aster.imported !== externalAster.totalQuestions ||
+    externalImportAudit.totalImported !== externalHaitham.totalQuestions + externalAster.totalQuestions) {
+  throw new Error('External question bank import audit does not match the imported data.');
+}
+for (const name of ['bank-haitham-nabil.webp', 'bank-aster-qbank.webp']) {
+  if (!fs.existsSync(safePath('assets/img/' + name))) throw new Error('Required external bank logo is missing: ' + name);
+}
 const pwaManifest = JSON.parse(fs.readFileSync(safePath('manifest.webmanifest'), 'utf8'));
 for (const icon of pwaManifest.icons || []) {
   const iconPath = String(icon.src || '').replace(/^\.\//, '');

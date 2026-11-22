@@ -54,3 +54,25 @@ test('iOS updater and Service Worker keep their original cache and student datab
 test('iOS PWA declares Safari standalone support but does not rely on guaranteed background execution',()=>{
  assert.ok(!clientSource.includes('SyncManager'));assert.ok(!clientSource.includes('registration.sync'));
 });
+
+test('iOS packages both imported clinical banks and their exact logo assets',()=>{
+ const haitham=JSON.parse(fs.readFileSync(path.join(__dirname,'../data/external-banks/haitham-nabil.json'),'utf8'));
+ const aster=JSON.parse(fs.readFileSync(path.join(__dirname,'../data/external-banks/aster-qbank.json'),'utf8'));
+ const count=bank=>bank.systems.flatMap(system=>system.topics.flatMap(topic=>topic.questions)).length;
+ assert.equal(haitham.totalQuestions,458);assert.equal(count(haitham),458);
+ assert.equal(aster.totalQuestions,1516);assert.equal(count(aster),1516);
+ const adapter=fs.readFileSync(path.join(__dirname,'../js/43-ai-bank-engine-adapter.js'),'utf8');
+ const settings=fs.readFileSync(path.join(__dirname,'../js/36-exam-planner-settings-smartreview.js'),'utf8');
+ assert.ok(adapter.includes('bank-haitham-nabil.webp'));assert.ok(adapter.includes('bank-aster-qbank.webp'));
+ assert.ok(fs.existsSync(path.join(__dirname,'../assets/img/bank-haitham-nabil.webp')));
+ assert.ok(fs.existsSync(path.join(__dirname,'../assets/img/bank-aster-qbank.webp')));
+ assert.ok(builder.includes('js/43-ai-bank-engine-adapter.js'));
+ assert.ok(builder.includes('external-qbank-import-audit.json'));
+ assert.ok(settings.includes('shb-privacy-card'));
+});
+test('the canonical analytics client has no startup disclosure popup but continues bounded daily collection',()=>{
+ assert.ok(clientSource.includes('function queueDaily()'));assert.ok(clientSource.includes('async function flush()'));
+ assert.doesNotMatch(clientSource,/privacyNotice|Basic usage analytics|Got it/);
+ const settings=fs.readFileSync(path.join(__dirname,'../js/36-exam-planner-settings-smartreview.js'),'utf8');
+ assert.ok(settings.includes('random installation identifier'));
+});

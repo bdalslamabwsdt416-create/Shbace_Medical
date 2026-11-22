@@ -1,9 +1,9 @@
 {
   "app": "Shbace Medical",
   "platform": "Unified Chrome PWA",
-  "version": "1.3.10-to-me.51",
-  "displayVersion": "1.3.10.51 · Chrome (Phone + Computer)",
-  "releaseDate": "2026-11-20",
+  "version": "1.3.10-to-me.52",
+  "displayVersion": "1.3.10.52 · Chrome (Phone + Computer)",
+  "releaseDate": "2026-11-22",
   "releaseNotes": [
     "Restores older installed copies from the cached offline manifest when IndexedDB or the READY marker is missing, preventing returning students from being forced through first-install Setup.",
     "Adds silent repair for returning installs with prior successful-install evidence and immediate online repair when the cached app shell is missing. Keeps the existing 48-hour update-check cadence, cache namespace, IndexedDB identity and student progress.",

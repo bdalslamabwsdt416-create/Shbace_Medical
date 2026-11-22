@@ -138,7 +138,7 @@ test("The build manifest covers the complete copied package and validates the bo
   assert.ok(build.includes("fileCount: offlineFiles.length"));
   assert.ok(build.includes("/(?:data-src|src)="), "parser-loaded Setup script must be syntax-checked by the build");
   assert.equal(pkg.version, pwa.version);
-  assert.equal(pwa.version, "1.3.10-to-me.51");
+  assert.equal(pwa.version, "1.3.10-to-me.52");
 });
 
 test("Splash portal transition remains short and app rendering waits for all scripts", () => {

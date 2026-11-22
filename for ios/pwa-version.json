@@ -1,9 +1,9 @@
 {
   "app": "Shbace Medical",
   "platform": "PWA",
-  "version": "1.4.17",
-  "displayVersion": "1.4.17",
-  "releaseDate": "2026-11-19",
+  "version": "1.4.18",
+  "displayVersion": "1.4.18",
+  "releaseDate": "2026-11-22",
   "releaseNotes": [
     "Fixes iOS topic-list scroll restoration: removes the legacy Exam Planner page-only scroll memo that reset the real app scroller to the top, while keeping the navigation history stack. The shared route-aware scroll layer now restores the exact previous topic-list position.",
     "Synchronizes the Clinical Case bank with To Me: 481 shared cases and 1,840 questions, preserving case and question IDs while aligning vignettes, stems, options, correct-answer text, explanations and validation metadata.",

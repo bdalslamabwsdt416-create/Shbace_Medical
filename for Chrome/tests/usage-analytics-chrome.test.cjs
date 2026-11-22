@@ -19,3 +19,22 @@ test('Chrome analytics POST bypasses the original Service Worker and offline stu
  assert.doesNotMatch(updater,/shbace_usage_analytics_install_id_v1|shbace_usage_analytics_queue_v1/);
  assert.ok(html.includes('__SHBACE_ANALYTICS_API_BASE_URL__'));
 });
+
+test('the two imported clinical banks and their logos are bundled independently',()=>{
+ const haitham=JSON.parse(fs.readFileSync(path.join(root,'data/external-banks/haitham-nabil.json'),'utf8'));
+ const aster=JSON.parse(fs.readFileSync(path.join(root,'data/external-banks/aster-qbank.json'),'utf8'));
+ const count=bank=>bank.systems.flatMap(system=>system.topics.flatMap(topic=>topic.questions)).length;
+ assert.equal(haitham.totalQuestions,458);assert.equal(count(haitham),458);
+ assert.equal(aster.totalQuestions,1516);assert.equal(count(aster),1516);
+ const adapter=fs.readFileSync(path.join(root,'js/43-ai-bank-engine-adapter.js'),'utf8');
+ assert.ok(adapter.includes('bank-haitham-nabil.webp'));assert.ok(adapter.includes('bank-aster-qbank.webp'));
+ assert.ok(fs.existsSync(path.join(root,'assets/img/bank-haitham-nabil.webp')));
+ assert.ok(fs.existsSync(path.join(root,'assets/img/bank-aster-qbank.webp')));
+});
+test('Analytics stays active without a startup banner and privacy details remain in Settings',()=>{
+ const source=fs.readFileSync(path.join(root,'../to me/js/54-usage-analytics.js'),'utf8');
+ const settings=fs.readFileSync(path.join(root,'js/36-exam-planner-settings-smartreview.js'),'utf8');
+ assert.ok(source.includes('function queueDaily()'));assert.ok(source.includes('async function flush()'));
+ assert.doesNotMatch(source,/privacyNotice|Basic usage analytics|Got it/);
+ assert.ok(settings.includes('shb-privacy-card'));assert.ok(settings.includes('random installation identifier'));
+});
