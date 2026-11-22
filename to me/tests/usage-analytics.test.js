@@ -9,6 +9,12 @@ const install='1f7b3f6a-37af-4b90-b8b8-a985f2bfcb2b';
 const event='c97b1b2e-a184-4ad0-9e1e-1f50e5a20c60';
 const now=Date.parse('2026-11-22T12:00:00.000Z');
 
+test('PWA source attribution stores only a validated hostname, not URL paths or IP addresses',()=>{
+ assert.equal(analytics.sourceHost({headers:{origin:'https://shbace-medical-ios.vercel.app',host:'shbace-medical-ios.vercel.app'}}),'shbace-medical-ios.vercel.app');
+ assert.equal(analytics.sourceHost({headers:{host:'shbace-medical-chrome.vercel.app'}}),'shbace-medical-chrome.vercel.app');
+ assert.equal(analytics.sourceHost({headers:{host:'203.0.113.10'}}),null);
+ assert.equal(analytics.sourceHost({headers:{origin:'not a URL'}}),null);
+});
 test('platform storage is physically separated',()=>{
  assert.notEqual(analytics.getTables('pwa').installs,analytics.getTables('android').installs);
  assert.notEqual(analytics.getTables('pwa').events,analytics.getTables('android').events);
@@ -111,6 +117,15 @@ test('To Me PWA build injects only a validated external HTTPS analytics API orig
 });
 
 
+test('PWA source is captured on first install insert and never overwritten on later activity',()=>{
+ assert.ok(analyticsSource.includes('(install_id, first_seen_at, last_active_at, source_host)'));
+ assert.ok(analyticsSource.includes('SELECT install_id, occurred_at, occurred_at, $4::text FROM inserted_event'));
+ assert.ok(analyticsSource.includes('platform === \'pwa\' ? sourceHost(req) : null'));
+ const conflict=analyticsSource.slice(analyticsSource.indexOf('ON CONFLICT (install_id) DO UPDATE'),analyticsSource.indexOf('RETURNING install_id',analyticsSource.indexOf('ON CONFLICT (install_id) DO UPDATE')));
+ assert.ok(conflict.includes('last_active_at'));
+ assert.ok(!conflict.includes('source_host'));
+ assert.ok(schemaSource.includes('ADD COLUMN IF NOT EXISTS source_host TEXT'));
+});
 test('event-first ingestion relies on deferred foreign keys and upserts the install only for a new event',()=>{
  assert.ok(analyticsSource.includes('WITH inserted_event AS ('));
  assert.ok(analyticsSource.includes('SELECT install_id, occurred_at, occurred_at FROM inserted_event'));
