@@ -30,6 +30,7 @@ th{color:#a6bfd4;font-weight:600}td code{color:#d6e8fa}.status{color:#aac2d8;mar
 <section id="dashboard" class="hidden">
 <div class="compare"><span id="totalPwa">PWA: —</span><span id="totalAndroid">Android: —</span><span id="totalAll">Combined: —</span><button id="refreshButton" class="secondary">Refresh</button><button id="logoutButton" class="secondary">Sign out</button></div>
 <h2>Platform comparison</h2><div class="grid"><section class="platform"><h2>PWA · Phones and browsers</h2><div id="pwaMetrics" class="metrics"></div></section><section class="platform"><h2>Android app</h2><div id="androidMetrics" class="metrics"></div></section></div>
+<h2>PWA installations by link / domain</h2><section class="panel table-wrap"><p class="small">The source is the hostname that first registered the installation. Existing installations collected before this change remain unattributed.</p><table><thead><tr><th>PWA hostname</th><th>Installations</th></tr></thead><tbody id="pwaSourceRows"></tbody></table></section>
 <h2>Daily activity · Last 30 days</h2><section class="panel"><div class="legend"><span><i class="dot"></i>PWA</span><span><i class="dot android"></i>Android</span></div><div id="activityChart" class="chart" aria-label="Daily active installations for the last 30 days"></div></section>
 <h2>Last activity per installation</h2><section class="panel table-wrap"><table><thead><tr><th>Platform</th><th>Installation ID</th><th>First seen</th><th>Last activity</th></tr></thead><tbody id="installRows"></tbody></table><div class="compare"><button id="moreButton" class="secondary">Load next page</button><span id="pageLabel" class="small"></span></div></section>
 <div id="dashboardStatus" class="status" role="status"></div></section>
@@ -53,6 +54,14 @@ var d=p[i]||a[i];if(!d)continue;var group=document.createElement('div');group.st
 chart.append(group);
 }
 }
+function renderSourceBreakdown(data){
+var root=$('pwaSourceRows');root.replaceChildren();
+(data.sourceBreakdown||[]).forEach(function(item){
+var row=document.createElement('tr'),host=document.createElement('td'),count=document.createElement('td');
+host.textContent=item.sourceHost==='unattributed'?'Unattributed · existing installations':item.sourceHost;
+count.textContent=num(item.installations);row.append(host,count);root.append(row);
+});
+}
 function appendRows(platforms){
 ['pwa','android'].forEach(function(platform){(platforms[platform].installations||[]).forEach(function(item){
 var row=document.createElement('tr');
@@ -68,7 +77,7 @@ async function load(append){
 if(busy)return;busy=true;$('dashboardStatus').textContent='Loading…';$('refreshButton').disabled=true;
 try{
 var d=await request('/api/analytics/admin-summary?platform=all&page='+page),p=d.platforms.pwa,a=d.platforms.android;
-renderMetrics('pwaMetrics',p);renderMetrics('androidMetrics',a);renderChart(d.platforms);
+renderMetrics('pwaMetrics',p);renderMetrics('androidMetrics',a);renderSourceBreakdown(p);renderChart(d.platforms);
 if(!append)$('installRows').replaceChildren();appendRows(d.platforms);
 $('totalPwa').textContent='PWA: '+num(p.totalInstallations);$('totalAndroid').textContent='Android: '+num(a.totalInstallations);$('totalAll').textContent='Combined: '+num(p.totalInstallations+a.totalInstallations);
 $('pageLabel').textContent='Page '+page+' · up to 50 installations per platform';$('moreButton').disabled=p.installations.length<50&&a.installations.length<50;
@@ -86,7 +95,7 @@ finally{$('loginButton').disabled=false}
 $('logoutButton').addEventListener('click',async function(){try{await request('/api/analytics/admin-logout',{method:'POST'})}catch(_){}$('dashboard').classList.add('hidden');$('login').classList.remove('hidden')});
 $('refreshButton').addEventListener('click',function(){page=1;load(false)});$('moreButton').addEventListener('click',function(){page++;load(true)});
 request('/api/analytics/admin-summary?platform=all&page=1').then(function(d){
-$('login').classList.add('hidden');$('dashboard').classList.remove('hidden');renderMetrics('pwaMetrics',d.platforms.pwa);renderMetrics('androidMetrics',d.platforms.android);renderChart(d.platforms);appendRows(d.platforms);
+$('login').classList.add('hidden');$('dashboard').classList.remove('hidden');renderMetrics('pwaMetrics',d.platforms.pwa);renderMetrics('androidMetrics',d.platforms.android);renderSourceBreakdown(d.platforms.pwa);renderChart(d.platforms);appendRows(d.platforms);
 $('totalPwa').textContent='PWA: '+num(d.platforms.pwa.totalInstallations);$('totalAndroid').textContent='Android: '+num(d.platforms.android.totalInstallations);$('totalAll').textContent='Combined: '+num(d.platforms.pwa.totalInstallations+d.platforms.android.totalInstallations);
 }).catch(function(e){if(e.status!==401)$('loginError').textContent=e.message==='analytics_database_not_configured'?'Database not configured.':e.message});
 })();
