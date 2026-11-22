@@ -2,6 +2,7 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const crypto=require('node:crypto');
+const {Readable}=require('node:stream');
 const analytics=require('../lib/usage-analytics');
 
 const install='1f7b3f6a-37af-4b90-b8b8-a985f2bfcb2b';
@@ -190,6 +191,17 @@ test('PWA event endpoint rejects hostile origins and invalid payloads',async()=>
  const invalid=responseStub();
  await handler({method:'POST',headers:{origin:'https://shbace-preview.example',host:'shbace-preview.example','content-type':'application/json'},body:{eventId:'bad',installId:install,occurredAt:new Date().toISOString()}},invalid);
  assert.equal(invalid.statusCode,422);
+});
+test('raw PWA request stream enforces the 1 KiB limit without reading req.body',async()=>{
+ const handler=require('../api/analytics/pwa-event');
+ const req=Readable.from([Buffer.alloc(1025,0x61)]);
+ req.method='POST';
+ req.headers={origin:'https://shbace-preview.example',host:'shbace-preview.example','content-type':'application/json'};
+ Object.defineProperty(req,'body',{get(){throw new Error('req.body must not be accessed');}});
+ const res=responseStub();
+ await handler(req,res);
+ assert.equal(res.statusCode,413);
+ assert.equal(JSON.parse(res.body).error,'payload_too_large');
 });
 test('event ingestion rejects oversized bodies, batches and unsupported methods before Redis or database access',async()=>{
  const handler=require('../api/analytics/pwa-event');
