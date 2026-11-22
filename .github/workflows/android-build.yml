@@ -21,6 +21,7 @@ on:
       - android/navigation-route-contract-v1
       - integrate/for-apk-main-20261119
       - main
+      - feat/basic-usage-analytics-20261121
     paths:
       - 'android/**'
       - 'for ApK/native/**'

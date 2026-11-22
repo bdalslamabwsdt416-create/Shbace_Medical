@@ -18,6 +18,15 @@ const root = process.cwd();
 const output = join(root, "www");
 const requiredFiles = [
   "index.html",
+  "admin/usage.html",
+  "api/analytics/pwa-event.js",
+  "api/analytics/android-event.js",
+  "api/analytics/cleanup.js",
+  "api/analytics/admin-login.js",
+  "api/analytics/admin-logout.js",
+  "api/analytics/admin-summary.js",
+  "lib/usage-analytics.js",
+  "scripts/usage-analytics-schema.sql",
   "manifest.webmanifest",
   "sw.js",
   "css/bundle-core.css",
@@ -95,9 +104,10 @@ const requiredFiles = [
   "js/39-clinical-case-pediatrics.js",
   "js/40-egyptian-book-pediatrics.js",
   "js/41-collections-integration.js",
-  "js/43-ai-bank-engine-adapter.js"
+  "js/43-ai-bank-engine-adapter.js",
+  "js/54-usage-analytics.js"
 ];
-const requiredDirs = ["css", "js", "data"];
+const requiredDirs = ["css", "js", "data", "admin"];
 const imageDirs = ["img", "img1", "img2"];
 const optionalDirs = ["fonts", "audio", "media", "videos", "documents"];
 
@@ -325,11 +335,23 @@ const [ajPortraitData, facultyLogoData] = await Promise.all([
 ]);
 const ajSlot = 'window.__SHBACE_AJ_PORTRAIT_DATA__="__SHBACE_AJ_PORTRAIT_DATA__";';
 const facultySlot = 'window.__SHBACE_FACULTY_LOGO_DATA__="__SHBACE_FACULTY_LOGO_DATA__";';
-if (!html.includes(ajSlot) || !html.includes(facultySlot)) {
-  fail("Pediatrics image slots are missing from index.html");
+const analyticsApiSlot = 'window.SHBACE_ANALYTICS_API_BASE_URL="__SHBACE_ANALYTICS_API_BASE_URL__";';
+if (!html.includes(ajSlot) || !html.includes(facultySlot) || !html.includes(analyticsApiSlot)) {
+  fail("Pediatrics image or analytics API configuration slots are missing from index.html");
 }
 html = html.replace(ajSlot, "window.__SHBACE_AJ_PORTRAIT_DATA__=" + JSON.stringify(ajPortraitData) + ";");
 html = html.replace(facultySlot, "window.__SHBACE_FACULTY_LOGO_DATA__=" + JSON.stringify(facultyLogoData) + ";");
+const configuredAnalyticsOrigin = String(process.env.SHBACE_ANALYTICS_API_BASE_URL || "").trim();
+let analyticsOrigin = "";
+if (configuredAnalyticsOrigin) {
+  const parsedAnalyticsOrigin = new URL(configuredAnalyticsOrigin);
+  if (parsedAnalyticsOrigin.protocol !== "https:" || parsedAnalyticsOrigin.username || parsedAnalyticsOrigin.password ||
+      parsedAnalyticsOrigin.pathname !== "/" || parsedAnalyticsOrigin.search || parsedAnalyticsOrigin.hash) {
+    fail("SHBACE_ANALYTICS_API_BASE_URL must be an HTTPS origin without credentials, path, query or fragment");
+  }
+  analyticsOrigin = parsedAnalyticsOrigin.origin;
+}
+html = html.replace(analyticsApiSlot, "window.SHBACE_ANALYTICS_API_BASE_URL=" + JSON.stringify(analyticsOrigin) + ";");
 writeFileSync(htmlPath, html);
 if (!html.includes("js/35-pediatrics-collections.js") ||
     !html.includes("js/36-exam-planner-settings-smartreview.js") ||
@@ -343,7 +365,7 @@ if (!consolidatedLateCss.includes(".cc-page") || !consolidatedLateCss.includes("
     !consolidatedLateCss.includes(".cc-case-group")) {
   fail("The consolidated late stylesheet is missing the Clinical Cases / AI Generated shared bank presentation.");
 }
-if (!html.includes("navigator.serviceWorker.register('./sw.js'") || !html.includes("js/29-offline-setup.js") || !html.includes("js/29-reviewed-bank-controls.js") || !html.includes("qbData_reviewed_patch.json")) {
+if (!html.includes("navigator.serviceWorker.register('./sw.js'") || !html.includes("js/29-offline-setup.js") || !html.includes("js/29-reviewed-bank-controls.js") || !html.includes("qbData_reviewed_patch.json") || !html.includes("js/54-usage-analytics.js")) {
   fail("index.html does not register ./sw.js");
 }
 

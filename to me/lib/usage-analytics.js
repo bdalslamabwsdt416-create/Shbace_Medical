@@ -10,10 +10,179 @@ const TABLES = Object.freeze({
   android: { installs: 'android_analytics_installs', events: 'android_analytics_events' }
 });
 let db = null;
-let failures = 0;
-let blockedUntil = 0;
 
 function getTables(platform) { return TABLES[platform] || null; }
+
+const RATE_LIMIT_WINDOW_SECONDS = 900;
+const RATE_LIMIT_MAX_ATTEMPTS = 5;
+const INGESTION_PER_MINUTE_LIMIT = 120;
+const INGESTION_PER_DAY_LIMIT = 5000;
+const ADMIN_RATE_LIMIT_SCRIPT =
+  "local count = redis.call('INCR', KEYS[1]); " +
+  "if count == 1 then redis.call('EXPIRE', KEYS[1], ARGV[1]); end; " +
+  "return {count, redis.call('TTL', KEYS[1])}";
+const INGESTION_RATE_LIMIT_SCRIPT =
+  "local now = tonumber(ARGV[1]); local minuteLimit = tonumber(ARGV[2]); local dayLimit = tonumber(ARGV[3]); " +
+  "redis.call('ZREMRANGEBYSCORE', KEYS[1], '-inf', now - 60000); " +
+  "local minuteCount = tonumber(redis.call('ZCARD', KEYS[1])); " +
+  "local dayCount = tonumber(redis.call('GET', KEYS[2]) or '0'); " +
+  "if minuteCount >= minuteLimit then " +
+  " local oldest = redis.call('ZRANGE', KEYS[1], 0, 0, 'WITHSCORES'); " +
+  " local retry = 1; if oldest[2] then retry = math.max(1, math.ceil((tonumber(oldest[2]) + 60000 - now) / 1000)); end; " +
+  " return {0, minuteCount, dayCount, retry, 1}; end; " +
+  "local nextUtcDay = (math.floor(now / 86400000) + 1) * 86400000; " +
+  "local dayRetry = math.max(1, math.ceil((nextUtcDay - now) / 1000)); " +
+  "if dayCount >= dayLimit then return {0, minuteCount, dayCount, dayRetry, 2}; end; " +
+  "local sequence = redis.call('INCR', KEYS[3]); redis.call('EXPIRE', KEYS[3], 120); " +
+  "local member = tostring(now) .. ':' .. tostring(sequence); " +
+  "redis.call('ZADD', KEYS[1], now, member); redis.call('EXPIRE', KEYS[1], 120); " +
+  "local nextDay = redis.call('INCR', KEYS[2]); " +
+  "if nextDay == 1 then redis.call('EXPIRE', KEYS[2], 172800); end; " +
+  "return {1, minuteCount + 1, nextDay, 0, 0}";
+
+function rateLimitConfig() {
+  const endpoint = process.env.UPSTASH_REDIS_REST_URL || '';
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN || '';
+  const secret = process.env.ANALYTICS_RATE_LIMIT_SECRET || '';
+  if (!endpoint || !token || Buffer.byteLength(secret, 'utf8') < 32) return null;
+  try {
+    const parsed = new URL(endpoint);
+    const localTestEndpoint = process.env.NODE_ENV === 'test' &&
+      (parsed.hostname === '127.0.0.1' || parsed.hostname === 'localhost');
+    if ((parsed.protocol !== 'https:' && !(localTestEndpoint && parsed.protocol === 'http:')) ||
+        parsed.username || parsed.password) return null;
+    return { endpoint: parsed.href.endsWith('/') ? parsed.href.slice(0, -1) : parsed.href, token, secret };
+  } catch (_) { return null; }
+}
+function adminRateLimitKey() {
+  const config = rateLimitConfig();
+  if (!config) return null;
+  const digest = crypto.createHmac('sha256', config.secret).update('admin-login-global-v1').digest('hex');
+  return 'shbace:analytics:admin-login:v2:' + digest;
+}
+function ingestionRateLimitKeys(platform, now) {
+  const config = rateLimitConfig();
+  if (!config || !TABLES[platform]) return null;
+  now = now === undefined ? Date.now() : now;
+  const day = new Date(now).toISOString().slice(0, 10);
+  const prefix = 'shbace:analytics:ingest:v1:' + platform + ':';
+  return {
+    minute: prefix + 'sliding-minute',
+    day: prefix + 'day:' + day,
+    sequence: prefix + 'sequence'
+  };
+}
+async function redisRateLimitCommand(command) {
+  const config = rateLimitConfig();
+  if (!config || typeof fetch !== 'function') return null;
+  try {
+    const response = await fetch(config.endpoint, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + config.token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(command),
+      signal: AbortSignal.timeout(3000)
+    });
+    if (!response.ok) return null;
+    const payload = await response.json();
+    return payload && !payload.error ? payload.result : null;
+  } catch (_) { return null; }
+}
+async function consumePostgresRateLimit(scope, now, windowSeconds, windowLimit, dailyLimit) {
+  let sql;
+  try { sql = database(); } catch (_) { return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'database_unavailable' }; }
+  if (!sql) return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'database_not_configured' };
+  now = now === undefined ? Date.now() : now;
+  try {
+    const rows = await sql.query(
+      'SELECT allowed, window_count, daily_count, retry_after_seconds, reason ' +
+      'FROM consume_shbace_analytics_rate_limit($1, $2::timestamptz, $3::integer, $4::integer, $5::integer)',
+      [scope, new Date(now).toISOString(), windowSeconds, windowLimit, dailyLimit]
+    );
+    const row = Array.isArray(rows) ? rows[0] : null;
+    if (!row || typeof row.allowed !== 'boolean') {
+      return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'invalid_response' };
+    }
+    const windowCount = Number(row.window_count);
+    const dailyCount = Number(row.daily_count);
+    const retryAfterSeconds = Number(row.retry_after_seconds);
+    if (![windowCount, dailyCount, retryAfterSeconds].every(Number.isFinite) || retryAfterSeconds < 0) {
+      return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'invalid_response' };
+    }
+    return {
+      available: true,
+      allowed: row.allowed,
+      minuteCount: windowCount,
+      dayCount: dailyCount,
+      retryAfterSeconds: row.allowed ? 0 : Math.max(1, retryAfterSeconds),
+      reason: row.allowed ? null : (row.reason === 'daily_limit' ? 'daily_limit' : 'minute_limit')
+    };
+  } catch (_) {
+    return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'database_unavailable' };
+  }
+}
+
+async function consumeAdminLoginAttempt(_req, now) {
+  const key = adminRateLimitKey();
+  if (!key) return consumePostgresRateLimit('admin-login', now, RATE_LIMIT_WINDOW_SECONDS, RATE_LIMIT_MAX_ATTEMPTS, null);
+  const result = await redisRateLimitCommand(['EVAL', ADMIN_RATE_LIMIT_SCRIPT, '1', key, String(RATE_LIMIT_WINDOW_SECONDS)]);
+  if (!Array.isArray(result) || result.length < 2) return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'redis_unavailable' };
+  const count = Number(result[0]), ttl = Number(result[1]);
+  if (!Number.isFinite(count) || !Number.isFinite(ttl) || ttl < 0) return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'invalid_response' };
+  return { available: true, allowed: count <= RATE_LIMIT_MAX_ATTEMPTS, retryAfterSeconds: count <= RATE_LIMIT_MAX_ATTEMPTS ? 0 : Math.max(1, ttl), minuteCount: count };
+}
+
+async function clearAdminLoginAttempts() {
+  const key = adminRateLimitKey();
+  if (key) {
+    const result = await redisRateLimitCommand(['DEL', key]);
+    return result !== null && Number.isFinite(Number(result)) && Number(result) >= 0;
+  }
+  let sql;
+  try { sql = database(); } catch (_) { return false; }
+  if (!sql) return false;
+  try {
+    const rows = await sql.query(
+      'SELECT reset_shbace_analytics_rate_limit($1) AS reset',
+      ['admin-login']
+    );
+    return Array.isArray(rows) && rows.length > 0 && rows[0].reset === true;
+  } catch (_) { return false; }
+}
+
+async function consumeIngestionAttempt(platform, now) {
+  now = now === undefined ? Date.now() : now;
+  if (!TABLES[platform]) {
+    return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'invalid_platform' };
+  }
+  const keys = ingestionRateLimitKeys(platform, now);
+  if (!keys) {
+    return consumePostgresRateLimit(
+      'ingest:' + platform,
+      now,
+      60,
+      INGESTION_PER_MINUTE_LIMIT,
+      INGESTION_PER_DAY_LIMIT
+    );
+  }
+  const result = await redisRateLimitCommand([
+    'EVAL', INGESTION_RATE_LIMIT_SCRIPT, '3', keys.minute, keys.day, keys.sequence,
+    String(now), String(INGESTION_PER_MINUTE_LIMIT), String(INGESTION_PER_DAY_LIMIT)
+  ]);
+  if (!Array.isArray(result) || result.length < 5) {
+    return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'redis_unavailable' };
+  }
+  const allowed = Number(result[0]) === 1;
+  const minuteCount = Number(result[1]), dayCount = Number(result[2]), ttl = Number(result[3]), window = Number(result[4]);
+  if (![minuteCount, dayCount, ttl, window].every(Number.isFinite) || ttl < 0) {
+    return { available: false, allowed: false, retryAfterSeconds: 0, reason: 'invalid_response' };
+  }
+  return {
+    available: true, allowed, minuteCount, dayCount,
+    retryAfterSeconds: allowed ? 0 : Math.max(1, ttl),
+    reason: allowed ? null : (window === 2 ? 'daily_limit' : 'minute_limit')
+  };
+}
+
 
 function validateEvent(body, now) {
   now = now === undefined ? Date.now() : now;
@@ -41,13 +210,94 @@ function bodyBytes(body) {
   try { return Buffer.byteLength(typeof body === 'string' ? body : JSON.stringify(body === undefined ? null : body), 'utf8'); }
   catch (_) { return Infinity; }
 }
+
+// Read Vercel's raw Node IncomingMessage stream before touching its lazy req.body
+// parser. This enforces the small application limit before JSON allocation.
+function readRawRequestBody(req, maxBytes) {
+  return new Promise((resolve, reject) => {
+    const headers = req && req.headers || {};
+    const contentLength = headers['content-length'];
+    if (contentLength !== undefined) {
+      const value = String(contentLength);
+      if (!/^\d+$/.test(value) || !Number.isSafeInteger(Number(value))) {
+        req.pause();
+        return resolve({ invalidLength: true });
+      }
+      if (Number(value) > maxBytes) {
+        req.pause();
+        return resolve({ tooLarge: true });
+      }
+    }
+
+    const chunks = [];
+    let total = 0;
+    let settled = false;
+    const cleanup = () => {
+      req.removeListener('data', onData);
+      req.removeListener('end', onEnd);
+      req.removeListener('error', onError);
+      req.removeListener('aborted', onAborted);
+    };
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve(value);
+    };
+    const fail = (error) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(error);
+    };
+    const onData = (chunk) => {
+      const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      total += buffer.length;
+      if (total > maxBytes) {
+        // Stop consuming immediately. The hosting runtime will close/drain
+        // the rejected request; no JSON parser or application handler sees it.
+        req.pause();
+        finish({ tooLarge: true });
+        return;
+      }
+      chunks.push(buffer);
+    };
+    const onEnd = () => finish({ raw: Buffer.concat(chunks, total) });
+    const onError = (error) => fail(error);
+    const onAborted = () => fail(new Error('request_aborted'));
+
+    req.on('data', onData);
+    req.once('end', onEnd);
+    req.once('error', onError);
+    req.once('aborted', onAborted);
+  });
+}
+
+async function readJsonBody(req, maxBytes) {
+  // Vercel's Node request exposes body as a lazy parsed getter. For a real
+  // IncomingMessage, consume the raw stream first so the limit precedes JSON
+  // parsing. Plain request doubles use the parsed-body fallback in unit tests.
+  if (req && typeof req.on === 'function' && typeof req.pause === 'function' &&
+      typeof req.removeListener === 'function') {
+    const result = await readRawRequestBody(req, maxBytes);
+    if (result.invalidLength) throw new Error('invalid_content_length');
+    if (result.tooLarge) throw new Error('payload_too_large');
+    try { return JSON.parse(result.raw.toString('utf8')); }
+    catch (_) { throw new Error('invalid_json'); }
+  }
+
+  const body = req ? req.body : undefined;
+  if (bodyBytes(body) > maxBytes) throw new Error('payload_too_large');
+  return body;
+}
 function sameOrigin(req) {
   const origin = req.headers && req.headers.origin;
   if (!origin) return false;
   try {
     const parsed = new URL(origin);
-    const configured = process.env.ANALYTICS_ALLOWED_ORIGIN;
-    if (configured && parsed.origin === configured) return true;
+    const configured = String(process.env.ANALYTICS_ALLOWED_ORIGIN || '')
+      .split(',').map(value => value.trim()).filter(Boolean);
+    if (configured.includes(parsed.origin)) return true;
     const host = req.headers.host;
     const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0].trim();
     return !!host && parsed.origin === proto + '://' + host;
@@ -142,6 +392,24 @@ function loginFailed(now) {
 }
 function resetLoginFailures() { failures = 0; blockedUntil = 0; }
 
+function cronAuthorized(req) {
+  const secret = process.env.CRON_SECRET || '';
+  if (Buffer.byteLength(secret, 'utf8') < 32) return false;
+  return passwordMatches(req && req.headers && req.headers.authorization, 'Bearer ' + secret);
+}
+async function cleanupExpiredEvents() {
+  const sql = database();
+  if (!sql) throw new Error('analytics_database_not_configured');
+  const rows = await sql.query(
+    "WITH pwa_deleted AS (DELETE FROM pwa_analytics_events WHERE occurred_at < NOW() - INTERVAL '12 months' RETURNING 1)," +
+    " android_deleted AS (DELETE FROM android_analytics_events WHERE occurred_at < NOW() - INTERVAL '12 months' RETURNING 1)" +
+    " SELECT (SELECT COUNT(*)::int FROM pwa_deleted) AS pwa, (SELECT COUNT(*)::int FROM android_deleted) AS android",
+    []
+  );
+  return { pwa: Number(rows[0] && rows[0].pwa || 0), android: Number(rows[0] && rows[0].android || 0) };
+}
+
+
 async function ingest(req, res, platform) {
   const t = getTables(platform);
   if (!t) return sendJson(res, 404, { error: 'not_found' });
@@ -149,30 +417,37 @@ async function ingest(req, res, platform) {
   if (req.method === 'OPTIONS') { res.statusCode = 204; return res.end(); }
   if (req.method !== 'POST') { res.setHeader('Allow', 'POST, OPTIONS'); return sendJson(res, 405, { error: 'method_not_allowed' }); }
   if (!String(req.headers['content-type'] || '').toLowerCase().includes('application/json')) return sendJson(res, 415, { error: 'json_required' });
-  if (bodyBytes(req.body) > 1024) return sendJson(res, 413, { error: 'payload_too_large' });
+  let body;
+  try { body = await readJsonBody(req, 1024); }
+  catch (e) {
+    if (e.message === 'payload_too_large') return sendJson(res, 413, { error: 'payload_too_large' });
+    return sendJson(res, 400, { error: e.message === 'invalid_content_length' ? 'invalid_content_length' : 'invalid_json' });
+  }
   let ev;
-  try { ev = validateEvent(req.body); } catch (e) { return sendJson(res, 422, { error: e.message || 'invalid_event' }); }
+  try { ev = validateEvent(body); } catch (e) { return sendJson(res, 422, { error: e.message || 'invalid_event' }); }
+  const quota = await consumeIngestionAttempt(platform);
+  if (!quota.available) return sendJson(res, 503, { error: 'analytics_rate_limiter_unavailable' });
+  if (!quota.allowed) {
+    res.setHeader('Retry-After', String(quota.retryAfterSeconds));
+    return sendJson(res, 429, { error: 'analytics_rate_limited', retryAfterSeconds: quota.retryAfterSeconds });
+  }
   let sql;
   try { sql = database(); } catch (_) { return sendJson(res, 503, { error: 'analytics_database_unavailable' }); }
   if (!sql) return sendJson(res, 503, { error: 'analytics_database_not_configured' });
   try {
     const rows = await sql.query(
-      'WITH created_install AS (' +
-      ' INSERT INTO ' + t.installs + ' (install_id, first_seen_at, last_active_at) VALUES ($1::uuid, $3::timestamptz, $3::timestamptz)' +
-      ' ON CONFLICT (install_id) DO NOTHING RETURNING install_id' +
-      '), target_install AS (' +
-      ' SELECT install_id FROM created_install UNION ALL' +
-      ' SELECT install_id FROM ' + t.installs + ' WHERE install_id = $1::uuid AND NOT EXISTS (SELECT 1 FROM created_install)' +
-      '), inserted_event AS (' +
+      'WITH inserted_event AS (' +
       ' INSERT INTO ' + t.events + ' (event_id, install_id, event_date, occurred_at)' +
-      ' SELECT $2::uuid, install_id, ($3::timestamptz AT TIME ZONE \'UTC\')::date, $3::timestamptz FROM target_install' +
+      ' VALUES ($2::uuid, $1::uuid, ($3::timestamptz AT TIME ZONE \'UTC\')::date, $3::timestamptz)' +
       ' ON CONFLICT DO NOTHING RETURNING install_id, occurred_at, event_id' +
-      '), updated_install AS (' +
-      ' UPDATE ' + t.installs + ' AS i SET last_active_at = GREATEST(COALESCE(i.last_active_at, e.occurred_at), e.occurred_at)' +
-      ' FROM inserted_event AS e WHERE i.install_id = e.install_id RETURNING e.event_id' +
+      '), upsert_install AS (' +
+      ' INSERT INTO ' + t.installs + ' (install_id, first_seen_at, last_active_at)' +
+      ' SELECT install_id, occurred_at, occurred_at FROM inserted_event' +
+      ' ON CONFLICT (install_id) DO UPDATE SET last_active_at = GREATEST(COALESCE(' + t.installs + '.last_active_at, EXCLUDED.last_active_at), EXCLUDED.last_active_at)' +
+      ' RETURNING install_id' +
       '), pruned_events AS (' +
       ' DELETE FROM ' + t.events + " WHERE occurred_at < NOW() - INTERVAL \'12 months\' AND EXISTS (SELECT 1 FROM inserted_event) RETURNING event_id" +
-      ') SELECT event_id FROM updated_install',
+      ') SELECT event_id FROM inserted_event',
       [ev.installId, ev.eventId, ev.occurredAt]
     );
     return sendJson(res, 200, { accepted: Array.isArray(rows) && rows.length > 0 });
@@ -214,7 +489,9 @@ async function summary(platform, page, size) {
   return { platform: 'all', page, pageSize: size, platforms: { pwa: result[0], android: result[1] } };
 }
 module.exports = {
-  getTables, validateEvent, sendJson, bodyBytes, sameOrigin, adminPassword, sessionSecret, passwordMatches,
-  createSession, validSession, hasSession, setCookie, clearCookie, loginBlocked, loginFailed, resetLoginFailures,
-  ingest, summary
+  getTables, validateEvent, sendJson, bodyBytes, readJsonBody, sameOrigin, adminPassword, sessionSecret, passwordMatches,
+  createSession, validSession, hasSession, setCookie, clearCookie,
+  consumeAdminLoginAttempt, clearAdminLoginAttempts, consumeIngestionAttempt,
+  ingestionRateLimitKeys, INGESTION_PER_MINUTE_LIMIT, INGESTION_PER_DAY_LIMIT,
+  ingest, summary, cronAuthorized, cleanupExpiredEvents
 };

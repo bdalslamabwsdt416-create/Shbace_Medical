@@ -8,26 +8,116 @@
       "owner": "android/app/src/main/java/com/shbace/medical/ShbaceNative.java",
       "purpose": "Explicit Android capabilities exposed to the local application WebView.",
       "methods": [
-        { "name": "copyText", "capability": "clipboard", "purpose": "Copy supplied text to the Android clipboard." },
-        { "name": "getDeviceInfo", "capability": "diagnostics", "purpose": "Return limited package, build, Android and device information." },
-        { "name": "getRemoteContentManifest", "capability": "remote-content-metadata", "purpose": "Read the installed remote-content manifest from app-private storage." },
-        { "name": "getRemoteContentState", "capability": "remote-content-metadata", "purpose": "Read installed and pending remote-content state." },
-        { "name": "haptic", "capability": "haptics", "purpose": "Request one of the bounded application vibration patterns." },
-        { "name": "keepScreenOn", "capability": "display-lifecycle", "purpose": "Set or clear the Android keep-screen-on window flag." },
-        { "name": "openExternalUrl", "capability": "external-navigation", "purpose": "Open an approved GitHub HTTPS URL in the external browser." },
-        { "name": "openRemoteContentFile", "capability": "remote-content-open", "purpose": "Open a verified installed content file through Android FileProvider." },
-        { "name": "printHtml", "capability": "document-print", "purpose": "Render supplied HTML in the native print flow." },
-        { "name": "readRemoteContentBase64", "capability": "remote-content-read", "purpose": "Read an installed remote-content file as Base64." },
-        { "name": "readRemoteContentText", "capability": "remote-content-read", "purpose": "Read an installed remote-content file as text." },
-        { "name": "saveFile", "capability": "file-export", "purpose": "Save a user-requested exported file to Android Downloads." },
-        { "name": "shareImage", "capability": "share", "purpose": "Share a generated image through Android's chooser." },
-        { "name": "shareText", "capability": "share", "purpose": "Share supplied text through Android's chooser." },
-        { "name": "speakText", "capability": "text-to-speech", "purpose": "Speak supplied text through Android TextToSpeech." },
-        { "name": "startRemoteContentRollback", "capability": "remote-content-rollback", "purpose": "Request rollback to the previously retained remote-content package." },
-        { "name": "startRemoteContentSync", "capability": "remote-content-update", "purpose": "Request the configured remote-content update flow." },
-        { "name": "stopSpeaking", "capability": "text-to-speech", "purpose": "Stop Android TextToSpeech playback." },
-        { "name": "stopStudyTimer", "capability": "study-timer-service", "purpose": "Stop the native foreground study-timer service." },
-        { "name": "updateStudyTimer", "capability": "study-timer-service", "purpose": "Update the native foreground study-timer service state." }
+        {
+          "name": "copyText",
+          "capability": "clipboard",
+          "purpose": "Copy supplied text to the Android clipboard."
+        },
+        {
+          "name": "getAnalyticsApiBaseUrl",
+          "capability": "usage-analytics-configuration",
+          "purpose": "Return the explicitly configured HTTPS usage-analytics API origin; empty until an approved origin is set."
+        },
+        {
+          "name": "getAnalyticsInstallId",
+          "capability": "usage-analytics-installation-id",
+          "purpose": "Return or create a random per-install UUID stored in the dedicated analytics SharedPreferences file."
+        },
+        {
+          "name": "getDeviceInfo",
+          "capability": "diagnostics",
+          "purpose": "Return limited package, build, Android and device information."
+        },
+        {
+          "name": "getRemoteContentManifest",
+          "capability": "remote-content-metadata",
+          "purpose": "Read the installed remote-content manifest from app-private storage."
+        },
+        {
+          "name": "getRemoteContentState",
+          "capability": "remote-content-metadata",
+          "purpose": "Read installed and pending remote-content state."
+        },
+        {
+          "name": "haptic",
+          "capability": "haptics",
+          "purpose": "Request one of the bounded application vibration patterns."
+        },
+        {
+          "name": "keepScreenOn",
+          "capability": "display-lifecycle",
+          "purpose": "Set or clear the Android keep-screen-on window flag."
+        },
+        {
+          "name": "openExternalUrl",
+          "capability": "external-navigation",
+          "purpose": "Open an approved GitHub HTTPS URL in the external browser."
+        },
+        {
+          "name": "openRemoteContentFile",
+          "capability": "remote-content-open",
+          "purpose": "Open a verified installed content file through Android FileProvider."
+        },
+        {
+          "name": "printHtml",
+          "capability": "document-print",
+          "purpose": "Render supplied HTML in the native print flow."
+        },
+        {
+          "name": "readRemoteContentBase64",
+          "capability": "remote-content-read",
+          "purpose": "Read an installed remote-content file as Base64."
+        },
+        {
+          "name": "readRemoteContentText",
+          "capability": "remote-content-read",
+          "purpose": "Read an installed remote-content file as text."
+        },
+        {
+          "name": "saveFile",
+          "capability": "file-export",
+          "purpose": "Save a user-requested exported file to Android Downloads."
+        },
+        {
+          "name": "shareImage",
+          "capability": "share",
+          "purpose": "Share a generated image through Android's chooser."
+        },
+        {
+          "name": "shareText",
+          "capability": "share",
+          "purpose": "Share supplied text through Android's chooser."
+        },
+        {
+          "name": "speakText",
+          "capability": "text-to-speech",
+          "purpose": "Speak supplied text through Android TextToSpeech."
+        },
+        {
+          "name": "startRemoteContentRollback",
+          "capability": "remote-content-rollback",
+          "purpose": "Request rollback to the previously retained remote-content package."
+        },
+        {
+          "name": "startRemoteContentSync",
+          "capability": "remote-content-update",
+          "purpose": "Request the configured remote-content update flow."
+        },
+        {
+          "name": "stopSpeaking",
+          "capability": "text-to-speech",
+          "purpose": "Stop Android TextToSpeech playback."
+        },
+        {
+          "name": "stopStudyTimer",
+          "capability": "study-timer-service",
+          "purpose": "Stop the native foreground study-timer service."
+        },
+        {
+          "name": "updateStudyTimer",
+          "capability": "study-timer-service",
+          "purpose": "Update the native foreground study-timer service state."
+        }
       ]
     },
     {
@@ -35,8 +125,16 @@
       "owner": "android/app/src/main/java/com/shbace/medical/MainActivity.java",
       "purpose": "Read window inset information and acknowledge the existing WebView startup handshake.",
       "methods": [
-        { "name": "get", "capability": "window-insets", "purpose": "Return the current inset data as JSON." },
-        { "name": "ready", "capability": "startup-handshake", "purpose": "Acknowledge the WebView readiness handshake." }
+        {
+          "name": "get",
+          "capability": "window-insets",
+          "purpose": "Return the current inset data as JSON."
+        },
+        {
+          "name": "ready",
+          "capability": "startup-handshake",
+          "purpose": "Acknowledge the WebView readiness handshake."
+        }
       ]
     }
   ]

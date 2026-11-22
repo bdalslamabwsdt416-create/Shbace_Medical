@@ -28,7 +28,7 @@ function walkRuntimeDirectory(directory, output) {
   }
 }
 function runtimeFiles() {
-  const files = ['index.html', 'manifest.webmanifest', 'pwa-version.json', 'sw.js'];
+  const files = ['index.html', 'manifest.webmanifest', 'pwa-version.json', 'sw.js', 'js/54-usage-analytics.js'];
   for (const directory of ['assets', 'css', 'data', 'js', 'fonts', 'audio', 'media', 'videos', 'documents', 'img', 'img1', 'img2']) {
     walkRuntimeDirectory(directory, files);
   }
@@ -63,18 +63,35 @@ async function buildPwa() {
   ]);
 
   for (const relative of runtimeFiles()) {
-    const originalBytes = fs.readFileSync(path.join(root, relative));
+    /* Consume the canonical To Me analytics client; do not maintain a fork in this PWA. */
+    const sourcePath = relative === 'js/54-usage-analytics.js'
+      ? path.resolve(root, '../to me/js/54-usage-analytics.js')
+      : path.join(root, relative);
+    if (!fs.existsSync(sourcePath)) throw new Error('Required shared analytics client is missing: ' + sourcePath);
+    const originalBytes = fs.readFileSync(sourcePath);
     let bytes = originalBytes;
 
     if (relative === 'index.html') {
       let html = bytes.toString('utf8');
       const ajSlot = 'window.__SHBACE_AJ_PORTRAIT_DATA__="__SHBACE_AJ_PORTRAIT_DATA__";';
       const facultySlot = 'window.__SHBACE_FACULTY_LOGO_DATA__="__SHBACE_FACULTY_LOGO_DATA__";';
-      if (!html.includes(ajSlot) || !html.includes(facultySlot)) {
-        throw new Error('The two To Me Pediatrics image slots are missing from index.html.');
+      const analyticsApiSlot = 'window.SHBACE_ANALYTICS_API_BASE_URL="__SHBACE_ANALYTICS_API_BASE_URL__";';
+      if (!html.includes(ajSlot) || !html.includes(facultySlot) || !html.includes(analyticsApiSlot)) {
+        throw new Error('A required Pediatrics or analytics API configuration slot is missing from index.html.');
       }
       html = html.replace(ajSlot, 'window.__SHBACE_AJ_PORTRAIT_DATA__=' + JSON.stringify(ajPortraitData) + ';');
       html = html.replace(facultySlot, 'window.__SHBACE_FACULTY_LOGO_DATA__=' + JSON.stringify(facultyLogoData) + ';');
+      const configuredAnalyticsOrigin = String(process.env.SHBACE_ANALYTICS_API_BASE_URL || '').trim();
+      let analyticsOrigin = '';
+      if (configuredAnalyticsOrigin) {
+        const parsedAnalyticsOrigin = new URL(configuredAnalyticsOrigin);
+        if (parsedAnalyticsOrigin.protocol !== 'https:' || parsedAnalyticsOrigin.username || parsedAnalyticsOrigin.password ||
+            parsedAnalyticsOrigin.pathname !== '/' || parsedAnalyticsOrigin.search || parsedAnalyticsOrigin.hash) {
+          throw new Error('SHBACE_ANALYTICS_API_BASE_URL must be an HTTPS origin without credentials, path, query or fragment.');
+        }
+        analyticsOrigin = parsedAnalyticsOrigin.origin;
+      }
+      html = html.replace(analyticsApiSlot, 'window.SHBACE_ANALYTICS_API_BASE_URL=' + JSON.stringify(analyticsOrigin) + ';');
       bytes = Buffer.from(html, 'utf8');
     }
 
@@ -101,7 +118,8 @@ if (
     html.includes('window.__SHBACE_AJ_PORTRAIT_DATA__="__SHBACE_AJ_PORTRAIT_DATA__";') ||
     html.includes('window.__SHBACE_FACULTY_LOGO_DATA__="__SHBACE_FACULTY_LOGO_DATA__";') ||
     !html.includes('window.__SHBACE_AJ_PORTRAIT_DATA__="data:image/webp;base64,') ||
-    !html.includes('window.__SHBACE_FACULTY_LOGO_DATA__="data:image/webp;base64,')
+    !html.includes('window.__SHBACE_FACULTY_LOGO_DATA__="data:image/webp;base64,') ||
+    html.includes('__SHBACE_ANALYTICS_API_BASE_URL__')
 ) {
   throw new Error('The To Me bank portrait or University of Tripoli logo was not embedded into the iOS build.');
 }
@@ -109,14 +127,15 @@ const deferredRefs = [...html.matchAll(/data-src=["']([^"']+)["']/g)].map(match 
 for (const relative of deferredRefs) {
   if (!fs.existsSync(safePath(relative))) throw new Error('Deferred runtime asset is missing: ' + relative);
 }
-const requiredIosTools = ['js/32-ios-study-tools.js','js/33-ios-exam-planner.js'];
+const requiredIosTools = ['js/32-ios-study-tools.js','js/33-ios-exam-planner.js','js/54-usage-analytics.js'];
 for (const relative of requiredIosTools) {
   if (deferredRefs.filter(file => file === relative).length !== 1) throw new Error('Required iOS feature runtime must be loaded exactly once: ' + relative);
 }
 const runtimePosition = relative => deferredRefs.indexOf(relative);
 if (!(runtimePosition('js/09-app-features-v6.js') < runtimePosition('js/36-exam-planner-settings-smartreview.js') &&
       runtimePosition('js/36-exam-planner-settings-smartreview.js') < runtimePosition('js/32-ios-study-tools.js') &&
-      runtimePosition('js/32-ios-study-tools.js') < runtimePosition('js/33-ios-exam-planner.js'))) {
+      runtimePosition('js/32-ios-study-tools.js') < runtimePosition('js/33-ios-exam-planner.js') &&
+      runtimePosition('js/33-ios-exam-planner.js') < runtimePosition('js/54-usage-analytics.js'))) {
   throw new Error('iOS feature runtime order is invalid; app core and Smart Review must load before study tools, followed by the iOS Exam Planner navigation layer.');
 }
 if (/js\/30-android-enhancements|js\/31-android-v13|js\/32-chrome-android/.test(html)) throw new Error('Android-only runtime module leaked into the iOS build.');
@@ -226,7 +245,7 @@ manifest.generatedAt = new Date().toISOString();
 fs.writeFileSync(path.join(out, 'offline-assets-manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 
 console.log('Shbace Medical iOS PWA build successful');
-console.log('First-install Setup gate, deferred onboarding load, 48-hour updater, iOS local-first Service Worker and Settings control verified.');
+console.log('First-install Setup gate, deferred onboarding load, 48-hour updater, iOS local-first Service Worker, Settings control and shared Basic Usage Analytics client verified.');
 console.log('Base question bank: '+baseBank.questions.length);
 console.log('Deferred runtime assets verified: '+deferredRefs.length);
 console.log('Offline inventory: '+manifest.fileCount+' files ('+(manifest.totalBytes/1024/1024).toFixed(2)+' MiB).');
