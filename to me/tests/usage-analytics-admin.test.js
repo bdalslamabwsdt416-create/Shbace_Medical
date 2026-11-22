@@ -41,6 +41,16 @@ test('Admin login parses a real raw request stream without relying on req.body',
   assert.deepEqual(commands.map(c=>c[0]),['EVAL','DEL']);
  } finally { global.fetch=original; }
 }));
+test('Admin login rejects an oversized raw request stream before parsing',async()=>env(config,async()=>{
+ const req=Readable.from([Buffer.alloc(513,0x61)]);
+ req.method='POST';
+ req.headers={origin:'https://ios-pwa.example',host:'api.example','x-forwarded-proto':'https','content-type':'application/json'};
+ Object.defineProperty(req,'body',{get(){throw new Error('req.body must not be accessed');}});
+ const r=res();
+ await login(req,r);
+ assert.equal(r.statusCode,413);
+ assert.match(r.body,/payload_too_large/);
+}));
 test('Admin logout enforces origin and expires the scoped host-only cookie',async()=>env(config,async()=>{
  const denied=res();logout({method:'POST',headers:{origin:'https://attacker.test',host:'to-me.example'}},denied);assert.equal(denied.statusCode,403);
  const ok=res();logout({method:'POST',headers:{origin:'https://to-me.example',host:'to-me.example'}},ok);assert.equal(ok.statusCode,200);assert.match(ok.headers['Set-Cookie'],/Max-Age=0/);assert.match(ok.headers['Set-Cookie'],/HttpOnly/);assert.match(ok.headers['Set-Cookie'],/Secure/);assert.match(ok.headers['Set-Cookie'],/SameSite=Strict/);assert.match(ok.headers['Set-Cookie'],/Path=\/api\/analytics/);
