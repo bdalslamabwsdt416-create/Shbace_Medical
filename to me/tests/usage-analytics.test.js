@@ -97,6 +97,19 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 const analyticsSource=fs.readFileSync(require('node:path').join(__dirname,'../lib/usage-analytics.js'),'utf8');
 const schemaSource=fs.readFileSync(require('node:path').join(__dirname,'../scripts/usage-analytics-schema.sql'),'utf8');
+const indexSource=fs.readFileSync(require('node:path').join(__dirname,'../index.html'),'utf8');
+const buildSource=fs.readFileSync(require('node:path').join(__dirname,'../scripts/build-pwa.mjs'),'utf8');
+
+test('To Me PWA build injects only a validated external HTTPS analytics API origin before the client loads',()=>{
+ const slot='window.SHBACE_ANALYTICS_API_BASE_URL="__SHBACE_ANALYTICS_API_BASE_URL__";';
+ assert.ok(indexSource.includes(slot));
+ assert.ok(indexSource.indexOf(slot)<indexSource.indexOf('id="usage-analytics-v1"'));
+ assert.ok(buildSource.includes('process.env.SHBACE_ANALYTICS_API_BASE_URL'));
+ assert.ok(buildSource.includes('parsedAnalyticsOrigin.protocol !== "https:"'));
+ assert.ok(buildSource.includes('parsedAnalyticsOrigin.pathname !== "/"'));
+ assert.ok(buildSource.includes('html.replace(analyticsApiSlot'));
+});
+
 
 test('event-first ingestion relies on deferred foreign keys and upserts the install only for a new event',()=>{
  assert.ok(analyticsSource.includes('WITH inserted_event AS ('));
