@@ -335,11 +335,23 @@ const [ajPortraitData, facultyLogoData] = await Promise.all([
 ]);
 const ajSlot = 'window.__SHBACE_AJ_PORTRAIT_DATA__="__SHBACE_AJ_PORTRAIT_DATA__";';
 const facultySlot = 'window.__SHBACE_FACULTY_LOGO_DATA__="__SHBACE_FACULTY_LOGO_DATA__";';
-if (!html.includes(ajSlot) || !html.includes(facultySlot)) {
-  fail("Pediatrics image slots are missing from index.html");
+const analyticsApiSlot = 'window.SHBACE_ANALYTICS_API_BASE_URL="__SHBACE_ANALYTICS_API_BASE_URL__";';
+if (!html.includes(ajSlot) || !html.includes(facultySlot) || !html.includes(analyticsApiSlot)) {
+  fail("Pediatrics image or analytics API configuration slots are missing from index.html");
 }
 html = html.replace(ajSlot, "window.__SHBACE_AJ_PORTRAIT_DATA__=" + JSON.stringify(ajPortraitData) + ";");
 html = html.replace(facultySlot, "window.__SHBACE_FACULTY_LOGO_DATA__=" + JSON.stringify(facultyLogoData) + ";");
+const configuredAnalyticsOrigin = String(process.env.SHBACE_ANALYTICS_API_BASE_URL || "").trim();
+let analyticsOrigin = "";
+if (configuredAnalyticsOrigin) {
+  const parsedAnalyticsOrigin = new URL(configuredAnalyticsOrigin);
+  if (parsedAnalyticsOrigin.protocol !== "https:" || parsedAnalyticsOrigin.username || parsedAnalyticsOrigin.password ||
+      parsedAnalyticsOrigin.pathname !== "/" || parsedAnalyticsOrigin.search || parsedAnalyticsOrigin.hash) {
+    fail("SHBACE_ANALYTICS_API_BASE_URL must be an HTTPS origin without credentials, path, query or fragment");
+  }
+  analyticsOrigin = parsedAnalyticsOrigin.origin;
+}
+html = html.replace(analyticsApiSlot, "window.SHBACE_ANALYTICS_API_BASE_URL=" + JSON.stringify(analyticsOrigin) + ";");
 writeFileSync(htmlPath, html);
 if (!html.includes("js/35-pediatrics-collections.js") ||
     !html.includes("js/36-exam-planner-settings-smartreview.js") ||
