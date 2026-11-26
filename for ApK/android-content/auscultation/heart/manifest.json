@@ -2,8 +2,8 @@
   "schema": "shbace-auscultation-pack-v1",
   "packageId": "auscultation-heart",
   "system": "heart",
-  "version": "3bd7282a3e2bcaf5f2d5602fe91ddd7d87a9fd742762619de3e63508a6924f84",
-  "contentVersionCode": 1,
+  "version": "4fc94b16aed67cb8bc1d0f81f27067dc9100938757cdfd504241d4b2598452a5",
+  "contentVersionCode": 3,
   "sourceProject": "Medara_Development",
   "catalogPath": "audio-catalog.json",
   "uniqueSoundCount": 77,
@@ -19,24 +19,89 @@
     "assets/models/valve-heart.bin",
     "assets/models/valve-heart.json"
   ],
-  "fileCount": 82,
+  "fileCount": 95,
   "audioBytes": 10071261,
   "totalBytes": 25158372,
   "files": [
     {
-      "path": "assets/models/thorax.bin",
-      "bytes": 13207248,
-      "sha256": "72c0d9a5bfc0d1faf1f3c67e82304a4bea8c003c78f4dde54a4d0f4ee36e9a38"
+      "path": "assets/models/chunks/thorax.bin.part000",
+      "bytes": 1048576,
+      "sha256": "bdb7033f0a54e731d0261974d53d5295b35ba880ed6d4ff031d8d850e29c15bf"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part001",
+      "bytes": 1048576,
+      "sha256": "b46d7e2c090de0c5397b7e51675019f8b18129fc996257e0e56b9c7be95fe9c2"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part002",
+      "bytes": 1048576,
+      "sha256": "4f3baef44dca81bb142bdc5557200973f1dd5f7d145480bd1d5a4c0886fe3865"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part003",
+      "bytes": 1048576,
+      "sha256": "4054a49cb7bded6510331de9d83208cf6724f49813c8cdbd1299e4e6ccf5b9e2"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part004",
+      "bytes": 1048576,
+      "sha256": "b11b27e23981e91509d2b7d04a9bc97ec742f8d39c229ab272fe9e72297d3726"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part005",
+      "bytes": 1048576,
+      "sha256": "30a453034c7e667512abe3d6d2deae7f44a78b3290847fbe85b6d4676c99f111"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part006",
+      "bytes": 1048576,
+      "sha256": "d09c8175f06b290a09c634bcb291409c65e217b1ea9325ab1d2c8ab8e320b51d"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part007",
+      "bytes": 1048576,
+      "sha256": "a2ed6f7e2b669c26c4b9421f42bdfa07df462d5cf27a27df232e86b5ab2fcf1c"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part008",
+      "bytes": 1048576,
+      "sha256": "375302eb4cfb6f055baaf1122303c3e8a017f68c2306d45fe31ad77e2c351217"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part009",
+      "bytes": 1048576,
+      "sha256": "55b0fb5250d47c3e1ecf05b619c82453d8eecbb1455e4308ec640c8504e5023a"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part010",
+      "bytes": 1048576,
+      "sha256": "0f74cf9e24549961ac893a4f2a195cc8ff6474f0c16b7abaa9a3d539bc93bdc5"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part011",
+      "bytes": 1048576,
+      "sha256": "d865768090c6f2a4857a5027aa7c4392b84314e9e46c4d1c2d0c0be31f81907b"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part012",
+      "bytes": 624336,
+      "sha256": "991ec57561bafdc95cba8dab091097ecd7621a73b4971139d9df5b56d897c36f"
+    },
+    {
+      "path": "assets/models/chunks/valve-heart.bin.part000",
+      "bytes": 1048576,
+      "sha256": "12c4a9c635e49d50ba031acc6a9d7f53924a19648dfdb141925496ba0b36d6b8"
+    },
+    {
+      "path": "assets/models/chunks/valve-heart.bin.part001",
+      "bytes": 764048,
+      "sha256": "4bb49bd4b5f68e57698e3e4af7a045c92ca582ebc8c647b1a2d9cdb8be440c9e"
     },
     {
       "path": "assets/models/thorax.json",
       "bytes": 1676,
       "sha256": "18aa7239ac8b70e4e77d073a1be6cb9f475a9bcf0fde70c6b7bdcc620c415402"
-    },
-    {
-      "path": "assets/models/valve-heart.bin",
-      "bytes": 1812624,
-      "sha256": "2379185ab268ad7c4ac8132753cf5be43acc9dfc47594035f4999b36df0b2217"
     },
     {
       "path": "assets/models/valve-heart.json",
@@ -432,6 +497,37 @@
       "path": "audio-library/Cardiac Auscultation/Ventricular Septal Defect- normal speed.mp3",
       "bytes": 111932,
       "sha256": "4e9501942afa0035867d29c9f6093733533eb5edc9f583b32768353614a8a8ae"
+    }
+  ],
+  "assembledFiles": [
+    {
+      "path": "assets/models/thorax.bin",
+      "bytes": 13207248,
+      "sha256": "72c0d9a5bfc0d1faf1f3c67e82304a4bea8c003c78f4dde54a4d0f4ee36e9a38",
+      "chunkPaths": [
+        "assets/models/chunks/thorax.bin.part000",
+        "assets/models/chunks/thorax.bin.part001",
+        "assets/models/chunks/thorax.bin.part002",
+        "assets/models/chunks/thorax.bin.part003",
+        "assets/models/chunks/thorax.bin.part004",
+        "assets/models/chunks/thorax.bin.part005",
+        "assets/models/chunks/thorax.bin.part006",
+        "assets/models/chunks/thorax.bin.part007",
+        "assets/models/chunks/thorax.bin.part008",
+        "assets/models/chunks/thorax.bin.part009",
+        "assets/models/chunks/thorax.bin.part010",
+        "assets/models/chunks/thorax.bin.part011",
+        "assets/models/chunks/thorax.bin.part012"
+      ]
+    },
+    {
+      "path": "assets/models/valve-heart.bin",
+      "bytes": 1812624,
+      "sha256": "2379185ab268ad7c4ac8132753cf5be43acc9dfc47594035f4999b36df0b2217",
+      "chunkPaths": [
+        "assets/models/chunks/valve-heart.bin.part000",
+        "assets/models/chunks/valve-heart.bin.part001"
+      ]
     }
   ]
 }

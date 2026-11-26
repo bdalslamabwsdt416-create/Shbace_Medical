@@ -28,6 +28,30 @@ const lungHtml = readFileSync(resolve(root, "js/auscultation/lung/index.html"), 
 const lungRuntime = readFileSync(resolve(root, "js/auscultation/lung/auscultation-pro.js"), "utf8");
 const lungScene = readFileSync(resolve(root, "js/auscultation/lung/scene.js"), "utf8");
 
+function assertAssembledFilesMatch(packRootPath, manifest) {
+  for (const assembled of (manifest.assembledFiles ?? [])) {
+    const chunks = assembled.chunkPaths.map((chunkPath) => {
+      const entry = manifest.files.find((item) => item.path === chunkPath);
+      assert.ok(entry, "missing chunk manifest entry: " + chunkPath);
+      const bytes = readFileSync(resolve(packRootPath, chunkPath));
+      assert.equal(bytes.length, entry.bytes, "chunk size mismatch: " + chunkPath);
+      assert.equal(
+        createHash("sha256").update(bytes).digest("hex"),
+        entry.sha256,
+        "chunk SHA-256 mismatch: " + chunkPath
+      );
+      return bytes;
+    });
+    const combined = Buffer.concat(chunks);
+    assert.equal(combined.length, assembled.bytes, "assembled size mismatch: " + assembled.path);
+    assert.equal(
+      createHash("sha256").update(combined).digest("hex"),
+      assembled.sha256,
+      "assembled SHA-256 mismatch: " + assembled.path
+    );
+  }
+}
+
 test("Heart package contains exactly 77 primary recordings and 77 distinct sounds", () => {
   assert.equal(heartManifest.packageId, "auscultation-heart");
   assert.equal(heartManifest.system, "heart");
@@ -44,7 +68,7 @@ test("Heart package contains exactly 77 primary recordings and 77 distinct sound
 });
 
 test("Heart package preserves cardiac model dependencies and excludes respiratory recordings", () => {
-  const paths = new Set(heartManifest.files.map((item) => item.path));
+  const paths = new Set([...heartManifest.files.map((item) => item.path), ...(heartManifest.assembledFiles ?? []).map((item) => item.path)]);
   assert.ok(heartCatalog.every((item) => paths.has("audio-library/" + item.path)));
   for (const model of [
     "assets/models/thorax.bin",
@@ -54,6 +78,7 @@ test("Heart package preserves cardiac model dependencies and excludes respirator
   ]) assert.ok(paths.has(model), "missing required model: " + model);
   assert.equal(heartManifest.files.filter((item) => /Respiratory Auscultation|lung/i.test(item.path)).length, 0);
   assert.equal(heartAudit.excludedSystems.includes("lung"), true);
+  assertAssembledFilesMatch(heartRoot, heartManifest);
 });
 
 test("Lung package contains 31 distinct sounds and retains all 73 Medara MP3 variants", () => {
@@ -82,7 +107,8 @@ test("Lung pack manifest paths, sizes, and SHA-256 hashes match every packaged f
   }
   const listed = new Set(lungManifest.files.map((item) => item.path));
   assert.ok(lungCatalog.every((item) => listed.has("audio-library/" + item.path)));
-  assert.ok(listed.has("assets/models/thorax.bin"));
+  assert.ok((lungManifest.assembledFiles ?? []).some((item) => item.path === "assets/models/thorax.bin"));
+  assertAssembledFilesMatch(lungRoot, lungManifest);
   assert.ok(listed.has("assets/models/thorax.json"));
 });
 
@@ -93,6 +119,7 @@ test("Android pack manager uses the published feature branch and validates both 
   assert.match(manager, /MAX_TOTAL_BYTES/);
   assert.match(manager, /MAX_READ_CHUNK_BYTES/);
   assert.match(manager, /SHA-256 or byte-count verification failed/);
+  assert.ok(manager.indexOf("assembleChunkedFiles(staging, manifest);") < manager.indexOf("verifyStagedPackage(system, staging, manifest);"), "chunk assembly must happen before staged verification");
   assert.match(manager, /uniqueSoundCount.*77|77.*uniqueSoundCount/);
   assert.match(manager, /uniqueSoundCount.*31|31.*uniqueSoundCount/);
   assert.match(manager, /audioFileCount.*73|73.*audioFileCount/);

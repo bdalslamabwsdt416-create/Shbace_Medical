@@ -205,7 +205,9 @@ final class AuscultationPackManager {
             }
             File storedManifest = new File(staging, "package-manifest.json");
             writeAtomic(storedManifest, manifest.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            assembleChunkedFiles(staging, manifest);
             verifyStagedPackage(system, staging, manifest);
+            removeAssemblyChunks(staging, manifest);
             if (finalDir.exists()) deleteTree(finalDir);
             if (!staging.renameTo(finalDir)) throw new IllegalStateException("Could not install the verified heart package.");
             writeCurrentManifest(system, manifest);
@@ -236,6 +238,7 @@ final class AuscultationPackManager {
         boolean hasCatalog = false;
         boolean hasThoraxBin = false;
         boolean hasThoraxJson = false;
+        boolean hasValveHeartJson = false;
         if (system.equals("heart") &&
                 (manifest.optInt("uniqueSoundCount", -1) != 77 || manifest.optInt("audioFileCount", -1) != 77)) {
             throw new IllegalArgumentException("Heart package must contain exactly 77 primary recordings.");
@@ -256,11 +259,41 @@ final class AuscultationPackManager {
             total += bytes;
             if (path.toLowerCase(java.util.Locale.US).endsWith(".mp3")) audioFiles++;
             if ("audio-catalog.json".equals(path)) hasCatalog = true;
-            if ("assets/models/thorax.bin".equals(path)) hasThoraxBin = true;
             if ("assets/models/thorax.json".equals(path)) hasThoraxJson = true;
+            if ("assets/models/valve-heart.json".equals(path)) hasValveHeartJson = true;
             for (int j = 0; j < i; j++) {
                 if (path.equals(files.getJSONObject(j).optString("path"))) {
                     throw new IllegalArgumentException("Duplicate package path: " + path);
+                }
+            }
+        }
+        hasThoraxBin = hasPackFileOrAssembly(manifest, "assets/models/thorax.bin");
+        JSONArray assembledFiles = manifest.optJSONArray("assembledFiles");
+        if (assembledFiles != null) {
+            java.util.HashSet<String> assembledTargets = new java.util.HashSet<>();
+            for (int i = 0; i < assembledFiles.length(); i++) {
+                JSONObject assembled = assembledFiles.getJSONObject(i);
+                String targetPath = assembled.optString("path", "");
+                long expectedBytes = assembled.optLong("bytes", -1L);
+                String expectedHash = assembled.optString("sha256", "");
+                JSONArray chunkPaths = assembled.optJSONArray("chunkPaths");
+                if (!validPath(targetPath) || expectedBytes <= 0L || expectedBytes > MAX_FILE_BYTES ||
+                        !expectedHash.matches("[A-Fa-f0-9]{64}") || chunkPaths == null || chunkPaths.length() == 0 ||
+                        findFile(files, targetPath) != null || !assembledTargets.add(targetPath)) {
+                    throw new IllegalArgumentException("Invalid assembled package entry: " + targetPath);
+                }
+                long chunkBytes = 0L;
+                java.util.HashSet<String> uniqueChunks = new java.util.HashSet<>();
+                for (int j = 0; j < chunkPaths.length(); j++) {
+                    String chunkPath = chunkPaths.getString(j);
+                    JSONObject chunk = findFile(files, chunkPath);
+                    if (!validPath(chunkPath) || chunk == null || !uniqueChunks.add(chunkPath)) {
+                        throw new IllegalArgumentException("Invalid or duplicate model chunk: " + chunkPath);
+                    }
+                    chunkBytes += chunk.getLong("bytes");
+                }
+                if (chunkBytes != expectedBytes) {
+                    throw new IllegalArgumentException("Assembled chunk sizes do not match target: " + targetPath);
                 }
             }
         }
@@ -274,12 +307,96 @@ final class AuscultationPackManager {
             throw new IllegalArgumentException("The package is missing the sound catalogue or thorax model.");
         }
         if (system.equals("heart") &&
-                (!containsPath(files, "assets/models/valve-heart.bin") ||
-                 !containsPath(files, "assets/models/valve-heart.json"))) {
+                (!hasPackFileOrAssembly(manifest, "assets/models/valve-heart.bin") ||
+                 !hasValveHeartJson)) {
             throw new IllegalArgumentException("The detailed cardiac model is missing.");
         }
     }
 
+    private static boolean hasPackFileOrAssembly(JSONObject manifest, String path) throws Exception {
+        if (findFile(manifest.optJSONArray("files"), path) != null) return true;
+        JSONArray assembled = manifest.optJSONArray("assembledFiles");
+        if (assembled == null) return false;
+        for (int i = 0; i < assembled.length(); i++) {
+            if (path.equals(assembled.getJSONObject(i).optString("path"))) return true;
+        }
+        return false;
+    }
+
+    private static boolean isAssemblyChunk(JSONObject manifest, String path) throws Exception {
+        JSONArray assembled = manifest.optJSONArray("assembledFiles");
+        if (assembled == null) return false;
+        for (int i = 0; i < assembled.length(); i++) {
+            JSONArray paths = assembled.getJSONObject(i).optJSONArray("chunkPaths");
+            if (paths == null) continue;
+            for (int j = 0; j < paths.length(); j++) if (path.equals(paths.getString(j))) return true;
+        }
+        return false;
+    }
+
+    private void assembleChunkedFiles(File staging, JSONObject manifest) throws Exception {
+        JSONArray assembled = manifest.optJSONArray("assembledFiles");
+        if (assembled == null) return;
+        for (int i = 0; i < assembled.length(); i++) {
+            JSONObject item = assembled.getJSONObject(i);
+            String targetPath = item.getString("path");
+            long expectedBytes = item.getLong("bytes");
+            String expectedHash = item.getString("sha256");
+            JSONArray chunkPaths = item.getJSONArray("chunkPaths");
+            File target = safeChild(staging, targetPath);
+            File parent = target.getParentFile();
+            if (parent != null && !parent.exists() && !parent.mkdirs()) throw new IllegalStateException("Could not create assembled model folder.");
+            File temporary = new File(parent, target.getName() + ".assembled");
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            long count = 0L;
+            try (FileOutputStream output = new FileOutputStream(temporary)) {
+                for (int j = 0; j < chunkPaths.length(); j++) {
+                    String chunkPath = chunkPaths.getString(j);
+                    JSONObject chunkEntry = findFile(manifest.getJSONArray("files"), chunkPath);
+                    if (chunkEntry == null) throw new IllegalArgumentException("Missing assembly chunk entry: " + chunkPath);
+                    File chunk = safeChild(staging, chunkPath);
+                    if (!chunk.isFile() || chunk.length() != chunkEntry.getLong("bytes")) throw new IllegalStateException("Model chunk is missing or truncated: " + chunkPath);
+                    try (InputStream input = new FileInputStream(chunk)) {
+                        byte[] buffer = new byte[32768];
+                        int read;
+                        while ((read = input.read(buffer)) != -1) {
+                            count += read;
+                            if (count > expectedBytes || count > MAX_FILE_BYTES) throw new IllegalStateException("Assembled model exceeds its manifest size.");
+                            digest.update(buffer, 0, read);
+                            output.write(buffer, 0, read);
+                        }
+                    }
+                }
+                output.getFD().sync();
+            }
+            if (count != expectedBytes || !toHex(digest.digest()).equalsIgnoreCase(expectedHash)) { temporary.delete(); throw new IllegalStateException("Assembled model SHA-256 or byte-count verification failed: " + targetPath); }
+            if (target.exists() && !target.delete()) { temporary.delete(); throw new IllegalStateException("Could not replace assembled model: " + targetPath); }
+            if (!temporary.renameTo(target)) { temporary.delete(); throw new IllegalStateException("Could not finalize assembled model: " + targetPath); }
+        }
+    }
+
+    private boolean fileHashMatches(File file, long expectedBytes, String expectedHash) throws Exception {
+        if (file == null || !file.isFile() || file.length() != expectedBytes) return false;
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        try (InputStream input = new FileInputStream(file)) {
+            byte[] buffer = new byte[32768]; int read;
+            while ((read = input.read(buffer)) != -1) digest.update(buffer, 0, read);
+        }
+        return toHex(digest.digest()).equalsIgnoreCase(expectedHash);
+    }
+
+    private void removeAssemblyChunks(File staging, JSONObject manifest) throws Exception {
+        JSONArray assembled = manifest.optJSONArray("assembledFiles");
+        if (assembled == null) return;
+        for (int i = 0; i < assembled.length(); i++) {
+            JSONArray paths = assembled.getJSONObject(i).optJSONArray("chunkPaths");
+            if (paths == null) continue;
+            for (int j = 0; j < paths.length(); j++) {
+                File chunk = safeChild(staging, paths.getString(j));
+                if (chunk.exists() && !chunk.delete()) throw new IllegalStateException("Could not remove verified model chunk: " + paths.getString(j));
+            }
+        }
+    }
     private void verifyStagedPackage(String system, File staging, JSONObject manifest) throws Exception {
         JSONArray files = manifest.getJSONArray("files");
         for (int i = 0; i < files.length(); i++) {
@@ -287,6 +404,14 @@ final class AuscultationPackManager {
             File file = safeChild(staging, item.getString("path"));
             if (!file.isFile() || file.length() != item.getLong("bytes")) {
                 throw new IllegalStateException("Staged pack file is missing or truncated: " + item.getString("path"));
+            }
+        }
+        JSONArray assembled = manifest.optJSONArray("assembledFiles");
+        if (assembled != null) {
+            for (int i = 0; i < assembled.length(); i++) {
+                JSONObject item = assembled.getJSONObject(i);
+                File file = safeChild(staging, item.getString("path"));
+                if (!fileHashMatches(file, item.getLong("bytes"), item.getString("sha256"))) throw new IllegalStateException("Assembled package file failed verification: " + item.getString("path"));
             }
         }
         File catalogFile = safeChild(staging, "audio-catalog.json");
@@ -399,8 +524,17 @@ final class AuscultationPackManager {
             String version = manifest.getString("version");
             for (int i = 0; i < files.length(); i++) {
                 JSONObject item = files.getJSONObject(i);
+                if (isAssemblyChunk(manifest, item.getString("path"))) continue;
                 File file = installedFile(system, version, item.getString("path"));
                 if (file == null || !file.isFile() || file.length() != item.getLong("bytes")) return false;
+            }
+            JSONArray assembled = manifest.optJSONArray("assembledFiles");
+            if (assembled != null) {
+                for (int i = 0; i < assembled.length(); i++) {
+                    JSONObject item = assembled.getJSONObject(i);
+                    File file = installedFile(system, version, item.getString("path"));
+                    if (!fileHashMatches(file, item.getLong("bytes"), item.getString("sha256"))) return false;
+                }
             }
             return true;
         } catch (Throwable ignored) { return false; }
