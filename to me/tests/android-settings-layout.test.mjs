@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
+import vm from "node:vm";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
@@ -73,10 +74,71 @@ test("APK release checker compares the installed APK to the public latest releas
   assert.match(layout, /api\.github\.com\/repos\/bdalslamabwsdt416-create\/Shbace_Medical\/releases\/latest/);
   assert.match(layout, /installedApkVersion/);
   assert.match(layout, /compareVersions/);
-  assert.match(layout, /safeReleaseAssetUrl/);
+  assert.match(layout, /resolveReleaseApkUrl/);
+  assert.match(layout, /findReleaseApkAsset/);
+  assert.match(layout, /assets_url/);
   assert.match(layout, /openExternalUrl/);
   assert.match(layout, /data-shb-apk-check/);
   assert.match(layout, /shb-apk-update-card/);
+});
+
+
+function createReleaseAssetResolver(fetchImpl = async () => ({ ok: false, json: async () => [] })) {
+  const start = layout.indexOf("  function findReleaseApkAsset");
+  const end = layout.indexOf("\n  function setApkStatus", start);
+  assert.ok(start >= 0 && end > start, "APK asset resolver helpers must be present");
+  const context = vm.createContext({ fetch: fetchImpl });
+  return vm.runInContext(
+    layout.slice(start, end) + "\n({ findReleaseApkAsset, resolveReleaseApkUrl })",
+    context,
+    { filename: "apk-release-asset-resolver.js" }
+  );
+}
+
+test("APK release resolver accepts the uploaded asset without URL constructor support", async () => {
+  const resolver = createReleaseAssetResolver();
+  const release = {
+    id: 459991135,
+    assets: [{ name: "app-release.apk", state: "uploaded", size: 22167665 }]
+  };
+  assert.equal(
+    await resolver.resolveReleaseApkUrl(release, "android-v1.3.11"),
+    "https://github.com/bdalslamabwsdt416-create/Shbace_Medical/releases/download/android-v1.3.11/app-release.apk"
+  );
+});
+
+test("APK release resolver verifies assets through the release assets endpoint when summary omits them", async () => {
+  const calls = [];
+  const resolver = createReleaseAssetResolver(async (url) => {
+    calls.push(url);
+    return {
+      ok: true,
+      json: async () => [{ name: "app-release.apk", state: "uploaded", size: 22167665 }]
+    };
+  });
+  const release = {
+    id: 459991135,
+    assets: [],
+    assets_url: "https://api.github.com/repos/bdalslamabwsdt416-create/Shbace_Medical/releases/459991135/assets"
+  };
+  assert.equal(
+    await resolver.resolveReleaseApkUrl(release, "android-v1.3.11"),
+    "https://github.com/bdalslamabwsdt416-create/Shbace_Medical/releases/download/android-v1.3.11/app-release.apk"
+  );
+  assert.deepEqual(calls, [release.assets_url]);
+});
+
+test("APK release resolver rejects missing, incomplete or unverified release assets", async () => {
+  const resolver = createReleaseAssetResolver();
+  assert.equal(await resolver.resolveReleaseApkUrl({ assets: [] }, "android-v1.3.11"), "");
+  assert.equal(await resolver.resolveReleaseApkUrl({
+    assets: [{ name: "app-release.apk", state: "starter", size: 22167665 }]
+  }, "android-v1.3.11"), "");
+  assert.equal(await resolver.resolveReleaseApkUrl({
+    id: 459991135,
+    assets: [],
+    assets_url: "https://api.github.com/repos/another-owner/another-repo/releases/459991135/assets"
+  }, "android-v1.3.11"), "");
 });
 
 test("native external-browser bridge only permits HTTPS GitHub URLs", () => {
