@@ -359,7 +359,7 @@ test('Admin global login lockout blocks every client until its window resets, th
   for(const [key,value] of Object.entries(values)){if(value===undefined)delete process.env[key];else process.env[key]=value;}
  }
 });
-test('Android UUID remains backed by private SharedPreferences and Android release version is unchanged',()=>{
+test('Android UUID remains backed by private SharedPreferences and Android release version metadata is current',()=>{
  const native=fs.readFileSync(require('node:path').join(__dirname,'../../android/app/src/main/java/com/shbace/medical/ShbaceNative.java'),'utf8');
  const gradle=fs.readFileSync(require('node:path').join(__dirname,'../../android/app/build.gradle'),'utf8');
  assert.ok(native.includes('ANALYTICS_PREFS = "shbace_usage_analytics_v1"'));
@@ -367,8 +367,8 @@ test('Android UUID remains backed by private SharedPreferences and Android relea
  assert.ok(native.includes('getSharedPreferences(ANALYTICS_PREFS, Context.MODE_PRIVATE)'));
  assert.ok(native.includes('UUID.randomUUID().toString()'));
  assert.ok(native.includes('prefs.edit().putString(ANALYTICS_ID_KEY, created).commit()'));
- assert.ok(gradle.includes('versionCode 19'));
- assert.ok(gradle.includes('versionName "1.3.10"'));
+ assert.ok(gradle.includes('versionCode 20'));
+ assert.ok(gradle.includes('versionName "1.3.11"'));
 });
 
 test('Admin logout rejects cross-origin requests and clears the hardened session cookie on same-origin POST',async()=>{
