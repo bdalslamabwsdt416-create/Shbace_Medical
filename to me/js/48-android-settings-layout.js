@@ -189,13 +189,47 @@
     return 0;
   }
 
-  function safeReleaseAssetUrl(value) {
-    try {
-      var url = new URL(String(value || ''));
-      if (url.protocol !== 'https:' || url.hostname !== 'github.com' ||
-          url.pathname.indexOf('/releases/download/') !== 0) return '';
-      return url.href;
-    } catch (e) { return ''; }
+  function safeReleaseAssetUrl(value, tag) {
+    var url = String(value || '').trim();
+    var expected = 'https://github.com/bdalslamabwsdt416-create/Shbace_Medical/releases/download/' +
+      String(tag || '') + '/app-release.apk';
+    /* Avoid URL() so older Android System WebViews can validate the link too. */
+    return url === expected ? url : '';
+  }
+
+  function findReleaseApkAsset(assets) {
+    if (!Array.isArray(assets)) return null;
+    for (var i = 0; i < assets.length; i++) {
+      var asset = assets[i];
+      if (asset && asset.name === 'app-release.apk' &&
+          (!asset.state || asset.state === 'uploaded') &&
+          (typeof asset.size !== 'number' || asset.size > 0)) return asset;
+    }
+    return null;
+  }
+
+  async function resolveReleaseApkUrl(release, tag) {
+    var asset = findReleaseApkAsset(release && release.assets);
+    if (!asset && release && typeof release.assets_url === 'string' &&
+        release.assets_url === 'https://api.github.com/repos/bdalslamabwsdt416-create/Shbace_Medical/releases/' +
+          String(release.id || '') + '/assets') {
+      var assetsResponse = await fetch(release.assets_url, {
+        method: 'GET',
+        mode: 'cors',
+        cache: 'no-store',
+        headers: { 'Accept': 'application/vnd.github+json' }
+      });
+      if (assetsResponse.ok) {
+        var listedAssets = await assetsResponse.json();
+        asset = findReleaseApkAsset(listedAssets);
+      }
+    }
+    if (!asset) return '';
+    /* Use GitHub's returned URL when exact; otherwise derive the canonical URL
+       only after the API has confirmed that app-release.apk exists on this release. */
+    return safeReleaseAssetUrl(asset.browser_download_url, tag) ||
+      'https://github.com/bdalslamabwsdt416-create/Shbace_Medical/releases/download/' +
+        tag + '/app-release.apk';
   }
 
   function setApkStatus(card, message) {
@@ -255,10 +289,8 @@
         return;
       }
 
-      var assets = Array.isArray(release.assets) ? release.assets : [];
-      var apk = assets.find(function (asset) { return asset && asset.name === 'app-release.apk'; });
-      var assetUrl = safeReleaseAssetUrl(apk && apk.browser_download_url);
-      if (!assetUrl) throw new Error('Version ' + latest + ' is published, but its APK download asset is not available.');
+      var assetUrl = await resolveReleaseApkUrl(release, tag);
+      if (!assetUrl) throw new Error('Version ' + latest + ' is published, but GitHub did not return the app-release.apk asset.');
       card.setAttribute('data-shb-apk-download-url', assetUrl);
       setApkStatus(card, 'New version available: ' + latest + '. Your installed version is ' + current.name + '.');
       download.hidden = false;
