@@ -30,7 +30,7 @@ import java.util.concurrent.Executors;
 final class AuscultationPackManager {
     private static final String TAG = "ShbaceAuscultation";
     private static final String BASE_URL =
-            "https://raw.githubusercontent.com/bdalslamabwsdt416-create/Shbace_Medical/main/for%20ApK/android-content/auscultation/";
+            "https://raw.githubusercontent.com/bdalslamabwsdt416-create/Shbace_Medical/feat/android-medara-sidebar-20261126/for%20ApK/android-content/auscultation/";
     private static final long MAX_MANIFEST_BYTES = 2L * 1024L * 1024L;
     private static final long MAX_FILE_BYTES = 24L * 1024L * 1024L;
     private static final long MAX_TOTAL_BYTES = 40L * 1024L * 1024L;
@@ -240,6 +240,10 @@ final class AuscultationPackManager {
                 (manifest.optInt("uniqueSoundCount", -1) != 77 || manifest.optInt("audioFileCount", -1) != 77)) {
             throw new IllegalArgumentException("Heart package must contain exactly 77 primary recordings.");
         }
+        if (system.equals("lung") &&
+                (manifest.optInt("uniqueSoundCount", -1) != 31 || manifest.optInt("audioFileCount", -1) != 73)) {
+            throw new IllegalArgumentException("Lung package must contain 31 distinct sounds and 73 Medara MP3 recordings.");
+        }
         for (int i = 0; i < files.length(); i++) {
             JSONObject file = files.getJSONObject(i);
             String path = file.optString("path", "");
@@ -290,17 +294,29 @@ final class AuscultationPackManager {
         JSONArray catalog = new JSONArray(new String(readFile(catalogFile, 4L * 1024L * 1024L),
                 java.nio.charset.StandardCharsets.UTF_8));
         int expected = manifest.optInt("uniqueSoundCount", -1);
-        if (catalog.length() != expected) throw new IllegalStateException("Installed sound catalogue count is incorrect.");
+        int expectedAudioFiles = manifest.optInt("audioFileCount", -1);
+        if (catalog.length() != expectedAudioFiles) {
+            throw new IllegalStateException("Installed audio catalogue entry count is incorrect.");
+        }
         java.util.HashSet<String> titles = new java.util.HashSet<>();
+        java.util.HashSet<String> identifiers = new java.util.HashSet<>();
+        java.util.HashSet<String> catalogPaths = new java.util.HashSet<>();
         for (int i = 0; i < catalog.length(); i++) {
             JSONObject entry = catalog.getJSONObject(i);
-            if (!system.equals(entry.optString("system")) || !titles.add(entry.optString("title"))) {
-                throw new IllegalStateException("The catalogue contains a duplicate or wrong-system sound.");
-            }
+            String title = entry.optString("title", "");
+            String identifier = entry.optString("id", "");
             String path = "audio-library/" + entry.optString("path", "");
+            if (!system.equals(entry.optString("system")) || title.length() == 0 ||
+                    identifier.length() == 0 || !identifiers.add(identifier) || !catalogPaths.add(path)) {
+                throw new IllegalStateException("The catalogue contains an invalid, duplicate or wrong-system recording.");
+            }
+            titles.add(title);
             if (findFile(files, path) == null) {
                 throw new IllegalStateException("A catalogue audio file is not included in the package: " + path);
             }
+        }
+        if (titles.size() != expected) {
+            throw new IllegalStateException("Distinct sound title count does not match the package manifest.");
         }
     }
 

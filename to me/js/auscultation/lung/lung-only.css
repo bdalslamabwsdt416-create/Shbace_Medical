@@ -1,0 +1,10 @@
+/* Lung-only presentation hosted inside the Shbace Medical Android route. */
+html,body{min-height:100%;background:#071427}
+body.auscultation-page{margin:0}
+.topbar,.clean-footer{display:none!important}
+.library-shell{max-width:1280px;padding:16px 14px 24px}
+.library-heading{margin-top:0}
+.system-tabs{display:none!important}
+.system-note{margin-left:0}
+#heart-count{display:none}
+.viewer-card,.browser-card{border-color:rgba(67,151,226,.22)}

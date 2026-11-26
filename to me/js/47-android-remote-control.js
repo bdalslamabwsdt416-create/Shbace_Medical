@@ -410,7 +410,7 @@
   }
 
   /* Android APK only: nested Auscultation Library drawer entry.
-     Download controls are intentionally added with their real pack handlers in the
+     Heart and Lung each have independent download handlers in the
      dedicated download stages; this stage only establishes the expandable hierarchy. */
   function installAuscultationDrawerStyles() {
     if (document.getElementById('shb-auscultation-drawer-styles')) return;
@@ -474,7 +474,7 @@
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v8"/><path d="M10 8c-1.8 0-3.1 1.4-4.2 4.2C4.5 15.6 3.5 18 3.5 20c0 1.2 1 1.7 2.2 1.7 3.7 0 6.3-2.7 6.3-6.4V9.8C12 8.6 11.2 8 10 8Z"/><path d="M14 8c1.8 0 3.1 1.4 4.2 4.2 1.3 3.4 2.3 5.8 2.3 7.8 0 1.2-1 1.7-2.2 1.7-3.7 0-6.3-2.7-6.3-6.4V9.8C12 8.6 12.8 8 14 8Z"/><path d="M12 11c-1.2 1.4-2.4 2.1-3.7 2.1M12 11c1.2 1.4 2.4 2.1 3.7 2.1"/></svg>' +
             '<span>Lung Auscultation</span>' +
           '</button>' +
-          '<button type="button" class="shb-ausc-download" aria-label="Lung download will be added in its stage" title="Lung download will be added in its stage" disabled>' +
+          '<button type="button" class="shb-ausc-download" data-shb-ausc-download="lung" aria-label="Download Lung Auscultation" title="Download Lung Auscultation">' +
             '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 18v3h16v-3"/></svg>' +
           '</button>' +
         '</div>' +

@@ -1,0 +1,418 @@
+{
+    "schema":  "shbace-auscultation-pack-v1",
+    "packageId":  "auscultation-lung",
+    "system":  "lung",
+    "version":  "50d918aef8f0ee1d66675b192aef82e6c48b6551ea06dc45351469bfd77e141c",
+    "contentVersionCode":  1,
+    "sourceProject":  "Medara_Development",
+    "catalogPath":  "audio-catalog.json",
+    "uniqueSoundCount":  31,
+    "audioFileCount":  73,
+    "audioCatalogEntryCount":  73,
+    "audioBytes":  16675164,
+    "totalBytes":  29947576,
+    "fileCount":  78,
+    "audioFormats":  [
+                         "mp3"
+                     ],
+    "modelDependencies":  [
+                              "assets/models/thorax.bin",
+                              "assets/models/thorax.json"
+                          ],
+    "selectionPolicy":  "All Medara MP3 recordings for the 31 distinct respiratory sound titles are retained, including patient, teaching, normal, slow and half-speed variants.",
+    "excludedExternalFiles":  [
+                                  "Rhonchi - Medical Doctor 4.04.ogg"
+                              ],
+    "files":  [
+                  {
+                      "path":  "assets/models/thorax.bin",
+                      "bytes":  13207248,
+                      "sha256":  "72c0d9a5bfc0d1faf1f3c67e82304a4bea8c003c78f4dde54a4d0f4ee36e9a38"
+                  },
+                  {
+                      "path":  "assets/models/thorax.json",
+                      "bytes":  1676,
+                      "sha256":  "18aa7239ac8b70e4e77d073a1be6cb9f475a9bcf0fde70c6b7bdcc620c415402"
+                  },
+                  {
+                      "path":  "attribution/kauh-source-attribution.txt",
+                      "bytes":  724,
+                      "sha256":  "c7e111435d1cdf88174ab251996ee6dfde4fd04e52bf1aaec13fcae7be638307"
+                  },
+                  {
+                      "path":  "attribution/medara-credits.html",
+                      "bytes":  12021,
+                      "sha256":  "fabfe49af211f87a6ffe2cd7124aaf5d5c5a053f8b24c2b4cd17979c215342b0"
+                  },
+                  {
+                      "path":  "audio-catalog.json",
+                      "bytes":  50743,
+                      "sha256":  "4d61a3b8c2ed5eb84789882d38e82ff1484f9b964cf6a749533ae5d6f6fa7eeb"
+                  },
+                  {
+                      "path":  "audio-library/Abnormal Bronchophony - Auscultation Sounds.mp3",
+                      "bytes":  176232,
+                      "sha256":  "ee2099687cbb8b78d5ac5c4a5c3afcad6c931ddf1ffe6b24fdec27c62a04335d"
+                  },
+                  {
+                      "path":  "audio-library/Abnormal Bronchophony - Patient Recording - Half Speed.mp3",
+                      "bytes":  350005,
+                      "sha256":  "5ab7ded3e48879c676a8475910ac26e365c589b85761f95deaf62b54d46b4c4f"
+                  },
+                  {
+                      "path":  "audio-library/Abnormal Bronchophony - Patient Recording of Abnormal Bronchophony.mp3",
+                      "bytes":  176232,
+                      "sha256":  "ee2099687cbb8b78d5ac5c4a5c3afcad6c931ddf1ffe6b24fdec27c62a04335d"
+                  },
+                  {
+                      "path":  "audio-library/Abnormal Whispered Pectoriloquy - Auscultation Sounds.mp3",
+                      "bytes":  124844,
+                      "sha256":  "9d898dbae586f69cc8c86c8b755a0ea795d5ec16578da244fc87732460b3fea3"
+                  },
+                  {
+                      "path":  "audio-library/Abnormal Whispered Pectoriloquy - Patient Recording - Half Speed.mp3",
+                      "bytes":  245955,
+                      "sha256":  "461555593319ea5e959e107fcd3543673a6e0505347b9cd0232487a348659426"
+                  },
+                  {
+                      "path":  "audio-library/Abnormal Whispered Pectoriloquy - Patient Recording of Abnormal Whispered Pectoriloquy.mp3",
+                      "bytes":  124844,
+                      "sha256":  "9d898dbae586f69cc8c86c8b755a0ea795d5ec16578da244fc87732460b3fea3"
+                  },
+                  {
+                      "path":  "audio-library/Bronchial - Auscultation Sounds.mp3",
+                      "bytes":  111987,
+                      "sha256":  "a612a6256a6a33f60be66aeed7ca53c650592f33857c5f26ede34ddacdc87140"
+                  },
+                  {
+                      "path":  "audio-library/Bronchial - Patient Recording - Half Speed.mp3",
+                      "bytes":  221074,
+                      "sha256":  "9a3b3143c93f156314c7d090c0f2f67993b4d163e45472f6fe3bfaf3a43376b0"
+                  },
+                  {
+                      "path":  "audio-library/Bronchial - Patient Recording of Bronchial.mp3",
+                      "bytes":  111987,
+                      "sha256":  "a612a6256a6a33f60be66aeed7ca53c650592f33857c5f26ede34ddacdc87140"
+                  },
+                  {
+                      "path":  "audio-library/Bronchovesicular - Auscultation Sounds.mp3",
+                      "bytes":  225089,
+                      "sha256":  "234a6d47a81a3dd8ab5b1df7c08aa2b58ba023e4e2cd0aa0b383a84afcab0188"
+                  },
+                  {
+                      "path":  "audio-library/Bronchovesicular - Patient Recording - Half Speed.mp3",
+                      "bytes":  447137,
+                      "sha256":  "380816160af880e508d66e136a1276eeb835921728bda080296c9f1deb01183b"
+                  },
+                  {
+                      "path":  "audio-library/Bronchovesicular - Patient Recording of Bronchovesicular.mp3",
+                      "bytes":  225089,
+                      "sha256":  "234a6d47a81a3dd8ab5b1df7c08aa2b58ba023e4e2cd0aa0b383a84afcab0188"
+                  },
+                  {
+                      "path":  "audio-library/Coarse Crackles - Auscultation Sounds.mp3",
+                      "bytes":  205478,
+                      "sha256":  "95588a3870ece0134064c4994d159868aee0e0ab1b219665b6febfd83b4748da"
+                  },
+                  {
+                      "path":  "audio-library/Coarse Crackles - Patient Recording - Half Speed.mp3",
+                      "bytes":  299168,
+                      "sha256":  "ff09fc07bb561edd2ed3451b1db2e74de8853d7f5eeb5244a69b4228b42d892f"
+                  },
+                  {
+                      "path":  "audio-library/Coarse Crackles - Patient Recording of Coarse Crackles.mp3",
+                      "bytes":  76329,
+                      "sha256":  "d7ac36d5e6f0cc23bd8fd62a4bf1b0d27713224995473d17904823bd15446f48"
+                  },
+                  {
+                      "path":  "audio-library/Early Inspiratory Crackles - Auscultation Sounds.mp3",
+                      "bytes":  109613,
+                      "sha256":  "b3c3620c49d85a387fc4657720207d2cda89a885879dfa8671c2121a8675410d"
+                  },
+                  {
+                      "path":  "audio-library/Early Inspiratory Crackles - Patient Recording - Half Speed.mp3",
+                      "bytes":  793876,
+                      "sha256":  "1161fe12b95ba38f9a60968cff1435d5347bcf82ba5baa5c950d164ec1fcc545"
+                  },
+                  {
+                      "path":  "audio-library/Early Inspiratory Crackles - Patient Recording of Early Inspiratory Crackles.mp3",
+                      "bytes":  398793,
+                      "sha256":  "6698034f968c940c7de1790e2506889e247cf5ae92fb6effc22e36c04a378559"
+                  },
+                  {
+                      "path":  "audio-library/Egophony - A - Auscultation Sounds.mp3",
+                      "bytes":  119137,
+                      "sha256":  "57d9761e296ba99a9bb7c547aff1383164e7d0b4f7cebb5042d6fa7bd948e810"
+                  },
+                  {
+                      "path":  "audio-library/Egophony - A - Patient Recording - Half Speed.mp3",
+                      "bytes":  235859,
+                      "sha256":  "d7c0e68c1b96adaeed7f2af1d527674b63175cf041c8335db52fbb45e7ba4c19"
+                  },
+                  {
+                      "path":  "audio-library/Egophony - A - Patient Recording of Egophony - A.mp3",
+                      "bytes":  119137,
+                      "sha256":  "57d9761e296ba99a9bb7c547aff1383164e7d0b4f7cebb5042d6fa7bd948e810"
+                  },
+                  {
+                      "path":  "audio-library/Egophony - E - Auscultation Sounds.mp3",
+                      "bytes":  134184,
+                      "sha256":  "7ec710946a98abc53223dbf75c3cf24d2403905488bfb5cf37f66d8b53449629"
+                  },
+                  {
+                      "path":  "audio-library/Egophony - E - Patient Recording - Half Speed.mp3",
+                      "bytes":  265968,
+                      "sha256":  "65ab2af153f9912990f6f876ba2c86e3af276b922c93289a35558790f4d83677"
+                  },
+                  {
+                      "path":  "audio-library/Egophony - E - Patient Recording of Egophony - E.mp3",
+                      "bytes":  134184,
+                      "sha256":  "7ec710946a98abc53223dbf75c3cf24d2403905488bfb5cf37f66d8b53449629"
+                  },
+                  {
+                      "path":  "audio-library/Expiratory Wheeze - Auscultation Sounds.mp3",
+                      "bytes":  188764,
+                      "sha256":  "accde48e163ca5f0568f7178287b5f394ca894d1c57c78b193ce55a81462fc52"
+                  },
+                  {
+                      "path":  "audio-library/Expiratory Wheeze - Patient Recording - Half Speed.mp3",
+                      "bytes":  373120,
+                      "sha256":  "740f0efb728a14008e73bddee4732d948873e4b40bb471d225346a46c2edfbfe"
+                  },
+                  {
+                      "path":  "audio-library/Expiratory Wheeze - Patient Recording of Expiratory Wheeze.mp3",
+                      "bytes":  187501,
+                      "sha256":  "720357cc2e2c6bbb08e3e36d326d8a9575d5bb55c2ed8b2dd73db1948418a5cf"
+                  },
+                  {
+                      "path":  "audio-library/Fine Crackles - Auscultation Sounds.mp3",
+                      "bytes":  262321,
+                      "sha256":  "91a90ccdc621f05baf7b828b80160b926b09dd1ef640c4ea7ee7f7529860becb"
+                  },
+                  {
+                      "path":  "audio-library/Fine Crackles - Patient Recording - Half Speed.mp3",
+                      "bytes":  383178,
+                      "sha256":  "3226cbc613cd636383b824a8d496dc943e5dcb436c8adf9c82f4bc7f1cfe1078"
+                  },
+                  {
+                      "path":  "audio-library/Fine Crackles - Patient Recording of Fine Crackles.mp3",
+                      "bytes":  262321,
+                      "sha256":  "91a90ccdc621f05baf7b828b80160b926b09dd1ef640c4ea7ee7f7529860becb"
+                  },
+                  {
+                      "path":  "audio-library/Healthy Bronchophony - Auscultation Sounds.mp3",
+                      "bytes":  212593,
+                      "sha256":  "0606a071fb8855ee127e90837efc98ee9ff39a5c7290adb27762eefacb81d18c"
+                  },
+                  {
+                      "path":  "audio-library/Healthy Bronchophony - Patient Recording - Half Speed.mp3",
+                      "bytes":  422102,
+                      "sha256":  "cd40ad9ce0e7bc71f44472c6423b7ba2b5ff3f2c77ccfb5ad5be0d0f9c7cf382"
+                  },
+                  {
+                      "path":  "audio-library/Healthy Bronchophony - Patient Recording of Healthy Bronchophony.mp3",
+                      "bytes":  212593,
+                      "sha256":  "0606a071fb8855ee127e90837efc98ee9ff39a5c7290adb27762eefacb81d18c"
+                  },
+                  {
+                      "path":  "audio-library/Healthy Whispered Pectoriloquy - Auscultation Sounds.mp3",
+                      "bytes":  151163,
+                      "sha256":  "45418a22093c0c7893a2f03ee8d5db16eda070689aea27cef086b510aef854cc"
+                  },
+                  {
+                      "path":  "audio-library/Healthy Whispered Pectoriloquy - Patient Recording - Half Speed.mp3",
+                      "bytes":  299232,
+                      "sha256":  "dba1c746e73a41caefe12928f353de7270bb3748d2f2e038c494ff9114d126f6"
+                  },
+                  {
+                      "path":  "audio-library/Healthy Whispered Pectoriloquy - Patient Recording of Healthy Whispered Pectoriloquy.mp3",
+                      "bytes":  151163,
+                      "sha256":  "45418a22093c0c7893a2f03ee8d5db16eda070689aea27cef086b510aef854cc"
+                  },
+                  {
+                      "path":  "audio-library/High-Pitched Crackles.mp3",
+                      "bytes":  398793,
+                      "sha256":  "6698034f968c940c7de1790e2506889e247cf5ae92fb6effc22e36c04a378559"
+                  },
+                  {
+                      "path":  "audio-library/KAUH P1 - Asthma - Inspiratory and Expiratory Wheezes - Posterior Left Lower.mp3",
+                      "bytes":  242253,
+                      "sha256":  "4d27a9e73f6cfa66d00c5cf014a3b149a7b408687c1cd15b668eff4628a2f2f7"
+                  },
+                  {
+                      "path":  "audio-library/KAUH P17 - COPD - Expiratory Wheeze - Anterior Right Middle.mp3",
+                      "bytes":  126477,
+                      "sha256":  "fca7d9a0172901d4ae8dd8e3ffad225bd6b75ab0543310e9f4dc7b36232e48bd"
+                  },
+                  {
+                      "path":  "audio-library/KAUH P18 - Pneumonia - Crackles - Posterior Right Upper.mp3",
+                      "bytes":  189837,
+                      "sha256":  "b3a81c9116e055d76167b8978fe8f23c7d46b1e7687b558e23f189eddf5259ac"
+                  },
+                  {
+                      "path":  "audio-library/KAUH P31 - Normal Breath Sounds - Posterior Left Mid.mp3",
+                      "bytes":  162765,
+                      "sha256":  "34c706d1026eaec34092c5590ee629518c911871375c0367b724f21a82e98792"
+                  },
+                  {
+                      "path":  "audio-library/KAUH P5 - Heart Failure and COPD - Inspiratory Crackles and Expiratory Wheeze - Posterior Right Lower.mp3",
+                      "bytes":  222669,
+                      "sha256":  "912d3eb78bcf85518b36444f289d2466930d5c780e37b9ea0cc42c9e7ca5e193"
+                  },
+                  {
+                      "path":  "audio-library/KAUH P52 - Lung Fibrosis - Crepitations - Posterior Left Lower.mp3",
+                      "bytes":  76365,
+                      "sha256":  "6695625fa1208d505a4ee75b5391114a6c979e6a73254c745c49381bc270dc67"
+                  },
+                  {
+                      "path":  "audio-library/KAUH P69 - Pneumonia - Bronchial Breath Sound - Posterior Right Lower.mp3",
+                      "bytes":  195597,
+                      "sha256":  "c1658cfc1fac17e5a47ba0b0c3407d493c1f1d9d15cc2644a6ef88c11646da66"
+                  },
+                  {
+                      "path":  "audio-library/KAUH P8 - Pleural Effusion - I C B Source Annotation - Posterior Left Lower.mp3",
+                      "bytes":  178893,
+                      "sha256":  "0c9df8678f187682cc68838a00e01000f57169b30214bc0f769c680af8eb5f66"
+                  },
+                  {
+                      "path":  "audio-library/Late Inspiratory Crackles - Auscultation Sounds.mp3",
+                      "bytes":  260870,
+                      "sha256":  "10544f6d6d4e1f5aba15ed5a8de369b240477de2b0970571a048135ae2eca7dc"
+                  },
+                  {
+                      "path":  "audio-library/Late Inspiratory Crackles - Patient Recording - Half Speed.mp3",
+                      "bytes":  518027,
+                      "sha256":  "b6cf24f1a9137315445a5c1ed443af2296bf47127eed8bdd7c4bab2324bc4ae1"
+                  },
+                  {
+                      "path":  "audio-library/Late Inspiratory Crackles - Patient Recording of Late Inspiratory Crackles.mp3",
+                      "bytes":  260870,
+                      "sha256":  "10544f6d6d4e1f5aba15ed5a8de369b240477de2b0970571a048135ae2eca7dc"
+                  },
+                  {
+                      "path":  "audio-library/Low-Pitched Crackles.mp3",
+                      "bytes":  169311,
+                      "sha256":  "8ae52df2361f6f1e389c11009e72dcee60c27b0e2ac51d2242487d8a4049dae4"
+                  },
+                  {
+                      "path":  "audio-library/Monophonic Wheeze - Auscultation Sounds.mp3",
+                      "bytes":  60668,
+                      "sha256":  "1c711c54eae880fdffb6d77ead0ebaecc9fe08ac4b9f126d123157971ef3f12d"
+                  },
+                  {
+                      "path":  "audio-library/Monophonic Wheeze - Patient Recording - Half Speed.mp3",
+                      "bytes":  118660,
+                      "sha256":  "09c4985d9d956e85c52fb2c1347f9586a0111ade5fe469a919d0847439700bfe"
+                  },
+                  {
+                      "path":  "audio-library/Monophonic Wheeze - Patient Recording of Monophonic Wheeze.mp3",
+                      "bytes":  60668,
+                      "sha256":  "1c711c54eae880fdffb6d77ead0ebaecc9fe08ac4b9f126d123157971ef3f12d"
+                  },
+                  {
+                      "path":  "audio-library/Pleural Friction Rub - Auscultation Sounds.mp3",
+                      "bytes":  247706,
+                      "sha256":  "11786b65a91bd7f11eb68ba229c55f6020e81b2d04b4e76314510b36cda3dbb6"
+                  },
+                  {
+                      "path":  "audio-library/Pleural Friction Rub - Patient Recording - Half Speed.mp3",
+                      "bytes":  361846,
+                      "sha256":  "9e25a56ac53c5df60acb771ac3cb96445b925f71ee89adb58a3af1578ca0bfe6"
+                  },
+                  {
+                      "path":  "audio-library/Pleural Friction Rub - Patient Recording of Pleural Friction Rub.mp3",
+                      "bytes":  247706,
+                      "sha256":  "11786b65a91bd7f11eb68ba229c55f6020e81b2d04b4e76314510b36cda3dbb6"
+                  },
+                  {
+                      "path":  "audio-library/Polyphonic Wheeze - Auscultation Sounds.mp3",
+                      "bytes":  129590,
+                      "sha256":  "eb303bd7761c475f4d5076370bd723e2ac00f5d3387a165bf216144eb77219eb"
+                  },
+                  {
+                      "path":  "audio-library/Polyphonic Wheeze - Patient Recording - Half Speed.mp3",
+                      "bytes":  518019,
+                      "sha256":  "e7433eece285f488cc63b5dfc9c41bb4de14cfb66c82fdc4410c89bbae7816fe"
+                  },
+                  {
+                      "path":  "audio-library/Polyphonic Wheeze - Patient Recording of Polyphonic Wheeze.mp3",
+                      "bytes":  129590,
+                      "sha256":  "00c82016e8a7ba201883c4a65ee4f4a104b14a5c1f82f97a9cb4a9c39431e38a"
+                  },
+                  {
+                      "path":  "audio-library/Rhonchi - Auscultation Sounds.mp3",
+                      "bytes":  255910,
+                      "sha256":  "ff32ff749099a4c32cac16fe97b7ec093b9767ce27aff808591d7752a8f35c98"
+                  },
+                  {
+                      "path":  "audio-library/Rhonchi - Patient Recording - Half Speed.mp3",
+                      "bytes":  304544,
+                      "sha256":  "b1540b62edf170952851126ba5f73dc5458faad6b5ed27ff0c0db73ecfc31081"
+                  },
+                  {
+                      "path":  "audio-library/Rhonchi - Patient Recording of Rhonchi.mp3",
+                      "bytes":  155869,
+                      "sha256":  "cfdc87c7ac76424080c4e167154fc5a60453df668e520692384498a86e94c981"
+                  },
+                  {
+                      "path":  "audio-library/Stridor - Auscultation Sounds.mp3",
+                      "bytes":  120815,
+                      "sha256":  "b1bceb5a822185e4d0a5539af6433052348dd4183ea9139b46fbfca6392b7cbf"
+                  },
+                  {
+                      "path":  "audio-library/Stridor - Patient Recording - Half Speed.mp3",
+                      "bytes":  234747,
+                      "sha256":  "53e3257e40a459df3edb70a78ee391c2399e26074600ab26b24db1e9c953d0de"
+                  },
+                  {
+                      "path":  "audio-library/Stridor - Patient Recording of Stridor.mp3",
+                      "bytes":  120815,
+                      "sha256":  "b1bceb5a822185e4d0a5539af6433052348dd4183ea9139b46fbfca6392b7cbf"
+                  },
+                  {
+                      "path":  "audio-library/Vesicular - Diminished - Auscultation Sounds.mp3",
+                      "bytes":  197030,
+                      "sha256":  "91e39d37345c7a395a2e58801f54ee82996d21dfd171c4d811661b25d140903b"
+                  },
+                  {
+                      "path":  "audio-library/Vesicular - Diminished - Patient Recording - Half Speed.mp3",
+                      "bytes":  392020,
+                      "sha256":  "8032047c3a17e1619f2494cef9c81567989cc70960c2269f99079b82970981ba"
+                  },
+                  {
+                      "path":  "audio-library/Vesicular - Diminished - Patient Recording of Vesicular - Diminished.mp3",
+                      "bytes":  197030,
+                      "sha256":  "91e39d37345c7a395a2e58801f54ee82996d21dfd171c4d811661b25d140903b"
+                  },
+                  {
+                      "path":  "audio-library/Vesicular - Normal - Auscultation Sounds.mp3",
+                      "bytes":  193723,
+                      "sha256":  "47577f6fe7058a211cc3bd97d065b944b993317e682cb6b735ab2fae3be4ff85"
+                  },
+                  {
+                      "path":  "audio-library/Vesicular - Normal - Patient Recording - Half Speed.mp3",
+                      "bytes":  192470,
+                      "sha256":  "b9c05fe2c1739d7eeed440cbdd61a4ddf199571de9d4acdfd2b3a0c721e3ea06"
+                  },
+                  {
+                      "path":  "audio-library/Vesicular - Normal - Patient Recording of Vesicular - Normal.mp3",
+                      "bytes":  97489,
+                      "sha256":  "ddf4b94a8d7b7f029c8b206f2aeeb214e6d16a6d66507b5c73f4b69748144c6d"
+                  },
+                  {
+                      "path":  "audio-library/Wheeze - Auscultation Sounds.mp3",
+                      "bytes":  230556,
+                      "sha256":  "7834458e114ad350bae02ce5d28fa83240d7825e5bf6f8d49d6efd1ea7c100e5"
+                  },
+                  {
+                      "path":  "audio-library/Wheeze - Patient Recording - Half Speed.mp3",
+                      "bytes":  336158,
+                      "sha256":  "ed3e2d4098431fcf12694c416b2824491cf2188093a87e7ff6ad2451193f8b58"
+                  },
+                  {
+                      "path":  "audio-library/Wheeze - Patient Recording of Wheeze.mp3",
+                      "bytes":  230556,
+                      "sha256":  "7834458e114ad350bae02ce5d28fa83240d7825e5bf6f8d49d6efd1ea7c100e5"
+                  }
+              ]
+}

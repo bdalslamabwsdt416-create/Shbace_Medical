@@ -62,6 +62,7 @@ function setSystem(system){
  const url=new URL(location.href);url.searchParams.set('system',system);url.searchParams.delete('audio');history.replaceState(null,'',url);
 }
 function isPlaybackOnlyVariant(item){
+ if(state.system==='lung')return false;
  const source=[item.variant,item.sourceTitle,item.path].filter(Boolean).join(' ').toLowerCase();
  return /half[\s_-]*speed/.test(source)||/(^|[\s_-])slow([\s_.-]|$)/.test(source);
 }
@@ -79,6 +80,8 @@ function recordingType(item){
 function meaningfulRecordingVariant(item){
  const v=String(item.variant||'').trim();
  if(/^(large defect|large secundum defect|rheumatic example|moderate murmur|mild lesion)$/i.test(v))return v;
+ if(/half[\s_-]*speed/i.test(v))return 'Half speed';
+ if(/^slow(?:\s+speed)?$/i.test(v))return 'Slow speed';
  return '';
 }
 function recordingPriority(item){
