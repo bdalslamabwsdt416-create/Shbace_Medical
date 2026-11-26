@@ -19,6 +19,7 @@ const lungManifest = JSON.parse(readFileSync(resolve(lungRoot, "manifest.json"),
 const lungCatalog = JSON.parse(readFileSync(resolve(lungRoot, "audio-catalog.json"), "utf8"));
 const manager = readFileSync(resolve(project, "for ApK/native/com/shbace/medical/AuscultationPackManager.java"), "utf8");
 const native = readFileSync(resolve(project, "android/app/src/main/java/com/shbace/medical/ShbaceNative.java"), "utf8");
+const gitAttributes = readFileSync(resolve(project, ".gitattributes"), "utf8");
 const page = readFileSync(resolve(root, "js/55-android-auscultation-library.js"), "utf8");
 const drawer = readFileSync(resolve(root, "js/47-android-remote-control.js"), "utf8");
 const heartAssets = readFileSync(resolve(root, "js/auscultation/heart/native-assets.js"), "utf8");
@@ -78,6 +79,12 @@ test("Heart package preserves cardiac model dependencies and excludes respirator
   ]) assert.ok(paths.has(model), "missing required model: " + model);
   assert.equal(heartManifest.files.filter((item) => /Respiratory Auscultation|lung/i.test(item.path)).length, 0);
   assert.equal(heartAudit.excludedSystems.includes("lung"), true);
+  for (const item of heartManifest.files) {
+    const path = resolve(heartRoot, item.path);
+    assert.equal(statSync(path).size, item.bytes, "size mismatch: " + item.path);
+    const digest = createHash("sha256").update(readFileSync(path)).digest("hex");
+    assert.equal(digest, item.sha256, "SHA-256 mismatch: " + item.path);
+  }
   assertAssembledFilesMatch(heartRoot, heartManifest);
 });
 
@@ -114,7 +121,8 @@ test("Lung pack manifest paths, sizes, and SHA-256 hashes match every packaged f
 
 test("Android pack manager uses the published feature branch and validates both independent packs", () => {
   assert.match(manager, /shbace-auscultation/);
-  assert.match(manager, /feat\/android-medara-sidebar-20261126\/for%20ApK\/android-content\/auscultation/);
+  assert.ok(gitAttributes.includes('"for ApK/android-content/auscultation/**" -text'), "pack files must preserve exact bytes in Git");
+  assert.match(manager, /feat\/medara-auscultation-library-20261126\/for%20ApK\/android-content\/auscultation/);
   assert.match(manager, /auscultation-" \+ system/);
   assert.match(manager, /MAX_TOTAL_BYTES/);
   assert.match(manager, /MAX_READ_CHUNK_BYTES/);
