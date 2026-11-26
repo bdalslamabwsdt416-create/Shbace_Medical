@@ -187,6 +187,12 @@ test("Heart and Lung pages are independent Android routes with their own counts 
 test("Sidebar exposes separate working Heart and Lung download arrows", () => {
   assert.match(drawer, /data-shb-ausc-download="heart"/);
   assert.match(drawer, /data-shb-ausc-download="lung"/);
+  assert.match(drawer, /shb-ausc-total">108 sounds/);
+  assert.match(drawer, /shb-ausc-child-count">77/);
+  assert.match(drawer, /shb-ausc-child-count">31/);
+  assert.match(page, /facts:\[\['77','distinct sounds'\]/);
+  assert.match(page, /facts:\[\['31','distinct sounds'\]/);
+  assert.doesNotMatch(page, /\['73','recordings'\]/);
   assert.match(page, /data-shb-ausc-download/);
   assert.match(page, /refreshDrawer:refreshDrawerButtons/);
   assert.match(page, /button\.disabled = !!state\.downloading \|\| !!state\.installed/);
