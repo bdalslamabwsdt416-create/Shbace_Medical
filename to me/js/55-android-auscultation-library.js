@@ -39,7 +39,7 @@
           eyebrow:'CARDIAC AUSCULTATION',
           heading:'Heart Auscultation',
           description:'77 primary heart sounds · five standard listening areas · interactive 3D cardiac anatomy',
-          facts:[['77','distinct sounds'],['77','recordings'],['3D','thorax + heart']],
+          facts:[['77','distinct sounds'],['5','listening areas'],['3D','thorax + heart']],
           button:'Download Heart Library',
           note:'Heart downloads separately. Lung recordings are not part of this package.'
         }
@@ -47,7 +47,7 @@
           eyebrow:'RESPIRATORY AUSCULTATION',
           heading:'Lung Auscultation',
           description:'31 distinct lung sounds · patient and teaching variants · interactive anterior and posterior 3D thorax',
-          facts:[['31','distinct sounds'],['73','recordings'],['3D','thorax + lungs']],
+          facts:[['31','distinct sounds'],['2','chest views'],['3D','thorax + lungs']],
           button:'Download Lung Library',
           note:'Lung downloads separately. Heart recordings are not part of this package.'
         };
