@@ -300,7 +300,7 @@ test("loader order, module registration and Android version metadata is preserve
   const p51=index.indexOf('data-src="js/51-navigation-contract-v1.js"');
   assert.ok(p50>=0&&p51>p50);
   assert.match(gradle,/versionName\s+"1\.3\.11"/);
-  assert.match(gradle,/versionCode\s+20/);
+  assert.match(gradle,/versionCode\s+21/);
 });
 
 test("navigation adapter never rewrites student stores or executes remote code",()=>{
