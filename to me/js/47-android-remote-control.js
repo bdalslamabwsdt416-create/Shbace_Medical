@@ -408,6 +408,120 @@
       return result;
     };
   }
+
+  /* Android APK only: nested Auscultation Library drawer entry.
+     Heart and Lung each have independent download handlers in the
+     dedicated download stages; this stage only establishes the expandable hierarchy. */
+  function installAuscultationDrawerStyles() {
+    if (document.getElementById('shb-auscultation-drawer-styles')) return;
+    var style = document.createElement('style');
+    style.id = 'shb-auscultation-drawer-styles';
+    style.textContent =
+      '.phone .shb-ausc-menu{margin:9px 0 4px;padding:0 2px}' +
+      '.phone .shb-ausc-parent{box-sizing:border-box;width:100%;min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border:1px solid rgba(56,189,248,.28);border-radius:14px;background:linear-gradient(110deg,rgba(47,139,255,.16),rgba(56,189,248,.07));color:#e7f4ff;text-align:left;font-family:inherit;font-size:14px;font-weight:700;line-height:1.3;cursor:pointer}' +
+      '.phone .shb-ausc-parent-main{display:flex;align-items:center;gap:11px;min-width:0}' +
+      '.phone .shb-ausc-parent-icon{width:21px;height:21px;flex:none;color:#62c6ff}' +
+      '.phone .shb-ausc-total{margin-left:auto;padding:4px 8px;border:1px solid rgba(56,189,248,.24);border-radius:999px;background:rgba(56,189,248,.10);color:#8fd8ff;font-size:10px;font-weight:800;white-space:nowrap}' +
+      '.phone .shb-ausc-child-count{margin-left:auto;padding:3px 7px;border-radius:999px;background:rgba(56,189,248,.09);color:#8fd8ff;font-size:10px;font-weight:800;white-space:nowrap}' +
+      '.phone .shb-ausc-chevron{width:17px;height:17px;flex:none;color:#8fc6ff;transition:transform .18s ease}' +
+      '.phone .shb-ausc-parent[aria-expanded=true] .shb-ausc-chevron{transform:rotate(180deg)}' +
+      '.phone .shb-ausc-children{display:grid;gap:5px;padding:7px 0 2px 9px}' +
+      '.phone .shb-ausc-children[hidden]{display:none!important}' +
+      '.phone .shb-ausc-child{box-sizing:border-box;min-height:45px;display:flex;align-items:center;gap:7px;padding:5px 7px 5px 10px;border-inline-start:2px solid rgba(56,189,248,.28);border-radius:0 11px 11px 0;color:#b9cde4;background:rgba(18,43,70,.34);font-size:13.5px;font-weight:650}' +
+      '.phone .shb-ausc-child-open{flex:1;min-width:0;min-height:35px;display:flex;align-items:center;gap:10px;padding:4px 2px;border:0;background:transparent;color:inherit;text-align:left;font:inherit}' +
+      '.phone .shb-ausc-child-open svg{width:19px;height:19px;flex:none}' +
+      '.phone .shb-ausc-download{width:34px;height:34px;flex:none;display:grid;place-items:center;border:1px solid rgba(56,189,248,.2);border-radius:10px;background:rgba(44,139,210,.1);color:#8fd8ff}' +
+      '.phone .shb-ausc-download svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}' +
+      '.phone .shb-ausc-download:disabled{opacity:.65;cursor:default}' +
+      '.phone .shb-ausc-download.is-installed{color:#6ee7b7;border-color:rgba(110,231,183,.25)}' +
+      '.phone .shb-ausc-download.is-downloading{color:#8fd8ff}' +
+      '.phone .shb-ausc-download-spinner{width:15px;height:15px;border:2px solid rgba(143,216,255,.25);border-top-color:#8fd8ff;border-radius:50%;animation:shbAuscSpin .8s linear infinite}' +
+      '.phone .shb-ausc-child svg{width:19px;height:19px;flex:none}' +
+      '.phone .shb-ausc-child[data-system=heart] svg{color:#f28b9a}' +
+      '.phone .shb-ausc-child[data-system=lung] svg{color:#64c6ff}' +
+      '.phone.light .shb-ausc-parent{color:#173451;background:linear-gradient(110deg,rgba(47,139,255,.10),rgba(56,189,248,.05));border-color:rgba(47,139,255,.25)}' +
+      '.phone.light .shb-ausc-child{color:#395571;background:rgba(47,139,255,.045)}' +
+      '.phone.light .shb-ausc-total,.phone.light .shb-ausc-child-count{color:#17669b;background:rgba(47,139,255,.08);border-color:rgba(47,139,255,.18)}';
+    document.head.appendChild(style);
+  }
+
+  function installAuscultationDrawerMenu() {
+    var drawer = document.getElementById('drawer');
+    var body = drawer && drawer.querySelector('.dr-body');
+    if (!body || body.querySelector('[data-shb-auscultation-menu]')) return;
+    installAuscultationDrawerStyles();
+
+    var section = document.createElement('section');
+    section.className = 'shb-ausc-menu';
+    section.setAttribute('data-shb-auscultation-menu', '1');
+    section.innerHTML =
+      '<button type="button" class="shb-ausc-parent" aria-expanded="false" aria-controls="shbAuscultationSubmenu">' +
+        '<span class="shb-ausc-parent-main">' +
+          '<svg class="shb-ausc-parent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V9"/><path d="M12 12c-1.8-4.8-6.8-6.1-8.4-2.3-1.6 3.8 1.3 8.1 5.3 8.1 1.8 0 3.1-1.1 3.1-2.9"/><path d="M12 12c1.8-4.8 6.8-6.1 8.4-2.3 1.6 3.8-1.3 8.1-5.3 8.1-1.8 0-3.1-1.1-3.1-2.9"/></svg>' +
+          '<span>Auscultation Library</span>' +
+        '</span>' +
+        '<span class="shb-ausc-total">108 sounds</span>' +
+        '<svg class="shb-ausc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>' +
+      '</button>' +
+      '<div class="shb-ausc-children" id="shbAuscultationSubmenu" role="list" hidden>' +
+        '<div class="shb-ausc-child" data-system="heart" role="listitem">' +
+          '<button type="button" class="shb-ausc-child-open" data-shb-ausc-open="heart">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 8.8c0 5.1-8.8 11-8.8 11s-8.8-5.9-8.8-11A4.8 4.8 0 0 1 12 6.1a4.8 4.8 0 0 1 8.8 2.7Z"/><path d="M3.5 12h4l2-4 3.1 8 2.1-4h5.8"/></svg>' +
+            '<span>Heart Auscultation</span>' +
+            '<small class="shb-ausc-child-count">77</small>' +
+          '</button>' +
+          '<button type="button" class="shb-ausc-download" data-shb-ausc-download="heart" aria-label="Download Heart Auscultation" title="Download Heart Auscultation">' +
+            '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 18v3h16v-3"/></svg>' +
+          '</button>' +
+        '</div>' +
+        '<div class="shb-ausc-child" data-system="lung" role="listitem">' +
+          '<button type="button" class="shb-ausc-child-open" data-shb-ausc-open="lung">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v8"/><path d="M10 8c-1.8 0-3.1 1.4-4.2 4.2C4.5 15.6 3.5 18 3.5 20c0 1.2 1 1.7 2.2 1.7 3.7 0 6.3-2.7 6.3-6.4V9.8C12 8.6 11.2 8 10 8Z"/><path d="M14 8c1.8 0 3.1 1.4 4.2 4.2 1.3 3.4 2.3 5.8 2.3 7.8 0 1.2-1 1.7-2.2 1.7-3.7 0-6.3-2.7-6.3-6.4V9.8C12 8.6 12.8 8 14 8Z"/><path d="M12 11c-1.2 1.4-2.4 2.1-3.7 2.1M12 11c1.2 1.4 2.4 2.1 3.7 2.1"/></svg>' +
+            '<span>Lung Auscultation</span>' +
+            '<small class="shb-ausc-child-count">31</small>' +
+          '</button>' +
+          '<button type="button" class="shb-ausc-download" data-shb-ausc-download="lung" aria-label="Download Lung Auscultation" title="Download Lung Auscultation">' +
+            '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 18v3h16v-3"/></svg>' +
+          '</button>' +
+        '</div>' +
+      '</div>';
+
+    var progressHeading = Array.prototype.find.call(body.querySelectorAll('.dl'), function (node) {
+      return /YOUR PROGRESS/i.test(node.textContent || '');
+    });
+    if (progressHeading) body.insertBefore(section, progressHeading);
+    else body.appendChild(section);
+
+    var parent = section.querySelector('.shb-ausc-parent');
+    var children = section.querySelector('.shb-ausc-children');
+    parent.addEventListener('click', function () {
+      var expanded = parent.getAttribute('aria-expanded') === 'true';
+      parent.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+      children.hidden = expanded;
+    });
+    var packUI = window.__SHBACE_AUSCULTATION_LIBRARY__;
+    if (packUI && typeof packUI.refreshDrawer === 'function') packUI.refreshDrawer();
+  }
+
+  function isAuscultationApk() {
+    try {
+      var cap = window.Capacitor;
+      return !!(cap && cap.isNativePlatform && cap.isNativePlatform() &&
+        (!cap.getPlatform || cap.getPlatform() === 'android') && window.ShbaceNative);
+    } catch (_) { return false; }
+  }
+  var previousToggleDrawer = window.toggleDrawer;
+  if (isAuscultationApk() && typeof previousToggleDrawer === 'function') {
+    window.toggleDrawer = function () {
+      var result = previousToggleDrawer.apply(this, arguments);
+      try {
+        var drawer = document.getElementById('drawer');
+        if (drawer && drawer.classList.contains('open')) installAuscultationDrawerMenu();
+      } catch (e) { console.warn('Auscultation drawer menu skipped:', e); }
+      return result;
+    };
+  }
+
   window.__SHBACE_REMOTE_CONTROL_V3__ = {
     version:3,
     nativeAndroidOnly:true,

@@ -1,0 +1,533 @@
+{
+  "schema": "shbace-auscultation-pack-v1",
+  "packageId": "auscultation-heart",
+  "system": "heart",
+  "version": "b3b50bbcab179370a1d93e0ad1b752ea1b2518431c4877937f49dad394703618",
+  "contentVersionCode": 5,
+  "sourceProject": "Medara_Development",
+  "catalogPath": "audio-catalog.json",
+  "uniqueSoundCount": 77,
+  "audioFileCount": 77,
+  "excludedDuplicateVariants": 57,
+  "selectionPolicy": "One recording per title: normal speed, then standard, patient, teaching, then remaining primary source. Duplicate slow/half-speed and source-mirror variants are excluded where a preferred recording exists.",
+  "audioFormats": [
+    "mp3"
+  ],
+  "modelDependencies": [
+    "assets/models/thorax.bin",
+    "assets/models/thorax.json",
+    "assets/models/valve-heart.bin",
+    "assets/models/valve-heart.json"
+  ],
+  "fileCount": 95,
+  "audioBytes": 10071261,
+  "totalBytes": 25157061,
+  "files": [
+    {
+      "path": "assets/models/chunks/thorax.bin.part000",
+      "bytes": 1048576,
+      "sha256": "bdb7033f0a54e731d0261974d53d5295b35ba880ed6d4ff031d8d850e29c15bf"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part001",
+      "bytes": 1048576,
+      "sha256": "b46d7e2c090de0c5397b7e51675019f8b18129fc996257e0e56b9c7be95fe9c2"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part002",
+      "bytes": 1048576,
+      "sha256": "4f3baef44dca81bb142bdc5557200973f1dd5f7d145480bd1d5a4c0886fe3865"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part003",
+      "bytes": 1048576,
+      "sha256": "4054a49cb7bded6510331de9d83208cf6724f49813c8cdbd1299e4e6ccf5b9e2"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part004",
+      "bytes": 1048576,
+      "sha256": "b11b27e23981e91509d2b7d04a9bc97ec742f8d39c229ab272fe9e72297d3726"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part005",
+      "bytes": 1048576,
+      "sha256": "30a453034c7e667512abe3d6d2deae7f44a78b3290847fbe85b6d4676c99f111"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part006",
+      "bytes": 1048576,
+      "sha256": "d09c8175f06b290a09c634bcb291409c65e217b1ea9325ab1d2c8ab8e320b51d"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part007",
+      "bytes": 1048576,
+      "sha256": "a2ed6f7e2b669c26c4b9421f42bdfa07df462d5cf27a27df232e86b5ab2fcf1c"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part008",
+      "bytes": 1048576,
+      "sha256": "375302eb4cfb6f055baaf1122303c3e8a017f68c2306d45fe31ad77e2c351217"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part009",
+      "bytes": 1048576,
+      "sha256": "55b0fb5250d47c3e1ecf05b619c82453d8eecbb1455e4308ec640c8504e5023a"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part010",
+      "bytes": 1048576,
+      "sha256": "0f74cf9e24549961ac893a4f2a195cc8ff6474f0c16b7abaa9a3d539bc93bdc5"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part011",
+      "bytes": 1048576,
+      "sha256": "d865768090c6f2a4857a5027aa7c4392b84314e9e46c4d1c2d0c0be31f81907b"
+    },
+    {
+      "path": "assets/models/chunks/thorax.bin.part012",
+      "bytes": 624336,
+      "sha256": "991ec57561bafdc95cba8dab091097ecd7621a73b4971139d9df5b56d897c36f"
+    },
+    {
+      "path": "assets/models/chunks/valve-heart.bin.part000",
+      "bytes": 1048576,
+      "sha256": "12c4a9c635e49d50ba031acc6a9d7f53924a19648dfdb141925496ba0b36d6b8"
+    },
+    {
+      "path": "assets/models/chunks/valve-heart.bin.part001",
+      "bytes": 764048,
+      "sha256": "4bb49bd4b5f68e57698e3e4af7a045c92ca582ebc8c647b1a2d9cdb8be440c9e"
+    },
+    {
+      "path": "assets/models/thorax.json",
+      "bytes": 1676,
+      "sha256": "18aa7239ac8b70e4e77d073a1be6cb9f475a9bcf0fde70c6b7bdcc620c415402"
+    },
+    {
+      "path": "assets/models/valve-heart.json",
+      "bytes": 15156,
+      "sha256": "a77e06c92bb64cdf6e57c20258771395e4f8ceaa85360869161f5642aa8c63c4"
+    },
+    {
+      "path": "audio-catalog.json",
+      "bytes": 49096,
+      "sha256": "067fa2ddd22a5620e946709922f8764a0829619b7c97a3d85c7668595a647199"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Additional/Heart Sound - Opening Snap(MP3_70K).mp3",
+      "bytes": 244865,
+      "sha256": "2f4adbdff962923cdb61f91168b7dff75c8ed598e6c4755be84e0d8b58bcf583"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Additional/Holosystolic Murmur - Heart Sounds - MEDZCOOL(MP3_70K).mp3",
+      "bytes": 963071,
+      "sha256": "c5b2d05d0d06800fd628610ecba3de460c8faac7bb72082e96e02640292eb5d4"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Additional/Mitral Valve Prolapse - Heart Sounds - MEDZCOOL(MP3_70K).mp3",
+      "bytes": 1013413,
+      "sha256": "d6c1d814d2e250f7bf5698901b2359a006f888cdbb0d6d6d6177a09e2297d9d2"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Aneurysm of Sinus of Valsalva.mp3",
+      "bytes": 245338,
+      "sha256": "b828175fc8505d305ffb13122407ceb08b1a9d5df0daa026a92891ddbfda549a"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Aortic Regurgitation  Ejection Systolic Murmur- normal speed.mp3",
+      "bytes": 61364,
+      "sha256": "386432b4c30fdf0af3c4a7d3e4e99cf7a7811fd84b6cbdf3f8df6208b9fab678"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Aortic Regurgitation and Mild Stenosis.mp3",
+      "bytes": 115811,
+      "sha256": "4cafbc690241a305bd26af1efaf8edf41510692d3623da0dea40939e0f92ce69"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Aortic Regurgitation- normal speed.mp3",
+      "bytes": 83726,
+      "sha256": "a6fd19dc8c249a76e1521abc49ce696367d0c8b4762d03b29679c5933060ab76"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Aortic Sclerosis - Musical Murmur.mp3",
+      "bytes": 55438,
+      "sha256": "67e091c5463f44b43bad528fe77da1a66d3b00a0458588cc3a7f91e9365e3d11"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Aortic Stenosis- normal speed.mp3",
+      "bytes": 78284,
+      "sha256": "1a8c074482f2d14a1fa227092f2eccf1a4e5c8fbf2753866a644cc9a43de4cf3"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Atrial Septal Defect and Ventricular Septal Defect- normal speed.mp3",
+      "bytes": 68251,
+      "sha256": "d91842a38cc013d724b3b2e1a7a7bb5381abe1fd6f5930fdde023954a2b50294"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Atrial Septal Defect- normal speed.mp3",
+      "bytes": 79802,
+      "sha256": "b2affaff109a573ad7a4754d1add31033b11b5a0cd12d96b226b9ec1a0634e8c"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Atrioventricular Septal Defect status post Pulmonary Artery Banding.mp3",
+      "bytes": 75870,
+      "sha256": "8e5431c786eedda5898a5fc5b92dbc68ed8e63f89b83dd9f5b5d1d4745358b3a"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Bicuspid Aortic Valve and Mild Stenosis- normal speed.mp3",
+      "bytes": 66198,
+      "sha256": "9798f2cf7bd3271bf3f2e394e49c6b98fd074747da47529a947399bb6719c0bd"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Bicuspid Aortic Valve and Systolic Click- normal speed.mp3",
+      "bytes": 96063,
+      "sha256": "94275f558cdefe3cfb80e273e996fc3c985609d209d1c0e1e487925748b9361b"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Bicuspid Aortic Valve- Apex 1.mp3",
+      "bytes": 75776,
+      "sha256": "09e21ecc2e44cd63af215ed4e1c738410512eef4c1c6216a81429009849723de"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Bicuspid Aortic Valve- Apex 2.mp3",
+      "bytes": 65020,
+      "sha256": "c5320459f4e99e8b9d6a78d970d959a4d3fa5293def831fbabbd016faae24986"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Bicuspid Aortic Valve- LUSB.mp3",
+      "bytes": 69547,
+      "sha256": "f4a9f8a1441893018d861e22aa330494f5747cab550f602fdee36c5583c04089"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Blood Pressure- Korotkoff Sounds 1.mp3",
+      "bytes": 163900,
+      "sha256": "935c99374091845ae95358de132475ab972296ef75315a11e2a730c5b8bdeaff"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Blood Pressure- Korotkoff Sounds 2.mp3",
+      "bytes": 122902,
+      "sha256": "c6f7481929c1a6308c923135bf957942c32bc42af9ef8c488c3a6973458886d7"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Carbomedics Aortic Valve Prosthesis.mp3",
+      "bytes": 112023,
+      "sha256": "5f92d439364ca946cef6b2073a091335ae46289844928b492e12aa6b89b517c3"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Clinical Murmur Examples - CirCor/CirCor 13918 - Holosystolic Murmur - Plateau Low Blowing - Tricuspid Point.mp3",
+      "bytes": 55053,
+      "sha256": "ce4021fbea3b7286ff43051d5e96f05a29e9f70fec1b847714f95666f79f7288"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Clinical Murmur Examples - CirCor/CirCor 40840 - Mid-Systolic Murmur - Diamond High Harsh - Pulmonary Point.mp3",
+      "bytes": 176589,
+      "sha256": "8627d7700b994af5073ba5386ee9b1315a424533b50f79af77201f61dbad025d"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Clinical Murmur Examples - CirCor/CirCor 46778 - Combined Holosystolic and Early Diastolic Murmur - Mitral Point.mp3",
+      "bytes": 75213,
+      "sha256": "9dfc91305da07d4f6abf4d9d9109bb3e3fa79ae11fd602d092a09030d6153a08"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Clinical Murmur Examples - CirCor/CirCor 49595 - Holosystolic Murmur - Diamond Medium Blowing - Aortic Point.mp3",
+      "bytes": 272205,
+      "sha256": "55cff0f2c8e7a6aa551bdf06c0c39776e5167a9255a24fd80fcf63a779fd4ea3"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Clinical Murmur Examples - CirCor/CirCor 85119 - Early Diastolic Murmur - Decrescendo Low Blowing - Pulmonary Point.mp3",
+      "bytes": 183501,
+      "sha256": "c86e59e9e2736ece7b15659de89389ed04be341ece7559bf937104a7c82c0bfa"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Coarcitation of the Aorta- normal speed.mp3",
+      "bytes": 59223,
+      "sha256": "4193e44b2f289a932502b4df8e3b46e2f154bb89f91e1ad95c61a9b5a9061e4b"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Complete Heart Block with Tricuspid Regurgitation- normal speed.mp3",
+      "bytes": 94259,
+      "sha256": "a6b457478459bf70db1376e55c3430bbc901b88ea7e5728fe59cf6e5b884c517"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Congestive Heart Failure- normal speed.mp3",
+      "bytes": 55999,
+      "sha256": "bea85a9a2ce6e4ffc7b7ced79a3a620a7553f45c5cb0469ae875907bf308b90a"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Continuous Murmur with Restrictive Patent Ductus Arteriosus.mp3",
+      "bytes": 118754,
+      "sha256": "2fa498b3b628f56b16b59cc19a5d5706e7d049e97ba7a41ad261e738cbb73fde"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Hypertrophic Cardiomyopathy- Apex  LUSB  Stand-Squat-Stand  LLSB  RUSB.mp3",
+      "bytes": 579832,
+      "sha256": "89774ab74fd45da577ce0c7f23ae84b380f70a503bce3ec884413577dd7deaeb"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Hypertrophic Cardiomyopathy- normal speed.mp3",
+      "bytes": 55506,
+      "sha256": "4dea0a74510be211f1bac6f4340646cd887b050c66bb8dccebd394ec38ce7e92"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Infective Endocarditis Mitral Regurgitation- normal speed.mp3",
+      "bytes": 65294,
+      "sha256": "35ea3b4a111758974c44c66056ac003cc2d44cf8f6e6ad29bb192bbfb479d165"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Innocent Systolic Murmur.mp3",
+      "bytes": 117977,
+      "sha256": "a5c94f45e298508f6e612d602094beb8263b6d04c6d4c509aa9bed55850f4db8"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Loud S1.mp3",
+      "bytes": 67491,
+      "sha256": "ea3d572996c1f275b2fda7dec47f93aaa1411d5543d593157ad2edb7873f3064"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Mid-Systolic Click - Patient Recording of Mid-Systolic Click.mp3",
+      "bytes": 49585,
+      "sha256": "a641c8f350fb7be6d7ed1747f1006bb8867af10a83146e2ea5facdd032441e3d"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Minor Cardiomyopathy- normal speed.mp3",
+      "bytes": 89812,
+      "sha256": "32c53bc9892315ccc36c03eb380d3d05ebe360c34e5a6a12f9db5698ab0d1db4"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Mitral Regurgitation Tricuspid Regurgitation- normal speed.mp3",
+      "bytes": 80385,
+      "sha256": "230021bf8630c9d155dfe42ca4bbeccdafe338f9eab7bf9249d5e5264a70f259"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Mitral Regurgitation- normal speed.mp3",
+      "bytes": 79282,
+      "sha256": "9e7ac6d08c281671edc7b8ebb4a773b5c9a661018725efb518ee9f123f3867d4"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Mitral Stenosis- normal speed.mp3",
+      "bytes": 105633,
+      "sha256": "f90cade2e8b3a2d22e7ba13048f639eb66dbab442d6f1f33543468893a1bfdcf"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Normal Heart Sound- normal speed.mp3",
+      "bytes": 96460,
+      "sha256": "9eb2a0dfe74fc05fbe65129c14c76c27217c8e3773e6950a4a7237acce4f4945"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Normal Third Heart Sound (S3).mp3",
+      "bytes": 114438,
+      "sha256": "633da1a24d9a8c2db1658df6f264ecbcc9559171dc6257a62705b2c94c62defc"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Patent Ductus Arteriosus- normal speed.mp3",
+      "bytes": 292788,
+      "sha256": "83a5939ecc68a5f00b676a4c92d2db656d95aafee32ec68bd0cdb692b89e1e55"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Pericarditis- normal speed.mp3",
+      "bytes": 73448,
+      "sha256": "15a0451aa084d3d85020837e1902a6cd412dc347eba24d6109361d2b8da9a61e"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Perimembranous Ventricular Septal Defect- normal speed.mp3",
+      "bytes": 65938,
+      "sha256": "bdb196ac43eb56b522943bc29ca3735119789fe566d1e2a6cab1321cdf75c8b8"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Post Fontan Procedure with Ventricular Septal Defect- normal speed.mp3",
+      "bytes": 66480,
+      "sha256": "4d053ab9bc8f39df7d891ba05b928afa30aa5c2acf11c59c291b3b62dfc679de"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Post Pulsatile Glenn Procedure- normal speed.mp3",
+      "bytes": 72254,
+      "sha256": "45f706dc03bb2698336c30b30333311507dde36d466095ed5f7984b68632df53"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Prosthetic Aortic Valve.mp3",
+      "bytes": 54803,
+      "sha256": "6b2e2a175be4f011a5c22a53fb81ab6a4b68bb95f4c005f5fbe84a214df3c349"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Prosthetic Mitral Valve Closing Click- normal speed.mp3",
+      "bytes": 118315,
+      "sha256": "f4b13479b481d1f98a3b3e09c378dd5a791dec00097e886f1433aecaa1ed8d6f"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Prosthetic Mitral Valve Systolic Murmur Mid-Diastolic Murmur- normal speed.mp3",
+      "bytes": 88460,
+      "sha256": "6abd89cc4b4dfb453997a9599edf28c0926b4789ff101c909c623be11bb69251"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Prosthetic Valve Aortic Valve Mitral Regurgitation- normal speed.mp3",
+      "bytes": 70590,
+      "sha256": "6771c29f327b91d200dc30bf950d96f9d4cabaa017e613e5356e97813ebc0a81"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Prosthetic Valve Systolic Murmur- normal speed.mp3",
+      "bytes": 72172,
+      "sha256": "e5f1ce38328f3cdb028eef9e91e445f93b2a55f716f3e700bd44eb0de815bc82"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Pulmonary Atresia and BTT Shunt.mp3",
+      "bytes": 60445,
+      "sha256": "8bc72402e8d6b5a4399a33b2876277e7d1209503f32df5ddd7f368f946687dd0"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Pulmonary Stenosis- mild.mp3",
+      "bytes": 84438,
+      "sha256": "0c1e7d4f558e023de162576413e9d01f2c392a1d327fefc023320ef64aa02157"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Pulmonic Regurgitation.mp3",
+      "bytes": 55438,
+      "sha256": "0075aea967cb8068a4d5424821c34df07e8c7f3782744b250e12f88b59e5f614"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Restrictive Apical Muscular Ventricular Septal Defect- normal speed.mp3",
+      "bytes": 81787,
+      "sha256": "8c12d4a2201a3fdd0968527f4f25a18e66d7b0df879f0755c4a636964a21fc14"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Restrictive High Muscular Ventricular Septal Defect.mp3",
+      "bytes": 100357,
+      "sha256": "c3717d6a96a2d2906b53c4f3ee3553b5b56aa308b74436cb7b8e1fe3b773166f"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Restrictive Membranous Ventricular Septal Defect- normal speed.mp3",
+      "bytes": 99456,
+      "sha256": "381be95c1473b3741fc3cbdcea8083064582120f6d10e04f4c65b4ee846629ef"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Restrictive Mid Muscular Ventricular Septal Defect- normal speed.mp3",
+      "bytes": 123270,
+      "sha256": "1881a79ccad42646da6667c121a6fb8f2318aeea4d0d33f650087ed8b2413686"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Restrictive Muscular Ventricular Septal Defect.mp3",
+      "bytes": 92878,
+      "sha256": "4eeeec3842256f3ed3a782a5c641ae94f8adefc9d35876304d31ab2efa73c66d"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Restrictive Perimembranous Ventricular Septal Defect- normal speed.mp3",
+      "bytes": 100212,
+      "sha256": "0ab7c3f8f51800ab873bd73ff321ce521fafa4695d16406831f44c36ec8e88bd"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Right Bundle Branch Block- normal speed.mp3",
+      "bytes": 64778,
+      "sha256": "695ccbeff5e324eea71ed8256d5f372acb6c613b2655f8144059f8adc0bd1b1e"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/S2 - Fixed Splitting - Patient Recording of S2 - Fixed Splitting.mp3",
+      "bytes": 63364,
+      "sha256": "8df612763a6f6a1f504589daa8e95bdd53d80957b2a1e2c581d2c3e65ca81a2a"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/S2 - Persistent Splitting.mp3",
+      "bytes": 103810,
+      "sha256": "def5b0b39a4b1a3a0501b09632b63ede375b82083016be3f4cf37f4ec6ef121b"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/S2 - Physiological Split - Patient Recording of S2 - Physiological Split.mp3",
+      "bytes": 64015,
+      "sha256": "9da57f640611f28682ca2e22b017d9bce939fe49ac6ba2fdec92f5287bf8caf8"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/S2 split- normal speed.mp3",
+      "bytes": 59434,
+      "sha256": "725d7757de5ad19463fd7544240f10b88f21200785cd146d8938c5d1f1252296"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/S4 Gallop- normal speed.mp3",
+      "bytes": 81346,
+      "sha256": "38b58cf2ab8a64015f6b1326944e91fd5d52c62f6c5054b71665eb85a878b552"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Small Muscular Ventricular Septal Defect- normal speed.mp3",
+      "bytes": 94064,
+      "sha256": "c3cd8f72c504f43246f27d2f0dd53c743f5960b73d83f389dce95042186b5775"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Split S1 - Markedly.mp3",
+      "bytes": 55021,
+      "sha256": "6f6706e7f51a1e0eda293f774732310397a4b80965510bba6cb36832c3241455"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Split S1 - Minimally - Patient Recording of Split S1 - Minimally.mp3",
+      "bytes": 60831,
+      "sha256": "f045c0bb60cf6a7fdc69f8b8e0a709d60e4a21d87a5203c62e332eaddbe39d84"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Still’s (Vibratory) Murmur.mp3",
+      "bytes": 66166,
+      "sha256": "0b47679625273c7dc83b4d49bc1781a6e02fcf2814bc43f6cbc4cff4eec5eb07"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Subaortic Stenosis.mp3",
+      "bytes": 315673,
+      "sha256": "45c1ec1b8d7fde0c0884ecb9de1c950fe4d40bb103fbf0dab17c6e7b95530bcd"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Systolic Ejection Murmur from AV Dialysis Fistula.mp3",
+      "bytes": 137882,
+      "sha256": "12c018b70c060711c6026abe0c61d978e412d3e06b3652e467c5edd7172ee607"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Takotsubo Cardiomyopathy.mp3",
+      "bytes": 53546,
+      "sha256": "d84af281205eb163eca2145f43068c78a602711040e545ba959f9974c80506c5"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Tetralogy of Fallot with Pulmonary Regurgitation.mp3",
+      "bytes": 116298,
+      "sha256": "d0edd8ed8b23bae14d0061dce35a59a668e3bf3fd6ab44c0bcb245058726547b"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Tricuspid Stenosis.mp3",
+      "bytes": 55021,
+      "sha256": "5375b231fd298aa19f94bd9af99fe6611d021f5ca1c1c1a49e1ae3a02c8044bc"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Ventricular Septal Defect after a Starflex device closure.mp3",
+      "bytes": 345398,
+      "sha256": "62fc79b9ee04aff1863a778fb500b0bee67f0a069600e84aa9f63f4ccef62eb4"
+    },
+    {
+      "path": "audio-library/Cardiac Auscultation/Ventricular Septal Defect- normal speed.mp3",
+      "bytes": 111932,
+      "sha256": "4e9501942afa0035867d29c9f6093733533eb5edc9f583b32768353614a8a8ae"
+    }
+  ],
+  "assembledFiles": [
+    {
+      "path": "assets/models/thorax.bin",
+      "bytes": 13207248,
+      "sha256": "72c0d9a5bfc0d1faf1f3c67e82304a4bea8c003c78f4dde54a4d0f4ee36e9a38",
+      "chunkPaths": [
+        "assets/models/chunks/thorax.bin.part000",
+        "assets/models/chunks/thorax.bin.part001",
+        "assets/models/chunks/thorax.bin.part002",
+        "assets/models/chunks/thorax.bin.part003",
+        "assets/models/chunks/thorax.bin.part004",
+        "assets/models/chunks/thorax.bin.part005",
+        "assets/models/chunks/thorax.bin.part006",
+        "assets/models/chunks/thorax.bin.part007",
+        "assets/models/chunks/thorax.bin.part008",
+        "assets/models/chunks/thorax.bin.part009",
+        "assets/models/chunks/thorax.bin.part010",
+        "assets/models/chunks/thorax.bin.part011",
+        "assets/models/chunks/thorax.bin.part012"
+      ]
+    },
+    {
+      "path": "assets/models/valve-heart.bin",
+      "bytes": 1812624,
+      "sha256": "2379185ab268ad7c4ac8132753cf5be43acc9dfc47594035f4999b36df0b2217",
+      "chunkPaths": [
+        "assets/models/chunks/valve-heart.bin.part000",
+        "assets/models/chunks/valve-heart.bin.part001"
+      ]
+    }
+  ]
+}

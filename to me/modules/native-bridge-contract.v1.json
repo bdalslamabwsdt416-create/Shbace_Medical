@@ -9,6 +9,26 @@
       "purpose": "Explicit Android capabilities exposed to the local application WebView.",
       "methods": [
         {
+          "name": "getAuscultationFileSize",
+          "capability": "offline-auscultation-read",
+          "purpose": "Return the verified size of one file in an independently installed Heart or Lung pack."
+        },
+        {
+          "name": "getAuscultationPackState",
+          "capability": "offline-auscultation-metadata",
+          "purpose": "Read installed/download status for one independent auscultation pack."
+        },
+        {
+          "name": "readAuscultationFileBase64Chunk",
+          "capability": "offline-auscultation-read",
+          "purpose": "Read a bounded Base64 chunk from a verified file in an installed auscultation pack."
+        },
+        {
+          "name": "startAuscultationPackDownload",
+          "capability": "offline-auscultation-download",
+          "purpose": "Start a verified, independent download of the selected Heart or Lung content package."
+        },
+        {
           "name": "copyText",
           "capability": "clipboard",
           "purpose": "Copy supplied text to the Android clipboard."

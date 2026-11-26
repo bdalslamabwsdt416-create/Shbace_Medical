@@ -1,0 +1,10 @@
+﻿SOURCE DETAILS — KAUH LUNG SOUND DATASET
+Dataset title: A dataset of lung sounds recorded from the chest wall using an electronic stethoscope
+Mendeley Data DOI: 10.17632/jwyy9np4gv.3
+Version: 3 (2021)
+License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+License URL: https://creativecommons.org/licenses/by/4.0/
+Dataset URL: https://data.mendeley.com/datasets/jwyy9np4gv/3
+Downloaded source archive: Audio Files.zip, 40,929,209 bytes.
+Verified SHA-256: 8093b608584c631b016086e1f2df38f89db5eae0234a42fe9ab5cdaac7121d7c
+The full archive was removed after extracting the eight selected original WAV files. Retained here: Data annotation.xlsx; Selected WAV\ (8 original WAV files); this attribution record.

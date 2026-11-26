@@ -105,7 +105,8 @@ const requiredFiles = [
   "js/40-egyptian-book-pediatrics.js",
   "js/41-collections-integration.js",
   "js/43-ai-bank-engine-adapter.js",
-  "js/54-usage-analytics.js"
+  "js/54-usage-analytics.js",
+  "js/55-android-auscultation-library.js"
 ];
 const requiredDirs = ["css", "js", "data", "admin"];
 const imageDirs = ["img", "img1", "img2"];

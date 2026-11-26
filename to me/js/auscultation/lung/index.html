@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071427">
+<meta name="description" content="Shbace Medical respiratory auscultation library with 31 distinct lung sounds and interactive 3D anatomy.">
+<title>Shbace Medical - Lung Auscultation</title>
+<link rel="icon" type="image/svg+xml" href="assets/brand/medara-app-icon.svg">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="brand.css">
+<link rel="stylesheet" href="learning.css">
+<link rel="stylesheet" href="site-clean.css">
+<link rel="stylesheet" href="lung.css?v=3">
+<link rel="stylesheet" href="teaching.css?v=4">
+<link rel="stylesheet" href="library-pro.css?v=9">
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/"}}</script>
+<link rel="stylesheet" href="lung-only.css">
+</head>
+<body class="auscultation-page medara-library">
+
+<main class="library-shell">
+<section class="library-heading">
+<div><div class="library-kicker">MEDARA · CLINICAL LISTENING LAB</div><h1>Lung <em>Auscultation</em></h1><p>Explore respiratory anatomy. Compare anterior and posterior chest fields and listen to normal and added lung sounds.</p></div>
+<div class="library-stats"><span id="total-count">31</span><small>distinct sounds<br>respiratory findings</small></div>
+</section>
+<div class="system-bar">
+<div class="system-tabs" role="group" aria-label="Organ system">
+<button class="active" data-system="heart" aria-pressed="true"><span class="system-dot heart-dot"></span>Heart <small id="heart-count">77</small></button>
+<button data-system="lung" aria-pressed="false"><span class="system-dot lung-dot"></span>Lungs <small id="lung-count">31</small></button>
+</div>
+<div class="system-note" id="system-note">RESPIRATORY AUSCULTATION · BILATERAL FRONT / BACK FIELDS</div>
+</div>
+<div class="workspace library-workspace">
+<section class="viewer-card library-viewer" aria-label="Interactive 3D anatomy and audio player">
+<div class="viewer-top"><div class="viewer-title"><span class="small-eyebrow">ANATOMICAL EXPLORER</span><strong id="anatomy-title">Lungs · anterior and posterior fields</strong></div><span class="model-tag">INTERACTIVE <span>/</span> 3D</span></div>
+<div class="scene-wrap" id="scene-wrap">
+<div id="scene" role="img" aria-label="Rotatable 3D anatomical thorax with selectable auscultation points"></div>
+<div id="point-labels"></div>
+<div class="loading" id="model-loading"><div class="spinner"></div><strong>Loading anatomy</strong><span>Preparing the 3D thorax and organs.</span><progress id="anatomy-progress" max="100" value="0" aria-label="Anatomy download"></progress></div>
+<div class="orientation"><span id="orientation-label">FRONT VIEW</span><div class="orientation-line"></div><span id="anatomical-side">R <span>·</span> L</span></div>
+<div class="scene-tools"><button id="reset-view" title="Reset view" aria-label="Reset view">↺</button><button id="zoom-in" title="Zoom in" aria-label="Zoom in">+</button><button id="zoom-out" title="Zoom out" aria-label="Zoom out">−</button></div>
+<div class="scene-hint">Drag to rotate <i>/</i> Select a point to listen</div>
+<div class="selected-callout"><span class="small-eyebrow">SELECTED LISTENING POINT</span><strong id="active-point-name">Right posterior chest</strong><span id="active-point-position">2nd right intercostal space, parasternal</span><span id="spatial-level" class="spatial-level" hidden></span></div>
+</div>
+<div class="view-controls">
+<div class="segmented" role="group" aria-label="Body view"><button class="active" data-view="front" aria-pressed="true">Front</button><button data-view="back" aria-pressed="false">Back</button></div>
+<div class="toggle-options"><label class="bone-control">Bones <input id="bone-opacity" aria-label="Bone visibility" type="range" min="0" max="100" value="32"></label><label class="switch-label"><input type="checkbox" id="xray" checked><span class="switch"></span> See through</label><label class="switch-label"><input type="checkbox" id="show-points" checked><span class="switch"></span> Listening points</label></div>
+</div>
+<section class="point-selector"><div class="point-heading"><span class="small-eyebrow">AUSCULTATION POINTS</span><span id="point-helper">Select a point on the model or below</span></div><div id="point-buttons"></div></section>
+<section class="sound-panel pro-sound-panel">
+<div class="sound-top"><div><span class="small-eyebrow">SELECTED RECORDING</span><span class="sound-status" id="sound-status">Ready to listen</span></div><span class="audio-type" id="audio-type" hidden>Choose a recording</span></div>
+<div class="wave-meta"><span>AUDIO SIGNAL / 4 SEC.</span></div>
+<div class="wave-wrap"><canvas id="waveform" aria-label="Live waveform synchronized with the selected audio recording"></canvas><span class="wave-placeholder" id="wave-placeholder">Select a sound from the library</span></div>
+<div class="playback">
+<button class="play-button" id="play" aria-label="Play audio" disabled><span id="play-icon" aria-hidden="true">▶</span></button>
+<div class="play-title"><strong id="play-title">No recording selected</strong><span id="play-subtitle">Your selected recording appears here</span></div>
+<div class="segmented chestpiece" role="group" aria-label="Stethoscope chestpiece"><button class="active" data-piece="diaphragm" aria-pressed="true">Diaphragm</button><button data-piece="bell" aria-pressed="false">Bell</button></div>
+<label class="volume-label" title="Volume"><span aria-hidden="true">◖</span><input id="volume" aria-label="Volume" type="range" min="0" max="100" value="45"></label><label class="speed-control" for="playback-speed"><span>Speed</span><select id="playback-speed" aria-label="Playback speed"><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option></select></label>
+</div>
+</section>
+<section class="teaching-card" id="learning-card" hidden aria-live="polite">
+<div class="teaching-card-heading"><span class="eyebrow">ABOUT THIS FINDING</span></div>
+<h3 class="teaching-title" id="learning-title">Selected finding</h3>
+<section class="teaching-quick"><span class="eyebrow">QUICK EXPLANATION</span><p id="learning-quick"></p></section>
+<div class="teaching-facts">
+<div><span>Timing</span><p id="learning-timing"></p></div><div><span>Best heard</span><p id="learning-best"></p></div><div><span>Chestpiece</span><p id="learning-piece"></p></div>
+</div>
+<div class="teaching-anatomy"><span class="eyebrow">3D ANATOMICAL SOURCE</span><strong id="learning-anatomy-title">Anatomical focus</strong><p id="learning-anatomy-text">The model highlights the approximate anatomical source.</p>
+<div class="teaching-facts teaching-location-facts"><div><span>Best listening site</span><p id="learning-listening-site"></p></div><div><span>Radiation / comparison</span><p id="learning-radiation"></p></div></div>
+<button id="go-to-point" type="button" disabled>Move stethoscope to best listening site ↗</button></div>
+<details class="teaching-full" id="full-lesson"><summary>Open full clinical explanation</summary><div id="learning-content"></div><div class="teaching-context"><h4>Clinical context</h4><p id="learning-clinical-context"></p></div></details>
+<details class="source-inline"><summary>Original recording and source files</summary><code id="selected-path">No file selected</code><p id="selected-source">Source information appears when you select a recording.</p><div id="duplicate-source-wrap" class="duplicate-source-wrap" hidden><span>Additional original source files retained</span><div id="duplicate-source-list"></div></div></details>
+</section>
+</section>
+<aside class="learn-panel library-browser">
+<section class="browser-card">
+<div class="browser-head"><div><span class="eyebrow">SOUND COLLECTION</span><h2>Browse recordings</h2></div><div class="browser-actions"><button id="quiz-start" class="quiz-launch" type="button">Listening quiz ↗</button><span class="level-badge" id="visible-count">31 sounds</span></div></div>
+<label class="search-box" id="search-wrap"><span aria-hidden="true">⌕</span><input id="sound-search" type="search" placeholder="Search sounds, conditions, or cases…" autocomplete="off"><kbd> / </kbd></label>
+<section id="quiz-panel" class="quiz-panel" hidden><div class="quiz-panel-head"><span class="eyebrow">LISTENING CHALLENGE</span><button id="quiz-exit" type="button">Back to library</button></div><div class="quiz-round"><span id="quiz-round">QUESTION 01</span><strong id="quiz-score">0 correct</strong></div><h3>Which finding matches this recording?</h3><p id="quiz-instruction">Listen carefully, then choose the best matching sound.</p><div id="quiz-options" class="quiz-options"></div><p id="quiz-feedback" role="status"></p><button id="quiz-next" class="quiz-next" type="button" hidden>Next recording →</button></section>
+
+<div id="category-tree" class="category-tree" aria-live="polite"></div>
+<div id="no-results" class="no-results" hidden>No matching recordings. Try a shorter search term.</div>
+</section>
+
+
+</aside>
+</div>
+
+</main>
+<div id="toast" class="toast" role="status"></div>
+<script src="native-assets.js"></script>
+<script type="module" src="auscultation-pro.js?v=11"></script>
+</body>
+</html>

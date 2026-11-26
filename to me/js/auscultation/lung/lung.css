@@ -1,0 +1,86 @@
+/* Lung exploration uses the same anatomical asset and the existing Medara palette. */
+.auscultation-page .point-selector{margin:0;padding:20px 0;border-bottom:1px solid var(--line)}
+.auscultation-page .point-chip{min-height:40px;line-height:1.35}
+#point-buttons:has(.point-group){display:grid;gap:14px}
+.point-group>span{display:block;font:10px var(--mono);color:var(--muted);margin-bottom:7px}
+.point-group>div{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.point-group .point-chip{text-align:left;padding:9px 10px;font-family:Arial,Helvetica,sans-serif;font-size:12px}
+.auscultation-page .point-chip.lung.active{background:#e9ded3;border-color:#ad7d61;color:#593623}
+#lung-guide{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.lung-guide-heading strong{font-size:13px;font-weight:500;display:block}
+#opposite-side{font-size:11px;min-height:38px;padding:8px 0;background:none;color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+#lung-region-tip,.lung-technique{font-size:12px;line-height:1.65;margin:6px 0;color:var(--muted)}
+.lung-technique{font-size:11px;margin-top:12px}
+.auscultation-page .system-tabs button{min-width:62px;min-height:44px;font-size:14px}
+.lung-mode .body-marker.lung{border-color:#c89572;color:#e9c5ac;background:#293332}
+.lung-mode .body-marker.lung.active{background:#dcaa86;color:#242626;border-color:#f4d2b7}
+@media(min-width:541px) and (max-width:800px){.auscultation-page .point-selector{grid-column:1;grid-row:2}.auscultation-page .explanation-card{grid-column:2;grid-row:1/3}}
+@media(max-width:540px){.auscultation-page .point-chip{min-height:44px}.auscultation-page .point-selector{padding:22px 0}#opposite-side{min-height:44px}.auscultation-page .view-controls .segmented button{min-height:40px}.lung-mode .play-title strong{font-size:12px}}
+
+/* v2 — educational respiratory taxonomy */
+.lung-section{margin:0 0 9px;border:1px solid #e5ded2;border-radius:11px;overflow:hidden;background:#fbfaf6}
+.lung-section>summary{display:flex;align-items:center;gap:10px;min-height:68px;padding:12px 13px;background:#f7f4ed}
+.lung-section>summary::-webkit-details-marker{display:none}
+.lung-section[open]>summary{background:#f1ece2;border-bottom:1px solid #e7dfd2}
+.lung-section-number{display:grid;place-items:center;flex:0 0 31px;width:31px;height:31px;border:1px solid #d9c9b9;border-radius:8px;color:#865b4d;background:#fffaf4;font:10px ui-monospace,monospace}
+.lung-section-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
+.lung-section-copy strong{font-size:12px;line-height:1.35;color:#333c36;font-weight:650}
+.lung-section-copy small{font-size:9px;line-height:1.4;color:#898278}
+.lung-section-count{display:flex;flex-direction:column;align-items:flex-end;gap:3px;white-space:nowrap}
+.lung-section-count b{font:16px Georgia,serif;color:#704b43}
+.lung-section-count small{font:8px ui-monospace,monospace;color:#9a9185}
+.lung-section-body{padding:4px 12px 13px}
+.lung-subgroup{margin-top:12px}
+.lung-subgroup h4{margin:0 0 7px;padding:0 2px 6px;border-bottom:1px solid #ece5da;color:#96765f;font:8px/1.5 ui-monospace,monospace;letter-spacing:1.1px}
+.lung-sound-list{display:grid;gap:7px}
+.lung-sound-card{min-width:0;padding:10px 10px 8px;border:1px solid #ebe5dc;border-radius:8px;background:#fffdfa}
+.lung-sound-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.lung-sound-title strong{font-size:11px;line-height:1.4;font-weight:650;color:#36473f}
+.lung-sound-title>span{flex:0 0 auto;color:#9a9185;font:8px ui-monospace,monospace}
+.lung-recordings{padding:0;display:grid;gap:2px}
+.lung-recording{min-height:34px;padding:6px 7px}
+.lung-recording .recording-option-text{font-size:9px}
+.lung-recording .recording-kind{min-width:48px;text-align:right}
+.lung-source-review{border-color:#e6d2be;background:#fcf7ef}
+.lung-source-review p{margin:6px 0 8px;color:#7c7064;font-size:9px;line-height:1.6}
+.lung-review-label{border:1px solid #dfc5a8;border-radius:4px;padding:4px 5px;color:#936944!important;font:7px ui-monospace,monospace!important;letter-spacing:.5px}
+.lung-source-review details,.lung-duplicate-details{margin-top:6px}
+.lung-source-review details summary,.lung-duplicate-details summary{padding:5px 2px;color:#8b7663;font-size:8px;cursor:pointer;list-style:none}
+.lung-source-review details summary::-webkit-details-marker,.lung-duplicate-details summary::-webkit-details-marker{display:none}
+.lung-source-review details code,.lung-duplicate-details code,.duplicate-source-wrap code{display:block;margin:5px 0;padding:6px 7px;overflow-wrap:anywhere;white-space:normal;border-radius:5px;background:#f3efe8;color:#686c63;font:8px/1.5 ui-monospace,monospace}
+.lung-duplicate-details{padding-top:3px;border-top:1px solid #f0ebe3}
+.lung-case-list{display:grid;gap:7px;padding-top:7px}
+.lung-case-card{display:flex;align-items:center;gap:9px;width:100%;min-width:0;min-height:59px;padding:9px 10px;border:1px solid #e8e1d7;border-radius:8px;background:#fffdfa;color:#39443e;text-align:left;cursor:pointer}
+.lung-case-card:hover,.lung-case-card.active{border-color:#c9a78e;background:#f8f1e8}
+.lung-case-id{display:grid;place-items:center;flex:0 0 43px;min-height:33px;border-radius:6px;background:#eae7dd;color:#806451;font:9px ui-monospace,monospace}
+.lung-case-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
+.lung-case-copy strong{font-size:10px;color:#39483f;line-height:1.35}
+.lung-case-copy small{font-size:8px;color:#8a857b;line-height:1.45}
+.lung-case-play{flex:0 0 22px;text-align:center;color:#ad7b61;font-size:12px}
+.lung-muted{padding:8px;color:#999184;font-size:9px}
+.duplicate-source-wrap{margin-top:9px;padding:8px 0 2px;border-top:1px solid #ebe5dc}
+.duplicate-source-wrap>span{color:#947b64;font:7px ui-monospace,monospace;letter-spacing:.6px}
+.pro-sound-panel .speed-control{display:flex;align-items:center;gap:5px;white-space:nowrap;color:#b8c5bb;font-size:9px}
+.pro-sound-panel .speed-control select{min-height:30px;padding:4px 6px;border:1px solid #ffffff2b;border-radius:6px;background:#243b39;color:#f0e7da;font-size:9px;accent-color:#d89b7a}
+@media(max-width:540px){
+ .lung-section>summary{gap:8px;min-height:64px;padding:10px 8px}
+ .lung-section-number{flex-basis:27px;width:27px;height:27px}
+ .lung-section-copy strong{font-size:11px}
+ .lung-section-copy small{font-size:8px}
+ .lung-section-count b{font-size:14px}
+ .lung-section-count small{font-size:7px}
+ .lung-section-body{padding-right:8px;padding-left:8px}
+ .lung-sound-card{padding:9px 8px 7px}
+ .lung-sound-title strong{font-size:10px}
+ .lung-recording{min-height:38px;padding:7px 5px}
+ .lung-recording .recording-option-text{font-size:9px}
+ .lung-recording .recording-kind{font-size:7px}
+ .pro-sound-panel .speed-control{margin-left:auto;font-size:8px}
+ .pro-sound-panel .speed-control select{min-height:32px}
+}
+
+/* Lung browser header: keep actions inside the available card width on narrow layouts. */
+.library-browser:has(.lung-section) .browser-head{align-items:flex-start;flex-wrap:wrap;gap:9px 8px}
+.library-browser:has(.lung-section) .browser-head>div:first-child{flex:1 1 100%;min-width:0}
+.library-browser:has(.lung-section) .browser-actions{width:100%;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.library-browser:has(.lung-section) .level-badge{max-width:100%;white-space:normal;text-align:right}

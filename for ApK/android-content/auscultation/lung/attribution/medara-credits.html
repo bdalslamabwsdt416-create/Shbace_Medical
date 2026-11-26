@@ -1,0 +1,163 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sources and licences — Medara</title><style>body{font:16px/1.6 -apple-system,BlinkMacSystemFont,Arial,sans-serif;color:#292b28;background:#f8f7f3;margin:0;padding:28px;max-width:760px}h1{font-size:32px;letter-spacing:-1px}h2{font-size:21px;margin-top:30px}a{color:#681c2c;overflow-wrap:anywhere}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.6 monospace}nav{display:flex;gap:20px;flex-wrap:wrap}</style></head><body><nav><a href="index.html">Medara</a><a href="support.html">Support</a><a href="privacy.html">Privacy</a></nav><h1>Sources and licences</h1><p>Medara contains independently licensed anatomy, character and audio resources. Their licences apply to those resources, not to the entire app. No endorsement is implied.</p><h2>assets/models/LICENSES.txt</h2><pre>BodyParts3D anatomy assets
+Copyright: The Database Center for Life Science (DBCLS)
+
+thorax.bin is a collection of independently indexed meshes. thorax.json lists
+the byte ranges and names so each component can be extracted independently.
+
+skin, bones, arteries, veins, airways, diaphragm:
+BodyParts3D release 4.0, CC BY 4.0.
+https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html
+https://creativecommons.org/licenses/by/4.0/
+Source: partof_BP3D_4.0_obj_99.zip, official DBCLS archive.
+
+heart, lungRight, lungLeft:
+BodyParts3D release 3.0, CC BY-SA 2.1 Japan. These adapted component meshes
+are distributed under that same license.
+https://creativecommons.org/licenses/by-sa/2.1/jp/
+https://github.com/Kevin-Mattheus-Moerman/BodyParts3D
+Source STL IDs: FMA7274, FMA7333, FMA7337, FMA7383, FMA7370, FMA7371.
+
+Changes by Lernstudio: crop to original Z 1000–1470 mm, coordinate transform
+(x/100, (z-1230)/100, -(y+105)/100), vertex merging and mesh grouping.
+Heart and lung surfaces are simplified by vertex clustering at 1.4 and
+2.1 mm respectively. Colors and transparency are runtime presentation.
+No endorsement by DBCLS, the mirror maintainer, or MedNotes is implied.
+
+The source-preparation script is scripts/prepare-anatomy.py in the project.
+
+cardiorenal.bin / cardiorenal.json: separate normalized organ meshes.
+kidneyRight (FJ3147), kidneyLeft (FJ3145), bladder (FJ3149): BodyParts3D 4.0,
+CC BY 4.0. Heart: the adapted heart mesh above, CC BY-SA 2.1 Japan.
+Changes: recentered per organ and scaled to unit height, then arranged
+schematically at runtime. Connection tubes and nephron diagram are original
+illustrations and not registered anatomy. Source: scripts/prepare-cardiorenal.py.
+
+Renal background skeleton (renal-skeleton.json / renal-skeleton.bin):
+BodyParts3D 4.0, (c) The Database Center for Life Science; CC BY 4.0.
+Same rib-cage source surfaces as the auscultation model, plus thoracic/lumbar
+vertebrae and pelvic bones. Converted OBJ to binary indexed meshes, axes and
+origin changed; display scales and depth offset are in renal-scene.js.
+Source: https://lifesciencedb.jp/bp3d/
+License: https://creativecommons.org/licenses/by/4.0/
+</pre><h2>assets/models/neuro-patient-LICENSE.txt</h2><pre>Microsoft Rocketbox — Male Adult 01
+Source: https://github.com/microsoft/Microsoft-Rocketbox
+Also includes m_walk_neutral_01 animation, sampled as joint positions and adapted for a seamless in-place loop.
+Changes: converted FBX to GLB, normalized coordinates, renamed joints, resized textures.
+
+MIT License
+
+Copyright (c) 2020 Microsoft
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the &quot;Software&quot;), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+</pre><h2>assets/audio/LICENSES.txt</h2><pre>normal.ogg: HROgg.ogg by James Heilman, MD; CC0.
+https://commons.wikimedia.org/wiki/File:HROgg.ogg
+https://creativecommons.org/publicdomain/zero/1.0/
+
+crackles.ogg: Crackles pneumoniaO.ogg by James Heilman, MD; CC BY-SA 3.0.
+https://commons.wikimedia.org/wiki/File:Crackles_pneumoniaO.ogg
+
+wheeze.ogg: Wheeze2O.ogg by James Heilman, MD; CC BY-SA 3.0.
+https://commons.wikimedia.org/wiki/File:Wheeze2O.ogg
+https://creativecommons.org/licenses/by-sa/3.0/
+
+Original files are unmodified. The application applies playback filters and
+volume changes. Aortic stenosis, mitral regurgitation, aortic regurgitation and mitral
+stenosis examples are original signals synthesized by sound.js. They are
+not patient recordings or clinically validated acoustic models. Timing,
+contour and frequency content are simplified for teaching.
+
+The .wav files are PCM 16-bit conversions of the corresponding .ogg
+recordings above and retain the same authorship and licenses. No filtering
+or trimming was applied. Normal heart sounds were scaled by 0.96804 to
+avoid clipping during conversion; the player normalizes playback levels.
+</pre><h2>vendor/LICENSE</h2><pre>The MIT License
+
+Copyright © 2010-2024 three.js authors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the &quot;Software&quot;), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+</pre><h2>Medical references</h2><p>Simulations are educational approximations. Auscultation recordings and synthetic examples are identified in the module. Gait and reflex teaching draws on <a href="https://stanfordmedicine25.stanford.edu/the25/gait.html">Stanford Medicine 25: gait</a>, <a href="https://stanfordmedicine25.stanford.edu/the25/tendon.html">tendon reflexes</a>, and the <a href="https://www.merckmanuals.com/professional/neurologic-disorders/neurologic-examination/how-to-assess-reflexes">Merck Manual</a>. Model and recording files, with their licence notices, are also available from the Medara website under the same asset paths listed above.</p><h2>Normal breath sound</h2><pre>
+normalLung.wav: HLS-CMDS, LS/M_N_RUA.wav (normal lung sound, right upper anterior chest).
+Authors: Yasaman Torabi, Shahram Shirani, James P. Reilly (McMaster University).
+Recorded from a clinical manikin, not a patient. Source WAV unchanged; renamed for the app.
+Dataset: https://zenodo.org/records/15376628
+Licence: CC BY 4.0 — https://creativecommons.org/licenses/by/4.0/
+Citation: Y. Torabi, S. Shirani and J. P. Reilly, “Descriptor: Heart and Lung Sounds Dataset Recorded from a Clinical Manikin using Digital Stethoscope (HLS-CMDS),” IEEE Data Descriptions, 2025. https://doi.org/10.1109/IEEEDATA.2025.3566012
+</pre><h2>Additional heart and lung recordings</h2><pre>
+Additional HLS-CMDS manikin recordings (not patient recordings):
+s3.wav: HS/F_S3_A.wav; amplitude multiplied by 20.64063.
+s4.wav: HS/M_S4_LUSB.wav; amplitude multiplied by 26.451665.
+fineCrackles.wav: LS/M_FC_RLA.wav; amplitude multiplied by 14.207913.
+coarseCrackles.wav: LS/M_CC_RLA.wav; amplitude multiplied by 44.056471.
+rhonchi.wav: LS/F_R_LUA.wav; amplitude multiplied by 23.075352.
+pleuralRub.wav: LS/M_PR_RMA.wav; amplitude multiplied by 34.310995.
+Authors: Yasaman Torabi, Shahram Shirani, James P. Reilly, McMaster University.
+Source: https://zenodo.org/records/15376628 (v1, 9 May 2025).
+Licence: CC BY 4.0 https://creativecommons.org/licenses/by/4.0/
+Citation: Torabi, Shirani &amp; Reilly, HLS-CMDS, IEEE Data Descriptions (2025), doi:10.1109/IEEEDATA.2025.3566012.
+Changes by Medara: renamed and amplitude-normalised to 0.8 peak (PCM16); no trimming, time stretching or synthesis. Playback filters remain active.
+Actual WAV headers: mono, 4000 Hz, 15 seconds (the general README says 22050 Hz).
+Archive FC/CC filenames correspond to C/G in the CSV, matched by sex and recording location and the README class definitions.
+Each recording is reused at listening points; it does not simulate recorded regional variation.
+</pre><h2>Additional basic findings</h2><pre>
+Basic findings added in sounds-4:
+tricuspidRegurgitation.wav: E_H_83_T.wav, recorded at the tricuspid area.
+Source: Fraiwan, Mohammad; Ibnian, Ali; Haider, Nishi (2025), A Dataset of Heart Sound Regurgitation of Patients with Heart Valve Disorders, Mendeley Data v1.
+https://doi.org/10.17632/jfbdvjw6sf.1
+Dataset licence: CC BY 4.0 https://creativecommons.org/licenses/by/4.0/
+Clinical annotation: participant 83, auscultatory finding TR, echo TR grade 3; coexisting MR grade 2. This is not an isolated lesion.
+Changes: excerpt 2–20 seconds (initial handling transient excluded), 5 ms edge fades, amplitude multiplied by 7.941351, PCM16. No timing or pitch changes.
+
+pulmonaryStenosis.wav: supplementary audio 7, Heart energy signature spectrogram for cardiovascular diagnosis.
+Authors: Vladimir Kudriavtsev, Vladimir Polyshchuk, Douglas L. Roy (2007), BioMedical Engineering OnLine 6:16.
+https://doi.org/10.1186/1475-925X-6-16
+Audio source: https://commons.wikimedia.org/wiki/File:Heart-energy-signature-spectrogram-for-cardiovascular-diagnosis-1475-925X-6-16-S7.ogg
+Licence: CC BY 2.0 https://creativecommons.org/licenses/by/2.0/
+Changes: Ogg decoded to mono PCM16 WAV, amplitude multiplied by 0.813934, 5 ms edge fades. Full 1.5325-second excerpt loops without changing its speed.
+
+Reduced breath sounds: existing normalLung.wav (HLS-CMDS, CC BY 4.0) with point-dependent playback attenuation; no new patient recording.
+The three new findings use simplified educational volume maps. These are not measured site-to-site transmission, isolated murmur stems, or a clinical acoustic model.
+</pre><p>The pulmonary stenosis excerpt has additional playback headroom to prevent filter clipping.</p><h2>Heart physiology anatomy</h2><pre>valve-heart.bin / valve-heart.json: BodyParts3D / Anatomography 4.3,
+© The Database Center for Life Science (DBCLS), supplied via
+https://github.com/olivercase/body_parts_3d_api
+The mirror supplies its mesh data under CC BY-SA 2.1 Japan:
+https://creativecommons.org/licenses/by-sa/2.1/jp/
+This adapted binary asset is distributed under the same license.
+Contains ventricular and atrial walls, ascending aorta/aortic arch, pulmonary
+trunk and coronary arteries. Exact source OBJ filenames and SHA-256 hashes
+are in valve-heart.json. Changes: binary conversion, axis/origin/unit changes;
+no decimation, cropping, or repositioning of individual anatomical parts.
+Source conversion: scripts/prepare-valve-heart.py. Presentation colors are
+illustrative. The moving valve detail is separate procedural geometry.
+</pre></body></html>

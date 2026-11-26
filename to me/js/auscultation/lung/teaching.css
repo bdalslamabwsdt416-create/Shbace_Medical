@@ -1,0 +1,95 @@
+/* Unified clinical learning card shared by cardiac and respiratory libraries. */
+.teaching-card{
+  margin-top:16px;padding:17px 16px 13px;border:1px solid #e5ded2;border-radius:13px;
+  background:#fbfaf6;color:#34423b;box-shadow:0 8px 24px rgba(35,43,37,.045);
+}
+.teaching-card[hidden]{display:none}
+.teaching-card-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.teaching-card-heading .eyebrow{color:#9a795f}
+.teaching-classification{padding:4px 7px;border-radius:5px;background:#eee9df;color:#79644e;font:8px/1.3 ui-monospace,monospace;letter-spacing:.35px}
+.teaching-card>h4{margin:9px 0 13px;color:#2f4139;font:600 19px/1.3 Georgia,serif}
+.guide-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.guide-section{min-width:0;padding:10px 11px;border:1px solid #eae4da;border-radius:8px;background:#fffdfa}
+.guide-section h5{margin:0 0 6px;color:#98765d;font:9px/1.4 ui-monospace,monospace;letter-spacing:.5px;text-transform:uppercase}
+.guide-section p{margin:0;color:#58655e;font:11px/1.65 Arial,Helvetica,sans-serif}
+.guide-disclaimer{margin:11px 1px 0;color:#837c70;font:10px/1.6 Arial,Helvetica,sans-serif}
+.teaching-anatomy{margin-top:13px;padding:12px 12px 11px;border:1px solid #dfd9cd;border-radius:9px;background:#f3f0e8}
+.teaching-anatomy>.eyebrow{display:block;color:#927359;font-size:8px}
+.teaching-anatomy>strong{display:block;margin-top:5px;color:#394940;font:600 13px/1.4 Arial,Helvetica,sans-serif}
+.teaching-anatomy>p{margin:5px 0 9px;color:#6e746b;font:10px/1.6 Arial,Helvetica,sans-serif}
+.teaching-anatomy>button{min-height:35px;padding:7px 10px;border:1px solid #c8b8a4;border-radius:6px;background:#fffdfa;color:#735944;font:10px Arial,Helvetica,sans-serif;cursor:pointer}
+.teaching-anatomy>button:disabled{opacity:.45;cursor:not-allowed}
+.source-inline{margin-top:10px;border-top:1px solid #e9e2d7;padding-top:7px}
+.source-inline>summary{color:#9a8d7e;font:8px ui-monospace,monospace;cursor:pointer;list-style:none}
+.source-inline>summary::-webkit-details-marker{display:none}
+.source-inline>code{display:block;margin-top:8px;padding:7px;border-radius:5px;background:#f0ede6;color:#77766d;font:8px/1.5 ui-monospace,monospace;white-space:normal;overflow-wrap:anywhere}
+.source-inline>p{font:9px/1.55 Arial,Helvetica,sans-serif;color:#7b7b72}
+@media(max-width:540px){
+ .teaching-card{margin-top:13px;padding:14px 11px 11px}
+ .teaching-card>h4{font-size:17px}
+ .guide-grid{grid-template-columns:minmax(0,1fr);gap:7px}
+ .guide-section{padding:9px 10px}
+ .guide-section p{font-size:11px}
+ .teaching-anatomy{padding:11px 10px}
+}
+
+/* Unified recording classification shared by heart and lung libraries */
+.tree-direct-sounds{padding:7px 4px 10px}
+.recording-alternates{margin:2px 0 5px 26px;border-top:1px solid #eee8df}
+.recording-alternates>summary{padding:6px 4px;color:#8f8274;font:8px/1.4 ui-monospace,monospace;cursor:pointer;list-style:none}
+.recording-alternates>summary::-webkit-details-marker{display:none}
+.recording-alternates>summary:before{content:'＋';margin-right:5px;color:#ae8971}
+.recording-alternates[open]>summary:before{content:'−'}
+.recording-alternates>div{padding-left:6px;border-left:1px solid #e9e1d6}
+.recording-alternate{opacity:.9}
+.lung-case-card{cursor:default}
+.lung-case-play{display:grid;place-items:center;width:30px;height:30px;padding:0;border:1px solid #e6ded2;border-radius:50%;background:#f7f3ec;color:#a97860;cursor:pointer}
+.lung-case-play:hover{background:#efe5d9;border-color:#c9a78e}
+.lung-case-type{color:#8f725e!important;font:8px ui-monospace,monospace;letter-spacing:.2px}
+.source-review-note{margin:5px 0 2px;color:#8a7866;font-size:9px;line-height:1.5}
+
+/* Selected finding: quick view first, expandable lesson on demand. */
+.teaching-card{margin-top:14px;padding:16px 16px 12px;background:#f0eee8;border-color:#ded8ce}
+.teaching-card-heading .eyebrow{font-size:9px;letter-spacing:1.35px}
+.teaching-title{margin:6px 0 12px;color:#293b35;font:600 21px/1.25 Georgia,serif}
+.teaching-quick{padding:12px 13px;border-left:2px solid #c58b6c;background:#faf8f3;border-radius:0 7px 7px 0}
+.teaching-quick>.eyebrow{font-size:8px}
+.teaching-quick>p{margin:7px 0 0;color:#4d5d55;font-size:12px;line-height:1.7}
+.teaching-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:12px;border-top:1px solid #ded8ce}
+.teaching-facts>div{min-width:0;padding:10px 9px 9px;border-bottom:1px solid #ded8ce}
+.teaching-facts>div+div{border-left:1px solid #ded8ce}
+.teaching-facts>div>span{display:block;color:#987d6c;font:8px/1.45 ui-monospace,monospace;letter-spacing:.45px;text-transform:uppercase}
+.teaching-facts>div>p{margin:5px 0 0;color:#3f5149;font-size:10px;line-height:1.6}
+.teaching-location-facts{grid-template-columns:1fr 1fr;margin:11px 0 8px;border-top:1px solid #dfd8cd}
+.teaching-anatomy{background:#f8f6f0;border-color:#ddd5c9}
+.teaching-anatomy>.eyebrow{font-size:8px;letter-spacing:1px}
+.teaching-anatomy>strong{font-size:13px;line-height:1.55}
+.teaching-anatomy>p{font-size:10px;line-height:1.65}
+.teaching-anatomy>button{min-height:37px;background:#2a403d;border-color:#2a403d;color:#f5eee4}
+.teaching-anatomy>button:disabled{opacity:.45}
+.teaching-full{margin-top:12px;border-top:1px solid #ddd6cb;border-bottom:1px solid #ddd6cb}
+.teaching-full>summary{display:flex;align-items:center;gap:8px;min-height:43px;color:#75474a;font-size:11px;font-weight:600;cursor:pointer;list-style:none}
+.teaching-full>summary::-webkit-details-marker{display:none}
+.teaching-full>summary:after{content:'＋';margin-left:auto;color:#a17c69;font-size:15px}
+.teaching-full[open]>summary:after{content:'−'}
+.teaching-full #learning-content{padding:2px 0 9px}
+.teaching-full .guide-grid{gap:7px}
+.teaching-full .guide-section{background:#faf8f3;border-color:#e3ddd2;padding:9px 10px}
+.teaching-full .guide-section h5{font-size:8px}
+.teaching-full .guide-section p{font-size:10px;line-height:1.65}
+.teaching-context{padding:10px 2px 3px;border-top:1px solid #e0d9cf}
+.teaching-context h4{margin:0 0 5px;color:#97745f;font:8px/1.4 ui-monospace,monospace;letter-spacing:.7px;text-transform:uppercase}
+.teaching-context p{margin:0;color:#68746b;font-size:10px;line-height:1.65}
+.teaching-card .source-inline{margin-top:9px}
+.spatial-level{max-width:360px;color:#edc5a7!important;font:8px/1.5 ui-monospace,monospace!important;letter-spacing:.2px}
+.spatial-level[hidden]{display:none}
+@media(max-width:540px){
+ .teaching-card{padding:13px 11px 10px}
+ .teaching-title{font-size:19px}
+ .teaching-quick>p{font-size:11px}
+ .teaching-facts{grid-template-columns:1fr}
+ .teaching-facts>div+div{border-left:0}
+ .teaching-location-facts{grid-template-columns:1fr}
+ .teaching-full .guide-grid{grid-template-columns:1fr}
+ .spatial-level{max-width:290px}
+}
