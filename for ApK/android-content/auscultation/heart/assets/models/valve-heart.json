@@ -1,0 +1,324 @@
+{
+  "meshes": [
+    {
+      "name": "heart",
+      "positionOffset": 0,
+      "positionCount": 63159,
+      "indexOffset": 252636,
+      "indexCount": 112326,
+      "sources": [
+        {
+          "file": "FJ2428_BP21837_FMA13884_Wall of ventricle.obj",
+          "sha256": "db5d6415f07c42b7b1af03f66190679595f8b6c4ff659b8d571ba8694afed75f"
+        }
+      ]
+    },
+    {
+      "name": "leftAtrium",
+      "positionOffset": 701940,
+      "positionCount": 12852,
+      "indexOffset": 753348,
+      "indexCount": 22632,
+      "sources": [
+        {
+          "file": "FJ2438_BP22747_FMA9531_Wall of left atrium.obj",
+          "sha256": "17544b1214ea0626f9564aeb42b5bb9d52a126f22237a499f8de0eca6073d8a7"
+        }
+      ]
+    },
+    {
+      "name": "rightAtrium",
+      "positionOffset": 843876,
+      "positionCount": 29661,
+      "indexOffset": 962520,
+      "indexCount": 53352,
+      "sources": [
+        {
+          "file": "FJ2439_BP21422_FMA9457_Wall of right atrium.obj",
+          "sha256": "85fddffea47ac61de11d29219fc4f32dfc857d17b3082929a3f048c57522c887"
+        }
+      ]
+    },
+    {
+      "name": "coronary",
+      "positionOffset": 1175928,
+      "positionCount": 57597,
+      "indexOffset": 1406316,
+      "indexCount": 90030,
+      "sources": [
+        {
+          "file": "FJ2632_BP22543_FMA3872_First right anterior branch of anterior interventricular branch of left coronary artery.obj",
+          "sha256": "b653ea34526817c2a15cf825f0a168396266bd1efb61d34b4be33e73a932ade0"
+        },
+        {
+          "file": "FJ2633_BP22495_FMA3860_Diagonal branch of anterior descending branch of left coronary artery.obj",
+          "sha256": "eeb5ea431a6fb341b93122e9dc9f37e58ffc636d62693b1ede8ae1734eb4990b"
+        },
+        {
+          "file": "FJ2634_BP22495_FMA3860_Diagonal branch of anterior descending branch of left coronary artery.obj",
+          "sha256": "d030052a98a163245052d9a45e834ce0e06d737aa1889a030e4b2c06d2e651a9"
+        },
+        {
+          "file": "FJ2635_BP22495_FMA3860_Diagonal branch of anterior descending branch of left coronary artery.obj",
+          "sha256": "9eadbf695e7807b3643ec7aafc5ab238c8710ffc305d6426170d624d582fe9b8"
+        },
+        {
+          "file": "FJ2636_BP22495_FMA3860_Diagonal branch of anterior descending branch of left coronary artery.obj",
+          "sha256": "e67e0284046467c7ec7bb12d199afa39c184605339c4ff35291efa2909b5b4b7"
+        },
+        {
+          "file": "FJ2637_BP22495_FMA3860_Diagonal branch of anterior descending branch of left coronary artery.obj",
+          "sha256": "817bbf4d3bd19479825361fc0b0b82e09dd02e982278bc2f807dae26515f1efc"
+        },
+        {
+          "file": "FJ2638_BP22495_FMA3860_Diagonal branch of anterior descending branch of left coronary artery.obj",
+          "sha256": "280afe77fadfa7364097e918c66c4bf403305cde03ab9cdca4361379d08e2f03"
+        },
+        {
+          "file": "FJ2639_BP22495_FMA3860_Diagonal branch of anterior descending branch of left coronary artery.obj",
+          "sha256": "4be6e0eee3ef35771738e7561b4e5fe4952618b5ec240623322d615e7e3ac429"
+        },
+        {
+          "file": "FJ2640_BP22495_FMA3860_Diagonal branch of anterior descending branch of left coronary artery.obj",
+          "sha256": "447e721a0c37f05065862c659bddfb652e00666f7ab22320edce004409c195c0"
+        },
+        {
+          "file": "FJ2641_BP22502_FMA3876_Third right anterior branch of anterior interventricular branch of left coronary artery.obj",
+          "sha256": "4a17b0b1bb0dc1f12a4855b2a42c295d99a3c7c94742e9c8d1e0c38aac1ea768"
+        },
+        {
+          "file": "FJ2642_BP22495_FMA3860_Diagonal branch of anterior descending branch of left coronary artery.obj",
+          "sha256": "acf8dd2962cef27a29ffb4f1f2a24a47ceb1397bb1ad85a4b56088facb29f506"
+        },
+        {
+          "file": "FJ2643_BP22544_FMA3868_Conus branch of anterior interventricular branch of left coronary artery.obj",
+          "sha256": "7d7f074ac3a950f9db7d4e632525aa08cb611f4ac610c2a140d6bc4b0abbd118"
+        },
+        {
+          "file": "FJ2644_BP22544_FMA3868_Conus branch of anterior interventricular branch of left coronary artery.obj",
+          "sha256": "bbab41619b7a4b5275240ab12f6003591108f70d39c18813f749d4d4d2636de8"
+        },
+        {
+          "file": "FJ2645_BP22543_FMA3872_First right anterior branch of anterior interventricular branch of left coronary artery.obj",
+          "sha256": "0e91acb8544c15e145c742c42c7c2d7d38996cc16f2596982c6ccfcf3b58c740"
+        },
+        {
+          "file": "FJ2646_BP22542_FMA3874_Second right anterior branch of anterior interventricular branch of left coronary artery.obj",
+          "sha256": "90a135de5abeea8f79af8f76b631dba9dfb679b318b08775972d96d08dc16d3c"
+        },
+        {
+          "file": "FJ2647_BP22502_FMA3876_Third right anterior branch of anterior interventricular branch of left coronary artery.obj",
+          "sha256": "b2c91c85da08afc324be6da8e010235d66ebd6df0cb412c7fea3ec44f44b05c9"
+        },
+        {
+          "file": "FJ2648_BP22495_FMA3860_Diagonal branch of anterior descending branch of left coronary artery.obj",
+          "sha256": "006d74143e679b5ce2251007675d2ca131f50fd7ded0ac5a18f6fa82467671d3"
+        },
+        {
+          "file": "FJ2649_BP19556_FMA3895_Circumflex branch of left coronary artery.obj",
+          "sha256": "16423ff420831deba4e5c8106233e7778e5fb246be8d36302d766c7624a59899"
+        },
+        {
+          "file": "FJ2650_BP19556_FMA3895_Circumflex branch of left coronary artery.obj",
+          "sha256": "e1efc5c1ef91d55e998ae89b66645a4c36e23f72350240562ee60ecbeae9b3f0"
+        },
+        {
+          "file": "FJ2651_BP19556_FMA3895_Circumflex branch of left coronary artery.obj",
+          "sha256": "409ebe0e4d2ea2504099de28853e3bbe11b1d165d5ae2f8212c22f7124f2d16c"
+        },
+        {
+          "file": "FJ2653_BP19556_FMA3895_Circumflex branch of left coronary artery.obj",
+          "sha256": "f380e4f51985b94dc14f4c7c8cf2982b386b281d3b45c475a58462b6825f8bd2"
+        },
+        {
+          "file": "FJ2654_BP19556_FMA3895_Circumflex branch of left coronary artery.obj",
+          "sha256": "2f5c858e3fa477aa5fd4d6298b3354fa4c9a8478b7d0ab5a0c8fff37f7f44405"
+        },
+        {
+          "file": "FJ2667_BP22716_FMA3818_Marginal branch of right coronary artery.obj",
+          "sha256": "f516e305a8c7362dc92d808896b1b3c1e259a0826b1003506246e01df529f721"
+        },
+        {
+          "file": "FJ2668_BP22716_FMA3818_Marginal branch of right coronary artery.obj",
+          "sha256": "1f5ab9505a02b6c20232dab1643627f8246e9414a264beec40b5da4b475c5349"
+        },
+        {
+          "file": "FJ2670_BP24006_FMA3807_Conus branch of right coronary artery.obj",
+          "sha256": "fec68104d5f5364d1f66cf0e9f778ad0374356e3d77835df961665d1b7ddcf28"
+        },
+        {
+          "file": "FJ2671_BP24086_FMA3815_First anterior ventricular branch of right coronary artery.obj",
+          "sha256": "0de95203caeb8c7230653a6e5956de031a2f9bfa4f5c7ebcdd9aa6d23e9f7b1b"
+        },
+        {
+          "file": "FJ2672_BP22716_FMA3818_Marginal branch of right coronary artery.obj",
+          "sha256": "e0ae539f652a3b81cccf57db521fd29e328b2fe8f49e703e76556323fbbe1c9c"
+        },
+        {
+          "file": "FJ2673_BP24086_FMA3815_First anterior ventricular branch of right coronary artery.obj",
+          "sha256": "80de74555454b5a2940d77894cb6784f4f457db0e2829ea1a32dd822194ba70f"
+        },
+        {
+          "file": "FJ2674_BP22716_FMA3818_Marginal branch of right coronary artery.obj",
+          "sha256": "94cd64b24fdf52ed605e5ecfae7187a44a7ef087be64a9f67e340206d9b7a506"
+        },
+        {
+          "file": "FJ2675_BP22716_FMA3818_Marginal branch of right coronary artery.obj",
+          "sha256": "d4938b2a2a30b58c89971718f301df4e5bf77e907f19611f9d570a03cc0c1726"
+        },
+        {
+          "file": "FJ2676_BP24006_FMA3807_Conus branch of right coronary artery.obj",
+          "sha256": "19973b556aca4e69e52f2d44b443dac39188845e1c14b14b743af3570f870cb1"
+        },
+        {
+          "file": "FJ2677_BP24086_FMA3815_First anterior ventricular branch of right coronary artery.obj",
+          "sha256": "19d779cd97d2fd8233d355204f6a4ccd0aa6802ddd67ffa08a3e72f8fb5452f8"
+        },
+        {
+          "file": "FJ2692_BP21601_FMA3840_Posterior interventricular branch of right coronary artery.obj",
+          "sha256": "79eca3f37e910c11dcd6dc50ba5ea2cf47397f5955d34b338f86047eced667a7"
+        },
+        {
+          "file": "FJ2695_BP21601_FMA3840_Posterior interventricular branch of right coronary artery.obj",
+          "sha256": "1f68d1b2bc899aed07b9cb2aa4abe81a3aef266a3bf59905e9dd57d916826769"
+        },
+        {
+          "file": "FJ2696_BP21601_FMA3840_Posterior interventricular branch of right coronary artery.obj",
+          "sha256": "1973fb404a01ba0f265f0a66d286f0b5ba973c9f4d586bf2f02d47f5e9135ba9"
+        },
+        {
+          "file": "FJ2697_BP21601_FMA3840_Posterior interventricular branch of right coronary artery.obj",
+          "sha256": "284901b570acf2d229ed7eb1670adee03f029bedbe63690f91ef3db51b158c10"
+        },
+        {
+          "file": "FJ2698_BP21601_FMA3840_Posterior interventricular branch of right coronary artery.obj",
+          "sha256": "48f79bb1d8749bc7653b5b228f35399a4ec58a80a121d88ce133fe8e215d565e"
+        },
+        {
+          "file": "FJ2699_BP21601_FMA3840_Posterior interventricular branch of right coronary artery.obj",
+          "sha256": "ef325475c48b0e7540bd38b5ed9c71b25f69c91fc72ece91bd3660babf563959"
+        },
+        {
+          "file": "FJ2700_BP21601_FMA3840_Posterior interventricular branch of right coronary artery.obj",
+          "sha256": "56469da81291c2c43d304f47a368bd1506674bf678de51d84d41a091a355a84d"
+        },
+        {
+          "file": "FJ2714_BP21137_FMA3837_First posterior ventricular branch of right coronary artery.obj",
+          "sha256": "61c593292292a0cd7d0c8a07e926f5a733a48ef5773f9b8cf655919bfe695e75"
+        },
+        {
+          "file": "FJ2715_BP21137_FMA3837_First posterior ventricular branch of right coronary artery.obj",
+          "sha256": "5ebbf7f842f9d8790b13f8f0b2f31b901eacce297e44d60766e87020214b0a0b"
+        },
+        {
+          "file": "FJ2716_BP21137_FMA3837_First posterior ventricular branch of right coronary artery.obj",
+          "sha256": "b452e429f9c1cd8171cf4fbfb467bbf97b919058f4b67e21d068064e941f13af"
+        },
+        {
+          "file": "FJ2717_BP21137_FMA3837_First posterior ventricular branch of right coronary artery.obj",
+          "sha256": "7b20b0975c0f853fd6312064dad7dc846d59268b3b3fdff093f2782c2a1084aa"
+        },
+        {
+          "file": "FJ2718_BP21137_FMA3837_First posterior ventricular branch of right coronary artery.obj",
+          "sha256": "78f5059663ad69f539b121a4605a65088cda340e5e849f8d542264ce8d37046c"
+        },
+        {
+          "file": "FJ2719_BP21137_FMA3837_First posterior ventricular branch of right coronary artery.obj",
+          "sha256": "627965cba959805ad1e156f5b0ea7737c25c8652aaf2c72785eb9fe31ba2f3e9"
+        },
+        {
+          "file": "FJ2720_BP21137_FMA3837_First posterior ventricular branch of right coronary artery.obj",
+          "sha256": "4239919017c3e5aada9887ae195098d3af01b838b3e88826d9818554b674655d"
+        },
+        {
+          "file": "FJ2721_BP21137_FMA3837_First posterior ventricular branch of right coronary artery.obj",
+          "sha256": "8dcceb2631ad48a615be275006de1e813406f51b517f6395f49ea4d0707df17f"
+        },
+        {
+          "file": "FJ2722_BP21137_FMA3837_First posterior ventricular branch of right coronary artery.obj",
+          "sha256": "88a858bdffaa26ec0d1c85f9281c0e56f81d1f3203f0a58f49e0528cf172da20"
+        },
+        {
+          "file": "FJ2723_BP20573_FMA3802_Trunk of right coronary artery.obj",
+          "sha256": "641cff7c6ee08e0a78eee7368a0ea3be421c689fd6f289656312b897226d6538"
+        },
+        {
+          "file": "FJ2737_BP24008_FMA3855_Trunk of left coronary artery.obj",
+          "sha256": "b9ad2fdf82c49029a65ab124e98ac8ce8cc58b20b77ce392cfac004d6bbab7b1"
+        },
+        {
+          "file": "FJ3660_BP19556_FMA3895_Circumflex branch of left coronary artery.obj",
+          "sha256": "4534e782075378e269f6331c4571b99d96b149394f5ae7cae95f2c9c87a9e6f7"
+        },
+        {
+          "file": "FJ3661_BP19556_FMA3895_Circumflex branch of left coronary artery.obj",
+          "sha256": "41913ed9ff723c49a2c042bece65676fa497bfe0d13ac84b26292877ba9c64c3"
+        },
+        {
+          "file": "FJ3662_BP19556_FMA3895_Circumflex branch of left coronary artery.obj",
+          "sha256": "4201be8bc205a13e0e1a2f6cbd1b59e8d32409a633d194366200544eea3b3e4f"
+        },
+        {
+          "file": "FJ3663_BP19556_FMA3895_Circumflex branch of left coronary artery.obj",
+          "sha256": "1920e0421ba1e02a94908699421af34afd20fe9085904a33c8e0b1f04a0a0049"
+        },
+        {
+          "file": "FJ3664_BP19556_FMA3895_Circumflex branch of left coronary artery.obj",
+          "sha256": "ae91ea9e37003af7729124f1bde94d7a2d3eb3411d8c333584aae41d6a8c66e3"
+        },
+        {
+          "file": "FJ3665_BP19556_FMA3895_Circumflex branch of left coronary artery.obj",
+          "sha256": "51de8bdd5f8fdc1f7afacafeeacb65bb6f43d06cc0edc573733871bbc6ac64c7"
+        },
+        {
+          "file": "FJ3666_BP19556_FMA3895_Circumflex branch of left coronary artery.obj",
+          "sha256": "064dba3b9395d14bc039e74f7b615f56816e8145b167cd75579e41dc08b3c697"
+        },
+        {
+          "file": "FJ6164_BP24013_FMA74912_Trunk of anterior interventricular branch of left coronary artery.obj",
+          "sha256": "2788459996be16b13a54c7e3108d29d13fac37239f3f1f6720f9ef502475f707"
+        },
+        {
+          "file": "FJ6182_BP29653_FMA74923_Trunk of circumflex branch of left coronary artery.obj",
+          "sha256": "0d4cc1a652dbb9068b768684e13ac2b97d273516f2de870d7a784dcc75fdec27"
+        }
+      ]
+    },
+    {
+      "name": "pulmonary",
+      "positionOffset": 1766436,
+      "positionCount": 2613,
+      "indexOffset": 1776888,
+      "indexCount": 3906,
+      "sources": [
+        {
+          "file": "FJ2966_BP23682_FMA8612_Pulmonary trunk.obj",
+          "sha256": "21cd36edc646954c795e8bd658f97448953b3e09d3e0c8b78f78711d7c9ef776"
+        }
+      ]
+    },
+    {
+      "name": "anatomicalAorta",
+      "positionOffset": 1792512,
+      "positionCount": 1830,
+      "indexOffset": 1799832,
+      "indexCount": 3198,
+      "sources": [
+        {
+          "file": "FJ3411_BP23913_FMA3768_Arch of aorta.obj",
+          "sha256": "6b72258bcc413abbcf6193e11575933d08f3ba960b52a7b8462a7b0ccb4607eb"
+        },
+        {
+          "file": "FJ3413_BP20272_FMA3736_Ascending aorta.obj",
+          "sha256": "6903aed5746a4e210ebd7c0a15bba69707b2ef29398b97903bc2815c2f82c2bc"
+        }
+      ]
+    }
+  ],
+  "bytes": 1812624,
+  "source": "BodyParts3D / Anatomography 4.3, DBCLS",
+  "repository": "https://github.com/olivercase/body_parts_3d_api",
+  "license": "CC BY-SA 2.1 Japan (as supplied by the source mirror)",
+  "transform": "(x-21.4223)/100, (z-1245)/100, -(y+122.0087)/100",
+  "changes": "OBJ to indexed float32/uint32; common axes/origin/units changed; no decimation or individual repositioning"
+}

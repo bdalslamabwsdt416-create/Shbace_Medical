@@ -1,0 +1,753 @@
+{
+  "schema": "shbace-auscultation-heart-audit-v1",
+  "uniqueSoundCount": 77,
+  "selectedAudioFileCount": 77,
+  "excludedDuplicateVariantCount": 57,
+  "selectedRecordings": [
+    {
+      "title": "Aneurysm of Sinus of Valsalva",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Aneurysm of Sinus of Valsalva.mp3"
+    },
+    {
+      "title": "Aortic Regurgitation",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Aortic Regurgitation- normal speed.mp3"
+    },
+    {
+      "title": "Aortic Regurgitation - Conflicting Ejection-Systolic Label",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Aortic Regurgitation  Ejection Systolic Murmur- normal speed.mp3"
+    },
+    {
+      "title": "Aortic Regurgitation and Mild Stenosis",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Aortic Regurgitation and Mild Stenosis.mp3"
+    },
+    {
+      "title": "Aortic Sclerosis - Musical Murmur",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Aortic Sclerosis - Musical Murmur.mp3"
+    },
+    {
+      "title": "Aortic Stenosis",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Aortic Stenosis- normal speed.mp3"
+    },
+    {
+      "title": "Atrial Septal Defect",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Atrial Septal Defect- normal speed.mp3"
+    },
+    {
+      "title": "Atrial Septal Defect and Ventricular Septal Defect",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Atrial Septal Defect and Ventricular Septal Defect- normal speed.mp3"
+    },
+    {
+      "title": "Atrioventricular Septal Defect status post Pulmonary Artery Banding",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Atrioventricular Septal Defect status post Pulmonary Artery Banding.mp3"
+    },
+    {
+      "title": "Bicuspid Aortic Valve and Systolic Click",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Bicuspid Aortic Valve and Systolic Click- normal speed.mp3"
+    },
+    {
+      "title": "Bicuspid Aortic Valve with Mild Stenosis",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Bicuspid Aortic Valve and Mild Stenosis- normal speed.mp3"
+    },
+    {
+      "title": "Bicuspid Aortic Valve- Apex 1",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Bicuspid Aortic Valve- Apex 1.mp3"
+    },
+    {
+      "title": "Bicuspid Aortic Valve- Apex 2",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Bicuspid Aortic Valve- Apex 2.mp3"
+    },
+    {
+      "title": "Bicuspid Aortic Valve- LUSB",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Bicuspid Aortic Valve- LUSB.mp3"
+    },
+    {
+      "title": "Blood Pressure- Korotkoff Sounds 1",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Blood Pressure- Korotkoff Sounds 1.mp3"
+    },
+    {
+      "title": "Blood Pressure- Korotkoff Sounds 2",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Blood Pressure- Korotkoff Sounds 2.mp3"
+    },
+    {
+      "title": "Carbomedics Aortic Valve Prosthesis",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Carbomedics Aortic Valve Prosthesis.mp3"
+    },
+    {
+      "title": "CirCor 13918 - Holosystolic Murmur - Plateau Low Blowing - Tricuspid Point",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Clinical Murmur Examples - CirCor/CirCor 13918 - Holosystolic Murmur - Plateau Low Blowing - Tricuspid Point.mp3"
+    },
+    {
+      "title": "CirCor 40840 - Mid-Systolic Murmur - Diamond High Harsh - Pulmonary Point",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Clinical Murmur Examples - CirCor/CirCor 40840 - Mid-Systolic Murmur - Diamond High Harsh - Pulmonary Point.mp3"
+    },
+    {
+      "title": "CirCor 46778 - Combined Holosystolic and Early Diastolic Murmur - Mitral Point",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Clinical Murmur Examples - CirCor/CirCor 46778 - Combined Holosystolic and Early Diastolic Murmur - Mitral Point.mp3"
+    },
+    {
+      "title": "CirCor 49595 - Holosystolic Murmur - Diamond Medium Blowing - Aortic Point",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Clinical Murmur Examples - CirCor/CirCor 49595 - Holosystolic Murmur - Diamond Medium Blowing - Aortic Point.mp3"
+    },
+    {
+      "title": "CirCor 85119 - Early Diastolic Murmur - Decrescendo Low Blowing - Pulmonary Point",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Clinical Murmur Examples - CirCor/CirCor 85119 - Early Diastolic Murmur - Decrescendo Low Blowing - Pulmonary Point.mp3"
+    },
+    {
+      "title": "Coarctation of the Aorta",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Coarcitation of the Aorta- normal speed.mp3"
+    },
+    {
+      "title": "Complete Heart Block with Tricuspid Regurgitation",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Complete Heart Block with Tricuspid Regurgitation- normal speed.mp3"
+    },
+    {
+      "title": "Congestive Heart Failure",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Congestive Heart Failure- normal speed.mp3"
+    },
+    {
+      "title": "Continuous Murmur with Restrictive Patent Ductus Arteriosus",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Continuous Murmur with Restrictive Patent Ductus Arteriosus.mp3"
+    },
+    {
+      "title": "Holosystolic Murmur",
+      "variant": "Teaching recording - 70 kbps",
+      "path": "Cardiac Auscultation/Additional/Holosystolic Murmur - Heart Sounds - MEDZCOOL(MP3_70K).mp3"
+    },
+    {
+      "title": "Hypertrophic Cardiomyopathy",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Hypertrophic Cardiomyopathy- normal speed.mp3"
+    },
+    {
+      "title": "Hypertrophic Cardiomyopathy- Apex LUSB Stand-Squat-Stand LLSB RUSB",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Hypertrophic Cardiomyopathy- Apex  LUSB  Stand-Squat-Stand  LLSB  RUSB.mp3"
+    },
+    {
+      "title": "Infective Endocarditis Mitral Regurgitation",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Infective Endocarditis Mitral Regurgitation- normal speed.mp3"
+    },
+    {
+      "title": "Innocent Systolic Murmur",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Innocent Systolic Murmur.mp3"
+    },
+    {
+      "title": "Loud S1",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Loud S1.mp3"
+    },
+    {
+      "title": "Mid-Systolic Click",
+      "variant": "Patient recording",
+      "path": "Cardiac Auscultation/Mid-Systolic Click - Patient Recording of Mid-Systolic Click.mp3"
+    },
+    {
+      "title": "Minor Cardiomyopathy",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Minor Cardiomyopathy- normal speed.mp3"
+    },
+    {
+      "title": "Mitral Regurgitation",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Mitral Regurgitation- normal speed.mp3"
+    },
+    {
+      "title": "Mitral Regurgitation Tricuspid Regurgitation",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Mitral Regurgitation Tricuspid Regurgitation- normal speed.mp3"
+    },
+    {
+      "title": "Mitral Stenosis",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Mitral Stenosis- normal speed.mp3"
+    },
+    {
+      "title": "Mitral Valve Prolapse",
+      "variant": "Teaching recording - 70 kbps",
+      "path": "Cardiac Auscultation/Additional/Mitral Valve Prolapse - Heart Sounds - MEDZCOOL(MP3_70K).mp3"
+    },
+    {
+      "title": "Normal Heart Sound",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Normal Heart Sound- normal speed.mp3"
+    },
+    {
+      "title": "Opening Snap",
+      "variant": "MP3 source - 70 kbps",
+      "path": "Cardiac Auscultation/Additional/Heart Sound - Opening Snap(MP3_70K).mp3"
+    },
+    {
+      "title": "Patent Ductus Arteriosus",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Patent Ductus Arteriosus- normal speed.mp3"
+    },
+    {
+      "title": "Pericarditis",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Pericarditis- normal speed.mp3"
+    },
+    {
+      "title": "Perimembranous Ventricular Septal Defect",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Perimembranous Ventricular Septal Defect- normal speed.mp3"
+    },
+    {
+      "title": "Post Fontan Procedure with Ventricular Septal Defect",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Post Fontan Procedure with Ventricular Septal Defect- normal speed.mp3"
+    },
+    {
+      "title": "Post Pulsatile Glenn Procedure",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Post Pulsatile Glenn Procedure- normal speed.mp3"
+    },
+    {
+      "title": "Prosthetic Aortic Valve",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Prosthetic Aortic Valve.mp3"
+    },
+    {
+      "title": "Prosthetic Mitral Valve Closing Click",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Prosthetic Mitral Valve Closing Click- normal speed.mp3"
+    },
+    {
+      "title": "Prosthetic Mitral Valve Systolic Murmur Mid-Diastolic Murmur",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Prosthetic Mitral Valve Systolic Murmur Mid-Diastolic Murmur- normal speed.mp3"
+    },
+    {
+      "title": "Prosthetic Valve Aortic Valve Mitral Regurgitation",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Prosthetic Valve Aortic Valve Mitral Regurgitation- normal speed.mp3"
+    },
+    {
+      "title": "Prosthetic Valve Systolic Murmur",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Prosthetic Valve Systolic Murmur- normal speed.mp3"
+    },
+    {
+      "title": "Pulmonary Atresia and BTT Shunt",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Pulmonary Atresia and BTT Shunt.mp3"
+    },
+    {
+      "title": "Pulmonary Regurgitation",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Pulmonic Regurgitation.mp3"
+    },
+    {
+      "title": "Pulmonary Stenosis",
+      "variant": "Mild lesion",
+      "path": "Cardiac Auscultation/Pulmonary Stenosis- mild.mp3"
+    },
+    {
+      "title": "Restrictive Apical Muscular Ventricular Septal Defect",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Restrictive Apical Muscular Ventricular Septal Defect- normal speed.mp3"
+    },
+    {
+      "title": "Restrictive High Muscular Ventricular Septal Defect",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Restrictive High Muscular Ventricular Septal Defect.mp3"
+    },
+    {
+      "title": "Restrictive Membranous Ventricular Septal Defect",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Restrictive Membranous Ventricular Septal Defect- normal speed.mp3"
+    },
+    {
+      "title": "Restrictive Mid Muscular Ventricular Septal Defect",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Restrictive Mid Muscular Ventricular Septal Defect- normal speed.mp3"
+    },
+    {
+      "title": "Restrictive Muscular Ventricular Septal Defect",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Restrictive Muscular Ventricular Septal Defect.mp3"
+    },
+    {
+      "title": "Restrictive Perimembranous Ventricular Septal Defect",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Restrictive Perimembranous Ventricular Septal Defect- normal speed.mp3"
+    },
+    {
+      "title": "Right Bundle Branch Block",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Right Bundle Branch Block- normal speed.mp3"
+    },
+    {
+      "title": "S2 - Fixed Splitting",
+      "variant": "Patient recording",
+      "path": "Cardiac Auscultation/S2 - Fixed Splitting - Patient Recording of S2 - Fixed Splitting.mp3"
+    },
+    {
+      "title": "S2 - Persistent Splitting",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/S2 - Persistent Splitting.mp3"
+    },
+    {
+      "title": "S2 - Physiological Split",
+      "variant": "Patient recording",
+      "path": "Cardiac Auscultation/S2 - Physiological Split - Patient Recording of S2 - Physiological Split.mp3"
+    },
+    {
+      "title": "S2 Splitting",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/S2 split- normal speed.mp3"
+    },
+    {
+      "title": "S4 Gallop",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/S4 Gallop- normal speed.mp3"
+    },
+    {
+      "title": "Small Muscular Ventricular Septal Defect",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Small Muscular Ventricular Septal Defect- normal speed.mp3"
+    },
+    {
+      "title": "Split S1 - Markedly",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Split S1 - Markedly.mp3"
+    },
+    {
+      "title": "Split S1 - Minimally",
+      "variant": "Patient recording",
+      "path": "Cardiac Auscultation/Split S1 - Minimally - Patient Recording of Split S1 - Minimally.mp3"
+    },
+    {
+      "title": "Still's (Vibratory) Murmur",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Still’s (Vibratory) Murmur.mp3"
+    },
+    {
+      "title": "Subaortic Stenosis",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Subaortic Stenosis.mp3"
+    },
+    {
+      "title": "Systolic Ejection Murmur from AV Dialysis Fistula",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Systolic Ejection Murmur from AV Dialysis Fistula.mp3"
+    },
+    {
+      "title": "Takotsubo Cardiomyopathy",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Takotsubo Cardiomyopathy.mp3"
+    },
+    {
+      "title": "Tetralogy of Fallot with Pulmonary Regurgitation",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Tetralogy of Fallot with Pulmonary Regurgitation.mp3"
+    },
+    {
+      "title": "Third Heart Sound (S3)",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Normal Third Heart Sound (S3).mp3"
+    },
+    {
+      "title": "Tricuspid Stenosis",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Tricuspid Stenosis.mp3"
+    },
+    {
+      "title": "Ventricular Septal Defect",
+      "variant": "Normal speed",
+      "path": "Cardiac Auscultation/Ventricular Septal Defect- normal speed.mp3"
+    },
+    {
+      "title": "Ventricular Septal Defect after a Starflex device closure",
+      "variant": "Standard recording",
+      "path": "Cardiac Auscultation/Ventricular Septal Defect after a Starflex device closure.mp3"
+    }
+  ],
+  "excludedVariants": [
+    {
+      "title": "Bicuspid Aortic Valve and Systolic Click",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Bicuspid Aortic Valve and Systolic Click- slow.mp3"
+    },
+    {
+      "title": "Bicuspid Aortic Valve and Systolic Click",
+      "variant": "Slow speed - source variant",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Additional/Bicuspid Aortic Valve and Systolic Click- slow(MP3_70K).mp3"
+    },
+    {
+      "title": "Mid-Systolic Click",
+      "variant": "Patient recording - half speed",
+      "kind": "Patient recording (filename label)",
+      "path": "Cardiac Auscultation/Mid-Systolic Click - Patient Recording - Half Speed.mp3"
+    },
+    {
+      "title": "Mid-Systolic Click",
+      "variant": "Teaching recording",
+      "kind": "Teaching recording",
+      "path": "Cardiac Auscultation/Mid-Systolic Click - Auscultation Sounds.mp3"
+    },
+    {
+      "title": "Prosthetic Mitral Valve Closing Click",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Prosthetic Mitral Valve Closing Click- slow.mp3"
+    },
+    {
+      "title": "S2 - Fixed Splitting",
+      "variant": "Patient recording - half speed",
+      "kind": "Patient recording (filename label)",
+      "path": "Cardiac Auscultation/S2 - Fixed Splitting - Patient Recording - Half Speed.mp3"
+    },
+    {
+      "title": "S2 - Fixed Splitting",
+      "variant": "Teaching recording",
+      "kind": "Teaching recording",
+      "path": "Cardiac Auscultation/S2 - Fixed Splitting - Auscultation Sounds.mp3"
+    },
+    {
+      "title": "S2 - Physiological Split",
+      "variant": "Patient recording - half speed",
+      "kind": "Patient recording (filename label)",
+      "path": "Cardiac Auscultation/S2 - Physiological Split - Patient Recording - Half Speed.mp3"
+    },
+    {
+      "title": "S2 - Physiological Split",
+      "variant": "Teaching recording",
+      "kind": "Teaching recording",
+      "path": "Cardiac Auscultation/S2 - Physiological Split - Auscultation Sounds.mp3"
+    },
+    {
+      "title": "S2 Splitting",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/S2 Split- slow.mp3"
+    },
+    {
+      "title": "S4 Gallop",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/S4 Gallop- slow.mp3"
+    },
+    {
+      "title": "Split S1 - Minimally",
+      "variant": "Patient recording - half speed",
+      "kind": "Patient recording (filename label)",
+      "path": "Cardiac Auscultation/Split S1 - Minimally - Patient Recording - Half Speed.mp3"
+    },
+    {
+      "title": "Split S1 - Minimally",
+      "variant": "Teaching recording",
+      "kind": "Teaching recording",
+      "path": "Cardiac Auscultation/Split S1 - Minimally - Auscultation Sounds.mp3"
+    },
+    {
+      "title": "Atrial Septal Defect",
+      "variant": "Standard recording",
+      "kind": "Audio example",
+      "path": "Cardiac Auscultation/Atrial Septal Defect.mp3"
+    },
+    {
+      "title": "Atrial Septal Defect and Ventricular Septal Defect",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Atrial Septal Defect and Ventricular Septal Defect- slow.mp3"
+    },
+    {
+      "title": "Atrial Septal Defect",
+      "variant": "Large defect",
+      "kind": "Audio example",
+      "path": "Cardiac Auscultation/Atrial Septal Defect- large.mp3"
+    },
+    {
+      "title": "Atrial Septal Defect",
+      "variant": "Large secundum defect",
+      "kind": "Audio example",
+      "path": "Cardiac Auscultation/Atrial Septal Defect- large secundum.mp3"
+    },
+    {
+      "title": "Atrial Septal Defect",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Atrial Septal Defect- slow.mp3"
+    },
+    {
+      "title": "Coarctation of the Aorta",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Coarcitation of the Aorta- slow.mp3"
+    },
+    {
+      "title": "Coarctation of the Aorta",
+      "variant": "Standard recording",
+      "kind": "Audio example",
+      "path": "Cardiac Auscultation/Coarctation of the Aorta.mp3"
+    },
+    {
+      "title": "Patent Ductus Arteriosus",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Patent Ductus Arteriosus- slow.mp3"
+    },
+    {
+      "title": "Perimembranous Ventricular Septal Defect",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Perimembranous Ventricular Septal Defect- slow.mp3"
+    },
+    {
+      "title": "Restrictive Apical Muscular Ventricular Septal Defect",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Restrictive Apical Muscular Ventricular Septal Defect- slow.mp3"
+    },
+    {
+      "title": "Restrictive Membranous Ventricular Septal Defect",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Restrictive Membranous Ventricular Septal Defect- slow.mp3"
+    },
+    {
+      "title": "Restrictive Mid Muscular Ventricular Septal Defect",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Restrictive Mid Muscular Ventricular Septal Defect- slow.mp3"
+    },
+    {
+      "title": "Restrictive Perimembranous Ventricular Septal Defect",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Restrictive Perimembranous Ventricular Septal Defect- slow.mp3"
+    },
+    {
+      "title": "Small Muscular Ventricular Septal Defect",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Small Muscular Ventricular Septal Defect- slow.mp3"
+    },
+    {
+      "title": "Ventricular Septal Defect",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Ventricular Septal Defect- slow.mp3"
+    },
+    {
+      "title": "Normal Heart Sound",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Normal Heart Sound- slow.mp3"
+    },
+    {
+      "title": "Congestive Heart Failure",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Congestive Heart Failure- slow.mp3"
+    },
+    {
+      "title": "Hypertrophic Cardiomyopathy",
+      "variant": "Standard recording",
+      "kind": "Audio example",
+      "path": "Cardiac Auscultation/Hypertrophic Cardiomyopathy.mp3"
+    },
+    {
+      "title": "Hypertrophic Cardiomyopathy",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Hypertrophic Cardiomyopathy- slow.mp3"
+    },
+    {
+      "title": "Minor Cardiomyopathy",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Minor Cardiomyopathy- slow.mp3"
+    },
+    {
+      "title": "Pericarditis",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Pericarditis- slow.mp3"
+    },
+    {
+      "title": "Right Bundle Branch Block",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Right Bundle Branch Block- slow.mp3"
+    },
+    {
+      "title": "Aortic Regurgitation - Conflicting Ejection-Systolic Label",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Aortic Regurgitation  Ejection Systolic Murmur- slow.mp3"
+    },
+    {
+      "title": "Post Fontan Procedure with Ventricular Septal Defect",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Post Fontan Procedure with Ventricular Septal Defect- slow.mp3"
+    },
+    {
+      "title": "Post Pulsatile Glenn Procedure",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Post Pulsatile Glenn Procedure- slow.mp3"
+    },
+    {
+      "title": "Aortic Regurgitation",
+      "variant": "Normal speed",
+      "kind": "Audio example",
+      "path": "Cardiac Auscultation/Aortic Insufficiency- normal speed.mp3"
+    },
+    {
+      "title": "Aortic Regurgitation",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Aortic Insufficiency- slow.mp3"
+    },
+    {
+      "title": "Aortic Regurgitation",
+      "variant": "Teaching recording - 70 kbps",
+      "kind": "Teaching recording",
+      "path": "Cardiac Auscultation/Additional/Aortic Regurgitation  - Heart Sounds - MEDZCOOL(MP3_70K).mp3"
+    },
+    {
+      "title": "Aortic Regurgitation",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Aortic Regurgitation- slow.mp3"
+    },
+    {
+      "title": "Mitral Stenosis",
+      "variant": "Teaching recording - 70 kbps",
+      "kind": "Teaching recording",
+      "path": "Cardiac Auscultation/Additional/Mitral Stenosis Heart Sound - MEDZCOOOL(MP3_70K).mp3"
+    },
+    {
+      "title": "Mitral Stenosis",
+      "variant": "Rheumatic example",
+      "kind": "Audio example",
+      "path": "Cardiac Auscultation/Mitral Stenosis- rheumatic.mp3"
+    },
+    {
+      "title": "Mitral Stenosis",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Mitral Stenosis- slow.mp3"
+    },
+    {
+      "title": "Mitral Regurgitation Tricuspid Regurgitation",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Mitral Regurgitation Tricuspid Regurgitation -slow.mp3"
+    },
+    {
+      "title": "Prosthetic Valve Aortic Valve Mitral Regurgitation",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Prosthetic Valve Aortic Valve Mitral Regurgitation- slow.mp3"
+    },
+    {
+      "title": "Aortic Stenosis",
+      "variant": "Standard recording",
+      "kind": "Audio example",
+      "path": "Cardiac Auscultation/Aortic Stenosis.mp3"
+    },
+    {
+      "title": "Aortic Stenosis",
+      "variant": "MP3 source - 128 kbps",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Additional/Aortic stenosis murmur(MP3_128K).mp3"
+    },
+    {
+      "title": "Aortic Stenosis",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Aortic Stenosis- slow.mp3"
+    },
+    {
+      "title": "Bicuspid Aortic Valve with Mild Stenosis",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Bicuspid Aortic Valve and Mild Stenosis- slow.mp3"
+    },
+    {
+      "title": "Bicuspid Aortic Valve with Mild Stenosis",
+      "variant": "Standard recording",
+      "kind": "Audio example",
+      "path": "Cardiac Auscultation/Bicuspid Aortic Valve with Mild Stenosis.mp3"
+    },
+    {
+      "title": "Infective Endocarditis Mitral Regurgitation",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Infective Endocarditis Mitral Regurgitation- slow.mp3"
+    },
+    {
+      "title": "Mitral Regurgitation",
+      "variant": "Moderate murmur",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Mitral Regurgitation- moderate.mp3"
+    },
+    {
+      "title": "Mitral Regurgitation",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Mitral Regurgitation- slow.mp3"
+    },
+    {
+      "title": "Prosthetic Valve Systolic Murmur",
+      "variant": "Slow speed",
+      "kind": "Speed / source variant",
+      "path": "Cardiac Auscultation/Prosthetic Valve Systolic Murmur- slow.mp3"
+    },
+    {
+      "title": "Pulmonary Stenosis",
+      "variant": "Mild lesion",
+      "kind": "Audio example",
+      "path": "Cardiac Auscultation/Pulmonic Stenosis- mild.mp3"
+    }
+  ],
+  "missingAudioFiles": 0,
+  "modelFiles": [
+    "assets/models/thorax.bin",
+    "assets/models/thorax.json",
+    "assets/models/valve-heart.bin",
+    "assets/models/valve-heart.json"
+  ],
+  "fileCount": 82,
+  "audioBytes": 10071261,
+  "totalBytes": 25158372,
+  "version": "3bd7282a3e2bcaf5f2d5602fe91ddd7d87a9fd742762619de3e63508a6924f84",
+  "excludedSystems": [
+    "lung"
+  ],
+  "externalAudioIncluded": false,
+  "licenseReview": "Pending before publication to a public GitHub repository"
+}

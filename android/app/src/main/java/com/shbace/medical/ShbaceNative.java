@@ -46,11 +46,13 @@ final class ShbaceNative {
 
     private final Activity activity;
     private final RemoteContentManager remoteContent;
+    private final AuscultationPackManager auscultationPacks;
     private WebView printView;            // kept alive until the print job has been handed to the PrintManager
 
     ShbaceNative(Activity activity, WebView webView) {
         this.activity = activity;
         this.remoteContent = new RemoteContentManager(activity, webView);
+        this.auscultationPacks = new AuscultationPackManager(activity, webView);
     }
 
     /** Open only official GitHub HTTPS pages/assets in the user's external browser. */
@@ -411,8 +413,26 @@ final class ShbaceNative {
     @JavascriptInterface
     public boolean startRemoteContentRollback() { return remoteContent.startRollback(); }
 
+    // Independent offline Heart/Lung auscultation packs. These APIs never touch QBank state.
+    @JavascriptInterface
+    public String getAuscultationPackState(String system) { return auscultationPacks.getState(system); }
+
+    @JavascriptInterface
+    public boolean startAuscultationPackDownload(String system) { return auscultationPacks.startDownload(system); }
+
+    @JavascriptInterface
+    public long getAuscultationFileSize(String system, String relativePath) {
+        return auscultationPacks.getFileSize(system, relativePath);
+    }
+
+    @JavascriptInterface
+    public String readAuscultationFileBase64Chunk(String system, String relativePath, long offset, int maxBytes) {
+        return auscultationPacks.readBase64Chunk(system, relativePath, offset, maxBytes);
+    }
+
     void shutdown() {
         try { remoteContent.shutdown(); } catch (Throwable ignored) {}
+        try { auscultationPacks.shutdown(); } catch (Throwable ignored) {}
         try { if (tts != null) { tts.stop(); tts.shutdown(); tts = null; ttsReady = false; } }
         catch (Throwable ignored) {}
         try { activity.getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); }

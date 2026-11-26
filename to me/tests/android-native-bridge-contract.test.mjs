@@ -61,12 +61,12 @@ function scanJavaScriptCalls(sources, interfaceName) {
 
 const jsSources = [
   { path: "index.html", content: index },
-  ...readdirSync(jsDir)
-    .filter((name) => name.endsWith(".js"))
+  ...walk(jsDir)
+    .filter((path) => path.endsWith(".js"))
     .sort()
-    .map((name) => ({
-      path: "js/" + name,
-      content: readFileSync(resolve(jsDir, name), "utf8")
+    .map((path) => ({
+      path: relative(root, path).replace(/\\\\/g, "/"),
+      content: readFileSync(path, "utf8")
     }))
 ];
 
@@ -99,7 +99,7 @@ test("all @JavascriptInterface methods are declared in the reviewed Android brid
     const methods = exposedMethods(readFileSync(path, "utf8"));
     if (!methods.length) continue;
 
-    const owner = relative(repositoryRoot, path);
+    const owner = relative(repositoryRoot, path).replaceAll("\\", "/");
     const declaration = allowedOwners.get(owner);
     assert.ok(declaration, "unreviewed JavaScript interface owner: " + owner);
     discovered.set(declaration.name, methods);

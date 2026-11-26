@@ -425,7 +425,15 @@
       '.phone .shb-ausc-parent[aria-expanded=true] .shb-ausc-chevron{transform:rotate(180deg)}' +
       '.phone .shb-ausc-children{display:grid;gap:5px;padding:7px 0 2px 9px}' +
       '.phone .shb-ausc-children[hidden]{display:none!important}' +
-      '.phone .shb-ausc-child{box-sizing:border-box;min-height:45px;display:flex;align-items:center;gap:11px;padding:8px 12px;border-inline-start:2px solid rgba(56,189,248,.28);border-radius:0 11px 11px 0;color:#b9cde4;background:rgba(18,43,70,.34);font-size:13.5px;font-weight:650}' +
+      '.phone .shb-ausc-child{box-sizing:border-box;min-height:45px;display:flex;align-items:center;gap:7px;padding:5px 7px 5px 10px;border-inline-start:2px solid rgba(56,189,248,.28);border-radius:0 11px 11px 0;color:#b9cde4;background:rgba(18,43,70,.34);font-size:13.5px;font-weight:650}' +
+      '.phone .shb-ausc-child-open{flex:1;min-width:0;min-height:35px;display:flex;align-items:center;gap:10px;padding:4px 2px;border:0;background:transparent;color:inherit;text-align:left;font:inherit}' +
+      '.phone .shb-ausc-child-open svg{width:19px;height:19px;flex:none}' +
+      '.phone .shb-ausc-download{width:34px;height:34px;flex:none;display:grid;place-items:center;border:1px solid rgba(56,189,248,.2);border-radius:10px;background:rgba(44,139,210,.1);color:#8fd8ff}' +
+      '.phone .shb-ausc-download svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}' +
+      '.phone .shb-ausc-download:disabled{opacity:.65;cursor:default}' +
+      '.phone .shb-ausc-download.is-installed{color:#6ee7b7;border-color:rgba(110,231,183,.25)}' +
+      '.phone .shb-ausc-download.is-downloading{color:#8fd8ff}' +
+      '.phone .shb-ausc-download-spinner{width:15px;height:15px;border:2px solid rgba(143,216,255,.25);border-top-color:#8fd8ff;border-radius:50%;animation:shbAuscSpin .8s linear infinite}' +
       '.phone .shb-ausc-child svg{width:19px;height:19px;flex:none}' +
       '.phone .shb-ausc-child[data-system=heart] svg{color:#f28b9a}' +
       '.phone .shb-ausc-child[data-system=lung] svg{color:#64c6ff}' +
@@ -453,12 +461,22 @@
       '</button>' +
       '<div class="shb-ausc-children" id="shbAuscultationSubmenu" role="list" hidden>' +
         '<div class="shb-ausc-child" data-system="heart" role="listitem">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 8.8c0 5.1-8.8 11-8.8 11s-8.8-5.9-8.8-11A4.8 4.8 0 0 1 12 6.1a4.8 4.8 0 0 1 8.8 2.7Z"/><path d="M3.5 12h4l2-4 3.1 8 2.1-4h5.8"/></svg>' +
-          '<span>Heart Auscultation</span>' +
+          '<button type="button" class="shb-ausc-child-open" data-shb-ausc-open="heart">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 8.8c0 5.1-8.8 11-8.8 11s-8.8-5.9-8.8-11A4.8 4.8 0 0 1 12 6.1a4.8 4.8 0 0 1 8.8 2.7Z"/><path d="M3.5 12h4l2-4 3.1 8 2.1-4h5.8"/></svg>' +
+            '<span>Heart Auscultation</span>' +
+          '</button>' +
+          '<button type="button" class="shb-ausc-download" data-shb-ausc-download="heart" aria-label="Download Heart Auscultation" title="Download Heart Auscultation">' +
+            '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 18v3h16v-3"/></svg>' +
+          '</button>' +
         '</div>' +
         '<div class="shb-ausc-child" data-system="lung" role="listitem">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v8"/><path d="M10 8c-1.8 0-3.1 1.4-4.2 4.2C4.5 15.6 3.5 18 3.5 20c0 1.2 1 1.7 2.2 1.7 3.7 0 6.3-2.7 6.3-6.4V9.8C12 8.6 11.2 8 10 8Z"/><path d="M14 8c1.8 0 3.1 1.4 4.2 4.2 1.3 3.4 2.3 5.8 2.3 7.8 0 1.2-1 1.7-2.2 1.7-3.7 0-6.3-2.7-6.3-6.4V9.8C12 8.6 12.8 8 14 8Z"/><path d="M12 11c-1.2 1.4-2.4 2.1-3.7 2.1M12 11c1.2 1.4 2.4 2.1 3.7 2.1"/></svg>' +
-          '<span>Lung Auscultation</span>' +
+          '<button type="button" class="shb-ausc-child-open" data-shb-ausc-open="lung">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v8"/><path d="M10 8c-1.8 0-3.1 1.4-4.2 4.2C4.5 15.6 3.5 18 3.5 20c0 1.2 1 1.7 2.2 1.7 3.7 0 6.3-2.7 6.3-6.4V9.8C12 8.6 11.2 8 10 8Z"/><path d="M14 8c1.8 0 3.1 1.4 4.2 4.2 1.3 3.4 2.3 5.8 2.3 7.8 0 1.2-1 1.7-2.2 1.7-3.7 0-6.3-2.7-6.3-6.4V9.8C12 8.6 12.8 8 14 8Z"/><path d="M12 11c-1.2 1.4-2.4 2.1-3.7 2.1M12 11c1.2 1.4 2.4 2.1 3.7 2.1"/></svg>' +
+            '<span>Lung Auscultation</span>' +
+          '</button>' +
+          '<button type="button" class="shb-ausc-download" aria-label="Lung download will be added in its stage" title="Lung download will be added in its stage" disabled>' +
+            '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 18v3h16v-3"/></svg>' +
+          '</button>' +
         '</div>' +
       '</div>';
 
@@ -475,10 +493,19 @@
       parent.setAttribute('aria-expanded', expanded ? 'false' : 'true');
       children.hidden = expanded;
     });
+    var packUI = window.__SHBACE_AUSCULTATION_LIBRARY__;
+    if (packUI && typeof packUI.refreshDrawer === 'function') packUI.refreshDrawer();
   }
 
+  function isAuscultationApk() {
+    try {
+      var cap = window.Capacitor;
+      return !!(cap && cap.isNativePlatform && cap.isNativePlatform() &&
+        (!cap.getPlatform || cap.getPlatform() === 'android') && window.ShbaceNative);
+    } catch (_) { return false; }
+  }
   var previousToggleDrawer = window.toggleDrawer;
-  if (typeof previousToggleDrawer === 'function') {
+  if (isAuscultationApk() && typeof previousToggleDrawer === 'function') {
     window.toggleDrawer = function () {
       var result = previousToggleDrawer.apply(this, arguments);
       try {

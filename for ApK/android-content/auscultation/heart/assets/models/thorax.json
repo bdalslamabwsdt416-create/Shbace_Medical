@@ -1,0 +1,70 @@
+{
+  "meshes": [
+    {
+      "name": "skin",
+      "positionOffset": 0,
+      "positionCount": 71166,
+      "indexOffset": 284664,
+      "indexCount": 140277
+    },
+    {
+      "name": "bones",
+      "positionOffset": 845772,
+      "positionCount": 500787,
+      "indexOffset": 2848920,
+      "indexCount": 1000368
+    },
+    {
+      "name": "arteries",
+      "positionOffset": 6850392,
+      "positionCount": 7311,
+      "indexOffset": 6879636,
+      "indexCount": 14448
+    },
+    {
+      "name": "veins",
+      "positionOffset": 6937428,
+      "positionCount": 67752,
+      "indexOffset": 7208436,
+      "indexCount": 134364
+    },
+    {
+      "name": "airways",
+      "positionOffset": 7745892,
+      "positionCount": 98460,
+      "indexOffset": 8139732,
+      "indexCount": 195705
+    },
+    {
+      "name": "diaphragm",
+      "positionOffset": 8922552,
+      "positionCount": 101808,
+      "indexOffset": 9329784,
+      "indexCount": 203514
+    },
+    {
+      "name": "heart",
+      "positionOffset": 10143840,
+      "positionCount": 130542,
+      "indexOffset": 10666008,
+      "indexCount": 257820
+    },
+    {
+      "name": "lungRight",
+      "positionOffset": 11697288,
+      "positionCount": 66885,
+      "indexOffset": 11964828,
+      "indexCount": 138069
+    },
+    {
+      "name": "lungLeft",
+      "positionOffset": 12517104,
+      "positionCount": 56667,
+      "indexOffset": 12743772,
+      "indexCount": 115869
+    }
+  ],
+  "bytes": 13207248,
+  "source": "BodyParts3D 4.0 (skeleton, skin, vessels); BodyParts3D 3.0 via Kevin-Mattheus-Moerman (lung surfaces, heart wall)",
+  "transform": "x/100, (z-1230)/100, -(y+105)/100; crop original z 1000\u20131470 mm"
+}
