@@ -1,2 +1,2 @@
 # Preserve exact bytes for independently downloaded auscultation packs.
-for ApK/android-content/auscultation/** -text
+"for ApK/android-content/auscultation/**" -text
