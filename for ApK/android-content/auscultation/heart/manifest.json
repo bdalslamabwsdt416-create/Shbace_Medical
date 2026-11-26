@@ -2,8 +2,8 @@
   "schema": "shbace-auscultation-pack-v1",
   "packageId": "auscultation-heart",
   "system": "heart",
-  "version": "0e0737000a1cd55267c1494c1459d0af4aed1482a1c6b67aed39f6be94838f6d",
-  "contentVersionCode": 4,
+  "version": "b3b50bbcab179370a1d93e0ad1b752ea1b2518431c4877937f49dad394703618",
+  "contentVersionCode": 5,
   "sourceProject": "Medara_Development",
   "catalogPath": "audio-catalog.json",
   "uniqueSoundCount": 77,
@@ -111,7 +111,7 @@
     {
       "path": "audio-catalog.json",
       "bytes": 49096,
-      "sha256": "649b2bcee1afae2689c5756174522c3218274cac4174744632ea6e56b79014fd"
+      "sha256": "067fa2ddd22a5620e946709922f8764a0829619b7c97a3d85c7668595a647199"
     },
     {
       "path": "audio-library/Cardiac Auscultation/Additional/Heart Sound - Opening Snap(MP3_70K).mp3",
