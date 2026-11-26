@@ -122,7 +122,7 @@ final class AuscultationPackManager {
             if (system == null || !validPath(relativePath)) return -1L;
             JSONObject manifest = readCurrentManifest(system);
             if (manifest == null) return -1L;
-            JSONObject item = findFile(manifest.optJSONArray("files"), relativePath);
+            JSONObject item = findPackageFile(manifest, relativePath);
             if (item == null) return -1L;
             File file = installedFile(system, manifest.optString("version", ""), relativePath);
             if (file == null || !file.isFile()) return -1L;
@@ -140,7 +140,7 @@ final class AuscultationPackManager {
             if (system == null || offset < 0L || maxBytes < 1 || maxBytes > MAX_READ_CHUNK_BYTES) return "";
             JSONObject manifest = readCurrentManifest(system);
             if (manifest == null) return "";
-            JSONObject item = findFile(manifest.optJSONArray("files"), relativePath);
+            JSONObject item = findPackageFile(manifest, relativePath);
             if (item == null) return "";
             File file = installedFile(system, manifest.optString("version", ""), relativePath);
             if (file == null || !file.isFile() || file.length() != item.optLong("bytes", -1L) ||
@@ -562,6 +562,14 @@ final class AuscultationPackManager {
             if (path.equals(item.optString("path"))) return item;
         }
         return null;
+    }
+
+    // Model binaries are assembled from download chunks and stored as virtual package files.
+    // Resolve both ordinary manifest files (audio/JSON/chunks) and assembled model targets.
+    private static JSONObject findPackageFile(JSONObject manifest, String path) throws Exception {
+        JSONObject item = findFile(manifest.optJSONArray("files"), path);
+        if (item != null) return item;
+        return findFile(manifest.optJSONArray("assembledFiles"), path);
     }
 
     private static boolean containsPath(JSONArray files, String path) throws Exception {
