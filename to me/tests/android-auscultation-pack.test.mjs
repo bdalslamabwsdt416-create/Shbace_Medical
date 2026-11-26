@@ -134,6 +134,10 @@ test("Android pack manager uses the published feature branch and validates both 
   assert.match(manager, /Distinct sound title count does not match/);
   assert.match(manager, /expectedAudioFiles/);
   assert.match(manager, /safeChild/);
+  assert.equal((manager.match(/findPackageFile\\(manifest, relativePath\\)/g) || []).length, 2,
+    "both metadata and byte reads must resolve assembled model files");
+  assert.match(manager, /private static JSONObject findPackageFile/);
+  assert.match(manager, /manifest\\.optJSONArray\\("assembledFiles"\\)/);
   assert.match(manager, /current-manifest\.json/);
 });
 
