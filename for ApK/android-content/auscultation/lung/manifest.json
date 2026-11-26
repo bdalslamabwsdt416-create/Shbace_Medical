@@ -2,8 +2,8 @@
   "schema": "shbace-auscultation-pack-v1",
   "packageId": "auscultation-lung",
   "system": "lung",
-  "version": "7d1d51e952d1262b36d3ae3faa9e6bc66d22b2f3f490dfdbc513d432519ffdcb",
-  "contentVersionCode": 3,
+  "version": "8cd3a2d2b2f48d3edbbb5637859ad3fa5660f9616e9cc0a7226a4b320633afdd",
+  "contentVersionCode": 4,
   "sourceProject": "Medara_Development",
   "catalogPath": "audio-catalog.json",
   "uniqueSoundCount": 31,
@@ -97,7 +97,7 @@
     {
       "path": "attribution/kauh-source-attribution.txt",
       "bytes": 723,
-      "sha256": "8a3546c3156f8f894b051531df4c5364a1d87c503adbb576320f88c0f3e72c74"
+      "sha256": "a56372415b9f32247684745f05f4962f471e5588a669debf770c4178a40692c0"
     },
     {
       "path": "attribution/medara-credits.html",
@@ -107,7 +107,7 @@
     {
       "path": "audio-catalog.json",
       "bytes": 49614,
-      "sha256": "c8932aeb3bb2363aa434056ff80a34812d7cfa4997a450bad64b59a7f8410dad"
+      "sha256": "315f7dea2139916043bfe19cffb7e2c7f2f15d3c4c7f59f5b753aff2328bfdec"
     },
     {
       "path": "audio-library/Abnormal Bronchophony - Auscultation Sounds.mp3",
