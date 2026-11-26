@@ -158,13 +158,18 @@ test("main Android release pipeline publishes a signed APK and checksum", () => 
 });
 
 
-test("Android release automation never replaces assets on an existing frozen version tag", () => {
+test("Android release automation only replaces the frozen v1.3.11 APK on the explicitly marked repair commit", () => {
   const workflow = readFileSync(resolve(root, "../.github/workflows/android-build.yml"), "utf8");
   const start = workflow.indexOf("- name: Publish signed Android APK release");
   const end = workflow.indexOf("- name: Remove temporary signing material", start);
   const step = workflow.slice(start, end);
   assert.match(step, /releases\/tags\/\$\{TAG\}/);
   assert.match(step, /Stable release \$\{TAG\} already exists/);
+  assert.match(step, /COMMIT_MESSAGE/);
+  assert.match(step, /VERSION_NAME.*1\.3\.11/);
+  assert.match(step, /\[republish-android-v1\.3\.11\]/);
+  assert.match(step, /gh release delete "\$TAG" --yes --cleanup-tag/);
   assert.ok(step.indexOf("already exists") < step.indexOf("gh release upload"));
   assert.doesNotMatch(step, /--clobber/);
+  assert.match(workflow, /github\.head_ref == 'fix\/android-apk-updater-1\.3\.11'/);
 });
