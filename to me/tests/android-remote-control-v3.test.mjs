@@ -62,3 +62,14 @@ test("Theme tokens have one runtime owner and support bounded design controls", 
   assert.match(remote, /shb-remote-surface-alt/);
   assert.match(remote, /shb-remote-warning/);
 });
+
+test("APK drawer exposes an expandable Auscultation Library with separate Heart and Lung entries", () => {
+  assert.match(remote, /Android APK only: nested Auscultation Library drawer entry/);
+  assert.match(remote, /data-shb-auscultation-menu/);
+  assert.match(remote, /aria-expanded="false"/);
+  assert.match(remote, /Heart Auscultation/);
+  assert.match(remote, /Lung Auscultation/);
+  assert.match(remote, /previousToggleDrawer = window\.toggleDrawer/);
+  assert.match(remote, /children\.hidden = expanded/);
+  assert.match(remote, /getPlatform\(\) === 'android'/);
+});
