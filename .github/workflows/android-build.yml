@@ -134,7 +134,7 @@ jobs:
           retention-days: 90
 
       - name: Prepare Release signing key
-        if: success() && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111' || github.ref == 'refs/heads/work/android-qtools-persistence-20261112' || github.ref == 'refs/heads/android/unified-to-me-20261117' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integrate/for-apk-main-20261119' || github.ref == 'refs/heads/android/universal-remote-control-1.3.7' || github.ref == 'refs/heads/android/settings-layout-1.3.8' || github.ref == 'refs/heads/android/apk-update-checker-1.3.9' || (github.event_name == 'pull_request' && github.head_ref == 'android-ota-engine-upgrade'))
+        if: success() && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111' || github.ref == 'refs/heads/work/android-qtools-persistence-20261112' || github.ref == 'refs/heads/android/unified-to-me-20261117' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integrate/for-apk-main-20261119' || github.ref == 'refs/heads/android/universal-remote-control-1.3.7' || github.ref == 'refs/heads/android/settings-layout-1.3.8' || github.ref == 'refs/heads/android/apk-update-checker-1.3.9' || (github.event_name == 'pull_request' && (github.head_ref == 'android-ota-engine-upgrade' || github.head_ref == 'fix/android-apk-updater-1.3.11')))
         id: release-signing
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -163,7 +163,7 @@ jobs:
           echo "ready=true" >> "$GITHUB_OUTPUT"
 
       - name: Build signed Release APK
-        if: success() && steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111' || github.ref == 'refs/heads/work/android-qtools-persistence-20261112' || github.ref == 'refs/heads/android/unified-to-me-20261117' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integrate/for-apk-main-20261119' || github.ref == 'refs/heads/android/universal-remote-control-1.3.7' || github.ref == 'refs/heads/android/settings-layout-1.3.8' || github.ref == 'refs/heads/android/apk-update-checker-1.3.9' || (github.event_name == 'pull_request' && github.head_ref == 'android-ota-engine-upgrade'))
+        if: success() && steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/work/android-enhancements-20261111' || github.ref == 'refs/heads/work/android-v1.3-planner-navigation-20261111' || github.ref == 'refs/heads/work/android-notifications-fix-20261111' || github.ref == 'refs/heads/work/android-qtools-persistence-20261112' || github.ref == 'refs/heads/android/unified-to-me-20261117' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integrate/for-apk-main-20261119' || github.ref == 'refs/heads/android/universal-remote-control-1.3.7' || github.ref == 'refs/heads/android/settings-layout-1.3.8' || github.ref == 'refs/heads/android/apk-update-checker-1.3.9' || (github.event_name == 'pull_request' && (github.head_ref == 'android-ota-engine-upgrade' || github.head_ref == 'fix/android-apk-updater-1.3.11')))
         working-directory: android
         run: |
           chmod +x gradlew
@@ -185,7 +185,7 @@ jobs:
           grep -Fq "certificate SHA-256 digest: 8412e14418309829ca3d2432643672508ff5d6e9f00b727a3ce9654745a53337" <<< "$SIGNATURE_INFO" || { echo "Release signing certificate changed; refusing to publish an incompatible update"; exit 1; }
 
       - name: Upload signed Release APK candidate
-        if: success() && steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/android/unified-to-me-20261117' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integrate/for-apk-main-20261119' || github.ref == 'refs/heads/android/universal-remote-control-1.3.7' || github.ref == 'refs/heads/android/settings-layout-1.3.8' || github.ref == 'refs/heads/android/apk-update-checker-1.3.9' || (github.event_name == 'pull_request' && github.head_ref == 'android-ota-engine-upgrade'))
+        if: success() && steps.release-signing.outputs.ready == 'true' && (github.ref == 'refs/heads/android/unified-to-me-20261117' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integrate/for-apk-main-20261119' || github.ref == 'refs/heads/android/universal-remote-control-1.3.7' || github.ref == 'refs/heads/android/settings-layout-1.3.8' || github.ref == 'refs/heads/android/apk-update-checker-1.3.9' || (github.event_name == 'pull_request' && (github.head_ref == 'android-ota-engine-upgrade' || github.head_ref == 'fix/android-apk-updater-1.3.11')))
         uses: actions/upload-artifact@v4
         with:
           name: SHBACE-Medical-Android-v1.3.11-release-candidate
@@ -199,6 +199,7 @@ jobs:
         working-directory: android
         env:
           GH_TOKEN: ${{ github.token }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         shell: bash
         run: |
           set -euo pipefail
@@ -207,11 +208,17 @@ jobs:
           APK="app/build/outputs/apk/release/app-release.apk"
           test -s "$APK"
 
-          # Never overwrite a published release when the application version is intentionally frozen.
+          # A one-time, explicitly marked main-branch commit may replace the uninstalled
+          # v1.3.11 APK. All ordinary pushes retain the frozen-release protection.
           if gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}" >/dev/null 2>&1; then
-            echo "::notice::Stable release ${TAG} already exists. Keeping its published APK/checksum unchanged."
-            echo "A signed validation candidate is available in this workflow's Actions artifacts."
-            exit 0
+            if [[ "$VERSION_NAME" == "1.3.11" && "${COMMIT_MESSAGE:-}" == *"[republish-android-v1.3.11]"* ]]; then
+              echo "::notice::Replacing the uninstalled v1.3.11 release with the corrected signed APK."
+              gh release delete "$TAG" --yes --cleanup-tag
+            else
+              echo "::notice::Stable release ${TAG} already exists. Keeping its published APK/checksum unchanged."
+              echo "A signed validation candidate is available in this workflow's Actions artifacts."
+              exit 0
+            fi
           fi
 
           RELEASE_JSON="$(gh api --method POST "repos/${GITHUB_REPOSITORY}/releases" \
