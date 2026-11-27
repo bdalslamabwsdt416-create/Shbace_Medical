@@ -3,14 +3,15 @@ import {pointForView} from './listening-points.js?v=library-1';
 import {SoundEngine} from './sound.js?v=library-1';
 import {getTeachingGuide} from './unified-learning.js?v=1';
 import {getClinicalLink,getRelativeIntensity} from './clinical-links.js?v=1';
-const $=s=>document.querySelector(s);
-const initialSystem=new URLSearchParams(location.search).get('system')==='lung'?'lung':'heart';
+export function mountAuscultation(root,systemOverride='heart'){
+const $=s=>root.querySelector(s);
+const initialSystem=systemOverride==='lung'?'lung':'heart';
 const state={system:initialSystem,view:'front',point:initialSystem==='lung'?'lung-right':'aortic',piece:'diaphragm',selected:null,items:[],playing:false,loadToken:0,waveElapsed:0,waveStarted:false,quizMode:false,quiz:{target:null,round:0,score:0,answered:false,options:[]}};
-const sound=new SoundEngine();let scene=null;
+const sound=new SoundEngine({assetBase:new URL('./',import.meta.url).pathname});let scene=null;let mounted=true;let animationFrame=0;let waveFrame=0;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pointById=id=>POINTS.find(p=>p.id===id);
 const toast=message=>{const t=$('#toast');t.textContent=message;t.classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('visible'),3200);};
-function setPressed(selector,key,value){document.querySelectorAll(selector).forEach(b=>{const on=b.dataset[key]===value;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});}
+function setPressed(selector,key,value){root.querySelectorAll(selector).forEach(b=>{const on=b.dataset[key]===value;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});}
 function applySpatialIntensity(){
  const output=$('#spatial-level');
  if(!state.selected){sound.setStrength(1);if(output)output.hidden=true;return;}
@@ -59,7 +60,7 @@ function setSystem(system){
  $('#anatomy-title').textContent=system==='heart'?'Heart · listening areas':'Lungs · anterior and posterior fields';
  $('#system-note').textContent=system==='heart'?'CARDIAC AUSCULTATION · FIVE STANDARD AREAS':'RESPIRATORY AUSCULTATION · BILATERAL FRONT / BACK FIELDS';
  renderPointButtons();updatePoint(state.point,true);renderTree();updateAudioUI();
- const url=new URL(location.href);url.searchParams.set('system',system);url.searchParams.delete('audio');history.replaceState(null,'',url);
+ 
 }
 function isPlaybackOnlyVariant(item){
  if(state.system==='lung')return false;
@@ -371,7 +372,7 @@ function selectRecording(id){
  $('#play').disabled=true;$('#wave-placeholder').hidden=false;$('#wave-placeholder').textContent='Loading audio preview…';$('#sound-status').textContent='Loading audio preview…';
  $('#category-tree').querySelectorAll('[data-audio-id]').forEach(b=>b.classList.toggle('active',b.dataset.audioId===id));
  updateAudioUI();preloadSelected(item);
- const url=new URL(location.href);url.searchParams.set('system',item.system);url.searchParams.set('audio',item.id);history.replaceState(null,'',url);
+ 
 }
 function exitQuiz(){
  state.quizMode=false;sound.pause();state.playing=false;
@@ -467,9 +468,10 @@ function drawWave(){
   ctx.beginPath();ctx.moveTo(x,top);ctx.lineTo(x,Math.max(top+.7,bottom));ctx.stroke();
  }
 }
-let frame=0;function animateWave(){if(frame++%2===0)drawWave();requestAnimationFrame(animateWave);}
+function animateWave(){if(!mounted)return;if(waveFrame++%2===0)drawWave();animationFrame=requestAnimationFrame(animateWave);}
 async function init(){
- const response=await fetch('audio-catalog.json',{cache:'no-store'});if(!response.ok)throw new Error('Audio catalogue is missing');
+ const response=await fetch(new URL('audio-catalog.json',import.meta.url),{cache:'no-store'});if(!response.ok)throw new Error('Audio catalogue is missing');
+ if(!mounted)return;
  state.items=await response.json();
  const countSounds=system=>new Set(state.items.filter(x=>x.system===system&&!x.duplicateOf&&!isPlaybackOnlyVariant(x)).map(x=>x.title)).size;
  const heart=countSounds('heart'),lung=countSounds('lung');
@@ -481,10 +483,10 @@ async function init(){
  $('#sound-search').addEventListener('input',renderTree);
  $('#sound-search').addEventListener('keydown',e=>{if(e.key==='Escape'){e.currentTarget.value='';renderTree();}});
  $('#quiz-start').addEventListener('click',startQuiz);$('#quiz-exit').addEventListener('click',exitQuiz);$('#quiz-next').addEventListener('click',nextQuiz);
- document.addEventListener('keydown',e=>{if(e.key==='/'&&!/INPUT|TEXTAREA/.test(e.target.tagName)&&!state.quizMode){e.preventDefault();$('#sound-search').focus();}});
- document.querySelectorAll('[data-system]').forEach(b=>b.addEventListener('click',()=>setSystem(b.dataset.system)));
- document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>changeView(b.dataset.view)));
- document.querySelectorAll('[data-piece]').forEach(b=>b.addEventListener('click',()=>{state.piece=b.dataset.piece;sound.setPiece(state.piece);setPressed('[data-piece]','piece',state.piece);}));
+ root.addEventListener('keydown',e=>{if(e.key==='/'&&!/INPUT|TEXTAREA/.test(e.target.tagName)&&!state.quizMode){e.preventDefault();$('#sound-search').focus();}});
+ root.querySelectorAll('[data-system]').forEach(b=>b.addEventListener('click',()=>setSystem(b.dataset.system)));
+ root.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>changeView(b.dataset.view)));
+ root.querySelectorAll('[data-piece]').forEach(b=>b.addEventListener('click',()=>{state.piece=b.dataset.piece;sound.setPiece(state.piece);setPressed('[data-piece]','piece',state.piece);}));
  $('#play').addEventListener('click',()=>{if(sound.playing){if(sound.context)state.waveElapsed=Math.max(0,(sound.context.currentTime-sound.startedAt)*sound.playbackRate);sound.pause();state.playing=false;updateAudioUI();}else playSelected();});
  $('#volume').addEventListener('input',e=>sound.setVolume(+e.target.value/100));
  $('#playback-speed').addEventListener('change',e=>{sound.setPlaybackRate(+e.target.value);updateAudioUI();});
@@ -495,13 +497,20 @@ async function init(){
  $('#show-points').addEventListener('change',e=>scene?.showPoints(e.target.checked));
  scene=new ThoraxScene($('#scene'),$('#point-labels'),{
   onPoint:id=>updatePoint(id,true),
-  onView:view=>{state.view=view;setPressed('[data-view]','view',view);$('#orientation-label').textContent=view==='back'?'BACK VIEW':'FRONT VIEW';$('#anatomical-side').innerHTML=view==='back'?'L <span>·</span> R':'R <span>·</span> L';},
+  onView:view=>{state.view=view;setPressed('[data-view]','view',view);$('#orientation-label').textContent=view==='back'?'BACK VIEW':'FRONT VIEW';$('#anatomical-side').textContent=view==='back'?'L · R':'R · L';},
   onProgress:(received,total)=>{const p=$('#anatomy-progress');if(p)p.value=Math.round(received/total*100);},
   onReady:()=>{$('#model-loading').hidden=true;},
-  onError:error=>{$('#model-loading').innerHTML='<strong>3D anatomy unavailable</strong><span>The audio library remains available. Check the local server and try reloading.</span><button id="retry-anatomy" type="button">Retry 3D</button>';$('#retry-anatomy').onclick=()=>location.reload();console.warn(error);}
+  onError:error=>{$('#model-loading').innerHTML='<strong>3D anatomy unavailable</strong><span>The sound library remains available. Reopen this section to retry.</span>';console.warn(error);}
+ },{
+  system:state.system,
+  base:new URL('assets/models/thorax',import.meta.url).pathname,
+  detailBase:new URL('assets/models/valve-heart',import.meta.url).pathname,
+  distance:6.25,centerY:.28
  });
  scene.setSystem(state.system);scene.setXray($('#xray').checked);scene.setBoneOpacity(+$('#bone-opacity').value/100);scene.showPoints($('#show-points').checked);scene.setView('front');scene.load();
- const params=new URLSearchParams(location.search),requested=params.get('audio');if(requested&&state.items.some(x=>x.id===requested))selectRecording(requested);
- requestAnimationFrame(animateWave);
+ animationFrame=requestAnimationFrame(animateWave);
 }
-init().catch(error=>{console.error(error);$('#category-tree').innerHTML='<p class="no-results">The audio catalogue could not be loaded. Check audio-catalog.json.</p>';toast('Library data could not be loaded.');});
+init().catch(error=>{if(!mounted)return;console.error(error);$('#category-tree').innerHTML='<p class="no-results">The audio catalogue could not be loaded. Check the installed package.</p>';toast('Library data could not be loaded.');});
+ return function dispose(){mounted=false;cancelAnimationFrame(animationFrame);sound.pause();if(scene)scene.dispose();};
+
+}

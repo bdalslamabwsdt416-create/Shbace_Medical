@@ -36,7 +36,7 @@ export function audioDeadline(promise,ms,code){
  return Promise.race([promise,deadline]).finally(()=>clearTimeout(timer));
 }
 export class SoundEngine{
- constructor({resumeTimeoutMs=0,loadTimeoutMs=0,fetcher=(typeof window!=='undefined'&&window.__shbAuscultationFetch)||fetch}={}){this.resumeTimeoutMs=resumeTimeoutMs;this.loadTimeoutMs=loadTimeoutMs;this.fetcher=fetcher;this.context=null;this.playing=false;this.cache=new Map();this.volume=.45;this.strength=1;this.playbackRate=1;this.piece='diaphragm';this.requestId=0;this.buffer=null;this.offset=0;this.startedAt=0;}
+ constructor({resumeTimeoutMs=0,loadTimeoutMs=0,assetBase='',fetcher=(typeof window!=='undefined'&&window.__shbAuscultationFetch)||fetch}={}){this.resumeTimeoutMs=resumeTimeoutMs;this.loadTimeoutMs=loadTimeoutMs;this.assetBase=assetBase;this.fetcher=fetcher;this.context=null;this.playing=false;this.cache=new Map();this.volume=.45;this.strength=1;this.playbackRate=1;this.piece='diaphragm';this.requestId=0;this.buffer=null;this.offset=0;this.startedAt=0;}
  init(){if(this.context)return;this.context=new AudioContext();this.gain=this.context.createGain();this.low=this.context.createBiquadFilter();this.low.type='lowpass';this.high=this.context.createBiquadFilter();this.high.type='highpass';this.analyser=this.context.createAnalyser();this.analyser.fftSize=2048;this.high.connect(this.low);this.low.connect(this.gain);this.gain.connect(this.analyser);this.analyser.connect(this.context.destination);this.setPiece(this.piece);this.setVolume(this.volume);}
  async load(id){
   this.init();if(this.cache.has(id))return this.cache.get(id);
@@ -44,7 +44,7 @@ export class SoundEngine{
   if(SYNTHETIC_IDS.includes(id)){
    const samples=synthesizeMurmur(id,this.context.sampleRate);buffer=this.context.createBuffer(1,samples.length,this.context.sampleRate);buffer.getChannelData(0).set(samples);
   }else{
-   const url=id.startsWith('user:')?'audio-library/'+id.slice(5).split('/').map(encodeURIComponent).join('/'):'assets/audio/'+id+'.wav';
+   const url=id.startsWith('user:')?this.assetBase+'audio-library/'+id.slice(5).split('/').map(encodeURIComponent).join('/'):'assets/audio/'+id+'.wav';
    const response=await this.fetcher(url);if(!response.ok)throw new Error('Audio could not be loaded: '+url);
    buffer=await this.context.decodeAudioData(await response.arrayBuffer());
   }
