@@ -447,7 +447,9 @@
 
   function installAuscultationDrawerMenu() {
     var drawer = document.getElementById('drawer');
-    var body = drawer && drawer.querySelector('.dr-body');
+    /* 06-drawer-menu.js renders .brand-small and the .dl/.di entries directly
+       inside #drawer. There is no .dr-body wrapper in the shipped app. */
+    var body = drawer;
     if (!body || body.querySelector('[data-shb-auscultation-menu]')) return;
     installAuscultationDrawerStyles();
 
@@ -489,8 +491,14 @@
     var progressHeading = Array.prototype.find.call(body.querySelectorAll('.dl'), function (node) {
       return /YOUR PROGRESS/i.test(node.textContent || '');
     });
-    if (progressHeading) body.insertBefore(section, progressHeading);
-    else body.appendChild(section);
+    if (progressHeading) {
+      body.insertBefore(section, progressHeading);
+    } else {
+      var brand = body.querySelector('.brand-small');
+      if (brand && brand.nextSibling) body.insertBefore(section, brand.nextSibling);
+      else if (brand) body.appendChild(section);
+      else body.insertBefore(section, body.firstChild);
+    }
 
     var parent = section.querySelector('.shb-ausc-parent');
     var children = section.querySelector('.shb-ausc-children');
