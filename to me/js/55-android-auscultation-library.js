@@ -59,9 +59,8 @@
     var head = typeof window.appHeader === 'function' ? window.appHeader(TITLES[system]) : '';
     var body;
     if (state.installed) {
-      body = '<div class="shb-ausc-pack-frame"><iframe title="' + esc(TITLES[system]) +
-        ' Library" src="js/auscultation/' + system + '/index.html?system=' + system +
-        '" loading="eager" allow="autoplay"></iframe></div>';
+      body = '<div class="shb-ausc-integrated" data-shb-ausc-host data-system="' + system +
+        '" aria-label="' + esc(TITLES[system]) + '"></div>';
     } else {
       var progress = Number(state.downloadedBytes || 0);
       var total = Number(state.totalBytes || state.packageBytes || 0);
@@ -74,8 +73,7 @@
       body = '<section class="shb-ausc-pack-gate">' +
         '<div class="shb-ausc-gate-icon ' + system + '">' + (system === 'heart' ? '♡' : '♧') + '</div>' +
         '<span class="shb-ausc-kicker">' + facts.eyebrow + '</span>' +
-        '<h1>' + facts.heading + '</h1>' +
-        '<p>' + facts.description + '</p>' +
+        '<h1>' + facts.heading + '</h1><p>' + facts.description + '</p>' +
         '<div class="shb-ausc-pack-facts">' + facts.facts.map(function (item) {
           return '<div><b>' + item[0] + '</b><small>' + item[1] + '</small></div>';
         }).join('') + '</div>' +
@@ -84,8 +82,7 @@
         '<button type="button" class="shb-ausc-primary" data-shb-pack-download="' + system + '" ' +
           (state.downloading ? 'disabled' : '') + '>' +
           (state.downloading ? 'Downloading…' : facts.button) + '</button>' +
-        '<small class="shb-ausc-pack-note">' + facts.note + '</small>' +
-      '</section>';
+        '<small class="shb-ausc-pack-note">' + facts.note + '</small></section>';
     }
     return head + '<div class="shb-ausc-pack-page">' + body + '</div>';
   }
@@ -157,6 +154,88 @@
     return true;
   }
 
+  var mountedHosts = new Map();
+  var adapterPromise = null;
+  var adapterPromiseSystem = '';
+  function ensureAuscultationAdapter(system) {
+    if (window.__shbAuscultationAssets && window.__shbAuscultationAssets.system === system) return Promise.resolve();
+    if (adapterPromise && adapterPromiseSystem === system) return adapterPromise;
+    adapterPromiseSystem = system;
+    adapterPromise = new Promise(function (resolve, reject) {
+      var old = document.getElementById('shb-auscultation-adapter-script');
+      if (old) old.remove();
+      var script = document.createElement('script');
+      script.id = 'shb-auscultation-adapter-script';
+      script.async = true;
+      script.src = new URL('js/auscultation/' + system + '/native-assets.js?v=shbace-integrated-2', document.baseURI).href;
+      script.onload = function () {
+        if (window.__shbAuscultationAssets && window.__shbAuscultationAssets.system === system) resolve();
+        else reject(new Error('The offline ' + system + ' adapter did not initialize.'));
+      };
+      script.onerror = function () { reject(new Error('Could not load the offline ' + system + ' adapter.')); };
+      document.head.appendChild(script);
+    }).finally(function () { adapterPromise = null; adapterPromiseSystem = ''; });
+    return adapterPromise;
+  }
+  function mountIntegratedHost(host) {
+    if (!host || host.dataset.shbMounted === 'true' || host.dataset.shbMounting === 'true') return;
+    var system = host.getAttribute('data-system') === 'lung' ? 'lung' : 'heart';
+    host.dataset.shbMounting = 'true';
+    var shadow = host.shadowRoot || host.attachShadow({ mode: 'open' });
+    var base = new URL('js/auscultation/' + system + '/', document.baseURI);
+    var cssFiles = ['styles.css', 'lung.css?v=3', 'teaching.css?v=4', 'library-pro.css?v=9',
+      system === 'heart' ? 'heart-only.css' : 'lung-only.css'];
+    var links = cssFiles.map(function (file) {
+      return '<link rel="stylesheet" href="' + new URL(file, base).href + '">';
+    }).join('');
+    shadow.innerHTML = links + '<link rel="stylesheet" href="' +
+      new URL('../shbace-integrated.css?v=2', base).href + '"><div class="shb-ausc-runtime shb-ausc-layout medara-library"><div class="shb-ausc-template-loading">Opening auscultation library…</div></div>';
+    var root = shadow.querySelector('.shb-ausc-runtime');
+    fetch(new URL('index.html', base), { cache: 'no-store' }).then(function (response) {
+      if (!response.ok) throw new Error('Auscultation interface template is unavailable.');
+      return response.text();
+    }).then(function (html) {
+      var parsed = new DOMParser().parseFromString(html, 'text/html');
+      var shell = parsed.querySelector('.library-shell');
+      if (!shell) throw new Error('Auscultation interface template is incomplete.');
+      root.innerHTML = '';
+      root.appendChild(document.importNode(shell, true));
+      var heading = root.querySelector('.library-heading');
+      var systemBar = root.querySelector('.system-bar');
+      if (heading) heading.remove();
+      if (systemBar) systemBar.remove();
+      var eyebrow = root.querySelector('.viewer-title .small-eyebrow');
+      if (eyebrow) eyebrow.textContent = '3D ANATOMY';
+      var hint = root.querySelector('.scene-hint');
+      if (hint) hint.textContent = 'Drag to rotate · Select a point to listen';
+      var callout = root.querySelector('.selected-callout');
+      var controls = root.querySelector('.view-controls');
+      if (callout && controls) controls.insertAdjacentElement('afterend', callout);
+      return ensureAuscultationAdapter(system);
+    }).then(function () {
+      return import(new URL('auscultation-pro.js?v=shbace-integrated-2', base).href);
+    }).then(function (runtime) {
+      if (!host.isConnected) return;
+      var dispose = runtime.mountAuscultation(root, system);
+      mountedHosts.set(host, { dispose: dispose });
+      host.dataset.shbMounted = 'true';
+      delete host.dataset.shbMounting;
+    }).catch(function (error) {
+      delete host.dataset.shbMounting;
+      var message = root.querySelector('#model-loading') || root.querySelector('.shb-ausc-template-loading');
+      if (message) message.textContent = 'Could not open the auscultation library: ' + String(error && error.message || error);
+      console.error('Shbace auscultation mount failed:', error);
+    });
+  }
+  function scanIntegratedHosts() {
+    document.querySelectorAll('[data-shb-ausc-host]').forEach(mountIntegratedHost);
+    mountedHosts.forEach(function (mounted, host) {
+      if (host.isConnected) return;
+      try { if (mounted.dispose) mounted.dispose(); } catch (_) {}
+      mountedHosts.delete(host);
+    });
+  }
+
   var style = document.createElement('style');
   style.id = 'shb-android-auscultation-page-styles';
   style.textContent =
@@ -170,7 +249,7 @@
     '.phone .shb-ausc-pack-facts b{display:block;font-size:20px;color:#eaf6ff}.phone .shb-ausc-pack-facts small{display:block;color:#8eabc8;font-size:10px;margin-top:3px}' +
     '.phone .shb-ausc-pack-status{min-height:36px}.phone .shb-ausc-primary{width:100%;min-height:48px;border:0;border-radius:14px;background:linear-gradient(105deg,#1678d7,#25a9d1);color:#fff;font-size:14px;font-weight:800}' +
     '.phone .shb-ausc-primary:disabled{opacity:.65}.phone .shb-ausc-pack-note{display:block;color:#88a6c4;font-size:10px;line-height:1.5;margin-top:12px}' +
-    '.phone .shb-ausc-pack-frame{height:calc(100dvh - 104px);min-height:520px;margin:-14px}.phone .shb-ausc-pack-frame iframe{display:block;width:100%;height:100%;border:0;background:#071427}' +
+    '.phone .shb-ausc-integrated{display:block;width:100%;min-width:0;margin:0;padding:0;background:transparent}' +
     '.phone .shb-ausc-pack-page progress{width:100%;accent-color:#28b7e8}.phone .shb-ausc-download-spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;display:inline-block;animation:shbAuscPackSpin .8s linear infinite}' +
     '@keyframes shbAuscPackSpin{to{transform:rotate(360deg)}}';
   document.head.appendChild(style);
@@ -182,7 +261,7 @@
   window.shbOpenAuscultationPage = openAuscultation;
   window.shbDownloadAuscultationPack = function (system) { return downloadPack(system || 'heart'); };
   window.__SHBACE_AUSCULTATION_LIBRARY__ = {
-    version:2,
+    version:3,
     state:function (system) { return packState(system || 'heart'); },
     refresh:function (system) { refreshPackPage(system || 'heart'); },
     refreshDrawer:refreshDrawerButtons
@@ -226,6 +305,9 @@
     }
     refreshPackPage(system);
   }
+  var auscultationPageObserver = new MutationObserver(scanIntegratedHosts);
+  if (document.body) auscultationPageObserver.observe(document.body, { childList:true, subtree:true });
+  scanIntegratedHosts();
   window.addEventListener('shbace-auscultation-pack-progress', onPackEvent);
   window.addEventListener('shbace-auscultation-pack-result', onPackEvent);
   setTimeout(refreshDrawerButtons, 0);
