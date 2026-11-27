@@ -169,31 +169,31 @@ test("Heart and Lung adapters read separate private packs in bounded chunks", ()
 });
 
 test("Heart and Lung render natively inside Shbace without a Medara page iframe", () => {
-  assert.match(page, /isNativeAndroid\\(\\)/);
-  assert.match(page, /ROUTES = \\{ heart:'auscultationheart', lung:'auscultationlung' \\}/);
-  assert.match(page, /startAuscultationPackDownload\\(system\\)/);
-  assert.match(page, /__shbRegisterPage\\(ROUTES\\.heart/);
-  assert.match(page, /__shbRegisterPage\\(ROUTES\\.lung/);
+  assert.match(page, /isNativeAndroid\(\)/);
+  assert.match(page, /ROUTES = \{ heart:'auscultationheart', lung:'auscultationlung' \}/);
+  assert.match(page, /startAuscultationPackDownload\(system\)/);
+  assert.match(page, /__shbRegisterPage\(ROUTES\.heart/);
+  assert.match(page, /__shbRegisterPage\(ROUTES\.lung/);
   assert.match(page, /data-shb-ausc-host/);
-  assert.match(page, /attachShadow\\(\\{ mode: 'open' \\}\\)/);
-  assert.match(page, /mountAuscultation\\(root, system\\)/);
-  assert.match(page, /native-assets\\.js/);
+  assert.match(page, /attachShadow\(\{ mode: 'open' \}\)/);
+  assert.match(page, /mountAuscultation\(root, system\)/);
+  assert.match(page, /native-assets\.js/);
   assert.doesNotMatch(page, /<iframe|pack-frame/);
   assert.match(page, /77 primary heart sounds/);
   assert.match(page, /31 distinct lung sounds/);
   for (const runtime of [heartRuntime, lungRuntime]) {
-    assert.match(runtime, /export function mountAuscultation\\(root,systemOverride=/);
-    assert.match(runtime, /root\\.querySelector/);
-    assert.doesNotMatch(runtime, /document\\.querySelector|document\\.addEventListener|location\\.reload|history\\.replaceState/);
-    assert.match(runtime, /new URL\\('audio-catalog\\.json',import\\.meta\\.url\\)/);
-    assert.match(runtime, /return function dispose\\(\\)/);
+    assert.match(runtime, /export function mountAuscultation\(root,systemOverride=/);
+    assert.match(runtime, /root\.querySelector/);
+    assert.doesNotMatch(runtime, /document\.querySelector|document\.addEventListener|location\.reload|history\.replaceState/);
+    assert.match(runtime, /new URL\('audio-catalog\.json',import\.meta\.url\)/);
+    assert.match(runtime, /return function dispose\(\)/);
   }
   for (const scene of [heartScene, lungScene]) {
-    assert.match(scene, /this\\.options\\.detailBase\\|\\|'assets\\/models\\/valve-heart'/);
-    assert.doesNotMatch(scene, /new THREE\\.TubeGeometry|updateTube|makeStethoscope/);
+    assert.match(scene, /this\.options\.detailBase\|\|'assets\/models\/valve-heart'/);
+    assert.doesNotMatch(scene, /new THREE\.TubeGeometry|updateTube|makeStethoscope/);
   }
   assert.match(integratedCss, /--sa-cyan:#29d8ff/);
-  assert.match(integratedCss, /@media\\(min-width:900px\\)/);
+  assert.match(integratedCss, /@media\(min-width:900px\)/);
   assert.match(integratedCss, /selected-callout/);
 });
 
