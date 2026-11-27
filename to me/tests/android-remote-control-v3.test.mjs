@@ -63,13 +63,18 @@ test("Theme tokens have one runtime owner and support bounded design controls", 
   assert.match(remote, /shb-remote-warning/);
 });
 
-test("APK drawer exposes an expandable Auscultation Library with separate Heart and Lung entries", () => {
-  assert.match(remote, /Android APK only: nested Auscultation Library drawer entry/);
-  assert.match(remote, /data-shb-auscultation-menu/);
-  assert.match(remote, /aria-expanded="false"/);
-  assert.match(remote, /Heart Auscultation/);
-  assert.match(remote, /Lung Auscultation/);
-  assert.match(remote, /previousToggleDrawer = window\.toggleDrawer/);
-  assert.match(remote, /children\.hidden = expanded/);
-  assert.match(remote, /getPlatform\(\) === 'android'/);
-});
+test("APK drawer exposes an expandable Auscultation Library from the original drawer renderer", () => {
+  assert.match(drawer, /function drawerIsNativeAndroid/);
+  assert.match(drawer, /function drawerAuscultationMarkup/);
+  assert.match(drawer, /data-shb-auscultation-menu/);
+  assert.match(drawer, /data-shb-ausc-toggle/);
+  assert.match(drawer, /aria-expanded="false"/);
+  assert.match(drawer, /Heart Auscultation/);
+  assert.match(drawer, /Lung Auscultation/);
+  assert.match(drawer, /data-shb-ausc-download="heart"/);
+  assert.match(drawer, /data-shb-ausc-download="lung"/);
+  assert.match(drawer, /children\.hidden=expanded/);
+  assert.match(drawer, /getPlatform\(\)==='android'/);
+  assert.match(drawer, /\$\{drawerAuscultationMarkup\(\)\}/);
+  assert.doesNotMatch(remote, /installAuscultationDrawerMenu|previousToggleDrawer/);
+});;
