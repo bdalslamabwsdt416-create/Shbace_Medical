@@ -200,13 +200,20 @@ test("Heart and Lung render natively inside Shbace without a Medara page iframe"
   assert.match(integratedCss, /selected-callout/);
 });
 
-test("Sidebar creates the Heart/Lung auscultation entry inside the native drawer itself", () => {
+test("Sidebar creates and recovers the Heart/Lung entry in the native Android drawer", () => {
   assert.match(drawer, /function drawerIsNativeAndroid/);
+  assert.match(drawer, /window\.ShbaceNative/);
+  assert.match(drawer, /getAuscultationPackState/);
   assert.match(drawer, /function drawerAuscultationMarkup/);
+  assert.match(drawer, /function ensureDrawerAuscultation/);
+  assert.match(drawer, /ensureDrawerAuscultation\(d\)/,
+    "Native drawer detection must be rechecked for an already-created drawer");
+  assert.match(drawer, /brand\.insertAdjacentHTML\('afterend',markup\)/,
+    "A stale drawer must recover the missing native entry beneath its brand");
   assert.match(drawer, /data-shb-auscultation-menu/);
   assert.match(drawer, /data-shb-ausc-toggle/);
   assert.match(drawer, /\$\{drawerAuscultationMarkup\(\)\}/,
-    "Auscultation markup must be part of the original drawer HTML, not injected after opening");
+    "Auscultation markup remains part of the original drawer HTML when native detection is ready");
   assert.match(drawer, /data-shb-ausc-open="heart"/);
   assert.match(drawer, /data-shb-ausc-open="lung"/);
   assert.match(drawer, /data-shb-ausc-download="heart"/);
