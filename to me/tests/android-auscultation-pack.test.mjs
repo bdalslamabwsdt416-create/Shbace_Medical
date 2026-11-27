@@ -171,6 +171,8 @@ test("Heart and Lung adapters read separate private packs in bounded chunks", ()
 });
 
 test("Heart and Lung catalogue is read from the installed pack before bundled fallback", async () => {
+  assert.ok(heartManifest.files.some((file) => file.path === "audio-catalog.json"));
+  assert.ok(lungManifest.files.some((file) => file.path === "audio-catalog.json"));
   for (const [system, assets, runtime] of [
     ["heart", heartAssets, heartRuntime],
     ["lung", lungAssets, lungRuntime]
