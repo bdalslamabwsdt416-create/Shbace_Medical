@@ -21,7 +21,8 @@ const manager = readFileSync(resolve(project, "for ApK/native/com/shbace/medical
 const native = readFileSync(resolve(project, "android/app/src/main/java/com/shbace/medical/ShbaceNative.java"), "utf8");
 const gitAttributes = readFileSync(resolve(project, ".gitattributes"), "utf8");
 const page = readFileSync(resolve(root, "js/55-android-auscultation-library.js"), "utf8");
-const drawer = readFileSync(resolve(root, "js/47-android-remote-control.js"), "utf8");
+const drawer = readFileSync(resolve(root, "js/06-drawer-menu.js"), "utf8");
+const remoteControl = readFileSync(resolve(root, "js/47-android-remote-control.js"), "utf8");
 const heartAssets = readFileSync(resolve(root, "js/auscultation/heart/native-assets.js"), "utf8");
 const lungAssets = readFileSync(resolve(root, "js/auscultation/lung/native-assets.js"), "utf8");
 const heartRuntime = readFileSync(resolve(root, "js/auscultation/heart/auscultation-pro.js"), "utf8");
@@ -199,24 +200,30 @@ test("Heart and Lung render natively inside Shbace without a Medara page iframe"
   assert.match(integratedCss, /selected-callout/);
 });
 
-test("Sidebar exposes separate working Heart and Lung download arrows", () => {
-  assert.match(drawer, /var body = drawer;/, "the submenu must mount into the actual #drawer node");
-  assert.doesNotMatch(drawer, /querySelector\('\.dr-body'\)/, "the shipped drawer has no .dr-body wrapper");
-  assert.match(drawer, /brand\.nextSibling/);
+test("Sidebar creates the Heart/Lung auscultation entry inside the native drawer itself", () => {
+  assert.match(drawer, /function drawerIsNativeAndroid/);
+  assert.match(drawer, /function drawerAuscultationMarkup/);
+  assert.match(drawer, /data-shb-auscultation-menu/);
+  assert.match(drawer, /data-shb-ausc-toggle/);
+  assert.match(drawer, /\$\{drawerAuscultationMarkup\(\)\}/,
+    "Auscultation markup must be part of the original drawer HTML, not injected after opening");
+  assert.match(drawer, /data-shb-ausc-open="heart"/);
+  assert.match(drawer, /data-shb-ausc-open="lung"/);
   assert.match(drawer, /data-shb-ausc-download="heart"/);
   assert.match(drawer, /data-shb-ausc-download="lung"/);
   assert.match(drawer, /shb-ausc-total">108 sounds/);
   assert.match(drawer, /shb-ausc-child-count">77/);
   assert.match(drawer, /shb-ausc-child-count">31/);
+  assert.match(drawer, /children\.hidden=expanded/);
+  assert.doesNotMatch(remoteControl, /installAuscultationDrawerMenu|previousToggleDrawer/,
+    "the old post-open injection must not compete with the native drawer");
   assert.match(page, /facts:\[\['77','distinct sounds'\]/);
   assert.match(page, /facts:\[\['31','distinct sounds'\]/);
   assert.doesNotMatch(page, /\['73','recordings'\]/);
   assert.match(page, /data-shb-ausc-download/);
   assert.match(page, /refreshDrawer:refreshDrawerButtons/);
   assert.match(page, /button\.disabled = !!state\.downloading \|\| !!state\.installed/);
-  assert.match(drawer, /packUI\.refreshDrawer\(\)/);
 });
-
 test("Lung runtime preserves Normal, Slow, half-speed, patient and teaching variants", () => {
   assert.match(lungRuntime, /if\(state\.system==='lung'\)return false/);
   assert.match(lungRuntime, /return 'Half speed'/);
