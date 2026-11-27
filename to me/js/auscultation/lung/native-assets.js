@@ -33,6 +33,7 @@
     if (path.indexOf('\\') >= 0 || path.indexOf(':') >= 0 ||
         path.indexOf('?') >= 0 || path.indexOf('#') >= 0 || path.indexOf('%') >= 0 ||
         /[\u0000-\u001f]/.test(path)) return '';
+    if (path === 'audio-catalog.json') return path;
     var modelPath = path.indexOf('assets/models/') === 0;
     var heartAudioPath = path.indexOf('audio-library/') === 0;
     if (!modelPath && !heartAudioPath) return '';

@@ -470,7 +470,9 @@ function drawWave(){
 }
 function animateWave(){if(!mounted)return;if(waveFrame++%2===0)drawWave();animationFrame=requestAnimationFrame(animateWave);}
 async function init(){
- const response=await fetch(new URL('audio-catalog.json',import.meta.url),{cache:'no-store'});if(!response.ok)throw new Error('Audio catalogue is missing');
+ const catalogUrl=new URL('audio-catalog.json',import.meta.url);const packFetch=(typeof window!=='undefined'&&window.__shbAuscultationFetch)||null;let response=null,catalogError='';
+ if(packFetch){try{response=await packFetch(catalogUrl,{cache:'no-store'});if(!response.ok){catalogError='installed pack: '+await response.text().catch(()=>'HTTP '+response.status);response=null;}}catch(error){catalogError='installed pack: '+String(error&&error.message||error);response=null;}}
+ if(!response){try{response=await fetch(catalogUrl,{cache:'no-store'});}catch(error){throw new Error((catalogError?catalogError+' | ':'')+'bundled copy: '+String(error&&error.message||error));}if(!response.ok)throw new Error((catalogError?catalogError+' | ':'')+'bundled copy: HTTP '+response.status);}
  if(!mounted)return;
  state.items=await response.json();
  const countSounds=system=>new Set(state.items.filter(x=>x.system===system&&!x.duplicateOf&&!isPlaybackOnlyVariant(x)).map(x=>x.title)).size;
@@ -510,7 +512,7 @@ async function init(){
  scene.setSystem(state.system);scene.setXray($('#xray').checked);scene.setBoneOpacity(+$('#bone-opacity').value/100);scene.showPoints($('#show-points').checked);scene.setView('front');scene.load();
  animationFrame=requestAnimationFrame(animateWave);
 }
-init().catch(error=>{if(!mounted)return;console.error(error);$('#category-tree').innerHTML='<p class="no-results">The audio catalogue could not be loaded. Check the installed package.</p>';toast('Library data could not be loaded.');});
+init().catch(error=>{if(!mounted)return;console.error(error);const tree=$('#category-tree');tree.innerHTML='<p class="no-results">The audio catalogue could not be loaded. Check the installed package.</p>';const detail=document.createElement('small');detail.className='no-results';detail.style.display='block';detail.style.opacity='.7';detail.style.wordBreak='break-word';detail.textContent=String(error&&error.message||error).slice(0,300);tree.appendChild(detail);const loading=$('#model-loading');if(loading)loading.innerHTML='<strong>3D anatomy unavailable</strong><span>The library data could not be loaded. Reopen this section to retry.</span>';toast('Library data could not be loaded.');});
  return function dispose(){mounted=false;cancelAnimationFrame(animationFrame);sound.pause();if(scene)scene.dispose();};
 
 }

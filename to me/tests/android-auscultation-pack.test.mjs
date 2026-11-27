@@ -170,6 +170,69 @@ test("Heart and Lung adapters read separate private packs in bounded chunks", ()
   assert.match(lungAssets, /\/js\/auscultation\/lung\//);
 });
 
+test("Heart and Lung catalogue is read from the installed pack before bundled fallback", async () => {
+  assert.ok(heartManifest.files.some((file) => file.path === "audio-catalog.json"));
+  assert.ok(lungManifest.files.some((file) => file.path === "audio-catalog.json"));
+  for (const [system, assets, runtime] of [
+    ["heart", heartAssets, heartRuntime],
+    ["lung", lungAssets, lungRuntime]
+  ]) {
+    const catalogueBytes = Buffer.from(JSON.stringify([
+      { system, title: "Pack catalogue test", path: "test.mp3" }
+    ]), "utf8");
+    const bridgeCalls = [];
+    const context = {
+      window: {
+        ShbaceNative: {
+          getAuscultationFileSize(requestedSystem, path) {
+            bridgeCalls.push(["size", requestedSystem, path]);
+            return requestedSystem === system && path === "audio-catalog.json"
+              ? catalogueBytes.length : -1;
+          },
+          readAuscultationFileBase64Chunk(requestedSystem, path, offset, length) {
+            bridgeCalls.push(["read", requestedSystem, path, offset, length]);
+            return catalogueBytes.subarray(offset, offset + length).toString("base64");
+          }
+        }
+      },
+      document: { baseURI: "file:///android_asset/public/index.html" },
+      URL,
+      Uint8Array,
+      Response,
+      DOMException,
+      atob,
+      fetch: async () => { throw new Error("Unexpected bundled fallback fetch"); }
+    };
+    vm.runInNewContext(assets, context);
+    const catalogueUrl = new URL(
+      "audio-catalog.json",
+      "file:///android_asset/public/js/auscultation/" + system + "/auscultation-pro.js"
+    );
+    assert.equal(
+      context.window.__shbAuscultationAssets.resolvePath(catalogueUrl),
+      "audio-catalog.json",
+      system + " adapter must allow the package catalogue path"
+    );
+    const response = await context.window.__shbAuscultationFetch(catalogueUrl, { cache: "no-store" });
+    assert.equal(response.status, 200);
+    const parsed = await response.json();
+    assert.equal(parsed[0].system, system);
+    assert.ok(bridgeCalls.some((call) =>
+      call[0] === "size" && call[1] === system && call[2] === "audio-catalog.json"
+    ));
+    assert.ok(bridgeCalls.some((call) =>
+      call[0] === "read" && call[1] === system && call[2] === "audio-catalog.json"
+    ));
+    assert.match(runtime, /window\.__shbAuscultationFetch/);
+    assert.match(runtime, /packFetch\(catalogUrl/);
+    assert.match(runtime, /if\(!response\)/);
+    assert.match(runtime, /fetch\(catalogUrl,\{cache:'no-store'\}\)/);
+    assert.match(runtime, /installed pack:/);
+    assert.match(runtime, /bundled copy:/);
+    assert.match(runtime, /3D anatomy unavailable/);
+  }
+});
+
 test("Heart and Lung render natively inside Shbace without a Medara page iframe", () => {
   assert.match(page, /isNativeAndroid\(\)/);
   assert.match(page, /ROUTES = \{ heart:'auscultationheart', lung:'auscultationlung' \}/);

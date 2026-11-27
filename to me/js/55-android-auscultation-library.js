@@ -252,7 +252,7 @@
       var script = document.createElement('script');
       script.id = 'shb-auscultation-adapter-script';
       script.async = true;
-      script.src = new URL('js/auscultation/' + system + '/native-assets.js?v=shbace-integrated-2', document.baseURI).href;
+      script.src = new URL('js/auscultation/' + system + '/native-assets.js?v=shbace-integrated-3', document.baseURI).href;
       script.onload = function () {
         if (window.__shbAuscultationAssets && window.__shbAuscultationAssets.system === system) resolve();
         else reject(new Error('The offline ' + system + ' adapter did not initialize.'));
@@ -300,7 +300,7 @@
       if (callout && controls) controls.insertAdjacentElement('afterend', callout);
       return ensureAuscultationAdapter(system);
     }).then(function () {
-      return import(new URL('auscultation-pro.js?v=shbace-integrated-2', base).href);
+      return import(new URL('auscultation-pro.js?v=shbace-integrated-3', base).href);
     }).then(function (runtime) {
       if (!host.isConnected) return;
       var dispose = runtime.mountAuscultation(root, system);
