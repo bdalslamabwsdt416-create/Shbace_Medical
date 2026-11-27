@@ -13,7 +13,7 @@ const index = readFileSync(resolve(root, "index.html"), "utf8");
 const gradle = readFileSync(resolve(root, "../android/app/build.gradle"), "utf8");
 const manifest = JSON.parse(readFileSync(resolve(root, "modules/module-manifest.v1.json"), "utf8"));
 
-function createRuntime(platform = "android", nativeBridge = { getDeviceInfo: () => "Version: 1.3.11 (20)" }) {
+function createRuntime(platform = "android", nativeBridge = { getDeviceInfo: () => "Version: 1.3.12 (21)" }) {
   const window = {
     Capacitor: { getPlatform: () => platform, isNativePlatform: () => platform === "android" },
     ShbaceNative: nativeBridge
@@ -152,11 +152,11 @@ test("loader order places Core and Module Registry after the existing Android mo
   assert.ok(settings >= 0 && core > settings && registry > core);
 });
 
-test("Android release metadata matches v1.3.11 / versionCode 20", () => {
-  assert.match(gradle, /versionCode\s+20/);
-  assert.match(gradle, /versionName\s+"1\.3\.11"/);
-  assert.equal(manifest.frozenAndroidRelease.versionName, "1.3.11");
-  assert.equal(manifest.frozenAndroidRelease.versionCode, 20);
+test("Android release metadata matches v1.3.12 / versionCode 21", () => {
+  assert.match(gradle, /versionCode\s+21/);
+  assert.match(gradle, /versionName\s+"1\.3\.12"/);
+  assert.equal(manifest.frozenAndroidRelease.versionName, "1.3.12");
+  assert.equal(manifest.frozenAndroidRelease.versionCode, 21);
 });
 
 test("module manifest covers the blueprint without overstating unfinished engines", () => {
