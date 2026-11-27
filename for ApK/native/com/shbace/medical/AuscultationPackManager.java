@@ -30,7 +30,7 @@ import java.util.concurrent.Executors;
 final class AuscultationPackManager {
     private static final String TAG = "ShbaceAuscultation";
     private static final String BASE_URL =
-            "https://raw.githubusercontent.com/bdalslamabwsdt416-create/Shbace_Medical/feat/medara-auscultation-library-20261126/for%20ApK/android-content/auscultation/";
+            "https://raw.githubusercontent.com/bdalslamabwsdt416-create/Shbace_Medical/main/for%20ApK/android-content/auscultation/";
     private static final long MAX_MANIFEST_BYTES = 2L * 1024L * 1024L;
     private static final long MAX_FILE_BYTES = 24L * 1024L * 1024L;
     private static final long MAX_TOTAL_BYTES = 40L * 1024L * 1024L;
