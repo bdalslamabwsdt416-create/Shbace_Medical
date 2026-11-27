@@ -208,6 +208,8 @@
       if (eyebrow) eyebrow.textContent = '3D ANATOMY';
       var hint = root.querySelector('.scene-hint');
       if (hint) hint.textContent = 'Drag to rotate · Select a point to listen';
+      var boneOpacity = root.querySelector('#bone-opacity');
+      if (boneOpacity) boneOpacity.value = system === 'heart' ? '17' : '22';
       var callout = root.querySelector('.selected-callout');
       var controls = root.querySelector('.view-controls');
       if (callout && controls) controls.insertAdjacentElement('afterend', callout);
