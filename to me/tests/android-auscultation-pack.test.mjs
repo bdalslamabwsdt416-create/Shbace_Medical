@@ -231,6 +231,24 @@ test("Sidebar creates and recovers the Heart/Lung entry in the native Android dr
   assert.match(page, /refreshDrawer:refreshDrawerButtons/);
   assert.match(page, /button\.disabled = !!state\.downloading \|\| !!state\.installed/);
 });
+test("Late-loaded Auscultation script repairs the final Android drawer override", () => {
+  assert.match(page, /typeof bridge\.getAuscultationPackState !== 'function'/);
+  assert.match(page, /typeof bridge\.startAuscultationPackDownload !== 'function'/);
+  assert.match(page, /function drawerAuscultationMarkup\(\)/);
+  assert.match(page, /data-shb-auscultation-menu/);
+  assert.match(page, /data-shb-ausc-open="heart"/);
+  assert.match(page, /data-shb-ausc-open="lung"/);
+  assert.match(page, /function ensureAuscultationDrawerEntry\(drawer\)/);
+  assert.match(page, /drawer\.querySelector\('\.dr-body'\)/);
+  assert.match(page, /body\.insertAdjacentHTML\('afterbegin', drawerAuscultationMarkup\(\)\)/);
+  assert.match(page, /function installDrawerToggleRecovery\(\)/);
+  assert.match(page, /var previousToggleDrawer = window\.toggleDrawer/);
+  assert.match(page, /previousToggleDrawer\.apply\(this, arguments\)/);
+  assert.match(page, /window\.toggleDrawer = recoveredToggleDrawer/);
+  assert.match(page, /installDrawerToggleRecovery\(\);/);
+  assert.match(page, /recoveredToggleDrawer\.__shbAuscultationDrawerRecovery = true/);
+});
+
 test("Lung runtime preserves Normal, Slow, half-speed, patient and teaching variants", () => {
   assert.match(lungRuntime, /if\(state\.system==='lung'\)return false/);
   assert.match(lungRuntime, /return 'Half speed'/);
