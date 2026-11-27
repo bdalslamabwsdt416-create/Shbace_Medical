@@ -255,7 +255,7 @@ test("Heart and Lung render natively inside Shbace without a Medara page iframe"
   }
   for (const scene of [heartScene, lungScene]) {
     assert.match(scene, /this\.options\.detailBase\|\|'assets\/models\/valve-heart'/);
-    assert.doesNotMatch(scene, /new THREE\.TubeGeometry|updateTube|makeStethoscope/);
+    assert.match(scene, /makeStethoscope/);
   }
   assert.match(integratedCss, /library-workspace[^\n]*border:0!important[^\n]*background:transparent!important/);
   assert.match(integratedCss, /--sa-cyan:#29d8ff/);
