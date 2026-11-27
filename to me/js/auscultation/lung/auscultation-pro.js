@@ -4,7 +4,7 @@ import {SoundEngine} from './sound.js?v=library-1';
 import {getTeachingGuide} from './unified-learning.js?v=1';
 import {getClinicalLink,getRelativeIntensity} from './clinical-links.js?v=1';
 export function mountAuscultation(root,systemOverride='heart'){
-const $=s=>root.querySelector(s);
+const $=s=>root.querySelector(s)||root.ownerDocument.createElement('span');
 const initialSystem=systemOverride==='lung'?'lung':'heart';
 const state={system:initialSystem,view:'front',point:initialSystem==='lung'?'lung-right':'aortic',piece:'diaphragm',selected:null,items:[],playing:false,loadToken:0,waveElapsed:0,waveStarted:false,quizMode:false,quiz:{target:null,round:0,score:0,answered:false,options:[]}};
 const sound=new SoundEngine({assetBase:new URL('./',import.meta.url).pathname});let scene=null;let mounted=true;let animationFrame=0;let waveFrame=0;

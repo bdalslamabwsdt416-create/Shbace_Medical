@@ -285,6 +285,11 @@
       if (!shell) throw new Error('Auscultation interface template is incomplete.');
       root.innerHTML = '';
       root.appendChild(document.importNode(shell, true));
+      if (!root.querySelector('#toast')) {
+        var toastEl = document.createElement('div');
+        toastEl.id = 'toast'; toastEl.className = 'toast'; toastEl.setAttribute('role', 'status');
+        root.appendChild(toastEl);
+      }
       var heading = root.querySelector('.library-heading');
       var systemBar = root.querySelector('.system-bar');
       if (heading) heading.remove();
@@ -300,7 +305,7 @@
       if (callout && controls) controls.insertAdjacentElement('afterend', callout);
       return ensureAuscultationAdapter(system);
     }).then(function () {
-      return import(new URL('auscultation-pro.js?v=shbace-integrated-3', base).href);
+      return import(new URL('auscultation-pro.js?v=shbace-integrated-4', base).href);
     }).then(function (runtime) {
       if (!host.isConnected) return;
       var dispose = runtime.mountAuscultation(root, system);
