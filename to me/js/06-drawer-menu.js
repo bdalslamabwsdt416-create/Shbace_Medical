@@ -77,8 +77,18 @@ document.addEventListener('click',function(event){
 },true);
 
 function drawerIsNativeAndroid(){
-  try{var cap=window.Capacitor;return !!(cap&&typeof cap.getPlatform==='function'&&cap.getPlatform()==='android'&&typeof cap.isNativePlatform==='function'&&cap.isNativePlatform());}
-  catch(e){return false;}
+  try{
+    var cap=window.Capacitor;
+    if(cap&&typeof cap.getPlatform==='function'&&cap.getPlatform()==='android'&&
+       typeof cap.isNativePlatform==='function'&&cap.isNativePlatform())return true;
+  }catch(e){}
+  /* MainActivity injects this bridge before page scripts. It is a stronger native-host
+     signal and keeps the drawer working even if Capacitor's JS platform registry is late. */
+  try{
+    var nativeBridge=window.ShbaceNative;
+    return !!(nativeBridge&&typeof nativeBridge.getAuscultationPackState==='function'&&
+      typeof nativeBridge.startAuscultationPackDownload==='function');
+  }catch(e){return false;}
 }
 function installDrawerAuscultationStyles(){
   if(document.getElementById('shb-auscultation-drawer-styles'))return;
@@ -125,6 +135,18 @@ function drawerAuscultationMarkup(){
       '<div class="shb-ausc-child" data-system="lung" role="listitem"><button type="button" class="shb-ausc-child-open" data-shb-ausc-open="lung"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v8"/><path d="M10 8c-1.8 0-3.1 1.4-4.2 4.2C4.5 15.6 3.5 18 3.5 20c0 1.2 1 1.7 2.2 1.7 3.7 0 6.3-2.7 6.3-6.4V9.8C12 8.6 11.2 8 10 8Z"/><path d="M14 8c1.8 0 3.1 1.4 4.2 4.2 1.3 3.4 2.3 5.8 2.3 7.8 0 1.2-1 1.7-2.2 1.7-3.7 0-6.3-2.7-6.3-6.4V9.8C12 8.6 12.8 8 14 8Z"/><path d="M12 11c-1.2 1.4-2.4 2.1-3.7 2.1M12 11c1.2 1.4 2.4 2.1 3.7 2.1"/></svg><span>Lung Auscultation</span><small class="shb-ausc-child-count">31</small></button><button type="button" class="shb-ausc-download" data-shb-ausc-download="lung" aria-label="Download Lung Auscultation" title="Download Lung Auscultation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 18v3h16v-3"/></svg></button></div>'+
     '</div></section>';
 }
+function ensureDrawerAuscultation(d){
+  if(!d||!drawerIsNativeAndroid())return false;
+  installDrawerAuscultationStyles();
+  if(d.querySelector('[data-shb-auscultation-menu]'))return true;
+  var markup=drawerAuscultationMarkup();
+  if(!markup)return false;
+  /* Recover a drawer that was created before the native bridge/platform check was ready. */
+  var brand=d.querySelector('.brand-small');
+  if(brand)brand.insertAdjacentHTML('afterend',markup);
+  else d.insertAdjacentHTML('afterbegin',markup);
+  return !!d.querySelector('[data-shb-auscultation-menu]');
+}
 document.addEventListener('click',function(event){
   const toggle=event.target&&event.target.closest?event.target.closest('[data-shb-ausc-toggle]'):null;
   if(!toggle)return;
@@ -139,15 +161,19 @@ document.addEventListener('click',function(event){
 
 function toggleDrawer(f){
  const ph=document.querySelector('.phone');
+ if(!ph)return;
  let d=document.getElementById('drawer');
  if(!d){
-  if(drawerIsNativeAndroid())installDrawerAuscultationStyles();
   ph.insertAdjacentHTML('beforeend',`<div id="drawerBk" class="drawer-bk" onclick="toggleDrawer(false)"></div><aside id="drawer" class="drawer"><div class="brand-small" style="margin:0 6px 8px"><b style="font-size:17px">Shbace <span style="color:var(--mint)">Medical</span></b></div>${drawerAuscultationMarkup()}${drawerGroups().map(([g,a])=>`<div class="dl">${drawerText(g)}</div>${a.map(([n,p,ic])=>`<button class="di" ${p?'data-shb-drawer-route="'+drawerText(p)+'"':''} ${p?'':'onclick="toggleDrawer(false)"'}>${drawerIcon(ic)}${drawerText(n)}</button>`).join('')}`).join('')}</aside>`);
   d=document.getElementById('drawer');
  }
+ /* Run on every open/close, not only initial creation: recover stale drawers too. */
+ ensureDrawerAuscultation(d);
+ if(!d)return;
  const o=f===undefined?!d.classList.contains('open'):f;
  d.classList.toggle('open',o);
- document.getElementById('drawerBk').classList.toggle('show',o);
+ const backdrop=document.getElementById('drawerBk');
+ if(backdrop)backdrop.classList.toggle('show',o);
 }
 function appHeader(label){const lt=!!(document.querySelector('.phone')&&document.querySelector('.phone').classList.contains('light'));return `<div class="phone-appbar hdr2">
 <button class="menu-btn" aria-label="Open menu" onclick="toggleDrawer()">☰</button>
