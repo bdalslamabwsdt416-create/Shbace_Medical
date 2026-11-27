@@ -93,7 +93,7 @@
           (state.downloading ? 'Downloading…' : facts.button) + '</button>' +
         '<small class="shb-ausc-pack-note">' + facts.note + '</small></section>';
     }
-    return head + '<div class="shb-ausc-pack-page">' + body + '</div>';
+    return head + '<div class="shb-ausc-pack-page' + (state.installed ? ' is-library' : '') + '">' + body + '</div>';
   }
   function currentPage() {
     try { return typeof appPage === 'string' ? appPage : ''; }
@@ -274,7 +274,7 @@
       return '<link rel="stylesheet" href="' + new URL(file, base).href + '">';
     }).join('');
     shadow.innerHTML = links + '<link rel="stylesheet" href="' +
-      new URL('../shbace-integrated.css?v=3', base).href + '"><div class="shb-ausc-runtime shb-ausc-layout medara-library"><div class="shb-ausc-template-loading">Opening auscultation library…</div></div>';
+      new URL('../shbace-integrated.css?v=4', base).href + '"><div class="shb-ausc-runtime shb-ausc-layout medara-library"><div class="shb-ausc-template-loading">Opening auscultation library…</div></div>';
     var root = shadow.querySelector('.shb-ausc-runtime');
     fetch(new URL('index.html', base), { cache: 'no-store' }).then(function (response) {
       if (!response.ok) throw new Error('Auscultation interface template is unavailable.');
@@ -305,7 +305,7 @@
       if (callout && controls) controls.insertAdjacentElement('afterend', callout);
       return ensureAuscultationAdapter(system);
     }).then(function () {
-      return import(new URL('auscultation-pro.js?v=shbace-integrated-4', base).href);
+      return import(new URL('auscultation-pro.js?v=shbace-integrated-5', base).href);
     }).then(function (runtime) {
       if (!host.isConnected) return;
       var dispose = runtime.mountAuscultation(root, system);
@@ -332,6 +332,9 @@
   style.id = 'shb-android-auscultation-page-styles';
   style.textContent =
     '.phone .shb-ausc-pack-page{min-height:calc(100dvh - 58px);background:#06142a;color:#e7f2ff;padding:14px;box-sizing:border-box}' +
+    /* installed library uses the full screen width; the download gate keeps its margins */
+    '.phone .screen.app-shell:has(.shb-ausc-pack-page.is-library) .app-scroll{margin-left:-16px;margin-right:-16px}' +
+    '.phone .shb-ausc-pack-page.is-library{padding:0}' +
     '.phone .shb-ausc-pack-gate{max-width:620px;margin:26px auto;padding:22px;border:1px solid rgba(68,153,229,.25);border-radius:22px;background:linear-gradient(155deg,rgba(20,54,88,.92),rgba(6,20,42,.98));box-shadow:0 18px 42px rgba(0,0,0,.22);text-align:center}' +
     '.phone .shb-ausc-gate-icon{font-size:42px;color:#f18b9a;line-height:1.3}.phone .shb-ausc-gate-icon.lung{color:#76c7ec}' +
     '.phone .shb-ausc-kicker{font-size:10px;letter-spacing:.17em;color:#76bff4;font-weight:800}' +

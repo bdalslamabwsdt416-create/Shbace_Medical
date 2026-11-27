@@ -6,8 +6,8 @@ import {getClinicalLink,getRelativeIntensity} from './clinical-links.js?v=1';
 export function mountAuscultation(root,systemOverride='heart'){
 const $=s=>root.querySelector(s)||root.ownerDocument.createElement('span');
 const initialSystem=systemOverride==='lung'?'lung':'heart';
-const state={system:initialSystem,view:'front',point:initialSystem==='lung'?'lung-right':'aortic',piece:'diaphragm',selected:null,items:[],playing:false,loadToken:0,waveElapsed:0,waveStarted:false,quizMode:false,quiz:{target:null,round:0,score:0,answered:false,options:[]}};
-const sound=new SoundEngine({assetBase:new URL('./',import.meta.url).pathname});let scene=null;let mounted=true;let animationFrame=0;let waveFrame=0;
+const state={system:initialSystem,view:'front',point:initialSystem==='lung'?'lung-right':'aortic',piece:'diaphragm',selected:null,items:[],playing:false,loadToken:0,waveElapsed:0,waveStarted:false,quizMode:false,quiz:{target:null,round:0,score:0,answered:false,options:[],returnPoint:null}};
+const sound=new SoundEngine({assetBase:new URL('./',import.meta.url).pathname});const ownerDocument=root.ownerDocument;let scene=null;let mounted=true;let animationFrame=0;let waveFrame=0;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pointById=id=>POINTS.find(p=>p.id===id);
 const toast=message=>{const t=$('#toast');t.textContent=message;t.classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('visible'),3200);};
@@ -279,14 +279,14 @@ function buildLungTree(items,query='',reviewItems=[]){
  }).join('');
  html+=section('04','Clinical Patient Cases','Patient recordings kept separate from teaching examples',clinical,'<div class="lung-case-list">'+clinicalCards+'</div>');
  if(reviewItems.length){
-  const reviewCards=reviewItems.map(item=>'<div class="lung-case-card"><span class="lung-case-id">Unclassified</span><span class="lung-case-copy"><strong>'+esc(item.title)+'</strong><small>Source annotation not confirmed</small></span><button class="lung-case-play" data-audio-id="'+item.id+'" aria-label="Play unclassified source recording">▶</button></div>').join('');
+  const reviewCards=reviewItems.map(item=>{const duplicate=state.items.find(x=>x.id===item.duplicateOf);const note=duplicate?'Same audio file as '+duplicate.title+'; shown as an alias and excluded from the quiz.':'Source annotation not confirmed';return '<div class="lung-case-card"><span class="lung-case-id">Unclassified</span><span class="lung-case-copy"><strong>'+esc(item.title)+'</strong><small>'+esc(note)+'</small></span><button class="lung-case-play" data-audio-id="'+item.id+'" aria-label="Play unclassified source recording">▶</button></div>';}).join('');
   html+=section('05','Unclassified Source Recordings','Source labels retained separately from confirmed teaching groups',reviewItems,'<div class="lung-case-list">'+reviewCards+'</div>');
  }
  return html;
 }
 function renderTree(){
  const query=$('#sound-search').value.trim().toLowerCase();
- const sourceItems=state.items.filter(x=>x.system===state.system&&!x.duplicateOf&&!isPlaybackOnlyVariant(x));
+ const sourceItems=state.items.filter(x=>x.system===state.system&&(!x.duplicateOf||state.system==='lung')&&!isPlaybackOnlyVariant(x));
  const matches=x=>!query||[x.title,x.category,x.subgroup,recordingType(x),meaningfulRecordingVariant(x)].join(' ').toLowerCase().includes(query);
  const reviewItems=sourceItems.filter(x=>x.category==='Needs Source Review'||x.reviewStatus==='Needs Source Review').filter(matches);
  const items=sourceItems.filter(x=>x.category!=='Needs Source Review'&&x.reviewStatus!=='Needs Source Review').filter(matches);
@@ -325,9 +325,8 @@ function showSelection(item){
  $('#go-to-point').textContent=p?'Move stethoscope to best listening site ↗':'Highlight anatomical region ↗';
  $('#go-to-point').onclick=()=>{
   if(p){if(p.system!==state.system)setSystem(p.system);updatePoint(p.id);}
-  scene?.setTeachingFocus(link.focus);
+  else scene?.setTeachingFocus(link.focus);
  };
- scene?.setTeachingFocus(link.focus);
  $('#selected-path').textContent=item.path;
  const sourceFiles=state.items.filter(x=>x.system===item.system&&x.title===item.title&&x.id!==item.id);
  $('#duplicate-source-wrap').hidden=sourceFiles.length===0;
@@ -339,26 +338,6 @@ function showSelection(item){
  }else{
   $('#selected-source').textContent='Inherited library recording. The source label is preserved; the original publisher and redistribution permission have not been independently verified.';
  }
-}async function preloadSelected(item){
- const token=state.loadToken;
- try{
-  $('#sound-status').textContent='Loading audio preview…';
-  const buffer=await sound.load('user:'+item.path);
-  if(token!==state.loadToken||state.selected?.id!==item.id)return;
-  sound.buffer=buffer;sound.normalization=1;state.waveElapsed=0;state.waveStarted=false;
-  $('#play').disabled=false;
-  $('#wave-placeholder').hidden=false;$('#wave-placeholder').textContent='Start audio';
-  $('#sound-status').textContent='AUDIO READY · '+buffer.duration.toFixed(1)+' SEC';
-  drawWave();
- }catch(error){
-  if(token!==state.loadToken||state.selected?.id!==item.id)return;
-  sound.buffer=null;$('#play').disabled=true;
-  $('#wave-placeholder').hidden=false;
-  $('#wave-placeholder').textContent='Audio could not be loaded';
-  $('#sound-status').textContent='AUDIO LOAD FAILED';
-  console.error('Audio preview failed:',item.path,error);
-  toast('Could not load this recording. Check the local audio file and try again.');
- }
 }
 function selectRecording(id){
  const item=state.items.find(x=>x.id===id);if(!item)return;
@@ -366,28 +345,29 @@ function selectRecording(id){
  state.loadToken++;sound.pause();sound.buffer=null;state.playing=false;state.waveElapsed=0;state.waveStarted=false;state.selected=item;
  const link=getClinicalLink(item);const mapped=pointById(link.point);
  if(mapped)updatePoint(mapped.id);else applySpatialIntensity();
- scene?.setTeachingFocus(link.focus);
+ scene?.setTeachingFocus('');
  showSelection(item);
  $('#play-title').textContent=displaySoundTitle(item.title);$('#play-subtitle').textContent=recordingType(item);$('#audio-type').textContent=recordingType(item);
  $('#play').disabled=true;$('#wave-placeholder').hidden=false;$('#wave-placeholder').textContent='Loading audio preview…';$('#sound-status').textContent='Loading audio preview…';
  $('#category-tree').querySelectorAll('[data-audio-id]').forEach(b=>b.classList.toggle('active',b.dataset.audioId===id));
- updateAudioUI();preloadSelected(item);
+ updateAudioUI();playSelected();
  
 }
 function exitQuiz(){
- state.quizMode=false;sound.pause();state.playing=false;
+ state.quizMode=false;root.classList.remove('quiz-mode');scene?.setQuizMode(false);sound.pause();state.playing=false;
+ if(state.quiz.returnPoint&&pointById(state.quiz.returnPoint)?.system===state.system)updatePoint(state.quiz.returnPoint);
  $('#quiz-panel').hidden=true;$('#search-wrap').hidden=false;
  $('#category-tree').hidden=false;$('#no-results').hidden=false;
  renderTree();if(state.selected)showSelection(state.selected);updateAudioUI();
 }
 function startQuiz(){
- state.quizMode=true;state.quiz.round=0;state.quiz.score=0;
+ state.quiz.returnPoint=state.point;state.quizMode=true;root.classList.add('quiz-mode');scene?.setQuizMode(true);state.quiz.round=0;state.quiz.score=0;
  $('#search-wrap').hidden=true;$('#category-tree').hidden=true;$('#no-results').hidden=true;
  $('#learning-card').hidden=true;$('#quiz-panel').hidden=false;
  nextQuiz();
 }
 function nextQuiz(){
- sound.pause();sound.buffer=null;state.playing=false;state.waveElapsed=0;state.waveStarted=false;state.quiz.answered=false;state.quiz.round++;
+ sound.pause();sound.buffer=null;state.playing=false;state.waveElapsed=0;state.waveStarted=false;state.quiz.answered=false;state.quiz.round++;state.loadToken++;root.classList.add('quiz-mode');scene?.setQuizMode(true);$('#spatial-level').hidden=true;
  const pool=state.items.filter(x=>x.system===state.system&&!x.duplicateOf&&!isPlaybackOnlyVariant(x));
  const titles=[...new Set(pool.map(x=>x.title))];
  if(titles.length<4){toast('Not enough distinct recordings for a quiz in this section.');exitQuiz();return;}
@@ -397,7 +377,6 @@ function nextQuiz(){
  const others=titles.filter(t=>t!==targetTitle).sort(()=>Math.random()-.5).slice(0,3);
  state.quiz.target=target;state.quiz.options=[targetTitle,...others].sort(()=>Math.random()-.5);
  state.selected=target;
- if(target.point&&pointById(target.point))updatePoint(target.point);else updatePoint(state.system==='heart'?'mitral':'lung-right');
  $('#quiz-round').textContent='QUESTION '+String(state.quiz.round).padStart(2,'0');
  $('#quiz-score').textContent=state.quiz.score+' correct';
  $('#quiz-feedback').textContent='';$('#quiz-next').hidden=true;
@@ -412,7 +391,10 @@ function nextQuiz(){
 }
 function answerQuiz(index){
  if(state.quiz.answered)return;state.quiz.answered=true;
- const answer=state.quiz.options[index],correct=answer===state.quiz.target.title;
+ const target=state.quiz.target;root.classList.remove('quiz-mode');scene?.setQuizMode(false);
+ if(target.point&&pointById(target.point))updatePoint(target.point);
+ else{scene?.setStethoscopeVisible(false);$('#active-point-name').textContent='No source-specific listening point';$('#active-point-position').textContent='The recording source does not identify one exact site';$('#spatial-level').hidden=true;}
+ const answer=state.quiz.options[index],correct=answer===target.title;
  if(correct)state.quiz.score++;
  $('#quiz-options').querySelectorAll('[data-quiz-answer]').forEach((b,i)=>{
   b.disabled=true;b.classList.toggle('correct',state.quiz.options[i]===state.quiz.target.title);
@@ -421,18 +403,19 @@ function answerQuiz(index){
  $('#quiz-feedback').textContent=correct?'Correct. '+state.quiz.target.title:'Not quite. The recording was '+state.quiz.target.title+'.';
  $('#quiz-score').textContent=state.quiz.score+' correct';
  $('#quiz-next').hidden=false;
- showSelection(state.quiz.target);
+ showSelection(target);
  $('#play-title').textContent=state.quiz.target.title;$('#play-subtitle').textContent=recordingType(state.quiz.target);
 }
 async function playSelected(){
  if(!state.selected)return;
- try{$('#play').disabled=true;$('#sound-status').textContent='Loading recording…';const ok=await sound.play('user:'+state.selected.path);state.playing=!!ok;state.waveStarted=!!ok;state.waveElapsed=0;updateAudioUI();}
- catch(e){state.playing=false;state.waveStarted=false;$('#sound-status').textContent='Could not load audio';toast('The selected audio could not be decoded. Check that the MP3 file is present.');console.error(e);}
- finally{$('#play').disabled=!state.selected;}
+ const token=state.loadToken,stale=()=>token!==state.loadToken;
+ try{$('#play').disabled=true;$('#sound-status').textContent='Loading recording…';const ok=await sound.play('user:'+state.selected.path);if(stale())return;state.playing=!!ok;state.waveStarted=!!ok;state.waveElapsed=0;updateAudioUI();}
+ catch(e){if(stale())return;state.playing=false;state.waveStarted=false;$('#wave-placeholder').textContent=e.code==='audio-activation'?'Tap Play to listen':'Audio could not be loaded';$('#sound-status').textContent=e.code==='audio-activation'?'Tap Play to listen':'Could not load audio';toast(e.code==='audio-activation'?e.message:'The selected audio could not be decoded. Check that the MP3 file is present.');console.error(e);}
+ finally{if(!stale())$('#play').disabled=!state.selected;}
 }
 function updateAudioUI(){
  $('#play-icon').textContent=state.playing?'Ⅱ':'▶';$('#play').setAttribute('aria-label',state.playing?'Pause audio':'Play audio');
- $('#sound-status').textContent=state.playing?'PLAYING · '+sound.playbackRate+'×':sound.buffer?'AUDIO READY · '+sound.buffer.duration.toFixed(1)+' SEC':state.selected?'Loading audio preview…':'Ready to listen';
+ $('#sound-status').textContent=state.playing?'PLAYING · '+sound.playbackRate+'×':sound.buffer?'AUDIO READY · '+sound.buffer.duration.toFixed(1)+' SEC':state.selected?'Tap Play to listen':'Ready to listen';
  const showStart=!!sound.buffer&&!state.waveStarted;
  $('#wave-placeholder').hidden=!!sound.buffer&&state.waveStarted;
  if(showStart)$('#wave-placeholder').textContent='Start audio';
@@ -469,13 +452,20 @@ function drawWave(){
  }
 }
 function animateWave(){if(!mounted)return;if(waveFrame++%2===0)drawWave();animationFrame=requestAnimationFrame(animateWave);}
+function pauseAudioOnBackground(){
+ if(!ownerDocument.hidden)return;
+ if(sound.playing&&sound.context)state.waveElapsed=Math.max(0,(sound.context.currentTime-sound.startedAt)*sound.playbackRate);
+ sound.pause();state.playing=false;updateAudioUI();
+ if(state.selected&&!sound.buffer)$('#wave-placeholder').textContent='Tap Play to listen';
+}
+ownerDocument.addEventListener('visibilitychange',pauseAudioOnBackground);
 async function init(){
  const catalogUrl=new URL('audio-catalog.json',import.meta.url);const packFetch=(typeof window!=='undefined'&&window.__shbAuscultationFetch)||null;let response=null,catalogError='';
  if(packFetch){try{response=await packFetch(catalogUrl,{cache:'no-store'});if(!response.ok){catalogError='installed pack: '+await response.text().catch(()=>'HTTP '+response.status);response=null;}}catch(error){catalogError='installed pack: '+String(error&&error.message||error);response=null;}}
  if(!response){try{response=await fetch(catalogUrl,{cache:'no-store'});}catch(error){throw new Error((catalogError?catalogError+' | ':'')+'bundled copy: '+String(error&&error.message||error));}if(!response.ok)throw new Error((catalogError?catalogError+' | ':'')+'bundled copy: HTTP '+response.status);}
  if(!mounted)return;
  state.items=await response.json();
- const countSounds=system=>new Set(state.items.filter(x=>x.system===system&&!x.duplicateOf&&!isPlaybackOnlyVariant(x)).map(x=>x.title)).size;
+ const countSounds=system=>new Set(state.items.filter(x=>x.system===system&&(!x.duplicateOf||system==='lung')&&!isPlaybackOnlyVariant(x)).map(x=>x.title)).size;
  const heart=countSounds('heart'),lung=countSounds('lung');
  $('#heart-count').textContent=heart;$('#lung-count').textContent=lung;$('#total-count').textContent=heart+lung;
  setPressed('[data-system]','system',state.system);
@@ -509,10 +499,10 @@ async function init(){
   detailBase:new URL('assets/models/valve-heart',import.meta.url).pathname,
   distance:6.25,centerY:.28
  });
- scene.setSystem(state.system);scene.setXray($('#xray').checked);scene.setBoneOpacity(+$('#bone-opacity').value/100);scene.showPoints($('#show-points').checked);scene.setView('front');scene.load();
+ scene.setSystem(state.system);scene.setXray($('#xray').checked);scene.setBoneOpacity(+$('#bone-opacity').value/100);scene.showPoints($('#show-points').checked);if(state.quizMode)scene.setQuizMode(true);scene.setView('front');scene.load();
  animationFrame=requestAnimationFrame(animateWave);
 }
 init().catch(error=>{if(!mounted)return;console.error(error);const tree=$('#category-tree');tree.innerHTML='<p class="no-results">The audio catalogue could not be loaded. Check the installed package.</p>';const detail=document.createElement('small');detail.className='no-results';detail.style.display='block';detail.style.opacity='.7';detail.style.wordBreak='break-word';detail.textContent=String(error&&error.message||error).slice(0,300);tree.appendChild(detail);const loading=$('#model-loading');if(loading)loading.innerHTML='<strong>3D anatomy unavailable</strong><span>The library data could not be loaded. Reopen this section to retry.</span>';toast('Library data could not be loaded.');});
- return function dispose(){mounted=false;cancelAnimationFrame(animationFrame);sound.pause();if(scene)scene.dispose();};
+ return function dispose(){mounted=false;ownerDocument.removeEventListener('visibilitychange',pauseAudioOnBackground);cancelAnimationFrame(animationFrame);sound.pause();if(scene)scene.dispose();};
 
 }
