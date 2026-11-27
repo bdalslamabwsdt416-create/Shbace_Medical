@@ -120,10 +120,11 @@ test("Lung pack manifest paths, sizes, and SHA-256 hashes match every packaged f
   assert.ok(listed.has("assets/models/thorax.json"));
 });
 
-test("Android pack manager uses the published feature branch and validates both independent packs", () => {
+test("Android pack manager uses the published main content feed and validates both independent packs", () => {
   assert.match(manager, /shbace-auscultation/);
   assert.ok(gitAttributes.includes('"for ApK/android-content/auscultation/**" -text'), "pack files must preserve exact bytes in Git");
-  assert.match(manager, /feat\/medara-auscultation-library-20261126\/for%20ApK\/android-content\/auscultation/);
+  assert.match(manager, /main\/for%20ApK\/android-content\/auscultation/);
+  assert.doesNotMatch(manager, /feat\/medara-auscultation-library-20261126/);
   assert.match(manager, /auscultation-" \+ system/);
   assert.match(manager, /MAX_TOTAL_BYTES/);
   assert.match(manager, /MAX_READ_CHUNK_BYTES/);
@@ -192,12 +193,16 @@ test("Heart and Lung render natively inside Shbace without a Medara page iframe"
     assert.match(scene, /this\.options\.detailBase\|\|'assets\/models\/valve-heart'/);
     assert.doesNotMatch(scene, /new THREE\.TubeGeometry|updateTube|makeStethoscope/);
   }
+  assert.match(integratedCss, /library-workspace[^\n]*border:0!important[^\n]*background:transparent!important/);
   assert.match(integratedCss, /--sa-cyan:#29d8ff/);
   assert.match(integratedCss, /@media\(min-width:900px\)/);
   assert.match(integratedCss, /selected-callout/);
 });
 
 test("Sidebar exposes separate working Heart and Lung download arrows", () => {
+  assert.match(drawer, /var body = drawer;/, "the submenu must mount into the actual #drawer node");
+  assert.doesNotMatch(drawer, /querySelector\('\.dr-body'\)/, "the shipped drawer has no .dr-body wrapper");
+  assert.match(drawer, /brand\.nextSibling/);
   assert.match(drawer, /data-shb-ausc-download="heart"/);
   assert.match(drawer, /data-shb-ausc-download="lung"/);
   assert.match(drawer, /shb-ausc-total">108 sounds/);

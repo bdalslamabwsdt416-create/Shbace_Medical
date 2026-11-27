@@ -45,6 +45,13 @@ test("remote navigation and pages are declarative and Android-only", () => {
   assert.doesNotMatch(remoteContentUi, /eval\s*\(|new Function\s*\(/);
 });
 
+test("Android 1.3.12 remains an in-place update over the existing installed app", () => {
+  assert.match(androidGradle, /applicationId "com\.shbace\.medical"/);
+  assert.match(androidGradle, /versionCode 21/);
+  assert.match(androidGradle, /versionName "1\.3\.12"/);
+  assert.match(androidGradle, /sourceSets[\s\S]*for ApK\/native/);
+});
+
 test("Gradle packages the generated to-me web build, not the legacy root web app", () => {
   assert.match(androidGradle, /\.\.\/to me\/www/);
   assert.doesNotMatch(androidGradle, /from "\$\{rootDir\}\/\.\.\/www"/);
