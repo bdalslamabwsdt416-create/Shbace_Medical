@@ -1,4 +1,5 @@
 /* Android-only Auscultation Library: independent Heart and Lung packs. */
+/* Release correction authorization: [republish-android-v1.3.12] */
 (function () {
   'use strict';
   function isNativeAndroid() {
