@@ -222,5 +222,5 @@ test("Lung runtime preserves Normal, Slow, half-speed, patient and teaching vari
 test("Lung 3D loads the shared thorax but skips the Heart-only valve model", () => {
   assert.match(lungScene, /base:this\.options\.base\|\|'assets\/models\/thorax'/);
   assert.match(lungScene, /if\(this\.system==='heart'\)\s*\{/);
-  assert.match(lungScene, /base:'assets\/models\/valve-heart'/);
+  assert.match(lungScene, /base:this\.options\.detailBase\|\|'assets\/models\/valve-heart'/);
 });
