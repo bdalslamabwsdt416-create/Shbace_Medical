@@ -43,7 +43,6 @@
 .shb-ausc-layout .segmented{display:flex;align-items:center;gap:4px;padding:3px;border:1px solid var(--sa-line);border-radius:11px;background:rgba(5,19,40,.42)}
 .shb-ausc-layout .segmented button{min-height:34px;padding:7px 14px;border:0;border-radius:8px;background:transparent;color:var(--sa-muted);font-size:11px;cursor:pointer}
 .shb-ausc-layout .segmented button.active{background:linear-gradient(135deg,#2f8bff,#1260ca);color:#fff;box-shadow:0 0 12px rgba(47,139,255,.23)}
-.shb-ausc-layout .toggle-options{display:none!important}
 .shb-ausc-layout .selected-callout{position:static!important;display:flex;flex-direction:column;gap:3px;max-width:none!important;width:auto;margin:0;padding:10px 13px;border:1px solid var(--sa-line);border-radius:0;background:rgba(47,139,255,.08);backdrop-filter:blur(8px)}
 .shb-ausc-layout .selected-callout .small-eyebrow{color:var(--sa-cyan);font-size:8px}
 .shb-ausc-layout .selected-callout strong{color:var(--sa-text);font:650 13px/1.35 Inter,Arial,sans-serif}
@@ -82,7 +81,6 @@
 .shb-ausc-layout .browser-head .eyebrow{color:var(--sa-cyan);font:800 8px ui-monospace,monospace;letter-spacing:1.3px}
 .shb-ausc-layout .browser-head h2{margin:4px 0 0;color:var(--sa-text);font:650 19px/1.2 Inter,Arial,sans-serif}
 .shb-ausc-layout .browser-actions{display:flex;align-items:center;gap:7px}
-.shb-ausc-layout #quiz-start,.shb-ausc-layout #quiz-panel,.shb-ausc-layout #learning-card{display:none!important}
 .shb-ausc-layout .search-box{display:flex;align-items:center;gap:9px;min-height:43px;padding:0 11px;border:1px solid var(--sa-line);border-radius:11px;background:rgba(4,19,40,.54);color:var(--sa-muted)}
 .shb-ausc-layout .search-box input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--sa-text);font:11px Inter,Arial,sans-serif}
 .shb-ausc-layout .search-box input::placeholder{color:var(--sa-muted)}
@@ -102,7 +100,7 @@
 .shb-ausc-layout .recording-kind,.shb-ausc-layout .recording-alternates summary{color:var(--sa-muted)}
 .shb-ausc-layout .no-results{color:var(--sa-muted)}
 .shb-ausc-layout .toast{background:var(--sa-panel);color:var(--sa-text);border:1px solid var(--sa-line)}
-.shb-ausc-layout .shb-ausc-compat,.shb-ausc-layout #learning-card{display:none!important}
+.shb-ausc-layout .shb-ausc-compat{display:none!important}
 @media(min-width:900px){
  .shb-ausc-layout{padding:12px 18px 28px}
  .shb-ausc-layout .library-workspace{grid-template-columns:minmax(0,1.12fr) minmax(330px,.88fr);gap:14px}
@@ -121,3 +119,70 @@
  .shb-ausc-layout .playback{gap:7px}
  .shb-ausc-layout .play-title{min-width:calc(100% - 55px);flex-basis:calc(100% - 55px)}
 }
+
+/* ===== v3: layout, visibility and theme fixes ===== */
+.shb-ausc-layout [hidden]{display:none!important}
+/* fixed card height (styles.css) clipped the player; header was an overlay on the 3D scene */
+.shb-ausc-layout .viewer-card,.shb-ausc-layout .library-viewer{height:auto!important;min-height:0!important;overflow:hidden}
+.shb-ausc-layout .viewer-top{position:relative!important;inset:auto!important;height:auto!important;z-index:3;border-bottom:1px solid var(--sa-line)!important}
+.shb-ausc-layout .scene-wrap{flex:0 0 auto}
+/* controls: bones, see-through, listening points */
+.shb-ausc-layout .view-controls{flex-wrap:wrap;row-gap:8px}
+.shb-ausc-layout .toggle-options{display:flex!important;width:100%;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:8px 16px;color:var(--sa-muted);font-size:10px}
+.shb-ausc-layout .bone-control,.shb-ausc-layout .switch-label{display:flex!important;align-items:center;gap:7px;color:var(--sa-muted);font-size:10px;white-space:nowrap}
+.shb-ausc-layout .bone-control input[type=range]{width:88px;accent-color:var(--sa-cyan)}
+.shb-ausc-layout .switch{border-color:var(--sa-line)}
+.shb-ausc-layout .switch:after{background:var(--sa-muted)}
+.shb-ausc-layout .switch-label input:checked+.switch{border-color:var(--sa-cyan)}
+.shb-ausc-layout .switch-label input:checked+.switch:after{background:var(--sa-cyan)}
+/* player */
+.shb-ausc-layout .pro-sound-panel{border-radius:0 0 14px 14px}
+.shb-ausc-layout .chestpiece{display:flex}
+.shb-ausc-layout .chestpiece button{color:var(--sa-muted)}
+.shb-ausc-layout .chestpiece button.active{color:#fff}
+.shb-ausc-layout .play-button:before{color:#041a35!important}
+/* white first row and other light-theme leftovers in the sound tree */
+.shb-ausc-layout .tree-category,.shb-ausc-layout .tree-category:first-child{border-top:0}
+.shb-ausc-layout .tree-category>summary,.shb-ausc-layout .tree-category:first-child>summary,.shb-ausc-layout .lung-section>summary,.shb-ausc-layout .lung-section[open]>summary{background:transparent!important;border-radius:0!important;border-bottom:0!important}
+.shb-ausc-layout .tree-category>summary:focus,.shb-ausc-layout .tree-category>summary:active,.shb-ausc-layout .tree-category>summary:hover{background:rgba(47,139,255,.08)!important;outline:0}
+.shb-ausc-layout .tree-count,.shb-ausc-layout .level-badge{background:rgba(47,139,255,.12)!important;border:1px solid var(--sa-line)!important;color:var(--sa-cyan)!important}
+.shb-ausc-layout .lung-section{border:1px solid var(--sa-line);background:rgba(9,31,57,.5)}
+.shb-ausc-layout .lung-section-body{background:transparent}
+.shb-ausc-layout .lung-section-copy small,.shb-ausc-layout .lung-muted,.shb-ausc-layout .lung-case-copy small{color:var(--sa-muted)}
+.shb-ausc-layout .lung-sound-card,.shb-ausc-layout .lung-case-card{background:rgba(9,31,57,.64)!important;border:1px solid rgba(91,166,230,.15)!important;color:var(--sa-text)}
+.shb-ausc-layout .lung-case-card:hover,.shb-ausc-layout .lung-case-card.active{background:rgba(47,139,255,.16)!important;border-color:var(--sa-blue)!important}
+.shb-ausc-layout .lung-case-id{background:rgba(47,139,255,.14)!important;color:var(--sa-cyan)!important}
+.shb-ausc-layout .lung-case-copy strong{color:var(--sa-text)}
+.shb-ausc-layout .lung-case-play{background:rgba(47,139,255,.14)!important;border-color:var(--sa-line)!important;color:var(--sa-cyan)!important}
+.shb-ausc-layout .unclassified-section .unclassified-intro{background:rgba(47,139,255,.08);border-left-color:var(--sa-blue);color:var(--sa-muted)}
+.shb-ausc-layout .recording-alternates>summary{color:var(--sa-muted)}
+/* quiz */
+.shb-ausc-layout .quiz-launch{border:1px solid var(--sa-line);background:rgba(47,139,255,.12);color:var(--sa-cyan);border-radius:8px}
+.shb-ausc-layout #quiz-panel:not([hidden]){display:block!important;margin:12px 0;padding:14px 12px;border:1px solid var(--sa-line);border-radius:12px;background:rgba(9,31,57,.6)}
+.shb-ausc-layout .quiz-panel h3{color:var(--sa-text)}
+.shb-ausc-layout .quiz-panel>p,.shb-ausc-layout .quiz-round,.shb-ausc-layout #quiz-feedback{color:var(--sa-muted)}
+.shb-ausc-layout .quiz-round strong{color:var(--sa-cyan)}
+.shb-ausc-layout .quiz-panel-head button{color:var(--sa-cyan)}
+.shb-ausc-layout .quiz-option{background:rgba(5,19,40,.5);border-color:var(--sa-line);color:var(--sa-text)}
+.shb-ausc-layout .quiz-option:hover:not(:disabled){background:rgba(47,139,255,.16);border-color:var(--sa-blue)}
+.shb-ausc-layout .quiz-option.correct{background:rgba(52,199,142,.18);border-color:#34c78e;color:var(--sa-text)}
+.shb-ausc-layout .quiz-option.wrong{background:rgba(240,98,98,.16);border-color:#f06262;color:var(--sa-text)}
+.shb-ausc-layout .quiz-next{background:linear-gradient(135deg,#2f8bff,#1260ca);color:#fff}
+/* teaching card (about this finding) */
+.shb-ausc-layout #learning-card:not([hidden]){display:block!important}
+.shb-ausc-layout .teaching-card{margin:0;padding:14px 13px 12px;border:0;border-top:1px solid var(--sa-line);border-radius:0 0 14px 14px;background:rgba(9,29,55,.7);color:var(--sa-text)}
+.shb-ausc-layout .teaching-card p{color:var(--sa-muted)}
+.shb-ausc-layout .teaching-card h3,.shb-ausc-layout .teaching-card h4,.shb-ausc-layout .teaching-card strong{color:var(--sa-text)}
+.shb-ausc-layout .teaching-title{font:650 17px/1.3 Inter,Arial,sans-serif}
+.shb-ausc-layout .teaching-card .eyebrow,.shb-ausc-layout .guide-section h5,.shb-ausc-layout .teaching-facts>div>span{color:var(--sa-cyan)}
+.shb-ausc-layout .teaching-quick{background:rgba(47,139,255,.09);border-left-color:var(--sa-blue)}
+.shb-ausc-layout .teaching-quick>p{color:var(--sa-text)}
+.shb-ausc-layout .teaching-facts,.shb-ausc-layout .teaching-facts>div,.shb-ausc-layout .teaching-facts>div+div,.shb-ausc-layout .teaching-full,.shb-ausc-layout .source-inline{border-color:var(--sa-line)}
+.shb-ausc-layout .teaching-facts>div>p{color:var(--sa-text)}
+.shb-ausc-layout .teaching-anatomy{background:rgba(47,139,255,.06);border-color:var(--sa-line)}
+.shb-ausc-layout .teaching-anatomy>button{background:linear-gradient(135deg,#2f8bff,#1260ca)!important;border-color:transparent!important;color:#fff!important}
+.shb-ausc-layout .teaching-full>summary,.shb-ausc-layout .teaching-full>summary:after{color:var(--sa-cyan)}
+.shb-ausc-layout .guide-section,.shb-ausc-layout .teaching-full .guide-section{background:rgba(9,31,57,.64)!important;border-color:rgba(91,166,230,.15)!important}
+.shb-ausc-layout .source-inline>summary{color:var(--sa-muted)}
+.shb-ausc-layout .source-inline>code,.shb-ausc-layout .duplicate-source-wrap code{background:rgba(5,19,40,.6);color:var(--sa-muted)}
+.shb-ausc-layout .teaching-classification{background:rgba(47,139,255,.12);color:var(--sa-cyan)}

@@ -274,7 +274,7 @@
       return '<link rel="stylesheet" href="' + new URL(file, base).href + '">';
     }).join('');
     shadow.innerHTML = links + '<link rel="stylesheet" href="' +
-      new URL('../shbace-integrated.css?v=2', base).href + '"><div class="shb-ausc-runtime shb-ausc-layout medara-library"><div class="shb-ausc-template-loading">Opening auscultation library…</div></div>';
+      new URL('../shbace-integrated.css?v=3', base).href + '"><div class="shb-ausc-runtime shb-ausc-layout medara-library"><div class="shb-ausc-template-loading">Opening auscultation library…</div></div>';
     var root = shadow.querySelector('.shb-ausc-runtime');
     fetch(new URL('index.html', base), { cache: 'no-store' }).then(function (response) {
       if (!response.ok) throw new Error('Auscultation interface template is unavailable.');
